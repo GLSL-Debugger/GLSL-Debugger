@@ -1,0 +1,2778 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1089</width>
+    <height>924</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>glslDevil</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="../glslDevil.qrc" >:/icons/icons/face-devil-grin_32.png</iconset>
+  </property>
+  <property name="animated" >
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <widget class="QFrame" name="fSBError" >
+    <property name="geometry" >
+     <rect>
+      <x>400</x>
+      <y>20</y>
+      <width>210</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="minimumSize" >
+     <size>
+      <width>210</width>
+      <height>16</height>
+     </size>
+    </property>
+    <property name="contextMenuPolicy" >
+     <enum>Qt::NoContextMenu</enum>
+    </property>
+    <property name="frameShape" >
+     <enum>QFrame::Panel</enum>
+    </property>
+    <property name="frameShadow" >
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <property name="lineWidth" >
+     <number>1</number>
+    </property>
+    <property name="midLineWidth" >
+     <number>0</number>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="spacing" >
+      <number>4</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="lSBErrorIcon" >
+       <property name="enabled" >
+        <bool>true</bool>
+       </property>
+       <property name="maximumSize" >
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="frameShape" >
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+       <property name="pixmap" >
+        <pixmap/>
+       </property>
+       <property name="scaledContents" >
+        <bool>true</bool>
+       </property>
+       <property name="buddy" >
+        <cstring>twShader</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lSBErrorText" >
+       <property name="enabled" >
+        <bool>true</bool>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+       <property name="pixmap" >
+        <pixmap/>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy" >
+        <cstring>twShader</cstring>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QFrame" name="fSBMouseInfo" >
+    <property name="geometry" >
+     <rect>
+      <x>200</x>
+      <y>130</y>
+      <width>210</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="minimumSize" >
+     <size>
+      <width>210</width>
+      <height>16</height>
+     </size>
+    </property>
+    <property name="contextMenuPolicy" >
+     <enum>Qt::NoContextMenu</enum>
+    </property>
+    <property name="frameShape" >
+     <enum>QFrame::Panel</enum>
+    </property>
+    <property name="frameShadow" >
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <property name="lineWidth" >
+     <number>1</number>
+    </property>
+    <property name="midLineWidth" >
+     <number>0</number>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="spacing" >
+      <number>4</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="lSBCurrentPosition" >
+       <property name="text" >
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_9" >
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lSBCurrentValueR" >
+       <property name="palette" >
+        <palette>
+         <active>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>213</red>
+             <green>12</green>
+             <blue>12</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>199</red>
+             <green>199</green>
+             <blue>199</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="autoFillBackground" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lSBCurrentValueG" >
+       <property name="palette" >
+        <palette>
+         <active>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>99</red>
+             <green>180</green>
+             <blue>39</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>199</red>
+             <green>199</green>
+             <blue>199</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lSBCurrentValueB" >
+       <property name="palette" >
+        <palette>
+         <active>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>199</red>
+             <green>199</green>
+             <blue>199</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText" >
+           <brush brushstyle="SolidPattern" >
+            <color alpha="255" >
+             <red>128</red>
+             <green>128</green>
+             <blue>128</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text" >
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <widget class="QToolBar" name="toolBar" >
+   <property name="windowTitle" >
+    <string>File</string>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <attribute name="toolBarArea" >
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
+   </attribute>
+   <addaction name="aOpen" />
+   <addaction name="aAttach" />
+  </widget>
+  <widget class="QDockWidget" name="dwGlTrace" >
+   <property name="autoFillBackground" >
+    <bool>true</bool>
+   </property>
+   <property name="floating" >
+    <bool>false</bool>
+   </property>
+   <property name="features" >
+    <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="allowedAreas" >
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <property name="windowTitle" >
+    <string>GL Trace</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents" >
+    <layout class="QVBoxLayout" >
+     <property name="spacing" >
+      <number>0</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QFrame" name="frame" >
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" >
+        <property name="spacing" >
+         <number>3</number>
+        </property>
+        <property name="leftMargin" >
+         <number>1</number>
+        </property>
+        <property name="topMargin" >
+         <number>1</number>
+        </property>
+        <property name="rightMargin" >
+         <number>1</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="tbExecute" >
+          <property name="enabled" >
+           <bool>true</bool>
+          </property>
+          <property name="toolTip" >
+           <string>Start Program (F5)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-execute_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F5</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbStep" >
+          <property name="toolTip" >
+           <string>Step</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/go-next_32.png</iconset>
+          </property>
+          <property name="autoRepeat" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbSkip" >
+          <property name="toolTip" >
+           <string>Skip</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/go-jump_32.png</iconset>
+          </property>
+          <property name="autoRepeat" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbEdit" >
+          <property name="toolTip" >
+           <string>Edit</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-edit_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbJumpToDrawCall" >
+          <property name="toolTip" >
+           <string>Jump to Next Draw Call (F7)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-jump-drawcall_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F7</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbJumpToShader" >
+          <property name="toolTip" >
+           <string>Jump to Next Shader Switch (F6)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-jump-shader_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F6</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbJumpToUserDef" >
+          <property name="toolTip" >
+           <string>Jump to User Defined OpenGL Call (Ctrl+F8)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/go-last_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>Ctrl+F8</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbRun" >
+          <property name="toolTip" >
+           <string>Run (F8)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-execute-run_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F8</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbPause" >
+          <property name="toolTip" >
+           <string>Pause (Alt+Break)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-pause_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>Alt+Pause</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_8" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbToggleHaltOnError" >
+          <property name="enabled" >
+           <bool>true</bool>
+          </property>
+          <property name="toolTip" >
+           <string>Halt on Error</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/dialog-warning_32.png</iconset>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="checked" >
+           <bool>true</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbToggleGuiUpdate" >
+          <property name="enabled" >
+           <bool>true</bool>
+          </property>
+          <property name="toolTip" >
+           <string>Disable GUI Updates</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-no-gui-update_32.png</iconset>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="checked" >
+           <bool>false</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbToggleNoTrace" >
+          <property name="toolTip" >
+           <string>Disable GL Trace</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-no-traceing_32.png</iconset>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="checked" >
+           <bool>false</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_10" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbGlTraceSettings" >
+          <property name="toolTip" >
+           <string>show GL Trace settings</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/gltrace-settings_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_11" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbSave" >
+          <property name="toolTip" >
+           <string>save GL Trace</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/buffer-view-save-as_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListView" name="lvGlTrace" >
+       <property name="iconSize" >
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dwShVar" >
+   <property name="windowTitle" >
+    <string>Shader Variables</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3" >
+    <layout class="QGridLayout" >
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <property name="horizontalSpacing" >
+      <number>0</number>
+     </property>
+     <property name="verticalSpacing" >
+      <number>0</number>
+     </property>
+     <item row="0" column="0" >
+      <widget class="QTabWidget" name="twShVar" >
+       <property name="currentIndex" >
+        <number>2</number>
+       </property>
+       <widget class="QWidget" name="tShVarAll" >
+        <attribute name="title" >
+         <string>All</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTreeView" name="tvShVarAll" >
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tShVarBuiltIn" >
+        <attribute name="title" >
+         <string>Built-In</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTreeView" name="tvShVarBuiltIn" />
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tShVarScope" >
+        <attribute name="title" >
+         <string>Scope</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTreeView" name="tvShVarScope" >
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tShVarUniform" >
+        <attribute name="title" >
+         <string>Uniform</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTreeView" name="tvShVarUniform" >
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dwWatch" >
+   <property name="windowTitle" >
+    <string>Watch</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4" >
+    <layout class="QVBoxLayout" >
+     <property name="spacing" >
+      <number>0</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QFrame" name="frame_3" >
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" >
+        <property name="spacing" >
+         <number>3</number>
+        </property>
+        <property name="leftMargin" >
+         <number>1</number>
+        </property>
+        <property name="topMargin" >
+         <number>1</number>
+        </property>
+        <property name="rightMargin" >
+         <number>1</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="tbWatchWindow" >
+          <property name="toolTip" >
+           <string>view vector</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-new_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbWatchWindowAdd" >
+          <property name="toolTip" >
+           <string>add to active window</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-add_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_6" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbWatchDelete" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-delete_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="lWatchSelectionPos" >
+          <property name="minimumSize" >
+           <size>
+            <width>70</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape" >
+           <enum>QFrame::Panel</enum>
+          </property>
+          <property name="frameShadow" >
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTreeView" name="tvWatchList" >
+       <property name="selectionMode" >
+        <enum>QAbstractItemView::MultiSelection</enum>
+       </property>
+       <property name="itemsExpandable" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar_2" >
+   <property name="windowTitle" >
+    <string>Edit</string>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <attribute name="toolBarArea" >
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
+   </attribute>
+   <addaction name="aZoom" />
+   <addaction name="aSelectPixel" />
+   <addaction name="aMinMaxLens" />
+  </widget>
+  <widget class="QDockWidget" name="dwShaderSource" >
+   <property name="windowTitle" >
+    <string>Shader Source</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2" >
+    <layout class="QGridLayout" >
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <property name="horizontalSpacing" >
+      <number>0</number>
+     </property>
+     <property name="verticalSpacing" >
+      <number>0</number>
+     </property>
+     <item row="1" column="0" >
+      <widget class="QTabWidget" name="twShader" >
+       <property name="tabPosition" >
+        <enum>QTabWidget::South</enum>
+       </property>
+       <property name="tabShape" >
+        <enum>QTabWidget::Rounded</enum>
+       </property>
+       <property name="currentIndex" >
+        <number>2</number>
+       </property>
+       <widget class="QWidget" name="tVertex" >
+        <attribute name="title" >
+         <string>Vertex Shader</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTextEdit" name="teVertexShader" >
+           <property name="undoRedoEnabled" >
+            <bool>false</bool>
+           </property>
+           <property name="lineWrapMode" >
+            <enum>QTextEdit::NoWrap</enum>
+           </property>
+           <property name="readOnly" >
+            <bool>true</bool>
+           </property>
+           <property name="tabStopWidth" >
+            <number>30</number>
+           </property>
+           <property name="textInteractionFlags" >
+            <set>Qt::TextSelectableByMouse</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tGeometry" >
+        <attribute name="title" >
+         <string>Geometry Shader</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTextEdit" name="teGeometryShader" >
+           <property name="undoRedoEnabled" >
+            <bool>false</bool>
+           </property>
+           <property name="lineWrapMode" >
+            <enum>QTextEdit::NoWrap</enum>
+           </property>
+           <property name="readOnly" >
+            <bool>true</bool>
+           </property>
+           <property name="tabStopWidth" >
+            <number>30</number>
+           </property>
+           <property name="textInteractionFlags" >
+            <set>Qt::TextSelectableByMouse</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tFragment" >
+        <attribute name="title" >
+         <string>Fragment Shader</string>
+        </attribute>
+        <layout class="QHBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTextEdit" name="teFragmentShader" >
+           <property name="undoRedoEnabled" >
+            <bool>false</bool>
+           </property>
+           <property name="lineWrapMode" >
+            <enum>QTextEdit::NoWrap</enum>
+           </property>
+           <property name="readOnly" >
+            <bool>true</bool>
+           </property>
+           <property name="tabStopWidth" >
+            <number>30</number>
+           </property>
+           <property name="textInteractionFlags" >
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item row="0" column="0" >
+      <widget class="QFrame" name="frame_2" >
+       <property name="frameShape" >
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" >
+        <property name="spacing" >
+         <number>3</number>
+        </property>
+        <property name="leftMargin" >
+         <number>1</number>
+        </property>
+        <property name="topMargin" >
+         <number>1</number>
+        </property>
+        <property name="rightMargin" >
+         <number>1</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="tbShaderExecute" >
+          <property name="toolTip" >
+           <string>Debug Shader (Ctrl+F5)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/shader-execute_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>Ctrl+F5</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbShaderReset" >
+          <property name="toolTip" >
+           <string>Reset Debug Session (Ctrl+Shift+F5)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/shader-reset_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>Ctrl+Shift+F5</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_4" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbShaderStep" >
+          <property name="toolTip" >
+           <string>Step (F11)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/shader-next_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F11</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbShaderStepOver" >
+          <property name="toolTip" >
+           <string>Step Over (F10)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/go-jump-over_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F10</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_5" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbShaderFragmentOptions" >
+          <property name="toolTip" >
+           <string>Edit Per-Fragment Options ... (F4)</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/shader-dbg-code_32.png</iconset>
+          </property>
+          <property name="shortcut" >
+           <string>F4</string>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>200</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dwBufferView" >
+   <property name="windowIcon" >
+    <iconset/>
+   </property>
+   <property name="autoFillBackground" >
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle" >
+    <string>GL Buffer View</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_7" >
+    <layout class="QVBoxLayout" >
+     <property name="spacing" >
+      <number>0</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QFrame" name="frame_4" >
+       <property name="maximumSize" >
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="frameShape" >
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" >
+        <property name="spacing" >
+         <number>1</number>
+        </property>
+        <property name="leftMargin" >
+         <number>3</number>
+        </property>
+        <property name="topMargin" >
+         <number>3</number>
+        </property>
+        <property name="rightMargin" >
+         <number>3</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="tbBVCapture" >
+          <property name="toolTip" >
+           <string>capture</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/buffer-view-capture_32.png</iconset>
+          </property>
+          <property name="checkable" >
+           <bool>false</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbBVCaptureAutomatic" >
+          <property name="toolTip" >
+           <string>automatic capture</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/buffer-view-auto-capture_32.png</iconset>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+          <property name="checked" >
+           <bool>false</bool>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_7" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="tbBVSave" >
+          <property name="toolTip" >
+           <string>save buffer as image</string>
+          </property>
+          <property name="text" >
+           <string>...</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="../glslDevil.qrc" >:/icons/icons/buffer-view-save-as_32.png</iconset>
+          </property>
+          <property name="autoRaise" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer>
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="fContent" >
+       <property name="frameShape" >
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow" >
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dwGlStatistic" >
+   <property name="windowIcon" >
+    <iconset/>
+   </property>
+   <property name="windowTitle" >
+    <string>GL Trace Statistics</string>
+   </property>
+   <attribute name="dockWidgetArea" >
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5" >
+    <layout class="QGridLayout" >
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <property name="horizontalSpacing" >
+      <number>6</number>
+     </property>
+     <property name="verticalSpacing" >
+      <number>6</number>
+     </property>
+     <item row="1" column="0" >
+      <layout class="QHBoxLayout" >
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <property name="leftMargin" >
+        <number>0</number>
+       </property>
+       <property name="topMargin" >
+        <number>0</number>
+       </property>
+       <property name="rightMargin" >
+        <number>0</number>
+       </property>
+       <property name="bottomMargin" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QComboBox" name="cbGlstCallOrigin" >
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <property name="insertPolicy" >
+          <enum>QComboBox::NoInsert</enum>
+         </property>
+         <item>
+          <property name="text" >
+           <string>GL</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>GLX</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>WGL</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cbGlstPfMode" >
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <property name="insertPolicy" >
+          <enum>QComboBox::NoInsert</enum>
+         </property>
+         <item>
+          <property name="text" >
+           <string>total</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>per frame</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QTabWidget" name="twGlStatistics" >
+       <property name="tabPosition" >
+        <enum>QTabWidget::North</enum>
+       </property>
+       <property name="tabShape" >
+        <enum>QTabWidget::Rounded</enum>
+       </property>
+       <property name="currentIndex" >
+        <number>7</number>
+       </property>
+       <property name="elideMode" >
+        <enum>Qt::ElideNone</enum>
+       </property>
+       <widget class="QWidget" name="taGlCalls" >
+        <attribute name="title" >
+         <string>GL Calls</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlCalls" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlCallsPf" >
+        <attribute name="title" >
+         <string>GL Calls</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlCallsPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlExt" >
+        <attribute name="title" >
+         <string>GL Extensions</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlExt" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlExtPf" >
+        <attribute name="title" >
+         <string>GL Extensions</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlExtPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlxCalls" >
+        <attribute name="title" >
+         <string>GLX Calls</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlxCalls" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlxCallsPf" >
+        <attribute name="title" >
+         <string>GLX Calls</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlxCallsPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taWglCalls" >
+        <attribute name="title" >
+         <string>WGL Calls</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTableView" name="tvWglCalls" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taWglExt" >
+        <attribute name="title" >
+         <string>WGL Extensions</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTableView" name="tvWglExt" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taWglExtPf" >
+        <attribute name="title" >
+         <string>WGL Extensions</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTableView" name="tvWglExtPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taWglCallsPf" >
+        <attribute name="title" >
+         <string>WGL Calls</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>0</number>
+         </property>
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTableView" name="tvWglCallsPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlxExt" >
+        <attribute name="title" >
+         <string>GLX Extensions</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlxExt" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="taGlxExtPf" >
+        <attribute name="title" >
+         <string>GLX Extension</string>
+        </attribute>
+        <layout class="QGridLayout" >
+         <property name="leftMargin" >
+          <number>0</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
+         <property name="rightMargin" >
+          <number>0</number>
+         </property>
+         <property name="bottomMargin" >
+          <number>0</number>
+         </property>
+         <property name="horizontalSpacing" >
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing" >
+          <number>0</number>
+         </property>
+         <item row="0" column="0" >
+          <widget class="QTableView" name="tvGlxExtPf" >
+           <property name="selectionMode" >
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+           <property name="selectionBehavior" >
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="verticalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode" >
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="showGrid" >
+            <bool>false</bool>
+           </property>
+           <property name="sortingEnabled" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item row="0" column="0" >
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>2</width>
+         <height>2</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1089</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="aOpen" />
+    <addaction name="aAttach" />
+    <addaction name="separator" />
+    <addaction name="aQuit" />
+   </widget>
+   <widget class="QMenu" name="menu_Edit" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="aZoom" />
+    <addaction name="aSelectPixel" />
+    <addaction name="aMinMaxLens" />
+   </widget>
+   <widget class="QMenu" name="menuAbout" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="separator" />
+    <addaction name="aAbout" />
+    <addaction name="aOnlineHelp" />
+   </widget>
+   <widget class="QMenu" name="menuWindows" >
+    <property name="title" >
+     <string>&amp;Windows</string>
+    </property>
+    <addaction name="action_GL_Buffer_View" />
+    <addaction name="action_GL_Trace" />
+    <addaction name="action_GL_Trace_Statistics" />
+    <addaction name="action_Shader_Source" />
+    <addaction name="action_Shader_Variables" />
+    <addaction name="action_Watch" />
+   </widget>
+   <addaction name="menu_File" />
+   <addaction name="menu_Edit" />
+   <addaction name="menuWindows" />
+   <addaction name="menuAbout" />
+  </widget>
+  <action name="aOpen" >
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/document-open_32.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Open Program</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="aAttach" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/applications-system_32.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Attach to Program</string>
+   </property>
+  </action>
+  <action name="aQuit" >
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/system-log-out_32.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="aZoom" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/system-search_32.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Zoom Mode</string>
+   </property>
+  </action>
+  <action name="aSelectPixel" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/crosshair_32.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Select Pixel Mode</string>
+   </property>
+  </action>
+  <action name="aAbout" >
+   <property name="text" >
+    <string>&amp;About glslDevil</string>
+   </property>
+  </action>
+  <action name="aOnlineHelp" >
+   <property name="text" >
+    <string>&amp;Online Help</string>
+   </property>
+  </action>
+  <action name="action_GL_Buffer_View" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>GL &amp;Buffer View</string>
+   </property>
+  </action>
+  <action name="action_GL_Trace_Statistics" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>GL Trace St&amp;atistics</string>
+   </property>
+  </action>
+  <action name="action_GL_Trace" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>GL &amp;Trace</string>
+   </property>
+  </action>
+  <action name="action_Shader_Source" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Shader &amp;Source</string>
+   </property>
+  </action>
+  <action name="action_Shader_Variables" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Shader &amp;Variables</string>
+   </property>
+  </action>
+  <action name="action_Watch" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Watch</string>
+   </property>
+  </action>
+  <action name="aMinMaxLens" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="../glslDevil.qrc" >:/icons/icons/min-max-lens.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Min Max Lens</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="0" margin="0" />
+ <resources>
+  <include location="../glslDevil.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>action_GL_Buffer_View</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwBufferView</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>406</x>
+     <y>204</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_GL_Trace</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwGlTrace</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>552</x>
+     <y>865</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_GL_Trace_Statistics</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwGlStatistic</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>406</x>
+     <y>495</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Shader_Source</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwShaderSource</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>1098</x>
+     <y>865</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Shader_Variables</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwShVar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>1233</x>
+     <y>293</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Watch</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dwWatch</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>1233</x>
+     <y>584</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwWatch</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_Watch</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>1233</x>
+     <y>584</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwShVar</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_Shader_Variables</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>1233</x>
+     <y>293</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwShaderSource</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_Shader_Source</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>1098</x>
+     <y>865</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwGlStatistic</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_GL_Trace_Statistics</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>406</x>
+     <y>495</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwGlTrace</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_GL_Trace</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>552</x>
+     <y>865</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dwBufferView</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>action_GL_Buffer_View</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>406</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,2496 @@
+<ui version="4.0" >
+ <class>wWatchTable</class>
+ <widget class="QWidget" name="wWatchTable" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>719</width>
+    <height>511</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string/>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-icon_32.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tableTab" >
+      <attribute name="title" >
+       <string>Data</string>
+      </attribute>
+      <layout class="QHBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frame" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
+          </property>
+          <property name="spacing" >
+           <number>1</number>
+          </property>
+          <item>
+           <widget class="QToolButton" name="tbHideInactive" >
+            <property name="toolTip" >
+             <string>Hide inactive vertices</string>
+            </property>
+            <property name="text" >
+             <string>...</string>
+            </property>
+            <property name="icon" >
+             <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-hide-inactive_32.png</iconset>
+            </property>
+            <property name="checkable" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableView" name="tvVertices" >
+         <property name="alternatingRowColors" >
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode" >
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior" >
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="sortingEnabled" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="scatterTab" >
+      <attribute name="title" >
+       <string>Plot</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frame_2" >
+         <property name="maximumSize" >
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" >
+          <property name="margin" >
+           <number>1</number>
+          </property>
+          <property name="spacing" >
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QToolButton" name="tbShowMapping" >
+            <property name="toolTip" >
+             <string>show color mapping</string>
+            </property>
+            <property name="text" >
+             <string>...</string>
+            </property>
+            <property name="icon" >
+             <iconset resource="../glslDevil.qrc" >:/icons/icons/watch-vector-mapping_32.png</iconset>
+            </property>
+            <property name="checkable" >
+             <bool>true</bool>
+            </property>
+            <property name="checked" >
+             <bool>false</bool>
+            </property>
+            <property name="autoRaise" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>40</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="fMapping" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>5</hsizetype>
+           <vsizetype>0</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>16777215</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>1</number>
+          </property>
+          <property name="spacing" >
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QGridLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>1</number>
+            </property>
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_2" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>255</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>255</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>G</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_4" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>X</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="8" >
+             <widget class="QCheckBox" name="cbSyncRed" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxRed" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxY" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QComboBox" name="cbMapX" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="5" >
+             <widget class="QToolButton" name="tbSwitchGreen" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" >
+             <widget class="QComboBox" name="cbRed" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="BrightText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="BrightText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="BrightText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="HighlightedText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="7" >
+             <widget class="QToolButton" name="tbMaxY" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3" >
+             <widget class="QToolButton" name="tbMinX" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinY" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>255</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>R</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinX" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxX" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3" >
+             <widget class="QToolButton" name="tbMinY" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="QComboBox" name="cbY" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinRed" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinZ" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3" >
+             <widget class="QToolButton" name="tbMinRed" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="8" >
+             <widget class="QCheckBox" name="cbSyncZ" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5" >
+             <widget class="QToolButton" name="tbSwitchX" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="5" column="0" >
+             <widget class="QLabel" name="label_3" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>B</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="8" >
+             <widget class="QCheckBox" name="cbSyncY" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="7" >
+             <widget class="QToolButton" name="tbMaxZ" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxZ" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinBlue" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="7" >
+             <widget class="QToolButton" name="tbMaxRed" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" >
+             <widget class="QToolButton" name="tbMinGreen" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3" >
+             <widget class="QToolButton" name="tbMinZ" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_10" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>Z</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="5" >
+             <widget class="QToolButton" name="tbSwitchZ" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5" >
+             <widget class="QToolButton" name="tbSwitchRed" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+              <property name="iconSize" >
+               <size>
+                <width>16</width>
+                <height>16</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5" >
+             <widget class="QToolButton" name="tbSwitchY" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" >
+             <widget class="QComboBox" name="cbGreen" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>170</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>10</number>
+              </property>
+              <property name="duplicatesEnabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="7" >
+             <widget class="QToolButton" name="tbMaxX" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3" >
+             <widget class="QToolButton" name="tbMinBlue" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="4" >
+             <widget class="QDoubleSpinBox" name="dsMinGreen" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2" >
+             <widget class="QComboBox" name="cbMapGreen" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="8" >
+             <widget class="QCheckBox" name="cbSyncX" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" >
+             <widget class="QComboBox" name="cbBlue" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>255</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="5" column="2" >
+             <widget class="QComboBox" name="cbMapBlue" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_9" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>199</red>
+                    <green>199</green>
+                    <blue>199</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>128</red>
+                    <green>128</green>
+                    <blue>128</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="frameShape" >
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow" >
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="text" >
+               <string>Y</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="5" >
+             <widget class="QToolButton" name="tbSwitchBlue" >
+              <property name="minimumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string>&lt;></string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QComboBox" name="cbZ" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2" >
+             <widget class="QComboBox" name="cbMapRed" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QComboBox" name="cbMapY" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2" >
+             <widget class="QComboBox" name="cbMapZ" >
+              <property name="maximumSize" >
+               <size>
+                <width>44</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QComboBox" name="cbX" >
+              <property name="palette" >
+               <palette>
+                <active>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Text" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="ButtonText" >
+                  <brush brushstyle="SolidPattern" >
+                   <color alpha="255" >
+                    <red>121</red>
+                    <green>125</green>
+                    <blue>121</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="minimumContentsLength" >
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxGreen" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="6" >
+             <widget class="QDoubleSpinBox" name="dsMaxBlue" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>7</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="buttonSymbols" >
+               <enum>QAbstractSpinBox::PlusMinus</enum>
+              </property>
+              <property name="accelerated" >
+               <bool>true</bool>
+              </property>
+              <property name="decimals" >
+               <number>7</number>
+              </property>
+              <property name="maximum" >
+               <double>339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="minimum" >
+               <double>-339999999999999996123846586046231871488.000000000000000</double>
+              </property>
+              <property name="value" >
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="7" >
+             <widget class="QToolButton" name="tbMaxGreen" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="7" >
+             <widget class="QToolButton" name="tbMaxBlue" >
+              <property name="text" >
+               <string>0</string>
+              </property>
+              <property name="toolButtonStyle" >
+               <enum>Qt::ToolButtonTextOnly</enum>
+              </property>
+              <property name="autoRaise" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="8" >
+             <widget class="QCheckBox" name="cbSyncGreen" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="8" >
+             <widget class="QCheckBox" name="cbSyncBlue" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="5" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="9" >
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>51</width>
+                <height>26</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>6</number>
+            </property>
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_5" >
+              <property name="text" >
+               <string>Pointsize</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4" >
+             <widget class="QLabel" name="lbPointSize" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>0</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>0.001</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QSlider" name="slPointSize" >
+              <property name="maximum" >
+               <number>200</number>
+              </property>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition" >
+               <enum>QSlider::TicksBelow</enum>
+              </property>
+              <property name="tickInterval" >
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QFrame" name="fGLview" >
+           <property name="sizePolicy" >
+            <sizepolicy>
+             <hsizetype>7</hsizetype>
+             <vsizetype>7</vsizetype>
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frameShape" >
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow" >
+            <enum>QFrame::Raised</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../glslDevil.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>tbShowMapping</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>fMapping</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>16</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>7</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

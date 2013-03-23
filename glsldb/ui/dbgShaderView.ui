@@ -1,0 +1,154 @@
+<ui version="4.0" >
+ <class>dDbgShaderView</class>
+ <widget class="QDialog" name="dDbgShaderView" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>498</width>
+    <height>604</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="margin" >
+       <number>1</number>
+      </property>
+      <property name="spacing" >
+       <number>3</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="toolButton" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="autoRaise" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line" >
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButton_2" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="autoRaise" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButton_3" >
+        <property name="text" >
+         <string>...</string>
+        </property>
+        <property name="autoRaise" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2" >
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox" >
+        <property name="currentIndex" >
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text" >
+          <string>Coverage</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Unchanged</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="teDbgShaderView" >
+     <property name="undoRedoEnabled" >
+      <bool>false</bool>
+     </property>
+     <property name="lineWrapMode" >
+      <enum>QTextEdit::NoWrap</enum>
+     </property>
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+     <property name="tabStopWidth" >
+      <number>30</number>
+     </property>
+     <property name="textInteractionFlags" >
+      <enum>Qt::NoTextInteraction</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>toolButton</sender>
+   <signal>clicked()</signal>
+   <receiver>dDbgShaderView</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>19</x>
+     <y>15</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>88</x>
+     <y>-17</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,172 @@
+<ui version="4.0" >
+ <class>Dialog_AttachToProcess</class>
+ <widget class="QDialog" name="Dialog_AttachToProcess" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>446</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Attach to Process</string>
+  </property>
+  <widget class="QTreeView" name="processList" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>381</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="indentation" >
+    <number>0</number>
+   </property>
+  </widget>
+  <widget class="QWidget" name="horizontalLayout" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>400</y>
+     <width>381</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="buttonAttach" >
+      <property name="text" >
+       <string>Attach</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="buttonCancel" >
+      <property name="text" >
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="buttonRefresh" >
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>370</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Refresh</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>381</width>
+     <height>44</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <item>
+     <widget class="QLabel" name="label" >
+      <property name="maximumSize" >
+       <size>
+        <width>42</width>
+        <height>42</height>
+       </size>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="pixmap" >
+       <pixmap resource="../glslDevil.qrc" >:/icons/icons/emblem-important_32.png</pixmap>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_2" >
+      <property name="text" >
+       <string>Attaching to running processes is experimental and will almost certainly crash the target process!</string>
+      </property>
+      <property name="wordWrap" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../glslDevil.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonAttach</sender>
+   <signal>pressed()</signal>
+   <receiver>Dialog_AttachToProcess</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>268</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>199</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonCancel</sender>
+   <signal>pressed()</signal>
+   <receiver>Dialog_AttachToProcess</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>351</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>199</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonRefresh</sender>
+   <signal>pressed()</signal>
+   <receiver>Dialog_AttachToProcess</receiver>
+   <slot>updateProcessList()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>348</x>
+     <y>382</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>199</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

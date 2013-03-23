@@ -1,0 +1,59 @@
+<ui version="4.0" >
+ <class>Widget_CompilerError</class>
+ <widget class="QWidget" name="Widget_CompilerError" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>432</width>
+    <height>250</height>
+   </rect>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>432</width>
+    <height>250</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <widget class="Line" name="line" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelDetails" >
+     <property name="text" >
+      <string>Detailed Error Information:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextBrowser" name="textBoxCompilerOutput" >
+     <property name="font" >
+      <font>
+       <family>Courier</family>
+       <kerning>false</kerning>
+      </font>
+     </property>
+     <property name="lineWrapMode" >
+      <enum>QTextEdit::NoWrap</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

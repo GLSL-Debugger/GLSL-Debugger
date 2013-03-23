@@ -1,0 +1,179 @@
+#version 120
+
+/******************************************************************************
+
+Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
+(VIS), Universität Stuttgart.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
+
+  * Neither the name of the name of VIS, Universität Stuttgart nor the names
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*******************************************************************************/
+
+// {2/vpsize[0], 2/vpsize[1], vpsize[0]/2, vpsize[1]/2}
+uniform vec4 vpParams;
+uniform float psize;
+
+varying	vec3 ellipsoid_Pos;         // oC pass-through particle position c
+varying	vec4 ellipsoid_PEyePos;     // oEye eye point e' in parameter space and its squared 2-norm
+varying vec3 ellipsoid_Color;       // color (rgb) and size (a)
+
+void main(void)
+{
+	// Constants
+	vec3 eyePos = gl_ModelViewMatrixInverse[3].xyz; //eye position in world space
+	vec4 c = gl_Vertex;                             // particle position c (rgb)
+	vec4 q = gl_Color;                              // particle color (rgb)
+
+	vec4 center;         // projection of ellipsoid center
+	vec2 minPos, maxPos; // min/max coord of projected bounding box
+	vec4 tmp0, tmp1, tmp2, tmp4; // "real" temporaries
+
+	// pass center c to fragment program
+	ellipsoid_Pos.xyz = c.xyz;
+
+    ellipsoid_Color = gl_Color.rgb;
+
+	// transform eye point into parameter space e' = (1/a)*(e-c)
+	ellipsoid_PEyePos.xyz = (eyePos - c.xyz)/psize;
+	
+	// pre-compute squared norm - 1 for fragment program
+	ellipsoid_PEyePos.w = dot(ellipsoid_PEyePos.xyz, ellipsoid_PEyePos.xyz) - 1.0;
+	
+	// model-view-projection transform of the ellipsoid center
+	center = gl_ModelViewProjectionMatrix*vec4(c.xyz, 1.0);	
+
+	// transform vertices of the ellipsoid's bounding box considering symmetry
+
+	// rotate A according to particle orientation
+	tmp0.xyz = vec3(psize);
+
+	// model-view-projection transform of A [note: A.w==0 --> 'MVP*(-A) = - MVP*A]
+	tmp1 = gl_ModelViewProjectionMatrix*vec4(tmp0.xyz, 0.0);
+
+	// image A' of A after projection
+	tmp2.xyw = center.xyw + tmp1.xyw;
+
+	// perspective divide of A'
+	// minPos and maxPos hold the min/max values of the bounding box coords
+	maxPos = minPos = tmp2.xy/tmp2.w;
+
+	// image -A' of -A after projection
+	tmp1.xyw = center.xyw - tmp1.xyw;
+
+	// perspective divide of -A'
+	tmp1.xy /= tmp1.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp1.xy);
+	minPos = min(minPos, tmp1.xy);
+
+	// rotate B according to particle orientation
+	tmp0.xyz = vec3(-psize, psize, psize);
+
+	// model-view-projection transform of B [note: B.w==0 --> 'MVP*(-B) = - MVP*B]
+	tmp1 = gl_ModelViewProjectionMatrix*vec4(tmp0.xyz, 0.0);
+	
+	// image B' of B after projection
+	tmp4.xyw = center.xyw + tmp1.xyw;
+
+	// perspective divide of B'
+	tmp4.xy /= tmp4.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp4.xy);
+	minPos = min(minPos, tmp4.xy);
+
+	// image -B' of -B after projection
+	tmp1.xyw = center.xyw - tmp1.xyw;
+
+	// perspective divide of -B'
+	 tmp1.xy /= tmp1.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp1.xy);
+	minPos = min(minPos, tmp1.xy);
+
+	// rotate C according to particle orientation
+	tmp0.xyz = vec3(-psize, psize, -psize);
+
+	// model-view-projection transform of C [note: C.w==0 --> 'MVP*(-C) = - MVP*C]
+	tmp1 = gl_ModelViewProjectionMatrix*vec4(tmp0.xyz, 0.0);
+
+	// image C' of C after projection
+	tmp4.xyw = center.xyw + tmp1.xyw;
+
+	// perspective divide of C'
+	tmp4.xy /= tmp4.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp4.xy);
+	minPos = min(minPos, tmp4.xy);
+
+	// image -C' of -C after projection
+	tmp1.xyw = center.xyw - tmp1.xyw;
+
+	// perspective divide of -C'
+	tmp1.xy /= tmp1.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp1.xy);
+	minPos = min(minPos, tmp1.xy);
+
+	// rotate D according to particle orientation
+	tmp0.xyz = vec3(psize, psize, -psize);
+
+	// model-view-projection transform of D [note: D.w==0 --> 'MVP*(-D) = - MVP*D]
+	tmp1 = gl_ModelViewProjectionMatrix*vec4(tmp0.xyz, 0.0);
+
+	// image D' of D after projection
+	tmp4.xyw = center.xyw + tmp1.xyw;
+
+	// perspective divide of D'
+	tmp4.xy /= tmp4.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp4.xy);
+	minPos = min(minPos, tmp4.xy);
+
+	// image -D' of -D after projection
+	tmp1.xyw = center.xyw - tmp1.xyw;
+
+	// perspective divide of -D'
+	tmp1.xy /= tmp1.w;
+
+	// min/max
+	maxPos = max(maxPos, tmp1.xy);
+	minPos = min(minPos, tmp1.xy);
+
+	// compute center of covered screen rectangle
+	gl_Position.xy = 0.5*(minPos + maxPos);
+	gl_Position.zw = center.zw/center.w; 
+
+	// compute size of covered area and set point size
+	tmp0.xy = (maxPos - minPos)*vpParams.zw;
+	gl_PointSize = max(tmp0.x, tmp0.y);
+}

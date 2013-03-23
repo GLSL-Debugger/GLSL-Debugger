@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="GLSL Debugger Custom Build Rules"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="Piped Perl Output"
+			DisplayName="Piped Perl Output"
+			CommandLine="@echo on&#x0D;&#x0A;perl.exe $(InputName).pl [Parameters] &gt; [OutputFile]&#x0D;&#x0A;@echo off"
+			Outputs="[OutputFile]"
+			AdditionalDependencies="[Dependencies]"
+			FileExtensions="*.pl"
+			ExecutionDescription="Running Perl script ..."
+			>
+			<Properties>
+				<StringProperty
+					Name="OutputFile"
+					DisplayName="Output File"
+					Description="Specify the name of the generated file."
+					Switch="[value]"
+					DefaultValue="$(InputName).inc"
+				/>
+				<StringProperty
+					Name="Dependencies"
+					DisplayName="Additional Dependencies"
+					Description="Specify the files this build step depends on."
+					Switch="[value]"
+				/>
+				<StringProperty
+					Name="Parameters"
+					DisplayName="Script Parameters"
+					Description="Specify additional command line parameters for the Perl script."
+					Switch="[value]"
+				/>
+			</Properties>
+		</CustomBuildRule>
+		<CustomBuildRule
+			Name="TrampolineRule"
+			DisplayName="Detours Trampolines"
+			CommandLine="@echo on&#x0D;&#x0A;perl.exe $(InputName).pl decl &gt; trampolines.h&#x0D;&#x0A;perl.exe $(InputName).pl def &gt; trampolines.inc&#x0D;&#x0A;perl.exe $(InputName).pl exp &gt; debuglib.def&#x0D;&#x0A;@echo off&#x0D;&#x0A;"
+			Outputs="trampolines.h;trampolines.inc;debuglib.def"
+			AdditionalDependencies="[Dependencies]"
+			FileExtensions="*.pl"
+			ExecutionDescription="Generating Detours Trampolines ..."
+			>
+			<Properties>
+				<StringProperty
+					Name="Dependencies"
+					DisplayName="Additional Dependencies"
+					Description="Specify the files this build step depends on."
+					Switch="[value]"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>
