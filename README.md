@@ -24,3 +24,6 @@ Improve GLSL language grammar support to incorporate newer dialects including sw
 Support OpenGL contexts for newer versions of OpenGL.
 
 We are looking for people who have an interest in this tool's capability to bring this project back to life and move it forward, so get in touch, check out the code, try it out, fix some things and push some changes!
+
+Discussion is at glsl-debugger-development@googlegroups.com
+https://groups.google.com/forum/?fromgroups#!forum/glsl-debugger-development
