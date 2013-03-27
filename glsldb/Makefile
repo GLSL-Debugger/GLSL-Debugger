@@ -3,7 +3,7 @@ include ../common.mk
 CXXFLAGS += -I$(QTDIR)/include -I. -I utils -I ../GLSLCompiler/glslang/Public \
             -DLIBPOSTFIX=\"$(POSTFIX)\"
 
-LDFLAGS += -L$(QTDIR)/$(ARCHLIB) -lQtCore -lQtGui -lQtOpenGL -lGLU -lGL
+LDFLAGS += -L$(QTDIR)/$(ARCHLIB) -lQtCore -lQtGui -lQtOpenGL -lGLU -lGL -lX11 -lpthread
 
 LIBS = ../GLSLCompiler/glslang/MachineIndependent/lib/libglslang.a \
        ./glenumerants/libglenumerants.a \
