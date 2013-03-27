@@ -48,6 +48,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef FontChange
 
 #include "glScatter.qt.h"
+#include <GL/glu.h>
 #include <QtCore/QFile>
 #include <QtGui/QMouseEvent>
 #include <stdlib.h>
