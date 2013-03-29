@@ -41,7 +41,7 @@ getProcAddressHook.inc: genGetProcAddressHook.pl \
 functionPointerTypes.inc: genFunctionPointerTypes.pl argumentListTools.pl\
 	                      ../GL/gl.h ../GL/glext.h ../GL/glx.h ../GL/glxext.h
 	perl genFunctionPointerTypes.pl > functionPointerTypes.inc
-	
+
 replayFunction.c: genReplayFunc.pl argumentListTools.pl \
                   justCopyPointersList.pl ../GL/gl.h ../GL/glext.h
 	perl genReplayFunc.pl > replayFunction.c
@@ -61,7 +61,7 @@ FUNCTIONSALLOWEDINBEGINEND=functionsAllowedInBeginEnd.pl-`glxinfo | \
 						   grep "OpenGL version string" | \
 						   sed 's/OpenGL version string: //' | \
 						   sed 's/ \|\/\|(\|)/_/g'`
-						   
+
 # use this target to regenerate functionsAllowedInBeginEnd.pl whenever a new
 # extension is supported by any (available) hardware
 allowedInBeginEndList: beginEndFunctionTest
@@ -86,7 +86,7 @@ cleandepend:
 
 tags:
 	ctags --recurse=yes *.[ch]
-	
+
 .PHONY: clean cleandepend depend lists preload_hooks types tags
 
 

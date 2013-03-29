@@ -8,8 +8,13 @@ ifeq ($(shell which icc >& /dev/null && echo exists),exists)
 	CC = icc
 	CXX = icc
 else
-	CC = gcc
-	CXX = g++
+	ifeq ($(shell uname),Darwin)
+		CC = clang
+		CXX = clang++
+	else
+		CC = gcc
+		CXX = g++
+	endif	
 endif
 
 # build architecture
@@ -50,9 +55,17 @@ RCC = $(QTDIR)/bin/rcc
 UIC = $(QTDIR)/bin/uic
 
 # compiler and linker flags
-CFLAGS = -fPIC $(CROSS_COMPILE_FLAG)
-CXXFLAGS = -std=c++0x -fPIC -DUNIX $(CROSS_COMPILE_FLAG)
+CFLAGS = -fPIC $(CROSS_COMPILE_FLAG) 
+CXXFLAGS = -fPIC -DUNIX $(CROSS_COMPILE_FLAG)
 LDFLAGS = -fPIC $(CROSS_COMPILE_FLAG)
+
+ifeq ($(shell uname),Darwin)
+	CFLAGS += -I/usr/X11/include
+	CXXFLAGS += -std=c++11 -stdlib=libc++ 
+else
+	CXXFLAGS += -std=c++0x
+endif
+
 ifeq ($(CC),icc)
 	# icc options (NOTE: requires sse2 and creates alternative codepaths for
 	# modern Intel processors)

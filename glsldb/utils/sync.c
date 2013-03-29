@@ -39,6 +39,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
+
+	#ifdef __MACH__
+		#include <mach/clock.h>
+		#include <mach/mach.h>
+	#endif
+
 #endif /* _!WIN32 */
 
 #include "sync.h"
@@ -142,7 +148,18 @@ int waitIpcEvent(IpcEvent evt, int timeout) {
         }
 
     } else {
+    
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+		clock_serv_t cclock;
+		mach_timespec_t mts;
+		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+		clock_get_time(cclock, &mts);
+		mach_port_deallocate(mach_task_self(), cclock);
+		tsEnd.tv_sec = mts.tv_sec;
+		tsEnd.tv_nsec = mts.tv_nsec;
+#else /* __MACH__ */
         clock_gettime(CLOCK_REALTIME, &tsEnd);
+#endif
         tsEnd.tv_sec += timeout / 1000;
         tsEnd.tv_nsec += (timeout % 1000) * 1000;
 

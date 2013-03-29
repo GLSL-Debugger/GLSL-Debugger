@@ -22,7 +22,7 @@ cleandepend:
 
 tags:
 	ctags --recurse=yes *.[ch]
-	
+
 .PHONY: clean depend tags
 
 
