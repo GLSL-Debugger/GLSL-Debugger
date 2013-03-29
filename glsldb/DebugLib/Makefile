@@ -1,7 +1,8 @@
 include ../../common.mk
 
 CFLAGS += -I.. -I../utils
-LDFLAGS += -ldl -lGL -lpthread
+#LDFLAGS += -ldl -lGL -lpthread
+LDFLAGS += -ldl -fOpenGL -lpthread
 
 all: libfunctionList.a types libglsldebug-$(POSTFIX).so libdlsym-$(POSTFIX).so 
 
@@ -9,12 +10,14 @@ libglsldebug-$(POSTFIX).so: libglsldebug.o streamRecorder.o streamRecording.o \
                  replayFunction.o glstate.o readback.o shader.o error.o \
                  memory.o hooks.o functionList.o queries.o preExecution.o \
 				 postExecution.o ../utils/libutils.a ../glenumerants/libglenumerants.a
-	$(CC) -shared -o $@ -Wl,-soname,$@ $^ $(LDFLAGS)
+	#$(CC) -shared -o $@ -Wl,-soname,$@ $^ $(LDFLAGS)
+	$(CC) -shared -o $@ -Wl $^ $(LDFLAGS)
 	mkdir -p ../libs
 	cp $@ ../libs/
 
 libdlsym-$(POSTFIX).so: libdlsym.o
-	$(CC) -shared -o $@ -Wl,-soname,$@ $^ -ldl $(LDFLAGS)
+	#$(CC) -shared -o $@ -Wl,-soname,$@ $^ -ldl $(LDFLAGS)
+	$(CC) -shared -o $@ -Wl $^ -ldl $(LDFLAGS)
 	mkdir -p ../libs
 	cp $@ ../libs/
 

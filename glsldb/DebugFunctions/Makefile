@@ -2,12 +2,13 @@ include ../../common.mk
 
 CFLAGS += -I..
 
-LDFLAGS += -L../glenumerants -lglenumerants -L../utils -lutils -ldl -lGL
+LDFLAGS += -L../glenumerants -lglenumerants -L../utils -lutils -ldl -fOpenGL
 
 all: glEnd.so
 
 %.so: %.o
-	$(CC) -shared -o $@ -Wl,-soname,$@ $^ $(LDFLAGS)
+	#$(CC) -shared -o $@ -Wl,-soname,$@ $^ $(LDFLAGS)
+	$(CC) -shared -o $@ -Wl $^ $(LDFLAGS)
 	mkdir -p ../libs/plugins$(POSTFIX)
 	cp $@ ../libs/plugins$(POSTFIX)/
 
