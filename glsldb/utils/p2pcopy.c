@@ -36,6 +36,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <string.h>
 #ifndef _WIN32
+	#ifdef __APPLE__
+		#include "osx_ptrace_defs.h"
+	#endif /* __APPLE __ */
 #include <sys/ptrace.h>
 #else /* _WIN32 */
 #include <windows.h>
