@@ -24,12 +24,33 @@ set(GLSLDEBUG_SRC
 execute_process(COMMAND perl 
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
 	INPUT_FILE genGetProcAddressHook.pl 
-	OUTPUT_FILE getProcAddressHook.inc )
-#execute_process(COMMAND perl genFunctionPointerTypes.pl > functionPointerTypes.inc)
-#execute_process(COMMAND perl genReplayFunc.pl > replayFunction.c)
-#execute_process(COMMAND perl genFunctionList.pl > functionList.c)
-#execute_process(COMMAND perl mergeAllowedInBeginEndList.pl > functionsAllowedInBeginEnd.pl)
-#execute_process(COMMAND perl genFunctionHooks.pl > functionHooks.inc)
+	OUTPUT_FILE getProcAddressHook.inc
+)
+execute_process(COMMAND perl 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+	INPUT_FILE genFunctionPointerTypes.pl 
+	OUTPUT_FILE functionPointerTypes.inc
+)
+execute_process(COMMAND perl 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+	INPUT_FILE genReplayFunc.pl 
+	OUTPUT_FILE replayFunction.c
+)
+execute_process(COMMAND perl 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+	INPUT_FILE genFunctionList.pl 
+	OUTPUT_FILE functionList.c
+)
+execute_process(COMMAND perl 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+	INPUT_FILE mergeAllowedInBeginEndList.pl 
+	OUTPUT_FILE functionsAllowedInBeginEnd.pl
+)
+execute_process(COMMAND perl 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+	INPUT_FILE genFunctionHooks.pl 
+	OUTPUT_FILE functionHooks.inc
+)
 
 include_directories(${PROJECT_SOURCE_DIR}/glsldb
 	${PROJECT_SOURCE_DIR}/glsldb/utils

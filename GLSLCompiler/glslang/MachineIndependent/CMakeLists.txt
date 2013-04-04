@@ -17,37 +17,24 @@ set(SRC
 	InfoSink.cpp
 )
 
-find_program(YACC_BINARY 
-	NAMES 
-		yacc 
-		bison
-	PATHS
-		/usr
-		/usr/local
-	PATH_SUFFIXES
-		bin
-	DOC 
-		"Yacc/Bison binary"
-)
-find_program(FLEX_BINARY 
-	NAMES 
-		flex 
-	PATHS
-		/usr/bin
-		/usr/local/bin
-	DOC 
-		"Flex binary"
-)
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
 # FIXME
 # original makefiles use dos2unix around here too, neccessary?
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
 add_custom_command(OUTPUT "Gen_glslang.cpp"
-	COMMAND ${FLEX_BINARY} -oGen_glslang.cpp glslang.l
+	COMMAND ${FLEX_EXECUTABLE} -oGen_glslang.cpp glslang.l
 	DEPENDS "glslang.l"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-execute_process(COMMAND postProcess)
+add_custom_command(OUTPUT "Gen_glslang_tab.cpp"
+	COMMAND "./postProcess.sh"
+	DEPENDS "glslang.y"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+#execute_process(COMMAND postProcess)
 
 # FIXME
 # modify this for windows support
