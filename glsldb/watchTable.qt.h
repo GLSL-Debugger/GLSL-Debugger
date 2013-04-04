@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WATCH_TABLE_QT_H_
 #define _WATCH_TABLE_QT_H_
 
-#include "ui/watchTable.ui.h"
+#include "ui_watchTable.h"
 #include "vertexBox.qt.h"
 #include "watchView.qt.h"
 #include "mappings.h"

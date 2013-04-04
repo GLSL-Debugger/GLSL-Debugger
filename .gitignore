@@ -12,6 +12,21 @@
 *.la
 *.a
 
+# CMake stuff
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+Makefile
+
+# output
+bin
+lib
+
+# QT stuff
+moc_*.cxx
+ui_*.h
+qrc_*.cxx
+
 *.bak
 
 glsldb/glenumerants/glxenumerants.h

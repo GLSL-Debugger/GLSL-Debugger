@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _COMPILERERRORDIALOG_QT_H
 
 #include <QtGui/QDialog>
-#include "ui/compilerErrorDialog.ui.h"
+#include "ui_compilerErrorDialog.h"
 #include "compilerErrorDetails.qt.h"
 
 class Dialog_CompilerError : public QDialog, public Ui::Dialog_CompilerError {

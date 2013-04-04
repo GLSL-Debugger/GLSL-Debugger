@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtCore/QVector>
 
-#include "ui/editCallDialog.ui.h"
+#include "ui_editCallDialog.h"
 #include "functionCall.h"
 
 class EditCallDialog : public QDialog, public Ui::dEditCall {

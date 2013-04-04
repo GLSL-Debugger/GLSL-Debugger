@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _ABOUTBOX_QT_H
 
 #include <QtGui/QDialog>
-#include "ui/aboutBox.ui.h"
+#include "ui_aboutBox.h"
 
 class Dialog_AboutBox : public QDialog, public Ui::Dialog_AboutBox {
 	Q_OBJECT

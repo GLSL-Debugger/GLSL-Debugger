@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _LOOP_DIALOG_QT_H_
 #define _LOOP_DIALOG_QT_H_
 
-#include "ui/loopDialog.ui.h"
+#include "ui_loopDialog.h"
 #include "loopData.qt.h"
 #include "curveView.qt.h"
 #include <QtGui/QLabel>

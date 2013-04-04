@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QTextStream>
 
 #include "globaldefines.h"
-#include "ui/mainWindow.ui.h"
+#include "ui_mainWindow.h"
 #include "openProgramDialog.qt.h"
 #include "glCallStatistics.qt.h"
 #include "jumpToDialog.qt.h"
