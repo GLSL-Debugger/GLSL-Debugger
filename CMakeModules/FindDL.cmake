@@ -15,13 +15,9 @@ else(DL_LIBRARIES)
   # of libc, so don't need to link extra libs.
   set(DL_LIBRARIES "")
 endif(DL_LIBRARIES)
-IF (DL_FOUND)
-	IF (NOT DL_FIND_QUIETLY)
-		MESSAGE(STATUS "Found dl header: ${XSITE_INCLUDE_DIR}")
-		MESSAGE(STATUS "Found dl: ${XSITE_LIBRARIES}")
-	ENDIF (NOT DL_FIND_QUIETLY)
-ELSE (DL_FOUND)
-	IF (XSITE_FIND_REQUIRED)
-		MESSAGE(FATAL_ERROR "Could not find dl library")
-	ENDIF (XSITE_FIND_REQUIRED)
-ENDIF (DL_FOUND)
+
+include(FindPackageHandleStandardArgs)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(DL
+                                  REQUIRED_VARS DL_LIBRARIES DL_INCLUDE_DIR
+)
