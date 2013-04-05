@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* (_MSC_VER > 1000) */
 
 #include <QtGui/QDialog>
-#include "ui/attachToProcessDialog.ui.h"
+#include "ui_attachToProcessDialog.h"
 
 #include "attachToProcess.qt.h"
 

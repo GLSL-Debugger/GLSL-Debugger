@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _DBG_SHADER_VIEW_QT_H_
 #define _DBG_SHADER_VIEW_QT_H__
 
-#include "ui/dbgShaderView.ui.h"
+#include "ui_dbgShaderView.h"
 
 class DbgShaderView : public QDialog, public Ui::dDbgShaderView {
     Q_OBJECT

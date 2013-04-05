@@ -42,7 +42,7 @@
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include "../glsldb/utils/dbgprint.h"
+#include "utils/dbgprint.h"
 
 #ifndef SQR
 #define SQR(a) ((a) * (a))

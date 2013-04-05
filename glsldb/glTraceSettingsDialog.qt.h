@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QCheckBox>
 #include <QtCore/QString>
 
-#include "ui/glTraceSettingsDialog.ui.h"
+#include "ui_glTraceSettingsDialog.h"
 #include "glTraceFilterModel.qt.h"
 
 class GlTraceSettingsViewFilter : public QSortFilterProxyModel

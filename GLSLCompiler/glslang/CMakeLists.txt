@@ -1,0 +1,4 @@
+add_subdirectory(DebugCodeGen)
+add_subdirectory(GenericCodeGen)
+add_subdirectory(MachineIndependent)
+add_subdirectory(OSDependent)

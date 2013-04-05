@@ -61,8 +61,9 @@ US          (u|U)
 #include <stdio.h>
 #include <stdlib.h>
 #include "ParseHelper.h"
+extern "C" {
 #include "glslang_tab.h"
-
+}
 /* windows only pragma */
 #ifdef _MSC_VER
 #pragma warning(disable : 4102)

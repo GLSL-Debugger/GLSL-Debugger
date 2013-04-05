@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QVector>
 #include <QtCore/QString>
 
-#include "ui/jumpToDialog.ui.h"
+#include "ui_jumpToDialog.h"
 
 class JumpToDialog : public QDialog, public Ui::dJumpTo {
     Q_OBJECT

@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _SELECTIN_DIALOG_QT_H_
 #define _SELECTIN_DIALOG_QT_H_
 
-#include "ui/selectionDialog.ui.h"
+#include "ui_selectionDialog.h"
 #include <QtGui/QLabel>
 #include <QtGui/QWidget>
 #include <QtGui/QScrollArea>

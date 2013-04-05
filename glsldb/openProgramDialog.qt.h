@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtGui/QCompleter>
 #include <QtGui/QDirModel>
-#include "ui/openProgramDialog.ui.h"
+#include "ui_openProgramDialog.h"
 
 class Dialog_OpenProgram : public QDialog, public Ui::Dialog_OpenProgram {
     Q_OBJECT
