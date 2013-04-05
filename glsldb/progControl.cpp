@@ -88,9 +88,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define LIBDLSYM ""
 #define DBG_FUNCTIONS_PATH "plugins"
 #else /* _WIN32 */
-#define DEBUGLIB "/libs/libglsldebug-"LIBPOSTFIX".so"
-#define LIBDLSYM "/libs/libdlsym-"LIBPOSTFIX".so"
-#define DBG_FUNCTIONS_PATH "/libs/plugins"LIBPOSTFIX
+#define DEBUGLIB "/../lib/libglsldebug.so"
+#define LIBDLSYM "/../lib/libdlsym.so"
+#define DBG_FUNCTIONS_PATH "/../lib/plugins"
 #endif /* _WIN32 */
 
 ProgramControl::ProgramControl(const char *pname)

@@ -33,7 +33,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define GLX_GLXEXT_PROTOTYPES
 #define GLH_EXT_SINGLE_FILE
-#include "glh/glh_extensions.h"
+//#include "glh/glh_extensions.h"
+#include <GL/glew.h>
 
 /* get rid of some symbols defined in X.h included from glx.h that conflict e.g. with QT */
 #undef None
@@ -167,10 +168,20 @@ static void printProgramInfoLog(GLuint shader)
 
 void GLScatter::initializeGL()
 {
-    if (!glh_init_extensions("GL_VERSION_2_0 ")) {
-        fprintf(stderr, "E: GL_VERSION 2.0 required\n");
-        exit(1);
+    GLenum err = glewInit();
+    if(err != GLEW_OK) {
+      fprintf(stderr, "E: Unable to initialize glew\n");
+      exit(1);
     }
+
+    if(!GLEW_VERSION_2_0) {
+      fprintf(stderr, "E: GL_VERSION 2.0 required\n");
+      exit(1);
+    }
+    // if (!glh_init_extensions("GL_VERSION_2_0 ")) {
+    //     fprintf(stderr, "E: GL_VERSION 2.0 required\n");
+    //     exit(1);
+    // }
 
     qglClearColor(m_qClearColor);
     glEnable(GL_DEPTH_TEST);

@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WATCH_GEODATATREE_QT_H_
 #define _WATCH_GEODATATREE_QT_H_
 
-#include "ui/watchGeoDataTree.ui.h"
+#include "ui_watchGeoDataTree.h"
 #include "vertexBox.qt.h"
 #include "watchView.qt.h"
 #include "glScatter.qt.h"

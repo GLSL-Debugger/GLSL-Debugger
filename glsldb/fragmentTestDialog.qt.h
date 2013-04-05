@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FRAGMENT_TEST_DIALOG_H
 #define FRAGMENT_TEST_DIALOG_H
 
-#include "ui/fragmentTestDialog.ui.h"
+#include "ui_fragmentTestDialog.h"
 
 class FragmentTestDialog : public QDialog, public Ui::dFragmentTest
 {

@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WATCH_VECTOR_QT_H_
 #define _WATCH_VECTOR_QT_H_
 
-#include "ui/watchVector.ui.h"
+#include "ui_watchVector.h"
 #include "pixelBox.qt.h"
 #include "watchView.qt.h"
 #include "imageView.qt.h"

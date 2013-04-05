@@ -38,7 +38,7 @@
 #include "osinclude.h"
 #include "InitializeDll.h"
 
-#if !(defined(linux))
+#if !(defined(GLSLDB_LINUX))
 #error Trying to build a Linux specific file in a non-Linux build.
 #endif
 
