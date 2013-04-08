@@ -8,7 +8,7 @@ find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
-if(GLSLDB_LINUX)
+if(GLSLDB_LINUX OR GLSLDB_OSX)
 	find_package(X11 REQUIRED)
 	find_package(Threads REQUIRED)
 endif()

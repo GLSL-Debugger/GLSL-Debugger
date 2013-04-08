@@ -474,8 +474,7 @@ void GlTraceFilterModel::checkExtensions() {
 		extensions.append(' ');
 		extensions.append(QByteArray(reinterpret_cast<const char*>(wglGetExtensionsStringARB(wglGetCurrentDC()))));
 	}
-
-#else
+#elif defined(GLSLDB_LINUX)
     int supportedXMajor, supportedXMinor;
     const char *versionXString;
 
@@ -494,7 +493,9 @@ void GlTraceFilterModel::checkExtensions() {
 
     extensions.append(' ');
     extensions.append(QByteArray(reinterpret_cast<const char*>(glXQueryExtensionsString(XOpenDisplay(NULL), 0))));
+#elif defined(GLSLDB_OSX)
 
+#error "FIXME: add code here"
 
 #endif
 
@@ -510,7 +511,7 @@ void GlTraceFilterModel::checkExtensions() {
 			} else {
 				item->isSupported = false;
 			}
-#ifndef _WIN32            
+#ifdef GLSLDB_LINUX            
 		} else if (strstr(item->function->extname, "GLX_VERSION_") == item->function->extname) {
 			int major, minor;
 			major = item->function->extname[12] - '0';
@@ -520,9 +521,13 @@ void GlTraceFilterModel::checkExtensions() {
 			} else {
 				item->isSupported = false;
             }
-#else
+#elif defined(_WIN32)
 		} else if (strstr(item->function->extname, "WGL_VERSION_") == item->function->extname) {
 			item->isSupported = true;
+#else //GLSLDB_OSX
+		} else if (strstr(item->function->extname, "GL_VERSION_") == item->function->extname) {
+			item->isSupported = true;	
+#error "FIXME: add code here"	
 #endif
 		} else {
 			item->isSupported = extList.contains(item->function->extname);

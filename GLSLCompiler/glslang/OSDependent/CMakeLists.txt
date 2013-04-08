@@ -1,4 +1,4 @@
-if(GLSLDB_LINUX)
+if(GLSLDB_LINUX OR GLSLDB_OSX)
 	add_subdirectory(Linux)
 endif()
 

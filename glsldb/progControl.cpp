@@ -45,13 +45,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #ifndef _WIN32
 #include <unistd.h>
-#include <sys/ptrace.h>
 #include <sys/types.h>
+#include <sys/ptrace.h>
 #include <sys/shm.h>
 #include <sched.h>
 #endif /* !_WIN32 */
 #include <errno.h>
 #include "utils/dbgprint.h"
+
+#ifdef GLSLDB_OSX
+#  include <signal.h>
+#  include "utils/osx_ptrace_defs.h"
+#  define __ptrace_request int
+#endif
 
 #ifndef PTRACE_SETOPTIONS
 /* from linux/ptrace.h */
@@ -185,8 +191,23 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		
 		/* from gdb: Try again with __WCLONE to check cloned processes. */
 		if (pid == -1 && errno == ECHILD) {
+#ifndef GLSLDB_OSX
 			dbgPrint(DBGLVL_INFO, "check clones: %i", (int)pid);
 			pid = waitpid (debuggedProgramPID, &status, __WCLONE);
+#else
+			/* Ack, ugly ugly hack --
+	  		   wait() doesn't work, waitpid() doesn't work, and ignoring SIG_CHLD
+	   		   doesn't work .. and the child thread is still a zombie, so kill()
+	   		   doesn't work.
+			*/
+			char command[1024];
+
+			sprintf(command,
+				"ps ax|fgrep -v fgrep|fgrep -v '<zombie>'|fgrep %d >/dev/null",
+				debuggedProgramPID);
+			while ( system(command) == 0 )
+				sleep(1);
+#endif
 			dbgPrint(DBGLVL_INFO, " %i\n", pid);
 			errorStatus = errno;
 		}
@@ -215,9 +236,11 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			break;
 		case PTRACE_EVENT_FORK:
 		case PTRACE_EVENT_VFORK:
+#ifndef GLSLDB_OSX
 			ptrace((__ptrace_request)PTRACE_GETEVENTMSG, pid, 0, &newPid);
 			dbgPrint(DBGLVL_INFO, "extended wait status: PTRACE_EVENT_FORK or "
 			                "PTRACE_EVENT_VFORKi with pid %i\n", (int)newPid);
+#endif
 			break;
 		case PTRACE_EVENT_EXEC:
 			dbgPrint(DBGLVL_INFO, "extended wait status: PTRACE_EVENT_EXEC\n");
@@ -247,7 +270,9 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			case SIGUSR1:
 			case SIGUSR2:
 			case SIGBUS:
+#ifndef GLSLDB_OSX
 			case SIGPOLL:
+#endif
 			case SIGPROF:
 			case SIGSYS:
 			case SIGXFSZ:
@@ -280,7 +305,9 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			case SIGUSR1:
 			case SIGUSR2:
 			case SIGBUS:
+#ifndef GLSLDB_OSX
 			case SIGPOLL:
+#endif
 			case SIGPROF:
 			case SIGSYS:
 			case SIGXFSZ:
