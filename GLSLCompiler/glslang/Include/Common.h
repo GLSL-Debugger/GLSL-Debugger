@@ -65,7 +65,11 @@
       namespace Sgi = ::__gnu_cxx;       // GCC 3.1 and later
     #endif
   #else
-    #include <unordered_map>  
+    #ifdef GLSLDB_OSX
+      #include <tr1/unordered_map> 
+    #else
+      #include <unordered_map>
+    #endif 
     namespace Sgi = std;
   #endif
 #else      // ...  there are other compilers, right?

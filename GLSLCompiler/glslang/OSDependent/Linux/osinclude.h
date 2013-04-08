@@ -39,7 +39,7 @@
 // This file contains any Linux specific functions.
 //
 
-#if !(defined(GLSLDB_LINUX))
+#if !(defined(GLSLDB_LINUX) || defined(GLSLDB_OSX))
 #error Trying to include a Linux specific file in a non-Linux build.
 #endif
 

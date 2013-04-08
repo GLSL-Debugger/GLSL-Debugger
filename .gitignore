@@ -18,14 +18,19 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 
-# output
+# output & generated stuff
 bin
 lib
+GLSLCompiler/glslang/MachineIndependent/Gen_glslang.cpp
+GLSLCompiler/glslang/MachineIndependent/Gen_glslang_tab.cpp
+GLSLCompiler/glslang/MachineIndependent/glslang.output
+GLSLCompiler/glslang/MachineIndependent/glslang_tab.h
 
 # QT stuff
 moc_*.cxx
 ui_*.h
 qrc_*.cxx
+glsldb/glslDevil.qrc.depends
 
 *.bak
 

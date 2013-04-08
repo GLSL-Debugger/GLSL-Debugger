@@ -2,6 +2,10 @@ find_package(DL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 
+if(GLSLDB_LINUX OR GLSLDB_OSX)
+	find_package(X11 REQUIRED)
+endif()
+
 set(DLSYM_SRC
 	libdlsym.c)
 
@@ -54,6 +58,7 @@ execute_process(COMMAND perl
 
 include_directories(${PROJECT_SOURCE_DIR}/glsldb
 	${PROJECT_SOURCE_DIR}/glsldb/utils
+	${X11_INCLUDE_DIR}
 )
 
 # FIXME

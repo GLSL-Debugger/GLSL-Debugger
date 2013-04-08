@@ -43,9 +43,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glenumerants.h"
 #include "enumerants.h"
 
-#ifndef _WIN32
-#  include <GL/glx.h>
-#  include <GL/glxext.h>
+#if (defined(GLSLDB_LINUX) || defined(GLSLDB_OSX))
+#  include "GL/glx.h"
+#  include "GL/glxext.h"
 
 /*#include "glenumerants.h"*/
 
@@ -55,7 +55,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  endif
 
 #  include "glxenumerants.h"
-#else
+#endif
+
+#ifdef GLSLDB_WIN32
 #  include <windows.h>
 #  include <GL/wglext.h>
 #  include "wglenumerants.h"
