@@ -443,7 +443,11 @@ enum DBG_PFT_OPTIONS {
 
 typedef intptr_t ALIGNED_DATA;
 
-#define SHM_SIZE (32*1024*1024) 
+#ifdef GLSLDB_OSX
+#	define SHM_SIZE (2*1024*1024)
+#else
+#	define SHM_SIZE (32*1024*1024)
+#endif
 #define SHM_MAX_FUNCNAME 1024
 #define SHM_MAX_THREADS	 16
 #ifdef _WIN32
