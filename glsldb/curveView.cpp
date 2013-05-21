@@ -74,6 +74,7 @@ CurveView::CurveView(QWidget *parent)
 
 void CurveView::setBase(int base)
 {
+    UNUSED_ARG(base)
     m_nBase = 0;
     viewport()->update();
 }
@@ -123,17 +124,21 @@ QRect CurveView::visualRect(const QModelIndex &index) const
 
 void CurveView::scrollTo(const QModelIndex &index, ScrollHint hint)
 {
-
+    UNUSED_ARG(index)
+    UNUSED_ARG(hint)
 }
 
 QModelIndex CurveView::indexAt(const QPoint &point) const
 {
+    UNUSED_ARG(point)
     return QModelIndex();
 }
 
 QModelIndex CurveView::moveCursor(QAbstractItemView::CursorAction cursorAction,
                                   Qt::KeyboardModifiers modifiers)
 {
+    UNUSED_ARG(cursorAction)
+    UNUSED_ARG(modifiers)
     return QModelIndex();
 }
 
@@ -149,16 +154,18 @@ int CurveView::verticalOffset() const
 
 bool CurveView::isIndexHidden(const QModelIndex &index) const
 {
+    UNUSED_ARG(index)
     return false;
 }
 
 void CurveView::setSelection(const QRect&, QItemSelectionModel::SelectionFlags command)
 {
-
+    UNUSED_ARG(command)
 }
 
 QRegion CurveView::visualRegionForSelection(const QItemSelection &selection) const
 {
+    UNUSED_ARG(selection)
     return QRegion();
 }
 
@@ -315,6 +322,7 @@ void CurveView::updateGeometries()
 
 void CurveView::resizeEvent(QResizeEvent *event)
 {
+    UNUSED_ARG(event)
     updateGeometries();
 }
 

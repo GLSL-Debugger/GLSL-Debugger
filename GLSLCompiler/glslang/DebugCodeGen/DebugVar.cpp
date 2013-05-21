@@ -64,7 +64,14 @@ class TOutputDebugVarCompiler : public TCompiler {
             debugOptions(dOptions),
             vl(variableList) { }
         virtual bool compile(TIntermNode* root);
-        virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl, ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) { return 0; }
+        virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl, ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) {
+            UNUSED_ARG(root)
+            UNUSED_ARG(cgbl)
+            UNUSED_ARG(vl)
+            UNUSED_ARG(dbgCgOptions)
+            UNUSED_ARG(code)
+            return 0;
+        }
         TInfoSink infoSink;
         int debugOptions;
     protected:

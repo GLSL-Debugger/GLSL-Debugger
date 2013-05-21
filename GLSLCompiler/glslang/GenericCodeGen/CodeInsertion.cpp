@@ -34,7 +34,7 @@ static struct {
     ShVariable *parameter;
 
     strMap  nameMap;
-	strList loopIters;
+    strList loopIters;
     int     numLoopIters;
 } g;
 
@@ -57,7 +57,7 @@ static ShVariable* createDefault(cgTypes type, EShLanguage l)
     ret->structName = NULL;
     ret->structSize = 0;
     ret->structSpec = NULL;
-    
+
     switch (type) {
         case CG_TYPE_RESULT:
             ret->type       = SH_FLOAT;
@@ -84,7 +84,7 @@ static ShVariable* createDefault(cgTypes type, EShLanguage l)
     }
 }
 
-static void getUnusedNameByPrefix(char **name, 
+static void getUnusedNameByPrefix(char **name,
                                   ShVariableList *vl, const char *prefix)
 {
     if (!(findFirstShVariableFromName(vl, prefix))) {
@@ -102,11 +102,11 @@ static void getUnusedNameByPrefix(char **name,
             exit(1);
         }
         strcpy(*name, prefix);
-        
+
         while (findFirstShVariableFromName(vl, *name)) {
             char ran;
             int i;
-            
+
             (*name)[strlen(prefix)] = '\0';
 
             for (i=0; i<CG_RANDOMIZED_POSTFIX_SIZE; i++) {
@@ -178,7 +178,7 @@ void cgInit(cgTypes type, ShVariable *src, ShVariableList *vl, EShLanguage l)
     }
 
     if (*var) cgDestruct(type);
-    
+
     if (!src) {
         *var = createDefault(type, l);
     } else {
@@ -302,6 +302,8 @@ void cgAddDeclaration(cgTypes type, TString &prog, EShLanguage l)
 
 static void addInitializationCode(cgInitialization init, TString &prog, EShLanguage l)
 {
+    UNUSED_ARG(l)
+
     switch(init) {
         case CG_INIT_BLACK:
             prog += "0.0";
@@ -410,14 +412,14 @@ char* itoMultiSwizzle(int i)
     int k, j;
     char* swizzle = new char[5];
     swizzle[0] = '\0';
-    
+
     dbgPrint(DBGLVL_COMPILERINFO, "%i\n", i);
-    
+
     for( k = (int)ceil(log10((float)i)), j=0; k>0; k--, j++) {
         int d = (int)(i/pow(10, (float)(k-1)));
 
         dbgPrint(DBGLVL_COMPILERINFO, "d:%i k:%i i:%i\n", d, k, i);
-        
+
         switch (d-1) {
             case 0: swizzle[j] = 'x'; break;
             case 1: swizzle[j] = 'y'; break;
@@ -434,12 +436,12 @@ char* itoMultiSwizzle(int i)
 static void addVariableCode(TString &prog, ShChangeable *cgb, ShVariableList *vl)
 {
     ShVariable *var;
-    
+
     if (!cgb || !vl) {
         dbgPrint(DBGLVL_ERROR, "CodeInsertion - called getVariableType without valid parameter\n");
         exit(1);
     }
-    
+
     var = findShVariableFromId(vl, cgb->id);
 
     if (!var) {
@@ -559,7 +561,7 @@ static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
     int size, i;
     int arraySub = 0;
     ShVariable *var;
-    
+
     if (!cgb || !vl) {
         return 0;
     }
@@ -599,7 +601,7 @@ static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
     return size;
 }
 
-static void addVariableCodeFromList(TString &prog, ShChangeableList *cgbl, 
+static void addVariableCodeFromList(TString &prog, ShChangeableList *cgbl,
                                     ShVariableList *vl, int targetSize)
 {
     int id;
@@ -609,22 +611,22 @@ static void addVariableCodeFromList(TString &prog, ShChangeableList *cgbl,
         dbgPrint(DBGLVL_WARNING, "CodeInsertion - no changeable list given to generate code\n");
         return;
     }
-    
+
     for(id=0; id<cgbl->numChangeables; id++) {
         addVariableCode(prog, cgbl->changeables[id], vl);
         size += getShChangeableSize(cgbl->changeables[id], vl);
-        
+
         if (id < (cgbl->numChangeables - 1)) {
             /* Only add seperator if not last item */
             prog += ", ";
         }
     }
-    
+
     if (size > 4) {
         dbgPrint(DBGLVL_WARNING, "CodeInsertion - given changeables exeed single request batch size by %i\n",
                 size-4);
     }
-    
+
     for(id=size; id<targetSize; id++) {
         prog += ", ";
         prog += "0.0";
@@ -664,7 +666,7 @@ static void addLoopHeader(TString &prog, TIntermNodeStack *stack)
                 prog += " && ";
             }
         }
-        
+
         prog += "(";
     }
 }
@@ -681,8 +683,8 @@ static void addLoopFooter(TString &prog, TIntermNodeStack *stack)
  *     DBG_CG_SELECTION_CONDITIONAL: branch (true or false)
  *     DBG_CG_GEOMETRY_MAP:          EmitVertex or EndPrimitive
  */
-void cgAddDbgCode(cgTypes type, TString &prog, DbgCgOptions cgOptions, 
-                  ShChangeableList *src, ShVariableList *vl, 
+void cgAddDbgCode(cgTypes type, TString &prog, DbgCgOptions cgOptions,
+                  ShChangeableList *src, ShVariableList *vl,
                   TIntermNodeStack *stack, int option, int outPrimType)
 {
 
@@ -691,7 +693,7 @@ void cgAddDbgCode(cgTypes type, TString &prog, DbgCgOptions cgOptions,
         case CG_TYPE_RESULT:
             /* Add additional overhead if inside loop */
             if (cgOptions != DBG_CG_GEOMETRY_CHANGEABLE ||
-				(option != CG_GEOM_CHANGEABLE_IN_SCOPE &&
+                (option != CG_GEOM_CHANGEABLE_IN_SCOPE &&
                 option != CG_GEOM_CHANGEABLE_NO_SCOPE)) {
                 addLoopHeader(prog, stack);
             }
@@ -800,7 +802,7 @@ void cgAddDbgCode(cgTypes type, TString &prog, DbgCgOptions cgOptions,
             }
             /* Add additional overhead if inside loop */
             if (cgOptions != DBG_CG_GEOMETRY_CHANGEABLE ||
-				(option != CG_GEOM_CHANGEABLE_IN_SCOPE &&
+                (option != CG_GEOM_CHANGEABLE_IN_SCOPE &&
                 option != CG_GEOM_CHANGEABLE_NO_SCOPE)) {
                 addLoopFooter(prog, stack);
             }
@@ -856,7 +858,7 @@ static const char* getNewUnusedFunctionName(const char *input, TIntermNode *root
 
     while (getFunctionBySignature(output, root)) {
         output[baseLen] = '\0';
-        
+
         for (i=0; i<CG_RANDOMIZED_POSTFIX_SIZE; i++) {
             output[baseLen+i] = (char)((rand()/(float)RAND_MAX)*('Z'-'A')+'A');
         }
@@ -866,7 +868,7 @@ static const char* getNewUnusedFunctionName(const char *input, TIntermNode *root
     return output;
 }
 
-void cgInitNameMap(void) 
+void cgInitNameMap(void)
 {
     g.nameMap.clear();
 }
@@ -874,7 +876,7 @@ void cgInitNameMap(void)
 void cgInitLoopIter(void)
 {
     g.numLoopIters = 0;
-	g.loopIters.clear();
+    g.loopIters.clear();
 }
 
 const char* cgGetDebugName(const char *input, TIntermNode *root)
@@ -898,12 +900,12 @@ void cgSetLoopIterName(char **name, ShVariableList *vl) {
     sprintf(prefix, "%s%i", CG_LOOP_ITER_PREFIX, g.numLoopIters);
     getUnusedNameByPrefix(name, vl, prefix);
 
-	g.loopIters.push_back(*name);
+    g.loopIters.push_back(*name);
     g.numLoopIters++;
 }
 
 void cgResetLoopIterNames(void) {
     g.numLoopIters = 0;
-	g.loopIters.clear();
+    g.loopIters.clear();
 }
 

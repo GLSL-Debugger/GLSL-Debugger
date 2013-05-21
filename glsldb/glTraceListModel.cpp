@@ -169,6 +169,7 @@ void GlTraceListModel::addGlTraceItem(const  GlTraceListItem::IconType type, con
 
 void GlTraceListModel::addGlTraceWarningItem(const QString & text)
 {
+    UNUSED_ARG(text)
     int idx = getNextIndex();
     int newRow = getLastRowIndex();
     beginInsertRows(QModelIndex(), newRow, newRow);
@@ -178,6 +179,7 @@ void GlTraceListModel::addGlTraceWarningItem(const QString & text)
 
 void GlTraceListModel::addGlTraceErrorItem(const QString & text)
 {
+    UNUSED_ARG(text)
     int idx = getNextIndex();
     int newRow = getLastRowIndex();
     beginInsertRows(QModelIndex(), newRow, newRow);
@@ -221,6 +223,7 @@ void GlTraceListModel::setCurrentGlTraceText(const QString &text, int offset)
 
 int GlTraceListModel::rowCount(const QModelIndex &parent) const
 {
+    UNUSED_ARG(parent)
     return m_iNum;
 }
 

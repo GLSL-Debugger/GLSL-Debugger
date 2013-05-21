@@ -117,6 +117,9 @@ TIntermFuncParam* TIntermediate::addFuncParam(int id, const TString& name, const
 //
 TIntermTyped* TIntermediate::addBinaryMath(TOperator op, TIntermTyped* left, TIntermTyped* right, TSourceRange range, TSymbolTable& symbolTable, TExtensionList &extMap)
 {
+    UNUSED_ARG(symbolTable)
+    UNUSED_ARG(range)
+
     switch (op) {
     case EOpLessThan:
     case EOpGreaterThan:
@@ -215,6 +218,7 @@ TIntermTyped* TIntermediate::addBinaryMath(TOperator op, TIntermTyped* left, TIn
 //
 TIntermTyped* TIntermediate::addAssign(TOperator op, TIntermTyped* left, TIntermTyped* right, TSourceRange range, TExtensionList &extMap)
 {
+    UNUSED_ARG(range)
     //
     // Like adding binary math, except the conversion can only go
     // from right to left.
@@ -378,6 +382,9 @@ TIntermNode* TIntermediate::addParameter(TSourceRange range, TType* type, TExten
 //
 TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, TSourceRange range, TSymbolTable& symbolTable, TExtensionList &extMap)
 {
+
+    UNUSED_ARG(symbolTable)
+
     TIntermUnary* node;
     TIntermTyped* child = childNode->getAsTyped();
 
@@ -1127,6 +1134,8 @@ TIntermNode* TIntermediate::addSelection(TIntermTyped* cond, TIntermNodePair nod
 
 TIntermTyped* TIntermediate::addComma(TIntermTyped* left, TIntermTyped* right, TSourceRange range, TExtensionList &extMap)
 {
+    UNUSED_ARG(range)
+
     if ((left->getType().getQualifier() == EvqConst || left->getType().getQualifier() == EvqConstNoValue) &&
         (right->getType().getQualifier() == EvqConst || right->getType().getQualifier() == EvqConstNoValue)) {
         return right;
@@ -1362,6 +1371,8 @@ TIntermBranch* TIntermediate::addBranch(TOperator branchOp, TIntermTyped* expres
 //
 bool TIntermediate::postProcess(TIntermNode* root, EShLanguage language)
 {
+    UNUSED_ARG(language)
+
     if (root == 0)
         return true;
 
@@ -1511,6 +1522,8 @@ bool TIntermUnary::promote(TInfoSink&)
 //
 bool TIntermBinary::promote(TInfoSink& infoSink)
 {
+    UNUSED_ARG(infoSink)
+
     if (left->isArray()) {
         if (right->isArray()) {
             // Arrays have to be exact matches.

@@ -214,6 +214,10 @@ protected:
 #       ifdef GUARD_BLOCKS
         new(memory) TAllocation(numBytes, memory, block->lastAllocation);
         block->lastAllocation = reinterpret_cast<TAllocation*>(memory);
+#		else
+        // TODO: UNUSED_ARG()
+        (void) block;
+        (void) numBytes;
 #       endif
 
         // This is optimized entirely away if GUARD_BLOCKS is not defined.

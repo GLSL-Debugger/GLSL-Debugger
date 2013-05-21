@@ -191,36 +191,36 @@ typedef union YYSTYPE
 /* Line 2053 of yacc.c  */
 #line 155 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
 
-	struct {
-		TSourceRange range;
-		union {
-			TString *string;
-			float f;
-			int i;
-			unsigned int ui;
-			bool b;
-		};
-		TSymbol* symbol;
-	} lex;
-	struct {
-		TSourceRange range;
-		TOperator op;
-		union {
-			TIntermNode* intermNode;
-			TIntermNodePair nodePair;
-			TIntermTyped* intermTypedNode;
-			TIntermAggregate* intermAggregate;
-		};
-		union {
-			TPublicType type;
-			TQualifier qualifier;
-			TVaryingModifier varyingModifier;
-			TFunction* function;
-			TParameter param;
-			TTypeRange typeRange;
-			TTypeList* typeList;
-		};
-	} interm;
+    struct {
+        TSourceRange range;
+        union {
+            TString *string;
+            float f;
+            int i;
+            unsigned int ui;
+            bool b;
+        };
+        TSymbol* symbol;
+    } lex;
+    struct {
+        TSourceRange range;
+        TOperator op;
+        union {
+            TIntermNode* intermNode;
+            TIntermNodePair nodePair;
+            TIntermTyped* intermTypedNode;
+            TIntermAggregate* intermAggregate;
+        };
+        union {
+            TPublicType type;
+            TQualifier qualifier;
+            TVaryingModifier varyingModifier;
+            TFunction* function;
+            TParameter param;
+            TTypeRange typeRange;
+            TTypeList* typeList;
+        };
+    } interm;
 
 
 /* Line 2053 of yacc.c  */

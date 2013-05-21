@@ -222,6 +222,7 @@ inline const TString String(const int i, const int base = 10)
 #ifdef _WIN32
     _itoa(i, text, base);
 #else
+    UNUSED_ARG(base)
     // we assume base 10 for all cases
     sprintf(text, "%d", i);
 #endif

@@ -969,6 +969,7 @@ bool TParseContext::arrayTypeErrorCheck(TSourceRange range, TPublicType type)
 //
 bool TParseContext::arraySizeUnspecifiedErrorCheck(TSourceRange range, TPublicType type)
 {
+    UNUSED_ARG(range)
     if (type.array && type.arraySize == 0) {
         return true;
     }
@@ -1425,6 +1426,8 @@ bool TParseContext::areAllChildConst(TIntermAggregate* aggrNode)
 //
 TIntermTyped* TParseContext::addConstructor(TIntermNode* node, const TType* type, TOperator op, TFunction* fnCall, TSourceRange range)
 {
+    UNUSED_ARG(fnCall)
+
     if (node == 0)
         return 0;
 

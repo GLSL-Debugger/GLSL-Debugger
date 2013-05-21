@@ -1909,7 +1909,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         nOldCoverageMap = nNewCoverageMap;
 
                         delete pCoverageBox;
-                    } else if ((currentRunLevel == RL_DBG_GEOMETRY_SHADER |
+                    } else if ((currentRunLevel == RL_DBG_GEOMETRY_SHADER ||
                                 currentRunLevel == RL_DBG_VERTEX_SHADER) &&
                             updateCovermap) {
                         /* Retrieve cover map (one render pass 'DBG_CG_COVERAGE') */

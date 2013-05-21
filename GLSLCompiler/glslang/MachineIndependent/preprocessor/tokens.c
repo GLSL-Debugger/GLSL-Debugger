@@ -56,7 +56,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -108,7 +108,7 @@ static char *idstr(const char *fstr, MemoryPool *pool)
         str = (char *) malloc(len + 1);
     else
         str = (char *) mem_Alloc(pool, len + 1);
-    
+
     for (f=fstr, t=str; *f; f++) {
         if (isalnum(*f)) *t++ = *f;
         else if (*f == '.' || *f == '/') *t++ = '_';
@@ -430,7 +430,7 @@ void UngetToken(int token, yystypepp * yylvalpp) {
 #ifdef _WIN32
     t->base.scan = (int (__cdecl*)(InputSrc *, yystypepp *))reget_token;
 #else /* _WIN32 */
-	t->base.scan = (void *)reget_token;
+    t->base.scan = (void *)reget_token;
 #endif /* _WIN32 */
     t->base.prev = cpp->currentInput;
     t->base.name = cpp->currentInput->name;

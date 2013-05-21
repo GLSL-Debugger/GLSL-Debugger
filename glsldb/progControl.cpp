@@ -461,6 +461,7 @@ void ProgramControl::setDebugEnvVars(void)
 
 void ProgramControl::buildEnvVars(const char *pname)
 {
+    UNUSED_ARG(pname)
     char *s;
     char *progPath = NULL;  // Absolute path to directory containing executable.
     int progPathLen = 0;    // Length of 'progPath' w/o trailing zero.
@@ -1053,6 +1054,7 @@ pcErrorCode ProgramControl::dbgCommandStartRecording()
 
 pcErrorCode ProgramControl::dbgCommandReplay(int target)
 {
+    UNUSED_ARG(target)
     DbgRec *rec = getThreadRecord(debuggedProgramPID);
     pcErrorCode error;
 
@@ -1588,6 +1590,7 @@ pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
 }
 #else /* _WIN32 */
 pcErrorCode ProgramControl::attachToProgram(const pid_t pid) {
+    UNUSED_ARG(pid)
     return PCE_UNKNOWN_ERROR;
 }
 #endif /* _WIN32 */

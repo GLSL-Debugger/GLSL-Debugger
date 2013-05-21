@@ -1804,6 +1804,7 @@ static bool ScopeStackTraverseSelection(bool /* preVisit */, TIntermSelection* n
             addScopeToScopeStack(node->getScope());
             return false;
     }
+    return true;
 }
 
 static bool ScopeStackTraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
@@ -1880,6 +1881,7 @@ static bool ScopeStackTraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it
             addScopeToScopeStack(node->getScope());
             return false;
     }
+    return true;
 }
 
 static bool ScopeStackTraverseUnary(bool,  TIntermUnary* node, TIntermTraverser* it)
