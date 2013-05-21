@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dbgprint.h"
 
 #ifdef _WIN32
-	#include <windows.h>
+    #include <windows.h>
 #endif
 
 #include "GL/gl.h"
@@ -60,11 +60,11 @@ typedef enum {
     DF_SCOPE,
     DF_SELECTABLE,
     DF_WATCHED,
-	DF_DATA_PIXELBOX,
-	DF_DATA_VERTEXBOX,
-	DF_DATA_CURRENTBOX,
-	DF_DEBUG_SELECTED_VALUE,
-	DF_DEBUG_UNIFORM_VALUE,
+    DF_DATA_PIXELBOX,
+    DF_DATA_VERTEXBOX,
+    DF_DATA_CURRENTBOX,
+    DF_DEBUG_SELECTED_VALUE,
+    DF_DEBUG_UNIFORM_VALUE,
     DF_LAST
 } varDataFields;
 
@@ -133,13 +133,13 @@ ShChangeable* ShVarItem::getShChangeable(void)
     } else {
         cgbl = m_qParent->getShChangeable();
         ShChangeableIndex* index;
-        index = createShChangeableIndex((ShChangeableType)(data(DF_CGBL_TYPE).toInt()), 
+        index = createShChangeableIndex((ShChangeableType)(data(DF_CGBL_TYPE).toInt()),
                                         data(DF_CGBL_INDEX_A).toInt());
         addShIndexToChangeable(cgbl, index);
         if (data(DF_CGBL_INDEX_B).isValid()) {
             ShChangeableIndex* matIdx;
-            matIdx = createShChangeableIndex((ShChangeableType)(data(DF_CGBL_TYPE).toInt()), 
-                                             data(DF_CGBL_INDEX_B).toInt());
+            matIdx = createShChangeableIndex((ShChangeableType)(data(DF_CGBL_TYPE).toInt()),
+                                            data(DF_CGBL_INDEX_B).toInt());
             addShIndexToChangeable(cgbl, matIdx);
         }
     }
@@ -149,70 +149,70 @@ ShChangeable* ShVarItem::getShChangeable(void)
 
 void ShVarItem::setPixelBoxPointer(PixelBox *fb)
 {
-	if (fb) {
-		dbgPrint(DBGLVL_DEBUG, "setPixelBoxPointer: PixelBox %p w=%i h=%i dmap=%p coverage=%p\n",
-				fb, fb->getWidth(), fb->getHeight(),
-				fb->getDataMapPointer(), fb->getCoveragePointer());
-	} else {
-		dbgPrint(DBGLVL_DEBUG, "setPixelBoxPointer: NULL\n");
-	}
-	setData(DF_DATA_PIXELBOX, QVariant::fromValue<void*>((void*)fb));
+    if (fb) {
+        dbgPrint(DBGLVL_DEBUG, "setPixelBoxPointer: PixelBox %p w=%i h=%i dmap=%p coverage=%p\n",
+                fb, fb->getWidth(), fb->getHeight(),
+                fb->getDataMapPointer(), fb->getCoveragePointer());
+    } else {
+        dbgPrint(DBGLVL_DEBUG, "setPixelBoxPointer: NULL\n");
+    }
+    setData(DF_DATA_PIXELBOX, QVariant::fromValue<void*>((void*)fb));
 }
 
 PixelBox*  ShVarItem::getPixelBoxPointer(void)
 {
-	QVariant v = data(DF_DATA_PIXELBOX);
-	if (v.value<void*>() == NULL) {
-		dbgPrint(DBGLVL_DEBUG, "getPixelBoxPointer: PixelBox not set\n");
-		return NULL;
-	} else {
-		dbgPrint(DBGLVL_DEBUG, "getPixelBoxPointer: PixelBox %p\n", v.value<void*>());
-		return (PixelBox*)v.value<void*>();
-	}
+    QVariant v = data(DF_DATA_PIXELBOX);
+    if (v.value<void*>() == NULL) {
+        dbgPrint(DBGLVL_DEBUG, "getPixelBoxPointer: PixelBox not set\n");
+        return NULL;
+    } else {
+        dbgPrint(DBGLVL_DEBUG, "getPixelBoxPointer: PixelBox %p\n", v.value<void*>());
+        return (PixelBox*)v.value<void*>();
+    }
 }
 
 void ShVarItem::setVertexBoxPointer(VertexBox *vb)
 {
-	if (vb) {
-		dbgPrint(DBGLVL_DEBUG, "setVertexBoxPointer: VertexBox %p numVertices=%i data=%p\n",
-				vb, vb->getNumVertices(), vb->getDataPointer());
-	} else {
-		dbgPrint(DBGLVL_DEBUG, "setVertexBoxPointer: NULL\n");
-	}
-	setData(DF_DATA_VERTEXBOX, QVariant::fromValue<void*>((void*)vb));
+    if (vb) {
+        dbgPrint(DBGLVL_DEBUG, "setVertexBoxPointer: VertexBox %p numVertices=%i data=%p\n",
+                vb, vb->getNumVertices(), vb->getDataPointer());
+    } else {
+        dbgPrint(DBGLVL_DEBUG, "setVertexBoxPointer: NULL\n");
+    }
+    setData(DF_DATA_VERTEXBOX, QVariant::fromValue<void*>((void*)vb));
 }
 
 VertexBox* ShVarItem::getVertexBoxPointer(void)
 {
-	QVariant v = data(DF_DATA_VERTEXBOX);
-	if (v.value<void*>() == NULL) {
-		dbgPrint(DBGLVL_DEBUG, "getVertexBoxPointer: VertexBox not set\n");
-		return NULL;
-	} else {
-		return (VertexBox*)v.value<void*>();
-	}
+    QVariant v = data(DF_DATA_VERTEXBOX);
+    if (v.value<void*>() == NULL) {
+        dbgPrint(DBGLVL_DEBUG, "getVertexBoxPointer: VertexBox not set\n");
+        return NULL;
+    } else {
+        return (VertexBox*)v.value<void*>();
+    }
 }
-			   
+
 void ShVarItem::setCurrentPointer(VertexBox *vb)
 {
-	if (vb) {
-		dbgPrint(DBGLVL_DEBUG, "setCurrentPointer: VertexBox %p numVertices=%i data=%p\n",
-				vb, vb->getNumVertices(), vb->getDataPointer());
-	} else {
-		dbgPrint(DBGLVL_DEBUG, "setCurrentPointer: NULL\n");
-	}
-	setData(DF_DATA_CURRENTBOX, QVariant::fromValue<void*>((void*)vb));
+    if (vb) {
+        dbgPrint(DBGLVL_DEBUG, "setCurrentPointer: VertexBox %p numVertices=%i data=%p\n",
+                vb, vb->getNumVertices(), vb->getDataPointer());
+    } else {
+        dbgPrint(DBGLVL_DEBUG, "setCurrentPointer: NULL\n");
+    }
+    setData(DF_DATA_CURRENTBOX, QVariant::fromValue<void*>((void*)vb));
 }
 
 VertexBox* ShVarItem::getCurrentPointer(void)
 {
-	QVariant v = data(DF_DATA_CURRENTBOX);
-	if (v.value<void*>() == NULL) {
-		dbgPrint(DBGLVL_DEBUG, "getCurrentPointer: VertexBox not set\n");
-		return NULL;
-	} else {
-		return (VertexBox*)v.value<void*>();
-	}
+    QVariant v = data(DF_DATA_CURRENTBOX);
+    if (v.value<void*>() == NULL) {
+        dbgPrint(DBGLVL_DEBUG, "getCurrentPointer: VertexBox not set\n");
+        return NULL;
+    } else {
+        return (VertexBox*)v.value<void*>();
+    }
 }
 
 bool ShVarItem::isChanged(void)
@@ -224,41 +224,41 @@ bool ShVarItem::isSelectable(void)
 {
     return data(DF_SELECTABLE).toBool();
 }
-    
+
 bool ShVarItem::isInScope(void)
 {
-	return data(DF_SCOPE).toInt() == InScope || 
-	       data(DF_SCOPE).toInt() == NewInScope;
+    return data(DF_SCOPE).toInt() == InScope ||
+        data(DF_SCOPE).toInt() == NewInScope;
 }
 
 bool ShVarItem::hasEnteredScope(void)
 {
-	return data(DF_SCOPE).toInt() == NewInScope;
+    return data(DF_SCOPE).toInt() == NewInScope;
 }
 
 bool ShVarItem::hasLeftScope(void)
 {
-	return data(DF_SCOPE).toInt() == LeftScope;
+    return data(DF_SCOPE).toInt() == LeftScope;
 }
 
 bool ShVarItem::isInScopeStack(void)
 {
-	return data(DF_SCOPE).toInt() == InScopeStack;
+    return data(DF_SCOPE).toInt() == InScopeStack;
 }
 
 bool ShVarItem::isBuildIn(void)
 {
-	return data(DF_BUILTIN).toBool();
+    return data(DF_BUILTIN).toBool();
 }
 
 bool ShVarItem::isUniform(void)
 {
-	return data(DF_QUALIFIER).toString() == "uniform";
+    return data(DF_QUALIFIER).toString() == "uniform";
 }
 
 bool ShVarItem::isActiveUniform(void)
 {
-	return isUniform() && data(DF_DEBUG_UNIFORM_VALUE) != QVariant();
+    return isUniform() && data(DF_DEBUG_UNIFORM_VALUE) != QVariant();
 }
 
 QString ShVarItem::getFullName(void)
@@ -268,55 +268,55 @@ QString ShVarItem::getFullName(void)
 
 int ShVarItem::getReadbackFormat()
 {
-	int varType = data(DF_TYPE).toInt();
+    int varType = data(DF_TYPE).toInt();
 
-	switch (varType)
-	{
-		case SH_FLOAT:
-			return GL_FLOAT;
-		case SH_INT:
-			return GL_INT;
-		case SH_UINT:
-		case SH_BOOL:
-		case SH_SAMPLER_1D:
-		case SH_ISAMPLER_1D:
-		case SH_USAMPLER_1D:
-		case SH_SAMPLER_2D:
-		case SH_ISAMPLER_2D:
-		case SH_USAMPLER_2D:
-		case SH_SAMPLER_3D:
-		case SH_ISAMPLER_3D:
-		case SH_USAMPLER_3D:
-		case SH_SAMPLER_CUBE:
-		case SH_ISAMPLER_CUBE:
-		case SH_USAMPLER_CUBE:
-		case SH_SAMPLER_1D_SHADOW:
-		case SH_SAMPLER_2D_SHADOW:
-		case SH_SAMPLER_2D_RECT:
-		case SH_ISAMPLER_2D_RECT:
-		case SH_USAMPLER_2D_RECT:
-		case SH_SAMPLER_2D_RECT_SHADOW:
-		case SH_SAMPLER_1D_ARRAY:
-		case SH_ISAMPLER_1D_ARRAY:
-		case SH_USAMPLER_1D_ARRAY:
-		case SH_SAMPLER_2D_ARRAY:
-		case SH_ISAMPLER_2D_ARRAY:
-		case SH_USAMPLER_2D_ARRAY:
-		case SH_SAMPLER_BUFFER:
-		case SH_ISAMPLER_BUFFER:
-		case SH_USAMPLER_BUFFER:
-		case SH_SAMPLER_1D_ARRAY_SHADOW:
-		case SH_SAMPLER_2D_ARRAY_SHADOW:
-		case SH_SAMPLER_CUBE_SHADOW:
-			return GL_UNSIGNED_INT;
-		case SH_STRUCT:
-		default:
-			dbgPrint(
-				DBGLVL_ERROR,
-				"Could not get readback type for ShVarItem of type %d\n",
-				varType);
-			return GL_NONE;
-	}
+    switch (varType)
+    {
+        case SH_FLOAT:
+            return GL_FLOAT;
+        case SH_INT:
+            return GL_INT;
+        case SH_UINT:
+        case SH_BOOL:
+        case SH_SAMPLER_1D:
+        case SH_ISAMPLER_1D:
+        case SH_USAMPLER_1D:
+        case SH_SAMPLER_2D:
+        case SH_ISAMPLER_2D:
+        case SH_USAMPLER_2D:
+        case SH_SAMPLER_3D:
+        case SH_ISAMPLER_3D:
+        case SH_USAMPLER_3D:
+        case SH_SAMPLER_CUBE:
+        case SH_ISAMPLER_CUBE:
+        case SH_USAMPLER_CUBE:
+        case SH_SAMPLER_1D_SHADOW:
+        case SH_SAMPLER_2D_SHADOW:
+        case SH_SAMPLER_2D_RECT:
+        case SH_ISAMPLER_2D_RECT:
+        case SH_USAMPLER_2D_RECT:
+        case SH_SAMPLER_2D_RECT_SHADOW:
+        case SH_SAMPLER_1D_ARRAY:
+        case SH_ISAMPLER_1D_ARRAY:
+        case SH_USAMPLER_1D_ARRAY:
+        case SH_SAMPLER_2D_ARRAY:
+        case SH_ISAMPLER_2D_ARRAY:
+        case SH_USAMPLER_2D_ARRAY:
+        case SH_SAMPLER_BUFFER:
+        case SH_ISAMPLER_BUFFER:
+        case SH_USAMPLER_BUFFER:
+        case SH_SAMPLER_1D_ARRAY_SHADOW:
+        case SH_SAMPLER_2D_ARRAY_SHADOW:
+        case SH_SAMPLER_CUBE_SHADOW:
+            return GL_UNSIGNED_INT;
+        case SH_STRUCT:
+        default:
+            dbgPrint(
+                DBGLVL_ERROR,
+                "Could not get readback type for ShVarItem of type %d\n",
+                varType);
+            return GL_NONE;
+    }
 }
 
 ShVarModel::ShVarModel(ShVariableList *i_pVL, QObject *i_qParent, QCoreApplication *i_qApp)
@@ -324,10 +324,10 @@ ShVarModel::ShVarModel(ShVariableList *i_pVL, QObject *i_qParent, QCoreApplicati
 {
     QList<QVariant> rootData;
     rootData << "Name" << "FullName" << "Type" << "TypeID" << "Qualifier" << "ID"
-	         << "CgblType" << "CgblIndexA" << "CgblIndexB" << "Built-In"
-	         << "Changed" << "Scope" << "Selectable" << "Watched"
-	         << "Data PixelBox" << "Data VertexBox" << "Data CurrentBox"
-	         << "Selection Value" << "Value";
+            << "CgblType" << "CgblIndexA" << "CgblIndexB" << "Built-In"
+            << "Changed" << "Scope" << "Selectable" << "Watched"
+            << "Data PixelBox" << "Data VertexBox" << "Data CurrentBox"
+            << "Selection Value" << "Value";
     m_qRootItem = new ShVarItem(rootData);
     setupModelData(i_pVL, m_qRootItem);
 
@@ -345,9 +345,9 @@ ShVarModel::ShVarModel(ShVariableList *i_pVL, QObject *i_qParent, QCoreApplicati
     m_qScopeProxy->setDynamicSortFilter(true);
     m_qScopeProxy->setSourceModel(this);
 
-	// do no show a special sampler tab. This is confusing in case samplers
-	// are defined in a uniform struct	
-#if 0 
+    // do no show a special sampler tab. This is confusing in case samplers
+    // are defined in a uniform struct
+#if 0
     m_qSamplerProxy = new SamplerSortFilterProxyModel(this);
     m_qSamplerProxy->setDynamicSortFilter(true);
     m_qSamplerProxy->setSourceModel(this);
@@ -392,7 +392,7 @@ QModelIndex ShVarModel::index(int i_nRow, int i_nColumn, const QModelIndex &i_qP
 QModelIndex ShVarModel::getIndex(ShVarItem *i_qItem, int i_nColumn)
 {
     if (i_qItem->parent() != m_qRootItem) {
-        return ShVarModel::index(i_qItem->row(), i_nColumn, 
+        return ShVarModel::index(i_qItem->row(), i_nColumn,
                 getIndex(i_qItem->parent(), i_nColumn));
     } else {
         return ShVarModel::index(i_qItem->row(), i_nColumn);
@@ -454,25 +454,25 @@ QVariant ShVarModel::data(const QModelIndex &i_qIndex, int i_nRole) const
             } else {
                 return QVariant();
             }
-		case Qt::FontRole:
-			// all inactive uniforms should never be made bold
-			if (item->isUniform() && !item->isActiveUniform())
-			{
-            	return QVariant();
-			}
-			if (item->isInScope()) {
-				QFont f;
-				f.setWeight(QFont::DemiBold);
-				return f;
-			} else {
-            	return QVariant();
-			}
+        case Qt::FontRole:
+            // all inactive uniforms should never be made bold
+            if (item->isUniform() && !item->isActiveUniform())
+            {
+                return QVariant();
+            }
+            if (item->isInScope()) {
+                QFont f;
+                f.setWeight(QFont::DemiBold);
+                return f;
+            } else {
+                return QVariant();
+            }
         default:
             return QVariant();
     }
 
     //return item->data(i_qIndex.column());
-	return QVariant();
+    return QVariant();
 }
 
 Qt::ItemFlags ShVarModel::flags(const QModelIndex &i_qIndex) const
@@ -501,7 +501,7 @@ QVariant ShVarModel::headerData(int i_nSection, Qt::Orientation i_qOrientation, 
 void ShVarModel::clearChanged(ShVarItem *i_qItem)
 {
     /* Hint: this does not emit any dataChanged signal */
-    
+
     int j;
 
     if (i_qItem != m_qRootItem) {
@@ -516,11 +516,11 @@ void ShVarModel::clearChanged(ShVarItem *i_qItem)
 void ShVarModel::setRecursiveScope(ShVarItem *i_qItem, ShVarItem::Scope scope)
 {
     int j;
-    
+
     if (!i_qItem) return;
 
     i_qItem->setData(DF_SCOPE, scope);
-    
+
     for (j=0; j<i_qItem->childCount(); j++) {
         setRecursiveScope(i_qItem->child(j), scope);
     }
@@ -533,7 +533,7 @@ void ShVarModel::setRecursiveChanged(ShVarItem *i_qItem)
     if (!i_qItem) return;
 
     i_qItem->setData(DF_CHANGED, true);
-    
+
     for (j=0; j<i_qItem->childCount(); j++) {
         setRecursiveChanged(i_qItem->child(j));
     }
@@ -557,20 +557,20 @@ void ShVarModel::setChangedAndScope(ShChangeableList &i_pCL, DbgRsScope &i_pSL, 
                 ShVarItem *item = m_qRootItem->child(j);
                 item->setData(DF_CHANGED, true);
 
-				for (l=0; l<c->numIndices; l++) {
-					switch(c->indices[l]->type) {
-						case SH_CGB_ARRAY_DIRECT:
-						case SH_CGB_ARRAY_INDIRECT:
-						case SH_CGB_STRUCT:
+                for (l=0; l<c->numIndices; l++) {
+                    switch(c->indices[l]->type) {
+                        case SH_CGB_ARRAY_DIRECT:
+                        case SH_CGB_ARRAY_INDIRECT:
+                        case SH_CGB_STRUCT:
                             if (c->indices[l]->index == -1) {
                                 item->setData(DF_CHANGED, true);
-                                goto ENDINDICES; 
+                                goto ENDINDICES;
                             } else {
                                 if (item->data(DF_CGBL_INDEX_B).isValid()) {
                                     if ((c->numIndices-l) >= 2) {
                                         item = item->child(c->indices[l]->index *
-                                                           item->data(DF_CGBL_INDEX_B).toInt() + 
-                                                           c->indices[l+1]->index);
+                                                        item->data(DF_CGBL_INDEX_B).toInt() +
+                                                        c->indices[l+1]->index);
                                         l++;
                                     }
                                 } else {
@@ -579,18 +579,18 @@ void ShVarModel::setChangedAndScope(ShChangeableList &i_pCL, DbgRsScope &i_pSL, 
                                 }
                             }
                             break;
-						case SH_CGB_SWIZZLE:
-							for (m=0; m<4; m++) {
-								if ((c->indices[l]->index & (1 << m)) == (1<<m)) {
-									item->child(m)->setData(DF_CHANGED, true);
-								}
-							}
-							item = NULL;
-							break;
-						default:
-							break;
-					}
-				}
+                        case SH_CGB_SWIZZLE:
+                            for (m=0; m<4; m++) {
+                                if ((c->indices[l]->index & (1 << m)) == (1<<m)) {
+                                    item->child(m)->setData(DF_CHANGED, true);
+                                }
+                            }
+                            item = NULL;
+                            break;
+                        default:
+                            break;
+                    }
+                }
 ENDINDICES:
                 setRecursiveChanged(item);
             }
@@ -598,45 +598,45 @@ ENDINDICES:
     }
 
     /* check scope */
-	for (j=0; j<m_qRootItem->childCount(); j++) {
-		ShVarItem *item = m_qRootItem->child(j);
-		if (item->isBuildIn()) {
-			continue;
-		}
-		QVariant id = item->data(DF_UNIQUE_ID);
-		ShVarItem::Scope oldScope = (ShVarItem::Scope)item->data(DF_SCOPE).toInt();
-		/* check scope list */
-		for (i=0; i<i_pSL.numIds; i++) {
-			int varId = i_pSL.ids[i];
-			if (id == varId) {
+    for (j=0; j<m_qRootItem->childCount(); j++) {
+        ShVarItem *item = m_qRootItem->child(j);
+        if (item->isBuildIn()) {
+            continue;
+        }
+        QVariant id = item->data(DF_UNIQUE_ID);
+        ShVarItem::Scope oldScope = (ShVarItem::Scope)item->data(DF_SCOPE).toInt();
+        /* check scope list */
+        for (i=0; i<i_pSL.numIds; i++) {
+            int varId = i_pSL.ids[i];
+            if (id == varId) {
                 if (oldScope == ShVarItem::InScope) {
                 } else if (oldScope == ShVarItem::NewInScope) {
-	                setRecursiveScope(item, ShVarItem::InScope);
-				} else {
-	                setRecursiveScope(item, ShVarItem::NewInScope);
-				}
-				break;
+                    setRecursiveScope(item, ShVarItem::InScope);
+                } else {
+                    setRecursiveScope(item, ShVarItem::NewInScope);
+                }
+                break;
             }
         }
-		/* not in scope list */
-		if (i == i_pSL.numIds) {
-			/* check scope stack */
-			for (i = 0; i < i_pSSL.numIds; i++) {
-				int varId = i_pSSL.ids[i];
-				if (id == varId) {
-					setRecursiveScope(item, ShVarItem::InScopeStack);
-					break;
-				}
-			}
-			/* not in scope stack */
-			if (i == i_pSSL.numIds) {
-				if (oldScope == ShVarItem::LeftScope) {
-					setRecursiveScope(item, ShVarItem::OutOfScope);
-				} else {
-					setRecursiveScope(item, ShVarItem::LeftScope);
-				}
-			}
-		}
+        /* not in scope list */
+        if (i == i_pSL.numIds) {
+            /* check scope stack */
+            for (i = 0; i < i_pSSL.numIds; i++) {
+                int varId = i_pSSL.ids[i];
+                if (id == varId) {
+                    setRecursiveScope(item, ShVarItem::InScopeStack);
+                    break;
+                }
+            }
+            /* not in scope stack */
+            if (i == i_pSSL.numIds) {
+                if (oldScope == ShVarItem::LeftScope) {
+                    setRecursiveScope(item, ShVarItem::OutOfScope);
+                } else {
+                    setRecursiveScope(item, ShVarItem::LeftScope);
+                }
+            }
+        }
     }
 
     ShVarItem *item;
@@ -649,95 +649,95 @@ ENDINDICES:
 
 void ShVarItem::setCurrentValue(int key0, int key1)
 {
-	if (key0 >= 0 && key1 >= 0 && data(DF_WATCHED).toBool()) {
-		if (data(DF_DATA_PIXELBOX).value<void*>() != NULL) {
-			PixelBox *fb = getPixelBoxPointer();
-			if (fb) {
-				QVariant value;
-				bool validValue = fb->getDataValue(key0, key1, &value);
-				if (validValue) {
-					setData(DF_DEBUG_SELECTED_VALUE, value.toString());
-					return;
-				}
-			}
-		}
-		setData(DF_DEBUG_SELECTED_VALUE, "?");
-		return;
-	} 
-	setData(DF_DEBUG_SELECTED_VALUE, QVariant());
+    if (key0 >= 0 && key1 >= 0 && data(DF_WATCHED).toBool()) {
+        if (data(DF_DATA_PIXELBOX).value<void*>() != NULL) {
+            PixelBox *fb = getPixelBoxPointer();
+            if (fb) {
+                QVariant value;
+                bool validValue = fb->getDataValue(key0, key1, &value);
+                if (validValue) {
+                    setData(DF_DEBUG_SELECTED_VALUE, value.toString());
+                    return;
+                }
+            }
+        }
+        setData(DF_DEBUG_SELECTED_VALUE, "?");
+        return;
+    }
+    setData(DF_DEBUG_SELECTED_VALUE, QVariant());
 }
 
 void ShVarItem::setCurrentValue(int key0)
 {
-	if (key0 >= 0 && data(DF_WATCHED).toBool()) {
-		if (data(DF_DATA_CURRENTBOX).value<void*>() != NULL) {
-			VertexBox *vb = getCurrentPointer();
-			if (vb) {
-				QVariant value;
-				bool validValue = vb->getDataValue(key0, &value);
-				if (validValue) {
-					setData(DF_DEBUG_SELECTED_VALUE, value.toString());
-					return;
-				}
-			}
-		} else if (data(DF_DATA_VERTEXBOX).value<void*>() != NULL) {
-			VertexBox *vb = getVertexBoxPointer();
-			if (vb) {
-				QVariant value;
-				bool validValue = vb->getDataValue(key0, &value);
-				if (validValue) {
-					setData(DF_DEBUG_SELECTED_VALUE, value.toString());
-					return;
-				}
-			}
-		}
-		setData(DF_DEBUG_SELECTED_VALUE, "?");
-		return;
-	} 
-	setData(DF_DEBUG_SELECTED_VALUE, QVariant());
+    if (key0 >= 0 && data(DF_WATCHED).toBool()) {
+        if (data(DF_DATA_CURRENTBOX).value<void*>() != NULL) {
+            VertexBox *vb = getCurrentPointer();
+            if (vb) {
+                QVariant value;
+                bool validValue = vb->getDataValue(key0, &value);
+                if (validValue) {
+                    setData(DF_DEBUG_SELECTED_VALUE, value.toString());
+                    return;
+                }
+            }
+        } else if (data(DF_DATA_VERTEXBOX).value<void*>() != NULL) {
+            VertexBox *vb = getVertexBoxPointer();
+            if (vb) {
+                QVariant value;
+                bool validValue = vb->getDataValue(key0, &value);
+                if (validValue) {
+                    setData(DF_DEBUG_SELECTED_VALUE, value.toString());
+                    return;
+                }
+            }
+        }
+        setData(DF_DEBUG_SELECTED_VALUE, "?");
+        return;
+    }
+    setData(DF_DEBUG_SELECTED_VALUE, QVariant());
 }
 
 void ShVarItem::resetCurrentValue(void)
 {
-	if (data(DF_WATCHED).toBool()) {
-		setData(DF_DEBUG_SELECTED_VALUE, "?");
-	} else { 
-		setData(DF_DEBUG_SELECTED_VALUE, QVariant());
-	}
+    if (data(DF_WATCHED).toBool()) {
+        setData(DF_DEBUG_SELECTED_VALUE, "?");
+    } else {
+        setData(DF_DEBUG_SELECTED_VALUE, QVariant());
+    }
 }
 
 void ShVarModel::setCurrentValues(int key0, int key1)
 {
-	for (int j = 0; j < m_qWatchListItems.count(); j++) {
+    for (int j = 0; j < m_qWatchListItems.count(); j++) {
         m_qWatchListItems[j]->setCurrentValue(key0, key1);
-	}
+    }
 
-	currentValuesChanged();
+    currentValuesChanged();
 }
 
 void ShVarModel::setCurrentValues(int key0)
 {
-	for (int j = 0; j < m_qWatchListItems.count(); j++) {
+    for (int j = 0; j < m_qWatchListItems.count(); j++) {
         m_qWatchListItems[j]->setCurrentValue(key0);
-	}
+    }
 
-	currentValuesChanged();
+    currentValuesChanged();
 }
 
 void ShVarModel::resetCurrentValues(void)
 {
-	for (int j = 0; j < m_qWatchListItems.count(); j++) {
+    for (int j = 0; j < m_qWatchListItems.count(); j++) {
         m_qWatchListItems[j]->resetCurrentValue();
-	}
+    }
 
-	currentValuesChanged();
+    currentValuesChanged();
 }
 
 void ShVarModel::currentValuesChanged(void)
 {
-	/* TODO: is there a way to notify the view more efficiently? I.e . how to
-	 * access a single column? 
-	 */
+    /* TODO: is there a way to notify the view more efficiently? I.e . how to
+    * access a single column?
+    */
     ShVarItem *item;
     item = m_qRootItem->child(0);
     QModelIndex indexBegin = ShVarModel::index(item->row(), DF_NAME);
@@ -749,358 +749,358 @@ void ShVarModel::currentValuesChanged(void)
 
 Uniform::Uniform()
 {
-	m_data = NULL;
-	m_isVector = false;
-	m_isMatrix = false;
-	m_arraySize = 0;
-	m_rows = 0;
-	m_columns = 0;
+    m_data = NULL;
+    m_isVector = false;
+    m_isMatrix = false;
+    m_arraySize = 0;
+    m_rows = 0;
+    m_columns = 0;
 }
 
 Uniform::~Uniform()
 {
-	delete m_data;
+    delete m_data;
 }
 
 int Uniform::initialize(const char* serializedUniform)
 {
-	GLint nameLength, valueSize, arraySize;
-	GLuint type;
-	char *pName;
-	int currentOffset;
+    GLint nameLength, valueSize, arraySize;
+    GLuint type;
+    // char *pName;
+    int currentOffset;
 
-	currentOffset = 0;
-	memcpy(&nameLength, serializedUniform, sizeof(GLint));
-	currentOffset += sizeof(GLint);
-	m_name = QString::fromAscii(
-			serializedUniform + currentOffset,
-			nameLength);
-	currentOffset += nameLength;
-	memcpy(&type, serializedUniform + currentOffset, sizeof(GLuint));
-	currentOffset += sizeof(GLuint);
-	memcpy(&arraySize, serializedUniform + currentOffset, sizeof(GLint));
-	m_arraySize = arraySize;
-	currentOffset += sizeof(GLint);
-	memcpy(&valueSize, serializedUniform + currentOffset, sizeof(GLint));
-	currentOffset += sizeof(GLint);
+    currentOffset = 0;
+    memcpy(&nameLength, serializedUniform, sizeof(GLint));
+    currentOffset += sizeof(GLint);
+    m_name = QString::fromAscii(
+            serializedUniform + currentOffset,
+            nameLength);
+    currentOffset += nameLength;
+    memcpy(&type, serializedUniform + currentOffset, sizeof(GLuint));
+    currentOffset += sizeof(GLuint);
+    memcpy(&arraySize, serializedUniform + currentOffset, sizeof(GLint));
+    m_arraySize = arraySize;
+    currentOffset += sizeof(GLint);
+    memcpy(&valueSize, serializedUniform + currentOffset, sizeof(GLint));
+    currentOffset += sizeof(GLint);
 
-	switch (type)
-	{
-		case GL_FLOAT:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 1);
-			m_rows = 1;
-			m_columns = 1;
-			break;
-		case GL_FLOAT_VEC2:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 2);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 2;
-			break;
-		case GL_FLOAT_VEC3:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 3);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 3;
-			break;
-		case GL_FLOAT_VEC4:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 4);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 4;
-			break;
-		case GL_FLOAT_MAT2:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 4);
-			m_isMatrix = true;
-			m_rows = 2;
-			m_columns = 2;
-			break;
-		case GL_FLOAT_MAT2x3:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 6);
-			m_isMatrix = true;
-			m_rows = 2;
-			m_columns = 3;
-			break;
-		case GL_FLOAT_MAT2x4:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 8);
-			m_isMatrix = true;
-			m_rows = 2;
-			m_columns = 4;
-			break;
-		case GL_FLOAT_MAT3:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 9);
-			m_isMatrix = true;
-			m_rows = 3;
-			m_columns = 3;
-			break;
-		case GL_FLOAT_MAT3x2:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 6);
-			m_isMatrix = true;
-			m_rows = 3;
-			m_columns = 2;
-			break;
-		case GL_FLOAT_MAT3x4:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 12);
-			m_isMatrix = true;
-			m_rows = 3;
-			m_columns = 4;
-			break;
-		case GL_FLOAT_MAT4:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 16);
-			m_isMatrix = true;
-			m_rows = 4;
-			m_columns = 4;
-			break;
-		case GL_FLOAT_MAT4x2:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 8);
-			m_isMatrix = true;
-			m_rows = 4;
-			m_columns = 2;
-			break;
-		case GL_FLOAT_MAT4x3:
-			m_data = new TypedUniformData<GLfloat>(
-					serializedUniform + currentOffset, 12);
-			m_isMatrix = true;
-			m_rows = 4;
-			m_columns = 3;
-			break;
-		case GL_INT:
-			m_data = new TypedUniformData<GLint>(
-					serializedUniform + currentOffset, 1);
-			m_rows = 1;
-			m_columns = 1;
-			break;
-		case GL_INT_VEC2:
-			m_data = new TypedUniformData<GLint>(
-					serializedUniform + currentOffset, 2);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 2;
-			break;
-		case GL_INT_VEC3:
-			m_data = new TypedUniformData<GLint>(
-					serializedUniform + currentOffset, 3);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 3;
-			break;
-		case GL_INT_VEC4:
-			m_data = new TypedUniformData<GLint>(
-					serializedUniform + currentOffset, 4);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 4;
-			break;
-		case GL_SAMPLER_1D:
-		case GL_SAMPLER_2D:
-		case GL_SAMPLER_3D:
-		case GL_SAMPLER_CUBE:
-		case GL_SAMPLER_1D_SHADOW:
-		case GL_SAMPLER_2D_SHADOW:
-		case GL_SAMPLER_2D_RECT_ARB:
-		case GL_SAMPLER_2D_RECT_SHADOW_ARB:
-		case GL_SAMPLER_1D_ARRAY_EXT:
-		case GL_SAMPLER_2D_ARRAY_EXT:
-		case GL_SAMPLER_BUFFER_EXT:
-		case GL_SAMPLER_1D_ARRAY_SHADOW_EXT:
-		case GL_SAMPLER_2D_ARRAY_SHADOW_EXT:
-		case GL_SAMPLER_CUBE_SHADOW_EXT:
-		case GL_INT_SAMPLER_1D_EXT:
-		case GL_INT_SAMPLER_2D_EXT:
-		case GL_INT_SAMPLER_3D_EXT:
-		case GL_INT_SAMPLER_CUBE_EXT:
-		case GL_INT_SAMPLER_2D_RECT_EXT:
-		case GL_INT_SAMPLER_1D_ARRAY_EXT:
-		case GL_INT_SAMPLER_2D_ARRAY_EXT:
-		case GL_INT_SAMPLER_BUFFER_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_1D_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_2D_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_3D_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_CUBE_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_2D_RECT_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY_EXT:
-		case GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT:
-			m_data = new TypedUniformData<GLint>(
-					serializedUniform + currentOffset, 1);
-			m_rows = 1;
-			m_columns = 1;
-			break;
-		case GL_BOOL:
-			m_data = new TypedUniformData<GLboolean>(
-					serializedUniform + currentOffset, 1);
-			m_rows = 1;
-			m_columns = 1;
-			break;
-		case GL_BOOL_VEC2:
-			m_data = new TypedUniformData<GLboolean>(
-					serializedUniform + currentOffset, 2);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 2;
-			break;
-		case GL_BOOL_VEC3:
-			m_data = new TypedUniformData<GLboolean>(
-					serializedUniform + currentOffset, 3);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 3;
-			break;
-		case GL_BOOL_VEC4:
-			m_data = new TypedUniformData<GLboolean>(
-					serializedUniform + currentOffset, 4);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 4;
-			break;
-		case GL_UNSIGNED_INT:
-			m_data = new TypedUniformData<GLuint>(
-					serializedUniform + currentOffset, 1);
-			m_rows = 1;
-			m_columns = 1;
-			break;
-		case GL_UNSIGNED_INT_VEC2_EXT:
-			m_data = new TypedUniformData<GLuint>(
-					serializedUniform + currentOffset, 2);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 2;
-			break;
-		case GL_UNSIGNED_INT_VEC3_EXT:
-			m_data = new TypedUniformData<GLuint>(
-					serializedUniform + currentOffset, 3);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 3;
-			break;
-		case GL_UNSIGNED_INT_VEC4_EXT:
-			m_data = new TypedUniformData<GLuint>(
-					serializedUniform + currentOffset, 4);
-			m_isVector = true;
-			m_rows = 1;
-			m_columns = 4;
-			break;
-		default:
-			dbgPrint(DBGLVL_ERROR, "HMM, unkown shader variable type: %i\n", type);
-			m_data = NULL;
-	}
+    switch (type)
+    {
+        case GL_FLOAT:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 1);
+            m_rows = 1;
+            m_columns = 1;
+            break;
+        case GL_FLOAT_VEC2:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 2);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 2;
+            break;
+        case GL_FLOAT_VEC3:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 3);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 3;
+            break;
+        case GL_FLOAT_VEC4:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 4);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 4;
+            break;
+        case GL_FLOAT_MAT2:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 4);
+            m_isMatrix = true;
+            m_rows = 2;
+            m_columns = 2;
+            break;
+        case GL_FLOAT_MAT2x3:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 6);
+            m_isMatrix = true;
+            m_rows = 2;
+            m_columns = 3;
+            break;
+        case GL_FLOAT_MAT2x4:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 8);
+            m_isMatrix = true;
+            m_rows = 2;
+            m_columns = 4;
+            break;
+        case GL_FLOAT_MAT3:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 9);
+            m_isMatrix = true;
+            m_rows = 3;
+            m_columns = 3;
+            break;
+        case GL_FLOAT_MAT3x2:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 6);
+            m_isMatrix = true;
+            m_rows = 3;
+            m_columns = 2;
+            break;
+        case GL_FLOAT_MAT3x4:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 12);
+            m_isMatrix = true;
+            m_rows = 3;
+            m_columns = 4;
+            break;
+        case GL_FLOAT_MAT4:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 16);
+            m_isMatrix = true;
+            m_rows = 4;
+            m_columns = 4;
+            break;
+        case GL_FLOAT_MAT4x2:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 8);
+            m_isMatrix = true;
+            m_rows = 4;
+            m_columns = 2;
+            break;
+        case GL_FLOAT_MAT4x3:
+            m_data = new TypedUniformData<GLfloat>(
+                    serializedUniform + currentOffset, 12);
+            m_isMatrix = true;
+            m_rows = 4;
+            m_columns = 3;
+            break;
+        case GL_INT:
+            m_data = new TypedUniformData<GLint>(
+                    serializedUniform + currentOffset, 1);
+            m_rows = 1;
+            m_columns = 1;
+            break;
+        case GL_INT_VEC2:
+            m_data = new TypedUniformData<GLint>(
+                    serializedUniform + currentOffset, 2);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 2;
+            break;
+        case GL_INT_VEC3:
+            m_data = new TypedUniformData<GLint>(
+                    serializedUniform + currentOffset, 3);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 3;
+            break;
+        case GL_INT_VEC4:
+            m_data = new TypedUniformData<GLint>(
+                    serializedUniform + currentOffset, 4);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 4;
+            break;
+        case GL_SAMPLER_1D:
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_3D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_1D_SHADOW:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_2D_RECT_ARB:
+        case GL_SAMPLER_2D_RECT_SHADOW_ARB:
+        case GL_SAMPLER_1D_ARRAY_EXT:
+        case GL_SAMPLER_2D_ARRAY_EXT:
+        case GL_SAMPLER_BUFFER_EXT:
+        case GL_SAMPLER_1D_ARRAY_SHADOW_EXT:
+        case GL_SAMPLER_2D_ARRAY_SHADOW_EXT:
+        case GL_SAMPLER_CUBE_SHADOW_EXT:
+        case GL_INT_SAMPLER_1D_EXT:
+        case GL_INT_SAMPLER_2D_EXT:
+        case GL_INT_SAMPLER_3D_EXT:
+        case GL_INT_SAMPLER_CUBE_EXT:
+        case GL_INT_SAMPLER_2D_RECT_EXT:
+        case GL_INT_SAMPLER_1D_ARRAY_EXT:
+        case GL_INT_SAMPLER_2D_ARRAY_EXT:
+        case GL_INT_SAMPLER_BUFFER_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_1D_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_2D_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_3D_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_2D_RECT_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY_EXT:
+        case GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT:
+            m_data = new TypedUniformData<GLint>(
+                    serializedUniform + currentOffset, 1);
+            m_rows = 1;
+            m_columns = 1;
+            break;
+        case GL_BOOL:
+            m_data = new TypedUniformData<GLboolean>(
+                    serializedUniform + currentOffset, 1);
+            m_rows = 1;
+            m_columns = 1;
+            break;
+        case GL_BOOL_VEC2:
+            m_data = new TypedUniformData<GLboolean>(
+                    serializedUniform + currentOffset, 2);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 2;
+            break;
+        case GL_BOOL_VEC3:
+            m_data = new TypedUniformData<GLboolean>(
+                    serializedUniform + currentOffset, 3);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 3;
+            break;
+        case GL_BOOL_VEC4:
+            m_data = new TypedUniformData<GLboolean>(
+                    serializedUniform + currentOffset, 4);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 4;
+            break;
+        case GL_UNSIGNED_INT:
+            m_data = new TypedUniformData<GLuint>(
+                    serializedUniform + currentOffset, 1);
+            m_rows = 1;
+            m_columns = 1;
+            break;
+        case GL_UNSIGNED_INT_VEC2_EXT:
+            m_data = new TypedUniformData<GLuint>(
+                    serializedUniform + currentOffset, 2);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 2;
+            break;
+        case GL_UNSIGNED_INT_VEC3_EXT:
+            m_data = new TypedUniformData<GLuint>(
+                    serializedUniform + currentOffset, 3);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 3;
+            break;
+        case GL_UNSIGNED_INT_VEC4_EXT:
+            m_data = new TypedUniformData<GLuint>(
+                    serializedUniform + currentOffset, 4);
+            m_isVector = true;
+            m_rows = 1;
+            m_columns = 4;
+            break;
+        default:
+            dbgPrint(DBGLVL_ERROR, "HMM, unkown shader variable type: %i\n", type);
+            m_data = NULL;
+    }
 
-	dbgPrint(DBGLVL_INFO, "Got Uniform ""%s"":\n", m_name.toAscii().data());
-	dbgPrint(DBGLVL_INFO, "    arraySize: %d\n", m_arraySize);
-	dbgPrint(DBGLVL_INFO, "    isVector: %d\n", m_isVector);
-	dbgPrint(DBGLVL_INFO, "    isMatrix: %d\n", m_isMatrix);
-	dbgPrint(DBGLVL_INFO, "    rows: %d\n", m_rows);
-	dbgPrint(DBGLVL_INFO, "    columns: %d\n", m_columns);
+    dbgPrint(DBGLVL_INFO, "Got Uniform ""%s"":\n", m_name.toAscii().data());
+    dbgPrint(DBGLVL_INFO, "    arraySize: %d\n", m_arraySize);
+    dbgPrint(DBGLVL_INFO, "    isVector: %d\n", m_isVector);
+    dbgPrint(DBGLVL_INFO, "    isMatrix: %d\n", m_isMatrix);
+    dbgPrint(DBGLVL_INFO, "    rows: %d\n", m_rows);
+    dbgPrint(DBGLVL_INFO, "    columns: %d\n", m_columns);
 
-	currentOffset += valueSize;
+    currentOffset += valueSize;
 
-	return currentOffset;
+    return currentOffset;
 }
 
 QString Uniform::toString() const
 {
-	QString result;
+    QString result;
 
-	for (int k = 0; k < m_arraySize; ++k)
-	{
-		if (k > 0)
-		{
-			result += ", ";
-		}
-		result += toString(k);
-	}
-	return result;
+    for (int k = 0; k < m_arraySize; ++k)
+    {
+        if (k > 0)
+        {
+            result += ", ";
+        }
+        result += toString(k);
+    }
+    return result;
 }
 
 QString Uniform::toString(int arrayElement) const
 {
-	if (arrayElement > m_arraySize)
-	{
-		return "?";
-	} else {
-		QString result;
-		if (m_isMatrix)
-		{
-			result += '(';
-		}
-		for (int j = 0; j < m_rows; ++j)
-		{
-			if (j != 0)
-			{
-				result += ", ";
-			}
-			if (m_isMatrix || m_isVector)
-			{
-				result += '(';
-			}
-			for (int i = 0; i < m_columns; ++i)
-			{
-				if (i != 0)
-				{
-					result += ", ";
-				}
-				result +=
-					m_data->toString(m_columns*(arrayElement*m_rows + j) + i);
-			}
-			if (m_isMatrix || m_isVector)
-			{
-				result += ')';
-			}
-		}
-		if (m_isMatrix)
-		{
-			result += ')';
-		}
-		return result;
-	}
+    if (arrayElement > m_arraySize)
+    {
+        return "?";
+    } else {
+        QString result;
+        if (m_isMatrix)
+        {
+            result += '(';
+        }
+        for (int j = 0; j < m_rows; ++j)
+        {
+            if (j != 0)
+            {
+                result += ", ";
+            }
+            if (m_isMatrix || m_isVector)
+            {
+                result += '(';
+            }
+            for (int i = 0; i < m_columns; ++i)
+            {
+                if (i != 0)
+                {
+                    result += ", ";
+                }
+                result +=
+                    m_data->toString(m_columns*(arrayElement*m_rows + j) + i);
+            }
+            if (m_isMatrix || m_isVector)
+            {
+                result += ')';
+            }
+        }
+        if (m_isMatrix)
+        {
+            result += ')';
+        }
+        return result;
+    }
 }
 
 void ShVarModel::setUniformValues(char *pSerializedUniforms, int numUniforms)
 {
-	char *p = pSerializedUniforms;
+    char *p = pSerializedUniforms;
 
-	for (int i = 0; i < numUniforms; ++i) {
-		Uniform u;
-		p += u.initialize(p);
+    for (int i = 0; i < numUniforms; ++i) {
+        Uniform u;
+        p += u.initialize(p);
 
-		for (int j=0; j<m_qRootItem->childCount(); j++) {
-			ShVarItem *item = m_qRootItem->child(j);
-			if (item->isBuildIn() || !item->isUniform()) {
-				continue;
-			}
-			setRecursiveUniformValues(item, u);
-		}
-	}
+        for (int j=0; j<m_qRootItem->childCount(); j++) {
+            ShVarItem *item = m_qRootItem->child(j);
+            if (item->isBuildIn() || !item->isUniform()) {
+                continue;
+            }
+            setRecursiveUniformValues(item, u);
+        }
+    }
 }
 
 void ShVarModel::setRecursiveUniformValues(
-		ShVarItem *item,
-		const Uniform& u)
+        ShVarItem *item,
+        const Uniform& u)
 {
     if (!item) return;
-    
-	if (item->getFullName() == u.name()) {
-		dbgPrint(DBGLVL_INFO, "found uniform: %s\n", u.name().toAscii().data());
-		item->setData(DF_DEBUG_UNIFORM_VALUE, u.toString());
-		emit dataChanged(ShVarModel::getIndex(item, 0), 
-				ShVarModel::getIndex(item, DF_LAST-1));
-	} else {
-		for (int i = 0; i < item->childCount(); ++i) {
-			setRecursiveUniformValues(item->child(i), u);
-		}
-	}
+
+    if (item->getFullName() == u.name()) {
+        dbgPrint(DBGLVL_INFO, "found uniform: %s\n", u.name().toAscii().data());
+        item->setData(DF_DEBUG_UNIFORM_VALUE, u.toString());
+        emit dataChanged(ShVarModel::getIndex(item, 0),
+                ShVarModel::getIndex(item, DF_LAST-1));
+    } else {
+        for (int i = 0; i < item->childCount(); ++i) {
+            setRecursiveUniformValues(item->child(i), u);
+        }
+    }
 }
 
 typedef enum {
@@ -1117,9 +1117,9 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
     QList<QVariant> varData;
     QString fullName;
     QString shortName;
-	char *typeString = NULL;
+    char *typeString = NULL;
 
-    
+
     /* Add data known */
     switch(i_eForceType) {
         case FORCE_NONE:
@@ -1140,7 +1140,7 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
             break;
         case FORCE_MATRIX:
             shortName = QString("[") + QVariant(i_pSubs[0]).toString() + QString("]")
-                       + QString("[") + QVariant(i_pSubs[1]).toString() + QString("]");
+                    + QString("[") + QVariant(i_pSubs[1]).toString() + QString("]");
             fullName  = i_qName + shortName;
             id = -1;
             break;
@@ -1164,9 +1164,9 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
             id = -1;
             break;
     }
-	
-	typeString = ShGetTypeString(i_pVar);
-	
+
+    typeString = ShGetTypeString(i_pVar);
+
     varData << shortName;                      /* DF_NAME */
     varData << fullName;                       /* DF_FULLNAME */
     varData << typeString;                     /* DF_TYPE */
@@ -1212,20 +1212,20 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
     }
 
     // Note: Allow selecting all but samplers and batch insert into watch list.
-	if (ShIsSampler(i_pVar->type))
-	{
-    	varData << false;                      /* DF_SELECTABLE */
-	} else {
-    	varData << true;                       /* DF_SELECTABLE */
-	}
+    if (ShIsSampler(i_pVar->type))
+    {
+        varData << false;                      /* DF_SELECTABLE */
+    } else {
+        varData << true;                       /* DF_SELECTABLE */
+    }
     varData << false;                          /* DF_WATCHED */
     varData << QVariant::fromValue<void*>(NULL);  /* DF_DATA_PIXELBOX */
     varData << QVariant::fromValue<void*>(NULL);  /* DF_DATA_VERTEXBOX */
     varData << QVariant::fromValue<void*>(NULL);  /* DF_DATA_CURRENTBOX */
-	varData << QVariant();                     /* DF_DEBUG_SELECTED_VALUE */
-	varData << QVariant();                     /* DF_DEBUG_UNIFORM_VALUE */
+    varData << QVariant();                     /* DF_DEBUG_SELECTED_VALUE */
+    varData << QVariant();                     /* DF_DEBUG_UNIFORM_VALUE */
 
-	free(typeString);
+    free(typeString);
 
     ShVarItem *newVar = new ShVarItem(varData, i_qParent);
     i_qParent->appendChild(newVar);
@@ -1259,11 +1259,11 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
 
     if (i_pVar->structSize) {
         for (i=0; i<i_pVar->structSize; i++) {
-			ShVariable *structElement = copyShVariable((ShVariable*)i_pVar->structSpec[i]);
-    		structElement->qualifier = i_pVar->qualifier;
-    		structElement->varyingModifier = i_pVar->varyingModifier;
+            ShVariable *structElement = copyShVariable((ShVariable*)i_pVar->structSpec[i]);
+            structElement->qualifier = i_pVar->qualifier;
+            structElement->varyingModifier = i_pVar->varyingModifier;
             addShVariable(structElement, fullName, i_pVar->builtin, FORCE_STRUCT, &i, newVar);
-		}
+        }
         return;
     }
 
@@ -1300,10 +1300,10 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName, bool i_bFor
 void ShVarModel::setRecursiveWatched(ShVarItem *i_qItem)
 {
     if (!i_qItem) return;
-    
+
     i_qItem->setData(DF_WATCHED, true);
-    emit dataChanged(ShVarModel::getIndex(i_qItem, 0), 
-                     ShVarModel::getIndex(i_qItem, DF_LAST-1));
+    emit dataChanged(ShVarModel::getIndex(i_qItem, 0),
+                    ShVarModel::getIndex(i_qItem, DF_LAST-1));
 
     if (i_qItem->parent() != m_qRootItem) {
         setRecursiveWatched(i_qItem->parent());
@@ -1313,21 +1313,21 @@ void ShVarModel::setRecursiveWatched(ShVarItem *i_qItem)
 void ShVarModel::setRecursiveExpand(ShVarItem *i_qItem)
 {
     int i;
-    
+
     if (!i_qItem) return;
-    
+
     if (i_qItem->parent() != m_qRootItem) {
         setRecursiveExpand(i_qItem->parent());
     }
-    
+
     if (m_qWatchList) {
         for (i=0; i<DF_LAST; i++) {
             QModelIndex testItem = ShVarModel::getIndex(i_qItem, i);
             QModelIndex watchItem = m_qWatchProxy->mapFromSource(testItem);
             m_qWatchList->expand(watchItem);
         }
-        emit dataChanged(ShVarModel::getIndex(i_qItem, 0), 
-                         ShVarModel::getIndex(i_qItem, DF_LAST-1));
+        emit dataChanged(ShVarModel::getIndex(i_qItem, 0),
+                        ShVarModel::getIndex(i_qItem, DF_LAST-1));
     }
 }
 
@@ -1336,21 +1336,21 @@ void ShVarModel::setItemWatched(const QModelIndex & i_qIndex)
     if (i_qIndex.isValid()) {
         ShVarItem *item = static_cast<ShVarItem*>(i_qIndex.internalPointer());
         if ( (item->data(DF_SELECTABLE).toBool() == true) &&
-             (item->childCount() > 0 || item->data(DF_WATCHED).toBool() == false)) {
-            
+            (item->childCount() > 0 || item->data(DF_WATCHED).toBool() == false)) {
+
             if (item->childCount() < 1) {
                 m_qWatchListItems << item;
-            
+
                 setRecursiveWatched(item);
-                
+
                 m_qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
                 setRecursiveExpand(item);
                 emit newWatchItem(item);
 
             } else {
-                // Note: According to Thomas, each variable must be read 
+                // Note: According to Thomas, each variable must be read
                 // separately when adding, so batching the process will not give
-                // much speedup compared to this recursion. 
+                // much speedup compared to this recursion.
                 for (int i = 0; i < item->childCount(); i++) {
                     // TODO: There is possible a more elegant solution to get
                     // indices of the children, but I am no Qt expert and this
@@ -1377,7 +1377,7 @@ void ShVarModel::unsetRecursiveWatched(ShVarItem *i_qItem)
             descent = false;
         }
     }
-    
+
     if (descent) {
         i_qItem->setData(DF_WATCHED, false);
 
@@ -1404,8 +1404,8 @@ void ShVarModel::unsetItemWatched(const QModelIndex & i_qIndex)
                 if (item->childCount() > 0) {
                     /* Item is root or inner node. */
                     for (int i = 0; i < item->childCount(); i++) {
-                        // TODO: There is possible a more elegant solution to 
-                        // get indices of the children, but I am no Qt expert 
+                        // TODO: There is possible a more elegant solution to
+                        // get indices of the children, but I am no Qt expert
                         // and this seems to work somehow.
                         stack.push(idx.child(i, idx.column()));
                     }
@@ -1434,24 +1434,24 @@ void ShVarModel::unsetItemWatched(const QModelIndex & i_qIndex)
         /* 'item' should now be the item associated with 'i_qIndex'. */
 
         /*
-         * Remove parent recursively when all children have left the watch list.
-         * This must not be done for child nodes of 'item' as (i) these are
-         * guaranteed to be removed be the iterative tree traversal above and 
-         * (ii) too many nodes will be removed if doing so because because the 
-         * tree is reorganised as nodes are removed and the indices of removed 
-         * nodes are reused under certain circumstances.
-         */
+        * Remove parent recursively when all children have left the watch list.
+        * This must not be done for child nodes of 'item' as (i) these are
+        * guaranteed to be removed be the iterative tree traversal above and
+        * (ii) too many nodes will be removed if doing so because because the
+        * tree is reorganised as nodes are removed and the indices of removed
+        * nodes are reused under certain circumstances.
+        */
         if (item != NULL) {
             unsetRecursiveWatched(item);
         }
 
         /* used to update the whole tree,
-         * it seems just emiting the signal is not enough for qt 4.2.2 */
+        * it seems just emiting the signal is not enough for qt 4.2.2 */
         m_qWatchProxy->setFilterRegExp(QRegExp("(true|1)"));
 
     } /* end if (i_qIndex.isValid()) */
 }
-    
+
 ShVarItem* ShVarModel::getWatchItemPointer(const QModelIndex & i_qIndex)
 {
     if (i_qIndex.isValid()) {
@@ -1462,7 +1462,7 @@ ShVarItem* ShVarModel::getWatchItemPointer(const QModelIndex & i_qIndex)
         return NULL;
     }
 }
-    
+
 QList<ShVarItem*> ShVarModel::getAllWatchItemPointers(void)
 {
     return m_qWatchListItems;
@@ -1479,10 +1479,10 @@ QList<ShVarItem*> ShVarModel::getChangedWatchItemPointers(void)
             changedWatchItems << item;
         }
     }
-    
+
     return changedWatchItems;
 }
-    
+
 QSortFilterProxyModel* ShVarModel::getFilterModel(tvDisplayRole role)
 {
     switch (role) {
@@ -1492,8 +1492,8 @@ QSortFilterProxyModel* ShVarModel::getFilterModel(tvDisplayRole role)
             return m_qScopeProxy;
         case TV_WATCH_LIST:
             return m_qWatchProxy;
-		case TV_UNIFORM:
-			return m_qUniformProxy;
+        case TV_UNIFORM:
+            return m_qUniformProxy;
         default:
             return NULL;
     }
@@ -1559,8 +1559,8 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setColumnHidden(DF_DATA_PIXELBOX, true);
             tView->setColumnHidden(DF_DATA_VERTEXBOX, true);
             tView->setColumnHidden(DF_DATA_CURRENTBOX, true);
-			tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
-			tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
             /* Only allow variables from actual scope to be added to watchlist
             connect(tView, SIGNAL(doubleClicked(const QModelIndex &)),
                     this, SLOT(onDoubleClickedAll(const QModelIndex &)));
@@ -1582,8 +1582,8 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setColumnHidden(DF_DATA_PIXELBOX, true);
             tView->setColumnHidden(DF_DATA_VERTEXBOX, true);
             tView->setColumnHidden(DF_DATA_CURRENTBOX, true);
-			tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
-			tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
             connect(tView, SIGNAL(doubleClicked(const QModelIndex &)),
                     this, SLOT(onDoubleClickedBuiltIns(const QModelIndex &)));
             break;
@@ -1603,8 +1603,8 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setColumnHidden(DF_DATA_PIXELBOX, true);
             tView->setColumnHidden(DF_DATA_VERTEXBOX, true);
             tView->setColumnHidden(DF_DATA_CURRENTBOX, true);
-			tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
-			tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
             connect(tView, SIGNAL(doubleClicked(const QModelIndex &)),
                     this, SLOT(onDoubleClickedScope(const QModelIndex &)));
             break;
@@ -1612,7 +1612,7 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setModel(m_qUniformProxy);
             tView->setColumnHidden(DF_FULLNAME, true);
             tView->setColumnHidden(DF_TYPEID, true);
-			tView->setColumnHidden(DF_QUALIFIER, true);
+            tView->setColumnHidden(DF_QUALIFIER, true);
             tView->setColumnHidden(DF_UNIQUE_ID, true);
             tView->setColumnHidden(DF_BUILTIN, true);
             tView->setColumnHidden(DF_CHANGED, true);
@@ -1625,7 +1625,7 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setColumnHidden(DF_DATA_PIXELBOX, true);
             tView->setColumnHidden(DF_DATA_VERTEXBOX, true);
             tView->setColumnHidden(DF_DATA_CURRENTBOX, true);
-			tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_SELECTED_VALUE, true);
             connect(tView, SIGNAL(doubleClicked(const QModelIndex &)),
                     this, SLOT(onDoubleClickedUniforms(const QModelIndex &)));
             break;
@@ -1645,7 +1645,7 @@ void ShVarModel::attach(QTreeView *tView, tvDisplayRole role)
             tView->setColumnHidden(DF_DATA_PIXELBOX, true);
             tView->setColumnHidden(DF_DATA_VERTEXBOX, true);
             tView->setColumnHidden(DF_DATA_CURRENTBOX, true);
-			tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
+            tView->setColumnHidden(DF_DEBUG_UNIFORM_VALUE, true);
             tView->setSelectionBehavior(QAbstractItemView::SelectRows);
             tView->setSelectionMode(QAbstractItemView::ExtendedSelection);
             m_qWatchList = tView;
@@ -1665,54 +1665,54 @@ void ShVarModel::detach(QAbstractItemView *view)
 }
 
 ScopeSortFilterProxyModel::ScopeSortFilterProxyModel(QObject *parent)
-	: QSortFilterProxyModel(parent)
+    : QSortFilterProxyModel(parent)
 {
 }
 
 bool ScopeSortFilterProxyModel::filterAcceptsRow(int sourceRow, const
-                                                 QModelIndex &sourceParent) const
+                                                QModelIndex &sourceParent) const
 {
-	QModelIndex scopeIndex = sourceModel()->index(sourceRow, DF_SCOPE, sourceParent);
-	QModelIndex builtInIndex = sourceModel()->index(sourceRow, DF_BUILTIN, sourceParent);
+    QModelIndex scopeIndex = sourceModel()->index(sourceRow, DF_SCOPE, sourceParent);
+    QModelIndex builtInIndex = sourceModel()->index(sourceRow, DF_BUILTIN, sourceParent);
     QModelIndex typeIndex = sourceModel()->index(sourceRow, DF_TYPEID, sourceParent);
     QModelIndex qualifierIndex = sourceModel()->index(sourceRow, DF_QUALIFIER, sourceParent);
 
     // no builtins, no uniforms, but everything else in scope
-	return !sourceModel()->data(builtInIndex).toBool() &&
-           sourceModel()->data(qualifierIndex).toString() != "uniform" &&
-	       (sourceModel()->data(scopeIndex).toInt() == ShVarItem::InScope ||
-	        sourceModel()->data(scopeIndex).toInt() == ShVarItem::NewInScope ||
-	        sourceModel()->data(scopeIndex).toInt() == ShVarItem::InScopeStack);
+    return !sourceModel()->data(builtInIndex).toBool() &&
+        sourceModel()->data(qualifierIndex).toString() != "uniform" &&
+        (sourceModel()->data(scopeIndex).toInt() == ShVarItem::InScope ||
+            sourceModel()->data(scopeIndex).toInt() == ShVarItem::NewInScope ||
+            sourceModel()->data(scopeIndex).toInt() == ShVarItem::InScopeStack);
 }
 
 SamplerSortFilterProxyModel::SamplerSortFilterProxyModel(QObject *parent)
-	: QSortFilterProxyModel(parent)
+    : QSortFilterProxyModel(parent)
 {
 }
 
 bool SamplerSortFilterProxyModel::filterAcceptsRow(int sourceRow, const
-                                                   QModelIndex &sourceParent) const
+                                                QModelIndex &sourceParent) const
 {
     QModelIndex typeIndex = sourceModel()->index(sourceRow, DF_TYPEID, sourceParent);
 
     // only samplers
-	return ShIsSampler((variableType) sourceModel()->data(typeIndex).toInt());
+    return ShIsSampler((variableType) sourceModel()->data(typeIndex).toInt());
 }
 
 UniformSortFilterProxyModel::UniformSortFilterProxyModel(QObject *parent)
-	: QSortFilterProxyModel(parent)
+    : QSortFilterProxyModel(parent)
 {
 }
 
 bool UniformSortFilterProxyModel::filterAcceptsRow(int sourceRow, const
-                                                   QModelIndex &sourceParent) const
+                                                QModelIndex &sourceParent) const
 {
     QModelIndex typeIndex = sourceModel()->index(sourceRow, DF_TYPEID, sourceParent);
     QModelIndex qualifierIndex = sourceModel()->index(sourceRow, DF_QUALIFIER, sourceParent);
-	QModelIndex builtInIndex = sourceModel()->index(sourceRow, DF_BUILTIN, sourceParent);
+    QModelIndex builtInIndex = sourceModel()->index(sourceRow, DF_BUILTIN, sourceParent);
 
     // only user declared uniforms, no built-ins
-	return sourceModel()->data(qualifierIndex).toString() == "uniform" &&
-		!sourceModel()->data(builtInIndex).toBool();
+    return sourceModel()->data(qualifierIndex).toString() == "uniform" &&
+        !sourceModel()->data(builtInIndex).toBool();
 }
 

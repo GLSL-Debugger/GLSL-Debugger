@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -81,8 +81,8 @@ void GlTraceListItem::setIconType(IconType type)
 GlTraceListFilterModel::GlTraceListFilterModel(GlTraceFilterModel *traceFilter, QObject *parent)
     : QSortFilterProxyModel(parent)
 {
-	m_GlTraceFilterModel = traceFilter;
-	currentShown = false;
+    m_GlTraceFilterModel = traceFilter;
+    currentShown = false;
 }
 
 bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow, const
@@ -95,12 +95,12 @@ bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow, const
     return (!(text.startsWith(QString("glXGetProcAddressARB("))));
     */
     //return true;
-	return m_GlTraceFilterModel->isFunctionVisible(text.left(text.indexOf("(")))
-		|| dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(index);
+    return m_GlTraceFilterModel->isFunctionVisible(text.left(text.indexOf("(")))
+        || dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(index);
 }
 
 void GlTraceListFilterModel::showCurrentItemAnyway(bool show) {
-	currentShown = show;
+    currentShown = show;
 }
 
 GlTraceListModel::GlTraceListModel(int maxListEntries, GlTraceFilterModel *traceFilter, QObject *parent)
@@ -110,14 +110,14 @@ GlTraceListModel::GlTraceListModel(int maxListEntries, GlTraceFilterModel *trace
     m_pData = new GlTraceListItem[maxListEntries];
     m_iFirst = 0;
     m_iNum   = 0;
-	m_pTraceFilterModel = traceFilter;
+    m_pTraceFilterModel = traceFilter;
 }
 
 GlTraceListModel::~GlTraceListModel()
 {
     delete[] m_pData;
 }
-    
+
 void GlTraceListModel::clear(void)
 {
     beginResetModel();
@@ -238,20 +238,20 @@ QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-		case Qt::ForegroundRole:
-			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-				return QVariant();
-			} else {
-				return QBrush(QColor(128,128,128));
-			}
-		case Qt::FontRole:
-			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-				return QVariant();
-			} else {
-				QFont f;
-				f.setItalic(true);
-				return f;
-			}
+        case Qt::ForegroundRole:
+            if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
+                return QVariant();
+            } else {
+                return QBrush(QColor(128,128,128));
+            }
+        case Qt::FontRole:
+            if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
+                return QVariant();
+            } else {
+                QFont f;
+                f.setItalic(true);
+                return f;
+            }
         case Qt::DisplayRole:
             return m_pData[idx].getText();
         case Qt::DecorationRole:
@@ -262,11 +262,11 @@ QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
 }
 
 bool GlTraceListModel::isCurrentCall(const QModelIndex &index) {
-	if ((m_iFirst + index.row()) % m_iMax == (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
-		return true;
-	} else {
-		return false;
-	}
+    if ((m_iFirst + index.row()) % m_iMax == (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void GlTraceListItem::outputTXT(QTextStream &out) const

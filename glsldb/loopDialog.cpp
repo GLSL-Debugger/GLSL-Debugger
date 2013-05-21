@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,11 +46,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dbgprint.h"
 
 /* Fragment Shader */
-LoopDialog::LoopDialog(LoopData *data, QWidget *parent) 
+LoopDialog::LoopDialog(LoopData *data, QWidget *parent)
     : QDialog(parent)
 {
     m_pData = data;
-    
+
     setupUi(this);
     setupGui();
 
@@ -68,15 +68,15 @@ LoopDialog::LoopDialog(LoopData *data, QWidget *parent)
 
 /* Geometry Shader */
 LoopDialog::LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems,
-                       int inPrimitiveType, int outPrimitiveType,
-                       VertexBox *primitiveMap,
-                       VertexBox *vertexCountMap,
-                       QWidget *parent)
+                    int inPrimitiveType, int outPrimitiveType,
+                    VertexBox *primitiveMap,
+                    VertexBox *vertexCountMap,
+                    QWidget *parent)
     : QDialog(parent)
 {
     int i;
     m_pData = data;
-    
+
     setupUi(this);
     setupGui();
 
@@ -93,16 +93,16 @@ LoopDialog::LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems,
         for (i=0; i<watchItems.count(); i++) {
             QString name = watchItems[i]->getFullName();
             model->addData(watchItems[i]->getCurrentPointer(),
-                           watchItems[i]->getVertexBoxPointer(),
-                           name);
+                        watchItems[i]->getVertexBoxPointer(),
+                        name);
         }
-        
+
         m_qTreeView->setModel(model);
 
         if (watchItems.count() != 0) {
             m_qTreeView->setColumnHidden(1, true);
         }
-        
+
         gridLayout->addWidget(m_qTreeView);
     }
 }
@@ -113,7 +113,7 @@ LoopDialog::LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems, QWidget *p
 {
     int i;
     m_pData = data;
-    
+
     setupUi(this);
     setupGui();
 
@@ -128,13 +128,13 @@ LoopDialog::LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems, QWidget *p
             model->addVertexBox(watchItems[i]->getVertexBoxPointer(), name);
         }
         model->setCondition(m_pData->getActualVertexBox(), m_pData->getInitialCoverage());
-        
+
         m_qTableView->setModel(model);
 
         if (watchItems.count() != 0) {
             m_qTableView->setColumnHidden(1, true);
         }
-        
+
         gridLayout->addWidget(m_qTableView);
     }
 }
@@ -146,7 +146,7 @@ void LoopDialog::setupGui(void)
     m_qLabel = NULL;
     m_qTreeView = NULL;
     m_qTableView = NULL;
-    
+
     /* Curves */
     m_qCurves = new CurveView(fCurvesDisplay);
     m_qCurves->setModel(m_pData->getModel());
@@ -176,7 +176,7 @@ void LoopDialog::setupGui(void)
     fProgress->setVisible(false);
 
     fJump->setVisible(false);
-    
+
     if (m_pData->getIteration() < MAX_LOOP_ITERATIONS) {
         pbStatistics->setEnabled(true);
         pbJump->setEnabled(true);
@@ -293,7 +293,10 @@ void LoopDialog::on_cbOut_stateChanged(int state)
 void LoopDialog::reorganizeLoopTable(const QModelIndex &parent, int start, int end)
 {
     int i;
-    
+    UNUSED_ARG(parent)
+    UNUSED_ARG(start)
+    UNUSED_ARG(end)
+
     QAbstractItemModel *data = tvStatTable->model();
     for (i=0; i<data->columnCount(); i++) {
         tvStatTable->resizeColumnToContents(i);
@@ -316,7 +319,7 @@ void LoopDialog::on_pbBreak_clicked()
 {
     done(SA_BREAK);
 }
-    
+
 void LoopDialog::on_pbStatistics_clicked()
 {
     /* Initialization */
@@ -331,8 +334,8 @@ void LoopDialog::on_pbStatistics_clicked()
     fCurvesDisplay->setUpdatesEnabled(false);
 
     /* Process loop */
-    while ((m_pData->getIteration() < MAX_LOOP_ITERATIONS - 1) && 
-           (m_pData->getActive() > 0) &&
+    while ((m_pData->getIteration() < MAX_LOOP_ITERATIONS - 1) &&
+        (m_pData->getActive() > 0) &&
             !m_bProcessStopped) {
         emit doShaderStep(DBG_BH_LOOP_NEXT_ITER, false, true);
         pbProgress->setValue(m_pData->getIteration());
@@ -342,7 +345,7 @@ void LoopDialog::on_pbStatistics_clicked()
 
     tvStatTable->setUpdatesEnabled(true);
     fCurvesDisplay->setUpdatesEnabled(true);
-    
+
     emit doShaderStep(DBG_BH_LOOP_NEXT_ITER, true, true);
     if (m_pData->isFragmentLoop()) {
         m_qLabel->setPixmap(QPixmap::fromImage(m_pData->getImage()));
@@ -410,7 +413,7 @@ void LoopDialog::on_pbStopProgress_clicked()
 void LoopDialog::on_pbStopJump_clicked()
 {
     fJump->setVisible(false);
-    
+
     pbBreak->setEnabled(true);
     if (m_pData->getIteration() < MAX_LOOP_ITERATIONS) {
         pbStatistics->setEnabled(true);

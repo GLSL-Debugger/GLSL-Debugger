@@ -41,16 +41,16 @@
 /* Based on:
 ANSI C Yacc grammar
 
-In 1985, Jeff Lee published his Yacc grammar (which is accompanied by a 
-matching Lex specification) for the April 30, 1985 draft version of the 
+In 1985, Jeff Lee published his Yacc grammar (which is accompanied by a
+matching Lex specification) for the April 30, 1985 draft version of the
 ANSI C standard.  Tom Stockfisch reposted it to net.sources in 1987; that
 original, as mentioned in the answer to question 17.25 of the comp.lang.c
 FAQ, can be ftp'ed from ftp.uu.net, file usenet/net.sources/ansi.c.grammar.Z.
- 
-I intend to keep this version as close to the current C Standard grammar as 
-possible; please let me know if you discover discrepancies. 
 
-Jutta Degener, 1995 
+I intend to keep this version as close to the current C Standard grammar as
+possible; please let me know if you discover discrepancies.
+
+Jutta Degener, 1995
 */
 
 #include "SymbolTable.h"
@@ -69,7 +69,7 @@ Jutta Degener, 1995
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
-    extern void yyerror(char*);    
+    extern void yyerror(char*);
 #endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
@@ -159,7 +159,7 @@ Jutta Degener, 1995
             TString *string;
             float f;
             int i;
-			unsigned int ui;
+            unsigned int ui;
             bool b;
         };
         TSymbol* symbol;
@@ -190,12 +190,12 @@ Jutta Degener, 1995
     extern int yylex(YYSTYPE*, void*);
 #endif
 
-void addStructInstance(TIntermSpecification* specificationNode, 
-                       TIntermNode* intermNode, 
-                       TParseContext &pC)
+void addStructInstance(TIntermSpecification* specificationNode,
+                    TIntermNode* intermNode,
+                    TParseContext &pC)
 {
     if (!specificationNode || !intermNode) return;
-    
+
     TIntermAggregate* instancePointer = *(specificationNode->getInstancesPointer());
 
     if (instancePointer && instancePointer->getOp() != EOpNull) {
@@ -207,51 +207,51 @@ void addStructInstance(TIntermSpecification* specificationNode,
     );
 
     instancePointer = *(specificationNode->getInstancesPointer());
-    
+
     if (instancePointer && instancePointer->getOp() != EOpInstances) {
         instancePointer->setOperator(EOpInstances);
     }
 }
 
 void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC) {
-    
+
     TTypeList::iterator iter = paramList->begin();
     for(; iter != paramList->end(); iter++) {
         if(iter->type->isSpecified() == true &&
-           iter->type->getBasicType() == EbtStruct) {
+        iter->type->getBasicType() == EbtStruct) {
 
             /* add specification */
-            TIntermNode *structNode = 
+            TIntermNode *structNode =
                 pC.intermediate.addSpecification(iter->range, iter->type, pC.extensionChanged);
 
             /* recursive process this struct */
-            processStruct(iter->type->getStruct(), 
-                          structNode->getAsSpecificationNode()->getParameterPointer(), 
-                          pC);
-            
+            processStruct(iter->type->getStruct(),
+                        structNode->getAsSpecificationNode()->getParameterPointer(),
+                        pC);
+
             /* Add instance */
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 pC.intermediate.addParameter(iter->range, iter->type, pC.extensionChanged);
-                
+
             addStructInstance(structNode->getAsSpecificationNode(),
-                              intermNode, pC);
-            
+                            intermNode, pC);
+
             /* Make aggregate and add to parameters */
-            TIntermAggregate *structAggregate = 
+            TIntermAggregate *structAggregate =
                 pC.intermediate.makeAggregate(structNode, pC.extensionChanged);
             structAggregate->setOperator(EOpSpecification);
 
             *p = pC.intermediate.growAggregate(*p, structAggregate, pC.extensionChanged);
 
         } else {
-            TIntermNode *paramNode = 
+            TIntermNode *paramNode =
                 pC.intermediate.addParameter(iter->range, iter->type, pC.extensionChanged);
             *p = pC.intermediate.growAggregate(*p, paramNode, pC.extensionChanged);
 
         }
     }
 
-    (*p)->setOperator(EOpParameter); 
+    (*p)->setOperator(EOpParameter);
 }
 
 %}
@@ -261,7 +261,7 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 %token <lex> ATTRIBUTE CONST_QUAL BOOL_TYPE FLOAT_TYPE INT_TYPE INVARIANT
 %token <lex> BREAK CONTINUE DO ELSE FOR IF DISCARD RETURN SWITCH CASE DEFAULT
 %token <lex> BVEC2 BVEC3 BVEC4 IVEC2 IVEC3 IVEC4 VEC2 VEC3 VEC4
-%token <lex> MATRIX2 MATRIX3 MATRIX4 
+%token <lex> MATRIX2 MATRIX3 MATRIX4
 %token <lex> MATRIX2X2 MATRIX3X2 MATRIX4X2
 %token <lex> MATRIX2X3 MATRIX3X3 MATRIX4X3
 %token <lex> MATRIX2X4 MATRIX3X4 MATRIX4X4
@@ -298,7 +298,7 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 %type <interm.intermTypedNode> variable_identifier primary_expression postfix_expression
 %type <interm.intermTypedNode> expression integer_expression assignment_expression
 %type <interm.intermTypedNode> unary_expression multiplicative_expression additive_expression
-%type <interm.intermTypedNode> relational_expression equality_expression 
+%type <interm.intermTypedNode> relational_expression equality_expression
 %type <interm.intermTypedNode> conditional_expression constant_expression
 %type <interm.intermTypedNode> logical_or_expression logical_xor_expression logical_and_expression
 %type <interm.intermTypedNode> shift_expression and_expression exclusive_or_expression inclusive_or_expression
@@ -313,29 +313,29 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 %type <interm.nodePair> selection_rest_statement for_rest_statement
 %type <interm.intermNode> iteration_statement jump_statement statement_no_new_scope
 %type <interm.intermNode> switch_statement case_label
-%type <interm> single_declaration init_declarator_list 
+%type <interm> single_declaration init_declarator_list
 %type <interm.type> array_declarator_suffix
 
 %type <interm> parameter_declaration parameter_declarator parameter_type_specifier
 %type <interm.qualifier> parameter_qualifier varying_geom_modifyer
 %type <interm.varyingModifier> varying_modifier
 
-%type <interm.type> type_qualifier fully_specified_type type_specifier 
+%type <interm.type> type_qualifier fully_specified_type type_specifier
 %type <interm.type> type_specifier_nonarray
-%type <interm.type> struct_specifier 
-%type <interm.typeRange> struct_declarator 
+%type <interm.type> struct_specifier
+%type <interm.typeRange> struct_declarator
 %type <interm.typeList> struct_declarator_list struct_declaration struct_declaration_list
 %type <interm.function> function_header function_declarator function_identifier
-%type <interm.function> function_header_with_parameters function_call_header 
+%type <interm.function> function_header_with_parameters function_call_header
 %type <interm> function_call_header_with_parameters function_call_header_no_parameters function_call_generic function_prototype
 %type <interm> function_call_or_method
 
-%start translation_unit 
+%start translation_unit
 %%
 
-variable_identifier 
+variable_identifier
     : IDENTIFIER {
-        
+
         // The symbol table search was done in the lexical phase
         const TSymbol* symbol = $1.symbol;
         const TVariable* variable;
@@ -347,7 +347,7 @@ variable_identifier
             parseContext.symbolTable.insert(*fakeVariable);
             variable = fakeVariable;
         } else {
-            // This identifier can only be a variable type symbol 
+            // This identifier can only be a variable type symbol
             if (! symbol->isVariable()) {
                 parseContext.error($1.range, "variable expected", $1.string->c_str(), "");
                 parseContext.recover(__FILE__, __LINE__);
@@ -363,11 +363,11 @@ variable_identifier
             TType t(variable->getType());
             $$ = parseContext.intermediate.addConstantUnion(constArray, t, $1.range, parseContext.extensionChanged);
         } else {
-            $$ = parseContext.intermediate.addSymbol(variable->getUniqueId(), 
-                                                     variable->getName(), 
-                                                     variable->getType(), 
-                                                     $1.range,
-                                                     parseContext.extensionChanged);
+            $$ = parseContext.intermediate.addSymbol(variable->getUniqueId(),
+                                                    variable->getName(),
+                                                    variable->getType(),
+                                                    $1.range,
+                                                    parseContext.extensionChanged);
         }
         if ($$) $$->setRange($1.range);
     }
@@ -379,10 +379,10 @@ primary_expression
     }
     | INTCONSTANT {
         //
-        // INT_TYPE is only 16-bit plus sign bit for vertex/fragment shaders, 
+        // INT_TYPE is only 16-bit plus sign bit for vertex/fragment shaders,
         // check for overflow for constants
         //
-		fprintf(stderr, "I:%d\n", $1.i);
+        fprintf(stderr, "I:%d\n", $1.i);
         if (abs($1.i) >= (1 << 16)) {
             if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                 parseContext.error($1.range, " integer constant overflow", "", "");
@@ -412,7 +412,7 @@ primary_expression
         */
 
         constUnion *unionArray = new constUnion[1];
-		fprintf(stderr, "UI:%u\n", $1.ui);
+        fprintf(stderr, "UI:%u\n", $1.ui);
         unionArray->setUIConst($1.ui);
         $$ = parseContext.intermediate.addConstantUnion(unionArray, TType(EbtUInt, EvqConst), $1.range, parseContext.extensionChanged);
         if ($$) $$->setRange($1.range);
@@ -437,9 +437,9 @@ primary_expression
     ;
 
 postfix_expression
-    : primary_expression { 
+    : primary_expression {
         $$ = $1;
-    } 
+    }
     | postfix_expression LEFT_BRACKET integer_expression RIGHT_BRACKET {
         if (!$1->isArray() && !$1->isMatrix() && !$1->isVector()) {
             if ($1->getAsSymbolNode())
@@ -452,13 +452,13 @@ postfix_expression
             if ($1->isArray()) { // constant folding for arrays
                 $$ = parseContext.addConstArrayNode($3->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), $1, $2.range);
             } else if ($1->isVector()) {  // constant folding for vectors
-                TVectorFields fields;                
+                TVectorFields fields;
                 fields.num = 1;
                 fields.offsets[0] = $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst(); // need to do it this way because v.xy sends fields integer array
                 $$ = parseContext.addConstVectorNode(fields, $1, $2.range);
             } else if ($1->isMatrix()) { // constant folding for matrices
                 $$ = parseContext.addConstMatrixNode($3->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), $1, $2.range);
-            } 
+            }
         } else {
             if ($3->getQualifier() == EvqConst) {
                 if ($1->isVector() && $1->getType().getNominalSize() <= $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst() && !$1->isArray() ) {
@@ -472,10 +472,10 @@ postfix_expression
                         if ($1->getType().getArraySize() == 0) {
                             if ($1->getType().getMaxArraySize() <= $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst()) {
                                 if (parseContext.arraySetMaxSize($1->getAsSymbolNode(), $1->getTypePointer(), $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), true, $2.range))
-                                    parseContext.recover(__FILE__, __LINE__); 
+                                    parseContext.recover(__FILE__, __LINE__);
                             } else {
                                 if (parseContext.arraySetMaxSize($1->getAsSymbolNode(), $1->getTypePointer(), 0, false, $2.range))
-                                    parseContext.recover(__FILE__, __LINE__); 
+                                    parseContext.recover(__FILE__, __LINE__);
                             }
                         } else if ( $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst() >= $1->getType().getArraySize()) {
                             parseContext.error($2.range, "", "[", "array index out of range '%d'", $3->getAsConstantUnion()->getUnionArrayPointer()->getIConst());
@@ -490,10 +490,10 @@ postfix_expression
                     parseContext.error($2.range, "", "[", "array must be redeclared with a size before being indexed with a variable");
                     parseContext.recover(__FILE__, __LINE__);
                 }
-                
+
                 $$ = parseContext.intermediate.addIndex(EOpIndexIndirect, $1, $3, $2.range, parseContext.extensionChanged);
             }
-        } 
+        }
         if ($$ == 0) {
             constUnion *unionArray = new constUnion[1];
             unionArray->setFConst(0.0f);
@@ -504,11 +504,11 @@ postfix_expression
             } else {
                 if ($1->isMatrix()) {
                     $$ ->setType(TType($1->getBasicType(), EvqTemporary, EvmNone, 1,
-                                       $1->getMatrixSize(0), $1->getMatrixSize(1), $1->isMatrix()));
+                                    $1->getMatrixSize(0), $1->getMatrixSize(1), $1->isMatrix()));
                 } else {
                     $$ ->setType(TType($1->getBasicType(), EvqTemporary, EvmNone, $1->getNominalSize(),
-                                       1,1, $1->isMatrix()));
-               }
+                                    1,1, $1->isMatrix()));
+            }
             }
             if ($1->getType().getQualifier() == EvqConst) {
                 $$->getTypePointer()->changeQualifier(EvqConst);
@@ -534,7 +534,7 @@ postfix_expression
     | function_call {
         $$ = $1;
     }
-    | postfix_expression DOT FIELD_SELECTION {        
+    | postfix_expression DOT FIELD_SELECTION {
         if ($1->isArray()) {
             parseContext.error($3.range, "cannot apply dot operator to an array", ".", "");
             parseContext.recover(__FILE__, __LINE__);
@@ -566,9 +566,9 @@ postfix_expression
                     $$->setType(TType($1->getBasicType()));
                 } else {
                     TString vectorString = *$3.string;
-                    TIntermTyped* index = parseContext.intermediate.addSwizzle(fields, $3.range, parseContext.extensionChanged);                
+                    TIntermTyped* index = parseContext.intermediate.addSwizzle(fields, $3.range, parseContext.extensionChanged);
                     $$ = parseContext.intermediate.addIndex(EOpVectorSwizzle, $1, index, $2.range, parseContext.extensionChanged);
-                    $$->setType(TType($1->getBasicType(),EvqTemporary, EvmNone, (int) vectorString.size()));  
+                    $$->setType(TType($1->getBasicType(),EvqTemporary, EvmNone, (int) vectorString.size()));
                 }
             }
         } else if ($1->isMatrix()) {
@@ -615,7 +615,7 @@ postfix_expression
                     if ((*fields)[i].type->getFieldName() == *$3.string) {
                         fieldFound = true;
                         break;
-                    }                
+                    }
                 }
                 if (fieldFound) {
                     if ($1->getType().getQualifier() == EvqConst) {
@@ -675,7 +675,7 @@ postfix_expression
     }
     ;
 
-integer_expression 
+integer_expression
     : expression {
         if (parseContext.integerErrorCheck($1, "[]"))
             parseContext.recover(__FILE__, __LINE__);
@@ -683,11 +683,11 @@ integer_expression
     }
     ;
 
-function_call 
+function_call
     : function_call_or_method {
         TFunction* fnCall = $1.function;
         TOperator op = fnCall->getBuiltInOp();
-        
+
         if (op == EOpArrayLength) {
             if ($1.intermNode->getAsTyped() == 0 || $1.intermNode->getAsTyped()->getType().getArraySize() == 0) {
                 parseContext.error($1.range, "", fnCall->getName().c_str(), "array must be declared with a size before using this method");
@@ -698,10 +698,10 @@ function_call
             unionArray->setIConst($1.intermNode->getAsTyped()->getType().getArraySize());
             $$ = parseContext.intermediate.addConstantUnion(unionArray, TType(EbtInt, EvqConst), $1.range, parseContext.extensionChanged);
         } else if (op != EOpNull) {
-            
+
             //
             // Then this should be a constructor.
-            // Don't go through the symbol table for constructors.  
+            // Don't go through the symbol table for constructors.
             // Their parameters will be verified algorithmically.
             //
             TType type(EbtVoid);  // use this to get the type back
@@ -719,7 +719,7 @@ function_call
                 $$ = parseContext.intermediate.setAggregateOperator(0, op, $1.range, parseContext.extensionChanged);
             }
             $$->setType(type);
-            
+
         } else {
             //
             // Not a constructor.  Find it in the symbol table.
@@ -741,10 +741,10 @@ function_call
                         //
                         // Treat it like a built-in unary operator.
                         //
-                        $$ = parseContext.intermediate.addUnaryMath(op, $1.intermNode, 
+                        $$ = parseContext.intermediate.addUnaryMath(op, $1.intermNode,
                             TSourceRangeInit, parseContext.symbolTable, parseContext.extensionChanged);
                         if ($$ == 0)  {
-                            parseContext.error($1.intermNode->getRange(), " wrong operand type", "Internal Error", 
+                            parseContext.error($1.intermNode->getRange(), " wrong operand type", "Internal Error",
                                 "built in unary operator function.  Type: %s",
                                 static_cast<TIntermTyped*>($1.intermNode)->getCompleteString().c_str());
                             YYERROR;
@@ -766,15 +766,15 @@ function_call
                     }
                 } else {
                     // This is a real function call
-                    
+
                     $$ = parseContext.intermediate.setAggregateOperator($1.intermAggregate, EOpFunctionCall, $1.range, parseContext.extensionChanged);
-                    $$->setType(fnCandidate->getReturnType());                   
-                    
+                    $$->setType(fnCandidate->getReturnType());
+
                     // this is how we know whether the given function is a builtIn function or a user defined function
                     // if builtIn == false, it's a userDefined -> could be an overloaded builtIn function also
                     // if builtIn == true, it's definitely a builtIn function with EOpNull
                     if (!builtIn) {
-                        $$->getAsAggregate()->setUserDefined(); 
+                        $$->getAsAggregate()->setUserDefined();
                     } else {
                         if (strcmp(fnCandidate->getMangledName().c_str(), EMIT_VERTEX_SIG) == 0) {
                             $$->setEmitVertex();
@@ -834,7 +834,7 @@ function_call_or_method
 function_call_generic
     : function_call_header_with_parameters RIGHT_PAREN {
         if ($1.function->getBuiltInOp() != EOpNull &&
-            $1.function->getReturnTypePointer()->isArray() && 
+            $1.function->getReturnTypePointer()->isArray() &&
             $1.function->getReturnTypePointer()->getArraySize() == 0) {
                 $1.function->getReturnTypePointer()->setArraySize($1.function->getParamCount());
         }
@@ -846,8 +846,8 @@ function_call_generic
         $$.range = addRange($1.range, $2.range);
     }
     ;
-    
-function_call_header_no_parameters 
+
+function_call_header_no_parameters
     : function_call_header VOID_TYPE {
         $$.function = $1;
         $$.intermNode = 0;
@@ -873,17 +873,17 @@ function_call_header_with_parameters
     }
     ;
 
-function_call_header 
+function_call_header
     : function_identifier LEFT_PAREN {
         $$ = $1;
     }
     ;
 
 // Grammar Note:  Constructors look like functions, but are recognized as types.
-    
+
 function_identifier
     : type_specifier {
-        
+
         //
         // Constructor
         //
@@ -925,47 +925,49 @@ function_identifier
                                 case 4:
                                                                 op = EOpConstructMat4;    break;
                             }
-                    }         
-                } else {      
+                    }
+                } else {
                     switch($1.size) {
                     case 1:                                     op = EOpConstructFloat; break;
                     case 2:                                     op = EOpConstructVec2;  break;
                     case 3:                                     op = EOpConstructVec3;  break;
                     case 4:                                     op = EOpConstructVec4;  break;
-                    }       
-                }  
-                break;               
+                    }
+                }
+                break;
             case EbtInt:
                 switch($1.size) {
                 case 1:                                         op = EOpConstructInt;   break;
                 case 2:       FRAG_VERT_GEOM_ONLY("ivec2", $1.range); op = EOpConstructIVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("ivec3", $1.range); op = EOpConstructIVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("ivec4", $1.range); op = EOpConstructIVec4; break;
-                }         
-                break;    
+                }
+                break;
             case EbtUInt:
                 switch($1.size) {
                 case 1:                                          op = EOpConstructUInt;  break;
                 case 2:       FRAG_VERT_GEOM_ONLY("uvec2", $1.range); op = EOpConstructUVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("uvec3", $1.range); op = EOpConstructUVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("uvec4", $1.range); op = EOpConstructUVec4; break;
-                }         
-                break;    
+                }
+                break;
             case EbtBool:
                 switch($1.size) {
                 case 1:                                         op = EOpConstructBool;  break;
                 case 2:       FRAG_VERT_GEOM_ONLY("bvec2", $1.range); op = EOpConstructBVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("bvec3", $1.range); op = EOpConstructBVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("bvec4", $1.range); op = EOpConstructBVec4; break;
-                }         
+                }
+                break;
+            default:
                 break;
             }
-            if (op == EOpNull) {                    
+            if (op == EOpNull) {
                 parseContext.error($1.range, "cannot construct this type", TType::getBasicString($1.type), "");
                 parseContext.recover(__FILE__, __LINE__);
                 $1.type = EbtFloat;
                 op = EOpConstructFloat;
-            }            
+            }
             TString tempString = "";
             TType type($1);
             TFunction *function = new TFunction(&tempString, type, op);
@@ -973,14 +975,14 @@ function_identifier
         }
     }
     | IDENTIFIER {
-        if (parseContext.reservedErrorCheck($1.range, *$1.string)) 
+        if (parseContext.reservedErrorCheck($1.range, *$1.string))
             parseContext.recover(__FILE__, __LINE__);
         TType type(EbtVoid);
         TFunction *function = new TFunction($1.string, type);
         $$ = function;
     }
     | FIELD_SELECTION {
-        if (parseContext.reservedErrorCheck($1.range, *$1.string)) 
+        if (parseContext.reservedErrorCheck($1.range, *$1.string))
             parseContext.recover(__FILE__, __LINE__);
         TType type(EbtVoid);
         TFunction *function = new TFunction($1.string, type);
@@ -1023,7 +1025,7 @@ unary_expression
                 case EOpNegative:   errorOp = "-"; break;
                 case EOpLogicalNot: errorOp = "!"; break;
                 case EOpBitwiseNot: errorOp = "~"; break;
-				default: break;
+                default: break;
                 }
                 parseContext.unaryOpError($1.range, errorOp, $2->getCompleteString());
                 parseContext.recover(__FILE__, __LINE__);
@@ -1040,12 +1042,12 @@ unary_operator
     : PLUS  { $$.range = $1.range; $$.op = EOpNull; }
     | DASH  { $$.range = $1.range; $$.op = EOpNegative; }
     | BANG  { $$.range = $1.range; $$.op = EOpLogicalNot; }
-    | TILDE { 
-              if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
-                  parseContext.recover(__FILE__, __LINE__);
-              }
-              $$.range = $1.range; 
-              $$.op = EOpBitwiseNot; 
+    | TILDE {
+            if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                parseContext.recover(__FILE__, __LINE__);
+            }
+            $$.range = $1.range;
+            $$.op = EOpBitwiseNot;
             }
     ;
 // Grammar Note:  No '*' or '&' unary ops.  Pointers are not supported.
@@ -1063,7 +1065,7 @@ multiplicative_expression
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
     | multiplicative_expression SLASH unary_expression {
-        FRAG_VERT_GEOM_ONLY("/", $2.range); 
+        FRAG_VERT_GEOM_ONLY("/", $2.range);
         $$ = parseContext.intermediate.addBinaryMath(EOpDiv, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "/", $1->getCompleteString(), $3->getCompleteString());
@@ -1088,7 +1090,7 @@ multiplicative_expression
 
 additive_expression
     : multiplicative_expression { $$ = $1; }
-    | additive_expression PLUS multiplicative_expression {  
+    | additive_expression PLUS multiplicative_expression {
         $$ = parseContext.intermediate.addBinaryMath(EOpAdd, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "+", $1->getCompleteString(), $3->getCompleteString());
@@ -1103,7 +1105,7 @@ additive_expression
             parseContext.binaryOpError($2.range, "-", $1->getCompleteString(), $3->getCompleteString());
             parseContext.recover(__FILE__, __LINE__);
             $$ = $1;
-        } 
+        }
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
     ;
@@ -1138,7 +1140,7 @@ shift_expression
 
 relational_expression
     : shift_expression { $$ = $1; }
-    | relational_expression LEFT_ANGLE shift_expression { 
+    | relational_expression LEFT_ANGLE shift_expression {
         $$ = parseContext.intermediate.addBinaryMath(EOpLessThan, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "<", $1->getCompleteString(), $3->getCompleteString());
@@ -1149,7 +1151,7 @@ relational_expression
         }
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
-    | relational_expression RIGHT_ANGLE shift_expression  { 
+    | relational_expression RIGHT_ANGLE shift_expression  {
         $$ = parseContext.intermediate.addBinaryMath(EOpGreaterThan, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, ">", $1->getCompleteString(), $3->getCompleteString());
@@ -1160,7 +1162,7 @@ relational_expression
         }
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
-    | relational_expression LE_OP shift_expression  { 
+    | relational_expression LE_OP shift_expression  {
         $$ = parseContext.intermediate.addBinaryMath(EOpLessThanEqual, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "<=", $1->getCompleteString(), $3->getCompleteString());
@@ -1171,7 +1173,7 @@ relational_expression
         }
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
-    | relational_expression GE_OP shift_expression  { 
+    | relational_expression GE_OP shift_expression  {
         $$ = parseContext.intermediate.addBinaryMath(EOpGreaterThanEqual, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, ">=", $1->getCompleteString(), $3->getCompleteString());
@@ -1197,7 +1199,7 @@ equality_expression
         }
         if ($$ && $1 && $3) $$->setRange(addRange($1->getRange(), $3->getRange()));
     }
-    | equality_expression NE_OP relational_expression { 
+    | equality_expression NE_OP relational_expression {
         $$ = parseContext.intermediate.addBinaryMath(EOpNotEqual, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "!=", $1->getCompleteString(), $3->getCompleteString());
@@ -1275,7 +1277,7 @@ logical_and_expression
 
 logical_xor_expression
     : logical_and_expression { $$ = $1; }
-    | logical_xor_expression XOR_OP logical_and_expression  { 
+    | logical_xor_expression XOR_OP logical_and_expression  {
         $$ = parseContext.intermediate.addBinaryMath(EOpLogicalXor, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "^^", $1->getCompleteString(), $3->getCompleteString());
@@ -1290,7 +1292,7 @@ logical_xor_expression
 
 logical_or_expression
     : logical_xor_expression { $$ = $1; }
-    | logical_or_expression OR_OP logical_xor_expression  { 
+    | logical_or_expression OR_OP logical_xor_expression  {
         $$ = parseContext.intermediate.addBinaryMath(EOpLogicalOr, $1, $3, $2.range, parseContext.symbolTable, parseContext.extensionChanged);
         if ($$ == 0) {
             parseContext.binaryOpError($2.range, "||", $1->getCompleteString(), $3->getCompleteString());
@@ -1306,15 +1308,15 @@ logical_or_expression
 conditional_expression
     : logical_or_expression { $$ = $1; }
     | logical_or_expression QUESTION expression COLON assignment_expression {
-       if (parseContext.boolErrorCheck($2.range, $1))
+    if (parseContext.boolErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
 
         $$ = parseContext.intermediate.addSelection($1, $3, $5, $2.range, parseContext.extensionChanged);
 
         /* GLSL 1.20 does not require the expressions to have the same type,
-         * as long as there is a conversion to one of the expressions to make
-         * their types match. The resulting matching is the type of the
-         * entire expression */
+        * as long as there is a conversion to one of the expressions to make
+        * their types match. The resulting matching is the type of the
+        * entire expression */
         /*
         if ($3->getType() != $5->getType())
             $$ = 0;
@@ -1331,7 +1333,7 @@ conditional_expression
 
 assignment_expression
     : conditional_expression { $$ = $1; }
-    | unary_expression assignment_operator assignment_expression {        
+    | unary_expression assignment_operator assignment_expression {
         if (parseContext.lValueErrorCheck($2.range, "assign", $1))
             parseContext.recover(__FILE__, __LINE__);
         $$ = parseContext.intermediate.addAssign($2.op, $1, $3, $2.range, parseContext.extensionChanged);
@@ -1348,49 +1350,49 @@ assignment_operator
     : EQUAL        {                                    $$.range = $1.range; $$.op = EOpAssign; }
     | MUL_ASSIGN   { FRAG_VERT_GEOM_ONLY("*=", $1.range);     $$.range = $1.range; $$.op = EOpMulAssign; }
     | DIV_ASSIGN   { FRAG_VERT_GEOM_ONLY("/=", $1.range);     $$.range = $1.range; $$.op = EOpDivAssign; }
-    | MOD_ASSIGN   { 
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+    | MOD_ASSIGN   {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; $$.op = EOpModAssign; 
-                   }
+                    }
+                    $$.range = $1.range; $$.op = EOpModAssign;
+                }
     | ADD_ASSIGN   { $$.range = $1.range; $$.op = EOpAddAssign; }
     | SUB_ASSIGN   { $$.range = $1.range; $$.op = EOpSubAssign; }
     | LEFT_ASSIGN  {
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; 
-                     $$.op = EOpLeftShiftAssign; 
-                   }
+                    }
+                    $$.range = $1.range;
+                    $$.op = EOpLeftShiftAssign;
+                }
     | RIGHT_ASSIGN {
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; 
-                     $$.op = EOpRightShiftAssign; 
-                   }
-    | AND_ASSIGN   { 
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                    }
+                    $$.range = $1.range;
+                    $$.op = EOpRightShiftAssign;
+                }
+    | AND_ASSIGN   {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; 
-                     $$.op = EOpAndAssign; 
-                   }
+                    }
+                    $$.range = $1.range;
+                    $$.op = EOpAndAssign;
+                }
     | XOR_ASSIGN   {
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; 
-                     $$.op = EOpExclusiveOrAssign; 
-                   }
+                    }
+                    $$.range = $1.range;
+                    $$.op = EOpExclusiveOrAssign;
+                }
     | OR_ASSIGN    {
-                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     $$.range = $1.range; 
-                     $$.op = EOpInclusiveOrAssign; 
-                   }
+                    }
+                    $$.range = $1.range;
+                    $$.op = EOpInclusiveOrAssign;
+                }
     ;
 
 expression
@@ -1423,21 +1425,21 @@ declaration
         $$ = funcDecl;
         if ($$) $$->setRange(addRange($1.range, $2.range));
     }
-    | init_declarator_list SEMICOLON { 
+    | init_declarator_list SEMICOLON {
         if (($1.intermAggregate) && ($1.intermAggregate->getOp() == EOpNull)) {
                 $1.intermAggregate->setOperator(EOpDeclaration);
         }
-        $$ = $1.intermAggregate; 
+        $$ = $1.intermAggregate;
         if ($$) $$->setRange(addRange($1.range, $2.range));
     }
     ;
 
-function_prototype 
+function_prototype
     : function_declarator RIGHT_PAREN  {
         //
         // Multiple declarations of the same function are allowed.
         //
-        // If this is a definition, the definition production code will check for redefinitions 
+        // If this is a definition, the definition production code will check for redefinitions
         // (we don't know at this point if it's a definition or not).
         //
         // Redeclarations are allowed.  But, return types and parameter qualifiers must match.
@@ -1455,7 +1457,7 @@ function_prototype
                 }
             }
         }
-        
+
         //
         // If this is a redeclaration, it could also be a definition,
         // in which case, we want to use the variable names from this one, and not the one that's
@@ -1471,7 +1473,7 @@ function_declarator
     : function_header {
         $$ = $1;
     }
-    | function_header_with_parameters { 
+    | function_header_with_parameters {
         $$ = $1;
     }
     ;
@@ -1489,7 +1491,7 @@ function_header_with_parameters
     | function_header_with_parameters COMMA parameter_declaration {
         //
         // Only first parameter of one-parameter functions can be void
-        // The check for named parameters not being void is done in parameter_declarator 
+        // The check for named parameters not being void is done in parameter_declarator
         //
         if ($3.param.type->getBasicType() == EbtVoid) {
             //
@@ -1499,8 +1501,8 @@ function_header_with_parameters
             parseContext.recover(__FILE__, __LINE__);
             delete $3.param.type;
         } else {
-            // Add the parameter 
-            $$ = $1; 
+            // Add the parameter
+            $$ = $1;
             $1->addParameter($3.param);
         }
     }
@@ -1516,7 +1518,7 @@ function_header
         if (parseContext.structQualifierErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
 
-        // Add the function as a prototype after parsing it (we do not support recursion) 
+        // Add the function as a prototype after parsing it (we do not support recursion)
         TFunction *function;
         TType type($1);
         function = new TFunction($2.string, type);
@@ -1567,14 +1569,14 @@ parameter_declarator
     }
     ;
 
-parameter_declaration 
+parameter_declaration
     //
-    // The only parameter qualifier a parameter can have are 
+    // The only parameter qualifier a parameter can have are
     // IN_QUAL, OUT_QUAL, INOUT_QUAL, or CONST.
     //
 
     //
-    // Type + name 
+    // Type + name
     //
     : type_qualifier parameter_qualifier parameter_declarator {
         $$ = $3;
@@ -1591,7 +1593,7 @@ parameter_declaration
         $$.range = $2.range;
     }
     //
-    // Only type 
+    // Only type
     //
     | type_qualifier parameter_qualifier parameter_type_specifier {
         $$ = $3;
@@ -1624,7 +1626,7 @@ parameter_qualifier
     }
     ;
 
-parameter_type_specifier 
+parameter_type_specifier
     : type_specifier {
         if (parseContext.arraySizeUnspecifiedErrorCheck($1.range, $1)) {
             parseContext.error($1.range, "array syntax error", "", "");
@@ -1674,7 +1676,7 @@ array_declarator_suffix
 init_declarator_list
     : single_declaration {
         $$ = $1;
-    } 
+    }
     | init_declarator_list COMMA IDENTIFIER {
         $$ = $1;
 
@@ -1690,25 +1692,25 @@ init_declarator_list
                 parseContext.recover(__FILE__, __LINE__);
 
             TSymbol *sym = parseContext.symbolTable.find(*$3.string);
-            TIntermNode *intermNode = 
-                parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL, 
-                                                         parseContext.extensionChanged);
+            TIntermNode *intermNode =
+                parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL,
+                                                        parseContext.extensionChanged);
 
             /* Special care taken for structs */
-            if ( $1.type.type == EbtStruct 
-                 && $1.type.userDef != 0 
-                 && $1.type.userDef->isSpecified() ) {
+            if ( $1.type.type == EbtStruct
+                && $1.type.userDef != 0
+                && $1.type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  intermNode->getAsDeclarationNode(), 
-                                  parseContext);
+                                intermNode->getAsDeclarationNode(),
+                                parseContext);
             } else {
                 /* Add declaration normally to the tree */
-                $$.intermAggregate = 
-                    parseContext.intermediate.growAggregate($1.intermNode, intermNode, 
+                $$.intermAggregate =
+                    parseContext.intermediate.growAggregate($1.intermNode, intermNode,
                                                             parseContext.extensionChanged);
             }
         } else {
@@ -1724,12 +1726,12 @@ init_declarator_list
                 newPType.setBasic(EbtInvariant, EvqTemporary);
                 TVariable *newVar = new TVariable(newName, newType);
 
-                TIntermNode *intermNode = 
-                    parseContext.intermediate.addDeclaration($3.range, newVar, NULL, 
-                                                             parseContext.extensionChanged);
+                TIntermNode *intermNode =
+                    parseContext.intermediate.addDeclaration($3.range, newVar, NULL,
+                                                            parseContext.extensionChanged);
                 /* Add declaration normally to the tree */
-                $$.intermAggregate = 
-                    parseContext.intermediate.growAggregate($1.intermNode, intermNode, 
+                $$.intermAggregate =
+                    parseContext.intermediate.growAggregate($1.intermNode, intermNode,
                                                             parseContext.extensionChanged);
             }
         }
@@ -1794,23 +1796,23 @@ init_declarator_list
         }
 
         TSymbol *sym = parseContext.symbolTable.find(*$3.string);
-        TIntermNode *intermNode = 
+        TIntermNode *intermNode =
             parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL, parseContext.extensionChanged);
 
         /* Special care taken for structs */
-        if ( $1.type.type == EbtStruct 
-             && $1.type.userDef != 0 
-             && $1.type.userDef->isSpecified() ) {
+        if ( $1.type.type == EbtStruct
+            && $1.type.userDef != 0
+            && $1.type.userDef->isSpecified() ) {
             /* Add declaration to instances of stuct */
-            TIntermSpecification* specificationNode = 
+            TIntermSpecification* specificationNode =
                 ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
             addStructInstance(specificationNode,
-                              intermNode->getAsDeclarationNode(), 
-                              parseContext);
+                            intermNode->getAsDeclarationNode(),
+                            parseContext);
         } else {
             /* Add declaration normally to the tree */
-            $$.intermAggregate = 
+            $$.intermAggregate =
                 parseContext.intermediate.growAggregate($1.intermNode, intermNode, parseContext.extensionChanged);
             $$.intermAggregate->setRange(addRange($1.range, $4.range));
         }
@@ -1826,13 +1828,13 @@ init_declarator_list
         if (parseContext.arrayTypeErrorCheck($4.range, $1.type) || parseContext.arrayQualifierErrorCheck($4.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
         else {
-			$1.type.setArray(true, $7->getType().getArraySize());
+            $1.type.setArray(true, $7->getType().getArraySize());
             if (parseContext.arrayErrorCheck($4.range, *$3.string, $1.type, variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
 
         TSymbol *sym = parseContext.symbolTable.find(*$3.string);
-        TIntermNode *intermNode = 
+        TIntermNode *intermNode =
             parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL, parseContext.extensionChanged);
         /* Special care taken for structs */
         if ( $1.type.type == EbtStruct && $1.type.userDef != 0 && $1.type.userDef->isSpecified() ) {
@@ -1852,12 +1854,12 @@ init_declarator_list
                 }
 
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode, 
-                                  parseContext);
+                                decNode,
+                                parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 $$.intermAggregate = 0;
@@ -1926,12 +1928,12 @@ init_declarator_list
                 }
 
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode, 
-                                  parseContext);
+                                decNode,
+                                parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 $$.intermAggregate = 0;
@@ -1965,9 +1967,9 @@ init_declarator_list
     | init_declarator_list COMMA IDENTIFIER EQUAL initializer {
         if (parseContext.structQualifierErrorCheck($3.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         $$ = $1;
-        
+
         TIntermNode* intermNode;
         if (!parseContext.executeInitializer($3.range, *$3.string, $1.type, $5, intermNode)) {
             //
@@ -1975,26 +1977,26 @@ init_declarator_list
             //
             TSymbol *sym = parseContext.symbolTable.find(*$3.string);
             TIntermNode *decNode;
-            decNode = 
+            decNode =
                 parseContext.intermediate.addDeclaration($3.range, (TVariable*) sym, intermNode, parseContext.extensionChanged);
             /* Special care taken for structs */
-           if ( $1.type.type == EbtStruct 
-                 && $1.type.userDef != 0 
-                 && $1.type.userDef->isSpecified() ) {
+        if ( $1.type.type == EbtStruct
+                && $1.type.userDef != 0
+                && $1.type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode->getAsDeclarationNode(), 
-                                  parseContext);
+                                decNode->getAsDeclarationNode(),
+                                parseContext);
             } else {
                 /* Add declaration normally to the tree */
-                $$.intermAggregate = 
+                $$.intermAggregate =
                     parseContext.intermediate.growAggregate($1.intermNode, decNode, parseContext.extensionChanged);
                 $$.intermAggregate->setRange(addRange($1.range, $5->getRange()));
             }
-         } else {
+        } else {
             parseContext.recover(__FILE__, __LINE__);
             $$.intermAggregate = 0;
         }
@@ -2002,36 +2004,36 @@ init_declarator_list
     }
     ;
 
-single_declaration 
+single_declaration
     : fully_specified_type {
         $$.type = $1;
         $$.intermAggregate = 0;
 
         if ( $1.type == EbtStruct &&
-             $1.userDef != 0 && 
-             $1.userDef->isSpecified() == true ) {
-            TIntermNode *intermNode = 
+            $1.userDef != 0 &&
+            $1.userDef->isSpecified() == true ) {
+            TIntermNode *intermNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                
-            processStruct($1.userDef->getStruct(), 
-                          intermNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
 
-            $$.intermAggregate = 
+            processStruct($1.userDef->getStruct(),
+                        intermNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            $$.intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
 
             if ($$.intermAggregate)
-                $$.intermAggregate->setOperator(EOpSpecification); 
+                $$.intermAggregate->setOperator(EOpSpecification);
         }
         $$.range = $1.range;
     }
     | fully_specified_type IDENTIFIER {
         $$.intermAggregate = 0;
         $$.type = $1;
-    
+
         if (parseContext.structQualifierErrorCheck($2.range, $$.type))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         if (parseContext.nonInitConstErrorCheck($2.range, *$2.string, $$.type))
             parseContext.recover(__FILE__, __LINE__);
 
@@ -2043,41 +2045,41 @@ single_declaration
             if (parseContext.nonArrayGeometryVaryingInErrorCheck($2.range, $1, *$2.string))
                 parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         /* Special handling for structs */
         if ( $1.type == EbtStruct  && $1.userDef != 0 && $1.userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                
+
             processStruct($1.userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
             TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-            TIntermNode *declarationNode = 
+            TIntermNode *declarationNode =
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             $$.intermAggregate = specificationAggregate;
 
         } else {
             /* None-struct declarations: just add declaration node */
             TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
             ((TIntermDeclaration*)intermNode)->setFirst(true);
-            $$.intermAggregate = 
+            $$.intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
         }
         $$.range = addRange($1.range, $2.range);
@@ -2091,7 +2093,7 @@ single_declaration
             parseContext.recover(__FILE__, __LINE__);
 
         $$.type = $1;
-        
+
         if (parseContext.arrayTypeErrorCheck($3.range, $1) || parseContext.arrayQualifierErrorCheck($3.range, $1)) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -2099,7 +2101,7 @@ single_declaration
             for (i=0; i<MAX_ARRAYS; i++) {
                 $1.addArray(true, $3.arraySize[i], i);
             }
-            
+
             TVariable* variable;
             if (parseContext.arrayErrorCheck($3.range, *$2.string, $1, variable))
                 parseContext.recover(__FILE__, __LINE__);
@@ -2113,7 +2115,7 @@ single_declaration
 
         /* Additional checks for geometry shaders */
         if (parseContext.language == EShLangGeometry && $1.qualifier == EvqVaryingIn) {
-            
+
             // First, find 'gl_VerticesIn' in symbol table
             int vertexInSize = 0;
             TVariable* variable = NULL;
@@ -2122,11 +2124,11 @@ single_declaration
                 variable = static_cast<TVariable*>(symbol);
                 constUnion* varUnion      = variable->getConstPointer();
                 vertexInSize = variable->getConstPointer()[0].getIConst();
-            
+
                 if ($3.arraySize[0] == 0) {
                     // Use gl_VertexIn for initialization of the array
                     $1.setArray(true, vertexInSize);
-    
+
                     if (parseContext.arrayErrorCheck($3.range, *$2.string, $1, variable))
                         parseContext.recover(__FILE__, __LINE__);
                 } else {
@@ -2140,42 +2142,42 @@ single_declaration
                 parseContext.recover(__FILE__, __LINE__);
             }
         }
- 
+
         /* Special handling for structs */
         if ( $1.type == EbtStruct  && $1.userDef != 0 && $1.userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                
+
             processStruct($1.userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
             TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-            TIntermNode *declarationNode = 
+            TIntermNode *declarationNode =
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             $$.intermAggregate = specificationAggregate;
 
         } else {
             /* None-struct declarations: just add declaration node */
             TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
             intermNode->getAsDeclarationNode()->setFirst(true);
-            $$.intermAggregate = 
-                parseContext.intermediate.makeAggregate(intermNode, 
+            $$.intermAggregate =
+                parseContext.intermediate.makeAggregate(intermNode,
                                                         parseContext.extensionChanged);
             $$.intermAggregate->setRange(addRange($1.range, $3.range));
         }
@@ -2198,21 +2200,21 @@ single_declaration
             if (parseContext.arrayErrorCheck($3.range, *$2.string, $1, variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         /* Special handling for structs */
         if ( $1.type == EbtStruct  && $1.userDef != 0 && $1.userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                
+
             processStruct($1.userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
@@ -2227,9 +2229,9 @@ single_declaration
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             $$.intermAggregate = specificationAggregate;
 
         } else {
@@ -2249,8 +2251,8 @@ single_declaration
                     ((TIntermDeclaration*)decNode)->setFirst(true);
                 }
 
-                $$.intermAggregate = parseContext.intermediate.makeAggregate(decNode, 
-                                                                   parseContext.extensionChanged);
+                $$.intermAggregate = parseContext.intermediate.makeAggregate(decNode,
+                                                                parseContext.extensionChanged);
                 $$.intermAggregate->setRange(addRange($1.range, $6->getRange()));
             } else {
                 parseContext.recover(__FILE__, __LINE__);
@@ -2274,27 +2276,27 @@ single_declaration
             int size;
             if (parseContext.arraySizeErrorCheck($3.range, $4, size))
                 parseContext.recover(__FILE__, __LINE__);
-            
+
             $1.setArray(true, size);
             if (parseContext.arrayErrorCheck($3.range, *$2.string, $1, variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
 
-        
+
         /* Special handling for structs */
         if ( $1.type == EbtStruct  && $1.userDef != 0 && $1.userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                
+
             processStruct($1.userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
@@ -2309,9 +2311,9 @@ single_declaration
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             $$.intermAggregate = specificationAggregate;
 
         } else {
@@ -2341,7 +2343,7 @@ single_declaration
         $$.range = addRange($1.range, $7->getRange());
     }
     | fully_specified_type IDENTIFIER EQUAL initializer {
-        
+
         if (parseContext.structQualifierErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
 
@@ -2357,54 +2359,54 @@ single_declaration
                 /* Struct declarations: add a Specification node to the parse tree */
                 TIntermNode *specificationNode =
                     parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
-                    
+
                 processStruct($1.userDef->getStruct(),
-                              specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                              parseContext);
-                
-                TIntermAggregate *specificationAggregate = 
+                            specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                            parseContext);
+
+                TIntermAggregate *specificationAggregate =
                     parseContext.intermediate.makeAggregate(specificationNode, parseContext.extensionChanged);
-            
+
                 if (specificationAggregate)
                     specificationAggregate->setOperator(EOpSpecification);
 
                 TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-                TIntermNode *declarationNode = 
-                    parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, 
-                                                             intermNode, parseContext.extensionChanged);
+                TIntermNode *declarationNode =
+                    parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym,
+                                                            intermNode, parseContext.extensionChanged);
 
                 addStructInstance(specificationNode->getAsSpecificationNode(),
-                                  declarationNode->getAsDeclarationNode(), 
-                                  parseContext);
-        
+                                declarationNode->getAsDeclarationNode(),
+                                parseContext);
+
                 $$.intermAggregate = specificationAggregate;
 
             } else {
                 /* None-struct declarations: just add declaration node */
                 TSymbol *sym = parseContext.symbolTable.find(*$2.string);
-                TIntermNode *decNode = 
-                    parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, 
-                                                             intermNode, parseContext.extensionChanged);
+                TIntermNode *decNode =
+                    parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym,
+                                                            intermNode, parseContext.extensionChanged);
                 decNode->getAsDeclarationNode()->setFirst(true);
-                $$.intermAggregate = 
+                $$.intermAggregate =
                     parseContext.intermediate.makeAggregate(decNode, parseContext.extensionChanged);
                 $$.intermAggregate->setRange(addRange($1.range, $4->getRange()));
             }
 #if 0
             TSymbol *sym = parseContext.symbolTable.find(*$2.string);
             TIntermNode *decNode;
-            
+
             if (intermNode) {
                 decNode = parseContext.intermediate.addDeclaration($2.range,
-                                                                   (TVariable*) sym,
-                                                                   intermNode);
+                                                                (TVariable*) sym,
+                                                                intermNode);
             } else {
                 decNode = parseContext.intermediate.addDeclaration($2.range,
-                                                                   (TVariable*) sym, 
-                                                                   NULL);
+                                                                (TVariable*) sym,
+                                                                NULL);
             }
             decNode->getAsDeclarationNode()->setFirst(true);
-            
+
             $$.intermAggregate = parseContext.intermediate.makeAggregate(decNode, $2.range);
 #endif
         } else {
@@ -2416,21 +2418,21 @@ single_declaration
     | INVARIANT IDENTIFIER {
         TSymbol *sym = parseContext.symbolTable.find(*$2.string);
         if (sym && sym->isVariable()) {
-            
+
             TVariable *var = static_cast<TVariable*>(sym);
             var->getType().addVaryingModifier(EvmInvariant);
-            
+
             TString *newName = new TString(var->getName());
             TType newType(EbtInvariant);
             TPublicType newPType;
             newPType.setBasic(EbtInvariant, EvqTemporary);
             TVariable *newVar = new TVariable(newName, newType);
 
-            TIntermNode *intermNode = 
-                parseContext.intermediate.addDeclaration($2.range, newVar, NULL, 
-                                                         parseContext.extensionChanged);
+            TIntermNode *intermNode =
+                parseContext.intermediate.addDeclaration($2.range, newVar, NULL,
+                                                        parseContext.extensionChanged);
             ((TIntermDeclaration*)intermNode)->setFirst(true);
-            $$.intermAggregate = 
+            $$.intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
             $$.type = newPType;
         } else {
@@ -2439,7 +2441,7 @@ single_declaration
         }
         $$.range = $2.range;
     }
-    
+
 //
 // Place holder for the pack/unpack languages.
 //
@@ -2454,7 +2456,7 @@ single_declaration
 // Place holder for the pack/unpack languages.
 //
 //%type <interm> buffer_declaration
-//%type <interm.type> buffer_specifier input_or_output buffer_declaration_list 
+//%type <interm.type> buffer_specifier input_or_output buffer_declaration_list
 //buffer_specifier
 //    : input_or_output LEFT_BRACE buffer_declaration_list RIGHT_BRACE {
 //    }
@@ -2465,7 +2467,7 @@ single_declaration
 //        if (parseContext.globalErrorCheck($1.range, parseContext.symbolTable.atGlobalLevel(), "input"))
 //            parseContext.recover(__FILE__, __LINE__);
 //        UNPACK_ONLY("input", $1.range);
-//        $$.qualifier = EvqInput;        
+//        $$.qualifier = EvqInput;
 //    }
 //    | OUTPUT {
 //        if (parseContext.globalErrorCheck($1.range, parseContext.symbolTable.atGlobalLevel(), "output"))
@@ -2527,7 +2529,7 @@ fully_specified_type
             parseContext.error($3.range, "varying modifier syntax error", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         if (parseContext.arraySizeUnspecifiedErrorCheck($3.range, $3)) {
             parseContext.error($3.range, "array syntax error", "", "");
             parseContext.recover(__FILE__, __LINE__);
@@ -2537,7 +2539,7 @@ fully_specified_type
             parseContext.recover(__FILE__, __LINE__);
             $3.setArray(false);
         }
-        
+
         if ($1.qualifier == EvqAttribute){
             if (!parseContext.extensionActiveCheck("GL_EXT_gpu_shader4")) {
                 // GLSL 1.20.8
@@ -2553,23 +2555,23 @@ fully_specified_type
                 }
             }
         }
-        
-        
-#if 0 // OLD     
-	 	/* Promote varying modifier to varyings in case of geometry shaders */
+
+
+#if 0 // OLD
+        /* Promote varying modifier to varyings in case of geometry shaders */
         if (parseContext.language == EShLangGeometry && $1.qualifier == EvqVaryingOut) {
             // Change from in to out if specifyed
             if ($2 == EvqIn) {
                 $1.qualifier = EvqVaryingIn;
             }
         }
-#else	
+#else
         /* GEOMETRY SHADER CHECKS - BEGIN */
         /* Promote varying modifiers to varying if necessary */
 
         // Change from in to out if specified
         if ($1.qualifier == EvqVaryingIn && $2 == EvqOut) {
-			$1.qualifier = EvqVaryingOut;
+            $1.qualifier = EvqVaryingOut;
         }
         if ($1.qualifier == EvqVaryingOut && $2 == EvqIn) {
             $1.qualifier = EvqVaryingIn;
@@ -2577,7 +2579,7 @@ fully_specified_type
 
         /* GEOMETRY SHADER CHECKS - END */
 #endif
-        
+
         if ($1.qualifier == EvqVaryingIn) {
             if (!parseContext.extensionActiveCheck("GL_EXT_gpu_shader4")) {
                 // GLSL 1.20.8
@@ -2612,13 +2614,13 @@ fully_specified_type
             }
         }
 
-        $$ = $3; 
+        $$ = $3;
         $$.qualifier = $1.qualifier;
         $$.varyingModifier = $1.varyingModifier;
         $$.range = addRange($1.range, $3.range);
     }
     ;
-    
+
 varying_geom_modifyer
     : {
         $$ = EvqInOut;
@@ -2637,7 +2639,7 @@ type_qualifier
         $$.setBasic(EbtVoid, EvqConst, EvmNone, $1.range);
         $$.range = $1.range;
     }
-    | ATTRIBUTE { 
+    | ATTRIBUTE {
         VERTEX_ONLY("attribute", $1.range);
         if (parseContext.globalErrorCheck($1.range, parseContext.symbolTable.atGlobalLevel(), "attribute"))
             parseContext.recover(__FILE__, __LINE__);
@@ -2709,7 +2711,7 @@ varying_modifier
             parseContext.error($2.range, "varying flat cannot be used with other qualifiers:", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         $$ |= EvmFlat;
     }
     | varying_modifier NOPERSPECTIVE {
@@ -2720,7 +2722,7 @@ varying_modifier
             parseContext.error($2.range, "varying flat cannot be used with noperspective qualifier:", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         $$ |= EvmNoperspective;
     }
     ;
@@ -2731,7 +2733,7 @@ type_specifier
     }
     | type_specifier_nonarray LEFT_BRACKET RIGHT_BRACKET {
         $$ = $1;
-        
+
         if (parseContext.arrayTypeErrorCheck($2.range, $1)) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -2741,7 +2743,7 @@ type_specifier
     }
     | type_specifier_nonarray LEFT_BRACKET constant_expression RIGHT_BRACKET {
         $$ = $1;
-        
+
         if (parseContext.arrayTypeErrorCheck($2.range, $1)) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -2758,7 +2760,7 @@ type_specifier
 type_specifier_nonarray
     : VOID_TYPE {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
-        $$.setBasic(EbtVoid, qual, EvmNone, $1.range); 
+        $$.setBasic(EbtVoid, qual, EvmNone, $1.range);
         $$.range = $1.range;
     }
     | FLOAT_TYPE {
@@ -2776,11 +2778,11 @@ type_specifier_nonarray
         $$.setBasic(EbtBool, qual, EvmNone, $1.range);
         $$.range = $1.range;
     }
-    | UNSIGNED INT_TYPE { 
+    | UNSIGNED INT_TYPE {
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
-        $$.setBasic(EbtUInt, qual, EvmNone, $1.range); 
+        $$.setBasic(EbtUInt, qual, EvmNone, $1.range);
         $$.range = $1.range;
     }
     | VEC2 {
@@ -2862,20 +2864,20 @@ type_specifier_nonarray
         $$.range = $1.range;
     }
     | MATRIX2 {
-        FRAG_VERT_GEOM_ONLY("mat2", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat2", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(2, 2);
         $$.range = $1.range;
     }
-    | MATRIX3 { 
-        FRAG_VERT_GEOM_ONLY("mat3", $1.range); 
+    | MATRIX3 {
+        FRAG_VERT_GEOM_ONLY("mat3", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(3, 3);
         $$.range = $1.range;
     }
-    | MATRIX4 { 
+    | MATRIX4 {
         FRAG_VERT_GEOM_ONLY("mat4", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
@@ -2883,63 +2885,63 @@ type_specifier_nonarray
         $$.range = $1.range;
     }
     | MATRIX2X2 {
-        FRAG_VERT_GEOM_ONLY("mat2x2", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat2x2", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(2, 2);
         $$.range = $1.range;
     }
     | MATRIX2X3 {
-        FRAG_VERT_GEOM_ONLY("mat2x3", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat2x3", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(2, 3);
         $$.range = $1.range;
     }
     | MATRIX2X4 {
-        FRAG_VERT_GEOM_ONLY("mat2x4", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat2x4", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(2, 4);
         $$.range = $1.range;
     }
     | MATRIX3X2 {
-        FRAG_VERT_GEOM_ONLY("mat3x2", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat3x2", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(3, 2);
         $$.range = $1.range;
     }
     | MATRIX3X3 {
-        FRAG_VERT_GEOM_ONLY("mat3x3", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat3x3", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(3, 3);
         $$.range = $1.range;
     }
     | MATRIX3X4 {
-        FRAG_VERT_GEOM_ONLY("mat3x4", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat3x4", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(3, 4);
         $$.range = $1.range;
     }
     | MATRIX4X2 {
-        FRAG_VERT_GEOM_ONLY("mat4x2", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat4x2", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(4, 2);
         $$.range = $1.range;
     }
     | MATRIX4X3 {
-        FRAG_VERT_GEOM_ONLY("mat4x3", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat4x3", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(4, 3);
         $$.range = $1.range;
     }
     | MATRIX4X4 {
-        FRAG_VERT_GEOM_ONLY("mat4x4", $1.range); 
+        FRAG_VERT_GEOM_ONLY("mat4x4", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtFloat, qual, EvmNone, $1.range);
         $$.setMatrix(4, 4);
@@ -2950,7 +2952,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler1D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLER1D {
         FRAG_VERT_GEOM_ONLY("isampler1D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -2959,7 +2961,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler1D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLER1D {
         FRAG_VERT_GEOM_ONLY("usampler1D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -2968,13 +2970,13 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler1D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER2D {
         FRAG_VERT_GEOM_ONLY("sampler2D", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler2D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLER2D {
         FRAG_VERT_GEOM_ONLY("isampler2D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -2983,7 +2985,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler2D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLER2D {
         FRAG_VERT_GEOM_ONLY("usampler2D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -2992,13 +2994,13 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler2D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER3D {
         FRAG_VERT_GEOM_ONLY("sampler3D", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler3D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLER3D {
         FRAG_VERT_GEOM_ONLY("isampler3D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3007,7 +3009,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler3D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLER3D {
         FRAG_VERT_GEOM_ONLY("usampler3D", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3016,13 +3018,13 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler3D, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLERCUBE {
         FRAG_VERT_GEOM_ONLY("samplerCube", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSamplerCube, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLERCUBE {
         FRAG_VERT_GEOM_ONLY("isamplerCube", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3031,7 +3033,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISamplerCube, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLERCUBE {
         FRAG_VERT_GEOM_ONLY("usamplerCube", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3040,26 +3042,26 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSamplerCube, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER1DSHADOW {
         FRAG_VERT_GEOM_ONLY("sampler1DShadow", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler1DShadow, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER2DSHADOW {
         FRAG_VERT_GEOM_ONLY("sampler2DShadow", $1.range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler2DShadow, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER2DRECTARB {
         // ARB_texture_rectangle
 
         FRAG_VERT_GEOM_ONLY("sampler2DRectARB", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_ARB_texture_rectangle"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler2DRect, qual, EvmNone, $1.range);
         $$.range = $1.range;
@@ -3070,7 +3072,7 @@ type_specifier_nonarray
         FRAG_VERT_GEOM_ONLY("isampler2DRectARB", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler2DRect, qual, EvmNone, $1.range);
         $$.range = $1.range;
@@ -3081,7 +3083,7 @@ type_specifier_nonarray
         FRAG_VERT_GEOM_ONLY("usampler2DRectARB", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler2DRect, qual, EvmNone, $1.range);
         $$.range = $1.range;
@@ -3105,7 +3107,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler1DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLER1DARRAY {
         FRAG_VERT_GEOM_ONLY("isampler1DArray", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3114,7 +3116,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler1DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLER1DARRAY {
         FRAG_VERT_GEOM_ONLY("usampler1DArray", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3123,7 +3125,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler1DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER2DARRAY {
         FRAG_VERT_GEOM_ONLY("sampler2DArray", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3132,7 +3134,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler2DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLER2DARRAY {
         FRAG_VERT_GEOM_ONLY("isampler2DArray", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3141,7 +3143,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISampler2DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLER2DARRAY {
         FRAG_VERT_GEOM_ONLY("usampler2DArray", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3150,7 +3152,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSampler2DArray, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLERBUFFER {
         FRAG_VERT_GEOM_ONLY("samplerBuffer", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3159,7 +3161,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSamplerBuffer, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | ISAMPLERBUFFER {
         FRAG_VERT_GEOM_ONLY("isamplerBuffer", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3168,7 +3170,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtISamplerBuffer, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | USAMPLERBUFFER {
         FRAG_VERT_GEOM_ONLY("usamplerBuffer", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3177,7 +3179,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtUSamplerBuffer, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER1DARRAYSHADOW {
         FRAG_VERT_GEOM_ONLY("sampler1DArrayShadow", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3186,7 +3188,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler1DArrayShadow, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLER2DARRAYSHADOW {
         FRAG_VERT_GEOM_ONLY("sampler2DArrayShadow", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3195,7 +3197,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSampler2DArrayShadow, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | SAMPLERCUBESHADOW {
         FRAG_VERT_GEOM_ONLY("samplerCubeShadow", $1.range);
         if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
@@ -3204,7 +3206,7 @@ type_specifier_nonarray
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         $$.setBasic(EbtSamplerCubeShadow, qual, EvmNone, $1.range);
         $$.range = $1.range;
-    } 
+    }
     | struct_specifier {
         FRAG_VERT_GEOM_ONLY("struct", $1.range);
         $$ = $1;
@@ -3214,9 +3216,9 @@ type_specifier_nonarray
         }
         $$.range = $1.range;
     }
-    | TYPE_NAME {     
+    | TYPE_NAME {
         //
-        // This is for user defined type names.  The lexical phase looked up the 
+        // This is for user defined type names.  The lexical phase looked up the
         // type.
         //
         TType& structure = static_cast<TVariable*>($1.symbol)->getType();
@@ -3232,7 +3234,7 @@ type_specifier_nonarray
 
 struct_specifier
     : STRUCT IDENTIFIER LEFT_BRACE struct_declaration_list RIGHT_BRACE {
-        
+
         TType* structure = new TType($4, *$2.string);
         TVariable* userTypeDef = new TVariable($2.string, *structure, true);
         if (! parseContext.symbolTable.insert(*userTypeDef)) {
@@ -3246,13 +3248,13 @@ struct_specifier
     }
     | STRUCT LEFT_BRACE struct_declaration_list RIGHT_BRACE {
         TType* structure = new TType($3, TString(""));
-        
+
         $$.setBasic(EbtStruct, EvqTemporary, EvmNone, $1.range);
         $$.userDef = structure;
         $$.range = addRange($1.range, $4.range);
     }
     ;
-    
+
 struct_declaration_list
     : struct_declaration {
         $$ = $1;
@@ -3270,7 +3272,7 @@ struct_declaration_list
         }
     }
     ;
-    
+
 struct_declaration
     : type_specifier struct_declarator_list SEMICOLON {
         $$ = $2;
@@ -3300,16 +3302,16 @@ struct_declaration
                 (*$$)[i].type->setTypeName($1.userDef->getTypeName());
 
             if ( i == 0 &&
-                 $1.type == EbtStruct &&
-                 $1.userDef != 0 && 
-                 $1.userDef->isSpecified() == true ) {
+                $1.type == EbtStruct &&
+                $1.userDef != 0 &&
+                $1.userDef->isSpecified() == true ) {
 
                     (*$$)[i].type->setSpecified(true);
             }
         }
     }
     ;
-        
+
 struct_declarator_list
     : struct_declarator {
         $$ = NewPoolTTypeList();
@@ -3319,7 +3321,7 @@ struct_declarator_list
         $$->push_back($3);
     }
     ;
-    
+
 struct_declarator
     : IDENTIFIER {
         $$.type = new TType(EbtVoid);
@@ -3329,7 +3331,7 @@ struct_declarator
     | IDENTIFIER LEFT_BRACKET constant_expression RIGHT_BRACKET {
         $$.type = new TType(EbtVoid);
         $$.type->setFieldName(*$1.string);
-        
+
         int size;
         if (parseContext.arraySizeErrorCheck($2.range, $3, size))
             parseContext.recover(__FILE__, __LINE__);
@@ -3342,7 +3344,7 @@ initializer
     : assignment_expression { $$ = $1; }
     ;
 
-declaration_statement 
+declaration_statement
     : declaration { $$ = $1; }
     ;
 
@@ -3353,7 +3355,7 @@ statement
 
 // Grammar Note:  No labeled statements; 'goto' is not supported.
 
-simple_statement 
+simple_statement
     : declaration_statement { $$ = $1; }
     | expression_statement  { $$ = $1; }
     | selection_statement   { $$ = $1; }
@@ -3364,31 +3366,31 @@ simple_statement
     ;
 
 compound_statement
-    : LEFT_BRACE RIGHT_BRACE { 
+    : LEFT_BRACE RIGHT_BRACE {
         $$ = 0;
     }
     | LEFT_BRACE { parseContext.symbolTable.push(); } statement_list { parseContext.symbolTable.pop(); } RIGHT_BRACE {
-        if ($3 != 0)            
-            $3->setOperator(EOpSequence); 
+        if ($3 != 0)
+            $3->setOperator(EOpSequence);
         $$ = $3;
         if ($$) $$->setRange(addRange($1.range, $5.range));
     }
     ;
 
-statement_no_new_scope 
+statement_no_new_scope
     : compound_statement_no_new_scope { $$ = $1; }
     | simple_statement                { $$ = $1; }
     ;
 
-compound_statement_no_new_scope 
-    // Statement that doesn't create a new scope, for selection_statement, iteration_statement 
-    : LEFT_BRACE RIGHT_BRACE { 
-        $$ = 0; 
+compound_statement_no_new_scope
+    // Statement that doesn't create a new scope, for selection_statement, iteration_statement
+    : LEFT_BRACE RIGHT_BRACE {
+        $$ = 0;
     }
-    | LEFT_BRACE statement_list RIGHT_BRACE { 
+    | LEFT_BRACE statement_list RIGHT_BRACE {
         if ($2)
-            $2->setOperator(EOpSequence); 
-        $$ = $2; 
+            $2->setOperator(EOpSequence);
+        $$ = $2;
         if ($$) $$->setRange(addRange($1.range, $3.range));
     }
     ;
@@ -3398,7 +3400,7 @@ statement_list
         $$ = parseContext.intermediate.makeAggregate($1, parseContext.extensionChanged);
         if ($$ && $1) $$->setRange($1->getRange());
     }
-    | statement_list statement { 
+    | statement_list statement {
         $$ = parseContext.intermediate.growAggregate($1, $2, parseContext.extensionChanged);
         if ($$ && $1 && $2) $$->setRange(addRange($1->getRange(), $2->getRange()));
     }
@@ -3410,7 +3412,7 @@ expression_statement
     ;
 
 selection_statement
-    : IF LEFT_PAREN expression RIGHT_PAREN selection_rest_statement { 
+    : IF LEFT_PAREN expression RIGHT_PAREN selection_rest_statement {
         if (parseContext.boolErrorCheck($1.range, $3))
             parseContext.recover(__FILE__, __LINE__);
         $$ = parseContext.intermediate.addSelection($3, $5, $1.range, parseContext.extensionChanged);
@@ -3418,12 +3420,12 @@ selection_statement
     }
     ;
 
-selection_rest_statement 
+selection_rest_statement
     : statement ELSE statement {
         $$.node1 = $1;
         $$.node2 = $3;
     }
-    | statement { 
+    | statement {
         $$.node1 = $1;
         $$.node2 = 0;
     }
@@ -3432,11 +3434,11 @@ selection_rest_statement
 // Grammar Note: labeled statements for SWITCH only; 'goto' is not supported
 
 condition
-    // In 1996 c++ draft, conditions can include single declarations 
+    // In 1996 c++ draft, conditions can include single declarations
     : expression {
         $$ = $1;
         if (parseContext.boolErrorCheck($1->getRange(), $1))
-            parseContext.recover(__FILE__, __LINE__);          
+            parseContext.recover(__FILE__, __LINE__);
         if ($$ && $1) $$->setRange($1->getRange());
     }
     | fully_specified_type IDENTIFIER EQUAL initializer {
@@ -3445,7 +3447,7 @@ condition
             parseContext.recover(__FILE__, __LINE__);
         if (parseContext.boolErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         if (!parseContext.executeInitializer($2.range, *$2.string, $1, $4, intermNode))
             $$ = $4;
         else {
@@ -3487,7 +3489,7 @@ case_label
     ;
 
 iteration_statement
-    : WHILE LEFT_PAREN { parseContext.symbolTable.push(); ++parseContext.loopNestingLevel; } condition RIGHT_PAREN statement_no_new_scope { 
+    : WHILE LEFT_PAREN { parseContext.symbolTable.push(); ++parseContext.loopNestingLevel; } condition RIGHT_PAREN statement_no_new_scope {
         parseContext.symbolTable.pop();
         $$ = parseContext.intermediate.addLoop($6, NULL, $4, 0, LOOP_WHILE, $1.range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
@@ -3496,7 +3498,7 @@ iteration_statement
     | DO { ++parseContext.loopNestingLevel; } statement WHILE LEFT_PAREN expression RIGHT_PAREN SEMICOLON {
         if (parseContext.boolErrorCheck($8.range, $6))
             parseContext.recover(__FILE__, __LINE__);
-                    
+
         $$ = parseContext.intermediate.addLoop($3, NULL, $6, 0, LOOP_DO, $4.range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
         if ($$) $$->setRange(addRange($4.range, $7.range));
@@ -3511,33 +3513,33 @@ iteration_statement
                 $1.range);
         $$->getAsAggregate()->setOperator(EOpSequence);
         */
-        
+
         $$ = parseContext.intermediate.addLoop($7, $4, reinterpret_cast<TIntermTyped*>($5.node1), reinterpret_cast<TIntermTyped*>($5.node2), LOOP_FOR, $1.range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
         if ($$) $$->setRange(addRange($1.range, $6.range));
     }
     ;
 
-for_init_statement 
+for_init_statement
     : expression_statement {
-        $$ = $1; 
-    } 
+        $$ = $1;
+    }
     | declaration_statement {
         $$ = $1;
     }
     ;
 
-conditionopt 
-    : condition { 
-        $$ = $1; 
+conditionopt
+    : condition {
+        $$ = $1;
     }
-    | /* May be null */ { 
-        $$ = 0; 
+    | /* May be null */ {
+        $$ = 0;
     }
     ;
 
-for_rest_statement 
-    : conditionopt SEMICOLON { 
+for_rest_statement
+    : conditionopt SEMICOLON {
         $$.node1 = $1;
         $$.node2 = 0;
     }
@@ -3552,7 +3554,7 @@ jump_statement
         if (parseContext.loopNestingLevel <= 0) {
             parseContext.error($1.range, "continue statement only allowed in loops", "", "");
             parseContext.recover(__FILE__, __LINE__);
-        }        
+        }
         $$ = parseContext.intermediate.addBranch(EOpContinue, $1.range, parseContext.extensionChanged);
         if ($$) $$->setRange(addRange($1.range, $2.range));
     }
@@ -3561,7 +3563,7 @@ jump_statement
             parseContext.switchNestingLevel <= 0) {
             parseContext.error($1.range, "break statement only allowed in loops and switches", "", "");
             parseContext.recover(__FILE__, __LINE__);
-        }        
+        }
         $$ = parseContext.intermediate.addBranch(EOpBreak, $1.range, parseContext.extensionChanged);
         if ($$) $$->setRange(addRange($1.range, $2.range));
     }
@@ -3573,7 +3575,7 @@ jump_statement
         }
         if ($$) $$->setRange(addRange($1.range, $2.range));
     }
-    | RETURN expression SEMICOLON {        
+    | RETURN expression SEMICOLON {
         $$ = parseContext.intermediate.addBranch(EOpReturn, $2, $1.range, parseContext.extensionChanged);
         parseContext.functionReturnsValue = true;
         if (parseContext.currentFunctionType->getBasicType() == EbtVoid) {
@@ -3589,15 +3591,15 @@ jump_statement
         FRAG_ONLY("discard", $1.range);
         $$ = parseContext.intermediate.addBranch(EOpKill, $1.range, parseContext.extensionChanged);
         if ($$) $$->setRange(addRange($1.range, $2.range));
-    }        
+    }
     ;
 
 // Grammar Note:  No 'goto'.  Gotos are not supported.
 
 translation_unit
-    : external_declaration { 
+    : external_declaration {
         $$ = $1;
-        parseContext.treeRoot = $$; 
+        parseContext.treeRoot = $$;
     }
     | translation_unit external_declaration {
         $$ = parseContext.intermediate.growAggregate($1, $2, parseContext.extensionChanged);
@@ -3607,11 +3609,11 @@ translation_unit
     ;
 
 external_declaration
-    : function_definition { 
-        $$ = $1; 
+    : function_definition {
+        $$ = $1;
     }
-    | declaration { 
-        $$ = $1; 
+    | declaration {
+        $$ = $1;
     }
     ;
 
@@ -3632,7 +3634,7 @@ function_definition
             parseContext.recover(__FILE__, __LINE__);
         }
         prevDec->setDefined();
-        
+
         //
         // Raise error message if main function takes any parameters or return anything other than void
         //
@@ -3644,23 +3646,23 @@ function_definition
             if (function.getReturnType().getBasicType() != EbtVoid) {
                 parseContext.error($1.range, "", function.getReturnType().getBasicString(), "main function cannot return a value");
                 parseContext.recover(__FILE__, __LINE__);
-            }            
+            }
         }
-   
+
         //
         // New symbol table scope for body of function plus its arguments
         //
         parseContext.symbolTable.push();
-        
+
         //
         // Remember the return type for later checking for RETURN statements.
         //
         parseContext.currentFunctionType = &(prevDec->getReturnType());
         parseContext.functionReturnsValue = false;
-        
-        // 
+
+        //
         // Insert parameters into the symbol table.
-        // If the parameter has no name, it's not an error, just don't insert it 
+        // If the parameter has no name, it's not an error, just don't insert it
         // (could be used for unused args).
         //
         // Also, accumulate the list of parameters into the HIL, so lower level code
@@ -3671,7 +3673,7 @@ function_definition
             TParameter& param = function[i];
             if (param.name != 0) {
                 TVariable *variable = new TVariable(param.name, *param.type);
-                // 
+                //
                 // Insert the parameters with name in the symbol table.
                 //
                 if (! parseContext.symbolTable.insert(*variable)) {
@@ -3683,22 +3685,22 @@ function_definition
                 // Transfer ownership of name pointer to symbol table.
                 //
                 param.name = 0;
-                
+
                 //
                 // Add the parameter to the HIL
-                //                
+                //
                 paramNodes = parseContext.intermediate.growAggregate(
-                        paramNodes, 
+                        paramNodes,
                         parseContext.intermediate.addFuncParam(variable->getUniqueId(),
-                                                               variable->getName(),
-                                                               variable->getType(), $1.range,
-                                                               parseContext.extensionChanged),
+                                                            variable->getName(),
+                                                            variable->getType(), $1.range,
+                                                            parseContext.extensionChanged),
                         parseContext.extensionChanged);
             } else {
                 paramNodes = parseContext.intermediate.growAggregate(
-                        paramNodes, 
+                        paramNodes,
                         parseContext.intermediate.addFuncParam(0, "", *param.type, $1.range,
-                                                               parseContext.extensionChanged),
+                                                            parseContext.extensionChanged),
                         parseContext.extensionChanged);
             }
         }
@@ -3714,7 +3716,7 @@ function_definition
             parseContext.recover(__FILE__, __LINE__);
         }
         parseContext.symbolTable.pop();
-        
+
 
         TIntermNode *body = NULL;
         // Add dummy node at the end of 'main' body for debugging the last statement
@@ -3746,13 +3748,13 @@ function_definition
                 body->getAsAggregate()->setOperator(EOpSequence);
             }
         }
-        
+
         $$ = parseContext.intermediate.growAggregate($1.intermAggregate, body, parseContext.extensionChanged);
         parseContext.intermediate.setAggregateOperator($$, EOpFunction, $1.range, parseContext.extensionChanged);
         $$->getAsAggregate()->setName($1.function->getMangledName().c_str());
         $$->getAsAggregate()->setType($1.function->getReturnType());
-        
-        // store the pragma information for debug and optimize and other vendor specific 
+
+        // store the pragma information for debug and optimize and other vendor specific
         // information. This information can be queried from the parse tree
         $$->getAsAggregate()->setOptimize(parseContext.contextPragma.optimize);
         $$->getAsAggregate()->setDebug(parseContext.contextPragma.debug);

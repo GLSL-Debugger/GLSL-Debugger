@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -53,7 +53,7 @@ public:
     WatchVector(QWidget *parent = 0);
     void updateView(bool force);
     void attachFpData(PixelBox *f, QString name);
-	void setWorkspace(QWorkspace *ws);
+    void setWorkspace(QWorkspace *ws);
 
 public slots:
     void on_cbRed_activated(int);
@@ -62,44 +62,44 @@ public slots:
     void on_cbMapRed_activated(int);
     void on_cbMapGreen_activated(int);
     void on_cbMapBlue_activated(int);
-	
-	void on_tbMinRed_clicked();
-	void on_tbMaxRed_clicked();
-	void on_tbMinGreen_clicked();
-	void on_tbMaxGreen_clicked();
-	void on_tbMinBlue_clicked();
-	void on_tbMaxBlue_clicked();
 
-	void on_dsMinRed_valueChanged(double d);
-	void on_dsMaxRed_valueChanged(double d);
-	void on_dsMinGreen_valueChanged(double d);
-	void on_dsMaxGreen_valueChanged(double d);
-	void on_dsMinBlue_valueChanged(double d);
-	void on_dsMaxBlue_valueChanged(double d);
-	
-	void on_tbSwitchRed_clicked();
-	void on_tbSwitchGreen_clicked();
-	void on_tbSwitchBlue_clicked();
+    void on_tbMinRed_clicked();
+    void on_tbMaxRed_clicked();
+    void on_tbMinGreen_clicked();
+    void on_tbMaxGreen_clicked();
+    void on_tbMinBlue_clicked();
+    void on_tbMaxBlue_clicked();
+
+    void on_dsMinRed_valueChanged(double d);
+    void on_dsMaxRed_valueChanged(double d);
+    void on_dsMinGreen_valueChanged(double d);
+    void on_dsMaxGreen_valueChanged(double d);
+    void on_dsMinBlue_valueChanged(double d);
+    void on_dsMaxBlue_valueChanged(double d);
+
+    void on_tbSwitchRed_clicked();
+    void on_tbSwitchGreen_clicked();
+    void on_tbSwitchBlue_clicked();
 
     void on_tbSaveImage_clicked();
-	
+
     void updateData();
     void detachData();
     void closeView();
 
-	void setZoomMode();
-	void setPickMode();
+    void setZoomMode();
+    void setPickMode();
     void setMinMaxMode();
     void updateAllMinMax();
 
 signals:
-	void mouseOverValuesChanged(int x, int y, const bool *active, const QVariant *values);
-	void selectionChanged(int x, int y);
-	
-private slots:	
-	void setMousePos(int x, int y);
-	void newSelection(int x, int y);
-	void newViewCenter(int x, int y);
+    void mouseOverValuesChanged(int x, int y, const bool *active, const QVariant *values);
+    void selectionChanged(int x, int y);
+
+private slots:
+    void setMousePos(int x, int y);
+    void newSelection(int x, int y);
+    void newViewCenter(int x, int y);
     void onMinMaxAreaChanged(void);
 
 private:
@@ -109,7 +109,7 @@ private:
     void delMappingOptions(int idx);
     int  getFirstFreeMapping(void);
     int  getIndexFromPixelBox(PixelBox *f);
-	void getActiveChannels(PixelBox *channels[3]);
+    void getActiveChannels(PixelBox *channels[3]);
     QImage* drawNewImage(bool useAlpha);
 
     PixelBox    *m_pData[MAX_ATTACHMENTS];
@@ -117,7 +117,7 @@ private:
 
     QScrollArea *m_qScrollArea;
     ImageView   *m_pImageView;
-	int          m_viewCenter[2];
+    int          m_viewCenter[2];
     bool         m_bNeedsUpdate;
     int          m_nActiveMappings;
 };

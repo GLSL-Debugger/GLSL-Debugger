@@ -35,9 +35,13 @@
 #ifndef _COMMON_INCLUDED_
 #define _COMMON_INCLUDED_
 
+#ifndef UNUSED_ARG
+    #define UNUSED_ARG(x) (void) x;
+#endif
+
 #ifdef _WIN32
     #include <basetsd.h>
-	#include <cstdlib>
+    #include <cstdlib>
 #elif defined (solaris)
     #include <sys/int_types.h>
     #define UINT_PTR uintptr_t
@@ -54,26 +58,26 @@
 #endif
 
 #ifdef __GNUC__
-  #if __GNUC__ < 3
+#if __GNUC__ < 3
     #include <hash_map.h>
     namespace Sgi { using ::hash_map; }; // inherit globals
-  #elif __GNUC__ < 4
+#elif __GNUC__ < 4
     #include <ext/hash_map>
     #if __GNUC_MINOR__ == 0
-      namespace Sgi = std;               // GCC 3.0
+    namespace Sgi = std;               // GCC 3.0
     #else
-      namespace Sgi = ::__gnu_cxx;       // GCC 3.1 and later
+    namespace Sgi = ::__gnu_cxx;       // GCC 3.1 and later
     #endif
-  #else
+#else
     #ifdef GLSLDB_OSX
-      #include <tr1/unordered_map> 
+    #include <tr1/unordered_map>
     #else
-      #include <unordered_map>
-    #endif 
+    #include <unordered_map>
+    #endif
     namespace Sgi = std;
-  #endif
+#endif
 #else      // ...  there are other compilers, right?
-  namespace Sgi = std;
+namespace Sgi = std;
 #endif
 
 //
@@ -84,7 +88,7 @@
 //
 //??#pragma warning(push, 3)
 
-	#include <set>
+    #include <set>
     #include <vector>
     #include <map>
     #include <list>
@@ -129,7 +133,7 @@ inline TSourceRange addRange(TSourceRange a, TSourceRange b)
     return range;
 }
 
-	#include <assert.h>
+    #include <assert.h>
 
 #include "PoolAlloc.h"
 
@@ -157,8 +161,8 @@ typedef pool_allocator<char> TStringAllocator;
 typedef std::basic_string <char, std::char_traits<char>, TStringAllocator > TString;
 inline TString* NewPoolTString(const char* s)
 {
-	void* memory = GlobalPoolAllocator.allocate(sizeof(TString));
-	return new(memory) TString(s);
+    void* memory = GlobalPoolAllocator.allocate(sizeof(TString));
+    return new(memory) TString(s);
 }
 
 //
@@ -186,7 +190,7 @@ template <class T, class CMP> class TStlSet : public std::set<T, CMP, pool_alloc
 };
 
 
-template <class K, class D, class CMP = std::less<K> > 
+template <class K, class D, class CMP = std::less<K> >
 class TMap : public TBaseMap<K, D, CMP, pool_allocator<std::pair<const K, D> > > {
 public:
     typedef pool_allocator<std::pair <const K, D> > tAllocator;
@@ -214,7 +218,7 @@ template <class T> T Max(const T a, const T b) { return a > b ? a : b; }
 inline const TString String(const int i, const int base = 10)
 {
     char text[16];     // 32 bit ints are at most 10 digits in base 10
-    
+
 #ifdef _WIN32
     _itoa(i, text, base);
 #else
@@ -232,8 +236,8 @@ __inline TPersistString FormatSourceRange(const TSourceRange range)
 {
     char locText[128];
 
-    sprintf(locText, "%4d:%3d - %4d:%3d", range.left.line, range.left.colum, 
-                                           range.right.line, range.right.colum);
+    sprintf(locText, "%4d:%3d - %4d:%3d", range.left.line, range.left.colum,
+                                        range.right.line, range.right.colum);
     /*
     int string = loc >> SourceLocStringShift;
     int line = loc & SourceLocLineMask;

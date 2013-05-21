@@ -139,10 +139,10 @@ TIntermTyped* TIntermediate::addBinaryMath(TOperator op, TIntermTyped* left, TIn
     case EOpMul:
         if (left->getType().getBasicType() == EbtStruct || left->getType().getBasicType() == EbtBool)
             return 0;
-    default: break; 
+    default: break;
     }
 
-    // 
+    //
     // First try converting the children to compatible types.
     //
     if (!(left->getType().getStruct() && right->getType().getStruct())) {
@@ -195,7 +195,7 @@ TIntermTyped* TIntermediate::addBinaryMath(TOperator op, TIntermTyped* left, TIn
 
     TIntermTyped* typedReturnNode = 0;
     if ( leftTempConstant && rightTempConstant) {
-    
+
         typedReturnNode = leftTempConstant->fold(node->getOp(), rightTempConstant, infoSink);
 
         if (typedReturnNode) {
@@ -234,7 +234,7 @@ TIntermTyped* TIntermediate::addAssign(TOperator op, TIntermTyped* left, TInterm
 
     node->setLeft(left);
     node->setRight(child);
-    
+
     if (! node->promote(infoSink)) {
         dbgPrint(DBGLVL_INFO, "((((TIntermediate::addAssign promote failed))))\n");
         return 0;
@@ -284,7 +284,7 @@ TIntermDeclaration::TIntermDeclaration(TVariable* v, TIntermNode* init)
 // adds our own variable node to the parse tree
 //
 
-TIntermNode* TIntermediate::addDeclaration(TSourceRange range, 
+TIntermNode* TIntermediate::addDeclaration(TSourceRange range,
                                            TVariable* variable,
                                            TIntermNode* init,
                                            TExtensionList &extMap)
@@ -294,11 +294,11 @@ TIntermNode* TIntermediate::addDeclaration(TSourceRange range,
     node = new TIntermDeclaration(variable, init);
     node->setRange(range);
     node->moveCPPExtensionChanges(extMap);
-    
+
     if (init && init->hasSideEffects()) {
         node->setHasSideEffects();
     }
-    
+
     return node;
 }
 
@@ -311,7 +311,7 @@ TIntermNode* TIntermediate::addFuncDeclaration(TSourceRange range, TFunction* fu
 {
     TIntermFuncDeclaration* node;
 
-    // make a copy of the function, as otherwise this would be dependent on the 
+    // make a copy of the function, as otherwise this would be dependent on the
     // symbol table
     TStructureMap map;
     TFunction *newFunc = func->clone(map);
@@ -402,7 +402,7 @@ TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, 
             return 0;
     default: break;
     }
-    
+
     //
     // Do we need to promote the operand?
     //
@@ -419,10 +419,10 @@ TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, 
 
     if (newType != EbtVoid) {
         child = addConversion(op, TType(newType, EvqTemporary, EvmNone,
-                                                               child->getNominalSize(), 
+                                                               child->getNominalSize(),
                                                                child->getMatrixSize(0),
                                                                child->getMatrixSize(1),
-                                                               child->isMatrix(), 
+                                                               child->isMatrix(),
                                                                child->isArray()),
                               child, extMap);
         if (child == 0)
@@ -440,7 +440,7 @@ TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, 
             return child;
         default: break;
     }
-    
+
     TIntermConstantUnion *childTempConstant = 0;
     if (child->getAsConstantUnion()) {
         childTempConstant = child->getAsConstantUnion();
@@ -454,7 +454,7 @@ TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, 
         range = child->getRange();
     node->setRange(range);
     node->setOperand(child);
-    
+
     switch(op) {
         case EOpPostIncrement:
         case EOpPreIncrement:
@@ -466,19 +466,19 @@ TIntermTyped* TIntermediate::addUnaryMath(TOperator op, TIntermNode* childNode, 
         default:
             break;
     }
-    
+
     if (! node->promote(infoSink)) {
         return 0;
     }
 
     if (childTempConstant)  {
         TIntermTyped* newChild = childTempConstant->fold(op, 0, infoSink);
-        
+
         if (newChild) {
             newChild->moveCPPExtensionChanges(extMap);
             return newChild;
         }
-    } 
+    }
 
     node->moveCPPExtensionChanges(extMap);
     return node;
@@ -501,7 +501,7 @@ TIntermAggregate* TIntermediate::setAggregateOperator(TIntermNode* node, TOperat
     //
     // Make sure we have an aggregate.  If not turn it into one.
     //
-    
+
     if (node) {
         aggNode = node->getAsAggregate();
         if (aggNode == 0 || aggNode->getOp() != EOpNull) {
@@ -578,7 +578,7 @@ TIntermConstantUnion* TIntermediate::foldAggregate(TIntermAggregate* node, TOper
     if (!node) {
         return NULL;
     }
-    
+
     // Check if all children are constant and have constant union attached
     TIntermSequence sequence = node->getSequence();
     TIntermSequence::iterator sit;
@@ -818,15 +818,15 @@ TIntermConstantUnion* TIntermediate::foldAggregate(TIntermAggregate* node, TOper
                 for (i=0; i<type.getObjectSize(); i++) {
                     switch (type.getBasicType()) {
                         case EbtInt:
-                            foldConstant[i].setIConst(CLAMP(ua[ca].getIConst(), 
+                            foldConstant[i].setIConst(CLAMP(ua[ca].getIConst(),
                                                             ub[cb].getIConst(), uc[cc].getIConst()));
                             break;
                         case EbtUInt:
-                            foldConstant[i].setUIConst(CLAMP(ua[ca].getUIConst(), 
+                            foldConstant[i].setUIConst(CLAMP(ua[ca].getUIConst(),
                                                              ub[cb].getUIConst(), uc[cc].getUIConst()));
                             break;
                         case EbtFloat:
-                            foldConstant[i].setFConst(CLAMP(ua[ca].getFConst(), 
+                            foldConstant[i].setFConst(CLAMP(ua[ca].getFConst(),
                                                             ub[cb].getFConst(), uc[cc].getFConst()));
                             break;
                         default:
@@ -848,7 +848,7 @@ TIntermConstantUnion* TIntermediate::foldAggregate(TIntermAggregate* node, TOper
         default:
             return NULL;
     }
-    
+
     return addConstantUnion(foldConstant, type, range, extMap);
 }
 
@@ -921,7 +921,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
         return 0;
 
     TBasicType promoteTo;
-    
+
     switch (op) {
     //
     // Explicit conversions
@@ -954,7 +954,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
             promoteTo = EbtInt;
             break;
         }
-        
+
         if (type.getBasicType() != node->getType().getBasicType())
             return 0;
         //
@@ -963,7 +963,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
         //
         return node;
     }
-    
+
     if (node->getAsConstantUnion()) {
         return (promoteConstantUnion(promoteTo, node->getAsConstantUnion(), extMap));
     } else {
@@ -979,7 +979,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
             case EbtInt:   newOp = EOpConvIntToFloat;  break;
             case EbtUInt:  newOp = EOpConvUIntToFloat; break;
             case EbtBool:  newOp = EOpConvBoolToFloat; break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Bad promotion node", node->getRange());
                 return 0;
             }
@@ -989,7 +989,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
             case EbtInt:   newOp = EOpConvIntToBool;   break;
             case EbtUInt:  newOp = EOpConvUIntToBool;  break;
             case EbtFloat: newOp = EOpConvFloatToBool; break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Bad promotion node", node->getRange());
                 return 0;
             }
@@ -999,7 +999,7 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
             case EbtBool:   newOp = EOpConvBoolToInt;  break;
             case EbtUInt:   newOp = EOpConvUIntToInt;  break;
             case EbtFloat:  newOp = EOpConvFloatToInt; break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Bad promotion node", node->getRange());
                 return 0;
             }
@@ -1009,12 +1009,12 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
                 case EbtInt:   newOp = EOpConvIntToUInt;   break;
                 case EbtBool:   newOp = EOpConvBoolToUInt;  break;
                 case EbtFloat:  newOp = EOpConvFloatToUInt; break;
-                default: 
+                default:
                     infoSink.info.message(EPrefixInternalError, "Bad promotion node", node->getRange());
                     return 0;
             }
             break;
-        default: 
+        default:
             infoSink.info.message(EPrefixInternalError, "Bad promotion type", node->getRange());
             return 0;
         }
@@ -1030,10 +1030,10 @@ TIntermTyped* TIntermediate::addConversion(TOperator op, const TType& type, TInt
 }
 
 //
-// Safe way to combine two nodes into an aggregate.  Works with null pointers, 
+// Safe way to combine two nodes into an aggregate.  Works with null pointers,
 // a node that's not a aggregate yet, etc.
 //
-// Returns the resulting aggregate, unless 0 was passed in for 
+// Returns the resulting aggregate, unless 0 was passed in for
 // both existing nodes.
 //
 TIntermAggregate* TIntermediate::growAggregate(TIntermNode* left, TIntermNode* right, TExtensionList &extMap)
@@ -1055,7 +1055,7 @@ TIntermAggregate* TIntermediate::growAggregate(TIntermNode* left, TIntermNode* r
         aggNode->getSequence().push_back(right);
     }
 
-    
+
     if (left && right) {
         aggNode->setRange(addRange(left->getRange(), right->getRange()));
     } else if (left) {
@@ -1102,10 +1102,10 @@ TIntermAggregate* TIntermediate::makeAggregate(TIntermNode* node, TExtensionList
 TIntermNode* TIntermediate::addSelection(TIntermTyped* cond, TIntermNodePair nodePair, TSourceRange range, TExtensionList &extMap)
 {
     //
-    // For compile time constant selections, prune the code and 
+    // For compile time constant selections, prune the code and
     // test now.
     //
-    
+
     if (cond->getAsTyped() && cond->getAsTyped()->getAsConstantUnion()) {
         if (cond->getAsTyped()->getAsConstantUnion()->getUnionArrayPointer()->getBConst())
             return nodePair.node1;
@@ -1127,12 +1127,12 @@ TIntermNode* TIntermediate::addSelection(TIntermTyped* cond, TIntermNodePair nod
 
 TIntermTyped* TIntermediate::addComma(TIntermTyped* left, TIntermTyped* right, TSourceRange range, TExtensionList &extMap)
 {
-    if ((left->getType().getQualifier() == EvqConst || left->getType().getQualifier() == EvqConstNoValue) && 
+    if ((left->getType().getQualifier() == EvqConst || left->getType().getQualifier() == EvqConstNoValue) &&
         (right->getType().getQualifier() == EvqConst || right->getType().getQualifier() == EvqConstNoValue)) {
         return right;
     } else {
         TIntermTyped *commaAggregate = growAggregate(left, right, extMap);
-        commaAggregate->getAsAggregate()->setOperator(EOpComma);    
+        commaAggregate->getAsAggregate()->setOperator(EOpComma);
         commaAggregate->setType(right->getType());
         commaAggregate->getTypePointer()->changeQualifier(EvqTemporary);
         commaAggregate->setNonAtomic();
@@ -1289,7 +1289,7 @@ TIntermConstantUnion* TIntermediate::addConstantUnion(constUnion* unionArrayPoin
 
 TIntermTyped* TIntermediate::addSwizzle(TVectorFields& fields, TSourceRange range, TExtensionList &extMap)
 {
-    
+
     TIntermAggregate* node = new TIntermAggregate(EOpSwizzles);
 
     node->setRange(range);
@@ -1315,7 +1315,7 @@ TIntermNode* TIntermediate::addLoop(TIntermNode* body, TIntermNode *init, TInter
 {
     TIntermNode* node = new TIntermLoop(body, init, test, terminal, loopType);
     node->setRange(range);
-    
+
     node->moveCPPExtensionChanges(extMap);
     if ((body && body->hasSideEffects()) ||
         (init && init->hasSideEffects()) ||
@@ -1397,26 +1397,26 @@ void TIntermediate::remove(TIntermNode* root)
 //
 bool TIntermOperator::modifiesState() const
 {
-    switch (op) {    
-    case EOpPostIncrement: 
-    case EOpPostDecrement: 
-    case EOpPreIncrement:  
-    case EOpPreDecrement:  
-    case EOpAssign:    
-    case EOpAddAssign: 
-    case EOpSubAssign: 
-    case EOpMulAssign: 
+    switch (op) {
+    case EOpPostIncrement:
+    case EOpPostDecrement:
+    case EOpPreIncrement:
+    case EOpPreDecrement:
+    case EOpAssign:
+    case EOpAddAssign:
+    case EOpSubAssign:
+    case EOpMulAssign:
     case EOpVectorTimesMatrixAssign:
     case EOpVectorTimesScalarAssign:
     case EOpMatrixTimesScalarAssign:
     case EOpMatrixTimesMatrixAssign:
-    case EOpDivAssign: 
-    case EOpModAssign: 
-    case EOpAndAssign: 
-    case EOpInclusiveOrAssign: 
-    case EOpExclusiveOrAssign: 
-    case EOpLeftShiftAssign:   
-    case EOpRightShiftAssign:  
+    case EOpDivAssign:
+    case EOpModAssign:
+    case EOpAndAssign:
+    case EOpInclusiveOrAssign:
+    case EOpExclusiveOrAssign:
+    case EOpLeftShiftAssign:
+    case EOpRightShiftAssign:
         return true;
     default:
         return false;
@@ -1455,7 +1455,7 @@ bool TIntermOperator::isConstructor() const
     }
 }
 //
-// Make sure the type of a unary operator is appropriate for its 
+// Make sure the type of a unary operator is appropriate for its
 // combination of operation and operand type.
 //
 // Returns false in nothing makes sense.
@@ -1497,7 +1497,7 @@ bool TIntermUnary::promote(TInfoSink&)
         if (operand->getBasicType() != EbtFloat)
             return false;
     }
-    
+
     setType(operand->getType());
 
     return true;
@@ -1526,7 +1526,7 @@ bool TIntermBinary::promote(TInfoSink& infoSink)
                     break;
                 // Set array information.
                 case EOpAssign:
-                    setType(TType(left->getBasicType(), EvqTemporary, EvmNone, left->getNominalSize(), 
+                    setType(TType(left->getBasicType(), EvqTemporary, EvmNone, left->getNominalSize(),
                                   left->getMatrixSize(0), left->getMatrixSize(1), left->isMatrix()));
                     getType().setArraySize(left->getType().getArraySize());
                     getType().setArrayInformationType(left->getType().getArrayInformationType());
@@ -1831,12 +1831,12 @@ bool CompareStruct(const TType& leftNodeType, constUnion* rightUnionArray, const
                 if (leftUnionArray[index] != rightUnionArray[index])
                     return false;
                 index++;
-            }    
-            
+            }
+
         }
     }
     return true;
-} 
+}
 
 bool CompareStructure(const TType& leftNodeType, constUnion* rightUnionArray, constUnion* leftUnionArray)
 {
@@ -1852,10 +1852,10 @@ bool CompareStructure(const TType& leftNodeType, constUnion* rightUnionArray, co
                 return false;
         }
     } else
-        return CompareStruct(leftNodeType, rightUnionArray, leftUnionArray);    
-    
+        return CompareStruct(leftNodeType, rightUnionArray, leftUnionArray);
+
     return true;
-} 
+}
 
 //
 // The fold functions see if an operation on a constant can be done in place,
@@ -1865,12 +1865,12 @@ bool CompareStructure(const TType& leftNodeType, constUnion* rightUnionArray, co
 //
 
 TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNode, TInfoSink& infoSink)
-{   
-    constUnion *unionArray = getUnionArrayPointer(); 
+{
+    constUnion *unionArray = getUnionArrayPointer();
     int objectSize = getType().getObjectSize();
-        
+
     if (constantNode) {  // binary operations
-    
+
         TIntermConstantUnion *node = constantNode->getAsConstantUnion();
         constUnion *rightUnionArray = node->getUnionArrayPointer();
         TType returnType = getType();
@@ -1879,29 +1879,29 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
         if (constantNode->getType().getObjectSize() == 1 && objectSize > 1) {
             rightUnionArray = new constUnion[objectSize];
             for (int i = 0; i < objectSize; ++i)
-                rightUnionArray[i] = *node->getUnionArrayPointer(); 
+                rightUnionArray[i] = *node->getUnionArrayPointer();
             returnType = getType();
         } else if (constantNode->getType().getObjectSize() > 1 && objectSize == 1) {
             // for a case like float f = vec4(2,3,4,5) + 1.2;
             unionArray = new constUnion[constantNode->getType().getObjectSize()];
             for (int i = 0; i < constantNode->getType().getObjectSize(); ++i)
-                unionArray[i] = *getUnionArrayPointer(); 
+                unionArray[i] = *getUnionArrayPointer();
             returnType = node->getType();
             objectSize = constantNode->getType().getObjectSize();
         }
-        
+
         constUnion* tempConstArray = 0;
         TIntermConstantUnion *tempNode;
         bool boolNodeFlag = false;
         switch(op) {
-        case EOpAdd: 
+        case EOpAdd:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
                 for (int i = 0; i < objectSize; i++)
                     tempConstArray[i] = unionArray[i] + rightUnionArray[i];
             }
             break;
-        case EOpSub: 
+        case EOpSub:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
                 for (int i = 0; i < objectSize; i++)
@@ -1911,14 +1911,14 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
 
         case EOpMul:
         case EOpVectorTimesScalar:
-        case EOpMatrixTimesScalar: 
+        case EOpMatrixTimesScalar:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
                 for (int i = 0; i < objectSize; i++)
                     tempConstArray[i] = unionArray[i] * rightUnionArray[i];
             }
             break;
-        case EOpMatrixTimesMatrix:                
+        case EOpMatrixTimesMatrix:
             if (getType().getBasicType() != EbtFloat || node->getBasicType() != EbtFloat) {
                 infoSink.info.message(EPrefixInternalError, "Constant Folding cannot be done for matrix multiply", getRange());
                 return 0;
@@ -1931,19 +1931,19 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                         for (int i = 0; i < getMatrixSize(0); i++) {
                             tempConstArray[getMatrixSize(1) * column + row].setFConst(
                                     tempConstArray[getMatrixSize(1) * column + row].getFConst() +
-                                    unionArray[i * getMatrixSize(1) + row].getFConst() * 
-                                    (rightUnionArray[column * constantNode->getType().getMatrixSize(0) + i].getFConst())); 
+                                    unionArray[i * getMatrixSize(1) + row].getFConst() *
+                                    (rightUnionArray[column * constantNode->getType().getMatrixSize(0) + i].getFConst()));
                         }
                     }
                 }
             }
             break;
-        case EOpDiv: 
+        case EOpDiv:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
                 for (int i = 0; i < objectSize; i++) {
                     switch (getType().getBasicType()) {
-                    case EbtFloat: 
+                    case EbtFloat:
                         if (rightUnionArray[i] == 0.0f) {
                             infoSink.info.message(EPrefixWarning, "Divide by zero error during constant folding", getRange());
                             tempConstArray[i].setFConst(FLT_MAX);
@@ -1951,15 +1951,15 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(unionArray[i].getFConst() / rightUnionArray[i].getFConst());
                     break;
 
-                    case EbtInt:   
+                    case EbtInt:
                     case EbtUInt:
                         if (rightUnionArray[i] == 0) {
                             infoSink.info.message(EPrefixWarning, "Divide by zero error during constant folding", getRange());
                             tempConstArray[i].setIConst(INT_MAX);
                         } else
                             tempConstArray[i].setIConst(unionArray[i].getIConst() / rightUnionArray[i].getIConst());
-                        break;            
-                    default: 
+                        break;
+                    default:
                         infoSink.info.message(EPrefixInternalError, "Constant folding cannot be done for \"/\"", getRange());
                         return 0;
                     }
@@ -1967,14 +1967,14 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             }
             break;
 
-        case EOpMatrixTimesVector: 
+        case EOpMatrixTimesVector:
             if (node->getBasicType() != EbtFloat) {
                 infoSink.info.message(EPrefixInternalError, "Constant Folding cannot be done for matrix times vector", getRange());
                 return 0;
             }
             tempConstArray = new constUnion[getMatrixSize(1)];
-            
-            {// support MSVC++6.0                    
+
+            {// support MSVC++6.0
                 for (int i = 0; i < getMatrixSize(1); i++) {
                     tempConstArray[i].setFConst(0.0f);
                     for (int j = 0; j < getMatrixSize(0); j++) {
@@ -1982,17 +1982,17 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                     }
                 }
             }
-            
+
             tempNode = new TIntermConstantUnion(tempConstArray, node->getType());
             tempNode->setRange(getRange());
 
-            return tempNode;                
+            return tempNode;
 
         case EOpVectorTimesMatrix:
             if (getType().getBasicType() != EbtFloat) {
                 infoSink.info.message(EPrefixInternalError, "Constant Folding cannot be done for vector times matrix", getRange());
                 return 0;
-            }  
+            }
 
             tempConstArray = new constUnion[constantNode->getType().getMatrixSize(0)];
             {// support MSVC++6.0
@@ -2011,7 +2011,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                     tempConstArray[i] = unionArray[i] % rightUnionArray[i];
             }
             break;
-    
+
         case EOpRightShift:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
@@ -2027,7 +2027,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                     tempConstArray[i] = unionArray[i] << rightUnionArray[i];
             }
             break;
-    
+
         case EOpAnd:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
@@ -2066,7 +2066,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             }
             break;
 
-        case EOpLogicalXor:  
+        case EOpLogicalXor:
             tempConstArray = new constUnion[objectSize];
             {// support MSVC++6.0
                 for (int i = 0; i < objectSize; i++)
@@ -2077,13 +2077,13 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             }
             break;
 
-        case EOpLessThan:         
+        case EOpLessThan:
             assert(objectSize == 1);
             tempConstArray = new constUnion[1];
             tempConstArray->setBConst(*unionArray < *rightUnionArray);
             returnType = TType(EbtBool, EvqConst);
             break;
-        case EOpGreaterThan:      
+        case EOpGreaterThan:
             assert(objectSize == 1);
             tempConstArray = new constUnion[1];
             tempConstArray->setBConst(*unionArray > *rightUnionArray);
@@ -2099,7 +2099,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             returnType = TType(EbtBool, EvqConst);
             break;
         }
-        case EOpGreaterThanEqual: 
+        case EOpGreaterThanEqual:
         {
             assert(objectSize == 1);
             constUnion constant;
@@ -2110,12 +2110,12 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             break;
         }
 
-        case EOpEqual: 
+        case EOpEqual:
             if (getType().getBasicType() == EbtStruct) {
                 if (!CompareStructure(node->getType(), node->getUnionArrayPointer(), unionArray))
                     boolNodeFlag = true;
             } else {
-                for (int i = 0; i < objectSize; i++) {    
+                for (int i = 0; i < objectSize; i++) {
                     if (unionArray[i] != rightUnionArray[i]) {
                         boolNodeFlag = true;
                         break;  // break out of for loop
@@ -2130,18 +2130,18 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             else {
                 tempConstArray->setBConst(false);
             }
-            
+
             tempNode = new TIntermConstantUnion(tempConstArray, TType(EbtBool, EvqConst));
             tempNode->setRange(getRange());
 
-            return tempNode;         
+            return tempNode;
 
-        case EOpNotEqual: 
+        case EOpNotEqual:
             if (getType().getBasicType() == EbtStruct) {
                 if (CompareStructure(node->getType(), node->getUnionArrayPointer(), unionArray))
                     boolNodeFlag = true;
             } else {
-                for (int i = 0; i < objectSize; i++) {    
+                for (int i = 0; i < objectSize; i++) {
                     if (unionArray[i] == rightUnionArray[i]) {
                         boolNodeFlag = true;
                         break;  // break out of for loop
@@ -2156,21 +2156,21 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
             else {
                 tempConstArray->setBConst(false);
             }
-            
+
             tempNode = new TIntermConstantUnion(tempConstArray, TType(EbtBool, EvqConst));
             tempNode->setRange(getRange());
 
-            return tempNode;         
-        
-        default: 
+            return tempNode;
+
+        default:
             infoSink.info.message(EPrefixInternalError, "Invalid operator for constant folding", getRange());
             return 0;
         }
         tempNode = new TIntermConstantUnion(tempConstArray, returnType);
         tempNode->setRange(getRange());
 
-        return tempNode;                
-    } else { 
+        return tempNode;
+    } else {
         //
         // Do unary operations
         //
@@ -2184,7 +2184,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst((float)(M_PI/180.0*unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2195,7 +2195,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst((float)(180.0/M_PI*unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2206,7 +2206,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(sin(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2217,7 +2217,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(cos(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2228,7 +2228,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(tan(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2239,7 +2239,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(asin(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2250,7 +2250,7 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(acos(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
@@ -2261,52 +2261,52 @@ TIntermTyped* TIntermConstantUnion::fold(TOperator op, TIntermTyped* constantNod
                             tempConstArray[i].setFConst(atan(unionArray[i].getFConst()));
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
                     break;
                 case EOpNegative:
                     switch (getType().getBasicType()) {
-                        case EbtFloat: 
-                            tempConstArray[i].setFConst(-unionArray[i].getFConst()); 
+                        case EbtFloat:
+                            tempConstArray[i].setFConst(-unionArray[i].getFConst());
                             break;
-                        case EbtUInt:  
-                            tempConstArray[i].setIConst(-unionArray[i].getIConst()); 
+                        case EbtUInt:
+                            tempConstArray[i].setIConst(-unionArray[i].getIConst());
                             break;
-                        case EbtInt:   
-                            tempConstArray[i].setIConst(-unionArray[i].getIConst()); 
+                        case EbtInt:
+                            tempConstArray[i].setIConst(-unionArray[i].getIConst());
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
                     break;
                 case EOpLogicalNot:
                     switch (getType().getBasicType()) {
-                        case EbtBool:  
-                            tempConstArray[i].setBConst(!unionArray[i].getBConst()); 
+                        case EbtBool:
+                            tempConstArray[i].setBConst(!unionArray[i].getBConst());
                             break;
                         default:
-                            infoSink.info.message(EPrefixInternalError, 
+                            infoSink.info.message(EPrefixInternalError,
                                                   "Unary operation not folded into constant", getRange());
                             return 0;
                     }
                     break;
-                default: 
+                default:
                     return 0;
             }
         }
         newNode = new TIntermConstantUnion(tempConstArray, getType());
         newNode->setRange(getRange());
-        return newNode;     
+        return newNode;
     }
 
     return this;
 }
 
-TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermConstantUnion* node, TExtensionList &extMap) 
+TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermConstantUnion* node, TExtensionList &extMap)
 {
     constUnion *rightUnionArray = node->getUnionArrayPointer();
     int size = node->getType().getObjectSize();
@@ -2314,7 +2314,7 @@ TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermC
     constUnion *leftUnionArray = new constUnion[size];
 
     for (int i=0; i < size; i++) {
-        
+
         switch (promoteTo) {
         case EbtFloat:
             switch (node->getType().getBasicType()) {
@@ -2330,10 +2330,10 @@ TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermC
             case EbtFloat:
                 leftUnionArray[i] = rightUnionArray[i];
                 break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Cannot promote", node->getRange());
                 return 0;
-            }                
+            }
             break;
         case EbtUInt:
             switch (node->getType().getBasicType()) {
@@ -2349,10 +2349,10 @@ TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermC
             case EbtFloat:
                 leftUnionArray[i].setUIConst(static_cast<int>(rightUnionArray[i].getFConst()));
                 break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Cannot promote", node->getRange());
                 return 0;
-            }                
+            }
             break;
         case EbtInt:
             switch (node->getType().getBasicType()) {
@@ -2368,10 +2368,10 @@ TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermC
             case EbtFloat:
                 leftUnionArray[i].setIConst(static_cast<int>(rightUnionArray[i].getFConst()));
                 break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Cannot promote", node->getRange());
                 return 0;
-            }                
+            }
             break;
         case EbtBool:
             switch (node->getType().getBasicType()) {
@@ -2387,21 +2387,21 @@ TIntermTyped* TIntermediate::promoteConstantUnion(TBasicType promoteTo, TIntermC
             case EbtFloat:
                 leftUnionArray[i].setBConst(rightUnionArray[i].getFConst() != 0.0f);
                 break;
-            default: 
+            default:
                 infoSink.info.message(EPrefixInternalError, "Cannot promote", node->getRange());
                 return 0;
-            }                
-            
+            }
+
             break;
         default:
             infoSink.info.message(EPrefixInternalError, "Incorrect data type found", node->getRange());
             return 0;
         }
-    
+
     }
-    
+
     const TType& t = node->getType();
-    
+
     return addConstantUnion(leftUnionArray, TType(promoteTo, t.getQualifier(), t.getVaryingModifier(), t.getNominalSize(), t.getMatrixSize(0), t.getMatrixSize(1), t.isMatrix(), t.isArray()), node->getRange(), extMap);
 }
 

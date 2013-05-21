@@ -44,7 +44,7 @@
 
 #include "dbgprint.h"
 
-#define bold  "[1m" 
+#define bold  "[1m"
 #define red   "[0;31m"
 #define bred  "[1;31m"
 
@@ -114,7 +114,7 @@ void TOutputDebugVarTraverser::addToScope(int id)
     // their first definition.
 
     // search for doubles
-	scopeList::iterator e = find(scope.begin(), scope.end(), id);
+    scopeList::iterator e = find(scope.begin(), scope.end(), id);
 
     // only insert if not already in there
     if (e == scope.end()) {
@@ -164,7 +164,7 @@ scopeList* TOutputDebugVarTraverser::getCopyOfScope(void)
 void TOutputDebugVarTraverser::dumpScope(void)
 {
     scopeList::iterator li = scope.begin();
-    
+
     while (li != scope.end()) {
         ShVariable* v;
         v = findShVariableFromId(vl, *li);
@@ -191,18 +191,18 @@ static bool TraverseVarAggregate(bool, TIntermAggregate* node, TIntermTraverser*
         case EOpSequence:
         case EOpFunction:
             {
-                VPRINT(3, "%c%sbegin %s %s at %s %c%s\n", 
-                        esc, bold, 
+                VPRINT(3, "%c%sbegin %s %s at %s %c%s\n",
+                        esc, bold,
                         node->getOp()==EOpSequence?"sequence":"function",
                         node->getOp()==EOpSequence?"":node->getName().c_str(),
-                        FormatSourceRange(node->getRange()).c_str(), 
+                        FormatSourceRange(node->getRange()).c_str(),
                         esc, reset);
-                
+
                 TIntermSequence sequence = node->getSequence();
                 TIntermSequence::iterator sit = sequence.begin();
                 scopeList::iterator end;
                 int restoreScope = (int)oit->getScope().size();
-                
+
 
                 if (restoreScope) {
                     end = --(oit->getScope().end());
@@ -213,19 +213,19 @@ static bool TraverseVarAggregate(bool, TIntermAggregate* node, TIntermTraverser*
                     (*sit)->traverse(it);
                     sit++;
                 }
-                
-                VPRINT(3, "%c%send %s %s at %s %c%s\n", 
-                        esc, bold, 
+
+                VPRINT(3, "%c%send %s %s at %s %c%s\n",
+                        esc, bold,
                         node->getOp()==EOpSequence?"sequence":"function",
                         node->getOp()==EOpSequence?"":node->getName().c_str(),
-                        FormatSourceRange(node->getRange()).c_str(), 
+                        FormatSourceRange(node->getRange()).c_str(),
                         esc, reset);
 
                 if (restoreScope) {
                     oit->getScope().erase(++end, oit->getScope().end());
                 } else {
-                    oit->getScope().erase(oit->getScope().begin(), 
-                                          oit->getScope().end());
+                    oit->getScope().erase(oit->getScope().begin(),
+                                        oit->getScope().end());
                 }
             }
             return false;
@@ -253,15 +253,17 @@ static bool TraverseVarUnary(bool, TIntermUnary* node, TIntermTraverser* it)
             // set scope of node
             node->setScope(oit->getCopyOfScope());
             return true;
+        default:
+            break;
     }
     return true;
 }
 
 static bool TraverseVarDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
 {
-    VPRINT(3, "%c%sdeclaration of %s <%i>%c%s\n", 
+    VPRINT(3, "%c%sdeclaration of %s <%i>%c%s\n",
             esc, bold,
-            node->getVariable()->getName().c_str(), 
+            node->getVariable()->getName().c_str(),
             node->getVariable()->getUniqueId(),
             esc, reset);
 
@@ -272,10 +274,10 @@ static bool TraverseVarDeclaration(TIntermDeclaration* node, TIntermTraverser* i
         // First process the variable
         ShVariableList *vl = oit->getVariableList();
         TVariable *v = node->getVariable();
-        
+
         // Add variable to the global list of all seen variables
         addShVariable(vl, v->getShVariable(), 0);
-        
+
         if (node->getInitialization()) {
             // Process childs first without the new variable
             node->getInitialization()->traverse(oit);
@@ -283,10 +285,10 @@ static bool TraverseVarDeclaration(TIntermDeclaration* node, TIntermTraverser* i
             scopeList *sl = node->getInitialization()->getScope();
             if (sl) {
                 /*
-                 * Actually do not add declared variable to the list here, because
-                 * Code Generation would access the data before it is declared. This should
-                 * not be needed anyway, since the data would be uninitialized
-                 * 
+                * Actually do not add declared variable to the list here, because
+                * Code Generation would access the data before it is declared. This should
+                * not be needed anyway, since the data would be uninitialized
+                *
                 // Dont forget to check for double ids
                 scopeList::iterator e = find(sl->begin(), sl->end(), v->getUniqueId());
 
@@ -316,9 +318,9 @@ static bool TraverseVarSelection(bool, TIntermSelection* node, TIntermTraverser*
 
     // nothing can be declared here in first place
     node->setScope(oit->getCopyOfScope());
-    
+
     node->getCondition()->traverse(it);
-    
+
 
     // traverse true block
     if (node->getTrueBlock()) {
@@ -328,7 +330,7 @@ static bool TraverseVarSelection(bool, TIntermSelection* node, TIntermTraverser*
         if (restoreScope) {
             end = --(oit->getScope().end());
         }
-        
+
         node->getTrueBlock()->traverse(it);
 
         // restore global scope list
@@ -347,9 +349,9 @@ static bool TraverseVarSelection(bool, TIntermSelection* node, TIntermTraverser*
         if (restoreScope) {
             end = --(oit->getScope().end());
         }
-        
+
         node->getFalseBlock()->traverse(it);
-        
+
         // again restore global scope list
         if (restoreScope) {
             oit->getScope().erase(++end, oit->getScope().end());
@@ -358,7 +360,7 @@ static bool TraverseVarSelection(bool, TIntermSelection* node, TIntermTraverser*
         }
 
     }
-    
+
     return false;
 }
 
@@ -368,7 +370,7 @@ static bool TraverseVarSwitch(bool, TIntermSwitch* node, TIntermTraverser* it)
 
     // nothing can be declared here in first place
     node->setScope(oit->getCopyOfScope());
-    
+
     node->getCondition()->traverse(it);
 
     // traverse case list
@@ -385,7 +387,7 @@ static bool TraverseVarCase(bool, TIntermCase* node, TIntermTraverser* it)
 
     // nothing can be declared here in first place
     node->setScope(oit->getCopyOfScope());
-    
+
     // traverse expression
     if (node->getExpression()) {
         node->getExpression()->traverse(it);
@@ -411,7 +413,7 @@ static bool TraverseVarLoop(bool, TIntermLoop* node, TIntermTraverser* it)
     if (restoreScope) {
         end = --(oit->getScope().end());
     }
-    
+
     // visit optional initialization
     if (node->getInit()) {
         node->getInit()->traverse(it);
@@ -431,7 +433,7 @@ static bool TraverseVarLoop(bool, TIntermLoop* node, TIntermTraverser* it)
     if (node->getBody()) {
         node->getBody()->traverse(it);
     }
-    
+
     // restore global scope list
     if (restoreScope) {
         oit->getScope().erase(++end, oit->getScope().end());
@@ -462,7 +464,7 @@ static void TraverseVarFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
             esc, reset);
 
     TOutputDebugVarTraverser *oit = static_cast<TOutputDebugVarTraverser*>(it);
-    
+
     ShVariableList *vl = oit->getVariableList();
 
     if (!(IsSampler(node->getTypePointer()->getBasicType()))) {
@@ -474,7 +476,7 @@ static void TraverseVarFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
         strcpy(v->name, node->getSymbol().c_str());
 
         addShVariable(vl, v, 0);
-    
+
         oit->addToScope(node->getId());
         oit->dumpScope();
     }
@@ -514,22 +516,22 @@ static TIntermNode* getFunctionBySignature(const char *sig, TIntermNode* root)
         // do not stop search at function prototypes
         if (aggregate->getSequence().size() != 0) {
             if (!strcmp( sig, aggregate->getName().c_str() )) {
-                VPRINT(3, "getFunctionBySignature: found %s at %p\n", 
+                VPRINT(3, "getFunctionBySignature: found %s at %p\n",
                         sig, aggregate);
                 return aggregate;
             }
         }
     } else {
         sequence = aggregate->getSequence();
-        
+
         for(sit = sequence.begin(); sit != sequence.end(); sit++) {
             if ( (*sit)->getAsAggregate() &&
                     (*sit)->getAsAggregate()->getOp() == EOpFunction ) {
                 VPRINT(2, "compare %s %s\n", sig, (*sit)->getAsAggregate()->getName().c_str());
                 // do not stop search at function prototypes
                 if ((*sit)->getAsAggregate()->getSequence().size() != 0) {
-                    
-                    
+
+
                     if (!strcmp( sig, (*sit)->getAsAggregate()->getName().c_str() )) {
                         VPRINT(3, "getFunctionBySignature: found %s at %p\n",
                                 sig, *sit);
@@ -558,7 +560,7 @@ class TOutputDebugCgbTraverser : public TIntermTraverser {
         TIntermNode *root;
     private:
         bool active;
-        
+
 };
 
 static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
@@ -566,12 +568,12 @@ static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTravers
     TOutputDebugCgbTraverser *oit = static_cast<TOutputDebugCgbTraverser*>(it);
 
     VPRINT(2, "(%s) changeAggregate \n", FormatSourceRange(node->getRange()).c_str());
-    
+
     switch (node->getOp()) {
         case EOpFunctionCall:
             // only user defined functions can have out/inout parameters
             if (node->getAsAggregate()->isUserDefined()) {
-                // changed variables are all out/inout parameters and 
+                // changed variables are all out/inout parameters and
                 // all changes made in the body of this function
 
                 TIntermNode *funcDec;
@@ -592,23 +594,23 @@ static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTravers
                 // for parameters we need more care
                 // iterate over all parameters simultaneously in the function call
                 // and the function declaration
-                // Assumption: 1. We assume that there is a parameter sequence in the 
+                // Assumption: 1. We assume that there is a parameter sequence in the
                 //                function declaration
                 //             2. Further more it's assumed that both sequences have
                 //                the same amount of parameters.
                 //             Both should hold pretty easy, as we searched for a
                 //             function with the same parameters. So we trust ourselves,
                 //             even if we know we should not (:
-                TIntermSequence funcCallParamSeq = 
+                TIntermSequence funcCallParamSeq =
                     node->getAsAggregate()->getSequence();
-                TIntermSequence funcDeclSeq = 
+                TIntermSequence funcDeclSeq =
                     funcDec->getAsAggregate()->getSequence();
-                TIntermSequence funcDeclParamSeq = 
+                TIntermSequence funcDeclParamSeq =
                     funcDeclSeq[0]->getAsAggregate()->getSequence();
-                    
+
                 TIntermSequence::iterator pC = funcCallParamSeq.begin();
                 TIntermSequence::iterator pD = funcDeclParamSeq.begin();
-                
+
                 for (; pC != funcCallParamSeq.end(); ++pC, ++pD) {
                     // check if parameter is of interest
                     if ((*pD)->getAsFuncParamNode()->getType().getQualifier()==EvqOut ||
@@ -621,16 +623,16 @@ static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTravers
                         // add these parameters to parameter-list
                         copyShChangeableList(node->getAsAggregate()->
                                                                 getCgbParameterList(),
-                                             (*pC)->getCgbList());
+                                            (*pC)->getCgbList());
                     } else {
                         oit->deactivate();
                         (*pC)->traverse(it);
-                        
+
                         // these can be added direcly to the changeables
                         copyShChangeableList(node->getCgbList(), (*pC)->getCgbList());
                     }
                 }
-                
+
                 // Add parameter to changeables, since they need to be passed to parents
                 copyShChangeableList(node->getCgbList(), node->getAsAggregate()->
                                                                 getCgbParameterList());
@@ -660,11 +662,11 @@ static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTravers
                         sit!=node->getSequence().end(); ++sit) {
                     VPRINT(2, "(%s) changeChild \n", FormatSourceRange(node->getRange()).c_str());
                     (*sit)->traverse(it);
-                    
+
                     // copy changeables
                     copyShChangeableList(node->getCgbList(), (*sit)->getCgbList());
                     //(node->getCgbList());
-                    
+
                     // emitVertex push
                     if ((*sit)->containsEmitVertex()) {
                         node->setEmitVertex();
@@ -680,14 +682,14 @@ static bool TraverseChangeAggregate(bool, TIntermAggregate* node, TIntermTravers
             // Assumption: first child is responsible for parameters,
             //             check with simmilar comment above
             copyShChangeableList(node->getAsAggregate()->getCgbParameterList(),
-                                 node->getAsAggregate()->getSequence()[0]->
-                                             getAsAggregate()->getCgbList());
-            
+                                node->getAsAggregate()->getSequence()[0]->
+                                            getAsAggregate()->getCgbList());
+
             return false;
         default:
             oit->deactivate();
     }
-    
+
     // visit children
     TIntermSequence::iterator sit;
     for (sit=node->getSequence().begin(); sit!=node->getSequence().end(); ++sit) {
@@ -733,20 +735,20 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
         case EOpRightShiftAssign:
             VPRINT(2, "(%s) changeAssigment\n", FormatSourceRange(node->getRange()).c_str());
             //(node->getCgbList());
-            
+
             // process left branch actively
             if (node->getLeft()) {
                 VPRINT(2, "===== left ============================\n");
-                
+
                 oit->activate();
                 node->getLeft()->traverse(it);
                 oit->deactivate();
-                
+
                 // copy the changeables of left branch
-                copyShChangeableList(node->getCgbList(), 
-                                     node->getLeft()->getCgbList());
+                copyShChangeableList(node->getCgbList(),
+                                    node->getLeft()->getCgbList());
                 //dumpShChangeableList(node->getCgbList());
-                    
+
                 // emitVertex push
                 if (node->getLeft()->containsEmitVertex()) {
                     node->setEmitVertex();
@@ -756,7 +758,7 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
                     node->setContainsDiscard();
                 }
             }
-            
+
             // process right branch passively
             if (node->getRight()) {
                 VPRINT(2, "===== right ===========================\n");
@@ -766,9 +768,9 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
 
                 // copy the changeables of right branch
                 copyShChangeableList(node->getCgbList(),
-                                     node->getRight()->getCgbList());
+                                    node->getRight()->getCgbList());
                 //dumpShChangeableList(node->getCgbList());
-                    
+
                 // emitVertex push
                 if (node->getRight()->containsEmitVertex()) {
                     node->setEmitVertex();
@@ -789,7 +791,7 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
             // then copy changeables
             // should be one or zero, otherwise we have a problem
             copyShChangeableList(node->getCgbList(),
-                                 node->getLeft()->getCgbList());
+                                node->getLeft()->getCgbList());
 
             // remove all changeables not in scope (markus bug)
             {
@@ -825,7 +827,7 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
             if (node->getLeft()->containsDiscard()) {
                 node->setContainsDiscard();
             }
-            
+
             if (node->getCgbList()->numChangeables == 0) {
                 return false;
             } else if (node->getCgbList()->numChangeables == 1) {
@@ -851,13 +853,13 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
 
                 for(rit = sequence.rbegin(); rit != sequence.rend(); rit++) {
                     /*
-                    index += ((int)pow(10, i)) * 
-                             (1+(*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
+                    index += ((int)pow(10, i)) *
+                            (1+(*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
                     */
                     index += 1 << ((*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
                     i++;
                 }
-                
+
                 cgbIdx = createShChangeableIndex(SH_CGB_SWIZZLE, index);
                 addShIndexToChangeableList(node->getCgbList(), 0, cgbIdx);
             } else {
@@ -878,8 +880,8 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
             // then copy changeables
             // should be one or zero, otherwise we have a problem
             copyShChangeableList(node->getCgbList(),
-                                 node->getLeft()->getCgbList());
-                    
+                                node->getLeft()->getCgbList());
+
             // emitVertex push
             if (node->getLeft()->containsEmitVertex()) {
                 node->setEmitVertex();
@@ -888,7 +890,7 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
             if (node->getLeft()->containsDiscard()) {
                 node->setContainsDiscard();
             }
-            
+
             if (node->getCgbList()->numChangeables == 0) {
                 return false;
             } else if (node->getCgbList()->numChangeables == 1) {
@@ -905,9 +907,9 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
                     case EOpIndexIndirect:
                         type = SH_CGB_ARRAY_INDIRECT;
                         break;
-					default:
-						dbgPrint(DBGLVL_ERROR, "DebugVar - invalid node op\n");
-						exit(1);
+                    default:
+                        dbgPrint(DBGLVL_ERROR, "DebugVar - invalid node op\n");
+                        exit(1);
                 }
 
                 int index;
@@ -916,9 +918,9 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
                     node->getRight()->getAsConstantUnion()->getUnionArrayPointer() &&
                     node->getRight()->getAsConstantUnion()->getType().getObjectSize() == 1 &&
                     (node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType() == EbtInt ||
-                     node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType() == EbtUInt ||
-                     node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType() == EbtSwizzle)) {
-                    
+                    node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType() == EbtUInt ||
+                    node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType() == EbtSwizzle)) {
+
                     index = node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst();
                 } else {
                     index = -1;
@@ -937,9 +939,9 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
             if (node->getLeft()) {
                 node->getLeft()->traverse(it);
                 // copy the changeables of left branch
-                copyShChangeableList(node->getCgbList(), 
-                                     node->getLeft()->getCgbList());
-                
+                copyShChangeableList(node->getCgbList(),
+                                    node->getLeft()->getCgbList());
+
                 // emitVertex push
                 if (node->getLeft()->containsEmitVertex()) {
                     node->setEmitVertex();
@@ -953,9 +955,9 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
                 node->getRight()->traverse(it);
                 // copy the changeables of right branch
                 copyShChangeableList(node->getCgbList(),
-                                     node->getRight()->getCgbList());
+                                    node->getRight()->getCgbList());
                 //dumpShChangeableList(node->getCgbList());
-                
+
                 // emitVertex push
                 if (node->getRight()->containsEmitVertex()) {
                     node->setEmitVertex();
@@ -970,8 +972,8 @@ static bool TraverseChangeBinary(bool, TIntermBinary* node, TIntermTraverser* it
     return true;
 }
 
-static bool TraverseChangeDeclaration(TIntermDeclaration* node, 
-                                      TIntermTraverser* it)
+static bool TraverseChangeDeclaration(TIntermDeclaration* node,
+                                    TIntermTraverser* it)
 {
     //TOutputDebugCgbTraverser *oit = static_cast<TOutputDebugCgbTraverser*>(it);
 
@@ -982,11 +984,11 @@ static bool TraverseChangeDeclaration(TIntermDeclaration* node,
         node->getInitialization()->traverse(it);
 
         // copy the changeables of initialization
-        copyShChangeableList(node->getCgbList(), 
+        copyShChangeableList(node->getCgbList(),
                 node->getInitialization()->getCgbList());
-                
+
         VPRINT(2, "(%s) changeDeclaration -> end\n", FormatSourceRange(node->getRange()).c_str());
-            
+
         // emitVertex push
         if (node->getInitialization()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -995,7 +997,7 @@ static bool TraverseChangeDeclaration(TIntermDeclaration* node,
         if (node->getInitialization()->containsDiscard()) {
             node->setContainsDiscard();
         }
-        
+
         //dumpShChangeableList(node->getCgbList());
         return false;
     }
@@ -1009,11 +1011,11 @@ static void TraverseChangeSymbol(TIntermSymbol* node, TIntermTraverser* it)
 
     if (oit->isActive()) {
         if (node->getCgbList()->numChangeables == 0) {
-            VPRINT(2, "(%s) changeSymbol -> created %i %s\n", 
+            VPRINT(2, "(%s) changeSymbol -> created %i %s\n",
                     FormatSourceRange(node->getRange()).c_str(), node->getId(), node->getSymbol().c_str());
             addShChangeable(node->getCgbList(), createShChangeable(node->getId()));
         } else {
-            VPRINT(2, "(%s) changeSymbol -> kept %i %s\n", 
+            VPRINT(2, "(%s) changeSymbol -> kept %i %s\n",
                     FormatSourceRange(node->getRange()).c_str(), node->getId(), node->getSymbol().c_str());
         }
     }
@@ -1024,15 +1026,15 @@ static void TraverseChangeFuncParam(TIntermFuncParam* node, TIntermTraverser* it
     //TOutputDebugCgbTraverser *oit = static_cast<TOutputDebugCgbTraverser*>(it);
 
     if (node->getType().getQualifier() == EvqIn ||
-		node->getType().getQualifier() == EvqConstIn || /* check back with Magnus */
+        node->getType().getQualifier() == EvqConstIn || /* check back with Magnus */
         node->getType().getQualifier() == EvqInOut) {
 
         if (node->getCgbList()->numChangeables == 0) {
-            VPRINT(2, "(%s) changeFuncParam -> created %i %s\n", 
+            VPRINT(2, "(%s) changeFuncParam -> created %i %s\n",
                     FormatSourceRange(node->getRange()).c_str(), node->getId(), node->getSymbol().c_str());
             addShChangeable(node->getCgbList(), createShChangeable(node->getId()));
         } else {
-            VPRINT(2, "(%s) changeFuncParam -> kept %i %s\n", 
+            VPRINT(2, "(%s) changeFuncParam -> kept %i %s\n",
                     FormatSourceRange(node->getRange()).c_str(), node->getId(), node->getSymbol().c_str());
         }
     }
@@ -1051,8 +1053,8 @@ static bool TraverseChangeUnary(bool, TIntermUnary* node, TIntermTraverser* it)
             oit->activate();
             node->getOperand()->traverse(it);
             oit->deactivate();
-            copyShChangeableList(node->getCgbList(), 
-                                 node->getOperand()->getCgbList());
+            copyShChangeableList(node->getCgbList(),
+                                node->getOperand()->getCgbList());
             // emitVertex push
             if (node->getOperand()->containsEmitVertex()) {
                 node->setEmitVertex();
@@ -1067,8 +1069,8 @@ static bool TraverseChangeUnary(bool, TIntermUnary* node, TIntermTraverser* it)
             // simply traverse and copy result
             oit->deactivate();
             node->getOperand()->traverse(it);
-            copyShChangeableList(node->getCgbList(), 
-                                 node->getOperand()->getCgbList());
+            copyShChangeableList(node->getCgbList(),
+                                node->getOperand()->getCgbList());
             // emitVertex push
             if (node->getOperand()->containsEmitVertex()) {
                 node->setEmitVertex();
@@ -1077,7 +1079,7 @@ static bool TraverseChangeUnary(bool, TIntermUnary* node, TIntermTraverser* it)
             if (node->getOperand()->containsDiscard()) {
                 node->setContainsDiscard();
             }
-            
+
             return true;
     }
 }
@@ -1089,12 +1091,12 @@ static bool TraverseChangeSelection(bool, TIntermSelection* node, TIntermTravers
     // just traverse and copy changeables all together
     oit->deactivate();
     node->getCondition()->traverse(it);
-    copyShChangeableList(node->getCgbList(), 
-                         node->getCondition()->getCgbList());
+    copyShChangeableList(node->getCgbList(),
+                        node->getCondition()->getCgbList());
     if (node->getTrueBlock()) {
         node->getTrueBlock()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getTrueBlock()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getTrueBlock()->getCgbList());
         // emitVertex push
         if (node->getTrueBlock()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1106,8 +1108,8 @@ static bool TraverseChangeSelection(bool, TIntermSelection* node, TIntermTravers
     }
     if (node->getFalseBlock()) {
         node->getFalseBlock()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getFalseBlock()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getFalseBlock()->getCgbList());
         // emitVertex push
         if (node->getFalseBlock()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1117,7 +1119,7 @@ static bool TraverseChangeSelection(bool, TIntermSelection* node, TIntermTravers
             node->setContainsDiscard();
         }
     }
-    
+
     return false;
 }
 
@@ -1128,12 +1130,12 @@ static bool TraverseChangeSwitch(bool, TIntermSwitch* node, TIntermTraverser* it
     // just traverse and copy changeables all together
     oit->deactivate();
     node->getCondition()->traverse(it);
-    copyShChangeableList(node->getCgbList(), 
-                         node->getCondition()->getCgbList());
+    copyShChangeableList(node->getCgbList(),
+                        node->getCondition()->getCgbList());
     if (node->getCaseList()) {
         node->getCaseList()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getCaseList()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getCaseList()->getCgbList());
         // emitVertex push
         if (node->getCaseList()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1143,7 +1145,7 @@ static bool TraverseChangeSwitch(bool, TIntermSwitch* node, TIntermTraverser* it
             node->setContainsDiscard();
         }
     }
-    
+
     return false;
 }
 
@@ -1155,8 +1157,8 @@ static bool TraverseChangeCase(bool, TIntermCase* node, TIntermTraverser* it)
     oit->deactivate();
     if (node->getExpression()) {
         node->getExpression()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getExpression()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getExpression()->getCgbList());
         // emitVertex push
         if (node->getExpression()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1169,8 +1171,8 @@ static bool TraverseChangeCase(bool, TIntermCase* node, TIntermTraverser* it)
 
     if (node->getCaseBody()) {
         node->getCaseBody()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getCaseBody()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getCaseBody()->getCgbList());
         // emitVertex push
         if (node->getCaseBody()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1180,7 +1182,7 @@ static bool TraverseChangeCase(bool, TIntermCase* node, TIntermTraverser* it)
             node->setContainsDiscard();
         }
     }
-    
+
     return false;
 }
 
@@ -1190,12 +1192,12 @@ static bool TraverseChangeLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 
     // just traverse and copy changeables all together
     oit->deactivate();
-    
+
     // visit optional initialization
     if (node->getInit()) {
         node->getInit()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getInit()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getInit()->getCgbList());
         // emitVertex push
         if (node->getInit()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1209,8 +1211,8 @@ static bool TraverseChangeLoop(bool, TIntermLoop* node, TIntermTraverser* it)
     // visit test, this should not change the changeables, but to be sure
     if (node->getTest()) {
         node->getTest()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getTest()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getTest()->getCgbList());
         // emitVertex push
         if (node->getTest()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1224,8 +1226,8 @@ static bool TraverseChangeLoop(bool, TIntermLoop* node, TIntermTraverser* it)
     // visit optional terminal, this cannot change the changeables either
     if (node->getTerminal()) {
         node->getTerminal()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getTerminal()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getTerminal()->getCgbList());
         // emitVertex push
         if (node->getTerminal()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1239,8 +1241,8 @@ static bool TraverseChangeLoop(bool, TIntermLoop* node, TIntermTraverser* it)
     // visit body
     if (node->getBody()) {
         node->getBody()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getBody()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getBody()->getCgbList());
         // emitVertex push
         if (node->getBody()->containsEmitVertex()) {
             node->setEmitVertex();
@@ -1250,7 +1252,7 @@ static bool TraverseChangeLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             node->setContainsDiscard();
         }
     }
-    
+
     return false;
 }
 
@@ -1262,8 +1264,8 @@ static bool TraverseChangeBranch(bool, TIntermBranch* node, TIntermTraverser* it
         // simply traverse and copy result
         oit->deactivate();
         node->getExpression()->traverse(it);
-        copyShChangeableList(node->getCgbList(), 
-                             node->getExpression()->getCgbList());
+        copyShChangeableList(node->getCgbList(),
+                            node->getExpression()->getCgbList());
 
         // emitVertex push
         if (node->getExpression()->containsEmitVertex()) {
@@ -1274,7 +1276,7 @@ static bool TraverseChangeBranch(bool, TIntermBranch* node, TIntermTraverser* it
             node->setContainsDiscard();
         }
     }
-    
+
     return false;
 }
 
@@ -1311,7 +1313,7 @@ bool TOutputDebugVarCompiler::compile(TIntermNode *root)
     it.rightToLeft = false;
     root->traverse(&it);
     VPRINT(2, "==Processing=Variables=done========================================\n");
-    
+
 
     // Now check which variables get altered at target and also
     // insert this information at end of sequences to be able to keep track

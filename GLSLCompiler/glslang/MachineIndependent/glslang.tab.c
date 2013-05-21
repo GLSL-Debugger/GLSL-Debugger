@@ -1,19 +1,19 @@
 /* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison implementation for Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,7 +26,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -69,16 +69,16 @@
 /* Based on:
 ANSI C Yacc grammar
 
-In 1985, Jeff Lee published his Yacc grammar (which is accompanied by a 
-matching Lex specification) for the April 30, 1985 draft version of the 
+In 1985, Jeff Lee published his Yacc grammar (which is accompanied by a
+matching Lex specification) for the April 30, 1985 draft version of the
 ANSI C standard.  Tom Stockfisch reposted it to net.sources in 1987; that
 original, as mentioned in the answer to question 17.25 of the comp.lang.c
 FAQ, can be ftp'ed from ftp.uu.net, file usenet/net.sources/ansi.c.grammar.Z.
- 
-I intend to keep this version as close to the current C Standard grammar as 
-possible; please let me know if you discover discrepancies. 
 
-Jutta Degener, 1995 
+I intend to keep this version as close to the current C Standard grammar as
+possible; please let me know if you discover discrepancies.
+
+Jutta Degener, 1995
 */
 
 #include "SymbolTable.h"
@@ -97,7 +97,7 @@ Jutta Degener, 1995
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
-    extern void yyerror(char*);    
+    extern void yyerror(char*);
 #endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
@@ -368,7 +368,7 @@ typedef union YYSTYPE
             TString *string;
             float f;
             int i;
-			unsigned int ui;
+            unsigned int ui;
             bool b;
         };
         TSymbol* symbol;
@@ -427,12 +427,12 @@ int yyparse ();
     extern int yylex(YYSTYPE*, void*);
 #endif
 
-void addStructInstance(TIntermSpecification* specificationNode, 
-                       TIntermNode* intermNode, 
-                       TParseContext &pC)
+void addStructInstance(TIntermSpecification* specificationNode,
+                    TIntermNode* intermNode,
+                    TParseContext &pC)
 {
     if (!specificationNode || !intermNode) return;
-    
+
     TIntermAggregate* instancePointer = *(specificationNode->getInstancesPointer());
 
     if (instancePointer && instancePointer->getOp() != EOpNull) {
@@ -444,51 +444,51 @@ void addStructInstance(TIntermSpecification* specificationNode,
     );
 
     instancePointer = *(specificationNode->getInstancesPointer());
-    
+
     if (instancePointer && instancePointer->getOp() != EOpInstances) {
         instancePointer->setOperator(EOpInstances);
     }
 }
 
 void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC) {
-    
+
     TTypeList::iterator iter = paramList->begin();
     for(; iter != paramList->end(); iter++) {
         if(iter->type->isSpecified() == true &&
-           iter->type->getBasicType() == EbtStruct) {
+        iter->type->getBasicType() == EbtStruct) {
 
             /* add specification */
-            TIntermNode *structNode = 
+            TIntermNode *structNode =
                 pC.intermediate.addSpecification(iter->range, iter->type, pC.extensionChanged);
 
             /* recursive process this struct */
-            processStruct(iter->type->getStruct(), 
-                          structNode->getAsSpecificationNode()->getParameterPointer(), 
-                          pC);
-            
+            processStruct(iter->type->getStruct(),
+                        structNode->getAsSpecificationNode()->getParameterPointer(),
+                        pC);
+
             /* Add instance */
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 pC.intermediate.addParameter(iter->range, iter->type, pC.extensionChanged);
-                
+
             addStructInstance(structNode->getAsSpecificationNode(),
-                              intermNode, pC);
-            
+                            intermNode, pC);
+
             /* Make aggregate and add to parameters */
-            TIntermAggregate *structAggregate = 
+            TIntermAggregate *structAggregate =
                 pC.intermediate.makeAggregate(structNode, pC.extensionChanged);
             structAggregate->setOperator(EOpSpecification);
 
             *p = pC.intermediate.growAggregate(*p, structAggregate, pC.extensionChanged);
 
         } else {
-            TIntermNode *paramNode = 
+            TIntermNode *paramNode =
                 pC.intermediate.addParameter(iter->range, iter->type, pC.extensionChanged);
             *p = pC.intermediate.growAggregate(*p, paramNode, pC.extensionChanged);
 
         }
     }
 
-    (*p)->setOperator(EOpParameter); 
+    (*p)->setOperator(EOpParameter);
 }
 
 
@@ -635,7 +635,7 @@ YYID (yyi)
 #  endif
 #  if (defined __cplusplus && ! defined EXIT_SUCCESS \
        && ! ((defined YYMALLOC || defined malloc) \
-	     && (defined YYFREE || defined free)))
+        && (defined YYFREE || defined free)))
 #   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
 #   ifndef EXIT_SUCCESS
 #    define EXIT_SUCCESS 0
@@ -661,7 +661,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-	 || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+    || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
@@ -689,11 +689,11 @@ union yyalloc
 # define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
     do									\
       {									\
-	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
-	Stack = &yyptr->Stack_alloc;					\
-	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-	yyptr += yynewbytes / sizeof (*yyptr);				\
+    YYSIZE_T yynewbytes;						\
+    YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
+    Stack = &yyptr->Stack_alloc;					\
+    yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+    yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
     while (YYID (0))
 
@@ -904,31 +904,31 @@ static const yytype_uint16 yyrline[] =
 {
        0,   337,   337,   377,   380,   402,   421,   427,   433,   440,
      443,   534,   537,   654,   665,   679,   687,   814,   817,   835,
-     844,   851,   855,   862,   868,   877,   885,   975,   982,   992,
-     995,  1006,  1017,  1040,  1041,  1042,  1043,  1054,  1055,  1065,
-    1075,  1090,  1091,  1100,  1112,  1113,  1125,  1140,  1141,  1152,
-    1163,  1174,  1188,  1189,  1200,  1214,  1215,  1230,  1231,  1246,
-    1247,  1262,  1263,  1277,  1278,  1292,  1293,  1307,  1308,  1333,
-    1334,  1348,  1349,  1350,  1351,  1357,  1358,  1359,  1366,  1373,
-    1380,  1387,  1397,  1400,  1412,  1420,  1426,  1436,  1471,  1474,
-    1481,  1489,  1510,  1529,  1545,  1579,  1585,  1596,  1602,  1613,
-    1616,  1619,  1622,  1628,  1641,  1646,  1657,  1663,  1675,  1678,
-    1738,  1819,  1891,  1965,  2006,  2028,  2085,  2185,  2262,  2343,
-    2416,  2513,  2525,  2623,  2626,  2629,  2636,  2640,  2647,  2660,
-    2673,  2682,  2685,  2688,  2691,  2694,  2697,  2704,  2715,  2729,
-    2732,  2742,  2759,  2764,  2769,  2774,  2779,  2786,  2792,  2798,
-    2804,  2810,  2816,  2822,  2828,  2834,  2840,  2848,  2856,  2864,
-    2871,  2878,  2885,  2892,  2899,  2906,  2913,  2920,  2927,  2934,
-    2941,  2948,  2954,  2963,  2972,  2978,  2987,  2996,  3002,  3011,
-    3020,  3026,  3035,  3044,  3050,  3056,  3067,  3078,  3089,  3100,
-    3109,  3118,  3127,  3136,  3145,  3154,  3163,  3172,  3181,  3190,
-    3199,  3208,  3217,  3234,  3247,  3257,  3260,  3275,  3314,  3318,
-    3324,  3329,  3342,  3346,  3350,  3351,  3357,  3358,  3359,  3360,
-    3361,  3362,  3363,  3367,  3370,  3370,  3370,  3379,  3380,  3385,
-    3388,  3397,  3401,  3408,  3409,  3413,  3422,  3426,  3436,  3442,
-    3460,  3460,  3469,  3472,  3479,  3483,  3490,  3490,  3496,  3496,
-    3504,  3504,  3522,  3525,  3531,  3534,  3540,  3544,  3551,  3559,
-    3568,  3576,  3588,  3598,  3602,  3610,  3613,  3619,  3619
+     844,   851,   855,   862,   868,   877,   885,   977,   984,   994,
+     997,  1008,  1019,  1042,  1043,  1044,  1045,  1056,  1057,  1067,
+    1077,  1092,  1093,  1102,  1114,  1115,  1127,  1142,  1143,  1154,
+    1165,  1176,  1190,  1191,  1202,  1216,  1217,  1232,  1233,  1248,
+    1249,  1264,  1265,  1279,  1280,  1294,  1295,  1309,  1310,  1335,
+    1336,  1350,  1351,  1352,  1353,  1359,  1360,  1361,  1368,  1375,
+    1382,  1389,  1399,  1402,  1414,  1422,  1428,  1438,  1473,  1476,
+    1483,  1491,  1512,  1531,  1547,  1581,  1587,  1598,  1604,  1615,
+    1618,  1621,  1624,  1630,  1643,  1648,  1659,  1665,  1677,  1680,
+    1740,  1821,  1893,  1967,  2008,  2030,  2087,  2187,  2264,  2345,
+    2418,  2515,  2527,  2625,  2628,  2631,  2638,  2642,  2649,  2662,
+    2675,  2684,  2687,  2690,  2693,  2696,  2699,  2706,  2717,  2731,
+    2734,  2744,  2761,  2766,  2771,  2776,  2781,  2788,  2794,  2800,
+    2806,  2812,  2818,  2824,  2830,  2836,  2842,  2850,  2858,  2866,
+    2873,  2880,  2887,  2894,  2901,  2908,  2915,  2922,  2929,  2936,
+    2943,  2950,  2956,  2965,  2974,  2980,  2989,  2998,  3004,  3013,
+    3022,  3028,  3037,  3046,  3052,  3058,  3069,  3080,  3091,  3102,
+    3111,  3120,  3129,  3138,  3147,  3156,  3165,  3174,  3183,  3192,
+    3201,  3210,  3219,  3236,  3249,  3259,  3262,  3277,  3316,  3320,
+    3326,  3331,  3344,  3348,  3352,  3353,  3359,  3360,  3361,  3362,
+    3363,  3364,  3365,  3369,  3372,  3372,  3372,  3381,  3382,  3387,
+    3390,  3399,  3403,  3410,  3411,  3415,  3424,  3428,  3438,  3444,
+    3462,  3462,  3471,  3474,  3481,  3485,  3492,  3492,  3498,  3498,
+    3506,  3506,  3524,  3527,  3533,  3536,  3542,  3546,  3553,  3561,
+    3570,  3578,  3590,  3600,  3604,  3612,  3615,  3621,  3621
 };
 #endif
 
@@ -1937,7 +1937,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value); \
+        Type, Value); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -2050,14 +2050,14 @@ yy_reduce_print (yyvsp, yyrule)
   int yyi;
   unsigned long int yylno = yyrline[yyrule];
   YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
-	     yyrule - 1, yylno);
+        yyrule - 1, yylno);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
-		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       );
+            &(yyvsp[(yyi + 1) - (yynrhs)])
+                            );
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -2166,27 +2166,27 @@ yytnamerr (char *yyres, const char *yystr)
       char const *yyp = yystr;
 
       for (;;)
-	switch (*++yyp)
-	  {
-	  case '\'':
-	  case ',':
-	    goto do_not_strip_quotes;
+    switch (*++yyp)
+    {
+    case '\'':
+    case ',':
+        goto do_not_strip_quotes;
 
-	  case '\\':
-	    if (*++yyp != '\\')
-	      goto do_not_strip_quotes;
-	    /* Fall through.  */
-	  default:
-	    if (yyres)
-	      yyres[yyn] = *yyp;
-	    yyn++;
-	    break;
+    case '\\':
+        if (*++yyp != '\\')
+        goto do_not_strip_quotes;
+        /* Fall through.  */
+    default:
+        if (yyres)
+        yyres[yyn] = *yyp;
+        yyn++;
+        break;
 
-	  case '"':
-	    if (yyres)
-	      yyres[yyn] = '\0';
-	    return yyn;
-	  }
+    case '"':
+        if (yyres)
+        yyres[yyn] = '\0';
+        return yyn;
+    }
     do_not_strip_quotes: ;
     }
 
@@ -2498,23 +2498,23 @@ YYSTYPE yylval YY_INITIAL_VALUE(yyval_default);
 
 #ifdef yyoverflow
       {
-	/* Give user a chance to reallocate the stack.  Use copies of
-	   these so that the &'s don't force the real ones into
-	   memory.  */
-	YYSTYPE *yyvs1 = yyvs;
-	yytype_int16 *yyss1 = yyss;
+    /* Give user a chance to reallocate the stack.  Use copies of
+    these so that the &'s don't force the real ones into
+    memory.  */
+    YYSTYPE *yyvs1 = yyvs;
+    yytype_int16 *yyss1 = yyss;
 
-	/* Each stack pointer address is followed by the size of the
-	   data in use in that stack, in bytes.  This used to be a
-	   conditional around just the two extra args, but that might
-	   be undefined if yyoverflow is a macro.  */
-	yyoverflow (YY_("memory exhausted"),
-		    &yyss1, yysize * sizeof (*yyssp),
-		    &yyvs1, yysize * sizeof (*yyvsp),
-		    &yystacksize);
+    /* Each stack pointer address is followed by the size of the
+    data in use in that stack, in bytes.  This used to be a
+    conditional around just the two extra args, but that might
+    be undefined if yyoverflow is a macro.  */
+    yyoverflow (YY_("memory exhausted"),
+            &yyss1, yysize * sizeof (*yyssp),
+            &yyvs1, yysize * sizeof (*yyvsp),
+            &yystacksize);
 
-	yyss = yyss1;
-	yyvs = yyvs1;
+    yyss = yyss1;
+    yyvs = yyvs1;
       }
 #else /* no yyoverflow */
 # ifndef YYSTACK_RELOCATE
@@ -2522,22 +2522,22 @@ YYSTYPE yylval YY_INITIAL_VALUE(yyval_default);
 # else
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-	goto yyexhaustedlab;
+    goto yyexhaustedlab;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
-	yystacksize = YYMAXDEPTH;
+    yystacksize = YYMAXDEPTH;
 
       {
-	yytype_int16 *yyss1 = yyss;
-	union yyalloc *yyptr =
-	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
-	if (! yyptr)
-	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss_alloc, yyss);
-	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+    yytype_int16 *yyss1 = yyss;
+    union yyalloc *yyptr =
+    (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
+    if (! yyptr)
+    goto yyexhaustedlab;
+    YYSTACK_RELOCATE (yyss_alloc, yyss);
+    YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
-	if (yyss1 != yyssa)
-	  YYSTACK_FREE (yyss1);
+    if (yyss1 != yyssa)
+    YYSTACK_FREE (yyss1);
       }
 # endif
 #endif /* no yyoverflow */
@@ -2546,10 +2546,10 @@ YYSTYPE yylval YY_INITIAL_VALUE(yyval_default);
       yyvsp = yyvs + yysize - 1;
 
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
-		  (unsigned long int) yystacksize));
+        (unsigned long int) yystacksize));
 
       if (yyss + yystacksize - 1 <= yyssp)
-	YYABORT;
+    YYABORT;
     }
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
@@ -2660,7 +2660,7 @@ yyreduce:
 /* Line 1787 of yacc.c  */
 #line 337 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        
+
         // The symbol table search was done in the lexical phase
         const TSymbol* symbol = (yyvsp[(1) - (1)].lex).symbol;
         const TVariable* variable;
@@ -2672,7 +2672,7 @@ yyreduce:
             parseContext.symbolTable.insert(*fakeVariable);
             variable = fakeVariable;
         } else {
-            // This identifier can only be a variable type symbol 
+            // This identifier can only be a variable type symbol
             if (! symbol->isVariable()) {
                 parseContext.error((yyvsp[(1) - (1)].lex).range, "variable expected", (yyvsp[(1) - (1)].lex).string->c_str(), "");
                 parseContext.recover(__FILE__, __LINE__);
@@ -2688,11 +2688,11 @@ yyreduce:
             TType t(variable->getType());
             (yyval.interm.intermTypedNode) = parseContext.intermediate.addConstantUnion(constArray, t, (yyvsp[(1) - (1)].lex).range, parseContext.extensionChanged);
         } else {
-            (yyval.interm.intermTypedNode) = parseContext.intermediate.addSymbol(variable->getUniqueId(), 
-                                                     variable->getName(), 
-                                                     variable->getType(), 
-                                                     (yyvsp[(1) - (1)].lex).range,
-                                                     parseContext.extensionChanged);
+            (yyval.interm.intermTypedNode) = parseContext.intermediate.addSymbol(variable->getUniqueId(),
+                                                    variable->getName(),
+                                                    variable->getType(),
+                                                    (yyvsp[(1) - (1)].lex).range,
+                                                    parseContext.extensionChanged);
         }
         if ((yyval.interm.intermTypedNode)) (yyval.interm.intermTypedNode)->setRange((yyvsp[(1) - (1)].lex).range);
     }
@@ -2711,10 +2711,10 @@ yyreduce:
 #line 380 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         //
-        // INT_TYPE is only 16-bit plus sign bit for vertex/fragment shaders, 
+        // INT_TYPE is only 16-bit plus sign bit for vertex/fragment shaders,
         // check for overflow for constants
         //
-		fprintf(stderr, "I:%d\n", (yyvsp[(1) - (1)].lex).i);
+        fprintf(stderr, "I:%d\n", (yyvsp[(1) - (1)].lex).i);
         if (abs((yyvsp[(1) - (1)].lex).i) >= (1 << 16)) {
             if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                 parseContext.error((yyvsp[(1) - (1)].lex).range, " integer constant overflow", "", "");
@@ -2749,7 +2749,7 @@ yyreduce:
         */
 
         constUnion *unionArray = new constUnion[1];
-		fprintf(stderr, "UI:%u\n", (yyvsp[(1) - (1)].lex).ui);
+        fprintf(stderr, "UI:%u\n", (yyvsp[(1) - (1)].lex).ui);
         unionArray->setUIConst((yyvsp[(1) - (1)].lex).ui);
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addConstantUnion(unionArray, TType(EbtUInt, EvqConst), (yyvsp[(1) - (1)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode)) (yyval.interm.intermTypedNode)->setRange((yyvsp[(1) - (1)].lex).range);
@@ -2791,7 +2791,7 @@ yyreduce:
   case 9:
 /* Line 1787 of yacc.c  */
 #line 440 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+    {
         (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode);
     }
     break;
@@ -2811,13 +2811,13 @@ yyreduce:
             if ((yyvsp[(1) - (4)].interm.intermTypedNode)->isArray()) { // constant folding for arrays
                 (yyval.interm.intermTypedNode) = parseContext.addConstArrayNode((yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), (yyvsp[(1) - (4)].interm.intermTypedNode), (yyvsp[(2) - (4)].lex).range);
             } else if ((yyvsp[(1) - (4)].interm.intermTypedNode)->isVector()) {  // constant folding for vectors
-                TVectorFields fields;                
+                TVectorFields fields;
                 fields.num = 1;
                 fields.offsets[0] = (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst(); // need to do it this way because v.xy sends fields integer array
                 (yyval.interm.intermTypedNode) = parseContext.addConstVectorNode(fields, (yyvsp[(1) - (4)].interm.intermTypedNode), (yyvsp[(2) - (4)].lex).range);
             } else if ((yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()) { // constant folding for matrices
                 (yyval.interm.intermTypedNode) = parseContext.addConstMatrixNode((yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), (yyvsp[(1) - (4)].interm.intermTypedNode), (yyvsp[(2) - (4)].lex).range);
-            } 
+            }
         } else {
             if ((yyvsp[(3) - (4)].interm.intermTypedNode)->getQualifier() == EvqConst) {
                 if ((yyvsp[(1) - (4)].interm.intermTypedNode)->isVector() && (yyvsp[(1) - (4)].interm.intermTypedNode)->getType().getNominalSize() <= (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst() && !(yyvsp[(1) - (4)].interm.intermTypedNode)->isArray() ) {
@@ -2831,10 +2831,10 @@ yyreduce:
                         if ((yyvsp[(1) - (4)].interm.intermTypedNode)->getType().getArraySize() == 0) {
                             if ((yyvsp[(1) - (4)].interm.intermTypedNode)->getType().getMaxArraySize() <= (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst()) {
                                 if (parseContext.arraySetMaxSize((yyvsp[(1) - (4)].interm.intermTypedNode)->getAsSymbolNode(), (yyvsp[(1) - (4)].interm.intermTypedNode)->getTypePointer(), (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst(), true, (yyvsp[(2) - (4)].lex).range))
-                                    parseContext.recover(__FILE__, __LINE__); 
+                                    parseContext.recover(__FILE__, __LINE__);
                             } else {
                                 if (parseContext.arraySetMaxSize((yyvsp[(1) - (4)].interm.intermTypedNode)->getAsSymbolNode(), (yyvsp[(1) - (4)].interm.intermTypedNode)->getTypePointer(), 0, false, (yyvsp[(2) - (4)].lex).range))
-                                    parseContext.recover(__FILE__, __LINE__); 
+                                    parseContext.recover(__FILE__, __LINE__);
                             }
                         } else if ( (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst() >= (yyvsp[(1) - (4)].interm.intermTypedNode)->getType().getArraySize()) {
                             parseContext.error((yyvsp[(2) - (4)].lex).range, "", "[", "array index out of range '%d'", (yyvsp[(3) - (4)].interm.intermTypedNode)->getAsConstantUnion()->getUnionArrayPointer()->getIConst());
@@ -2849,10 +2849,10 @@ yyreduce:
                     parseContext.error((yyvsp[(2) - (4)].lex).range, "", "[", "array must be redeclared with a size before being indexed with a variable");
                     parseContext.recover(__FILE__, __LINE__);
                 }
-                
+
                 (yyval.interm.intermTypedNode) = parseContext.intermediate.addIndex(EOpIndexIndirect, (yyvsp[(1) - (4)].interm.intermTypedNode), (yyvsp[(3) - (4)].interm.intermTypedNode), (yyvsp[(2) - (4)].lex).range, parseContext.extensionChanged);
             }
-        } 
+        }
         if ((yyval.interm.intermTypedNode) == 0) {
             constUnion *unionArray = new constUnion[1];
             unionArray->setFConst(0.0f);
@@ -2863,11 +2863,11 @@ yyreduce:
             } else {
                 if ((yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()) {
                     (yyval.interm.intermTypedNode) ->setType(TType((yyvsp[(1) - (4)].interm.intermTypedNode)->getBasicType(), EvqTemporary, EvmNone, 1,
-                                       (yyvsp[(1) - (4)].interm.intermTypedNode)->getMatrixSize(0), (yyvsp[(1) - (4)].interm.intermTypedNode)->getMatrixSize(1), (yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()));
+                                    (yyvsp[(1) - (4)].interm.intermTypedNode)->getMatrixSize(0), (yyvsp[(1) - (4)].interm.intermTypedNode)->getMatrixSize(1), (yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()));
                 } else {
                     (yyval.interm.intermTypedNode) ->setType(TType((yyvsp[(1) - (4)].interm.intermTypedNode)->getBasicType(), EvqTemporary, EvmNone, (yyvsp[(1) - (4)].interm.intermTypedNode)->getNominalSize(),
-                                       1,1, (yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()));
-               }
+                                    1,1, (yyvsp[(1) - (4)].interm.intermTypedNode)->isMatrix()));
+            }
             }
             if ((yyvsp[(1) - (4)].interm.intermTypedNode)->getType().getQualifier() == EvqConst) {
                 (yyval.interm.intermTypedNode)->getTypePointer()->changeQualifier(EvqConst);
@@ -2903,7 +2903,7 @@ yyreduce:
   case 12:
 /* Line 1787 of yacc.c  */
 #line 537 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    {        
+    {
         if ((yyvsp[(1) - (3)].interm.intermTypedNode)->isArray()) {
             parseContext.error((yyvsp[(3) - (3)].lex).range, "cannot apply dot operator to an array", ".", "");
             parseContext.recover(__FILE__, __LINE__);
@@ -2935,9 +2935,9 @@ yyreduce:
                     (yyval.interm.intermTypedNode)->setType(TType((yyvsp[(1) - (3)].interm.intermTypedNode)->getBasicType()));
                 } else {
                     TString vectorString = *(yyvsp[(3) - (3)].lex).string;
-                    TIntermTyped* index = parseContext.intermediate.addSwizzle(fields, (yyvsp[(3) - (3)].lex).range, parseContext.extensionChanged);                
+                    TIntermTyped* index = parseContext.intermediate.addSwizzle(fields, (yyvsp[(3) - (3)].lex).range, parseContext.extensionChanged);
                     (yyval.interm.intermTypedNode) = parseContext.intermediate.addIndex(EOpVectorSwizzle, (yyvsp[(1) - (3)].interm.intermTypedNode), index, (yyvsp[(2) - (3)].lex).range, parseContext.extensionChanged);
-                    (yyval.interm.intermTypedNode)->setType(TType((yyvsp[(1) - (3)].interm.intermTypedNode)->getBasicType(),EvqTemporary, EvmNone, (int) vectorString.size()));  
+                    (yyval.interm.intermTypedNode)->setType(TType((yyvsp[(1) - (3)].interm.intermTypedNode)->getBasicType(),EvqTemporary, EvmNone, (int) vectorString.size()));
                 }
             }
         } else if ((yyvsp[(1) - (3)].interm.intermTypedNode)->isMatrix()) {
@@ -2984,7 +2984,7 @@ yyreduce:
                     if ((*fields)[i].type->getFieldName() == *(yyvsp[(3) - (3)].lex).string) {
                         fieldFound = true;
                         break;
-                    }                
+                    }
                 }
                 if (fieldFound) {
                     if ((yyvsp[(1) - (3)].interm.intermTypedNode)->getType().getQualifier() == EvqConst) {
@@ -3070,7 +3070,7 @@ yyreduce:
     {
         TFunction* fnCall = (yyvsp[(1) - (1)].interm).function;
         TOperator op = fnCall->getBuiltInOp();
-        
+
         if (op == EOpArrayLength) {
             if ((yyvsp[(1) - (1)].interm).intermNode->getAsTyped() == 0 || (yyvsp[(1) - (1)].interm).intermNode->getAsTyped()->getType().getArraySize() == 0) {
                 parseContext.error((yyvsp[(1) - (1)].interm).range, "", fnCall->getName().c_str(), "array must be declared with a size before using this method");
@@ -3081,10 +3081,10 @@ yyreduce:
             unionArray->setIConst((yyvsp[(1) - (1)].interm).intermNode->getAsTyped()->getType().getArraySize());
             (yyval.interm.intermTypedNode) = parseContext.intermediate.addConstantUnion(unionArray, TType(EbtInt, EvqConst), (yyvsp[(1) - (1)].interm).range, parseContext.extensionChanged);
         } else if (op != EOpNull) {
-            
+
             //
             // Then this should be a constructor.
-            // Don't go through the symbol table for constructors.  
+            // Don't go through the symbol table for constructors.
             // Their parameters will be verified algorithmically.
             //
             TType type(EbtVoid);  // use this to get the type back
@@ -3102,7 +3102,7 @@ yyreduce:
                 (yyval.interm.intermTypedNode) = parseContext.intermediate.setAggregateOperator(0, op, (yyvsp[(1) - (1)].interm).range, parseContext.extensionChanged);
             }
             (yyval.interm.intermTypedNode)->setType(type);
-            
+
         } else {
             //
             // Not a constructor.  Find it in the symbol table.
@@ -3124,10 +3124,10 @@ yyreduce:
                         //
                         // Treat it like a built-in unary operator.
                         //
-                        (yyval.interm.intermTypedNode) = parseContext.intermediate.addUnaryMath(op, (yyvsp[(1) - (1)].interm).intermNode, 
+                        (yyval.interm.intermTypedNode) = parseContext.intermediate.addUnaryMath(op, (yyvsp[(1) - (1)].interm).intermNode,
                             TSourceRangeInit, parseContext.symbolTable, parseContext.extensionChanged);
                         if ((yyval.interm.intermTypedNode) == 0)  {
-                            parseContext.error((yyvsp[(1) - (1)].interm).intermNode->getRange(), " wrong operand type", "Internal Error", 
+                            parseContext.error((yyvsp[(1) - (1)].interm).intermNode->getRange(), " wrong operand type", "Internal Error",
                                 "built in unary operator function.  Type: %s",
                                 static_cast<TIntermTyped*>((yyvsp[(1) - (1)].interm).intermNode)->getCompleteString().c_str());
                             YYERROR;
@@ -3149,15 +3149,15 @@ yyreduce:
                     }
                 } else {
                     // This is a real function call
-                    
+
                     (yyval.interm.intermTypedNode) = parseContext.intermediate.setAggregateOperator((yyvsp[(1) - (1)].interm).intermAggregate, EOpFunctionCall, (yyvsp[(1) - (1)].interm).range, parseContext.extensionChanged);
-                    (yyval.interm.intermTypedNode)->setType(fnCandidate->getReturnType());                   
-                    
+                    (yyval.interm.intermTypedNode)->setType(fnCandidate->getReturnType());
+
                     // this is how we know whether the given function is a builtIn function or a user defined function
                     // if builtIn == false, it's a userDefined -> could be an overloaded builtIn function also
                     // if builtIn == true, it's definitely a builtIn function with EOpNull
                     if (!builtIn) {
-                        (yyval.interm.intermTypedNode)->getAsAggregate()->setUserDefined(); 
+                        (yyval.interm.intermTypedNode)->getAsAggregate()->setUserDefined();
                     } else {
                         if (strcmp(fnCandidate->getMangledName().c_str(), EMIT_VERTEX_SIG) == 0) {
                             (yyval.interm.intermTypedNode)->setEmitVertex();
@@ -3226,7 +3226,7 @@ yyreduce:
 #line 835 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if ((yyvsp[(1) - (2)].interm).function->getBuiltInOp() != EOpNull &&
-            (yyvsp[(1) - (2)].interm).function->getReturnTypePointer()->isArray() && 
+            (yyvsp[(1) - (2)].interm).function->getReturnTypePointer()->isArray() &&
             (yyvsp[(1) - (2)].interm).function->getReturnTypePointer()->getArraySize() == 0) {
                 (yyvsp[(1) - (2)].interm).function->getReturnTypePointer()->setArraySize((yyvsp[(1) - (2)].interm).function->getParamCount());
         }
@@ -3296,7 +3296,7 @@ yyreduce:
 /* Line 1787 of yacc.c  */
 #line 885 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        
+
         //
         // Constructor
         //
@@ -3338,47 +3338,49 @@ yyreduce:
                                 case 4:
                                                                 op = EOpConstructMat4;    break;
                             }
-                    }         
-                } else {      
+                    }
+                } else {
                     switch((yyvsp[(1) - (1)].interm.type).size) {
                     case 1:                                     op = EOpConstructFloat; break;
                     case 2:                                     op = EOpConstructVec2;  break;
                     case 3:                                     op = EOpConstructVec3;  break;
                     case 4:                                     op = EOpConstructVec4;  break;
-                    }       
-                }  
-                break;               
+                    }
+                }
+                break;
             case EbtInt:
                 switch((yyvsp[(1) - (1)].interm.type).size) {
                 case 1:                                         op = EOpConstructInt;   break;
                 case 2:       FRAG_VERT_GEOM_ONLY("ivec2", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructIVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("ivec3", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructIVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("ivec4", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructIVec4; break;
-                }         
-                break;    
+                }
+                break;
             case EbtUInt:
                 switch((yyvsp[(1) - (1)].interm.type).size) {
                 case 1:                                          op = EOpConstructUInt;  break;
                 case 2:       FRAG_VERT_GEOM_ONLY("uvec2", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructUVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("uvec3", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructUVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("uvec4", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructUVec4; break;
-                }         
-                break;    
+                }
+                break;
             case EbtBool:
                 switch((yyvsp[(1) - (1)].interm.type).size) {
                 case 1:                                         op = EOpConstructBool;  break;
                 case 2:       FRAG_VERT_GEOM_ONLY("bvec2", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructBVec2; break;
                 case 3:       FRAG_VERT_GEOM_ONLY("bvec3", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructBVec3; break;
                 case 4:       FRAG_VERT_GEOM_ONLY("bvec4", (yyvsp[(1) - (1)].interm.type).range); op = EOpConstructBVec4; break;
-                }         
+                }
+                break;
+            default:
                 break;
             }
-            if (op == EOpNull) {                    
+            if (op == EOpNull) {
                 parseContext.error((yyvsp[(1) - (1)].interm.type).range, "cannot construct this type", TType::getBasicString((yyvsp[(1) - (1)].interm.type).type), "");
                 parseContext.recover(__FILE__, __LINE__);
                 (yyvsp[(1) - (1)].interm.type).type = EbtFloat;
                 op = EOpConstructFloat;
-            }            
+            }
             TString tempString = "";
             TType type((yyvsp[(1) - (1)].interm.type));
             TFunction *function = new TFunction(&tempString, type, op);
@@ -3389,9 +3391,9 @@ yyreduce:
 
   case 27:
 /* Line 1787 of yacc.c  */
-#line 975 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 977 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        if (parseContext.reservedErrorCheck((yyvsp[(1) - (1)].lex).range, *(yyvsp[(1) - (1)].lex).string)) 
+        if (parseContext.reservedErrorCheck((yyvsp[(1) - (1)].lex).range, *(yyvsp[(1) - (1)].lex).string))
             parseContext.recover(__FILE__, __LINE__);
         TType type(EbtVoid);
         TFunction *function = new TFunction((yyvsp[(1) - (1)].lex).string, type);
@@ -3401,9 +3403,9 @@ yyreduce:
 
   case 28:
 /* Line 1787 of yacc.c  */
-#line 982 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 984 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        if (parseContext.reservedErrorCheck((yyvsp[(1) - (1)].lex).range, *(yyvsp[(1) - (1)].lex).string)) 
+        if (parseContext.reservedErrorCheck((yyvsp[(1) - (1)].lex).range, *(yyvsp[(1) - (1)].lex).string))
             parseContext.recover(__FILE__, __LINE__);
         TType type(EbtVoid);
         TFunction *function = new TFunction((yyvsp[(1) - (1)].lex).string, type);
@@ -3413,7 +3415,7 @@ yyreduce:
 
   case 29:
 /* Line 1787 of yacc.c  */
-#line 992 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 994 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode);
     }
@@ -3421,7 +3423,7 @@ yyreduce:
 
   case 30:
 /* Line 1787 of yacc.c  */
-#line 995 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 997 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.lValueErrorCheck((yyvsp[(1) - (2)].lex).range, "++", (yyvsp[(2) - (2)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
@@ -3437,7 +3439,7 @@ yyreduce:
 
   case 31:
 /* Line 1787 of yacc.c  */
-#line 1006 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1008 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.lValueErrorCheck((yyvsp[(1) - (2)].lex).range, "--", (yyvsp[(2) - (2)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
@@ -3453,7 +3455,7 @@ yyreduce:
 
   case 32:
 /* Line 1787 of yacc.c  */
-#line 1017 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1019 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if ((yyvsp[(1) - (2)].interm).op != EOpNull) {
             (yyval.interm.intermTypedNode) = parseContext.intermediate.addUnaryMath((yyvsp[(1) - (2)].interm).op, (yyvsp[(2) - (2)].interm.intermTypedNode), (yyvsp[(1) - (2)].interm).range, parseContext.symbolTable, parseContext.extensionChanged);
@@ -3463,7 +3465,7 @@ yyreduce:
                 case EOpNegative:   errorOp = "-"; break;
                 case EOpLogicalNot: errorOp = "!"; break;
                 case EOpBitwiseNot: errorOp = "~"; break;
-				default: break;
+                default: break;
                 }
                 parseContext.unaryOpError((yyvsp[(1) - (2)].interm).range, errorOp, (yyvsp[(2) - (2)].interm.intermTypedNode)->getCompleteString());
                 parseContext.recover(__FILE__, __LINE__);
@@ -3477,43 +3479,43 @@ yyreduce:
 
   case 33:
 /* Line 1787 of yacc.c  */
-#line 1040 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1042 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpNull; }
     break;
 
   case 34:
 /* Line 1787 of yacc.c  */
-#line 1041 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1043 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpNegative; }
     break;
 
   case 35:
 /* Line 1787 of yacc.c  */
-#line 1042 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1044 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpLogicalNot; }
     break;
 
   case 36:
 /* Line 1787 of yacc.c  */
-#line 1043 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-              if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
-                  parseContext.recover(__FILE__, __LINE__);
-              }
-              (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-              (yyval.interm).op = EOpBitwiseNot; 
+#line 1045 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+            if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+                parseContext.recover(__FILE__, __LINE__);
+            }
+            (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+            (yyval.interm).op = EOpBitwiseNot;
             }
     break;
 
   case 37:
 /* Line 1787 of yacc.c  */
-#line 1054 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1056 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 38:
 /* Line 1787 of yacc.c  */
-#line 1055 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1057 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("*", (yyvsp[(2) - (3)].lex).range);
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpMul, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
@@ -3528,9 +3530,9 @@ yyreduce:
 
   case 39:
 /* Line 1787 of yacc.c  */
-#line 1065 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1067 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("/", (yyvsp[(2) - (3)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("/", (yyvsp[(2) - (3)].lex).range);
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpDiv, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "/", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3543,7 +3545,7 @@ yyreduce:
 
   case 40:
 /* Line 1787 of yacc.c  */
-#line 1075 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1077 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
                 parseContext.recover(__FILE__, __LINE__);
@@ -3560,14 +3562,14 @@ yyreduce:
 
   case 41:
 /* Line 1787 of yacc.c  */
-#line 1090 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1092 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 42:
 /* Line 1787 of yacc.c  */
-#line 1091 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    {  
+#line 1093 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpAdd, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "+", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3580,27 +3582,27 @@ yyreduce:
 
   case 43:
 /* Line 1787 of yacc.c  */
-#line 1100 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1102 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpSub, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "-", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
             parseContext.recover(__FILE__, __LINE__);
             (yyval.interm.intermTypedNode) = (yyvsp[(1) - (3)].interm.intermTypedNode);
-        } 
+        }
         if ((yyval.interm.intermTypedNode) && (yyvsp[(1) - (3)].interm.intermTypedNode) && (yyvsp[(3) - (3)].interm.intermTypedNode)) (yyval.interm.intermTypedNode)->setRange(addRange((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getRange()));
     }
     break;
 
   case 44:
 /* Line 1787 of yacc.c  */
-#line 1112 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1114 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 45:
 /* Line 1787 of yacc.c  */
-#line 1113 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1115 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -3617,7 +3619,7 @@ yyreduce:
 
   case 46:
 /* Line 1787 of yacc.c  */
-#line 1125 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1127 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -3634,14 +3636,14 @@ yyreduce:
 
   case 47:
 /* Line 1787 of yacc.c  */
-#line 1140 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1142 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 48:
 /* Line 1787 of yacc.c  */
-#line 1141 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1143 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpLessThan, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "<", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3656,8 +3658,8 @@ yyreduce:
 
   case 49:
 /* Line 1787 of yacc.c  */
-#line 1152 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1154 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpGreaterThan, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, ">", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3672,8 +3674,8 @@ yyreduce:
 
   case 50:
 /* Line 1787 of yacc.c  */
-#line 1163 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1165 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpLessThanEqual, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "<=", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3688,8 +3690,8 @@ yyreduce:
 
   case 51:
 /* Line 1787 of yacc.c  */
-#line 1174 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1176 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpGreaterThanEqual, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, ">=", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3704,13 +3706,13 @@ yyreduce:
 
   case 52:
 /* Line 1787 of yacc.c  */
-#line 1188 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1190 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 53:
 /* Line 1787 of yacc.c  */
-#line 1189 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1191 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpEqual, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
@@ -3726,8 +3728,8 @@ yyreduce:
 
   case 54:
 /* Line 1787 of yacc.c  */
-#line 1200 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1202 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpNotEqual, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "!=", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3742,13 +3744,13 @@ yyreduce:
 
   case 55:
 /* Line 1787 of yacc.c  */
-#line 1214 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1216 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 56:
 /* Line 1787 of yacc.c  */
-#line 1215 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1217 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -3765,13 +3767,13 @@ yyreduce:
 
   case 57:
 /* Line 1787 of yacc.c  */
-#line 1230 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1232 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 58:
 /* Line 1787 of yacc.c  */
-#line 1231 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1233 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -3788,13 +3790,13 @@ yyreduce:
 
   case 59:
 /* Line 1787 of yacc.c  */
-#line 1246 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1248 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 60:
 /* Line 1787 of yacc.c  */
-#line 1247 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1249 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (3)].interm.intermTypedNode)->getRange(), "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -3811,13 +3813,13 @@ yyreduce:
 
   case 61:
 /* Line 1787 of yacc.c  */
-#line 1262 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1264 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 62:
 /* Line 1787 of yacc.c  */
-#line 1263 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1265 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpLogicalAnd, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
@@ -3833,14 +3835,14 @@ yyreduce:
 
   case 63:
 /* Line 1787 of yacc.c  */
-#line 1277 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1279 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 64:
 /* Line 1787 of yacc.c  */
-#line 1278 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1280 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpLogicalXor, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "^^", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3855,14 +3857,14 @@ yyreduce:
 
   case 65:
 /* Line 1787 of yacc.c  */
-#line 1292 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1294 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 66:
 /* Line 1787 of yacc.c  */
-#line 1293 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1295 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addBinaryMath(EOpLogicalOr, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.symbolTable, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
             parseContext.binaryOpError((yyvsp[(2) - (3)].lex).range, "||", (yyvsp[(1) - (3)].interm.intermTypedNode)->getCompleteString(), (yyvsp[(3) - (3)].interm.intermTypedNode)->getCompleteString());
@@ -3877,23 +3879,23 @@ yyreduce:
 
   case 67:
 /* Line 1787 of yacc.c  */
-#line 1307 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1309 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 68:
 /* Line 1787 of yacc.c  */
-#line 1308 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1310 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-       if (parseContext.boolErrorCheck((yyvsp[(2) - (5)].lex).range, (yyvsp[(1) - (5)].interm.intermTypedNode)))
+    if (parseContext.boolErrorCheck((yyvsp[(2) - (5)].lex).range, (yyvsp[(1) - (5)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
 
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addSelection((yyvsp[(1) - (5)].interm.intermTypedNode), (yyvsp[(3) - (5)].interm.intermTypedNode), (yyvsp[(5) - (5)].interm.intermTypedNode), (yyvsp[(2) - (5)].lex).range, parseContext.extensionChanged);
 
         /* GLSL 1.20 does not require the expressions to have the same type,
-         * as long as there is a conversion to one of the expressions to make
-         * their types match. The resulting matching is the type of the
-         * entire expression */
+        * as long as there is a conversion to one of the expressions to make
+        * their types match. The resulting matching is the type of the
+        * entire expression */
         /*
         if ($3->getType() != $5->getType())
             $$ = 0;
@@ -3910,14 +3912,14 @@ yyreduce:
 
   case 69:
 /* Line 1787 of yacc.c  */
-#line 1333 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1335 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 70:
 /* Line 1787 of yacc.c  */
-#line 1334 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    {        
+#line 1336 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         if (parseContext.lValueErrorCheck((yyvsp[(2) - (3)].interm).range, "assign", (yyvsp[(1) - (3)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addAssign((yyvsp[(2) - (3)].interm).op, (yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].interm).range, parseContext.extensionChanged);
@@ -3932,108 +3934,108 @@ yyreduce:
 
   case 71:
 /* Line 1787 of yacc.c  */
-#line 1348 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1350 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {                                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpAssign; }
     break;
 
   case 72:
 /* Line 1787 of yacc.c  */
-#line 1349 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1351 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { FRAG_VERT_GEOM_ONLY("*=", (yyvsp[(1) - (1)].lex).range);     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpMulAssign; }
     break;
 
   case 73:
 /* Line 1787 of yacc.c  */
-#line 1350 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1352 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { FRAG_VERT_GEOM_ONLY("/=", (yyvsp[(1) - (1)].lex).range);     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpDivAssign; }
     break;
 
   case 74:
 /* Line 1787 of yacc.c  */
-#line 1351 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+#line 1353 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpModAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpModAssign;
+                }
     break;
 
   case 75:
 /* Line 1787 of yacc.c  */
-#line 1357 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1359 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpAddAssign; }
     break;
 
   case 76:
 /* Line 1787 of yacc.c  */
-#line 1358 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1360 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; (yyval.interm).op = EOpSubAssign; }
     break;
 
   case 77:
 /* Line 1787 of yacc.c  */
-#line 1359 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1361 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-                     (yyval.interm).op = EOpLeftShiftAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+                    (yyval.interm).op = EOpLeftShiftAssign;
+                }
     break;
 
   case 78:
 /* Line 1787 of yacc.c  */
-#line 1366 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1368 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-                     (yyval.interm).op = EOpRightShiftAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+                    (yyval.interm).op = EOpRightShiftAssign;
+                }
     break;
 
   case 79:
 /* Line 1787 of yacc.c  */
-#line 1373 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+#line 1375 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-                     (yyval.interm).op = EOpAndAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+                    (yyval.interm).op = EOpAndAssign;
+                }
     break;
 
   case 80:
 /* Line 1787 of yacc.c  */
-#line 1380 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1382 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-                     (yyval.interm).op = EOpExclusiveOrAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+                    (yyval.interm).op = EOpExclusiveOrAssign;
+                }
     break;
 
   case 81:
 /* Line 1787 of yacc.c  */
-#line 1387 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1389 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-                     if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
+                    if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                     }
-                     (yyval.interm).range = (yyvsp[(1) - (1)].lex).range; 
-                     (yyval.interm).op = EOpInclusiveOrAssign; 
-                   }
+                    }
+                    (yyval.interm).range = (yyvsp[(1) - (1)].lex).range;
+                    (yyval.interm).op = EOpInclusiveOrAssign;
+                }
     break;
 
   case 82:
 /* Line 1787 of yacc.c  */
-#line 1397 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1399 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode);
     }
@@ -4041,7 +4043,7 @@ yyreduce:
 
   case 83:
 /* Line 1787 of yacc.c  */
-#line 1400 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1402 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = parseContext.intermediate.addComma((yyvsp[(1) - (3)].interm.intermTypedNode), (yyvsp[(3) - (3)].interm.intermTypedNode), (yyvsp[(2) - (3)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermTypedNode) == 0) {
@@ -4055,7 +4057,7 @@ yyreduce:
 
   case 84:
 /* Line 1787 of yacc.c  */
-#line 1412 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1414 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.constErrorCheck((yyvsp[(1) - (1)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
@@ -4065,7 +4067,7 @@ yyreduce:
 
   case 85:
 /* Line 1787 of yacc.c  */
-#line 1420 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1422 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TIntermNode *funcDecl;
         funcDecl = parseContext.intermediate.addFuncDeclaration((yyvsp[(1) - (2)].interm).range, (yyvsp[(1) - (2)].interm).function, parseContext.extensionChanged);
@@ -4076,24 +4078,24 @@ yyreduce:
 
   case 86:
 /* Line 1787 of yacc.c  */
-#line 1426 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1428 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         if (((yyvsp[(1) - (2)].interm).intermAggregate) && ((yyvsp[(1) - (2)].interm).intermAggregate->getOp() == EOpNull)) {
                 (yyvsp[(1) - (2)].interm).intermAggregate->setOperator(EOpDeclaration);
         }
-        (yyval.interm.intermNode) = (yyvsp[(1) - (2)].interm).intermAggregate; 
+        (yyval.interm.intermNode) = (yyvsp[(1) - (2)].interm).intermAggregate;
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (2)].interm).range, (yyvsp[(2) - (2)].lex).range));
     }
     break;
 
   case 87:
 /* Line 1787 of yacc.c  */
-#line 1436 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1438 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         //
         // Multiple declarations of the same function are allowed.
         //
-        // If this is a definition, the definition production code will check for redefinitions 
+        // If this is a definition, the definition production code will check for redefinitions
         // (we don't know at this point if it's a definition or not).
         //
         // Redeclarations are allowed.  But, return types and parameter qualifiers must match.
@@ -4111,7 +4113,7 @@ yyreduce:
                 }
             }
         }
-        
+
         //
         // If this is a redeclaration, it could also be a definition,
         // in which case, we want to use the variable names from this one, and not the one that's
@@ -4125,7 +4127,7 @@ yyreduce:
 
   case 88:
 /* Line 1787 of yacc.c  */
-#line 1471 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1473 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.function) = (yyvsp[(1) - (1)].interm.function);
     }
@@ -4133,15 +4135,15 @@ yyreduce:
 
   case 89:
 /* Line 1787 of yacc.c  */
-#line 1474 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 1476 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.function) = (yyvsp[(1) - (1)].interm.function);
     }
     break;
 
   case 90:
 /* Line 1787 of yacc.c  */
-#line 1481 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1483 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         // Add the parameter
         (yyval.interm.function) = (yyvsp[(1) - (2)].interm.function);
@@ -4154,11 +4156,11 @@ yyreduce:
 
   case 91:
 /* Line 1787 of yacc.c  */
-#line 1489 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1491 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         //
         // Only first parameter of one-parameter functions can be void
-        // The check for named parameters not being void is done in parameter_declarator 
+        // The check for named parameters not being void is done in parameter_declarator
         //
         if ((yyvsp[(3) - (3)].interm).param.type->getBasicType() == EbtVoid) {
             //
@@ -4168,8 +4170,8 @@ yyreduce:
             parseContext.recover(__FILE__, __LINE__);
             delete (yyvsp[(3) - (3)].interm).param.type;
         } else {
-            // Add the parameter 
-            (yyval.interm.function) = (yyvsp[(1) - (3)].interm.function); 
+            // Add the parameter
+            (yyval.interm.function) = (yyvsp[(1) - (3)].interm.function);
             (yyvsp[(1) - (3)].interm.function)->addParameter((yyvsp[(3) - (3)].interm).param);
         }
     }
@@ -4177,7 +4179,7 @@ yyreduce:
 
   case 92:
 /* Line 1787 of yacc.c  */
-#line 1510 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1512 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if ((yyvsp[(1) - (3)].interm.type).qualifier != EvqGlobal && (yyvsp[(1) - (3)].interm.type).qualifier != EvqTemporary) {
             parseContext.error((yyvsp[(2) - (3)].lex).range, "no qualifiers allowed for function return", getQualifierString((yyvsp[(1) - (3)].interm.type).qualifier, parseContext.language), "");
@@ -4187,7 +4189,7 @@ yyreduce:
         if (parseContext.structQualifierErrorCheck((yyvsp[(2) - (3)].lex).range, (yyvsp[(1) - (3)].interm.type)))
             parseContext.recover(__FILE__, __LINE__);
 
-        // Add the function as a prototype after parsing it (we do not support recursion) 
+        // Add the function as a prototype after parsing it (we do not support recursion)
         TFunction *function;
         TType type((yyvsp[(1) - (3)].interm.type));
         function = new TFunction((yyvsp[(2) - (3)].lex).string, type);
@@ -4197,7 +4199,7 @@ yyreduce:
 
   case 93:
 /* Line 1787 of yacc.c  */
-#line 1529 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1531 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.arraySizeUnspecifiedErrorCheck((yyvsp[(1) - (2)].interm.type).range, (yyvsp[(1) - (2)].interm.type))) {
             parseContext.error((yyvsp[(1) - (2)].interm.type).range, "array syntax error", "", "");
@@ -4218,7 +4220,7 @@ yyreduce:
 
   case 94:
 /* Line 1787 of yacc.c  */
-#line 1545 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1547 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.arraySizeUnspecifiedErrorCheck((yyvsp[(1) - (5)].interm.type).range, (yyvsp[(1) - (5)].interm.type))) {
             parseContext.error((yyvsp[(1) - (5)].interm.type).range, "array syntax error", "", "");
@@ -4246,7 +4248,7 @@ yyreduce:
 
   case 95:
 /* Line 1787 of yacc.c  */
-#line 1579 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1581 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(3) - (3)].interm);
         if (parseContext.paramErrorCheck((yyvsp[(3) - (3)].interm).range, (yyvsp[(1) - (3)].interm.type).qualifier, (yyvsp[(2) - (3)].interm.qualifier), (yyval.interm).param.type))
@@ -4257,7 +4259,7 @@ yyreduce:
 
   case 96:
 /* Line 1787 of yacc.c  */
-#line 1585 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1587 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(2) - (2)].interm);
         if (parseContext.parameterSamplerErrorCheck((yyvsp[(2) - (2)].interm).range, (yyvsp[(1) - (2)].interm.qualifier), *(yyvsp[(2) - (2)].interm).param.type))
@@ -4270,7 +4272,7 @@ yyreduce:
 
   case 97:
 /* Line 1787 of yacc.c  */
-#line 1596 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1598 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(3) - (3)].interm);
         if (parseContext.paramErrorCheck((yyvsp[(3) - (3)].interm).range, (yyvsp[(1) - (3)].interm.type).qualifier, (yyvsp[(2) - (3)].interm.qualifier), (yyval.interm).param.type))
@@ -4281,7 +4283,7 @@ yyreduce:
 
   case 98:
 /* Line 1787 of yacc.c  */
-#line 1602 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1604 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(2) - (2)].interm);
         if (parseContext.parameterSamplerErrorCheck((yyvsp[(2) - (2)].interm).range, (yyvsp[(1) - (2)].interm.qualifier), *(yyvsp[(2) - (2)].interm).param.type))
@@ -4294,7 +4296,7 @@ yyreduce:
 
   case 99:
 /* Line 1787 of yacc.c  */
-#line 1613 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1615 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqIn;
     }
@@ -4302,7 +4304,7 @@ yyreduce:
 
   case 100:
 /* Line 1787 of yacc.c  */
-#line 1616 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1618 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqIn;
     }
@@ -4310,7 +4312,7 @@ yyreduce:
 
   case 101:
 /* Line 1787 of yacc.c  */
-#line 1619 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1621 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqOut;
     }
@@ -4318,7 +4320,7 @@ yyreduce:
 
   case 102:
 /* Line 1787 of yacc.c  */
-#line 1622 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1624 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqInOut;
     }
@@ -4326,7 +4328,7 @@ yyreduce:
 
   case 103:
 /* Line 1787 of yacc.c  */
-#line 1628 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1630 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.arraySizeUnspecifiedErrorCheck((yyvsp[(1) - (1)].interm.type).range, (yyvsp[(1) - (1)].interm.type))) {
             parseContext.error((yyvsp[(1) - (1)].interm.type).range, "array syntax error", "", "");
@@ -4341,7 +4343,7 @@ yyreduce:
 
   case 104:
 /* Line 1787 of yacc.c  */
-#line 1641 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1643 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type).setBasic(EbtVoid, EvqConst, EvmNone, (yyvsp[(1) - (2)].lex).range);
         (yyval.interm.type).setArray(true);
@@ -4351,7 +4353,7 @@ yyreduce:
 
   case 105:
 /* Line 1787 of yacc.c  */
-#line 1646 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1648 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type).setBasic(EbtVoid, EvqConst, EvmNone, (yyvsp[(1) - (3)].lex).range);
 
@@ -4367,7 +4369,7 @@ yyreduce:
 
   case 106:
 /* Line 1787 of yacc.c  */
-#line 1657 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1659 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         GEOM_ONLY("multiple array suffixes", (yyvsp[(3) - (3)].interm.type).range);
         (yyval.interm.type) = (yyvsp[(3) - (3)].interm.type);
@@ -4378,7 +4380,7 @@ yyreduce:
 
   case 107:
 /* Line 1787 of yacc.c  */
-#line 1663 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1665 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         GEOM_ONLY("multiple array suffixes", (yyvsp[(3) - (4)].lex).range);
         (yyval.interm.type) = (yyvsp[(4) - (4)].interm.type);
@@ -4392,7 +4394,7 @@ yyreduce:
 
   case 108:
 /* Line 1787 of yacc.c  */
-#line 1675 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1677 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(1) - (1)].interm);
     }
@@ -4400,7 +4402,7 @@ yyreduce:
 
   case 109:
 /* Line 1787 of yacc.c  */
-#line 1678 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1680 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm) = (yyvsp[(1) - (3)].interm);
 
@@ -4416,25 +4418,25 @@ yyreduce:
                 parseContext.recover(__FILE__, __LINE__);
 
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(3) - (3)].lex).string);
-            TIntermNode *intermNode = 
-                parseContext.intermediate.addDeclaration((yyvsp[(3) - (3)].lex).range, (TVariable*)sym, NULL, 
-                                                         parseContext.extensionChanged);
+            TIntermNode *intermNode =
+                parseContext.intermediate.addDeclaration((yyvsp[(3) - (3)].lex).range, (TVariable*)sym, NULL,
+                                                        parseContext.extensionChanged);
 
             /* Special care taken for structs */
-            if ( (yyvsp[(1) - (3)].interm).type.type == EbtStruct 
-                 && (yyvsp[(1) - (3)].interm).type.userDef != 0 
-                 && (yyvsp[(1) - (3)].interm).type.userDef->isSpecified() ) {
+            if ( (yyvsp[(1) - (3)].interm).type.type == EbtStruct
+                && (yyvsp[(1) - (3)].interm).type.userDef != 0
+                && (yyvsp[(1) - (3)].interm).type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ((yyvsp[(1) - (3)].interm).intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  intermNode->getAsDeclarationNode(), 
-                                  parseContext);
+                                intermNode->getAsDeclarationNode(),
+                                parseContext);
             } else {
                 /* Add declaration normally to the tree */
-                (yyval.interm).intermAggregate = 
-                    parseContext.intermediate.growAggregate((yyvsp[(1) - (3)].interm).intermNode, intermNode, 
+                (yyval.interm).intermAggregate =
+                    parseContext.intermediate.growAggregate((yyvsp[(1) - (3)].interm).intermNode, intermNode,
                                                             parseContext.extensionChanged);
             }
         } else {
@@ -4450,12 +4452,12 @@ yyreduce:
                 newPType.setBasic(EbtInvariant, EvqTemporary);
                 TVariable *newVar = new TVariable(newName, newType);
 
-                TIntermNode *intermNode = 
-                    parseContext.intermediate.addDeclaration((yyvsp[(3) - (3)].lex).range, newVar, NULL, 
-                                                             parseContext.extensionChanged);
+                TIntermNode *intermNode =
+                    parseContext.intermediate.addDeclaration((yyvsp[(3) - (3)].lex).range, newVar, NULL,
+                                                            parseContext.extensionChanged);
                 /* Add declaration normally to the tree */
-                (yyval.interm).intermAggregate = 
-                    parseContext.intermediate.growAggregate((yyvsp[(1) - (3)].interm).intermNode, intermNode, 
+                (yyval.interm).intermAggregate =
+                    parseContext.intermediate.growAggregate((yyvsp[(1) - (3)].interm).intermNode, intermNode,
                                                             parseContext.extensionChanged);
             }
         }
@@ -4465,7 +4467,7 @@ yyreduce:
 
   case 110:
 /* Line 1787 of yacc.c  */
-#line 1738 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1740 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.structQualifierErrorCheck((yyvsp[(3) - (4)].lex).range, (yyvsp[(1) - (4)].interm).type))
             parseContext.recover(__FILE__, __LINE__);
@@ -4525,23 +4527,23 @@ yyreduce:
         }
 
         TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(3) - (4)].lex).string);
-        TIntermNode *intermNode = 
+        TIntermNode *intermNode =
             parseContext.intermediate.addDeclaration((yyvsp[(3) - (4)].lex).range, (TVariable*)sym, NULL, parseContext.extensionChanged);
 
         /* Special care taken for structs */
-        if ( (yyvsp[(1) - (4)].interm).type.type == EbtStruct 
-             && (yyvsp[(1) - (4)].interm).type.userDef != 0 
-             && (yyvsp[(1) - (4)].interm).type.userDef->isSpecified() ) {
+        if ( (yyvsp[(1) - (4)].interm).type.type == EbtStruct
+            && (yyvsp[(1) - (4)].interm).type.userDef != 0
+            && (yyvsp[(1) - (4)].interm).type.userDef->isSpecified() ) {
             /* Add declaration to instances of stuct */
-            TIntermSpecification* specificationNode = 
+            TIntermSpecification* specificationNode =
                 ((yyvsp[(1) - (4)].interm).intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
             addStructInstance(specificationNode,
-                              intermNode->getAsDeclarationNode(), 
-                              parseContext);
+                            intermNode->getAsDeclarationNode(),
+                            parseContext);
         } else {
             /* Add declaration normally to the tree */
-            (yyval.interm).intermAggregate = 
+            (yyval.interm).intermAggregate =
                 parseContext.intermediate.growAggregate((yyvsp[(1) - (4)].interm).intermNode, intermNode, parseContext.extensionChanged);
             (yyval.interm).intermAggregate->setRange(addRange((yyvsp[(1) - (4)].interm).range, (yyvsp[(4) - (4)].interm.type).range));
         }
@@ -4551,7 +4553,7 @@ yyreduce:
 
   case 111:
 /* Line 1787 of yacc.c  */
-#line 1819 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1821 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.structQualifierErrorCheck((yyvsp[(3) - (7)].lex).range, (yyvsp[(1) - (7)].interm).type))
             parseContext.recover(__FILE__, __LINE__);
@@ -4562,13 +4564,13 @@ yyreduce:
         if (parseContext.arrayTypeErrorCheck((yyvsp[(4) - (7)].lex).range, (yyvsp[(1) - (7)].interm).type) || parseContext.arrayQualifierErrorCheck((yyvsp[(4) - (7)].lex).range, (yyvsp[(1) - (7)].interm).type))
             parseContext.recover(__FILE__, __LINE__);
         else {
-			(yyvsp[(1) - (7)].interm).type.setArray(true, (yyvsp[(7) - (7)].interm.intermTypedNode)->getType().getArraySize());
+            (yyvsp[(1) - (7)].interm).type.setArray(true, (yyvsp[(7) - (7)].interm.intermTypedNode)->getType().getArraySize());
             if (parseContext.arrayErrorCheck((yyvsp[(4) - (7)].lex).range, *(yyvsp[(3) - (7)].lex).string, (yyvsp[(1) - (7)].interm).type, variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
 
         TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(3) - (7)].lex).string);
-        TIntermNode *intermNode = 
+        TIntermNode *intermNode =
             parseContext.intermediate.addDeclaration((yyvsp[(3) - (7)].lex).range, (TVariable*)sym, NULL, parseContext.extensionChanged);
         /* Special care taken for structs */
         if ( (yyvsp[(1) - (7)].interm).type.type == EbtStruct && (yyvsp[(1) - (7)].interm).type.userDef != 0 && (yyvsp[(1) - (7)].interm).type.userDef->isSpecified() ) {
@@ -4588,12 +4590,12 @@ yyreduce:
                 }
 
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ((yyvsp[(1) - (7)].interm).intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode, 
-                                  parseContext);
+                                decNode,
+                                parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 (yyval.interm).intermAggregate = 0;
@@ -4628,7 +4630,7 @@ yyreduce:
 
   case 112:
 /* Line 1787 of yacc.c  */
-#line 1891 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1893 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.structQualifierErrorCheck((yyvsp[(3) - (8)].lex).range, (yyvsp[(1) - (8)].interm).type))
             parseContext.recover(__FILE__, __LINE__);
@@ -4667,12 +4669,12 @@ yyreduce:
                 }
 
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ((yyvsp[(1) - (8)].interm).intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode, 
-                                  parseContext);
+                                decNode,
+                                parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 (yyval.interm).intermAggregate = 0;
@@ -4707,13 +4709,13 @@ yyreduce:
 
   case 113:
 /* Line 1787 of yacc.c  */
-#line 1965 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 1967 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.structQualifierErrorCheck((yyvsp[(3) - (5)].lex).range, (yyvsp[(1) - (5)].interm).type))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         (yyval.interm) = (yyvsp[(1) - (5)].interm);
-        
+
         TIntermNode* intermNode;
         if (!parseContext.executeInitializer((yyvsp[(3) - (5)].lex).range, *(yyvsp[(3) - (5)].lex).string, (yyvsp[(1) - (5)].interm).type, (yyvsp[(5) - (5)].interm.intermTypedNode), intermNode)) {
             //
@@ -4721,26 +4723,26 @@ yyreduce:
             //
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(3) - (5)].lex).string);
             TIntermNode *decNode;
-            decNode = 
+            decNode =
                 parseContext.intermediate.addDeclaration((yyvsp[(3) - (5)].lex).range, (TVariable*) sym, intermNode, parseContext.extensionChanged);
             /* Special care taken for structs */
-           if ( (yyvsp[(1) - (5)].interm).type.type == EbtStruct 
-                 && (yyvsp[(1) - (5)].interm).type.userDef != 0 
-                 && (yyvsp[(1) - (5)].interm).type.userDef->isSpecified() ) {
+        if ( (yyvsp[(1) - (5)].interm).type.type == EbtStruct
+                && (yyvsp[(1) - (5)].interm).type.userDef != 0
+                && (yyvsp[(1) - (5)].interm).type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
-                TIntermSpecification* specificationNode = 
+                TIntermSpecification* specificationNode =
                     ((yyvsp[(1) - (5)].interm).intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                  decNode->getAsDeclarationNode(), 
-                                  parseContext);
+                                decNode->getAsDeclarationNode(),
+                                parseContext);
             } else {
                 /* Add declaration normally to the tree */
-                (yyval.interm).intermAggregate = 
+                (yyval.interm).intermAggregate =
                     parseContext.intermediate.growAggregate((yyvsp[(1) - (5)].interm).intermNode, decNode, parseContext.extensionChanged);
                 (yyval.interm).intermAggregate->setRange(addRange((yyvsp[(1) - (5)].interm).range, (yyvsp[(5) - (5)].interm.intermTypedNode)->getRange()));
             }
-         } else {
+        } else {
             parseContext.recover(__FILE__, __LINE__);
             (yyval.interm).intermAggregate = 0;
         }
@@ -4750,26 +4752,26 @@ yyreduce:
 
   case 114:
 /* Line 1787 of yacc.c  */
-#line 2006 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2008 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm).type = (yyvsp[(1) - (1)].interm.type);
         (yyval.interm).intermAggregate = 0;
 
         if ( (yyvsp[(1) - (1)].interm.type).type == EbtStruct &&
-             (yyvsp[(1) - (1)].interm.type).userDef != 0 && 
-             (yyvsp[(1) - (1)].interm.type).userDef->isSpecified() == true ) {
-            TIntermNode *intermNode = 
+            (yyvsp[(1) - (1)].interm.type).userDef != 0 &&
+            (yyvsp[(1) - (1)].interm.type).userDef->isSpecified() == true ) {
+            TIntermNode *intermNode =
                 parseContext.intermediate.addSpecification((yyvsp[(1) - (1)].interm.type).range, (yyvsp[(1) - (1)].interm.type).userDef, parseContext.extensionChanged);
-                
-            processStruct((yyvsp[(1) - (1)].interm.type).userDef->getStruct(), 
-                          intermNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
 
-            (yyval.interm).intermAggregate = 
+            processStruct((yyvsp[(1) - (1)].interm.type).userDef->getStruct(),
+                        intermNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            (yyval.interm).intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
 
             if ((yyval.interm).intermAggregate)
-                (yyval.interm).intermAggregate->setOperator(EOpSpecification); 
+                (yyval.interm).intermAggregate->setOperator(EOpSpecification);
         }
         (yyval.interm).range = (yyvsp[(1) - (1)].interm.type).range;
     }
@@ -4777,14 +4779,14 @@ yyreduce:
 
   case 115:
 /* Line 1787 of yacc.c  */
-#line 2028 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2030 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm).intermAggregate = 0;
         (yyval.interm).type = (yyvsp[(1) - (2)].interm.type);
-    
+
         if (parseContext.structQualifierErrorCheck((yyvsp[(2) - (2)].lex).range, (yyval.interm).type))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         if (parseContext.nonInitConstErrorCheck((yyvsp[(2) - (2)].lex).range, *(yyvsp[(2) - (2)].lex).string, (yyval.interm).type))
             parseContext.recover(__FILE__, __LINE__);
 
@@ -4796,41 +4798,41 @@ yyreduce:
             if (parseContext.nonArrayGeometryVaryingInErrorCheck((yyvsp[(2) - (2)].lex).range, (yyvsp[(1) - (2)].interm.type), *(yyvsp[(2) - (2)].lex).string))
                 parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         /* Special handling for structs */
         if ( (yyvsp[(1) - (2)].interm.type).type == EbtStruct  && (yyvsp[(1) - (2)].interm.type).userDef != 0 && (yyvsp[(1) - (2)].interm.type).userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification((yyvsp[(1) - (2)].interm.type).range, (yyvsp[(1) - (2)].interm.type).userDef, parseContext.extensionChanged);
-                
+
             processStruct((yyvsp[(1) - (2)].interm.type).userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (2)].lex).string);
-            TIntermNode *declarationNode = 
+            TIntermNode *declarationNode =
                 parseContext.intermediate.addDeclaration((yyvsp[(2) - (2)].lex).range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             (yyval.interm).intermAggregate = specificationAggregate;
 
         } else {
             /* None-struct declarations: just add declaration node */
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (2)].lex).string);
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration((yyvsp[(2) - (2)].lex).range, (TVariable*) sym, NULL, parseContext.extensionChanged);
             ((TIntermDeclaration*)intermNode)->setFirst(true);
-            (yyval.interm).intermAggregate = 
+            (yyval.interm).intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
         }
         (yyval.interm).range = addRange((yyvsp[(1) - (2)].interm.type).range, (yyvsp[(2) - (2)].lex).range);
@@ -4839,7 +4841,7 @@ yyreduce:
 
   case 116:
 /* Line 1787 of yacc.c  */
-#line 2085 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2087 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm).intermAggregate = 0;
         if (parseContext.structQualifierErrorCheck((yyvsp[(2) - (3)].lex).range, (yyvsp[(1) - (3)].interm.type)))
@@ -4849,7 +4851,7 @@ yyreduce:
             parseContext.recover(__FILE__, __LINE__);
 
         (yyval.interm).type = (yyvsp[(1) - (3)].interm.type);
-        
+
         if (parseContext.arrayTypeErrorCheck((yyvsp[(3) - (3)].interm.type).range, (yyvsp[(1) - (3)].interm.type)) || parseContext.arrayQualifierErrorCheck((yyvsp[(3) - (3)].interm.type).range, (yyvsp[(1) - (3)].interm.type))) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -4857,7 +4859,7 @@ yyreduce:
             for (i=0; i<MAX_ARRAYS; i++) {
                 (yyvsp[(1) - (3)].interm.type).addArray(true, (yyvsp[(3) - (3)].interm.type).arraySize[i], i);
             }
-            
+
             TVariable* variable;
             if (parseContext.arrayErrorCheck((yyvsp[(3) - (3)].interm.type).range, *(yyvsp[(2) - (3)].lex).string, (yyvsp[(1) - (3)].interm.type), variable))
                 parseContext.recover(__FILE__, __LINE__);
@@ -4871,7 +4873,7 @@ yyreduce:
 
         /* Additional checks for geometry shaders */
         if (parseContext.language == EShLangGeometry && (yyvsp[(1) - (3)].interm.type).qualifier == EvqVaryingIn) {
-            
+
             // First, find 'gl_VerticesIn' in symbol table
             int vertexInSize = 0;
             TVariable* variable = NULL;
@@ -4880,11 +4882,11 @@ yyreduce:
                 variable = static_cast<TVariable*>(symbol);
                 constUnion* varUnion      = variable->getConstPointer();
                 vertexInSize = variable->getConstPointer()[0].getIConst();
-            
+
                 if ((yyvsp[(3) - (3)].interm.type).arraySize[0] == 0) {
                     // Use gl_VertexIn for initialization of the array
                     (yyvsp[(1) - (3)].interm.type).setArray(true, vertexInSize);
-    
+
                     if (parseContext.arrayErrorCheck((yyvsp[(3) - (3)].interm.type).range, *(yyvsp[(2) - (3)].lex).string, (yyvsp[(1) - (3)].interm.type), variable))
                         parseContext.recover(__FILE__, __LINE__);
                 } else {
@@ -4898,42 +4900,42 @@ yyreduce:
                 parseContext.recover(__FILE__, __LINE__);
             }
         }
- 
+
         /* Special handling for structs */
         if ( (yyvsp[(1) - (3)].interm.type).type == EbtStruct  && (yyvsp[(1) - (3)].interm.type).userDef != 0 && (yyvsp[(1) - (3)].interm.type).userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification((yyvsp[(1) - (3)].interm.type).range, (yyvsp[(1) - (3)].interm.type).userDef, parseContext.extensionChanged);
-                
+
             processStruct((yyvsp[(1) - (3)].interm.type).userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (3)].lex).string);
-            TIntermNode *declarationNode = 
+            TIntermNode *declarationNode =
                 parseContext.intermediate.addDeclaration((yyvsp[(2) - (3)].lex).range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             (yyval.interm).intermAggregate = specificationAggregate;
 
         } else {
             /* None-struct declarations: just add declaration node */
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (3)].lex).string);
-            TIntermNode *intermNode = 
+            TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration((yyvsp[(2) - (3)].lex).range, (TVariable*) sym, NULL, parseContext.extensionChanged);
             intermNode->getAsDeclarationNode()->setFirst(true);
-            (yyval.interm).intermAggregate = 
-                parseContext.intermediate.makeAggregate(intermNode, 
+            (yyval.interm).intermAggregate =
+                parseContext.intermediate.makeAggregate(intermNode,
                                                         parseContext.extensionChanged);
             (yyval.interm).intermAggregate->setRange(addRange((yyvsp[(1) - (3)].interm.type).range, (yyvsp[(3) - (3)].interm.type).range));
         }
@@ -4944,7 +4946,7 @@ yyreduce:
 
   case 117:
 /* Line 1787 of yacc.c  */
-#line 2185 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2187 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm).intermAggregate = 0;
 
@@ -4961,21 +4963,21 @@ yyreduce:
             if (parseContext.arrayErrorCheck((yyvsp[(3) - (6)].lex).range, *(yyvsp[(2) - (6)].lex).string, (yyvsp[(1) - (6)].interm.type), variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         /* Special handling for structs */
         if ( (yyvsp[(1) - (6)].interm.type).type == EbtStruct  && (yyvsp[(1) - (6)].interm.type).userDef != 0 && (yyvsp[(1) - (6)].interm.type).userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification((yyvsp[(1) - (6)].interm.type).range, (yyvsp[(1) - (6)].interm.type).userDef, parseContext.extensionChanged);
-                
+
             processStruct((yyvsp[(1) - (6)].interm.type).userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
@@ -4990,9 +4992,9 @@ yyreduce:
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             (yyval.interm).intermAggregate = specificationAggregate;
 
         } else {
@@ -5012,8 +5014,8 @@ yyreduce:
                     ((TIntermDeclaration*)decNode)->setFirst(true);
                 }
 
-                (yyval.interm).intermAggregate = parseContext.intermediate.makeAggregate(decNode, 
-                                                                   parseContext.extensionChanged);
+                (yyval.interm).intermAggregate = parseContext.intermediate.makeAggregate(decNode,
+                                                                parseContext.extensionChanged);
                 (yyval.interm).intermAggregate->setRange(addRange((yyvsp[(1) - (6)].interm.type).range, (yyvsp[(6) - (6)].interm.intermTypedNode)->getRange()));
             } else {
                 parseContext.recover(__FILE__, __LINE__);
@@ -5026,7 +5028,7 @@ yyreduce:
 
   case 118:
 /* Line 1787 of yacc.c  */
-#line 2262 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2264 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm).intermAggregate = 0;
 
@@ -5042,27 +5044,27 @@ yyreduce:
             int size;
             if (parseContext.arraySizeErrorCheck((yyvsp[(3) - (7)].lex).range, (yyvsp[(4) - (7)].interm.intermTypedNode), size))
                 parseContext.recover(__FILE__, __LINE__);
-            
+
             (yyvsp[(1) - (7)].interm.type).setArray(true, size);
             if (parseContext.arrayErrorCheck((yyvsp[(3) - (7)].lex).range, *(yyvsp[(2) - (7)].lex).string, (yyvsp[(1) - (7)].interm.type), variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
 
-        
+
         /* Special handling for structs */
         if ( (yyvsp[(1) - (7)].interm.type).type == EbtStruct  && (yyvsp[(1) - (7)].interm.type).userDef != 0 && (yyvsp[(1) - (7)].interm.type).userDef->isSpecified() ) {
             /* Struct declarations: add a Specification node to the parse tree */
             TIntermNode *specificationNode =
                 parseContext.intermediate.addSpecification((yyvsp[(1) - (7)].interm.type).range, (yyvsp[(1) - (7)].interm.type).userDef, parseContext.extensionChanged);
-                
+
             processStruct((yyvsp[(1) - (7)].interm.type).userDef->getStruct(),
-                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                          parseContext);
-            
-            TIntermAggregate *specificationAggregate = 
-                parseContext.intermediate.makeAggregate(specificationNode, 
+                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                        parseContext);
+
+            TIntermAggregate *specificationAggregate =
+                parseContext.intermediate.makeAggregate(specificationNode,
                                                         parseContext.extensionChanged);
-        
+
             if (specificationAggregate)
                 specificationAggregate->setOperator(EOpSpecification);
 
@@ -5077,9 +5079,9 @@ yyreduce:
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                              declarationNode->getAsDeclarationNode(), 
-                              parseContext);
-    
+                            declarationNode->getAsDeclarationNode(),
+                            parseContext);
+
             (yyval.interm).intermAggregate = specificationAggregate;
 
         } else {
@@ -5112,9 +5114,9 @@ yyreduce:
 
   case 119:
 /* Line 1787 of yacc.c  */
-#line 2343 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2345 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        
+
         if (parseContext.structQualifierErrorCheck((yyvsp[(2) - (4)].lex).range, (yyvsp[(1) - (4)].interm.type)))
             parseContext.recover(__FILE__, __LINE__);
 
@@ -5130,54 +5132,54 @@ yyreduce:
                 /* Struct declarations: add a Specification node to the parse tree */
                 TIntermNode *specificationNode =
                     parseContext.intermediate.addSpecification((yyvsp[(1) - (4)].interm.type).range, (yyvsp[(1) - (4)].interm.type).userDef, parseContext.extensionChanged);
-                    
+
                 processStruct((yyvsp[(1) - (4)].interm.type).userDef->getStruct(),
-                              specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                              parseContext);
-                
-                TIntermAggregate *specificationAggregate = 
+                            specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                            parseContext);
+
+                TIntermAggregate *specificationAggregate =
                     parseContext.intermediate.makeAggregate(specificationNode, parseContext.extensionChanged);
-            
+
                 if (specificationAggregate)
                     specificationAggregate->setOperator(EOpSpecification);
 
                 TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (4)].lex).string);
-                TIntermNode *declarationNode = 
-                    parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range, (TVariable*) sym, 
-                                                             intermNode, parseContext.extensionChanged);
+                TIntermNode *declarationNode =
+                    parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range, (TVariable*) sym,
+                                                            intermNode, parseContext.extensionChanged);
 
                 addStructInstance(specificationNode->getAsSpecificationNode(),
-                                  declarationNode->getAsDeclarationNode(), 
-                                  parseContext);
-        
+                                declarationNode->getAsDeclarationNode(),
+                                parseContext);
+
                 (yyval.interm).intermAggregate = specificationAggregate;
 
             } else {
                 /* None-struct declarations: just add declaration node */
                 TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (4)].lex).string);
-                TIntermNode *decNode = 
-                    parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range, (TVariable*) sym, 
-                                                             intermNode, parseContext.extensionChanged);
+                TIntermNode *decNode =
+                    parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range, (TVariable*) sym,
+                                                            intermNode, parseContext.extensionChanged);
                 decNode->getAsDeclarationNode()->setFirst(true);
-                (yyval.interm).intermAggregate = 
+                (yyval.interm).intermAggregate =
                     parseContext.intermediate.makeAggregate(decNode, parseContext.extensionChanged);
                 (yyval.interm).intermAggregate->setRange(addRange((yyvsp[(1) - (4)].interm.type).range, (yyvsp[(4) - (4)].interm.intermTypedNode)->getRange()));
             }
 #if 0
             TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (4)].lex).string);
             TIntermNode *decNode;
-            
+
             if (intermNode) {
                 decNode = parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range,
-                                                                   (TVariable*) sym,
-                                                                   intermNode);
+                                                                (TVariable*) sym,
+                                                                intermNode);
             } else {
                 decNode = parseContext.intermediate.addDeclaration((yyvsp[(2) - (4)].lex).range,
-                                                                   (TVariable*) sym, 
-                                                                   NULL);
+                                                                (TVariable*) sym,
+                                                                NULL);
             }
             decNode->getAsDeclarationNode()->setFirst(true);
-            
+
             (yyval.interm).intermAggregate = parseContext.intermediate.makeAggregate(decNode, (yyvsp[(2) - (4)].lex).range);
 #endif
         } else {
@@ -5190,25 +5192,25 @@ yyreduce:
 
   case 120:
 /* Line 1787 of yacc.c  */
-#line 2416 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2418 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TSymbol *sym = parseContext.symbolTable.find(*(yyvsp[(2) - (2)].lex).string);
         if (sym && sym->isVariable()) {
-            
+
             TVariable *var = static_cast<TVariable*>(sym);
             var->getType().addVaryingModifier(EvmInvariant);
-            
+
             TString *newName = new TString(var->getName());
             TType newType(EbtInvariant);
             TPublicType newPType;
             newPType.setBasic(EbtInvariant, EvqTemporary);
             TVariable *newVar = new TVariable(newName, newType);
 
-            TIntermNode *intermNode = 
-                parseContext.intermediate.addDeclaration((yyvsp[(2) - (2)].lex).range, newVar, NULL, 
-                                                         parseContext.extensionChanged);
+            TIntermNode *intermNode =
+                parseContext.intermediate.addDeclaration((yyvsp[(2) - (2)].lex).range, newVar, NULL,
+                                                        parseContext.extensionChanged);
             ((TIntermDeclaration*)intermNode)->setFirst(true);
-            (yyval.interm).intermAggregate = 
+            (yyval.interm).intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
             (yyval.interm).type = newPType;
         } else {
@@ -5221,7 +5223,7 @@ yyreduce:
 
   case 121:
 /* Line 1787 of yacc.c  */
-#line 2513 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2515 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.arraySizeUnspecifiedErrorCheck((yyvsp[(1) - (1)].interm.type).range, (yyvsp[(1) - (1)].interm.type))) {
             parseContext.error((yyvsp[(1) - (1)].interm.type).range, "array syntax error", "", "");
@@ -5234,13 +5236,13 @@ yyreduce:
 
   case 122:
 /* Line 1787 of yacc.c  */
-#line 2525 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2527 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.varyingModifyerErrorCheck((yyvsp[(3) - (3)].interm.type).range, (yyvsp[(1) - (3)].interm.type), (yyvsp[(2) - (3)].interm.qualifier))) {
             parseContext.error((yyvsp[(3) - (3)].interm.type).range, "varying modifier syntax error", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         if (parseContext.arraySizeUnspecifiedErrorCheck((yyvsp[(3) - (3)].interm.type).range, (yyvsp[(3) - (3)].interm.type))) {
             parseContext.error((yyvsp[(3) - (3)].interm.type).range, "array syntax error", "", "");
             parseContext.recover(__FILE__, __LINE__);
@@ -5250,7 +5252,7 @@ yyreduce:
             parseContext.recover(__FILE__, __LINE__);
             (yyvsp[(3) - (3)].interm.type).setArray(false);
         }
-        
+
         if ((yyvsp[(1) - (3)].interm.type).qualifier == EvqAttribute){
             if (!parseContext.extensionActiveCheck("GL_EXT_gpu_shader4")) {
                 // GLSL 1.20.8
@@ -5266,23 +5268,23 @@ yyreduce:
                 }
             }
         }
-        
-        
-#if 0 // OLD     
-	 	/* Promote varying modifier to varyings in case of geometry shaders */
+
+
+#if 0 // OLD
+        /* Promote varying modifier to varyings in case of geometry shaders */
         if (parseContext.language == EShLangGeometry && (yyvsp[(1) - (3)].interm.type).qualifier == EvqVaryingOut) {
             // Change from in to out if specifyed
             if ((yyvsp[(2) - (3)].interm.qualifier) == EvqIn) {
                 (yyvsp[(1) - (3)].interm.type).qualifier = EvqVaryingIn;
             }
         }
-#else	
+#else
         /* GEOMETRY SHADER CHECKS - BEGIN */
         /* Promote varying modifiers to varying if necessary */
 
         // Change from in to out if specified
         if ((yyvsp[(1) - (3)].interm.type).qualifier == EvqVaryingIn && (yyvsp[(2) - (3)].interm.qualifier) == EvqOut) {
-			(yyvsp[(1) - (3)].interm.type).qualifier = EvqVaryingOut;
+            (yyvsp[(1) - (3)].interm.type).qualifier = EvqVaryingOut;
         }
         if ((yyvsp[(1) - (3)].interm.type).qualifier == EvqVaryingOut && (yyvsp[(2) - (3)].interm.qualifier) == EvqIn) {
             (yyvsp[(1) - (3)].interm.type).qualifier = EvqVaryingIn;
@@ -5290,7 +5292,7 @@ yyreduce:
 
         /* GEOMETRY SHADER CHECKS - END */
 #endif
-        
+
         if ((yyvsp[(1) - (3)].interm.type).qualifier == EvqVaryingIn) {
             if (!parseContext.extensionActiveCheck("GL_EXT_gpu_shader4")) {
                 // GLSL 1.20.8
@@ -5325,7 +5327,7 @@ yyreduce:
             }
         }
 
-        (yyval.interm.type) = (yyvsp[(3) - (3)].interm.type); 
+        (yyval.interm.type) = (yyvsp[(3) - (3)].interm.type);
         (yyval.interm.type).qualifier = (yyvsp[(1) - (3)].interm.type).qualifier;
         (yyval.interm.type).varyingModifier = (yyvsp[(1) - (3)].interm.type).varyingModifier;
         (yyval.interm.type).range = addRange((yyvsp[(1) - (3)].interm.type).range, (yyvsp[(3) - (3)].interm.type).range);
@@ -5334,7 +5336,7 @@ yyreduce:
 
   case 123:
 /* Line 1787 of yacc.c  */
-#line 2623 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2625 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqInOut;
     }
@@ -5342,7 +5344,7 @@ yyreduce:
 
   case 124:
 /* Line 1787 of yacc.c  */
-#line 2626 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2628 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqIn;
     }
@@ -5350,7 +5352,7 @@ yyreduce:
 
   case 125:
 /* Line 1787 of yacc.c  */
-#line 2629 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2631 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.qualifier) = EvqOut;
     }
@@ -5358,7 +5360,7 @@ yyreduce:
 
   case 126:
 /* Line 1787 of yacc.c  */
-#line 2636 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2638 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type).setBasic(EbtVoid, EvqConst, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (1)].lex).range;
@@ -5367,8 +5369,8 @@ yyreduce:
 
   case 127:
 /* Line 1787 of yacc.c  */
-#line 2640 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 2642 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         VERTEX_ONLY("attribute", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.globalErrorCheck((yyvsp[(1) - (1)].lex).range, parseContext.symbolTable.atGlobalLevel(), "attribute"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5379,7 +5381,7 @@ yyreduce:
 
   case 128:
 /* Line 1787 of yacc.c  */
-#line 2647 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2649 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.globalErrorCheck((yyvsp[(2) - (2)].lex).range, parseContext.symbolTable.atGlobalLevel(), "varying"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5397,7 +5399,7 @@ yyreduce:
 
   case 129:
 /* Line 1787 of yacc.c  */
-#line 2660 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2662 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.globalErrorCheck((yyvsp[(1) - (1)].lex).range, parseContext.symbolTable.atGlobalLevel(), "varying"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5415,7 +5417,7 @@ yyreduce:
 
   case 130:
 /* Line 1787 of yacc.c  */
-#line 2673 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2675 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.globalErrorCheck((yyvsp[(1) - (1)].lex).range, parseContext.symbolTable.atGlobalLevel(), "uniform"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5426,7 +5428,7 @@ yyreduce:
 
   case 131:
 /* Line 1787 of yacc.c  */
-#line 2682 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2684 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.varyingModifier) = EvmInvariant;
     }
@@ -5434,7 +5436,7 @@ yyreduce:
 
   case 132:
 /* Line 1787 of yacc.c  */
-#line 2685 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2687 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.varyingModifier) = EvmCentroid;
     }
@@ -5442,7 +5444,7 @@ yyreduce:
 
   case 133:
 /* Line 1787 of yacc.c  */
-#line 2688 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2690 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.varyingModifier) = EvmFlat;
     }
@@ -5450,7 +5452,7 @@ yyreduce:
 
   case 134:
 /* Line 1787 of yacc.c  */
-#line 2691 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2693 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.varyingModifier) = EvmNoperspective;
     }
@@ -5458,7 +5460,7 @@ yyreduce:
 
   case 135:
 /* Line 1787 of yacc.c  */
-#line 2694 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2696 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.varyingModifier) |= EvmInvariant;
     }
@@ -5466,7 +5468,7 @@ yyreduce:
 
   case 136:
 /* Line 1787 of yacc.c  */
-#line 2697 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2699 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if ((yyvsp[(1) - (2)].interm.varyingModifier) & EvmFlat) {
             parseContext.error((yyvsp[(2) - (2)].lex).range, "varying flat cannot be used with centroid qualifier:", "", "");
@@ -5478,7 +5480,7 @@ yyreduce:
 
   case 137:
 /* Line 1787 of yacc.c  */
-#line 2704 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2706 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(2) - (2)].lex).range, "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -5487,14 +5489,14 @@ yyreduce:
             parseContext.error((yyvsp[(2) - (2)].lex).range, "varying flat cannot be used with other qualifiers:", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         (yyval.interm.varyingModifier) |= EvmFlat;
     }
     break;
 
   case 138:
 /* Line 1787 of yacc.c  */
-#line 2715 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2717 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(2) - (2)].lex).range, "GL_EXT_gpu_shader4")) {
             parseContext.recover(__FILE__, __LINE__);
@@ -5503,14 +5505,14 @@ yyreduce:
             parseContext.error((yyvsp[(2) - (2)].lex).range, "varying flat cannot be used with noperspective qualifier:", "", "");
             parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         (yyval.interm.varyingModifier) |= EvmNoperspective;
     }
     break;
 
   case 139:
 /* Line 1787 of yacc.c  */
-#line 2729 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2731 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type) = (yyvsp[(1) - (1)].interm.type);
     }
@@ -5518,10 +5520,10 @@ yyreduce:
 
   case 140:
 /* Line 1787 of yacc.c  */
-#line 2732 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2734 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type) = (yyvsp[(1) - (3)].interm.type);
-        
+
         if (parseContext.arrayTypeErrorCheck((yyvsp[(2) - (3)].lex).range, (yyvsp[(1) - (3)].interm.type))) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -5533,10 +5535,10 @@ yyreduce:
 
   case 141:
 /* Line 1787 of yacc.c  */
-#line 2742 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2744 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.type) = (yyvsp[(1) - (4)].interm.type);
-        
+
         if (parseContext.arrayTypeErrorCheck((yyvsp[(2) - (4)].lex).range, (yyvsp[(1) - (4)].interm.type))) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -5552,17 +5554,17 @@ yyreduce:
 
   case 142:
 /* Line 1787 of yacc.c  */
-#line 2759 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2761 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
-        (yyval.interm.type).setBasic(EbtVoid, qual, EvmNone, (yyvsp[(1) - (1)].lex).range); 
+        (yyval.interm.type).setBasic(EbtVoid, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (1)].lex).range;
     }
     break;
 
   case 143:
 /* Line 1787 of yacc.c  */
-#line 2764 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2766 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5572,7 +5574,7 @@ yyreduce:
 
   case 144:
 /* Line 1787 of yacc.c  */
-#line 2769 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2771 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtInt, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5582,7 +5584,7 @@ yyreduce:
 
   case 145:
 /* Line 1787 of yacc.c  */
-#line 2774 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2776 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtBool, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5592,19 +5594,19 @@ yyreduce:
 
   case 146:
 /* Line 1787 of yacc.c  */
-#line 2779 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 2781 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (2)].lex).range, "GL_EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
-        (yyval.interm.type).setBasic(EbtUInt, qual, EvmNone, (yyvsp[(1) - (2)].lex).range); 
+        (yyval.interm.type).setBasic(EbtUInt, qual, EvmNone, (yyvsp[(1) - (2)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (2)].lex).range;
     }
     break;
 
   case 147:
 /* Line 1787 of yacc.c  */
-#line 2786 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2788 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5615,7 +5617,7 @@ yyreduce:
 
   case 148:
 /* Line 1787 of yacc.c  */
-#line 2792 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2794 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5626,7 +5628,7 @@ yyreduce:
 
   case 149:
 /* Line 1787 of yacc.c  */
-#line 2798 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2800 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5637,7 +5639,7 @@ yyreduce:
 
   case 150:
 /* Line 1787 of yacc.c  */
-#line 2804 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2806 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtBool, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5648,7 +5650,7 @@ yyreduce:
 
   case 151:
 /* Line 1787 of yacc.c  */
-#line 2810 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2812 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtBool, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5659,7 +5661,7 @@ yyreduce:
 
   case 152:
 /* Line 1787 of yacc.c  */
-#line 2816 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2818 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtBool, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5670,7 +5672,7 @@ yyreduce:
 
   case 153:
 /* Line 1787 of yacc.c  */
-#line 2822 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2824 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtInt, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5681,7 +5683,7 @@ yyreduce:
 
   case 154:
 /* Line 1787 of yacc.c  */
-#line 2828 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2830 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtInt, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5692,7 +5694,7 @@ yyreduce:
 
   case 155:
 /* Line 1787 of yacc.c  */
-#line 2834 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2836 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtInt, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5703,7 +5705,7 @@ yyreduce:
 
   case 156:
 /* Line 1787 of yacc.c  */
-#line 2840 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2842 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5716,7 +5718,7 @@ yyreduce:
 
   case 157:
 /* Line 1787 of yacc.c  */
-#line 2848 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2850 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5729,7 +5731,7 @@ yyreduce:
 
   case 158:
 /* Line 1787 of yacc.c  */
-#line 2856 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2858 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
@@ -5742,9 +5744,9 @@ yyreduce:
 
   case 159:
 /* Line 1787 of yacc.c  */
-#line 2864 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2866 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat2", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat2", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(2, 2);
@@ -5754,9 +5756,9 @@ yyreduce:
 
   case 160:
 /* Line 1787 of yacc.c  */
-#line 2871 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        FRAG_VERT_GEOM_ONLY("mat3", (yyvsp[(1) - (1)].lex).range); 
+#line 2873 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        FRAG_VERT_GEOM_ONLY("mat3", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(3, 3);
@@ -5766,8 +5768,8 @@ yyreduce:
 
   case 161:
 /* Line 1787 of yacc.c  */
-#line 2878 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 2880 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         FRAG_VERT_GEOM_ONLY("mat4", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
@@ -5778,9 +5780,9 @@ yyreduce:
 
   case 162:
 /* Line 1787 of yacc.c  */
-#line 2885 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2887 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat2x2", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat2x2", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(2, 2);
@@ -5790,9 +5792,9 @@ yyreduce:
 
   case 163:
 /* Line 1787 of yacc.c  */
-#line 2892 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2894 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat2x3", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat2x3", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(2, 3);
@@ -5802,9 +5804,9 @@ yyreduce:
 
   case 164:
 /* Line 1787 of yacc.c  */
-#line 2899 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2901 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat2x4", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat2x4", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(2, 4);
@@ -5814,9 +5816,9 @@ yyreduce:
 
   case 165:
 /* Line 1787 of yacc.c  */
-#line 2906 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2908 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat3x2", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat3x2", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(3, 2);
@@ -5826,9 +5828,9 @@ yyreduce:
 
   case 166:
 /* Line 1787 of yacc.c  */
-#line 2913 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2915 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat3x3", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat3x3", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(3, 3);
@@ -5838,9 +5840,9 @@ yyreduce:
 
   case 167:
 /* Line 1787 of yacc.c  */
-#line 2920 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2922 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat3x4", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat3x4", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(3, 4);
@@ -5850,9 +5852,9 @@ yyreduce:
 
   case 168:
 /* Line 1787 of yacc.c  */
-#line 2927 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2929 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat4x2", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat4x2", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(4, 2);
@@ -5862,9 +5864,9 @@ yyreduce:
 
   case 169:
 /* Line 1787 of yacc.c  */
-#line 2934 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2936 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat4x3", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat4x3", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(4, 3);
@@ -5874,9 +5876,9 @@ yyreduce:
 
   case 170:
 /* Line 1787 of yacc.c  */
-#line 2941 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2943 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        FRAG_VERT_GEOM_ONLY("mat4x4", (yyvsp[(1) - (1)].lex).range); 
+        FRAG_VERT_GEOM_ONLY("mat4x4", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtFloat, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).setMatrix(4, 4);
@@ -5886,7 +5888,7 @@ yyreduce:
 
   case 171:
 /* Line 1787 of yacc.c  */
-#line 2948 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2950 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler1D", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -5897,7 +5899,7 @@ yyreduce:
 
   case 172:
 /* Line 1787 of yacc.c  */
-#line 2954 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2956 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isampler1D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -5911,7 +5913,7 @@ yyreduce:
 
   case 173:
 /* Line 1787 of yacc.c  */
-#line 2963 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2965 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usampler1D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -5925,7 +5927,7 @@ yyreduce:
 
   case 174:
 /* Line 1787 of yacc.c  */
-#line 2972 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2974 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler2D", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -5936,7 +5938,7 @@ yyreduce:
 
   case 175:
 /* Line 1787 of yacc.c  */
-#line 2978 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2980 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isampler2D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -5950,7 +5952,7 @@ yyreduce:
 
   case 176:
 /* Line 1787 of yacc.c  */
-#line 2987 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2989 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usampler2D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -5964,7 +5966,7 @@ yyreduce:
 
   case 177:
 /* Line 1787 of yacc.c  */
-#line 2996 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 2998 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler3D", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -5975,7 +5977,7 @@ yyreduce:
 
   case 178:
 /* Line 1787 of yacc.c  */
-#line 3002 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3004 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isampler3D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -5989,7 +5991,7 @@ yyreduce:
 
   case 179:
 /* Line 1787 of yacc.c  */
-#line 3011 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3013 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usampler3D", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6003,7 +6005,7 @@ yyreduce:
 
   case 180:
 /* Line 1787 of yacc.c  */
-#line 3020 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3022 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("samplerCube", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -6014,7 +6016,7 @@ yyreduce:
 
   case 181:
 /* Line 1787 of yacc.c  */
-#line 3026 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3028 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isamplerCube", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6028,7 +6030,7 @@ yyreduce:
 
   case 182:
 /* Line 1787 of yacc.c  */
-#line 3035 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3037 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usamplerCube", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6042,7 +6044,7 @@ yyreduce:
 
   case 183:
 /* Line 1787 of yacc.c  */
-#line 3044 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3046 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler1DShadow", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -6053,7 +6055,7 @@ yyreduce:
 
   case 184:
 /* Line 1787 of yacc.c  */
-#line 3050 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3052 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler2DShadow", (yyvsp[(1) - (1)].lex).range);
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
@@ -6064,14 +6066,14 @@ yyreduce:
 
   case 185:
 /* Line 1787 of yacc.c  */
-#line 3056 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3058 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         // ARB_texture_rectangle
 
         FRAG_VERT_GEOM_ONLY("sampler2DRectARB", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_ARB_texture_rectangle"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtSampler2DRect, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (1)].lex).range;
@@ -6080,14 +6082,14 @@ yyreduce:
 
   case 186:
 /* Line 1787 of yacc.c  */
-#line 3067 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3069 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         // ARB_texture_rectangle
 
         FRAG_VERT_GEOM_ONLY("isampler2DRectARB", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtISampler2DRect, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (1)].lex).range;
@@ -6096,14 +6098,14 @@ yyreduce:
 
   case 187:
 /* Line 1787 of yacc.c  */
-#line 3078 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3080 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         // ARB_texture_rectangle
 
         FRAG_VERT_GEOM_ONLY("usampler2DRectARB", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "EXT_gpu_shader4"))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         TQualifier qual = parseContext.symbolTable.atGlobalLevel() ? EvqGlobal : EvqTemporary;
         (yyval.interm.type).setBasic(EbtUSampler2DRect, qual, EvmNone, (yyvsp[(1) - (1)].lex).range);
         (yyval.interm.type).range = (yyvsp[(1) - (1)].lex).range;
@@ -6112,7 +6114,7 @@ yyreduce:
 
   case 188:
 /* Line 1787 of yacc.c  */
-#line 3089 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3091 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         // ARB_texture_rectangle
 
@@ -6128,7 +6130,7 @@ yyreduce:
 
   case 189:
 /* Line 1787 of yacc.c  */
-#line 3100 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3102 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler1DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6142,7 +6144,7 @@ yyreduce:
 
   case 190:
 /* Line 1787 of yacc.c  */
-#line 3109 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3111 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isampler1DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6156,7 +6158,7 @@ yyreduce:
 
   case 191:
 /* Line 1787 of yacc.c  */
-#line 3118 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3120 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usampler1DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6170,7 +6172,7 @@ yyreduce:
 
   case 192:
 /* Line 1787 of yacc.c  */
-#line 3127 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3129 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler2DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6184,7 +6186,7 @@ yyreduce:
 
   case 193:
 /* Line 1787 of yacc.c  */
-#line 3136 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3138 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isampler2DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6198,7 +6200,7 @@ yyreduce:
 
   case 194:
 /* Line 1787 of yacc.c  */
-#line 3145 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3147 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usampler2DArray", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6212,7 +6214,7 @@ yyreduce:
 
   case 195:
 /* Line 1787 of yacc.c  */
-#line 3154 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3156 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("samplerBuffer", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6226,7 +6228,7 @@ yyreduce:
 
   case 196:
 /* Line 1787 of yacc.c  */
-#line 3163 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3165 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("isamplerBuffer", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6240,7 +6242,7 @@ yyreduce:
 
   case 197:
 /* Line 1787 of yacc.c  */
-#line 3172 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3174 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("usamplerBuffer", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6254,7 +6256,7 @@ yyreduce:
 
   case 198:
 /* Line 1787 of yacc.c  */
-#line 3181 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3183 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler1DArrayShadow", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6268,7 +6270,7 @@ yyreduce:
 
   case 199:
 /* Line 1787 of yacc.c  */
-#line 3190 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3192 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("sampler2DArrayShadow", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6282,7 +6284,7 @@ yyreduce:
 
   case 200:
 /* Line 1787 of yacc.c  */
-#line 3199 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3201 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("samplerCubeShadow", (yyvsp[(1) - (1)].lex).range);
         if (parseContext.extensionErrorCheck((yyvsp[(1) - (1)].lex).range, "GL_EXT_gpu_shader4")) {
@@ -6296,7 +6298,7 @@ yyreduce:
 
   case 201:
 /* Line 1787 of yacc.c  */
-#line 3208 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3210 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_VERT_GEOM_ONLY("struct", (yyvsp[(1) - (1)].interm.type).range);
         (yyval.interm.type) = (yyvsp[(1) - (1)].interm.type);
@@ -6310,10 +6312,10 @@ yyreduce:
 
   case 202:
 /* Line 1787 of yacc.c  */
-#line 3217 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    {     
+#line 3219 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         //
-        // This is for user defined type names.  The lexical phase looked up the 
+        // This is for user defined type names.  The lexical phase looked up the
         // type.
         //
         TType& structure = static_cast<TVariable*>((yyvsp[(1) - (1)].lex).symbol)->getType();
@@ -6329,9 +6331,9 @@ yyreduce:
 
   case 203:
 /* Line 1787 of yacc.c  */
-#line 3234 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3236 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        
+
         TType* structure = new TType((yyvsp[(4) - (5)].interm.typeList), *(yyvsp[(2) - (5)].lex).string);
         TVariable* userTypeDef = new TVariable((yyvsp[(2) - (5)].lex).string, *structure, true);
         if (! parseContext.symbolTable.insert(*userTypeDef)) {
@@ -6347,10 +6349,10 @@ yyreduce:
 
   case 204:
 /* Line 1787 of yacc.c  */
-#line 3247 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3249 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TType* structure = new TType((yyvsp[(3) - (4)].interm.typeList), TString(""));
-        
+
         (yyval.interm.type).setBasic(EbtStruct, EvqTemporary, EvmNone, (yyvsp[(1) - (4)].lex).range);
         (yyval.interm.type).userDef = structure;
         (yyval.interm.type).range = addRange((yyvsp[(1) - (4)].lex).range, (yyvsp[(4) - (4)].lex).range);
@@ -6359,7 +6361,7 @@ yyreduce:
 
   case 205:
 /* Line 1787 of yacc.c  */
-#line 3257 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3259 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeList) = (yyvsp[(1) - (1)].interm.typeList);
     }
@@ -6367,7 +6369,7 @@ yyreduce:
 
   case 206:
 /* Line 1787 of yacc.c  */
-#line 3260 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3262 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeList) = (yyvsp[(1) - (2)].interm.typeList);
         for (unsigned int i = 0; i < (yyvsp[(2) - (2)].interm.typeList)->size(); ++i) {
@@ -6384,7 +6386,7 @@ yyreduce:
 
   case 207:
 /* Line 1787 of yacc.c  */
-#line 3275 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3277 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeList) = (yyvsp[(2) - (3)].interm.typeList);
 
@@ -6413,9 +6415,9 @@ yyreduce:
                 (*(yyval.interm.typeList))[i].type->setTypeName((yyvsp[(1) - (3)].interm.type).userDef->getTypeName());
 
             if ( i == 0 &&
-                 (yyvsp[(1) - (3)].interm.type).type == EbtStruct &&
-                 (yyvsp[(1) - (3)].interm.type).userDef != 0 && 
-                 (yyvsp[(1) - (3)].interm.type).userDef->isSpecified() == true ) {
+                (yyvsp[(1) - (3)].interm.type).type == EbtStruct &&
+                (yyvsp[(1) - (3)].interm.type).userDef != 0 &&
+                (yyvsp[(1) - (3)].interm.type).userDef->isSpecified() == true ) {
 
                     (*(yyval.interm.typeList))[i].type->setSpecified(true);
             }
@@ -6425,7 +6427,7 @@ yyreduce:
 
   case 208:
 /* Line 1787 of yacc.c  */
-#line 3314 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3316 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeList) = NewPoolTTypeList();
         (yyval.interm.typeList)->push_back((yyvsp[(1) - (1)].interm.typeRange));
@@ -6434,7 +6436,7 @@ yyreduce:
 
   case 209:
 /* Line 1787 of yacc.c  */
-#line 3318 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3320 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeList)->push_back((yyvsp[(3) - (3)].interm.typeRange));
     }
@@ -6442,7 +6444,7 @@ yyreduce:
 
   case 210:
 /* Line 1787 of yacc.c  */
-#line 3324 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3326 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeRange).type = new TType(EbtVoid);
         (yyval.interm.typeRange).type->setFieldName(*(yyvsp[(1) - (1)].lex).string);
@@ -6452,11 +6454,11 @@ yyreduce:
 
   case 211:
 /* Line 1787 of yacc.c  */
-#line 3329 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3331 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.typeRange).type = new TType(EbtVoid);
         (yyval.interm.typeRange).type->setFieldName(*(yyvsp[(1) - (4)].lex).string);
-        
+
         int size;
         if (parseContext.arraySizeErrorCheck((yyvsp[(2) - (4)].lex).range, (yyvsp[(3) - (4)].interm.intermTypedNode), size))
             parseContext.recover(__FILE__, __LINE__);
@@ -6467,96 +6469,96 @@ yyreduce:
 
   case 212:
 /* Line 1787 of yacc.c  */
-#line 3342 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3344 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); }
     break;
 
   case 213:
 /* Line 1787 of yacc.c  */
-#line 3346 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3348 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 214:
 /* Line 1787 of yacc.c  */
-#line 3350 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3352 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermAggregate); }
     break;
 
   case 215:
 /* Line 1787 of yacc.c  */
-#line 3351 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3353 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 216:
 /* Line 1787 of yacc.c  */
-#line 3357 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3359 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 217:
 /* Line 1787 of yacc.c  */
-#line 3358 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3360 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 218:
 /* Line 1787 of yacc.c  */
-#line 3359 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3361 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 219:
 /* Line 1787 of yacc.c  */
-#line 3360 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3362 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 220:
 /* Line 1787 of yacc.c  */
-#line 3361 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3363 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 221:
 /* Line 1787 of yacc.c  */
-#line 3362 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3364 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 222:
 /* Line 1787 of yacc.c  */
-#line 3363 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3365 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 223:
 /* Line 1787 of yacc.c  */
-#line 3367 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3369 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermAggregate) = 0;
     }
     break;
 
   case 224:
 /* Line 1787 of yacc.c  */
-#line 3370 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3372 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { parseContext.symbolTable.push(); }
     break;
 
   case 225:
 /* Line 1787 of yacc.c  */
-#line 3370 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3372 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { parseContext.symbolTable.pop(); }
     break;
 
   case 226:
 /* Line 1787 of yacc.c  */
-#line 3370 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3372 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        if ((yyvsp[(3) - (5)].interm.intermAggregate) != 0)            
-            (yyvsp[(3) - (5)].interm.intermAggregate)->setOperator(EOpSequence); 
+        if ((yyvsp[(3) - (5)].interm.intermAggregate) != 0)
+            (yyvsp[(3) - (5)].interm.intermAggregate)->setOperator(EOpSequence);
         (yyval.interm.intermAggregate) = (yyvsp[(3) - (5)].interm.intermAggregate);
         if ((yyval.interm.intermAggregate)) (yyval.interm.intermAggregate)->setRange(addRange((yyvsp[(1) - (5)].lex).range, (yyvsp[(5) - (5)].lex).range));
     }
@@ -6564,38 +6566,38 @@ yyreduce:
 
   case 227:
 /* Line 1787 of yacc.c  */
-#line 3379 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3381 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 228:
 /* Line 1787 of yacc.c  */
-#line 3380 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3382 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); }
     break;
 
   case 229:
 /* Line 1787 of yacc.c  */
-#line 3385 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        (yyval.interm.intermNode) = 0; 
+#line 3387 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        (yyval.interm.intermNode) = 0;
     }
     break;
 
   case 230:
 /* Line 1787 of yacc.c  */
-#line 3388 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3390 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         if ((yyvsp[(2) - (3)].interm.intermAggregate))
-            (yyvsp[(2) - (3)].interm.intermAggregate)->setOperator(EOpSequence); 
-        (yyval.interm.intermNode) = (yyvsp[(2) - (3)].interm.intermAggregate); 
+            (yyvsp[(2) - (3)].interm.intermAggregate)->setOperator(EOpSequence);
+        (yyval.interm.intermNode) = (yyvsp[(2) - (3)].interm.intermAggregate);
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (3)].lex).range, (yyvsp[(3) - (3)].lex).range));
     }
     break;
 
   case 231:
 /* Line 1787 of yacc.c  */
-#line 3397 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3399 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermAggregate) = parseContext.intermediate.makeAggregate((yyvsp[(1) - (1)].interm.intermNode), parseContext.extensionChanged);
         if ((yyval.interm.intermAggregate) && (yyvsp[(1) - (1)].interm.intermNode)) (yyval.interm.intermAggregate)->setRange((yyvsp[(1) - (1)].interm.intermNode)->getRange());
@@ -6604,8 +6606,8 @@ yyreduce:
 
   case 232:
 /* Line 1787 of yacc.c  */
-#line 3401 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3403 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermAggregate) = parseContext.intermediate.growAggregate((yyvsp[(1) - (2)].interm.intermAggregate), (yyvsp[(2) - (2)].interm.intermNode), parseContext.extensionChanged);
         if ((yyval.interm.intermAggregate) && (yyvsp[(1) - (2)].interm.intermAggregate) && (yyvsp[(2) - (2)].interm.intermNode)) (yyval.interm.intermAggregate)->setRange(addRange((yyvsp[(1) - (2)].interm.intermAggregate)->getRange(), (yyvsp[(2) - (2)].interm.intermNode)->getRange()));
     }
@@ -6613,20 +6615,20 @@ yyreduce:
 
   case 233:
 /* Line 1787 of yacc.c  */
-#line 3408 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3410 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = 0; }
     break;
 
   case 234:
 /* Line 1787 of yacc.c  */
-#line 3409 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3411 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { (yyval.interm.intermNode) = static_cast<TIntermNode*>((yyvsp[(1) - (2)].interm.intermTypedNode)); }
     break;
 
   case 235:
 /* Line 1787 of yacc.c  */
-#line 3413 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3415 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         if (parseContext.boolErrorCheck((yyvsp[(1) - (5)].lex).range, (yyvsp[(3) - (5)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
         (yyval.interm.intermNode) = parseContext.intermediate.addSelection((yyvsp[(3) - (5)].interm.intermTypedNode), (yyvsp[(5) - (5)].interm.nodePair), (yyvsp[(1) - (5)].lex).range, parseContext.extensionChanged);
@@ -6636,7 +6638,7 @@ yyreduce:
 
   case 236:
 /* Line 1787 of yacc.c  */
-#line 3422 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3424 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.nodePair).node1 = (yyvsp[(1) - (3)].interm.intermNode);
         (yyval.interm.nodePair).node2 = (yyvsp[(3) - (3)].interm.intermNode);
@@ -6645,8 +6647,8 @@ yyreduce:
 
   case 237:
 /* Line 1787 of yacc.c  */
-#line 3426 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3428 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.nodePair).node1 = (yyvsp[(1) - (1)].interm.intermNode);
         (yyval.interm.nodePair).node2 = 0;
     }
@@ -6654,25 +6656,25 @@ yyreduce:
 
   case 238:
 /* Line 1787 of yacc.c  */
-#line 3436 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3438 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode);
         if (parseContext.boolErrorCheck((yyvsp[(1) - (1)].interm.intermTypedNode)->getRange(), (yyvsp[(1) - (1)].interm.intermTypedNode)))
-            parseContext.recover(__FILE__, __LINE__);          
+            parseContext.recover(__FILE__, __LINE__);
         if ((yyval.interm.intermTypedNode) && (yyvsp[(1) - (1)].interm.intermTypedNode)) (yyval.interm.intermTypedNode)->setRange((yyvsp[(1) - (1)].interm.intermTypedNode)->getRange());
     }
     break;
 
   case 239:
 /* Line 1787 of yacc.c  */
-#line 3442 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3444 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TIntermNode* intermNode;
         if (parseContext.structQualifierErrorCheck((yyvsp[(2) - (4)].lex).range, (yyvsp[(1) - (4)].interm.type)))
             parseContext.recover(__FILE__, __LINE__);
         if (parseContext.boolErrorCheck((yyvsp[(2) - (4)].lex).range, (yyvsp[(1) - (4)].interm.type)))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         if (!parseContext.executeInitializer((yyvsp[(2) - (4)].lex).range, *(yyvsp[(2) - (4)].lex).string, (yyvsp[(1) - (4)].interm.type), (yyvsp[(4) - (4)].interm.intermTypedNode), intermNode))
             (yyval.interm.intermTypedNode) = (yyvsp[(4) - (4)].interm.intermTypedNode);
         else {
@@ -6685,13 +6687,13 @@ yyreduce:
 
   case 240:
 /* Line 1787 of yacc.c  */
-#line 3460 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3462 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { parseContext.symbolTable.push(); ++parseContext.switchNestingLevel; }
     break;
 
   case 241:
 /* Line 1787 of yacc.c  */
-#line 3460 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3462 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         parseContext.symbolTable.pop();
         (yyval.interm.intermNode) = parseContext.intermediate.addSwitch((yyvsp[(4) - (8)].interm.intermTypedNode), (yyvsp[(7) - (8)].interm.intermAggregate), (yyvsp[(2) - (8)].lex).range, parseContext.extensionChanged);
@@ -6702,7 +6704,7 @@ yyreduce:
 
   case 242:
 /* Line 1787 of yacc.c  */
-#line 3469 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3471 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermAggregate) = 0;
     }
@@ -6710,7 +6712,7 @@ yyreduce:
 
   case 243:
 /* Line 1787 of yacc.c  */
-#line 3472 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3474 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermAggregate) = (yyvsp[(1) - (1)].interm.intermAggregate);
         if ((yyval.interm.intermAggregate)) (yyval.interm.intermAggregate)->getAsAggregate()->setOperator(EOpSequence);
@@ -6719,7 +6721,7 @@ yyreduce:
 
   case 244:
 /* Line 1787 of yacc.c  */
-#line 3479 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3481 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermNode) = parseContext.intermediate.addCase((yyvsp[(2) - (3)].interm.intermTypedNode), (yyvsp[(1) - (3)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (3)].lex).range, (yyvsp[(3) - (3)].lex).range));
@@ -6728,7 +6730,7 @@ yyreduce:
 
   case 245:
 /* Line 1787 of yacc.c  */
-#line 3483 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3485 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermNode) = parseContext.intermediate.addCase(NULL, (yyvsp[(1) - (2)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (2)].lex).range, (yyvsp[(2) - (2)].lex).range));
@@ -6737,14 +6739,14 @@ yyreduce:
 
   case 246:
 /* Line 1787 of yacc.c  */
-#line 3490 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3492 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { parseContext.symbolTable.push(); ++parseContext.loopNestingLevel; }
     break;
 
   case 247:
 /* Line 1787 of yacc.c  */
-#line 3490 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3492 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         parseContext.symbolTable.pop();
         (yyval.interm.intermNode) = parseContext.intermediate.addLoop((yyvsp[(6) - (6)].interm.intermNode), NULL, (yyvsp[(4) - (6)].interm.intermTypedNode), 0, LOOP_WHILE, (yyvsp[(1) - (6)].lex).range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
@@ -6754,17 +6756,17 @@ yyreduce:
 
   case 248:
 /* Line 1787 of yacc.c  */
-#line 3496 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3498 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { ++parseContext.loopNestingLevel; }
     break;
 
   case 249:
 /* Line 1787 of yacc.c  */
-#line 3496 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3498 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.boolErrorCheck((yyvsp[(8) - (8)].lex).range, (yyvsp[(6) - (8)].interm.intermTypedNode)))
             parseContext.recover(__FILE__, __LINE__);
-                    
+
         (yyval.interm.intermNode) = parseContext.intermediate.addLoop((yyvsp[(3) - (8)].interm.intermNode), NULL, (yyvsp[(6) - (8)].interm.intermTypedNode), 0, LOOP_DO, (yyvsp[(4) - (8)].lex).range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(4) - (8)].lex).range, (yyvsp[(7) - (8)].lex).range));
@@ -6773,13 +6775,13 @@ yyreduce:
 
   case 250:
 /* Line 1787 of yacc.c  */
-#line 3504 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3506 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     { parseContext.symbolTable.push(); ++parseContext.loopNestingLevel; }
     break;
 
   case 251:
 /* Line 1787 of yacc.c  */
-#line 3504 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3506 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         parseContext.symbolTable.pop();
         /*
@@ -6790,7 +6792,7 @@ yyreduce:
                 $1.range);
         $$->getAsAggregate()->setOperator(EOpSequence);
         */
-        
+
         (yyval.interm.intermNode) = parseContext.intermediate.addLoop((yyvsp[(7) - (7)].interm.intermNode), (yyvsp[(4) - (7)].interm.intermNode), reinterpret_cast<TIntermTyped*>((yyvsp[(5) - (7)].interm.nodePair).node1), reinterpret_cast<TIntermTyped*>((yyvsp[(5) - (7)].interm.nodePair).node2), LOOP_FOR, (yyvsp[(1) - (7)].lex).range, parseContext.extensionChanged);
         --parseContext.loopNestingLevel;
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (7)].lex).range, (yyvsp[(6) - (7)].lex).range));
@@ -6799,15 +6801,15 @@ yyreduce:
 
   case 252:
 /* Line 1787 of yacc.c  */
-#line 3522 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3524 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
-        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); 
+        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode);
     }
     break;
 
   case 253:
 /* Line 1787 of yacc.c  */
-#line 3525 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3527 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode);
     }
@@ -6815,24 +6817,24 @@ yyreduce:
 
   case 254:
 /* Line 1787 of yacc.c  */
-#line 3531 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode); 
+#line 3533 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        (yyval.interm.intermTypedNode) = (yyvsp[(1) - (1)].interm.intermTypedNode);
     }
     break;
 
   case 255:
 /* Line 1787 of yacc.c  */
-#line 3534 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        (yyval.interm.intermTypedNode) = 0; 
+#line 3536 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        (yyval.interm.intermTypedNode) = 0;
     }
     break;
 
   case 256:
 /* Line 1787 of yacc.c  */
-#line 3540 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3542 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.nodePair).node1 = (yyvsp[(1) - (2)].interm.intermTypedNode);
         (yyval.interm.nodePair).node2 = 0;
     }
@@ -6840,7 +6842,7 @@ yyreduce:
 
   case 257:
 /* Line 1787 of yacc.c  */
-#line 3544 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3546 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.nodePair).node1 = (yyvsp[(1) - (3)].interm.intermTypedNode);
         (yyval.interm.nodePair).node2 = (yyvsp[(3) - (3)].interm.intermTypedNode);
@@ -6849,12 +6851,12 @@ yyreduce:
 
   case 258:
 /* Line 1787 of yacc.c  */
-#line 3551 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3553 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.loopNestingLevel <= 0) {
             parseContext.error((yyvsp[(1) - (2)].lex).range, "continue statement only allowed in loops", "", "");
             parseContext.recover(__FILE__, __LINE__);
-        }        
+        }
         (yyval.interm.intermNode) = parseContext.intermediate.addBranch(EOpContinue, (yyvsp[(1) - (2)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (2)].lex).range, (yyvsp[(2) - (2)].lex).range));
     }
@@ -6862,13 +6864,13 @@ yyreduce:
 
   case 259:
 /* Line 1787 of yacc.c  */
-#line 3559 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3561 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         if (parseContext.loopNestingLevel <= 0 &&
             parseContext.switchNestingLevel <= 0) {
             parseContext.error((yyvsp[(1) - (2)].lex).range, "break statement only allowed in loops and switches", "", "");
             parseContext.recover(__FILE__, __LINE__);
-        }        
+        }
         (yyval.interm.intermNode) = parseContext.intermediate.addBranch(EOpBreak, (yyvsp[(1) - (2)].lex).range, parseContext.extensionChanged);
         if ((yyval.interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (2)].lex).range, (yyvsp[(2) - (2)].lex).range));
     }
@@ -6876,7 +6878,7 @@ yyreduce:
 
   case 260:
 /* Line 1787 of yacc.c  */
-#line 3568 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3570 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermNode) = parseContext.intermediate.addBranch(EOpReturn, (yyvsp[(1) - (2)].lex).range, parseContext.extensionChanged);
         if (parseContext.currentFunctionType->getBasicType() != EbtVoid) {
@@ -6889,8 +6891,8 @@ yyreduce:
 
   case 261:
 /* Line 1787 of yacc.c  */
-#line 3576 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    {        
+#line 3578 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermNode) = parseContext.intermediate.addBranch(EOpReturn, (yyvsp[(2) - (3)].interm.intermTypedNode), (yyvsp[(1) - (3)].lex).range, parseContext.extensionChanged);
         parseContext.functionReturnsValue = true;
         if (parseContext.currentFunctionType->getBasicType() == EbtVoid) {
@@ -6906,7 +6908,7 @@ yyreduce:
 
   case 262:
 /* Line 1787 of yacc.c  */
-#line 3588 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3590 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         FRAG_ONLY("discard", (yyvsp[(1) - (2)].lex).range);
         (yyval.interm.intermNode) = parseContext.intermediate.addBranch(EOpKill, (yyvsp[(1) - (2)].lex).range, parseContext.extensionChanged);
@@ -6916,16 +6918,16 @@ yyreduce:
 
   case 263:
 /* Line 1787 of yacc.c  */
-#line 3598 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
+#line 3600 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
         (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode);
-        parseContext.treeRoot = (yyval.interm.intermNode); 
+        parseContext.treeRoot = (yyval.interm.intermNode);
     }
     break;
 
   case 264:
 /* Line 1787 of yacc.c  */
-#line 3602 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3604 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         (yyval.interm.intermNode) = parseContext.intermediate.growAggregate((yyvsp[(1) - (2)].interm.intermNode), (yyvsp[(2) - (2)].interm.intermNode), parseContext.extensionChanged);
         if ((yyval.interm.intermNode) && (yyvsp[(1) - (2)].interm.intermNode) && (yyvsp[(2) - (2)].interm.intermNode)) (yyval.interm.intermNode)->setRange(addRange((yyvsp[(1) - (2)].interm.intermNode)->getRange(), (yyvsp[(2) - (2)].interm.intermNode)->getRange()));
@@ -6935,23 +6937,23 @@ yyreduce:
 
   case 265:
 /* Line 1787 of yacc.c  */
-#line 3610 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); 
+#line 3612 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode);
     }
     break;
 
   case 266:
 /* Line 1787 of yacc.c  */
-#line 3613 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
-    { 
-        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode); 
+#line 3615 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+    {
+        (yyval.interm.intermNode) = (yyvsp[(1) - (1)].interm.intermNode);
     }
     break;
 
   case 267:
 /* Line 1787 of yacc.c  */
-#line 3619 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3621 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         TFunction& function = *((yyvsp[(1) - (1)].interm).function);
         TFunction* prevDec = static_cast<TFunction*>(parseContext.symbolTable.find(function.getMangledName()));
@@ -6968,7 +6970,7 @@ yyreduce:
             parseContext.recover(__FILE__, __LINE__);
         }
         prevDec->setDefined();
-        
+
         //
         // Raise error message if main function takes any parameters or return anything other than void
         //
@@ -6980,23 +6982,23 @@ yyreduce:
             if (function.getReturnType().getBasicType() != EbtVoid) {
                 parseContext.error((yyvsp[(1) - (1)].interm).range, "", function.getReturnType().getBasicString(), "main function cannot return a value");
                 parseContext.recover(__FILE__, __LINE__);
-            }            
+            }
         }
-   
+
         //
         // New symbol table scope for body of function plus its arguments
         //
         parseContext.symbolTable.push();
-        
+
         //
         // Remember the return type for later checking for RETURN statements.
         //
         parseContext.currentFunctionType = &(prevDec->getReturnType());
         parseContext.functionReturnsValue = false;
-        
-        // 
+
+        //
         // Insert parameters into the symbol table.
-        // If the parameter has no name, it's not an error, just don't insert it 
+        // If the parameter has no name, it's not an error, just don't insert it
         // (could be used for unused args).
         //
         // Also, accumulate the list of parameters into the HIL, so lower level code
@@ -7007,7 +7009,7 @@ yyreduce:
             TParameter& param = function[i];
             if (param.name != 0) {
                 TVariable *variable = new TVariable(param.name, *param.type);
-                // 
+                //
                 // Insert the parameters with name in the symbol table.
                 //
                 if (! parseContext.symbolTable.insert(*variable)) {
@@ -7019,22 +7021,22 @@ yyreduce:
                 // Transfer ownership of name pointer to symbol table.
                 //
                 param.name = 0;
-                
+
                 //
                 // Add the parameter to the HIL
-                //                
+                //
                 paramNodes = parseContext.intermediate.growAggregate(
-                        paramNodes, 
+                        paramNodes,
                         parseContext.intermediate.addFuncParam(variable->getUniqueId(),
-                                                               variable->getName(),
-                                                               variable->getType(), (yyvsp[(1) - (1)].interm).range,
-                                                               parseContext.extensionChanged),
+                                                            variable->getName(),
+                                                            variable->getType(), (yyvsp[(1) - (1)].interm).range,
+                                                            parseContext.extensionChanged),
                         parseContext.extensionChanged);
             } else {
                 paramNodes = parseContext.intermediate.growAggregate(
-                        paramNodes, 
+                        paramNodes,
                         parseContext.intermediate.addFuncParam(0, "", *param.type, (yyvsp[(1) - (1)].interm).range,
-                                                               parseContext.extensionChanged),
+                                                            parseContext.extensionChanged),
                         parseContext.extensionChanged);
             }
         }
@@ -7046,7 +7048,7 @@ yyreduce:
 
   case 268:
 /* Line 1787 of yacc.c  */
-#line 3709 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3711 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
     {
         //?? Check that all paths return a value if return type != void ?
         //   May be best done as post process phase on intermediate code
@@ -7055,7 +7057,7 @@ yyreduce:
             parseContext.recover(__FILE__, __LINE__);
         }
         parseContext.symbolTable.pop();
-        
+
 
         TIntermNode *body = NULL;
         // Add dummy node at the end of 'main' body for debugging the last statement
@@ -7087,13 +7089,13 @@ yyreduce:
                 body->getAsAggregate()->setOperator(EOpSequence);
             }
         }
-        
+
         (yyval.interm.intermNode) = parseContext.intermediate.growAggregate((yyvsp[(1) - (3)].interm).intermAggregate, body, parseContext.extensionChanged);
         parseContext.intermediate.setAggregateOperator((yyval.interm.intermNode), EOpFunction, (yyvsp[(1) - (3)].interm).range, parseContext.extensionChanged);
         (yyval.interm.intermNode)->getAsAggregate()->setName((yyvsp[(1) - (3)].interm).function->getMangledName().c_str());
         (yyval.interm.intermNode)->getAsAggregate()->setType((yyvsp[(1) - (3)].interm).function->getReturnType());
-        
-        // store the pragma information for debug and optimize and other vendor specific 
+
+        // store the pragma information for debug and optimize and other vendor specific
         // information. This information can be queried from the parse tree
         (yyval.interm.intermNode)->getAsAggregate()->setOptimize(parseContext.contextPragma.optimize);
         (yyval.interm.intermNode)->getAsAggregate()->setDebug(parseContext.contextPragma.debug);
@@ -7104,7 +7106,7 @@ yyreduce:
 
 
 /* Line 1787 of yacc.c  */
-#line 7108 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.tab.c"
+#line 7110 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -7194,20 +7196,20 @@ yyerrlab:
   if (yyerrstatus == 3)
     {
       /* If just tried and failed to reuse lookahead token after an
-	 error, discard it.  */
+    error, discard it.  */
 
       if (yychar <= YYEOF)
-	{
-	  /* Return failure if at end of input.  */
-	  if (yychar == YYEOF)
-	    YYABORT;
-	}
+    {
+    /* Return failure if at end of input.  */
+    if (yychar == YYEOF)
+        YYABORT;
+    }
       else
-	{
-	  yydestruct ("Error: discarding",
-		      yytoken, &yylval);
-	  yychar = YYEMPTY;
-	}
+    {
+    yydestruct ("Error: discarding",
+            yytoken, &yylval);
+    yychar = YYEMPTY;
+    }
     }
 
   /* Else will try to reuse lookahead token after shifting the error
@@ -7245,23 +7247,23 @@ yyerrlab1:
     {
       yyn = yypact[yystate];
       if (!yypact_value_is_default (yyn))
-	{
-	  yyn += YYTERROR;
-	  if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
-	    {
-	      yyn = yytable[yyn];
-	      if (0 < yyn)
-		break;
-	    }
-	}
+    {
+    yyn += YYTERROR;
+    if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+        {
+        yyn = yytable[yyn];
+        if (0 < yyn)
+        break;
+        }
+    }
 
       /* Pop the current state because it cannot handle the error token.  */
       if (yyssp == yyss)
-	YYABORT;
+    YYABORT;
 
 
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp);
+        yystos[yystate], yyvsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -7319,7 +7321,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp);
+        yystos[*yyssp], yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -7336,5 +7338,5 @@ yyreturn:
 
 
 /* Line 2050 of yacc.c  */
-#line 3764 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
+#line 3766 "/media/sda9/projects/GLSL-Debugger/GLSLCompiler/glslang/MachineIndependent/glslang.y"
 
