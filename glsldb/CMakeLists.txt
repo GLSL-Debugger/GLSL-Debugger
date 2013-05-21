@@ -33,10 +33,12 @@ set(SRC
 	${RES_OUTFILES}
 )
 
-include_directories(${OPENGL_INCLUDE_DIR} 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+	${OPENGL_INCLUDE_DIR} 
 	${X11_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
 	${CMAKE_CURRENT_SOURCE_DIR}/utils
+        ${CMAKE_CURRENT_BINARY_DIR}
 	${GLEW_INCLUDE_DIR}
 )
 
@@ -52,7 +54,7 @@ target_link_libraries(glsldb
 	glenumerants
 	functionList
 	utils
+	${GLEW_LIBRARY}
 	${OPENGL_LIBRARIES}
 	${X11_LIBRARIES}
-	${GLEW_LIBRARIES}
 )

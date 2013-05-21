@@ -120,9 +120,10 @@ GlTraceListModel::~GlTraceListModel()
     
 void GlTraceListModel::clear(void)
 {
+    beginResetModel();
     m_iFirst = 0;
     m_iNum   = 0;
-    layoutChanged();
+    endResetModel();
 }
 
 int  GlTraceListModel::getNextIndex(void)
@@ -132,8 +133,9 @@ int  GlTraceListModel::getNextIndex(void)
     m_iNum++;
     if (m_iNum > m_iMax) {
         m_iNum = m_iMax;
-
+        beginRemoveRows(QModelIndex(), 0, 0);
         m_iFirst++;
+        endRemoveRows();
         if (m_iFirst >= m_iMax) {
             m_iFirst = 0;
         }
@@ -150,61 +152,70 @@ int  GlTraceListModel::getNextIndex(void)
     return idx;
 }
 
+int GlTraceListModel::getLastRowIndex(void)
+{
+    return m_iNum - 1;
+}
+
 void GlTraceListModel::addGlTraceItem(const  GlTraceListItem::IconType type, const QString & text)
 {
     int idx = getNextIndex();
-
+    int newRow = getLastRowIndex();
+    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(type);
     m_pData[idx].setText(text);
-
-    layoutChanged();
+    endInsertRows();
 }
 
 void GlTraceListModel::addGlTraceWarningItem(const QString & text)
 {
     int idx = getNextIndex();
-
+    int newRow = getLastRowIndex();
+    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(GlTraceListItem::IT_WARNING);
-
-    layoutChanged();
+    endInsertRows();
 }
 
 void GlTraceListModel::addGlTraceErrorItem(const QString & text)
 {
     int idx = getNextIndex();
-
+    int newRow = getLastRowIndex();
+    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(GlTraceListItem::IT_ERROR);
-
-    layoutChanged();
+    endInsertRows();
 }
 
 void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType type, int offset)
 {
     int idx;
+    int rowIdx = m_iNum + offset;
 
-    idx = m_iFirst + m_iNum + offset;
+    idx = m_iFirst + rowIdx;
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
 
     if ( 0 <= idx && idx < m_iMax) {
         m_pData[idx].setIconType(type);
-        layoutChanged();
+        QModelIndex dataIndex = createIndex(rowIdx, 0);
+        dataChanged(dataIndex, dataIndex);
     }
 }
 
 void GlTraceListModel::setCurrentGlTraceText(const QString &text, int offset)
 {
     int idx;
+    int rowIdx = m_iNum + offset;
 
-    idx = m_iFirst + m_iNum + offset;
+    idx = m_iFirst + rowIdx;
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
 
     if ( 0 <= idx && idx < m_iMax) {
         m_pData[idx].setText(text);
-        layoutChanged();
+        QModelIndex dataIndex = createIndex(rowIdx, 0);
+        dataChanged(dataIndex, dataIndex);
     }
 }
 

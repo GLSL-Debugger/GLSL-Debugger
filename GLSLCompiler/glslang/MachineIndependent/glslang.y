@@ -1308,7 +1308,7 @@ conditional_expression
     | logical_or_expression QUESTION expression COLON assignment_expression {
        if (parseContext.boolErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
-       
+
         $$ = parseContext.intermediate.addSelection($1, $3, $5, $2.range, parseContext.extensionChanged);
 
         /* GLSL 1.20 does not require the expressions to have the same type,
@@ -1441,7 +1441,7 @@ function_prototype
         // (we don't know at this point if it's a definition or not).
         //
         // Redeclarations are allowed.  But, return types and parameter qualifiers must match.
-        //        
+        //
         TFunction* prevDec = static_cast<TFunction*>(parseContext.symbolTable.find($1->getMangledName()));
         if (prevDec) {
             if (prevDec->getReturnType() != $1->getReturnType()) {
@@ -1467,26 +1467,26 @@ function_prototype
     }
     ;
 
-function_declarator 
+function_declarator
     : function_header {
         $$ = $1;
     }
     | function_header_with_parameters { 
-        $$ = $1;  
+        $$ = $1;
     }
     ;
 
 
 function_header_with_parameters
     : function_header parameter_declaration {
-        // Add the parameter 
+        // Add the parameter
         $$ = $1;
         if ($2.param.type->getBasicType() != EbtVoid)
             $1->addParameter($2.param);
         else
             delete $2.param.type;
     }
-    | function_header_with_parameters COMMA parameter_declaration {   
+    | function_header_with_parameters COMMA parameter_declaration {
         //
         // Only first parameter of one-parameter functions can be void
         // The check for named parameters not being void is done in parameter_declarator 
@@ -1506,7 +1506,7 @@ function_header_with_parameters
     }
     ;
 
-function_header 
+function_header
     : fully_specified_type IDENTIFIER LEFT_PAREN {
         if ($1.qualifier != EvqGlobal && $1.qualifier != EvqTemporary) {
             parseContext.error($2.range, "no qualifiers allowed for function return", getQualifierString($1.qualifier, parseContext.language), "");
@@ -1515,7 +1515,7 @@ function_header
         // make sure a sampler is not involved as well...
         if (parseContext.structQualifierErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
-        
+
         // Add the function as a prototype after parsing it (we do not support recursion) 
         TFunction *function;
         TType type($1);
@@ -1525,7 +1525,7 @@ function_header
     ;
 
 parameter_declarator
-    // Type + name 
+    // Type + name
     : type_specifier IDENTIFIER {
         if (parseContext.arraySizeUnspecifiedErrorCheck($1.range, $1)) {
             parseContext.error($1.range, "array syntax error", "", "");
@@ -1551,15 +1551,15 @@ parameter_declarator
         // Check that we can make an array out of this type
         if (parseContext.arrayTypeErrorCheck($3.range, $1))
             parseContext.recover(__FILE__, __LINE__);
-            
+
         if (parseContext.reservedErrorCheck($2.range, *$2.string))
             parseContext.recover(__FILE__, __LINE__);
-            
+
         int size;
         if (parseContext.arraySizeErrorCheck($3.range, $4, size))
             parseContext.recover(__FILE__, __LINE__);
         $1.setArray(true, size);
-             
+
         TType* type = new TType($1);
         TParameter param = { $2.string, type };
         $$.range = addRange($2.range, $5.range);
@@ -1568,11 +1568,11 @@ parameter_declarator
     ;
 
 parameter_declaration 
-    // 
+    //
     // The only parameter qualifier a parameter can have are 
     // IN_QUAL, OUT_QUAL, INOUT_QUAL, or CONST.
     //
-    
+
     //
     // Type + name 
     //
@@ -1608,7 +1608,7 @@ parameter_declaration
         $$.range = $2.range;
     }
     ;
-    
+
 parameter_qualifier
     : /* empty */ {
         $$ = EvqIn;
@@ -1679,16 +1679,16 @@ init_declarator_list
         $$ = $1;
 
         if ($1.type.type != EbtInvariant) {
-        
+
             if (parseContext.structQualifierErrorCheck($3.range, $$.type))
                 parseContext.recover(__FILE__, __LINE__);
-        
+
             if (parseContext.nonInitConstErrorCheck($3.range, *$3.string, $$.type))
                 parseContext.recover(__FILE__, __LINE__);
 
             if (parseContext.nonInitErrorCheck($3.range, *$3.string, $$.type))
                 parseContext.recover(__FILE__, __LINE__);
-                
+
             TSymbol *sym = parseContext.symbolTable.find(*$3.string);
             TIntermNode *intermNode = 
                 parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL, 
@@ -1714,10 +1714,10 @@ init_declarator_list
         } else {
             TSymbol *sym = parseContext.symbolTable.find(*$3.string);
             if (sym && sym->isVariable()) {
-            
+
                 TVariable *var = static_cast<TVariable*>(sym);
                 var->getType().addVaryingModifier(EvmInvariant);
-            
+
                 TString *newName = new TString(var->getName());
                 TType newType(EbtInvariant);
                 TPublicType newPType;
@@ -1738,12 +1738,12 @@ init_declarator_list
     | init_declarator_list COMMA IDENTIFIER array_declarator_suffix {
         if (parseContext.structQualifierErrorCheck($3.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
-            
+
         if (parseContext.nonInitConstErrorCheck($3.range, *$3.string, $1.type))
             parseContext.recover(__FILE__, __LINE__);
 
         $$ = $1;
-        
+
         if (parseContext.arrayTypeErrorCheck($4.range, $1.type) || parseContext.arrayQualifierErrorCheck($4.range, $1.type)) {
             parseContext.recover(__FILE__, __LINE__);
         } else {
@@ -1751,12 +1751,12 @@ init_declarator_list
             for (i=0; i<MAX_ARRAYS; i++) {
                 $1.type.addArray(true, $4.arraySize[i], i);
             }
-            
+
             TVariable* variable;
             if (parseContext.arrayErrorCheck($4.range, *$3.string, $1.type, variable))
                 parseContext.recover(__FILE__, __LINE__);
         }
-        
+
         /* Check for multi-dimensional arrays usage */
         if ($4.getNumArrays() > 1 && $1.type.qualifier != EvqVaryingIn) {
             parseContext.error($4.range, "multi-dimensional array usage error", "", "");
@@ -1765,7 +1765,7 @@ init_declarator_list
 
         /* Additional checks for geometry shaders */
         if (parseContext.language == EShLangGeometry && $1.qualifier == EvqVaryingIn) {
-            
+
             // First, find 'gl_VerticesIn' in symbol table
             int vertexInSize = 0;
             TVariable* variable = NULL;
@@ -1774,11 +1774,11 @@ init_declarator_list
                 variable = static_cast<TVariable*>(symbol);
                 constUnion* varUnion      = variable->getConstPointer();
                 vertexInSize = variable->getConstPointer()[0].getIConst();
-            
+
                 if ($4.arraySize[0] == 0) {
                     // Use gl_VertexIn for initialization of the array
                     $1.type.setArray(true, vertexInSize);
-    
+
                     if (parseContext.arrayErrorCheck($4.range, *$3.string, $1.type, variable))
                         parseContext.recover(__FILE__, __LINE__);
                 } else {
@@ -1792,7 +1792,7 @@ init_declarator_list
                 parseContext.recover(__FILE__, __LINE__);
             }
         }
- 
+
         TSymbol *sym = parseContext.symbolTable.find(*$3.string);
         TIntermNode *intermNode = 
             parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL, parseContext.extensionChanged);
@@ -1819,9 +1819,9 @@ init_declarator_list
     | init_declarator_list COMMA IDENTIFIER LEFT_BRACKET RIGHT_BRACKET EQUAL initializer {
         if (parseContext.structQualifierErrorCheck($3.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
-            
+
         $$ = $1;
-            
+
         TVariable* variable = 0;
         if (parseContext.arrayTypeErrorCheck($4.range, $1.type) || parseContext.arrayQualifierErrorCheck($4.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
@@ -1891,9 +1891,9 @@ init_declarator_list
     | init_declarator_list COMMA IDENTIFIER LEFT_BRACKET constant_expression RIGHT_BRACKET EQUAL initializer {
         if (parseContext.structQualifierErrorCheck($3.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);
-            
+
         $$ = $1;
-            
+
         TVariable* variable = 0;
         if (parseContext.arrayTypeErrorCheck($4.range, $1.type) || parseContext.arrayQualifierErrorCheck($4.range, $1.type))
             parseContext.recover(__FILE__, __LINE__);

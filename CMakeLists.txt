@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(glsldb)
 
 # DEBUG
-set(CMAKE_BUILD_TYPE "Maintainer")
+#set(CMAKE_BUILD_TYPE "Maintainer")
 
 # path to custom modules 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")

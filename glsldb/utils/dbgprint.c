@@ -109,7 +109,8 @@ void startLogging(const char* baseName)
 #else
 			pid_t pid = getpid();
 #endif
-			if (!(logfileName = malloc(strlen(g.logDir) + 1 + (int)log10(pid) + 16 +strlen(LOG_SUFFIX)))) {
+            /* 64 bit pid should suffice (20 digits) */
+			if (!(logfileName = malloc(strlen(g.logDir) + 1 + 20 + 16 +strlen(LOG_SUFFIX)))) {
 				perror("Error opening logfile");
 				exit(1);
 			}
