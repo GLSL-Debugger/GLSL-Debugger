@@ -1030,6 +1030,7 @@ static void TraverseChangeSymbol(TIntermSymbol* node, TIntermTraverser* it)
 
 static void TraverseChangeFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
 {
+    UNUSED_ARG(it)
     //TOutputDebugCgbTraverser *oit = static_cast<TOutputDebugCgbTraverser*>(it);
 
     if (node->getType().getQualifier() == EvqIn ||

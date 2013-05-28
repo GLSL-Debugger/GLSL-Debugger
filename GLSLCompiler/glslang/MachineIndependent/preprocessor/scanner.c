@@ -395,7 +395,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
         switch (ch) {
             default:
                 SetTokenPos(1, GetCursor());
-                return ch; // Single character token
+                return ch; /* Single character token */
             case EOF:
                 return -1;
             case 'A': case 'B': case 'C': case 'D': case 'E':
@@ -477,7 +477,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     yylvalpp->sc_int = ival;
                     SetTokenPos(1, GetCursor());
                     return CPP_INTCONSTANT;
-                } else if (ch >= '0' && ch <= '7') { // octal integer constants
+                } else if (ch >= '0' && ch <= '7') { /* octal integer constants */
                     AlreadyComplained = 0;
                     ival = 0;
                     do {
@@ -746,7 +746,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     return result;
                 } else {
                     if (ch == '.') {
-                        return -1; // Special EOF hack
+                        return -1; /* Special EOF hack */
                     } else {
                         cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
                         SetTokenPos(1, GetCursor());
@@ -783,7 +783,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     if (nlcount) {
                         return '\n';
                     }
-                    // Go try it again...
+                    /* Go try it again... */
                 } else if (ch == '=') {
                     SetTokenPos(1, GetCursor());
                     return CPP_DIV_ASSIGN;
