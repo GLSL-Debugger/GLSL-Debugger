@@ -41,20 +41,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 GlCallStatistics::GlCallStatistics(QTableView *parent)
 {
     m_pTableView = parent;
-    
+
 
     m_pModel = new QStandardItemModel(m_pTableView);
     m_pProxyModel = new QSortFilterProxyModel(parent);
     m_pProxyModel->setSourceModel(m_pModel);
     m_pProxyModel->setDynamicSortFilter(true);
-    
+
     m_pTableView->setModel(m_pProxyModel);
-    
+
     m_pTableView->setSortingEnabled(true);
     m_pTableView->sortByColumn(0, Qt::DescendingOrder);
 
     resetStatistic();
-    
+
     m_nNumCalls = 0;
 }
 
@@ -104,8 +104,9 @@ void GlCallStatistics::incCallStatistic(QString i_qFName)
         m_pModel->item(row, 1)->setEditable(false);
 
         /* set row height of view */
-        m_pTableView->setRowHeight(
-                m_pProxyModel->mapFromSource(m_pModel->index(row, 0)).row(), 22);
+        QModelIndex rowIndex = m_pModel->index(row, 0);
+        if (rowIndex.isValid())
+            m_pTableView->setRowHeight(m_pProxyModel->mapFromSource(rowIndex).row(), 22);
     } else if (resultList.count() == 1) {
         /* Exiting item */
         row = resultList[0]->row();
