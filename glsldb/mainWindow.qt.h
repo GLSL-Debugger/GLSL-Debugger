@@ -46,8 +46,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glCallStatistics.qt.h"
 #include "jumpToDialog.qt.h"
 
-//#include "ShHandle.h"
+#ifdef USE_MESA
+#include "main/mtypes.h"
+#else
+#include "ShHandle.h"
 #include "ShaderLang.h"
+#endif
 
 #include "progControl.qt.h"
 #include "shVarModel.qt.h"

@@ -2394,7 +2394,13 @@ void MainWindow::on_tbShaderExecute_clicked()
     QString sourceCode;
     char *shaderCode = NULL;
     int debugOptions =  EDebugOpIntermediate;
+
+#ifdef USE_MESA
+    GLenum language = GL_FRAGMENT_SHADER;
+#else
     EShLanguage language = EShLangFragment;
+#endif
+
     pcErrorCode error = PCE_NONE;
 
     if (currentRunLevel == RL_DBG_VERTEX_SHADER ||
@@ -2473,14 +2479,22 @@ void MainWindow::on_tbShaderExecute_clicked()
         case 0: /* Vertex shaders */
             if (m_pShaders[0]) {
                 setRunLevel(RL_DBG_VERTEX_SHADER);
-                language = EShLangVertex;
+#ifdef USE_MESA
+                language = GL_VERTEX_SHADER;
+#else
+                language = EShLangVertex;              
+#endif
             } else {
                 return;
             }
             break;
         case 1: /* Geometry shaders */
             if (m_pShaders[1]) {
+#ifdef USE_MESA
+                language = GL_GEOMETRY_SHADER;
+#else
                 language = EShLangGeometry;
+#endif
                 setRunLevel(RL_DBG_GEOMETRY_SHADER);
             } else {
                 return;
@@ -2488,7 +2502,11 @@ void MainWindow::on_tbShaderExecute_clicked()
             break;
         case 2: /* Fragment shaders */
             if (m_pShaders[2]) {
+#ifdef USE_MESA
+                language = GL_FRAGMENT_SHADER;
+#else
                 language = EShLangFragment;
+#endif
                 setRunLevel(RL_DBG_FRAGMENT_SHADER);
             } else {
                 return;
@@ -2498,6 +2516,7 @@ void MainWindow::on_tbShaderExecute_clicked()
             return;
     }
 
+#ifndef USE_MESA
     /* start building the parse tree for this shader */
     m_dShCompiler = ShConstructCompiler(language, debugOptions);
     if (m_dShCompiler == 0) {
@@ -2506,11 +2525,29 @@ void MainWindow::on_tbShaderExecute_clicked()
         setRunLevel(RL_SETUP);
         return;
     }
+#else
+    struct gl_shader_program *whole_program;
+    whole_program = rzalloc(NULL, struct gl_shader_program);
+    assert(whole_program != NULL);
+    whole_program->InfoLog = ralloc_strdup(whole_program, "");
 
+    struct gl_shader *shader = rzalloc(whole_program, gl_shader);
+    whole_program->Shaders[whole_program->NumShaders] = shader;
+    whole_program->NumShaders++;
+    shader->Type = language;
+#endif
+
+#ifndef USE_MESA
     shaderCode = m_pShaders[type];
 
     if (! ShCompile(m_dShCompiler, &shaderCode, 1, EShOptNone, &m_dShResources, debugOptions, &m_dShVariableList)) {
         const char *err = ShGetInfoLog(m_dShCompiler);
+#else
+    shader->Source = m_pShaders[type];
+    compile_shader(ctx, shader);
+    if (!shader->CompileStatus) {
+        const char *err = shader->InfoLog;
+#endif
         Dialog_CompilerError dlgCompilerError(this);
         dlgCompilerError.labelMessage->setText("Your shader seems not to be compliant to the official GLSL1.2 specification and may rely on vendor specific enhancements.<br>If this is not the case, please report this probem to <A HREF=\"mailto:glsldevil@vis.uni-stuttgart.de\">glsldevil@vis.uni-stuttgart.de</A>.");
         dlgCompilerError.setDetailedOutput(err);
@@ -2519,6 +2556,7 @@ void MainWindow::on_tbShaderExecute_clicked()
         setRunLevel(RL_DBG_RESTART);
         return;
     }
+#else
 
     m_pShVarModel = new ShVarModel(&m_dShVariableList, this, qApp);
     connect(m_pShVarModel, SIGNAL(newWatchItem(ShVarItem*)),
@@ -2550,6 +2588,7 @@ void MainWindow::on_tbShaderExecute_clicked()
         return;
     }
 
+#ifndef USE_MESA
     if (language == EShLangGeometry) {
         delete m_pGeometryMap;
         delete m_pVertexCount;
@@ -2576,6 +2615,7 @@ void MainWindow::on_tbShaderExecute_clicked()
         //			m_dShResources.geoOutputType, m_pGeometryMap, m_pVertexCount);
 
     }
+#endif
 
 }
 

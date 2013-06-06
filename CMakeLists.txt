@@ -67,5 +67,16 @@ set( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
 set(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/lib")
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/bin")
 
+# For mesa glsl compiller
+set(USE_MESA true)
+
+if(DEFINED USE_MESA)
+    add_definitions(-DUSE_MESA)
+    add_subdirectory(mesa-glsl)
+else()
+    #add_subdirectory(GLSLCompiler)
+endif()
+
 add_subdirectory(GLSLCompiler)
+
 add_subdirectory(glsldb)

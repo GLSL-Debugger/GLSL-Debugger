@@ -34,7 +34,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _FLOAT_BOX_QT_H_
 #define _FLOAT_BOX_QT_H_
 
-#include "ShaderLang.h"
+#ifndef USE_MESA
+    #include "ShaderLang.h"
+#endif
 
 #include <QtCore/QObject>
 #include <QtGui/QImage>

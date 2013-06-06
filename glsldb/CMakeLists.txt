@@ -35,12 +35,21 @@ set(SRC
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 	${OPENGL_INCLUDE_DIR} 
-	${X11_INCLUDE_DIR}
-	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
+	${X11_INCLUDE_DIR}	
 	${CMAKE_CURRENT_SOURCE_DIR}/utils
         ${CMAKE_CURRENT_BINARY_DIR}
 	${GLEW_INCLUDE_DIR}
 )
+
+if(DEFINED USE_MESA)
+    include_directories(${PROJECT_SOURCE_DIR}/glsl-mesa/glsl)
+    include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
+    set(GLSL_LIBRARIES glslmesa)
+else()
+    include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
+    set(GLSL_LIBRARIES glslang)
+endif()
+
 
 if(GLSLDB_LINUX)
 	#add_definitions(-DUNIX)
@@ -50,7 +59,7 @@ add_executable(glsldb ${SRC})
 target_link_libraries(glsldb 
 	${QT_LIBRARIES} 
 	${CMAKE_THREAD_LIBS_INIT} 
-	glslang 
+        ${GLSL_LIBRARIES}
 	glenumerants
 	functionList
 	utils
@@ -58,3 +67,5 @@ target_link_libraries(glsldb
 	${OPENGL_LIBRARIES}
 	${X11_LIBRARIES}
 )
+
+
