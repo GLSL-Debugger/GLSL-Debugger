@@ -8,20 +8,20 @@ extern "C" {
 /*
 ** Copyright 1998-2002, NVIDIA Corporation.
 ** All Rights Reserved.
-** 
+**
 ** THE INFORMATION CONTAINED HEREIN IS PROPRIETARY AND CONFIDENTIAL TO
 ** NVIDIA, CORPORATION.  USE, REPRODUCTION OR DISCLOSURE TO ANY THIRD PARTY
 ** IS SUBJECT TO WRITTEN PRE-APPROVAL BY NVIDIA, CORPORATION.
-** 
-** 
+**
+**
 ** Copyright 1992-1999, Silicon Graphics, Inc.
 ** All Rights Reserved.
-** 
+**
 ** Portions of this file are UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon
 ** Graphics, Inc.; the contents of this file may not be disclosed to third
 ** parties, copied or duplicated in any form, in whole or in part, without
 ** the prior written permission of Silicon Graphics, Inc.
-** 
+**
 ** RESTRICTED RIGHTS LEGEND:
 ** Use, duplication or disclosure by the Government is subject to
 ** restrictions as set forth in subdivision (c)(1)(ii) of the Rights in

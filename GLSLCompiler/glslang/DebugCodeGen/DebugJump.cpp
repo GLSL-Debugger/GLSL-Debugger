@@ -153,11 +153,11 @@ static void addScopeToScopeStack(scopeList *s)
             }
         }
 
-    
+
         g.result.scopeStack.numIds++;
 
         g.result.scopeStack.ids = (int*) realloc(g.result.scopeStack.ids,
-                                                 g.result.scopeStack.numIds*sizeof(int));
+                                                g.result.scopeStack.numIds*sizeof(int));
         g.result.scopeStack.ids[g.result.scopeStack.numIds-1] = *si;
 
 NEXTINSCOPE:
@@ -236,7 +236,7 @@ static TIntermNode* getFunctionBySignature(const char *sig, TIntermNode* root)
     TIntermAggregate *aggregate;
     TIntermSequence sequence;
     TIntermSequence::iterator sit;
-    
+
     // Root must be aggregate
     if (!(aggregate = root->getAsAggregate())) {
         VPRINT(4, "root is not an aggregate node???\n", sig);
@@ -247,16 +247,16 @@ static TIntermNode* getFunctionBySignature(const char *sig, TIntermNode* root)
         // do not stop search at function prototypes
         if (aggregate->getSequence().size() != 0) {
             if (!strcmp( sig, aggregate->getName().c_str() )) {
-                VPRINT(3, "getFunctionBySignature: found %s at %p\n", 
+                VPRINT(3, "getFunctionBySignature: found %s at %p\n",
                         sig, aggregate);
                 return aggregate;
             }
         }
     } else {
         sequence = aggregate->getSequence();
-    
+
         for(sit = sequence.begin(); sit != sequence.end(); sit++) {
-            if ( (*sit)->getAsAggregate() && 
+            if ( (*sit)->getAsAggregate() &&
                     (*sit)->getAsAggregate()->getOp() == EOpFunction ) {
                 // do not stop search at function prototypes
                 if ((*sit)->getAsAggregate()->getSequence().size() != 0) {
@@ -287,7 +287,7 @@ static void processDebugable(TIntermNode *node, OTOperation *op)
 // Default handling of a node that can be debugged
 {
     TDebugState newState;
-    VPRINT(3, "processDebugable L:%s Op:%i DbgSt:%i\n", 
+    VPRINT(3, "processDebugable L:%s Op:%i DbgSt:%i\n",
             FormatSourceRange(node->getRange()).c_str(), *op, node->getDebugState());
 
     switch (*op) {
@@ -356,10 +356,10 @@ static void processDebugable(TIntermNode *node, OTOperation *op)
                         TIntermSequence sequence = tn->getSequence();
                         TIntermSequence::iterator sit;
                         for (sit = sequence.begin();
-                             sit != sequence.end(); ++sit) {
+                            sit != sequence.end(); ++sit) {
 
                             VPRINT(6, "getDebugState: %i\n", (*sit)->getDebugState());
-                            
+
                             if ((*sit)->getDebugState() != DbgStNone) {
                                 newState = DbgStPath;
                             }
@@ -368,30 +368,30 @@ static void processDebugable(TIntermNode *node, OTOperation *op)
                         /* Check left and right */
                         TIntermBinary *tn = node->getAsBinaryNode();
                         if ( (tn->getLeft() &&
-                              tn->getLeft()->getDebugState() != DbgStNone) || 
-                             (tn->getRight() &&
-                              tn->getRight()->getDebugState() != DbgStNone) ) {
+                            tn->getLeft()->getDebugState() != DbgStNone) ||
+                            (tn->getRight() &&
+                            tn->getRight()->getDebugState() != DbgStNone) ) {
                             newState = DbgStPath;
                         }
                     } else if (node->getAsDeclarationNode()) {
                         /* Check optional initialization */
                         TIntermDeclaration *tn = node->getAsDeclarationNode();
                         if ( (tn->getInitialization()) &&
-                             (tn->getInitialization()->getDebugState() != 
-                                 DbgStNone) ) {
+                            (tn->getInitialization()->getDebugState() !=
+                                DbgStNone) ) {
                             newState = DbgStPath;
                         }
                     } else if (node->getAsSelectionNode()) {
                         /* Check conditional branches */
                         TIntermSelection *sn = node->getAsSelectionNode();
                         if ( (sn->getTrueBlock() &&
-                              sn->getTrueBlock()->getDebugState() != DbgStNone)
+                            sn->getTrueBlock()->getDebugState() != DbgStNone)
                                 ||
-                             (sn->getFalseBlock() &&
-                              sn->getFalseBlock()->getDebugState() != DbgStNone)
+                            (sn->getFalseBlock() &&
+                            sn->getFalseBlock()->getDebugState() != DbgStNone)
                                 ||
-                             (sn->getCondition() &&
-                              sn->getCondition()->getDebugState() != DbgStNone))
+                            (sn->getCondition() &&
+                            sn->getCondition()->getDebugState() != DbgStNone))
                         {
                             newState = DbgStPath;
                         }
@@ -403,7 +403,7 @@ static void processDebugable(TIntermNode *node, OTOperation *op)
                         }
                     } else if (node->getAsUnaryNode()) {
                         TIntermUnary *un = node->getAsUnaryNode();
-                        if (un->getOperand() && 
+                        if (un->getOperand() &&
                             un->getOperand()->getDebugState() != DbgStNone) {
                             newState = DbgStPath;
                         }
@@ -426,12 +426,12 @@ static void processDebugable(TIntermNode *node, OTOperation *op)
 static bool TraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    
-    VPRINT(2, "processAggregate L:%s N:%s UD:%i Op:%i DbgSt:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
-            node->getName().c_str(), 
+
+    VPRINT(2, "processAggregate L:%s N:%s UD:%i Op:%i DbgSt:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
+            node->getName().c_str(),
             (int) node->isUserDefined(),
-            oit->operation, 
+            oit->operation,
             node->getDebugState());
 
     switch (node->getOp()) {
@@ -443,12 +443,12 @@ static bool TraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TInte
                         VPRINT(2, "\t ---- pop %p from stack ----\n", node);
                         oit->parseStack.pop();
                         /* Do not dirctly jump into next function after
-                         * returning from a function */
+                        * returning from a function */
                         oit->dbgBehaviour &= ~DBG_BH_JUMPINTO;
                         oit->finishedDbgFunction = true;
                         if (!oit->parseStack.empty())
                         {
-                            VPRINT(2, "\t ---- continue parsing at %pk ----\n", 
+                            VPRINT(2, "\t ---- continue parsing at %pk ----\n",
                                     oit->parseStack.top());
                             oit->operation = OTOpTargetUnset;
                             oit->parseStack.top()->traverse(oit);
@@ -488,9 +488,9 @@ static bool TraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TInte
 
                                 // add local parameters of called function first
                                 copyShChangeableList(&(g.result.cgbls),
-                                                     funcDec->getAsAggregate()->
-                                                     getCgbParameterList());
-                                
+                                                    funcDec->getAsAggregate()->
+                                                    getCgbParameterList());
+
                                 funcDec->traverse(oit);
 
                                 // if parsing ends up here and a target is still beeing
@@ -582,9 +582,9 @@ static bool TraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TInte
 static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    
-    VPRINT(2, "processBinary L:%s DbgSt:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(2, "processBinary L:%s DbgSt:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
 
     switch (node->getOp()) {
@@ -610,7 +610,7 @@ static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTrav
                         // do not visit children
                         // add all changeables of this node to the list
                         copyShChangeableList(&(g.result.cgbls), node->getCgbList());
-                        
+
                         // Check if this operation would have emitted a vertex
                         if (node->containsEmitVertex()) {
                             g.result.passedEmitVertex = true;
@@ -662,7 +662,7 @@ static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTrav
                         node->getLeft()->traverse(it);
                     }
                     --it->depth;
-                    
+
                     // the old target was found inside left/right branch and
                     // a new one is still being searched for
                     // -> add only changed variables of this assigment, i.e.
@@ -705,8 +705,8 @@ static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTrav
 static bool TraverseDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    
-    VPRINT(2, "processDeclaration L:%s DbgSt:%i\n", 
+
+    VPRINT(2, "processDeclaration L:%s DbgSt:%i\n",
             FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
 
@@ -727,8 +727,8 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
     TIntermSelection *sn = node->getAsSelectionNode();
-    
-    VPRINT(2, "processSelection L:%s DbgSt:%i\n", 
+
+    VPRINT(2, "processSelection L:%s DbgSt:%i\n",
             FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
 
@@ -753,8 +753,8 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
 
                                 if (oit->operation == OTOpTargetSet) {
                                     // there was not target in condition, so copy all
-                                    // changeables; it's unlikely that there is a 
-                                    // changeable and no target, but anyway be on the 
+                                    // changeables; it's unlikely that there is a
+                                    // changeable and no target, but anyway be on the
                                     // safe side
                                     copyShChangeableList(&(g.result.cgbls), node->getCondition()->getCgbList());
 
@@ -789,7 +789,7 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
                                     g.result.passedDiscard = true;
                                     VPRINT(6, "passed Discard %i\n", __LINE__);
                                 }
-                                
+
                                 if (node->getTrueBlock()) {
                                     copyShChangeableList(&(g.result.cgbls), node->getTrueBlock()->getCgbList());
                                     // Check if true block emitted a vertex
@@ -885,7 +885,7 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
                                             g.result.passedDiscard = true;
                                             VPRINT(6, "passed Discard %i\n", __LINE__);
                                         }
-                                     }
+                                    }
                                     return false;
                                 } else {
                                     sn->setDbgInternalState(DBG_STATE_SELECTION_IF);
@@ -910,12 +910,12 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
                             oit->operation = OTOpDone;
                             sn->setDbgInternalState(DBG_STATE_SELECTION_INIT);
                             if (node->getAsSelectionNode()->getFalseBlock()) {
-                                g.result.position = 
+                                g.result.position =
                                     DBG_RS_POSITION_SELECTION_IF_ELSE;
                                 g.result.range = setDbgResultRange(node->getRange());
                                 setGobalScope(node->getScope());
                             } else {
-                                g.result.position = 
+                                g.result.position =
                                     DBG_RS_POSITION_SELECTION_IF;
                                 g.result.range = setDbgResultRange(node->getRange());
                                 setGobalScope(node->getScope());
@@ -939,7 +939,7 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
                         case DBG_STATE_SELECTION_ELSE:
                             VPRINT(4, "\t -------- set condition pass ---------\n");
                             // Debugging of condition finished! Take care of the
-                            // non-debugged branch - if there is one - and copy 
+                            // non-debugged branch - if there is one - and copy
                             // it's changeables!
                             if (sn->getDbgInternalState() == DBG_STATE_SELECTION_IF)
                             {
@@ -988,11 +988,11 @@ static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TInte
                 /* Check conditional and branches */
                 TIntermSelection *sn = node->getAsSelectionNode();
                 if ( (sn->getTrueBlock() &&
-                      sn->getTrueBlock()->getDebugState() != DbgStNone) ||
-                     (sn->getFalseBlock() &&
-                      sn->getFalseBlock()->getDebugState() != DbgStNone) ||
-                     (sn->getCondition() &&
-                      sn->getCondition()->getDebugState() != DbgStNone))
+                    sn->getTrueBlock()->getDebugState() != DbgStNone) ||
+                    (sn->getFalseBlock() &&
+                    sn->getFalseBlock()->getDebugState() != DbgStNone) ||
+                    (sn->getCondition() &&
+                    sn->getCondition()->getDebugState() != DbgStNone))
                 {
                     node->setDebugState(DbgStPath);
                 }
@@ -1028,8 +1028,8 @@ static DbgRsTargetPosition setPositionLoop(LoopT t)
             return DBG_RS_POSITION_LOOP_FOR;
         case LOOP_DO:
             return DBG_RS_POSITION_LOOP_DO;
-		default:
-			dbgPrint(DBGLVL_ERROR, "CodeTools - setPositionLoop invalid loop type: %i\n", (int)t);
+        default:
+            dbgPrint(DBGLVL_ERROR, "CodeTools - setPositionLoop invalid loop type: %i\n", (int)t);
             exit(1);
             break;
     }
@@ -1039,11 +1039,11 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
     TIntermLoop *ln = node->getAsLoopNode();
-    
-    VPRINT(1, "processLoop L:%s DbgSt:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(1, "processLoop L:%s DbgSt:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
-            
+
     switch (oit->operation) {
         case OTOpTargetUnset:
             switch (ln->getDebugState()) {
@@ -1065,7 +1065,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 
                                 if (oit->operation == OTOpTargetSet) {
                                     // there was not target in condition, so copy all
-                                    // changeables; it's unlikely that there is a 
+                                    // changeables; it's unlikely that there is a
                                     // changeable and no target, but anyway be on the
                                     // safe side
                                     copyShChangeableList(&(g.result.cgbls), node->getInit()->getCgbList());
@@ -1078,7 +1078,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                         g.result.passedDiscard = true;
                                         VPRINT(6, "passed Discard %i\n", __LINE__);
                                     }
-                                 }
+                                }
                             } else {
 #if 0    /* Jump only over loop */
                                 // user did not want to check initialization, so just
@@ -1089,7 +1089,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                 /* Finish debugging this loop */
                                 ln->setDbgInternalState(DBG_STATE_LOOP_UNSET);
                                 ln->setDbgIter(0);
-                                
+
                                 /* Copy all changeables from condition, test, body, terminal */
                                 copyShChangeableList(&(g.result.cgbls),
                                         node->getInit()->getCgbList());
@@ -1151,7 +1151,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                             if (oit->dbgBehaviour & DBG_BH_JUMPINTO) {
                                 // visit test
                                 node->getTest()->traverse(it);
-                                
+
                                 if (oit->operation == OTOpTargetSet) {
                                     copyShChangeableList(&(g.result.cgbls), node->getTest()->getCgbList());
                                     /* Check if condition emitted a vertex */
@@ -1173,7 +1173,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                 /* Finish debugging this loop */
                                 ln->setDbgInternalState(DBG_STATE_LOOP_UNSET);
                                 ln->setDbgIter(0);
-                                
+
                                 /* Copy all changeables from test, body, terminal */
                                 if (ln->getTest()) {
                                     copyShChangeableList(&(g.result.cgbls), ln->getTest()->getCgbList());
@@ -1224,9 +1224,9 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                 /* Finish debugging this loop */
                                 ln->setDbgInternalState(DBG_STATE_LOOP_UNSET);
                                 ln->setDbgIter(0);
-                                
-                                /* Copy all changeables from 
-                                 * test, body, terminal */
+
+                                /* Copy all changeables from
+                                * test, body, terminal */
                                 if (ln->getTest()) {
                                     copyShChangeableList(&(g.result.cgbls), ln->getTest()->getCgbList());
                                     /* Check if test emitted a vertex */
@@ -1266,11 +1266,11 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                 return false;
                             } else if (oit->dbgBehaviour & DBG_BH_LOOP_NEXT_ITER) {
                                 /* Perform one iteration without further debugging
-                                 *  - target stays the same
-                                 *  - increase loop iter counter
-                                 *  - change traverse to be finished
-                                 *  - prepare result
-                                 */
+                                *  - target stays the same
+                                *  - increase loop iter counter
+                                *  - change traverse to be finished
+                                *  - prepare result
+                                */
 
                                 /* Reset target */
                                 node->setDebugState(DbgStTarget);
@@ -1281,7 +1281,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 
                                 /* Finish debugging */
                                 oit->operation = OTOpDone;
-                                
+
                                 /* Build result struct */
                                 g.result.position = DBG_RS_POSITION_LOOP_CHOOSE;
                                 switch (ln->getLoopType()) {
@@ -1330,7 +1330,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                         VPRINT(6, "passed Discard %i\n", __LINE__);
                                     }
                                 }
-                                
+
                                 setGobalScope(node->getScope());
                             } else {
                                 ln->setDbgInternalState(DBG_STATE_LOOP_WRK_BODY);
@@ -1345,7 +1345,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                             if (oit->dbgBehaviour & DBG_BH_JUMPINTO) {
                                 // visit terminal
                                 node->getTerminal()->traverse(it);
-                                
+
                                 if (oit->operation == OTOpTargetSet) {
                                     copyShChangeableList(&(g.result.cgbls), node->getTerminal()->getCgbList());
                                     /* Check if terminal emitted a vertex */
@@ -1372,7 +1372,11 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                 }
                             }
                             return false;
+                        default:
+                            break;
                     }
+                default:
+                    break;
             }
             break;
         case OTOpTargetSet:
@@ -1389,17 +1393,17 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                                     if (ln->getInit()) {
                                         ln->setDbgInternalState(
                                                 DBG_STATE_LOOP_QYR_INIT);
-                                        g.result.position = 
+                                        g.result.position =
                                             setPositionLoop(ln->getLoopType());
                                     } else if (ln->getTest()) {
                                         ln->setDbgInternalState(
                                                 DBG_STATE_LOOP_QYR_TEST);
-                                        g.result.position = 
+                                        g.result.position =
                                             setPositionLoop(ln->getLoopType());
                                     } else {
                                         ln->setDbgInternalState(
                                                 DBG_STATE_LOOP_SELECT_FLOW);
-                                        g.result.position = 
+                                        g.result.position =
                                             DBG_RS_POSITION_LOOP_CHOOSE;
                                         g.result.loopIteration = ln->getDbgIter();
                                     }
@@ -1449,11 +1453,11 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                             oit->operation = OTOpDone;
                             if (ln->getTerminal()) {
                                 ln->setDbgInternalState(DBG_STATE_LOOP_QYR_TERMINAL);
-                                g.result.position = 
+                                g.result.position =
                                     setPositionLoop(ln->getLoopType());
                             } else if (ln->getTest()) {
                                 ln->setDbgInternalState(DBG_STATE_LOOP_QYR_TEST);
-                                g.result.position = 
+                                g.result.position =
                                     setPositionLoop(ln->getLoopType());
                                 /* Increase the loop counter */
                                 ln->addDbgIter(1);
@@ -1481,7 +1485,7 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                             oit->operation = OTOpDone;
                             if (ln->getTest()) {
                                 ln->setDbgInternalState(DBG_STATE_LOOP_QYR_TEST);
-                                g.result.position = 
+                                g.result.position =
                                     setPositionLoop(ln->getLoopType());
                             } else {
                                 ln->setDbgInternalState(DBG_STATE_LOOP_SELECT_FLOW);
@@ -1494,6 +1498,8 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                             g.result.range = setDbgResultRange(node->getRange());
                             setGobalScope(node->getScope());
                             return false;
+                        default:
+                            break;
                     }
                 case DbgStTarget:
                     break;
@@ -1510,13 +1516,13 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             if (node->getDebugState() == DbgStNone) {
                 /* Check init, test, terminal, and body */
                 if ( (ln->getInit() &&
-                      ln->getInit()->getDebugState() != DbgStNone) ||
-                     (ln->getTest() &&
-                      ln->getTest()->getDebugState() != DbgStNone) ||
-                     (ln->getTerminal() &&
-                      ln->getTerminal()->getDebugState() != DbgStNone) ||
-                     (ln->getBody() &&
-                      ln->getBody()->getDebugState() != DbgStNone) )
+                    ln->getInit()->getDebugState() != DbgStNone) ||
+                    (ln->getTest() &&
+                    ln->getTest()->getDebugState() != DbgStNone) ||
+                    (ln->getTerminal() &&
+                    ln->getTerminal()->getDebugState() != DbgStNone) ||
+                    (ln->getBody() &&
+                    ln->getBody()->getDebugState() != DbgStNone) )
                 {
                     node->setDebugState(DbgStPath);
                 }
@@ -1550,11 +1556,11 @@ static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 static bool TraverseUnary(bool,  TIntermUnary* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    
-    VPRINT(2, "processUnary L:%d DbgSt:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(2, "processUnary L:%d DbgSt:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
-            
+
     switch (node->getOp()) {
         case EOpPostIncrement:
         case EOpPostDecrement:
@@ -1660,9 +1666,9 @@ static bool TraverseBranch(bool /* previsit*/, TIntermBranch* node, TIntermTrave
 static void TraverseDummy(TIntermDummy* node, TIntermTraverser* it)
 {
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    
-    VPRINT(2, "processDummy L:%d DbgSt:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(2, "processDummy L:%d DbgSt:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState());
 
     processDebugable(node, &oit->operation);
@@ -1681,14 +1687,14 @@ public:
     TScopeStackTraverser() : passedTarget(false) { };
     bool passedTarget;
 };
- 
+
 static bool ScopeStackTraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processAggregate L:%s N:%s UD:%i DbgSt:%i Passed:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
-            node->getName().c_str(), 
+
+    VPRINT(-2, "processAggregate L:%s N:%s UD:%i DbgSt:%i Passed:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
+            node->getName().c_str(),
             (int) node->isUserDefined(),
             node->getDebugState(),
             sit->passedTarget);
@@ -1721,9 +1727,9 @@ static bool ScopeStackTraverseAggregate(bool /* preVisit */, TIntermAggregate* n
 static bool ScopeStackTraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processBinary L:%s DbgSt:%i Passed:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(-2, "processBinary L:%s DbgSt:%i Passed:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState(),
             sit->passedTarget);
 
@@ -1745,8 +1751,8 @@ static bool ScopeStackTraverseBinary(bool /* preVisit */, TIntermBinary* node, T
 static bool ScopeStackTraverseSelection(bool /* preVisit */, TIntermSelection* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processSelection L:%s DbgSt:%i Passed:%i\n", 
+
+    VPRINT(-2, "processSelection L:%s DbgSt:%i Passed:%i\n",
             FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState(),sit->passedTarget);
 
@@ -1798,14 +1804,15 @@ static bool ScopeStackTraverseSelection(bool /* preVisit */, TIntermSelection* n
             addScopeToScopeStack(node->getScope());
             return false;
     }
+    return true;
 }
 
 static bool ScopeStackTraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processLoop L:%s DbgSt:%i Passed:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(-2, "processLoop L:%s DbgSt:%i Passed:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState(),
             sit->passedTarget);
 
@@ -1874,17 +1881,18 @@ static bool ScopeStackTraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it
             addScopeToScopeStack(node->getScope());
             return false;
     }
+    return true;
 }
 
 static bool ScopeStackTraverseUnary(bool,  TIntermUnary* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processUnary L:%d DbgSt:%i Passed:%i\n", 
-            FormatSourceRange(node->getRange()).c_str(), 
+
+    VPRINT(-2, "processUnary L:%d DbgSt:%i Passed:%i\n",
+            FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState(),
             sit->passedTarget);
-            
+
 
     if (sit->passedTarget) {
         return false;
@@ -1921,8 +1929,8 @@ static bool ScopeStackTraverseBranch(bool /* previsit*/, TIntermBranch* node, TI
 static bool ScopeStackTraverseDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
 {
     TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    
-    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n", 
+
+    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n",
             FormatSourceRange(node->getRange()).c_str(),
             node->getDebugState(),
             sit->passedTarget);
@@ -1968,7 +1976,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
     initGlobalScope();
     initGlobalScopeStack();
     initGlobalChangeables();
-        
+
     g.result.range.left.line = 0;
     g.result.range.left.colum = 0;
     g.result.range.right.line = 0;
@@ -1983,7 +1991,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
         clearGlobalChangeables();
         return &g.result;
     }
-    
+
     /* Check validity of debug request */
 
     g.result.status = DBG_RS_STATUS_UNSET;
@@ -1999,7 +2007,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
     if (!g.it) {
         g.it = new TOutputDebugJumpTraverser(infoSink, m_debugProgram);
     }
-    
+
     g.it->root = root;
 
     g.it->preVisit = false;
@@ -2008,7 +2016,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
     g.it->rightToLeft = false;
 
     g.it->dbgBehaviour = dbgBehaviour;
-    
+
     g.it->visitAggregate = TraverseAggregate;
     g.it->visitBinary = TraverseBinary;
     g.it->visitConstantUnion = 0;
@@ -2023,9 +2031,9 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
     g.it->visitSpecification = 0;
     g.it->visitParameter = 0;
     g.it->visitDummy = TraverseDummy;
-    
+
     m_debugProgram = "";
-    
+
     /* Check for finished parsing */
     if (dbgBehaviour != DBG_BH_RESET  &&
         root->getDebugState() == DbgStFinished) {
@@ -2033,7 +2041,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
         g.result.status = DBG_RS_STATUS_FINISHED;
         return &g.result;
     }
-    
+
     /* In case of a reset clear DbgStates and empty stack */
     if (dbgBehaviour == DBG_BH_RESET) {
         g.it->operation = OTOpReset;
@@ -2044,7 +2052,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
         root->traverse(g.it);
         return NULL;
     }
-    
+
     /* Clear debug path, i.e remove all DbgStPath */
     g.it->operation = OTOpPathClear;
     VPRINT(1, "********* clear path traverse **********\n");
@@ -2062,7 +2070,7 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
         g.it->operation = OTOpTargetSet;
         g.it->parseStack.push(main);
     }
-    
+
     /* Advance the debug trace; move DbgStTarget */
     VPRINT(1, "********* jump traverse **********\n");
     g.it->parseStack.top()->traverse(g.it);

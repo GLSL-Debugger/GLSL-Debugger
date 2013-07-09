@@ -66,7 +66,7 @@ include_directories(${PROJECT_SOURCE_DIR}/glsldb
 add_library(functionList SHARED functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
-target_link_libraries(glsldebug utils glenumerants)
+target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})
 
 add_library(dlsym SHARED ${DLSYM_SRC})
 target_link_libraries(dlsym ${DL_LIBRARIES})

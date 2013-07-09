@@ -1,36 +1,37 @@
-//
-//Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//
-//    Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//    Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
 
@@ -56,7 +57,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -75,9 +76,10 @@ TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
 NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \****************************************************************************/
 
-//
-// atom.c
-//
+/*
+ * atom.c
+ */
+
 
 #include <assert.h>
 #include <stdlib.h>
@@ -90,9 +92,9 @@ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef realloc
 #undef free
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////// String table: //////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////// String table: ///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 static const struct {
     int val;
@@ -107,32 +109,32 @@ static const struct {
     { CPP_MUL_ASSIGN,     "*=" },
     { CPP_RIGHT_BRACKET,  ":>" },
     { CPP_EQ_OP,          "==" },
-    { CPP_XOR_OP,         "^^" }, 
-    { CPP_XOR_ASSIGN,     "^=" }, 
+    { CPP_XOR_OP,         "^^" },
+    { CPP_XOR_ASSIGN,     "^=" },
     { CPP_FLOATCONSTANT,  "<float-const>" },
     { CPP_GE_OP,          ">=" },
     { CPP_RIGHT_OP,       ">>" },
-    { CPP_RIGHT_ASSIGN,   ">>=" }, 
+    { CPP_RIGHT_ASSIGN,   ">>=" },
     { CPP_IDENTIFIER,     "<ident>" },
     { CPP_INTCONSTANT,    "<int-const>" },
     { CPP_LE_OP,          "<=" },
     { CPP_LEFT_OP,        "<<" },
     { CPP_LEFT_ASSIGN,    "<<=" },
     { CPP_LEFT_BRACKET,   "<:" },
-    { CPP_LEFT_BRACE,     "<%" }, 
+    { CPP_LEFT_BRACE,     "<%" },
     { CPP_DEC_OP,         "--" },
-    { CPP_RIGHT_BRACE,    "%>" }, 
+    { CPP_RIGHT_BRACE,    "%>" },
     { CPP_NE_OP,          "!=" },
     { CPP_OR_OP,          "||" },
-    { CPP_OR_ASSIGN,      "|=" }, 
+    { CPP_OR_ASSIGN,      "|=" },
     { CPP_INC_OP,         "++" },
     { CPP_STRCONSTANT,    "<string-const>" },
     { CPP_TYPEIDENTIFIER, "<type-ident>" },
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////// String table: //////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////// String table: ///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 #define INIT_STRING_TABLE_SIZE 16384
 
@@ -152,11 +154,11 @@ static int InitStringTable(StringTable *stable)
     stable->strings = (char *) malloc(INIT_STRING_TABLE_SIZE);
     if (!stable->strings)
         return 0;
-    // Zero-th offset means "empty" so don't use it.
+    /* Zero-th offset means "empty" so don't use it. */
     stable->nextFree = 1;
     stable->size = INIT_STRING_TABLE_SIZE;
     return 1;
-} // InitStringTable
+} /* InitStringTable */
 
 /*
  * FreeStringTable() - Free the string table.
@@ -170,7 +172,7 @@ static void FreeStringTable(StringTable *stable)
     stable->strings = NULL;
     stable->nextFree = 0;
     stable->size = 0;
-} // FreeStringTable
+} /* FreeStringTable */
 
 /*
  * HashString() - Hash a string with the base hash function.
@@ -186,7 +188,7 @@ static int HashString(const char *s)
         s++;
     }
     return hval & 0x7fffffff;
-} // HashString
+} /* HashString */
 
 /*
  * HashString2() - Hash a string with the incrimenting hash function.
@@ -202,7 +204,7 @@ static int HashString2(const char *s)
         s++;
     }
     return hval;
-} // HashString2
+} /* HashString2 */
 
 /*
  * AddString() - Add a string to a string table.  Return it's offset.
@@ -226,18 +228,18 @@ static int AddString(StringTable *stable, const char *s)
     strcpy(&stable->strings[loc], s);
     stable->nextFree += len + 1;
     return loc;
-} // AddString
+} /* AddString */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////// Hash table: ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////// Hash table: ////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 #define INIT_HASH_TABLE_SIZE 2047
 #define HASH_TABLE_MAX_COLLISIONS 3
 
 typedef struct HashEntry_Rec {
-    int index;      // String table offset of string representation
-    int value;      // Atom (symbol) value
+    int index;      /* String table offset of string representation */
+    int value;      /* Atom (symbol) value */
 } HashEntry;
 
 typedef struct HashTable_Rec {
@@ -268,7 +270,7 @@ static int InitHashTable(HashTable *htable, int fsize)
     for (ii = 0; ii <= HASH_TABLE_MAX_COLLISIONS; ii++)
         htable->counts[ii] = 0;
     return 1;
-} // InitHashTable
+} /* InitHashTable */
 
 /*
  * FreeHashTable() - Free the hash table.
@@ -282,7 +284,7 @@ static void FreeHashTable(HashTable *htable)
     htable->entry = NULL;
     htable->size = 0;
     htable->entries = 0;
-} // FreeHashTable
+} /* FreeHashTable */
 
 /*
  * Empty() - See if a hash table entry is empty.
@@ -297,7 +299,7 @@ static int Empty(HashTable *htable, int hashloc)
     } else {
         return 0;
     }
-} // Empty
+} /* Empty */
 
 /*
  * Match() - See if a hash table entry is matches a string.
@@ -314,27 +316,27 @@ static int Match(HashTable *htable, StringTable *stable, const char *s, int hash
     } else {
         return 0;
     }
-} // Match
+} /* Match */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////// Atom table: ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////// Atom table: ////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 #define INIT_ATOM_TABLE_SIZE 1024
 
 
 struct AtomTable_Rec {
-    StringTable stable; // String table.
-    HashTable htable;   // Hashes string to atom number and token value.  Multiple strings can
-                        // have the same token value but each unique string is a unique atom.
-    int *amap;          // Maps atom value to offset in string table.  Atoms all map to unique
-                        // strings except for some undefined values in the lower, fixed part
-                        // of the atom table that map to "<undefined>".  The lowest 256 atoms
-                        // correspond to single character ASCII values except for alphanumeric
-                        // characters and '_', which can be other tokens.  Next come the
-                        // language tokens with their atom values equal to the token value.
-                        // Then come predefined atoms, followed by user specified identifiers.
-    int *arev;          // Reversed atom for symbol table use.
+    StringTable stable; /* String table. */
+    HashTable htable;   /* Hashes string to atom number and token value.  Multiple strings can
+                           have the same token value but each unique string is a unique atom. */
+    int *amap;          /* Maps atom value to offset in string table.  Atoms all map to unique
+                           strings except for some undefined values in the lower, fixed part
+                           of the atom table that map to "<undefined>".  The lowest 256 atoms
+                           correspond to single character ASCII values except for alphanumeric
+                           characters and '_', which can be other tokens.  Next come the
+                           language tokens with their atom values equal to the token value.
+                           Then come predefined atoms, followed by user specified identifiers. */
+    int *arev;          /* Reversed atom for symbol table use. */
     int nextFree;
     int size;
 };
@@ -377,7 +379,7 @@ static int GrowAtomTable(AtomTable *atable, int size)
         atable->size = size;
     }
     return 0;
-} // GrowAtomTable
+} /* GrowAtomTable */
 
 /*
  * lReverse() - Reverse the bottom 20 bits of a 32 bit int.
@@ -396,13 +398,13 @@ static int lReverse(int fval)
         cnt++;
     }
 
-    // Don't use all 31 bits.  One million atoms is plenty and sometimes the
-    // upper bits are used for other things.
+    /* Don't use all 31 bits.  One million atoms is plenty and sometimes the
+       upper bits are used for other things. */
 
     if (cnt < 20)
         result <<= 20 - cnt;
     return result;
-} // lReverse
+} /* lReverse */
 
 /*
  * AllocateAtom() - Allocate a new atom.  Associated with the "undefined" value of -1.
@@ -417,7 +419,7 @@ static int AllocateAtom(AtomTable *atable)
     atable->arev[atable->nextFree] = lReverse(atable->nextFree);
     atable->nextFree++;
     return atable->nextFree - 1;
-} // AllocateAtom
+} /* AllocateAtom */
 
 /*
  * SetAtomValue() - Allocate a new atom associated with "hashindex".
@@ -428,7 +430,7 @@ static void SetAtomValue(AtomTable *atable, int atomnumber, int hashindex)
 {
     atable->amap[atomnumber] = atable->htable.entry[hashindex].index;
     atable->htable.entry[hashindex].value = atomnumber;
-} // SetAtomValue
+} /* SetAtomValue */
 
 /*
  * FindHashLoc() - Find the hash location for this string.  Return -1 it hash table is full.
@@ -484,7 +486,7 @@ static int FindHashLoc(AtomTable *atable, const char *s)
         }
     }
     return hashloc;
-} // FindHashLoc
+} /* FindHashLoc */
 
 /*
  * IncreaseHashTableSize()
@@ -497,14 +499,14 @@ static int IncreaseHashTableSize(AtomTable *atable)
     AtomTable oldtable;
     char *s;
 
-    // Save the old atom table and create a new one:
+    /* Save the old atom table and create a new one: */
 
     oldtable = *atable;
     size = oldtable.htable.size*2 + 1;
     if (!InitAtomTable(atable, size))
         return 0;
 
-    // Add all the existing values to the new atom table preserving their atom values:
+    /* Add all the existing values to the new atom table preserving their atom values: */
 
     for (ii = atable->nextFree; ii < oldtable.nextFree; ii++) {
         strloc = oldtable.amap[ii];
@@ -516,7 +518,7 @@ static int IncreaseHashTableSize(AtomTable *atable)
     }
     FreeAtomTable(&oldtable);
     return 1;
-} // IncreaseHashTableSize
+} /* IncreaseHashTableSize */
 
 /*
  * LookUpAddStringHash() - Lookup a string in the hash table.  If it's not there, add it and
@@ -541,7 +543,7 @@ static int LookUpAddStringHash(AtomTable *atable, const char *s)
         atable->htable.entry[hashloc].value = 0;
     }
     return hashloc;
-} // LookUpAddStringHash
+} /* LookUpAddStringHash */
 
 /*
  * LookUpAddString() - Lookup a string in the hash table.  If it's not there, add it and
@@ -560,7 +562,7 @@ int LookUpAddString(AtomTable *atable, const char *s)
         SetAtomValue(atable, atom, hashindex);
     }
     return atom;
-} // LookUpAddString
+} /* LookUpAddString */
 
 /*
  * GetAtomString()
@@ -589,7 +591,7 @@ const  char *GetAtomString(AtomTable *atable, int atom)
             }
         }
     }
-} // GetAtomString
+} /* GetAtomString */
 
 /*
  * GetReversedAtom()
@@ -603,7 +605,7 @@ int GetReversedAtom(AtomTable *atable, int atom)
     } else {
         return 0;
     }
-} // GetReversedAtom
+} /* GetReversedAtom */
 
 /*
  * AddAtom() - Add a string to the atom, hash and string tables if it isn't already there.
@@ -616,7 +618,7 @@ int AddAtom(AtomTable *atable, const char *s)
 
     atom = LookUpAddString(atable, s);
     return atom;
-} // AddAtom
+} /* AddAtom */
 
 /*
  * AddAtomFixed() - Add an atom to the hash and string tables if it isn't already there.
@@ -636,14 +638,14 @@ static int AddAtomFixed(AtomTable *atable, const char *s, int atom)
     }
     atable->amap[atom] = atable->htable.entry[hashindex].index;
     atable->htable.entry[hashindex].value = atom;
-    //if (atom >= atable->nextFree)
-    //    atable->nextFree = atom + 1;
+    /*if (atom >= atable->nextFree)
+          atable->nextFree = atom + 1;*/
     while (atom >= atable->nextFree) {
         atable->arev[atable->nextFree] = lReverse(atable->nextFree);
         atable->nextFree++;
     }
     return atom;
-} // AddAtomFixed
+} /* AddAtomFixed */
 
 /*
  * InitAtomTable() - Initialize the atom table.
@@ -667,16 +669,16 @@ int InitAtomTable(AtomTable *atable, int htsize)
     if (!atable->amap)
         return 0;
 
-    // Initialize lower part of atom table to "<undefined>" atom:
+    /* Initialize lower part of atom table to "<undefined>" atom: */
 
     AddAtomFixed(atable, "<undefined>", 0);
     for (ii = 0; ii < FIRST_USER_TOKEN_SY; ii++)
         atable->amap[ii] = atable->amap[0];
 
-    // Add single character tokens to the atom table:
+    /* Add single character tokens to the atom table: */
 
     {
-		const char *s = "~!%^&*()-+=|,.<>/?;:[]{}#";
+        const char *s = "~!%^&*()-+=|,.<>/?;:[]{}#";
         char t[2];
 
         t[1] = '\0';
@@ -687,12 +689,12 @@ int InitAtomTable(AtomTable *atable, int htsize)
         }
     }
 
-    // Add multiple character scanner tokens :
+    /* Add multiple character scanner tokens : */
 
     for (ii = 0; ii < sizeof(tokens)/sizeof(tokens[0]); ii++)
         AddAtomFixed(atable, tokens[ii].str, tokens[ii].val);
 
-    // Add error symbol if running in error mode:
+    /* Add error symbol if running in error mode: */
 
     if (cpp->options.ErrorMode)
         AddAtomFixed(atable, "error", ERROR_SY);
@@ -700,11 +702,11 @@ int InitAtomTable(AtomTable *atable, int htsize)
     AddAtom(atable, "<*** end fixed atoms ***>");
 
     return 1;
-} // InitAtomTable
+} /* InitAtomTable */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Debug Printing Functions: //////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Debug Printing Functions: ///////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 /*
  * PrintAtomTable()
@@ -728,7 +730,7 @@ void PrintAtomTable(AtomTable *atable)
         CPPDebugLogMsg(str);
     }
 
-} // PrintAtomTable
+} /* PrintAtomTable */
 
 
 /*
@@ -738,10 +740,10 @@ void PrintAtomTable(AtomTable *atable)
 
 char* GetStringOfAtom(AtomTable *atable, int atom)
 {
-	 char* chr_str;
-	 chr_str=&atable->stable.strings[atable->amap[atom]];
-	 return chr_str;
-} // GetStringOfAtom
+    char* chr_str;
+    chr_str=&atable->stable.strings[atable->amap[atom]];
+    return chr_str;
+} /* GetStringOfAtom */
 
 /*
  * FreeAtomTable() - Free the atom table and associated memory
@@ -760,9 +762,9 @@ void FreeAtomTable(AtomTable *atable)
     atable->arev = NULL;
     atable->nextFree = 0;
     atable->size = 0;
-} // FreeAtomTable
+} /* FreeAtomTable */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// End of atom.c ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////// End of atom.c ////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 

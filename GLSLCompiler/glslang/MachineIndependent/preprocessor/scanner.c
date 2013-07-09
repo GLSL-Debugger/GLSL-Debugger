@@ -1,36 +1,37 @@
-//
-//Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//
-//    Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//    Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /****************************************************************************\
   Copyright (c) 2002, NVIDIA Corporation.
 
@@ -56,7 +57,7 @@
   express or implied, are granted by NVIDIA herein, including but not
   limited to any patent rights that may be infringed by your derivative
   works or by other works in which the NVIDIA Software may be
-  incorporated. No hardware is licensed hereunder. 
+  incorporated. No hardware is licensed hereunder.
 
   THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
   WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -74,9 +75,10 @@
   TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
   NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   \****************************************************************************/
-//
-// scanner.c
-//
+/*
+ * scanner.c
+ */
+
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -106,7 +108,7 @@ typedef struct StringInputSrc {
 static int eof_scan(InputSrc *is, yystypepp * yylvalpp)
 {
     return EOF;
-} // eof_scan
+} /* eof_scan */
 
 static void noop(InputSrc *in, int ch, yystypepp * yylvalpp) {}
 
@@ -141,7 +143,7 @@ __int64 RDTSC ( void ) {
 
 int InitScanner(CPPStruct *cpp)
 {
-    // Add various atoms needed by the CPP line scanner:
+    /* Add various atoms needed by the CPP line scanner: */
     if (!InitCPP())
         return 0;
 
@@ -156,7 +158,7 @@ int InitScanner(CPPStruct *cpp)
     cpp->notAVersionToken = 0;
 
     return 1;
-} // InitScanner
+} /* InitScanner */
 
 int FreeScanner(void)
 {
@@ -189,7 +191,7 @@ static int str_getch(StringInputSrc *in)
             SetCursor(0);
             ScanFromString(cpp->PaArgv[cpp->PaWhichStr]);
             in=(StringInputSrc*)cpp->currentInput;
-            continue;             
+            continue;
         }
         else{
             cpp->currentInput = in->base.prev;
@@ -198,14 +200,14 @@ static int str_getch(StringInputSrc *in)
             return EOF;
         }
     }
-} // str_getch
+} /* str_getch */
 
 static void str_ungetch(StringInputSrc *in, int ch, yystypepp *type) {
     if (in->p[-1] == ch) {
         DecCursor();
         in->p--;
     } else {
-        *(in->p)='\0';      //this would take care of shifting to the previous string.
+        *(in->p)='\0';      /*this would take care of shifting to the previous string. */
         cpp->PaWhichStr--;
 
         /*TODO: check curser col in previous string,
@@ -223,7 +225,7 @@ static void str_ungetch(StringInputSrc *in, int ch, yystypepp *type) {
         in->base.line--;
         DecLineNumber();
     }
-} // str_ungetch
+} /* str_ungetch */
 
 int ScanFromString(char *s)
 {
@@ -239,12 +241,12 @@ int ScanFromString(char *s)
     cpp->currentInput = &in->base;
 
     return 1;
-} // ScanFromString;
+} /* ScanFromString; */
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// Floating point constants: /////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// Floating point constants: //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 /*
  * lBuildFloatValue() - Quick and dirty conversion to floating point.  Since all
  *         we need is single precision this should be quite precise.
@@ -281,7 +283,7 @@ static float lBuildFloatValue(const char *str, int len, int exp)
         CPPErrorToInfoLog(" ERROR___FP_CONST_OVERFLOW");
     }
     return rv;
-} // lBuildFloatValue
+} /* lBuildFloatValue */
 
 
 /*
@@ -320,14 +322,14 @@ static int lFloatConst(char *str, int len, int ch, yystypepp * yylvalpp)
         }
     }
 
-    // Exponent:
+    /* Exponent: */
 
     if (ch == 'e' || ch == 'E') {
         ExpSign = 1;
         str[len++]=ch;
         ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
         if (ch == '+') {
-            str[len++]=ch;  
+            str[len++]=ch;
             ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
         } else if (ch == '-') {
             ExpSign = -1;
@@ -345,7 +347,7 @@ static int lFloatConst(char *str, int len, int ch, yystypepp * yylvalpp)
         }
         exp *= ExpSign;
     }
-    // Suffix:
+    /* Suffix: */
     if (ch == 'f' || ch == 'F') {
         str[len++]=ch;
         ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
@@ -355,20 +357,20 @@ static int lFloatConst(char *str, int len, int ch, yystypepp * yylvalpp)
         lval = 0.0f;
         strcpy(str,"0.0");
     } else {
-        str[len]='\0';      
+        str[len]='\0';
         lval = lBuildFloatValue(str, str_len, exp - declen);
     }
 
     yylvalpp->sc_fval = lval;
-    //strcpy(yylvalpp->symbol_name,str);
+    /* strcpy(yylvalpp->symbol_name,str); */
     memmove(yylvalpp->symbol_name, str, strlen(str) + 1);
-    cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);            
+    cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
     return CPP_FLOATCONSTANT;
-} // lFloatConst
+} /* lFloatConst */
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// Normal Scanner //////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////// Normal Scanner ///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
 {
@@ -393,7 +395,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
         switch (ch) {
             default:
                 SetTokenPos(1, GetCursor());
-                return ch; // Single character token
+                return ch; /* Single character token */
             case EOF:
                 return -1;
             case 'A': case 'B': case 'C': case 'D': case 'E':
@@ -407,12 +409,12 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
             case 'k': case 'l': case 'm': case 'n': case 'o':
             case 'p': case 'q': case 'r': case 's': case 't':
             case 'u': case 'v': case 'w': case 'x': case 'y':
-            case 'z':            
+            case 'z':
                 do {
                     if (len < MAX_SYMBOL_NAME_LEN) {
                         symbol_name[len] = ch;
                         len++;
-                        ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);					
+                        ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
                     } else {
                         ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
                     }
@@ -475,7 +477,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     yylvalpp->sc_int = ival;
                     SetTokenPos(1, GetCursor());
                     return CPP_INTCONSTANT;
-                } else if (ch >= '0' && ch <= '7') { // octal integer constants
+                } else if (ch >= '0' && ch <= '7') { /* octal integer constants */
                     AlreadyComplained = 0;
                     ival = 0;
                     do {
@@ -495,7 +497,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                         SetTokenPos(1, GetCursor());
                         return result;
                     }
-                    
+
                     if (ch == 'u' || ch == 'U') {
                         if (len < MAX_SYMBOL_NAME_LEN) {
                             yylvalpp->symbol_name[len] = ch;
@@ -504,7 +506,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     } else {
                         cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
                     }
-                    
+
                     yylvalpp->symbol_name[len] = '\0';
                     yylvalpp->sc_int = ival;
                     SetTokenPos(1, GetCursor());
@@ -513,7 +515,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
                     ch = '0';
                 }
-                // Fall through...
+                /* Fall through... */
             case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
                 do {
@@ -737,14 +739,14 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
             case '.':
                 ch = cpp->currentInput->getch(cpp->currentInput, yylvalpp);
                 if (ch >= '0' && ch <= '9') {
-					int result;
+                    int result;
                     cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
                     result = lFloatConst(yylvalpp->symbol_name, 0, '.', yylvalpp);
                     SetTokenPos(1, GetCursor());
                     return result;
                 } else {
                     if (ch == '.') {
-                        return -1; // Special EOF hack
+                        return -1; /* Special EOF hack */
                     } else {
                         cpp->currentInput->ungetch(cpp->currentInput, ch, yylvalpp);
                         SetTokenPos(1, GetCursor());
@@ -781,7 +783,7 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                     if (nlcount) {
                         return '\n';
                     }
-                    // Go try it again...
+                    /* Go try it again... */
                 } else if (ch == '=') {
                     SetTokenPos(1, GetCursor());
                     return CPP_DIV_ASSIGN;
@@ -817,12 +819,12 @@ static int byte_scan(InputSrc *in, yystypepp * yylvalpp)
                 }
         }
     }
-} // byte_scan
+} /* byte_scan */
 
 int yylex_CPP(char* buf, int maxSize)
-{    
+{
     yystypepp yylvalpp;
-    int token = '\n';   
+    int token = '\n';
 
     for(;;) {
 
@@ -842,7 +844,7 @@ int yylex_CPP(char* buf, int maxSize)
             }
         }
         cpp->previous_token = token;
-        // expand macros
+        /* expand macros */
         if (token == CPP_IDENTIFIER && MacroExpand(yylvalpp.sc_ident, &yylvalpp)) {
             cpp->notAVersionToken = 1;
             continue;
@@ -851,35 +853,35 @@ int yylex_CPP(char* buf, int maxSize)
         if (token == '\n')
             continue;
 
-        if (token == CPP_IDENTIFIER) {                
+        if (token == CPP_IDENTIFIER) {
             cpp->notAVersionToken = 1;
             tokenString = GetStringOfAtom(atable,yylvalpp.sc_ident);
-        } else if (token == CPP_FLOATCONSTANT||token == CPP_INTCONSTANT){             
-            cpp->notAVersionToken = 1;            
+        } else if (token == CPP_FLOATCONSTANT||token == CPP_INTCONSTANT){
+            cpp->notAVersionToken = 1;
             tokenString = yylvalpp.symbol_name;
-        } else {            
-            cpp->notAVersionToken = 1;            
+        } else {
+            cpp->notAVersionToken = 1;
             tokenString = GetStringOfAtom(atable,token);
         }
 
         if (tokenString) {
             if ((signed)strlen(tokenString) >= maxSize) {
                 cpp->tokensBeforeEOF = 1;
-                return maxSize;               
+                return maxSize;
             } else  if (strlen(tokenString) > 0) {
                 strcpy(buf, tokenString);
                 cpp->tokensBeforeEOF = 1;
                 return (int)strlen(tokenString);
-            }  
+            }
 
             return 0;
         }
     }
 
     return 0;
-} // yylex
+} /* yylex */
 
-//Checks if the token just read is EOF or not.
+/* Checks if the token just read is EOF or not. */
 int check_EOF(int token)
 {
     if(token==-1){
@@ -892,7 +894,7 @@ int check_EOF(int token)
     return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////// End of scanner.c //////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// End of scanner.c ///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 

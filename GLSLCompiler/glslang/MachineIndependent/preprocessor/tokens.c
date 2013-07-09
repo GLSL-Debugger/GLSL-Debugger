@@ -1,36 +1,37 @@
-//
-//Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//
-//    Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//    Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
 
@@ -56,7 +57,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -74,9 +75,10 @@ NVIDIA SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT,
 TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
 NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \****************************************************************************/
-//
-// tokens.c
-//
+/*
+ * tokens.c
+ */
+
 
 #include <assert.h>
 #include <stdlib.h>
@@ -86,9 +88,9 @@ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "slglobals.h"
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////// Preprocessor and Token Recorder and Playback: ////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// Preprocessor and Token Recorder and Playback: /////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 /*
  * idstr()
@@ -108,14 +110,14 @@ static char *idstr(const char *fstr, MemoryPool *pool)
         str = (char *) malloc(len + 1);
     else
         str = (char *) mem_Alloc(pool, len + 1);
-    
+
     for (f=fstr, t=str; *f; f++) {
         if (isalnum(*f)) *t++ = *f;
         else if (*f == '.' || *f == '/') *t++ = '_';
     }
     *t = 0;
     return str;
-} // idstr
+} /* idstr */
 
 
 /*
@@ -143,7 +145,7 @@ static TokenBlock *lNewBlock(TokenStream *fTok, MemoryPool *pool)
     }
     fTok->current = lBlock;
     return lBlock;
-} // lNewBlock
+} /* lNewBlock */
 
 /*
  * lAddByte()
@@ -157,7 +159,7 @@ static void lAddByte(TokenStream *fTok, unsigned char fVal)
     if (lBlock->count >= lBlock->max)
         lBlock = lNewBlock(fTok, 0);
     lBlock->data[lBlock->count++] = fVal;
-} // lAddByte
+} /* lAddByte */
 
 
 
@@ -183,9 +185,9 @@ static int lReadByte(TokenStream *pTok)
             lval = lBlock->data[lBlock->current++];
     }
     return lval;
-} // lReadByte
+} /* lReadByte */
 
-/////////////////////////////////////// Global Functions://////////////////////////////////////
+/*////////////////////////////////////// Global Functions:////////////////////////////////////*/
 
 /*
  * NewTokenStream()
@@ -206,7 +208,7 @@ TokenStream *NewTokenStream(const char *name, MemoryPool *pool)
     pTok->current = NULL;
     lNewBlock(pTok, pool);
     return pTok;
-} // NewTokenStream
+} /* NewTokenStream */
 
 /*
  * DeleteTokenStream()
@@ -228,7 +230,7 @@ void DeleteTokenStream(TokenStream *pTok)
             free(pTok->name);
         free(pTok);
     }
-} // DeleteTokenStream
+} /* DeleteTokenStream */
 
 /*
  * RecordToken() - Add a token to the end of a list for later playback or printout.
@@ -267,7 +269,7 @@ void RecordToken(TokenStream *pTok, int token, yystypepp * yylvalpp)
     default:
         break;
     }
-} // RecordToken
+} /* RecordToken */
 
 /*
  * RewindTokenStream() - Reset a token stream in preperation for reading.
@@ -280,7 +282,7 @@ void RewindTokenStream(TokenStream *pTok)
         pTok->current = pTok->head;
         pTok->current->current = 0;
     }
-} // RewindTokenStream
+} /* RewindTokenStream */
 
 /*
  * ReadToken() - Read the next token from a stream.
@@ -366,7 +368,7 @@ int ReadToken(TokenStream *pTok, yystypepp * yylvalpp)
         return ltoken;
     }
     return EOF_SY;
-} // ReadToken
+} /* ReadToken */
 
 typedef struct TokenInputSrc {
     InputSrc            base;
@@ -430,7 +432,7 @@ void UngetToken(int token, yystypepp * yylvalpp) {
 #ifdef _WIN32
     t->base.scan = (int (__cdecl*)(InputSrc *, yystypepp *))reget_token;
 #else /* _WIN32 */
-	t->base.scan = (void *)reget_token;
+    t->base.scan = (void *)reget_token;
 #endif /* _WIN32 */
     t->base.prev = cpp->currentInput;
     t->base.name = cpp->currentInput->name;
@@ -455,10 +457,10 @@ void DumpTokenStream(FILE *fp, TokenStream *s, yystypepp * yylvalpp) {
             sprintf(str, "\"%s\"", GetAtomString(atable, yylvalpp->sc_ident));
             break;
         case CPP_FLOATCONSTANT:
-            //printf("%g9.6 ", yylvalpp->sc_fval);
+            /* printf("%g9.6 ", yylvalpp->sc_fval); */
             break;
         case CPP_INTCONSTANT:
-            //printf("%d ", yylvalpp->sc_int);
+            /* printf("%d ", yylvalpp->sc_int); */
             break;
         default:
             if (token >= 127)
@@ -471,6 +473,6 @@ void DumpTokenStream(FILE *fp, TokenStream *s, yystypepp * yylvalpp) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////// End of tokens.c ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// End of tokens.c ////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/

@@ -88,6 +88,8 @@ void AliveSymbol(TIntermSymbol* node, TIntermTraverser* it)
 
 bool AliveSelection(bool preVisit, TIntermSelection* node, TIntermTraverser* it)
 {
+    UNUSED_ARG(preVisit)
+    UNUSED_ARG(node)
     TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
 
     if (lit->wasFound())
@@ -98,6 +100,8 @@ bool AliveSelection(bool preVisit, TIntermSelection* node, TIntermTraverser* it)
 
 bool AliveSwitch(bool preVisit, TIntermSwitch* node, TIntermTraverser* it)
 {
+    UNUSED_ARG(preVisit)
+    UNUSED_ARG(node)
     TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
 
     if (lit->wasFound())

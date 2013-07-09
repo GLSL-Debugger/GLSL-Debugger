@@ -1,7 +1,7 @@
 /******************************************************************************
 
 Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
-(VIS), Universität Stuttgart.
+(VIS), Universitï¿½t Stuttgart.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, UniversitÃ¤t Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -57,7 +57,7 @@ QString ProcessSnapshotModel::Item::toQString(const wchar_t *str) {
     QString retval;
 
     if (str != NULL) {
-        int bufLen = ::WideCharToMultiByte(CP_THREAD_ACP, 0, str, -1, NULL, 0, 
+        int bufLen = ::WideCharToMultiByte(CP_THREAD_ACP, 0, str, -1, NULL, 0,
             NULL, NULL);
         char *tmp = new char[bufLen];
         ::WideCharToMultiByte(CP_THREAD_ACP, 0, str, -1, tmp, bufLen, NULL,
@@ -74,9 +74,9 @@ QString ProcessSnapshotModel::Item::toQString(const wchar_t *str) {
 /*
  * ProcessSnapshotModel::Item::Item
  */
-ProcessSnapshotModel::Item::Item(const char *exe, const char *owner, PID pid, 
-        const bool isAttachable, Item *parent) 
-        : child(NULL), parent(parent), exe(exe), owner(owner), 
+ProcessSnapshotModel::Item::Item(const char *exe, const char *owner, PID pid,
+        const bool isAttachable, Item *parent)
+        : child(NULL), parent(parent), exe(exe), owner(owner),
         isAttachable(isAttachable), pid(pid) {
 }
 
@@ -85,47 +85,47 @@ ProcessSnapshotModel::Item::Item(const char *exe, const char *owner, PID pid,
 /*
  * ProcessSnapshotModel::Item::Item
  */
-ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent) 
-        : child(NULL), exe(toQString(pe.szExeFile)), parent(parent), 
+ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent)
+        : child(NULL), exe(toQString(pe.szExeFile)), parent(parent),
         isAttachable(false), pid(pe.th32ProcessID) {
     HANDLE hProcess = NULL;     // Process handle.
     HANDLE hToken = NULL;       // Process security token.
     HANDLE hSnapshot = NULL;    // Snapshot of process modules.
     MODULEENTRY32 me;           // For iterating modules.
 
-    if ((hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, 
+    if ((hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE,
             this->pid)) != NULL) {
         // TODO: System UNC path is too weird.
         //char tmp[MAX_PATH];
         //if (::GetProcessImageFileNameA(hProcess, tmp, MAX_PATH)) {
         //    this->exe = QString(tmp);
         //}
-    
+
         if (::OpenProcessToken(hProcess, TOKEN_QUERY, &hToken)) {
-            
+
             /* User user information about process token. */
             DWORD userInfoLen = 0;
-            if (::GetTokenInformation(hToken, TokenUser, NULL, 0, &userInfoLen) 
+            if (::GetTokenInformation(hToken, TokenUser, NULL, 0, &userInfoLen)
                     || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)) {
                 char *userInfo = new char[userInfoLen];
-            
-                if (::GetTokenInformation(hToken, TokenUser, userInfo, 
+
+                if (::GetTokenInformation(hToken, TokenUser, userInfo,
                         userInfoLen, &userInfoLen)) {
                     PSID sid = reinterpret_cast<TOKEN_USER *>(
                         userInfo)->User.Sid;
-                
+
                     /* Lookup the user name of the SID. */
                     DWORD userNameLen = 0;
                     DWORD domainLen = 0;
                     SID_NAME_USE snu = SidTypeUnknown;
-                    if (::LookupAccountSidA(NULL, sid, NULL, &userNameLen, 
-                            NULL, &domainLen, &snu) || (::GetLastError() 
+                    if (::LookupAccountSidA(NULL, sid, NULL, &userNameLen,
+                            NULL, &domainLen, &snu) || (::GetLastError()
                             == ERROR_INSUFFICIENT_BUFFER)) {
                         char *userName = new char[userNameLen];
                         char *domain = new char[domainLen];
-                        if (::LookupAccountSidA(NULL, sid, userName, 
+                        if (::LookupAccountSidA(NULL, sid, userName,
                                 &userNameLen, domain, &domainLen, &snu)) {
-                            this->owner = QString(domain) + "\\" 
+                            this->owner = QString(domain) + "\\"
                                 + QString(userName);
                             this->isAttachable = true;
                             // Note: If we cannot get the owner SID, the owner
@@ -136,7 +136,7 @@ ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent)
                         delete[] domain;
                     }
                 }
-    
+
                 delete[] userInfo;
             }
             ::CloseHandle(hToken);
@@ -151,7 +151,7 @@ ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent)
 
         // Note: If we cannot enumerate the modules, we probably cannot attach,
         // too, because of insufficient privileges.
-        if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 
+        if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
                 this->pid)) != INVALID_HANDLE_VALUE) {
             me.dwSize = sizeof(me);
 
@@ -192,7 +192,7 @@ ProcessSnapshotModel::Item::~Item(void) {
 /*
  * ProcessSnapshotModel::ProcessSnapshotModel
  */
-ProcessSnapshotModel::ProcessSnapshotModel(QObject *parent) 
+ProcessSnapshotModel::ProcessSnapshotModel(QObject *parent)
         : Super(parent), root(NULL) {
     this->Update();
 }
@@ -218,7 +218,7 @@ bool ProcessSnapshotModel::Update(void) {
     PROCESSENTRY32 pe;
     Item *item = NULL;
 
-    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)) 
+    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0))
             == INVALID_HANDLE_VALUE) {
         return false;
     }
@@ -250,6 +250,7 @@ bool ProcessSnapshotModel::Update(void) {
  * ProcessSnapshotModel::columnCount
  */
 int ProcessSnapshotModel::columnCount(const QModelIndex& parent) const {
+    UNUSED_ARG(parent)
     return 3;
 }
 
@@ -258,7 +259,7 @@ int ProcessSnapshotModel::columnCount(const QModelIndex& parent) const {
  * ProcessSnapshotModel::data
  */
 QVariant ProcessSnapshotModel::data(const QModelIndex& index, int role) const {
-    Item *item = (index.isValid()) 
+    Item *item = (index.isValid())
         ? static_cast<Item *>(index.internalPointer()) : NULL;
 
     if (item != NULL) {
@@ -284,7 +285,7 @@ QVariant ProcessSnapshotModel::data(const QModelIndex& index, int role) const {
  * ProcessSnapshotModel::flags
  */
 Qt::ItemFlags ProcessSnapshotModel::flags(const QModelIndex& index) const {
-    Item *item = (index.isValid()) 
+    Item *item = (index.isValid())
         ? static_cast<Item *>(index.internalPointer()) : NULL;
 
     if ((item != NULL) && (item->isAttachable)) {
@@ -298,7 +299,7 @@ Qt::ItemFlags ProcessSnapshotModel::flags(const QModelIndex& index) const {
 /*
  * ProcessSnapshotModel::headerData
  */
-QVariant ProcessSnapshotModel::headerData(int section, 
+QVariant ProcessSnapshotModel::headerData(int section,
         Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal) {
         switch (role) {
@@ -312,7 +313,7 @@ QVariant ProcessSnapshotModel::headerData(int section,
 
             default:
                 return QVariant();
-        } 
+        }
     } else {
         return QVariant();
     }
@@ -322,9 +323,9 @@ QVariant ProcessSnapshotModel::headerData(int section,
 /*
  * ProcessSnapshotModel::index
  */
-QModelIndex ProcessSnapshotModel::index(int row, int column, 
+QModelIndex ProcessSnapshotModel::index(int row, int column,
         const QModelIndex& parent) const {
-    Item *item = (parent.isValid()) 
+    Item *item = (parent.isValid())
         ? static_cast<Item *>(parent.internalPointer()) : this->root;
 
     for (int r = 0; (r < row) && (item != NULL); r++) {
@@ -343,7 +344,7 @@ QModelIndex ProcessSnapshotModel::index(int row, int column,
  * ProcessSnapshotModel::rowCount
  */
 int ProcessSnapshotModel::rowCount(const QModelIndex& parent) const {
-    Item *item = (parent.isValid()) 
+    Item *item = (parent.isValid())
         ? static_cast<Item *>(parent.internalPointer()) : this->root;
     int retval = 0;
 
@@ -380,7 +381,7 @@ static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
     HMODULE retval = NULL;          // Handle to loaded remote library.
     FARPROC loadLibrary = NULL;     // Function pointer of LoadLibrary.
     void *remoteLibPath = NULL;     // Remote memory for path to library.
-    
+
     /* Sanity checks. */
     if (hProcess == NULL) {
         goto cleanup;
@@ -403,22 +404,22 @@ static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
 
     /* Allocate memory for library path in remote process. */
     remoteMemSize = ::strlen(libPath) + 1;
-    if ((remoteLibPath = ::VirtualAllocEx(hProcess, NULL, remoteMemSize, 
+    if ((remoteLibPath = ::VirtualAllocEx(hProcess, NULL, remoteMemSize,
             MEM_COMMIT, PAGE_READWRITE)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Copy library path to remote process. */
-    if (!::WriteProcessMemory(hProcess, remoteLibPath, libPath, 
+    if (!::WriteProcessMemory(hProcess, remoteLibPath, libPath,
             remoteMemSize, NULL)) {
         dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Load the debug library into the remote process. */
-    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0, 
-            reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibrary), 
+    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibrary),
             remoteLibPath, 0, NULL)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "CreateRemoteThread failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -431,7 +432,7 @@ static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
     }
 
     /* Get exit code, which is the module handle of our remote debug library. */
-    // TODO: Das könnte unter 64 bit kriminell sein ...
+    // TODO: Das kï¿½nnte unter 64 bit kriminell sein ...
     if (!::GetExitCodeThread(hThread, &exitCode)) {
         dbgPrint(DBGLVL_ERROR, "GetExitCodeThread failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -459,7 +460,7 @@ static bool RemoteFreeLibrary(HANDLE hProcess, HANDLE hRemoteModule) {
     HANDLE hThread = NULL;          // Handle to remote thread.
     HMODULE hKernel32 = NULL;       // Module handle of kernel32.dll.
     FARPROC freeLibrary = NULL;     // Function pointer of LoadLibrary.
-    
+
     /* Sanity checks. */
     if (hProcess == NULL) {
         goto cleanup;
@@ -481,8 +482,8 @@ static bool RemoteFreeLibrary(HANDLE hProcess, HANDLE hRemoteModule) {
     }
 
     /* Unload the debug library from the remote process. */
-    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0, 
-            reinterpret_cast<LPTHREAD_START_ROUTINE>(freeLibrary), 
+    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(freeLibrary),
             reinterpret_cast<void *>(hRemoteModule), 0, NULL)) == NULL) {
         goto cleanup;
     }
@@ -492,7 +493,7 @@ static bool RemoteFreeLibrary(HANDLE hProcess, HANDLE hRemoteModule) {
         dbgPrint(DBGLVL_ERROR, "WaitForSingleObject failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
-    
+
     /* Get exit code, which is the result of remote FreeLibrary. */
     if (!::GetExitCodeThread(hThread, &exitCode)) {
         dbgPrint(DBGLVL_ERROR, "GetExitCodeThread failed: %u.\n", ::GetLastError());
@@ -514,17 +515,17 @@ cleanup:
  * This function is executed in the remote process to set environment variables.
  *
  * IN CASE YOU ARE NOT "ICH HAB'S ERFUNDEN (5)", READ THIS CAREFULLY:
- 
-* It is crucial to place _sizeCrowbarRemoteSetEnvFunc directly after 
+
+* It is crucial to place _sizeCrowbarRemoteSetEnvFunc directly after
  * _remoteSetEnvFunc, because it is used to determine the binary code size of
  * _remoteSetEnvFunc! If the operation crashes, the linker might have reordered
- * the functions. You can use the /ORDER linker directive to enforce the order 
- * of these two functions. The two pragmas enclosing the two functions should 
- * increase the probability that the linker does not do any harmful 
+ * the functions. You can use the /ORDER linker directive to enforce the order
+ * of these two functions. The two pragmas enclosing the two functions should
+ * increase the probability that the linker does not do any harmful
  * optimisation.
  *
- * Additionally, it is crucial that _remoteSetEnvFunc and 
- * _sizeCrowbarRemoteSetEnvFunc have static linkage to avoid indirect calls 
+ * Additionally, it is crucial that _remoteSetEnvFunc and
+ * _sizeCrowbarRemoteSetEnvFunc have static linkage to avoid indirect calls
  * that result from incremental linking (see the Codeproject link below for
  * further information).
  *
@@ -533,20 +534,20 @@ cleanup:
  * must reside in kernel32.dll. You should pass them as function pointers via
  * the parameter 'params'.
  *
- * You MUST NOT USE ANY LOCAL ARRAY, including hard-coded constant strings 
+ * You MUST NOT USE ANY LOCAL ARRAY, including hard-coded constant strings
  * within this function!
  *
  * This dirty hack uses the "CreateRemoteThread & WriteProcessMemory Technique"
  * described on http://www.codeproject.com/threads/winspy.asp. Read this article
  * for further information why it is dangerous.
  *
- * @param params The parameters holding the environment variables to set. The 
+ * @param params The parameters holding the environment variables to set. The
  *               following layout is assumed:
  *               - 4 byte DWORD n holding the number of variables to set.
  *               - A pointer to SetEnvironmentVariableA. Note that the function
  *               must not determine the address itself as is must not use any
  *               constant string.
- *               - 2n ANSI character strings in order name, value, name, 
+ *               - 2n ANSI character strings in order name, value, name,
  *               value ... Each of the strings is zero-terminated as normal.
  *
  * @return zero in case of an error, non-zero in case of success.
@@ -562,7 +563,7 @@ static DWORD _remoteSetEnvFunc(void *params) {
     SetEnvFunc setEnv = *reinterpret_cast<SetEnvFunc *>(
         static_cast<char *>(params) + sizeof(DWORD));
     // TODO: This is probably not 64-bit compatible!
-    
+
     cntVars = *static_cast<DWORD *>(params);
     value = static_cast<char *>(params) + sizeof(DWORD) + sizeof(void *);
     //__asm int 3
@@ -577,20 +578,20 @@ static DWORD _remoteSetEnvFunc(void *params) {
     }
 
     return 1;
-} 
+}
 // DO NOT INSERT ANYTHING HERE!!!
 static void _sizeCrowbarRemoteSetEnvFunc(void) {
 }
-#pragma runtime_checks("", restore) 
+#pragma runtime_checks("", restore)
 #pragma optimize("", on)
 
 
 /**
  * Set environment variables in remote process designated by 'hProcess'. The
- * environment variables must be specified interleaved as parameters. The 
+ * environment variables must be specified interleaved as parameters. The
  * parameter list must have a NULL pointer as end marker.
  */
-static bool RemoteSetEnv(HANDLE hProcess, const char *name0, 
+static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
         const char *value0, ...) {
     va_list argptr;                 // Variable argument list cursor.
     bool retval = false;            // Overall success of operation.
@@ -606,7 +607,7 @@ static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
     char *insPos = NULL;            // Write pointer into 'data'.
     const char *arg;                // Pointer on current variable.
     FARPROC fpSetEnv = NULL;        // Pointer to SetEnvironmentVariableA
-    
+
     /* Sanity check. */
     if (hProcess == NULL) {
         goto cleanup;
@@ -624,7 +625,7 @@ static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
             "%u.\n", ::GetLastError());
         goto cleanup;
     }
-    if ((fpSetEnv = ::GetProcAddress(hKernel32, "SetEnvironmentVariableA")) 
+    if ((fpSetEnv = ::GetProcAddress(hKernel32, "SetEnvironmentVariableA"))
             == NULL) {
         dbgPrint(DBGLVL_ERROR, "\"SetEnvironmentVariableA\" could not be found: %u.\n",
             ::GetLastError());
@@ -670,17 +671,17 @@ static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
         arg = va_arg(argptr, const char *);
         while ((*insPos++ = *arg++) != 0);
     }
-    va_end(argptr);    
+    va_end(argptr);
 
     /* Allocate memory for parameteters in remote process. */
-    if ((remoteData = ::VirtualAllocEx(hProcess, NULL, remoteDataSize, 
+    if ((remoteData = ::VirtualAllocEx(hProcess, NULL, remoteDataSize,
             MEM_COMMIT, PAGE_READWRITE)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Copy parameters to remote process. */
-    if (!::WriteProcessMemory(hProcess, remoteData, data, 
+    if (!::WriteProcessMemory(hProcess, remoteData, data,
             remoteDataSize, NULL)) {
         dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -693,22 +694,22 @@ static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
     // Note: The maximum of 400 B ist just an assumption. You might check the
     // binary if this assertion fails.
     assert(remoteFuncSize < 400);
-    if ((remoteFunc = ::VirtualAllocEx(hProcess, NULL, remoteFuncSize, 
+    if ((remoteFunc = ::VirtualAllocEx(hProcess, NULL, remoteFuncSize,
             MEM_COMMIT, PAGE_READWRITE)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Copy code of injected function into remote process. */
-    if (!::WriteProcessMemory(hProcess, remoteFunc, _remoteSetEnvFunc, 
+    if (!::WriteProcessMemory(hProcess, remoteFunc, _remoteSetEnvFunc,
             remoteFuncSize, NULL)) {
         dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Run the injected function in a remote thread. */
-    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0, 
-            reinterpret_cast<LPTHREAD_START_ROUTINE>(remoteFunc), 
+    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(remoteFunc),
             remoteData, 0, NULL)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "CreateRemoteThread failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -748,14 +749,14 @@ cleanup:
 /**
  * TODO: documentation
  *
- * NOTE: THIS FUNCTION BEHAVES SIMILAR TO _remoteSetEnvFunc. READ THE 
+ * NOTE: THIS FUNCTION BEHAVES SIMILAR TO _remoteSetEnvFunc. READ THE
  * DOCUMENTATION FOR THIS FUNCTION CAREFULLY, TOO, BEFORE MODIFYING ANYTHING
  * HERE!
  *
  * @param params The parameter holds all information to call a remote function.
-                 The following layout of the parameter is assumed.
- *               - 4 byte pointer to GetProcAddress function. Note that the 
- *               function must not determine the address itself as is must not 
+                The following layout of the parameter is assumed.
+ *               - 4 byte pointer to GetProcAddress function. Note that the
+ *               function must not determine the address itself as is must not
  *               use any constant string.
  *               - Module handle of the DLL holding the function to lookup and
  *               call.
@@ -792,7 +793,7 @@ static DWORD _remoteForceUninitFunc(void *params) {
 // DO NOT INSERT ANYTHING HERE!!!
 static void _sizeCrowbarRemoteForceUninitFunc(void) {
 }
-#pragma runtime_checks("", restore) 
+#pragma runtime_checks("", restore)
 #pragma optimize("", on)
 
 
@@ -813,7 +814,7 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
     char *data = NULL;              // Parameter list for remote thread.
     char *insPos = NULL;            // Write pointer into 'data'.
     FARPROC fpGetProcAddr = NULL;   // Pointer to GetProcAddress
-    
+
     /* Sanity check. */
     if (hProcess == NULL) {
         goto cleanup;
@@ -828,7 +829,7 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
             "%u.\n", ::GetLastError());
         goto cleanup;
     }
-    if ((fpGetProcAddr = ::GetProcAddress(hKernel32, "GetProcAddress")) 
+    if ((fpGetProcAddr = ::GetProcAddress(hKernel32, "GetProcAddress"))
             == NULL) {
         dbgPrint(DBGLVL_ERROR, "\"GetProcAddress\" could not be found: %u.\n",
             ::GetLastError());
@@ -836,7 +837,7 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
     }
 
     /* Compute required size for remote data. */
-    remoteDataSize = sizeof(void *) + sizeof(HMODULE) 
+    remoteDataSize = sizeof(void *) + sizeof(HMODULE)
         + (::strlen(REMOTE_FUNC_NAME) + 1) * sizeof(char);
 
     /* Allocate parameter list and fill it. */
@@ -850,18 +851,18 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
     insPos += sizeof(void *);
     ::memcpy(insPos, &hModule, sizeof(HMODULE));
     insPos += sizeof(HMODULE);
-    ::memcpy(insPos, REMOTE_FUNC_NAME, (::strlen(REMOTE_FUNC_NAME) + 1) 
+    ::memcpy(insPos, REMOTE_FUNC_NAME, (::strlen(REMOTE_FUNC_NAME) + 1)
         * sizeof(char));
 
     /* Allocate memory for parameteters in remote process. */
-    if ((remoteData = ::VirtualAllocEx(hProcess, NULL, remoteDataSize, 
+    if ((remoteData = ::VirtualAllocEx(hProcess, NULL, remoteDataSize,
             MEM_COMMIT, PAGE_READWRITE)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
         goto cleanup;
     }
 
     /* Copy parameters to remote process. */
-    if (!::WriteProcessMemory(hProcess, remoteData, data, 
+    if (!::WriteProcessMemory(hProcess, remoteData, data,
             remoteDataSize, NULL)) {
         dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -874,7 +875,7 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
     // Note: The maximum of 400 B ist just an assumption. You might check the
     // binary if this assertion fails.
     assert(remoteFuncSize < 400);
-    if ((remoteFunc = ::VirtualAllocEx(hProcess, NULL, remoteFuncSize, 
+    if ((remoteFunc = ::VirtualAllocEx(hProcess, NULL, remoteFuncSize,
             MEM_COMMIT, PAGE_READWRITE)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -888,8 +889,8 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
     }
 
     /* Run the injected function in a remote thread. */
-    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0, 
-            reinterpret_cast<LPTHREAD_START_ROUTINE>(remoteFunc), 
+    if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(remoteFunc),
             remoteData, 0, NULL)) == NULL) {
         dbgPrint(DBGLVL_ERROR, "CreateRemoteThread failed: %u.\n", ::GetLastError());
         goto cleanup;
@@ -940,7 +941,7 @@ bool RemoteResumeAllThreads(HANDLE hProcess) {
         return false;
     }
 
-    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 
+    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,
             ::GetProcessId(hProcess))) == INVALID_HANDLE_VALUE) {
         dbgPrint(DBGLVL_ERROR, "CreateToolhelp32Snapshot failed: %u.\n", ::GetLastError());
         return false;
@@ -954,7 +955,7 @@ bool RemoteResumeAllThreads(HANDLE hProcess) {
     }
 
     do {
-        if ((hThread = ::OpenThread(THREAD_SUSPEND_RESUME, FALSE, 
+        if ((hThread = ::OpenThread(THREAD_SUSPEND_RESUME, FALSE,
                 te.th32ThreadID)) == NULL) {
             dbgPrint(DBGLVL_ERROR, "OpenThread failed: %u.\n", ::GetLastError());
             retval = false;
@@ -988,7 +989,7 @@ bool RemoteSuspendAllThreads(HANDLE hProcess) {
         return false;
     }
 
-    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 
+    if ((hSnapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,
             ::GetProcessId(hProcess))) == INVALID_HANDLE_VALUE) {
         dbgPrint(DBGLVL_ERROR, "CreateToolhelp32Snapshot failed: %u.\n", ::GetLastError());
         return false;
@@ -1002,7 +1003,7 @@ bool RemoteSuspendAllThreads(HANDLE hProcess) {
     }
 
     do {
-        if ((hThread = ::OpenThread(THREAD_SUSPEND_RESUME, FALSE, 
+        if ((hThread = ::OpenThread(THREAD_SUSPEND_RESUME, FALSE,
                 te.th32ThreadID)) == NULL) {
             dbgPrint(DBGLVL_ERROR, "OpenThread failed: %u.\n", ::GetLastError());
             ::CloseHandle(hSnapshot);
@@ -1027,7 +1028,7 @@ bool RemoteSuspendAllThreads(HANDLE hProcess) {
 
 
 /**
- * Repaints 'hWnd' if it belongs to the process designated by the process ID 
+ * Repaints 'hWnd' if it belongs to the process designated by the process ID
  * passed as 'lParam'.
  */
 static BOOL CALLBACK _updateWindowProc(HWND hWnd, LPARAM lParam) {
@@ -1061,8 +1062,8 @@ bool RemoteUpdateTopLevelWindows(HANDLE hProcess) {
 /*
  * ::AttachToProcess
  */
-bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid, 
-        DWORD desiredAccess, const char *libPath, const char *smName, 
+bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
+        DWORD desiredAccess, const char *libPath, const char *smName,
         const char *dbgFuncPath) {
     HMODULE hDetouredDll = NULL;
     char detouredDllPath[_MAX_PATH];
@@ -1083,7 +1084,7 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
     }
 
     /* Open process for attachment. */
-    outAi.hProcess = ::OpenProcess(desiredAccess | PROCESS_CREATE_THREAD 
+    outAi.hProcess = ::OpenProcess(desiredAccess | PROCESS_CREATE_THREAD
         | PROCESS_VM_OPERATION | PROCESS_VM_WRITE, FALSE, pid);
     if (outAi.hProcess == NULL) {
         dbgPrint(DBGLVL_ERROR, "OpenProcess failed: %u.\n", ::GetLastError());

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(glsldb)
 
 # DEBUG
-set(CMAKE_BUILD_TYPE "Maintainer")
+#set(CMAKE_BUILD_TYPE "Maintainer")
 
 # path to custom modules 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -24,7 +24,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         endif()
     endif()
     list(APPEND MNT_C_FLAGS "-Wall -pedantic")
-    list(APPEND MNT_CXX_FLAGS "-Wall -Wextra -std=c++11")
+    list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
     list(APPEND MNT_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
     list(APPEND MNT_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()

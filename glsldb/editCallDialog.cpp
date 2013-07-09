@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -72,6 +72,7 @@ GLEnumValidator::GLEnumValidator(QWidget *parent) : QValidator(parent)
 
 QValidator::State GLEnumValidator::validate(QString &input, int &pos) const
 {
+    UNUSED_ARG(pos)
     QValidator::State state = QValidator::Invalid;
     int i = 0;
 
@@ -92,9 +93,9 @@ QValidator::State GLEnumValidator::validate(QString &input, int &pos) const
 EditCallDialog::EditCallDialog(const FunctionCall *fn)
 {
     int i;
-    
+
     setupUi(this);
-    
+
     m_pChangedCall = new FunctionCall(fn);
     m_qObjects.clear();
 
@@ -111,7 +112,7 @@ EditCallDialog::EditCallDialog(const FunctionCall *fn)
             hboxLayout->addWidget(w);
         }
         m_qObjects.append(w);
-        
+
         /* Labels */
         QLabel *l = new QLabel(this);
         if (i<fn->getNumArguments() - 1) {
@@ -131,7 +132,7 @@ EditCallDialog::~EditCallDialog()
 void EditCallDialog::checkValidity(void)
 {
     QValidator::State state = QValidator::Acceptable;
-    
+
     int i;
     for (i=0; i<m_qObjects.size(); i++) {
         const FunctionCall::Argument *arg = m_pChangedCall->getArgument(i);
@@ -157,7 +158,7 @@ void EditCallDialog::checkValidity(void)
     QList<QAbstractButton*> buttonList;
     buttonList = buttonBox->buttons();
     for(i=0; i<buttonList.size(); i++) {
-        if (buttonBox->buttonRole(buttonList[i]) == 
+        if (buttonBox->buttonRole(buttonList[i]) ==
                 QDialogButtonBox::AcceptRole) {
             okButton = buttonList[i];
         }
@@ -294,7 +295,7 @@ const FunctionCall* EditCallDialog::getChangedFunction(void)
                     GLenum v;
                     int eIdx = 0;
                     QString s = ((QComboBox*)m_qObjects[i])->currentText();
-                    
+
                     while (glEnumerantsMap[i].string != NULL) {
                         if (!(s.compare(QString(glEnumerantsMap[eIdx].string))))
                         {
@@ -306,13 +307,13 @@ const FunctionCall* EditCallDialog::getChangedFunction(void)
                     }
                     break;
                 }
-			case DBG_TYPE_STRUCT:
+            case DBG_TYPE_STRUCT:
                 /* don't know how to change a struct */
-				break;
-			default:
-				break;
-		}
-	}
+                break;
+            default:
+                break;
+        }
+    }
 
     return m_pChangedCall;
 }
@@ -442,11 +443,11 @@ QWidget* EditCallDialog::getManipulator(const FunctionCall::Argument *arg)
                     }
                     i++;
                 }
-                connect(w, SIGNAL(editTextChanged(QString)), 
+                connect(w, SIGNAL(editTextChanged(QString)),
                         this, SLOT(checkValidity()));
                 break;
             }
-		case DBG_TYPE_STRUCT:
+        case DBG_TYPE_STRUCT:
             {
                 w = new QLineEdit(this);
                 ((QLineEdit*)w)->setEnabled(false);

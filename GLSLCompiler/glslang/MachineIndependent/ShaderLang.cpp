@@ -47,7 +47,7 @@
 #endif /* _WIN32 */
 
 #ifndef SH_EXPORTING
-	#define SH_EXPORTING
+    #define SH_EXPORTING
 #endif
 #include "../Public/ShaderLang.h"
 #include "Initialize.h"
@@ -249,7 +249,7 @@ static const char* getShQualifierString(variableQualifier q)
 void dumpShChangeable(ShChangeable *cgb)
 {
     int j;
-    
+
     if (cgb) {
         dbgPrint(DBGLVL_INFO, "%i", cgb->id);
         for (j=0; j<cgb->numIndices; j++) {
@@ -277,7 +277,7 @@ void dumpShChangeable(ShChangeable *cgb)
     }
 }
 
-void dumpShChangeableList(ShChangeableList *cl) 
+void dumpShChangeableList(ShChangeableList *cl)
 {
     int i;
 
@@ -287,7 +287,7 @@ void dumpShChangeableList(ShChangeableList *cl)
         dbgPrint(DBGLVL_INFO, "empty\n");
         return;
     }
-    
+
 
     for (i=0; i<cl->numChangeables; i++) {
         ShChangeable *cgb = cl->changeables[i];
@@ -337,7 +337,7 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
 {
     int i;
     ShChangeable *copy;
-    
+
     if (!cl || !c) return;
 
     cl->numChangeables++;
@@ -365,10 +365,10 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
 static bool isEqualShChangeable(ShChangeable *a, ShChangeable *b)
 {
     int i;
-    
+
     if (a->id != b->id) return false;
     if (a->numIndices != b->numIndices) return false;
-    
+
     for (i=0; i<a->numIndices; i++) {
         if (a->indices[i]->type != b->indices[i]->type) return false;
         if (a->indices[i]->index != b->indices[i]->index) return false;
@@ -380,14 +380,14 @@ static bool isEqualShChangeable(ShChangeable *a, ShChangeable *b)
 void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
 {
     int i, j;
-    
+
     if (!clout || !clin) return;
 
     for (i = 0; i < clin->numChangeables; i++) {
         // copy only if not already in list
         bool alreadyInList = false;
         for (j=0; j<clout->numChangeables; j++) {
-            if (isEqualShChangeable(clout->changeables[j], 
+            if (isEqualShChangeable(clout->changeables[j],
                                     clin->changeables[i])) {
                 alreadyInList = true;
                 break;
@@ -409,7 +409,7 @@ void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
     c->indices[c->numIndices-1] = idx;
 }
 
-void addShIndexToChangeableList(ShChangeableList *cl, 
+void addShIndexToChangeableList(ShChangeableList *cl,
                                 int s,
                                 ShChangeableIndex *idx)
 {
@@ -422,15 +422,15 @@ void addShIndexToChangeableList(ShChangeableList *cl,
 
 void freeShChangeable(ShChangeable **c)
 {
-	if (c && *c) {
-		int i;
-		for (i = 0; i < (*c)->numIndices; i++) {
-			free((*c)->indices[i]);
-		}
-		free((*c)->indices);
-		free(*c);
-		*c = NULL;
-	}
+    if (c && *c) {
+        int i;
+        for (i = 0; i < (*c)->numIndices; i++) {
+            free((*c)->indices[i]);
+        }
+        free((*c)->indices);
+        free(*c);
+        *c = NULL;
+    }
 }
 
 void ShDumpVariable(ShVariable *v, int depth)
@@ -444,7 +444,7 @@ void ShDumpVariable(ShVariable *v, int depth)
     if (0 <= v->uniqueId) {
         dbgPrint(DBGLVL_COMPILERINFO, "<%i> ", v->uniqueId);
     }
-    
+
     if (v->builtin) {
         dbgPrint(DBGLVL_COMPILERINFO, "builtin ");
     }
@@ -482,16 +482,16 @@ void ShDumpVariable(ShVariable *v, int depth)
             ShDumpVariable(v->structSpec[i], depth);
         }
     }
-    
+
 }
 
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin)
 {
     int i;
     ShVariable **vp = vl->variables;
-    
+
     v->builtin = builtin;
-    
+
     for (i=0; i<vl->numVariables; i++) {
         if (vp[i]->uniqueId == v->uniqueId) {
             vp[i] = v;
@@ -515,13 +515,13 @@ ShVariable* findShVariableFromId(ShVariableList *vl, int id)
     }
 
     vp = vl->variables;
-    
+
     for (i=0; i<vl->numVariables; i++) {
         if (vp[i]->uniqueId == id) {
             return vp[i];
         }
     }
-    
+
     return NULL;
 }
 
@@ -529,13 +529,13 @@ ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name)
 {
     ShVariable **vp = NULL;
     int i;
-    
+
     if (!vl) {
         return NULL;
     }
-    
+
     vp = vl->variables;
-    
+
     for (i=0; i<vl->numVariables; i++) {
         if (!(strcmp(vp[i]->name, name))) {
             return vp[i];
@@ -606,7 +606,7 @@ char* ShGetTypeString(const ShVariable *v)
             asprintf(&result, getShTypeString((ShVariable*)v));
             return result;
         }
-        
+
     }
     return result;
 }
@@ -686,7 +686,7 @@ ShVariable* copyShVariable(ShVariable *src)
         if (!(ret->structName = (char*) malloc(strlen(src->structName)+1))) {
             dbgPrint(DBGLVL_ERROR, "not enough memory to copy strctName of ShVariable\n");
             exit(1);
-        } 
+        }
         strcpy(ret->structName, src->structName);
     } else {
         ret->structName = NULL;
@@ -707,27 +707,27 @@ ShVariable* copyShVariable(ShVariable *src)
 
 void freeShVariable(ShVariable **var)
 {
-	if (var && *var) {
-		int i;
-		free((*var)->name);
-		for (i = 0; i < (*var)->structSize; i++) {
-			freeShVariable(&(*var)->structSpec[i]);
-		}
-		free((*var)->structSpec);
-		free((*var)->structName);
-		free(*var);
-		*var = NULL;
-	}
+    if (var && *var) {
+        int i;
+        free((*var)->name);
+        for (i = 0; i < (*var)->structSize; i++) {
+            freeShVariable(&(*var)->structSpec[i]);
+        }
+        free((*var)->structSpec);
+        free((*var)->structName);
+        free(*var);
+        *var = NULL;
+    }
 }
 
 void freeShVariableList(ShVariableList *vl)
 {
-	int i;
+    int i;
     for (i=0; i<vl->numVariables; i++) {
-		freeShVariable(&vl->variables[i]);
-	}
-	free(vl->variables);
-	vl->numVariables = 0;
+        freeShVariable(&vl->variables[i]);
+    }
+    free(vl->variables);
+    vl->numVariables = 0;
 }
 
 
@@ -743,17 +743,17 @@ int ShInitialize()
     if (!InitProcess())
         return 0;
 
-    // This method should be called once per process. If its called by multiple threads, then 
+    // This method should be called once per process. If its called by multiple threads, then
     // we need to have thread synchronization code around the initialization of per process
     // global pool allocator
-    if (!PerProcessGPA) { 
+    if (!PerProcessGPA) {
         TPoolAllocator *builtInPoolAllocator = new TPoolAllocator(true);
         builtInPoolAllocator->push();
         TPoolAllocator* gPoolAllocator = &GlobalPoolAllocator;
         SetGlobalPoolAllocatorPtr(builtInPoolAllocator);
 
         TSymbolTable symTables[EShLangCount];
-        
+
         GenerateBuiltInSymbolTable(0, infoSink, symTables);
 
         PerProcessGPA = new TPoolAllocator(true);
@@ -771,7 +771,7 @@ int ShInitialize()
         symTables[EShLangFragment].pop();
 
         builtInPoolAllocator->popAll();
-        delete builtInPoolAllocator;        
+        delete builtInPoolAllocator;
 
     }
 
@@ -789,7 +789,7 @@ ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
         return 0;
 
     TShHandleBase* base = static_cast<TShHandleBase*>(ConstructCompiler(language, debugOptions));
-    
+
     return reinterpret_cast<void*>(base);
 }
 
@@ -827,14 +827,14 @@ void ShDestruct(ShHandle handle)
 
         TIntermediate intermediate(compiler->infoSink);
         TSymbolTable symbolTable(SymbolTables[compiler->getLanguage()]);
-        TParseContext* parseContext = new TParseContext(symbolTable, intermediate, 
+        TParseContext* parseContext = new TParseContext(symbolTable, intermediate,
                 compiler->getLanguage(), compiler->infoSink, NULL);
 
         intermediate.remove(parseContext->treeRoot);
         parseContext->treeRoot = NULL;
 
-    	delete parseContext;
-		
+        delete parseContext;
+
         DeleteCompiler(base->getAsCompiler());
 
         // Throw away all the temporary memory used by the compilation process.
@@ -857,7 +857,7 @@ void ShDestruct(ShHandle handle)
 // Cleanup symbol tables
 //
 int __fastcall ShFinalize()
-{  
+{
   if (PerProcessGPA) {
     PerProcessGPA->popAll();
     delete PerProcessGPA;
@@ -870,42 +870,42 @@ bool GenerateBuiltInSymbolTable(const TBuiltInResource* resources, TInfoSink& in
 {
 
     TBuiltIns builtIns;
-    
-	if (resources) {
-		builtIns.initialize(*resources);
+
+    if (resources) {
+        builtIns.initialize(*resources);
         InitializeSymbolTable(builtIns.getBuiltInStrings(), language, infoSink, resources, symbolTables);
-	} else {
-		builtIns.initialize();
+    } else {
+        builtIns.initialize();
         dbgPrint(DBGLVL_COMPILERINFO, "!!!!!!!! Parse EShLangVertex BuiltIns\n");
-		InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangVertex, infoSink, resources, symbolTables);
+        InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangVertex, infoSink, resources, symbolTables);
         dbgPrint(DBGLVL_COMPILERINFO, "!!!!!!!! Parse EShLangGeometry BuiltIns\n");
-		InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangGeometry, infoSink, resources, symbolTables);
+        InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangGeometry, infoSink, resources, symbolTables);
         dbgPrint(DBGLVL_COMPILERINFO, "!!!!!!!! Parse EShLangFragment BuiltIns\n");
-		InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangFragment, infoSink, resources, symbolTables);
-	}
+        InitializeSymbolTable(builtIns.getBuiltInStrings(), EShLangFragment, infoSink, resources, symbolTables);
+    }
 
     return true;
 }
 
 bool InitializeSymbolTable(TBuiltInStrings* BuiltInStrings, EShLanguage language, TInfoSink& infoSink, const TBuiltInResource* resources, TSymbolTable* symbolTables)
 {
-    TIntermediate intermediate(infoSink);	
+    TIntermediate intermediate(infoSink);
     TSymbolTable* symbolTable;
-	
-	if (resources) {
-		symbolTable = symbolTables;
+
+    if (resources) {
+        symbolTable = symbolTables;
     } else {
-		symbolTable = &symbolTables[language];
+        symbolTable = &symbolTables[language];
     }
 
     TParseContext parseContext(*symbolTable, intermediate, language, infoSink);
 
     GlobalParseContext = &parseContext;
-    
+
     setInitialState();
 
     assert(symbolTable->isEmpty() || symbolTable->atSharedBuiltInLevel());
-       
+
     //
     // Parse the built-ins.  This should only happen once per
     // language symbol table.
@@ -916,14 +916,14 @@ bool InitializeSymbolTable(TBuiltInStrings* BuiltInStrings, EShLanguage language
     //
 
     symbolTable->push();
-    
+
     //Initialize the Preprocessor
     int ret = InitPreprocessor();
     if (ret) {
         infoSink.info.message(EPrefixInternalError,  "Unable to intialize the Preprocessor");
         return false;
     }
-    
+
     int j = 0;
     for (TBuiltInStrings::iterator i  = BuiltInStrings[parseContext.language].begin();
                                     i != BuiltInStrings[parseContext.language].end();
@@ -940,11 +940,11 @@ bool InitializeSymbolTable(TBuiltInStrings* BuiltInStrings, EShLanguage language
         }
     }
 
-	if (resources) {
-		IdentifyBuiltIns(parseContext.language, *symbolTable, *resources);
-	} else {									   
-		IdentifyBuiltIns(parseContext.language, *symbolTable);
-	}
+    if (resources) {
+        IdentifyBuiltIns(parseContext.language, *symbolTable, *resources);
+    } else {
+        IdentifyBuiltIns(parseContext.language, *symbolTable);
+    }
 
     FinalizePreprocessor();
 
@@ -952,7 +952,7 @@ bool InitializeSymbolTable(TBuiltInStrings* BuiltInStrings, EShLanguage language
 }
 
 //
-// Do an actual compile on the given strings.  The result is left 
+// Do an actual compile on the given strings.  The result is left
 // in the given compile object.
 //
 // Return:  The return value of ShCompile is really boolean, indicating
@@ -975,9 +975,9 @@ int ShCompile(
     TCompiler* compiler = base->getAsCompiler();
     if (compiler == 0)
         return 0;
-    
+
     clearTraverseDebugJump();
-    
+
     GlobalPoolAllocator.push();
     compiler->infoSink.info.erase();
     compiler->infoSink.debug.erase();
@@ -996,23 +996,23 @@ int ShCompile(
     TBuiltInResource* rs = new TBuiltInResource;
     memcpy(rs, resources, sizeof(TBuiltInResource));
 
-    TParseContext* parseContext = new TParseContext(symbolTable, intermediate, 
+    TParseContext* parseContext = new TParseContext(symbolTable, intermediate,
                                                     compiler->getLanguage(), compiler->infoSink, rs);
     parseContext->initializeExtensionBehavior();
 
     GlobalParseContext = parseContext;
     compiler->setParseContext(parseContext);
-    
+
     setInitialState();
-    
-    InitPreprocessor();    
+
+    InitPreprocessor();
     //
     // Parse the application's shaders.  All the following symbol table
     // work will be throw-away, so push a new allocation scope that can
     // be thrown away, then push a scope for the current shader's globals.
     //
     bool success = true;
-    
+
     symbolTable.push();
     if (!symbolTable.atGlobalLevel())
         parseContext->infoSink.info.message(EPrefixInternalError, "Wrong symbol table level");
@@ -1026,7 +1026,7 @@ int ShCompile(
 
     if (success && parseContext->treeRoot) {
         if (optLevel == EShOptNoGeneration)
-            parseContext->infoSink.info.message(EPrefixNone, 
+            parseContext->infoSink.info.message(EPrefixNone,
                     "No errors.  No code generation or linking was requested.");
         else {
             success = intermediate.postProcess(parseContext->treeRoot, parseContext->language);
@@ -1046,13 +1046,13 @@ int ShCompile(
         }
     } else if (!success) {
         parseContext->infoSink.info.prefix(EPrefixError);
-        parseContext->infoSink.info << parseContext->numErrors << 
+        parseContext->infoSink.info << parseContext->numErrors <<
             " compilation errors.  No code generated.\n\n";
         success = false;
         if (debugOptions & EDebugOpIntermediate)
             intermediate.outputTree(parseContext->treeRoot);
     }
-    
+
     // Do not remove tree for further usage
     // intermediate.remove(parseContext->treeRoot);
     // parseContext->treeRoot = NULL;
@@ -1069,17 +1069,17 @@ int ShCompile(
 
         for (j=0; j<2; j++) {
             TSymbolTableLevel* level = symbolTable.getLevel(j);
-        
+
             for (i=0; i<(int)level->getSize(); i++) {
                 TString *name;
                 TSymbol *symbol;
                 level->getEntry(i, &name, &symbol);
-                
-                if (symbol->isVariable() && 
+
+                if (symbol->isVariable() &&
                         ((TVariable*)symbol)->getType().getQualifier()!=EvqConst &&
                         ((TVariable*)symbol)->getType().getQualifier()!=EvqConstNoValue &&
                         ((TVariable*)symbol)->getType().getQualifier()!=EvqTemporary ) {
-                    addShVariable(vl, ((TVariable*)symbol)->getShVariable(), 
+                    addShVariable(vl, ((TVariable*)symbol)->getShVariable(),
                             true);
                 }
             }
@@ -1093,17 +1093,17 @@ int ShCompile(
                                       compiler->getLanguage(),
                                       debugOptions,
                                       vl);
-                                      
+
     dbgVarTraverser->compile(parseContext->treeRoot);
     delete dbgVarTraverser;
-    
+
     intermediate.outputTree(parseContext->treeRoot);
-    
+
     while (! symbolTable.atSharedBuiltInLevel())
         symbolTable.pop();
 
     FinalizePreprocessor();
-    
+
     // Used to throw away all the temporary memory used by the compilation process.
     // GlobalPoolAllocator.pop();
 
@@ -1117,18 +1117,18 @@ DbgResult* ShDebugJumpToNext(
     )
 {
     DbgResult *result;
-    
+
     TShHandleBase* base = reinterpret_cast<TShHandleBase*>(handle);
     TCompiler* compiler = base->getAsCompiler();
     if (compiler == 0)
         return NULL;
-    
+
     TParseContext* parseContext = compiler->getParseContext();
-    
+
     compiler->infoSink.info.erase();
     compiler->infoSink.debug.erase();
 
-    TCompiler* traverser = 
+    TCompiler* traverser =
         ConstructTraverseDebugJump(compiler->getLanguage(),
                                    debugOptions,
                                    dbgBh);
@@ -1180,6 +1180,10 @@ int ShLink(
     int* numUniformsAccessed)
 
 {
+    UNUSED_ARG(uniformMapHandle)
+    UNUSED_ARG(uniformsAccessed)
+    UNUSED_ARG(numUniformsAccessed)
+
     if (!InitThread())
         return 0;
 
@@ -1221,8 +1225,8 @@ int ShLinkExt(
             }
             if (base->getAsCompiler())
                 cObjects.push_back(base->getAsCompiler());
-    
-    
+
+
             if (cObjects[i] == 0)
                 return 0;
         }
@@ -1240,7 +1244,7 @@ int ShLinkExt(
         for (int i = 0; i < numHandles; ++i) {
             if (cObjects[i]->getAsCompiler()) {
                 if (! cObjects[i]->getAsCompiler()->linkable()) {
-                    linker->infoSink.info.message(EPrefixError, "Not all shaders have valid object code.");                
+                    linker->infoSink.info.message(EPrefixError, "Not all shaders have valid object code.");
                     return 0;
                 }
             }
@@ -1281,12 +1285,12 @@ const char* ShGetInfoLog(const ShHandle handle)
     else if (base->getAsLinker())
         infoSink = &(base->getAsLinker()->getInfoSink());
 
-	if (infoSink) {
-	    infoSink->info << infoSink->debug.c_str();
-	    return infoSink->info.c_str();
-	} else {
-		return NULL;
-	}
+    if (infoSink) {
+        infoSink->info << infoSink->debug.c_str();
+        return infoSink->info.c_str();
+    } else {
+        return NULL;
+    }
 }
 
 //
@@ -1302,7 +1306,7 @@ const void* ShGetExecutable(const ShHandle handle)
         return 0;
 
     TShHandleBase* base = reinterpret_cast<TShHandleBase*>(handle);
-    
+
     TLinker* linker = static_cast<TLinker*>(base->getAsLinker());
     if (linker == 0)
         return 0;
@@ -1319,7 +1323,7 @@ const void* ShGetExecutable(const ShHandle handle)
 // success or failure.
 //
 int ShSetVirtualAttributeBindings(const ShHandle handle, const ShBindingTable* table)
-{    
+{
     if (!InitThread())
         return 0;
 
@@ -1331,7 +1335,7 @@ int ShSetVirtualAttributeBindings(const ShHandle handle, const ShBindingTable* t
 
     if (linker == 0)
         return 0;
-   
+
     linker->setAppAttributeBindings(table);
 
     return 1;

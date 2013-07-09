@@ -57,7 +57,7 @@ static char esc = 27;
 //
 
 //
-// Use this class to carry along data from node to node in 
+// Use this class to carry along data from node to node in
 // the traversal
 //
 class TOutputTraverser : public TIntermTraverser {
@@ -94,7 +94,7 @@ TString TType::getCompleteString() const
     sprintf(p, "%s", getBasicString());
 
     return TString(buf);
-}   
+}
 
 //
 // Helper functions for printing, not part of traversing.
@@ -109,7 +109,7 @@ void OutputTreeText(TInfoSink& infoSink, TIntermNode* node, const int depth)
     infoSink.debug << " *" << node->hasNoSideEffects();
     infoSink.debug << "*" << node->containsEmitVertex();
     infoSink.debug << "*" << node->containsDiscard() << "*";
-    
+
     for (i = 0; i < depth; ++i)
         infoSink.debug << "  ";
 }
@@ -118,7 +118,7 @@ void OutputExtensionText(TInfoSink& infoSink, TIntermNode* node)
 {
     TExtensionList extMap;
     TExtensionList::iterator iter;
-    
+
     extMap = node->getCPPExtensionList();
     for (iter = extMap.begin(); iter != extMap.end(); iter++) {
         infoSink.debug << FormatSourceRange(node->getRange());
@@ -144,7 +144,7 @@ static void OutputScopeText(TInfoSink& infoSink,
     if (scope) {
         scopeList::iterator li = scope->begin();
         infoSink.debug << "     └─scope─› ";
-        
+
         while (li != scope->end()) {
             infoSink.debug << *li << " ";
             li++;
@@ -169,7 +169,7 @@ static void OutputChangeableText(TInfoSink &infoSink,
     if (param && !(node->getAsAggregate())) return;
     if (param && !(cgbl = node->getAsAggregate()->getCgbParameterList())) return;
     if (param && !cgbl->numChangeables) return;
-    
+
     infoSink.debug << FormatSourceRange(node->getRange());
     for (i = 0; i < depth; ++i)
         infoSink.debug << "  ";
@@ -363,7 +363,7 @@ bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverser* it)
     OutputExtensionText(out, node);
     OutputTreeText(out, node, oit->depth);
 
-    switch (node->getOp()) {        
+    switch (node->getOp()) {
     case EOpNegative:       out.debug << "Negate value";         break;
     case EOpVectorLogicalNot:
     case EOpLogicalNot:     out.debug << "Negate conditional";   break;
@@ -377,15 +377,15 @@ bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverser* it)
     case EOpConvIntToBool:    out.debug << "Convert int to bool";  break;
     case EOpConvUIntToBool:   out.debug << "Convert unsigne int to bool";  break;
     case EOpConvFloatToBool:  out.debug << "Convert float to bool";break;
-    
+
     case EOpConvBoolToFloat:  out.debug << "Convert bool to float";break;
     case EOpConvIntToFloat:   out.debug << "Convert int to float"; break;
     case EOpConvUIntToFloat:  out.debug << "Convert unsigned int to float"; break;
-    
+
     case EOpConvFloatToInt:   out.debug << "Convert float to int"; break;
     case EOpConvBoolToInt:    out.debug << "Convert bool to int";  break;
     case EOpConvUIntToInt:    out.debug << "Convert unsigned int to int";  break;
-    
+
     case EOpConvFloatToUInt:  out.debug << "Convert float to unsigned int"; break;
     case EOpConvBoolToUInt:   out.debug << "Convert bool to unsigned int";  break;
     case EOpConvIntToUInt:    out.debug << "Convert int to unsigned int";  break;
@@ -414,10 +414,10 @@ bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverser* it)
 
     case EOpLength:         out.debug << "length";               break;
     case EOpNormalize:      out.debug << "normalize";            break;
-    case EOpDPdx:           out.debug << "dPdx";                 break;               
-    case EOpDPdy:           out.debug << "dPdy";                 break;   
-    case EOpFwidth:         out.debug << "fwidth";               break;                   
-    
+    case EOpDPdx:           out.debug << "dPdx";                 break;
+    case EOpDPdy:           out.debug << "dPdy";                 break;
+    case EOpFwidth:         out.debug << "fwidth";               break;
+
     case EOpAny:            out.debug << "any";                  break;
     case EOpAll:            out.debug << "all";                  break;
 
@@ -463,11 +463,11 @@ bool OutputAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTravers
     case EOpComma:         out.debug << "Comma ";         break;
     case EOpFunction:      out.debug << "Function Definition: "<<node->getName();
                            break;
-    case EOpFunctionCall:  out.debug << "Function Call: " << node->getName(); 
+    case EOpFunctionCall:  out.debug << "Function Call: " << node->getName();
                            break;
     case EOpParameters:    out.debug << "Function Parameters: "; break;
     case EOpInstances:     out.debug << "Declaration of instances: "; break;
-    
+
     case EOpConstructFloat: out.debug << "Construct float"; break;
     case EOpConstructVec2:  out.debug << "Construct vec2";  break;
     case EOpConstructVec3:  out.debug << "Construct vec3";  break;
@@ -494,7 +494,7 @@ bool OutputAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTravers
     case EOpConstructMat4x3:  out.debug << "Construct mat4x3";  break;
     case EOpConstructMat4:  out.debug << "Construct mat4";  break;
     case EOpConstructStruct:  out.debug << "Construct structure";  break;
-        
+
     case EOpLessThan:         out.debug << "Compare Less Than";             break;
     case EOpGreaterThan:      out.debug << "Compare Greater Than";          break;
     case EOpLessThanEqual:    out.debug << "Compare Less Than or Equal";    break;
@@ -534,13 +534,13 @@ bool OutputAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTravers
     case EOpBitmapMsb:     out.debug << "bitmapMSB";   break;
     case EOpWriteOutput:   out.debug << "writeOutput"; break;
     case EOpReadPixel:     out.debug << "readPixel";   break;
-    
+
     case EOpSwizzles:      out.debug << "swizzles"; break;
 
     default: out.debug.message(EPrefixError, "Bad aggregation op");
     }
 
-    if (node->getOp() != EOpSequence 
+    if (node->getOp() != EOpSequence
         && node->getOp() != EOpComma
         && node->getOp() != EOpSpecification
         && node->getOp() != EOpDeclaration
@@ -548,7 +548,7 @@ bool OutputAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTravers
         && node->getOp() != EOpInstances
         && node->getOp() != EOpSwizzles )
         out.debug << " (" << node->getCompleteString() << ")";
-    
+
     OutputDebugText(out, node);
     out.debug << "\n";
 
@@ -601,16 +601,16 @@ bool OutputSelection(bool /* preVisit */, TIntermSelection* node, TIntermTravers
     out.debug << " <<";
     out.debug << getDbgSelectionStatus(node->getDbgInternalState());
     out.debug << ">>\n";
-    
+
 #if DEBUG_SCOPE == 1
     OutputScopeText(oit->infoSink, node, oit->depth);
 #endif
 #if DEBUG_CHANGEABLE == 1
     OutputChangeableText(oit->infoSink, node, oit->depth, 0);
 #endif
- 
+
     ++oit->depth;
-    
+
     OutputExtensionText(out, node);
     OutputTreeText(oit->infoSink, node, oit->depth);
     out.debug << "Condition\n";
@@ -618,19 +618,19 @@ bool OutputSelection(bool /* preVisit */, TIntermSelection* node, TIntermTravers
 
     OutputExtensionText(out, node);
     OutputTreeText(oit->infoSink, node, oit->depth);
-	if (node->getTrueBlock()) {
-		out.debug << "true case\n";
-		node->getTrueBlock()->traverse(it);
-	} else
-		out.debug << "true case is null\n";
-    
+    if (node->getTrueBlock()) {
+        out.debug << "true case\n";
+        node->getTrueBlock()->traverse(it);
+    } else
+        out.debug << "true case is null\n";
+
     if (node->getFalseBlock()) {
         OutputExtensionText(out, node);
         OutputTreeText(oit->infoSink, node, oit->depth);
         out.debug << "false case\n";
         node->getFalseBlock()->traverse(it);
     }
-    
+
     --oit->depth;
 
     return false;
@@ -650,14 +650,14 @@ bool OutputSwitch(bool /* preVisit */, TIntermSwitch* node, TIntermTraverser* it
     out.debug << " <<";
     out.debug << getDbgSelectionStatus(node->getDbgInternalState());
     out.debug << ">>\n";
-    
+
 #if DEBUG_SCOPE == 1
     OutputScopeText(oit->infoSink, node, oit->depth);
 #endif
 #if DEBUG_CHANGEABLE == 1
     OutputChangeableText(oit->infoSink, node, oit->depth, 0);
 #endif
- 
+
     ++oit->depth;
 
     OutputExtensionText(out, node);
@@ -693,14 +693,14 @@ bool OutputCase(bool /* preVisit */, TIntermCase* node, TIntermTraverser* it)
     out.debug << " (" << node->getCompleteString() << ")";
     OutputDebugText(out, node);
     out.debug << "\n";
-    
+
 #if DEBUG_SCOPE == 1
     OutputScopeText(oit->infoSink, node, oit->depth);
 #endif
 #if DEBUG_CHANGEABLE == 1
     OutputChangeableText(oit->infoSink, node, oit->depth, 0);
 #endif
- 
+
     ++oit->depth;
     if (node->getExpression()) {
         node->getExpression()->traverse(it);
@@ -731,9 +731,9 @@ void OutputConstantUnion(TIntermConstantUnion* node, TIntermTraverser* it)
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
     TInfoSink& out = oit->infoSink;
-    
+
     int size = node->getType().getObjectSize();
-                
+
     OutputExtensionText(out, node);
     OutputTreeText(out, node, oit->depth);
     out.debug << "Constant union";
@@ -759,7 +759,7 @@ void OutputConstantUnion(TIntermConstantUnion* node, TIntermTraverser* it)
                 char buf[300];
                 sprintf(buf, "%f (%s)", node->getUnionArrayPointer()[i].getFConst(), "const float");
 
-                out.debug << buf << "\n";           
+                out.debug << buf << "\n";
             }
             break;
         case EbtInt:
@@ -785,7 +785,7 @@ void OutputConstantUnion(TIntermConstantUnion* node, TIntermTraverser* it)
                 out.debug << buf << "\n";
             }
             break;
-        default: 
+        default:
             out.info.message(EPrefixInternalError, "Unknown constant", node->getRange());
             break;
         }
@@ -828,7 +828,7 @@ bool OutputLoop(bool /* preVisit */, TIntermLoop* node, TIntermTraverser* it)
 
     OutputExtensionText(out, node);
     OutputTreeText(out, node, oit->depth);
-    
+
     out.debug << "Loop with condition of type  ";
     switch (node->getLoopType()) {
         case LOOP_WHILE:
@@ -856,16 +856,16 @@ bool OutputLoop(bool /* preVisit */, TIntermLoop* node, TIntermTraverser* it)
 #if DEBUG_CHANGEABLE == 1
     OutputChangeableText(oit->infoSink, node, oit->depth, 0);
 #endif
- 
+
     ++oit->depth;
-    
+
     if (node->getInit()) {
         OutputExtensionText(out, node);
         OutputTreeText(oit->infoSink, node, oit->depth);
         out.debug << "Loop Initialization\n";
         node->getInit()->traverse(it);
     }
-    
+
     OutputExtensionText(out, node);
     OutputTreeText(oit->infoSink, node, oit->depth);
     if (node->getTest()) {
@@ -873,7 +873,7 @@ bool OutputLoop(bool /* preVisit */, TIntermLoop* node, TIntermTraverser* it)
         node->getTest()->traverse(it);
     } else
         out.debug << "No loop condition\n";
-    
+
     OutputExtensionText(out, node);
     OutputTreeText(oit->infoSink, node, oit->depth);
     if (node->getBody()) {
@@ -914,7 +914,7 @@ bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTraverser* it)
         out.debug << " with expression";
         OutputDebugText(out, node);
         out.debug << "\n";
-        
+
 #if DEBUG_SCOPE == 1
         OutputScopeText(oit->infoSink, node, oit->depth);
 #endif
@@ -941,16 +941,16 @@ bool OutputDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
     if (v->getType().getBasicType() == EbtInvariant) {
         out.debug << "redeclare '" << v->getName() << "' as invariant";
     } else if (v->getType().getBasicType() != EbtStruct) {
-        out.debug << "declare '" << v->getName() << "' (" << 
-                     v->getType().getCompleteString() << 
+        out.debug << "declare '" << v->getName() << "' (" <<
+                     v->getType().getCompleteString() <<
                      ") [id: " << v->getUniqueId() << "]";
     } else {
-        out.debug << "declare '" << v->getName() << "' (" << 
+        out.debug << "declare '" << v->getName() << "' (" <<
                      v->getType().getCompleteString() << " '" <<
-                     v->getType().getTypeName() << "') [id: " << 
+                     v->getType().getTypeName() << "') [id: " <<
                      v->getUniqueId() << "]";
     }
-    
+
     out.debug << " {" << node->isFirst() << "}";
     OutputDebugText(out, node);
     out.debug << "\n";
@@ -958,7 +958,7 @@ bool OutputDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
 #if DEBUG_CHANGEABLE == 1
     OutputChangeableText(oit->infoSink, node, oit->depth, 0);
 #endif
-    
+
     return true;
 }
 
@@ -966,10 +966,10 @@ void OutputFuncDeclaration(TIntermFuncDeclaration* node, TIntermTraverser* it)
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
     TInfoSink& out = oit->infoSink;
-    
+
     OutputExtensionText(out, node);
     OutputTreeText(out, node, oit->depth);
-    out.debug << "Function Declaration: " << 
+    out.debug << "Function Declaration: " <<
         node->getFunction()->getMangledName() << "\n" ;
 }
 
@@ -1011,11 +1011,11 @@ void OutputParameter(TIntermParameter* node, TIntermTraverser* it)
     TType* t = node->getType();
 
     if (t->getBasicType() != EbtStruct) {
-        out.debug << "param '" << t->getFieldName() << "' (" << 
+        out.debug << "param '" << t->getFieldName() << "' (" <<
                      t->getCompleteString() << ")\n";
     } else {
-        out.debug << "param '" << t->getFieldName() << "' (" << 
-                     t->getCompleteString() << " '" << 
+        out.debug << "param '" << t->getFieldName() << "' (" <<
+                     t->getCompleteString() << " '" <<
                      t->getTypeName() << "')\n";
     }
 }
@@ -1029,7 +1029,7 @@ void OutputDummy(TIntermDummy* node, TIntermTraverser* it)
     OutputTreeText(out, node, oit->depth);
 
     out.debug << "dummy ";
-    
+
     OutputDebugText(out, node);
     out.debug << "\n";
 

@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* NOTE: only OpenGL functions can be currently recorded and replayed! I.e.,
  * there are no DBG_STREAM_HINT_*s defined for GLX and WGL. However,
- * there is no sense in replaying GLX or WGL functions, or is there? 
+ * there is no sense in replaying GLX or WGL functions, or is there?
  */
 
 /* specify stream replay hints here */
@@ -1566,7 +1566,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DBG_STREAM_HINT_GLDRAWARRAYSINSTANCEDEXT DBG_RECORD_AND_REPLAY
 #define DBG_STREAM_HINT_GLDRAWELEMENTSINSTANCEDEXT DBG_RECORD_AND_REPLAY
 
-//TODO: DBG_STREAM_HINT_* automatisch erzeugen fuer alle funktionen....
+/* TODO: DBG_STREAM_HINT_* automatisch erzeugen fuer alle funktionen....
+ * TODO: DBG_STREAM_HINT_* automatically generate for all functions.... */
 
 GLAPI void APIENTRY glVertexAttribI1i (GLuint, GLint);
 GLAPI void APIENTRY glVertexAttribI2i (GLuint, GLint, GLint);

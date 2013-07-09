@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,10 +40,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <time.h>
 
-	#ifdef __MACH__
-		#include <mach/clock.h>
-		#include <mach/mach.h>
-	#endif
+    #ifdef __MACH__
+        #include <mach/clock.h>
+        #include <mach/mach.h>
+    #endif
 
 #endif /* _!WIN32 */
 
@@ -79,7 +79,7 @@ int createIpcEvent(IpcEvent *evt, const int reserved, const int isInitiallySet,
         strcpy(n, "/");
         strcat(n, name);
 
-        if ((*evt = sem_open(n, (isCreateOnly ? O_CREAT : 0), 0666, 
+        if ((*evt = sem_open(n, (isCreateOnly ? O_CREAT : 0), 0666,
                 (isInitiallySet ? 1 : 0))) == SEM_FAILED) {
             retval = errno;
         }
@@ -111,6 +111,8 @@ int setIpcEvent(IpcEvent evt) {
     if (sem_post(evt) == -1) {
         return errno;
     }
+
+    return 0;
 
 #endif /* _WIN32 */
 }
@@ -148,15 +150,15 @@ int waitIpcEvent(IpcEvent evt, int timeout) {
         }
 
     } else {
-    
-#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-		clock_serv_t cclock;
-		mach_timespec_t mts;
-		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-		clock_get_time(cclock, &mts);
-		mach_port_deallocate(mach_task_self(), cclock);
-		tsEnd.tv_sec = mts.tv_sec;
-		tsEnd.tv_nsec = mts.tv_nsec;
+
+#ifdef __MACH__ /* OS X does not have clock_gettime, use clock_get_time */
+        clock_serv_t cclock;
+        mach_timespec_t mts;
+        host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+        clock_get_time(cclock, &mts);
+        mach_port_deallocate(mach_task_self(), cclock);
+        tsEnd.tv_sec = mts.tv_sec;
+        tsEnd.tv_nsec = mts.tv_nsec;
 #else /* __MACH__ */
         clock_gettime(CLOCK_REALTIME, &tsEnd);
 #endif
@@ -182,7 +184,7 @@ int deleteIpcEvent(IpcEvent evt) {
 #else /* _WIN32 */
     /* TODO: Should unlink semaphore. Needs name. */
     /*
-     * mueller: I assume that sem_close releases the memory, but I could not 
+     * mueller: I assume that sem_close releases the memory, but I could not
      * find any documentation about that.
      */
     return ((sem_close(evt) == -1) ? errno : 0);

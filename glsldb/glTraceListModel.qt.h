@@ -104,6 +104,7 @@ class GlTraceListModel : public QAbstractListModel
 
  private:
      int  getNextIndex(void);
+     int  getLastRowIndex(void);
      
      GlTraceListItem *m_pData;
      int              m_iMax;
