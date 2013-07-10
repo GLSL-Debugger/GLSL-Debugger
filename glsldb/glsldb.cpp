@@ -304,7 +304,7 @@ int main(int argc, char **argv)
 	QCoreApplication::setOrganizationDomain("vis.uni-stuttgart.de");
 	QCoreApplication::setApplicationName("glsldevil");
 
-	// setMaxDebugOutputLevel(DBGLVL_ERROR);               /* default for release builds */
+	//setMaxDebugOutputLevel(DBGLVL_ERROR);               /* default for release builds */
 	//setMaxDebugOutputLevel(DBGLVL_INTERNAL_WARNING);
 	//setMaxDebugOutputLevel(DBGLVL_COMPILERINFO);
 	setMaxDebugOutputLevel(DBGLVL_DEBUG);             /* only effective in case of a DEBUG build */
