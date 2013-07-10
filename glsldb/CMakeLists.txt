@@ -35,6 +35,7 @@ set(SRC
 
 include_directories(${OPENGL_INCLUDE_DIR} 
 	${X11_INCLUDE_DIR}
+	${QT_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
 	${CMAKE_CURRENT_SOURCE_DIR}/utils
 	${GLEW_INCLUDE_DIR}

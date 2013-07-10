@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(glsldb)
 
-# DEBUG
+# DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Maintainer")
 
 # path to custom modules 
@@ -23,16 +23,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
             add_definitions(-fPIC)
         endif()
     endif()
-    list(APPEND MNT_C_FLAGS "-Wall -pedantic")
-    list(APPEND MNT_CXX_FLAGS "-Wall -Wextra -std=c++11")
+    list(APPEND MNT_C_FLAGS "-g -O0 -Wall -pedantic")
+    list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
     list(APPEND MNT_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
     list(APPEND MNT_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(GLSLDB_OSX 1)
     add_definitions(-DGLSLDB_OSX)
-    list(APPEND MNT_C_FLAGS "-Wall -pedantic")
-    list(APPEND MNT_CXX_FLAGS "-Wall -Wextra -std=c++11")
+    list(APPEND MNT_C_FLAGS "-g -O0 -Wall -pedantic")
+    list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(GLSLDB_WIN32 1)
