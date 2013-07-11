@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WIN32
 #include <unistd.h>
 #include <signal.h>
+#include <execinfo.h>
 #endif /* _WIN32 */
 #include <string.h>
 #ifndef _WIN32
@@ -282,6 +283,20 @@ void printResult(void)
 }
 #endif
 
+#ifndef GLSLDB_WINDOWS
+void handler(int UNUSED sig)
+{
+	void *buf[MAX_BACKTRACE_DEPTH];
+	int size = backtrace(buf, MAX_BACKTRACE_DEPTH);
+	fprintf(stderr, "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************\n");
+	backtrace_symbols_fd(buf, size, STDERR_FILENO);
+	fprintf(stderr, "**************** SEGMENTATION FAULT - END BACKTRACE   ****************\n");
+	if(size == MAX_BACKTRACE_DEPTH)
+		fprintf(stderr, "Warning: backtrace might have been truncated");
+	exit(EXIT_FAILURE);
+}
+#endif
+
 void setNotifyLevel(int l)
 {
 	severity_t t;
@@ -343,6 +358,12 @@ int main(int argc, char **argv)
 {
 	QStringList al = parseArguments(argc, argv);
 
+#ifndef GLSLDB_WINDOWS
+	// activate backtracing if log level is high enough
+	if(UTILS_NOTIFY_LEVEL(0) > LV_INFO)
+		signal(SIGSEGV, handler);
+#endif
+	
     QApplication app(argc, argv);
 
 #ifdef _WIN32
