@@ -65,6 +65,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "runLevel.h"
 #include "debuglib.h"
 #include "utils/dbgprint.h"
+#include "utils/notify.h"
 
 #define MAX(a,b) ( a < b ? b : a )
 #define MIN(a,b) ( a > b ? b : a )
@@ -75,7 +76,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" GLFunctionList glFunctions[];
 
-MainWindow::MainWindow(char *pname, char **progArgs)
+MainWindow::MainWindow(char *pname, const QStringList& args)
+    : dbgProgArgs(args)
 {
     int i;
 
@@ -136,18 +138,10 @@ MainWindow::MainWindow(char *pname, char **progArgs)
     m_pCurrentCall = NULL;
     m_pShVarModel  = NULL;
 
-    dbgProgArgs.clear();
-    if (progArgs) {
-
-        char **p = progArgs;
-        while (*p != '\0') {
-            dbgProgArgs.append(QString(*p));
-            p++;
-        }
+    if(dbgProgArgs.size())
         setRunLevel(RL_SETUP);
-    } else {
+    else
         setRunLevel(RL_INIT);
-    }
 
 	m_bInDLCompilation = false;
 
@@ -208,11 +202,11 @@ MainWindow::MainWindow(char *pname, char **progArgs)
 MainWindow::~MainWindow()
 {
     /* Stop still running progs */
-    dbgPrint(DBGLVL_INFO, "~MainWindow kill program\n");
+    UT_NOTIFY(LV_TRACE, "~MainWindow kill program");
     killProgram(1);
 
     /* Free reachable memory */
-    dbgPrint(DBGLVL_INFO, "~MainWindow free pc\n");
+    UT_NOTIFY(LV_TRACE, "~MainWindow free pc");
     delete pc;
     delete m_pGlCallSt;
     delete m_pGlExtSt;
@@ -248,6 +242,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::killProgram(int hard)
 {
+    UT_NOTIFY(LV_TRACE, "Killing debugee");
 	pc->killProgram(hard);
         /* status log */
 	if (hard) {
@@ -261,6 +256,7 @@ void MainWindow::killProgram(int hard)
 
 void MainWindow::on_aQuit_triggered()
 {
+    UT_NOTIFY(LV_TRACE, "Quitting application");
     close();
 }
 
@@ -342,6 +338,8 @@ void MainWindow::on_aOpen_triggered()
 
 void MainWindow::on_aAttach_triggered() 
 {
+    UT_NOTIFY(LV_TRACE, "Quitting application");
+
     pcErrorCode errorCode;
     Dialog_AttachToProcess dlgAttach(this);
     dlgAttach.exec();
@@ -542,7 +540,6 @@ void MainWindow::on_cbGlstPfMode_currentIndexChanged(int m)
     setGlStatisticTabs(cbGlstCallOrigin->currentIndex(), m);
 }
 
-
 pcErrorCode MainWindow::getNextCall()
 {
 	m_pCurrentCall = pc->getCurrentCall();
@@ -576,6 +573,7 @@ pcErrorCode MainWindow::getNextCall()
 
 void MainWindow::on_tbExecute_clicked()
 {
+    UT_NOTIFY(LV_TRACE, "Executing");
     delete m_pCurrentCall;
     m_pCurrentCall = NULL;
     
@@ -1010,7 +1008,7 @@ void MainWindow::waitForEndOfExecution()
 			break;
 		}
 		if (!pc->childAlive()) {
-			dbgPrint(DBGLVL_INFO, "child was terminated!");
+			UT_NOTIFY(LV_INFO, "Debugee terminated!");
 			killProgram(0);
 			setRunLevel(RL_SETUP);
 			return;
@@ -1425,7 +1423,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 	                             &numPrimitives, &numVertices, &data);
 
 	/////// DEBUG 
-    dbgPrint(DBGLVL_COMPILERINFO, ">>>>> DEBUG CG: ");
+    UT_NOTIFY(LV_DEBUG, ">>>>> DEBUG CG: ");
 	switch (option) {
 		case DBG_CG_GEOMETRY_MAP:
             dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "DBG_CG_GEOMETRY_MAP\n");
@@ -1470,23 +1468,21 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 			QMessageBox::critical(this, "Critical Error", "Could not debug "
 		                                "shader. An error occured!",
                                   QMessageBox::Ok);
-			dbgPrint(DBGLVL_WARNING, "Critical Error in getDebugVertexData: %s!\n",
-		    	     getErrorDescription(error));
+			UT_NOTIFY(LV_ERROR, "Critical Error in getDebugVertexData: " << getErrorDescription(error));
         	killProgram(1);
 			return false;
 		}
 		QMessageBox::critical(this, "Error", "Could not debug "
 	                                "shader. An error occured!",
                               QMessageBox::Ok);
-		dbgPrint(DBGLVL_WARNING, "Error in getDebugVertexData: %s!\n",
-		         getErrorDescription(error));
+		UT_NOTIFY(LV_WARN, "Error in getDebugVertexData: " << getErrorDescription(error));
 		return false;
 	}
 
 	vdata->setData(data, elementsPerVertex, numVertices, numPrimitives,
 	               coverage);
 	free(data);
-	dbgPrint(DBGLVL_INFO, "getDebugVertexData done.\n");
+	UT_NOTIFY(LV_TRACE, "getDebugVertexData done");
 	return true;
 }
 
@@ -1533,7 +1529,7 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
             channels = 3;
     }
     
-	dbgPrint(DBGLVL_INFO, "Init buffers...\n");
+	UT_NOTIFY(LV_TRACE, "Init buffers...");
 	switch (option) {
 		case DBG_CG_ORIGINAL_SRC:
 			error = pc->initializeRenderBuffer(true, true, true, true,
@@ -1621,11 +1617,11 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
 			*fbData = fb;
 		}
 	} else {
-		dbgPrint(DBGLVL_ERROR, "Invalid image data format\n");
+		UT_NOTIFY(LV_ERROR, "Invalid image data format");
 	}
 
 	free(imageData);
-    dbgPrint(DBGLVL_INFO, "getDebugImage done.\n");
+    UT_NOTIFY(LV_TRACE, "getDebugImage done.");
 	return true;
 }
 
@@ -1677,7 +1673,7 @@ void MainWindow::updateWatchItemData(ShVarItem *watchItem)
 	} else if (currentRunLevel == RL_DBG_GEOMETRY_SHADER) {
 		VertexBox *currentData = new VertexBox();
 
-        dbgPrint(DBGLVL_INFO, "Get CHANGABLE:\n");
+        UT_NOTIFY(LV_TRACE, "Get CHANGEABLE:");
 		if (getDebugVertexData(DBG_CG_CHANGEABLE, &cl, m_pCoverage, currentData)) {
 			VertexBox *vb = watchItem->getCurrentPointer();
 			if (vb) {
@@ -1689,7 +1685,7 @@ void MainWindow::updateWatchItemData(ShVarItem *watchItem)
 
 			VertexBox *vertexData = new VertexBox();
 
-			dbgPrint(DBGLVL_INFO, "Get GEOMETRY_CHANGABLE:\n");
+			UT_NOTIFY(LV_TRACE, "Get GEOMETRY_CHANGABLE:");
 			if (getDebugVertexData(DBG_CG_GEOMETRY_CHANGEABLE, &cl, NULL, vertexData)) {
 				VertexBox *vb = watchItem->getVertexBoxPointer();
 				if (vb) {
@@ -1738,7 +1734,7 @@ void MainWindow::updateWatchListData(CoverageMapStatus cmstatus, bool forceUpdat
     for (i=0; i<watchItems.count(); i++) {
         ShVarItem *item = watchItems[i];
 
-        dbgPrint(DBGLVL_INFO, ">>>>>>>>>>>>>>>>>>>>>>>>>>>updateWatchListData: %s (%i, %i, %i, %i)\n",
+        UT_NOTIFY_VA(LV_TRACE, ">>>>>>>>>>>>>>updateWatchListData: %s (%i, %i, %i, %i)\n",
 				qPrintable(item->getFullName()), 
                 item->isChanged(), item->hasEnteredScope(), item->isInScope(), item->isInScopeStack());
 
@@ -1918,7 +1914,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             QMessageBox::warning(this, "Warning", "An error "
                                 "occurred while reading vertex coverage.");
                             /* TODO: error handling */
-							dbgPrint(DBGLVL_WARNING, "Error reading vertex coverage!\n");
+							UT_NOTIFY(LV_WARN, "Error reading vertex coverage!");
                         	delete pCoverageBox;
         					cleanupDBGShader();
 	        				setRunLevel(RL_DBG_RESTART);
@@ -1935,10 +1931,10 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         updateWatchItemsCoverage(m_pCoverage);
                         
                         if (coverageChanged) {
-                            dbgPrint(DBGLVL_INFO, "cmstatus = COVERAGEMAP_GROWN\n");
+                            UT_NOTIFY(LV_INFO, "cmstatus = COVERAGEMAP_GROWN");
                             cmstatus = COVERAGEMAP_GROWN;
 						} else {
-                            dbgPrint(DBGLVL_INFO, "cmstatus = COVERAGEMAP_UNCHANGED\n");
+                            UT_NOTIFY(LV_INFO, "cmstatus = COVERAGEMAP_UNCHANGED");
                             cmstatus = COVERAGEMAP_UNCHANGED;
                         }
                         
@@ -1972,7 +1968,9 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
 
         /* Process watch list */
         if (updateWatchData) {
-            dbgPrint(DBGLVL_INFO, "updateWatchData %i emitVertex:%i discard:\n", cmstatus, dr->passedEmitVertex, dr->passedDiscard);
+            UT_NOTIFY(LV_INFO, "updateWatchData " << cmstatus 
+                << " emitVertex: " << dr->passedEmitVertex 
+                << " discard: " << dr->passedDiscard);
             updateWatchListData(cmstatus, dr->passedEmitVertex || dr->passedDiscard);
         }
 
@@ -2094,11 +2092,11 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 
                                 /* Add data to the loop storage */
                                 if (dr->loopIteration == 0) {
-                                    dbgPrint(DBGLVL_INFO, "==> new loop encountered\n");
+                                    UT_NOTIFY(LV_INFO, "==> new loop encountered");
                                     lData = new LoopData(loopCondition, this);
                                     m_qLoopData.push(lData);
                                 } else {
-                                    dbgPrint(DBGLVL_INFO, "==> known loop at %i\n", dr->loopIteration);
+                                    UT_NOTIFY(LV_INFO, "==> known loop at " << dr->loopIteration);
                                     if (!m_qLoopData.isEmpty()) {
                                         lData = m_qLoopData.top();
                                         if (updateCovermap) {
@@ -2132,11 +2130,11 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 
                                 /* Add data to the loop storage */
                                 if (dr->loopIteration == 0) {
-                                    dbgPrint(DBGLVL_INFO, "==> new loop encountered\n");
+                                    UT_NOTIFY(LV_INFO, "==> new loop encountered\n");
                                     lData = new LoopData(&loopCondition, this);
                                     m_qLoopData.push(lData);
                                 } else {
-                                    dbgPrint(DBGLVL_INFO, "==> known loop at %i\n", dr->loopIteration);
+                                    UT_NOTIFY(LV_INFO, "==> known loop at " << dr->loopIteration);
                                     if (!m_qLoopData.isEmpty()) {
                                         lData = m_qLoopData.top();
                                         if (updateCovermap) {
@@ -2343,7 +2341,7 @@ void MainWindow::recordDrawCall()
 		    recordCall() != PCE_NONE) {
 			if (currentRunLevel == RL_DBG_RECORD_DRAWCALL) {
 				/* TODO: error handling */
-                dbgPrint(DBGLVL_WARNING, "recordDrawCall: begin without end????\n");
+                UT_NOTIFY(LV_WARN, "recordDrawCall: begin without end????");
 				return;
 			} else {
 				/* draw call recording stopped by user interaction */
@@ -2555,7 +2553,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 		delete m_pVertexCount;
 		m_pGeometryMap = new VertexBox();
 		m_pVertexCount = new VertexBox();
-        dbgPrint(DBGLVL_INFO, "Get GEOMETRY_MAP:\n");
+        UT_NOTIFY(LV_INFO, "Get GEOMETRY_MAP:");
 		if (getDebugVertexData(DBG_CG_GEOMETRY_MAP, NULL, NULL, m_pGeometryMap)) {
 			/* TODO: build geometry model */	
 		} else {
@@ -2563,7 +2561,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 			setRunLevel(RL_DBG_RESTART);
 			return;
 		}
-        dbgPrint(DBGLVL_INFO, "Get VERTEX_COUNT:\n");
+        UT_NOTIFY(LV_INFO, "Get VERTEX_COUNT:");
 		if (getDebugVertexData(DBG_CG_VERTEX_COUNT, NULL, NULL, m_pVertexCount)) {
 			/* TODO: build geometry model */	
 		} else {
@@ -2809,7 +2807,7 @@ void MainWindow::on_tbWatchWindow_clicked()
 				window = newWatchWindowFragment(list);
 				break;
 			default:
-                dbgPrint(DBGLVL_WARNING, "invalid RL in on_tbWatchWindow_clicked\n");
+                UT_NOTIFY(LV_WARN, "invalid runlevel");
 		}
 		if (window) {
 			window->updateView(true);
@@ -3102,7 +3100,7 @@ void MainWindow::cleanupDBGShader()
 				freeShVariableList(&m_dShVariableList);
 			}
 
-			dbgPrint(DBGLVL_INFO, "cleanupDBGShader: restore render target\n");
+			UT_NOTIFY(LV_INFO, "restore render target");
 			/* restore render target */
 			switch (currentRunLevel) {
 				case RL_DBG_VERTEX_SHADER:
@@ -3122,13 +3120,11 @@ void MainWindow::cleanupDBGShader()
 			if (error != PCE_NONE) {
 				if (isErrorCritical(error)) {
 	    	    	setRunLevel(RL_SETUP);
-					dbgPrint(DBGLVL_WARNING, "Critical Error in cleanupDBGShader: %s!\n",
-							getErrorDescription(error));
+					UT_NOTIFY(LV_ERROR, getErrorDescription(error));
     	    		killProgram(1);
 					return;
 				}
-				dbgPrint(DBGLVL_WARNING, "Critical Error in cleanupDBGShader: %s!\n",
-						getErrorDescription(error));
+                UT_NOTIFY(LV_WARN, getErrorDescription(error));
 				return;
 			}
 			break;
@@ -3140,8 +3136,8 @@ void MainWindow::cleanupDBGShader()
 void MainWindow::setRunLevel(int rl)
 {
     QString title = QString(MAIN_WINDOW_TITLE);
-    dbgPrint(DBGLVL_INFO, "setRunLevel: %i %s\n", rl, m_pCurrentCall ?
-			m_pCurrentCall->getName() : NULL);
+    UT_NOTIFY(LV_INFO, "new level: " << rl << " " << (m_pCurrentCall ?
+			m_pCurrentCall->getName() : NULL));
     
     switch (rl) {
         case RL_INIT: // Program start

@@ -33,8 +33,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <list>
+#include <string>
 #ifndef _WIN32
 #include <unistd.h>
+#include <signal.h>
 #endif /* _WIN32 */
 #include <string.h>
 #ifndef _WIN32
@@ -44,8 +47,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 
 #include <QtGui/QApplication>
+#include <QtCore/QStringList>
 #include "mainWindow.qt.h"
-#include "dbgprint.h"
+#include "notify.h"
+#include "build-config.h"
 
 extern "C" {
   #include "GL/gl.h"
@@ -54,7 +59,7 @@ extern "C" {
   #include "glenumerants/glenumerants.h"
   #include "utils/p2pcopy.h"
 }
-
+/*
 static struct {
 	int shmid;
 	DbgRec *fcalls;
@@ -65,25 +70,11 @@ static struct {
 	char *libdlsym;
 #ifndef _WIN32
 	pid_t debuggedProgramPID;
-#else /* _WIN32 */
+#else // _WIN32 
 	DWORD debuggedProgramPID;
-#endif /* _WIN32 */
+#endif // _WIN32 
 } g;
-
-void usage(const char *pname)
-{
-	printf("Usage: %s [OPTIONS] [executable-file arguments]\n", pname);
-	printf("\n");
-	printf("\t-h\n\t\tshow usage information\n");
-	printf("\t-v\n\t\tverbose logging\n");
-	printf("\t-vv\n\t\tmore verbose logging\n");
-#ifdef DEBUG
-	printf("\t-compilerInfo\n\t\tlog compiler info\n");
-	printf("\t-debug\n\t\tfull debug logging\n");
-#endif
-	printf("\t-ld dirname\n\t\tlog to specified directory. Default: log to stderr\n");
-}
-
+*/
 #ifdef _WIN32
 #  define DIRSEP '\\'
 #else
@@ -106,7 +97,7 @@ static DbgRec *getThreadRecord(pid_t pid)
 	return &g.fcalls[i];
 }
 #endif
-
+/*
 static void parseArgs(int argc, char **argv, char ***debuggedProgramArgs)
 {
 	int i, j;
@@ -142,9 +133,9 @@ static void parseArgs(int argc, char **argv, char ***debuggedProgramArgs)
 			usage(argv[0]);
 			exit(1);
 		} else {
-			/* not a debugger command switch, assume the rest is program and
-			 * program switches
-			 */
+			// not a debugger command switch, assume the rest is program and
+			// program switches
+			//
 			if (!(*debuggedProgramArgs = (char**) malloc((argc - i + 1)*sizeof(char*)))) {
 				dbgPrint(DBGLVL_ERROR, "Error: allocation of debuggedProgramArgs failed\n");
 				exit(1);
@@ -179,7 +170,7 @@ static void freeArgs(char ***debuggedProgramArgs)
 		*debuggedProgramArgs = NULL;
 	}
 }
-
+*/
 #if 0
 void printArgument(void *addr, int type)
 {
@@ -291,40 +282,87 @@ void printResult(void)
 }
 #endif
 
+void setNotifyLevel(int l)
+{
+	severity_t t;
+	switch (l) {
+    	case 0:
+			t = LV_FATAL;
+			break;
+		case 1:
+			t = LV_ERROR;
+			break;
+		case 2:
+			t = LV_WARN;
+			break;
+		case 3:
+			t = LV_INFO;
+			break;
+		case 4:
+			t = LV_DEBUG;
+			break;
+		case 5:
+			t = LV_TRACE;
+			break;
+		default:
+			t = LV_INFO;
+	}
+	UTILS_NOTIFY_LEVEL(&t);
+}
+QStringList parseArguments(int argc, char** argv)
+{
+	int opt = getopt(argc, argv, "+hv:f");
+	bool abort = false;
+	while(opt != -1) {
+		switch(opt) {
+			case 'h':
+				std::cout << "Usage: " << argv[0] << " [options] debuggee [debugee_options]" << std::endl;
+				std::cout << "  -h      : this help message" << std::endl; 
+				std::cout << "  -v value: log level from 0 (FATAL) to 5 (LV_TRACE) " << std::endl; 
+				std::cout << "  -f value: log to file \"value\"" << std::endl;
+				exit(EXIT_SUCCESS);
+			case 'v':
+				setNotifyLevel(atoi(optarg));
+				break;
+			default:
+				std::cout << "def" << std::endl;
+				abort = true;
+		}
+		if(abort)
+			break;
+		opt = getopt(argc, argv, "+hv:f");
+	}
+	int i = optind;
+	QStringList al;
+	while(i < argc)
+		al.push_back(argv[i++]);
+	return al;
+}
+
 int main(int argc, char **argv)
 {
+	QStringList al = parseArguments(argc, argv);
+
     QApplication app(argc, argv);
+
 #ifdef _WIN32
 	app.setStyle("windowsxp");
-#else /* _WIN32 */
-    app.setStyle("cleanlooks");
 #endif /* _WIN32 */
 
 	QCoreApplication::setOrganizationName("VIS");
 	QCoreApplication::setOrganizationDomain("vis.uni-stuttgart.de");
 	QCoreApplication::setApplicationName("glsldevil");
 
-	//setMaxDebugOutputLevel(DBGLVL_ERROR);               /* default for release builds */
-	//setMaxDebugOutputLevel(DBGLVL_INTERNAL_WARNING);
-	//setMaxDebugOutputLevel(DBGLVL_COMPILERINFO);
-	setMaxDebugOutputLevel(DBGLVL_DEBUG);             /* only effective in case of a DEBUG build */
-	
-    parseArgs(argc, argv, &g.debuggedProgramArgs);
+	UTILS_NOTIFY_STARTUP();
+	UT_NOTIFY(LV_INFO, "Application startup.");
 
-	startLogging("glsldb");
+    MainWindow mainWin(argv[0], al);
 
-    MainWindow *mainWin = new MainWindow(argv[0], g.debuggedProgramArgs);
-
-	freeArgs(&g.debuggedProgramArgs);
-	
-    mainWin->show();
+    mainWin.show();
 
     int returnValue = app.exec();
 
-	delete mainWin;
-
-	quitLogging();
-
+	UTILS_NOTIFY_SHUTDOWN();
 	return returnValue;
 }
 
