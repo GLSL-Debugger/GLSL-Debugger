@@ -13,7 +13,7 @@ static struct {
     int log_to_file;
     FILE *file;
     char filename[256];
-} utils_notify_settings = {LV_INFO, 0, 0, {0}};
+} utils_notify_settings = {LV_DEBUG, 0, 0, {0}};
 
 int check_notify_file()
 {
@@ -64,12 +64,12 @@ void utils_notify_va(const severity_t sev, const char* filename, unsigned int li
 		return;
 
 	va_list list;
-	char p[12];
-	char prefix[128];
-	char msg[MAX_NOTIFY_SIZE];
+	static char p[12];
+	static char prefix[128];
+	static char msg[MAX_NOTIFY_SIZE];
+	static char t[22];
     time_t timeval = time(0);
     struct tm *tp = localtime(&timeval);
-    char t[22];
     snprintf(t, 22, "%4d-%02d-%02d %02d:%02d:%02d", 1900+tp->tm_year, tp->tm_mon+1, tp->tm_mday, tp->tm_hour, tp->tm_min, tp->tm_sec);
 	switch (sev) {
 		case LV_TRACE:

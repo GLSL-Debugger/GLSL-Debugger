@@ -363,7 +363,7 @@ int main(int argc, char **argv)
 	if(UTILS_NOTIFY_LEVEL(0) > LV_INFO)
 		signal(SIGSEGV, handler);
 #endif
-	
+
     QApplication app(argc, argv);
 
 #ifdef _WIN32
@@ -374,7 +374,11 @@ int main(int argc, char **argv)
 	QCoreApplication::setOrganizationDomain("vis.uni-stuttgart.de");
 	QCoreApplication::setApplicationName("glsldevil");
 
+	// we need both for now...
 	UTILS_NOTIFY_STARTUP();
+	startLogging("glsldevil");
+	setMaxDebugOutputLevel(DBGLVL_DEBUG);
+
 	UT_NOTIFY(LV_INFO, "Application startup.");
 
     MainWindow mainWin(argv[0], al);
@@ -384,6 +388,7 @@ int main(int argc, char **argv)
     int returnValue = app.exec();
 
 	UTILS_NOTIFY_SHUTDOWN();
+	quitLogging();
 	return returnValue;
 }
 
