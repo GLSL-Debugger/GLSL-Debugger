@@ -152,34 +152,32 @@ int  GlTraceListModel::getNextIndex(void)
 
 void GlTraceListModel::addGlTraceItem(const  GlTraceListItem::IconType type, const QString & text)
 {
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-
     m_pData[idx].setIconType(type);
     m_pData[idx].setText(text);
-
     layoutChanged();
 }
 
 void GlTraceListModel::addGlTraceWarningItem(const QString & text)
 {
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-
     m_pData[idx].setIconType(GlTraceListItem::IT_WARNING);
-
     layoutChanged();
 }
 
 void GlTraceListModel::addGlTraceErrorItem(const QString & text)
 {
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-
     m_pData[idx].setIconType(GlTraceListItem::IT_ERROR);
-
     layoutChanged();
 }
 
 void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType type, int offset)
 {
+    layoutAboutToBeChanged();
     int idx;
 
     idx = m_iFirst + m_iNum + offset;
@@ -188,6 +186,7 @@ void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType
     }
 
     if ( 0 <= idx && idx < m_iMax) {
+        layoutAboutToBeChanged();
         m_pData[idx].setIconType(type);
         layoutChanged();
     }
@@ -203,6 +202,7 @@ void GlTraceListModel::setCurrentGlTraceText(const QString &text, int offset)
     }
 
     if ( 0 <= idx && idx < m_iMax) {
+        layoutAboutToBeChanged();
         m_pData[idx].setText(text);
         layoutChanged();
     }
@@ -225,7 +225,6 @@ QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
-
     switch (role) {
 		case Qt::ForegroundRole:
 			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
