@@ -52,6 +52,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mainWindow.qt.h"
 #include "notify.h"
 #include "build-config.h"
+#include "FunctionsMap.h"
 
 extern "C" {
   #include "GL/gl.h"
@@ -380,6 +381,9 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(DBGLVL_DEBUG);
 
 	UT_NOTIFY(LV_INFO, "Application startup.");
+	// we'll need that later...
+	FunctionsMap& map = FunctionsMap::instance();
+	map.initialize();
 
     MainWindow mainWin(argv[0], al);
 

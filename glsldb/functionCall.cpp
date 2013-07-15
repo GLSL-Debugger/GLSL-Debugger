@@ -46,12 +46,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "errno.h"
 #include "debuglib.h"
 #include "functionCall.h"
+#include "FunctionsMap.h"
 
 extern "C" {
 #include "glenumerants/glenumerants.h"
 }
 
-extern "C" GLFunctionList glFunctions[];
+//extern "C" GLFunctionList glFunctions[];
 
 
 FunctionCall::FunctionCall()
@@ -99,14 +100,8 @@ void FunctionCall::setName(const char *i_pName)
 
 const char* FunctionCall::getExtension(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            return glFunctions[i].extname;
-        }
-        i++;
-    }
-    return NULL;
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    return f ? f->extname : 0;
 }
 
 int FunctionCall::getNumArguments(void) const
@@ -443,37 +438,21 @@ bool FunctionCall::isDebuggable(int *primitiveMode) const
 
 bool FunctionCall::isDebuggableDrawCall(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (glFunctions[i].isDebuggableDrawCall) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && f->isDebuggableDrawCall)
+        return true;
     return false;
 }
 
 bool FunctionCall::isDebuggableDrawCall(int *primitiveMode) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (glFunctions[i].isDebuggableDrawCall) {
-				int idx = glFunctions[i].primitiveModeIndex;
-				*primitiveMode = *(GLenum*)m_pArguments[idx].pData;
-                return true;
-            } else {
-				*primitiveMode = GL_NONE;
-                return false;
-            }
-        }
-        i++;
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if( f && f->isDebuggableDrawCall ) {
+        int idx = f->primitiveModeIndex;
+        *primitiveMode = *(GLenum*)m_pArguments[idx].pData;
+        return true;
     }
-	*primitiveMode = GL_NONE;
+    *primitiveMode = GL_NONE;
     return false;
 }
 
@@ -484,98 +463,50 @@ bool FunctionCall::isEditable(void) const
 
 bool FunctionCall::isShaderSwitch(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (glFunctions[i].isShaderSwitch) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if ( f && f->isShaderSwitch )
+        return true;
     return false;
 }
 
 bool FunctionCall::isGlFunc(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (!strcmp("GL", glFunctions[i].prefix)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && strcmp("GL", f->prefix) == 0)
+        return true;
     return false;
 }
 
 
 bool FunctionCall::isGlxFunc(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (!strcmp("GLX", glFunctions[i].prefix)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && strcmp("GLX", f->prefix) == 0)
+        return true;
     return false;
 }
 
 bool FunctionCall::isWglFunc(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (!strcmp("WGL", glFunctions[i].prefix)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && strcmp("WGL", f->prefix) == 0)
+        return true;
     return false;
 }
 
 bool FunctionCall::isFrameEnd(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (glFunctions[i].isFrameEnd) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && f->isFrameEnd)
+        return true;
     return false;
 }
 
 bool FunctionCall::isFramebufferChange(void) const
 {
-    int i = 0;
-    while (glFunctions[i].fname != NULL) {
-        if (!strcmp(m_pName, glFunctions[i].fname)) {
-            if (glFunctions[i].isFramebufferChange) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        i++;
-    }
+    GLFunctionList *f = FunctionsMap::instance()[m_pName];
+    if (f && f->isFramebufferChange)
+        return true;
     return false;
 }
 
