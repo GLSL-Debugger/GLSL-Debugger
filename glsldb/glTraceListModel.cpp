@@ -120,6 +120,7 @@ GlTraceListModel::~GlTraceListModel()
     
 void GlTraceListModel::clear(void)
 {
+    layoutAboutToBeChanged();
     m_iFirst = 0;
     m_iNum   = 0;
     layoutChanged();
@@ -177,7 +178,6 @@ void GlTraceListModel::addGlTraceErrorItem(const QString & text)
 
 void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType type, int offset)
 {
-    layoutAboutToBeChanged();
     int idx;
 
     idx = m_iFirst + m_iNum + offset;
