@@ -57,15 +57,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <dirent.h>
 #endif /* _WIN32 */
 #include "../GL/gl.h"
-#include "../GL/glext.h"
+//#include "../GL/glext.h"
 #ifndef _WIN32
-#include "../GL/glx.h"
-#else /* !_WIN32 */
+//#include "../GL/glx.h"
+#else /* _WIN32 */
 #include "../GL/wglext.h"
 #include "trampolines.h"
 #endif /* !_WIN32 */
 
 #include "../utils/dbgprint.h"
+#include "../utils/notify.h"
 #include "../utils/dlutils.h"
 #include "../utils/hash.h"
 #include "../glenumerants/glenumerants.h"
@@ -1194,40 +1195,24 @@ void (*DEBUGLIB_EXTERNAL_getOrigFunc(const char *fname))(void)
 
 int checkGLExtensionSupported(const char *extension)
 {
-    static const char *extString = NULL;
-    const char *start;
+    const GLubyte *extString = NULL;
 	
-	 if (!extString) {
-		 extString = (char *)ORIG_GL(glGetString)(GL_EXTENSIONS);
-		 dbgPrint(DBGLVL_INFO, "EXTENSION STRING: %s\n", extString);
+	//UT_NOTIFY_VA(LV_INFO, "EXTENSION STRING: %s", extString);
+	
+	/* check support, take care of substrings! */
+	int i = 0;
+	while(1) {
+		extString = (char *)ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
+		if(!extString)
+			break;
+		int s = strcmp((const char*)extString, extension);
+		if (s == 0) {
+			UT_NOTIFY_VA(LV_INFO, "found: %s", extension);
+			return 1;
+		}
+		++i;
 	 }
-
-	 /* Extension names do not contain spaces. */
-	 if (!extension || !*extension || strchr(extension, ' ')) {
-		 return 0;
-	 } 
-
-	 /* check support, take care of substrings! */
-	 start = extString;
-	 while(1) {
-		 const char *s = strstr(start, extension);
-		 if (!s) {
-			 dbgPrint(DBGLVL_INFO, "not found: %s\n", extension);
-			 return 0;
-		 }
-		 s += strlen(extension);
-		 if (*s  == ' ' || *s == '\0') {
-			 dbgPrint(DBGLVL_INFO, "found: %s\n", extension);
-			 return 1;
-		 }
-		 start = strchr(s, ' ');
-		 if (!start) {
-			 dbgPrint(DBGLVL_INFO, "not found: %s\n", extension);
-			 return 0;
-		 }
-		 start++;
-	 }
-	 dbgPrint(DBGLVL_INFO, "not found: %s\n", extension);
+	 UT_NOTIFY_VA(LV_INFO, "not found: %s", extension);
 	 return 0;
 }
 
@@ -1236,24 +1221,26 @@ int checkGLVersionSupported(int majorVersion, int minorVersion)
 	static int major = 0;
 	static int minor = 0;
 		
-	dbgPrint(DBGLVL_INFO, "GL version %i.%i: ", majorVersion, minorVersion);
+	UT_NOTIFY_VA(LV_INFO, "Looking for GL version %i.%i: ", majorVersion, minorVersion);
 	if (major == 0) {
 		const char *versionString = (char*)ORIG_GL(glGetString)(GL_VERSION);
 		const char *rendererString = (char*)ORIG_GL(glGetString)(GL_RENDERER);
 		const char *vendorString = (char*)ORIG_GL(glGetString)(GL_VENDOR);
+		const char *shadingString = (char*)ORIG_GL(glGetString)(GL_SHADING_LANGUAGE_VERSION);
 		char  *dot = NULL;
 		major = (int)strtol(versionString, &dot, 10);
 		minor = (int)strtol(++dot, NULL, 10);
-		dbgPrint(DBGLVL_INFO, "GL VENDOR: %s\n", rendererString);
-		dbgPrint(DBGLVL_INFO, "GL RENDERER: %s\n", rendererString);
-		dbgPrint(DBGLVL_INFO, "GL VERSION: %s\n", versionString);
-		checkGLExtensionSupported(NULL);
+		UT_NOTIFY_VA(LV_INFO, "GL VENDOR: %s", vendorString);
+		UT_NOTIFY_VA(LV_INFO, "GL RENDERER: %s", rendererString);
+		UT_NOTIFY_VA(LV_INFO, "GL VERSION: %s", versionString);
+		UT_NOTIFY_VA(LV_INFO, "GL SHADING LANGUAGE: %s", shadingString);
 	}
 	if (majorVersion < major ||
 	    (majorVersion == major && minorVersion <= minor)) {
+		UT_NOTIFY(LV_INFO, "requested version found");
 		return 1;
 	}
-	dbgPrint(DBGLVL_INFO, "required GL version supported: NO\n");
+	UT_NOTIFY_VA(LV_INFO, "required GL version supported: NO");
 	return 0;
 }
 
@@ -1280,12 +1267,12 @@ void *dlsym(void *handle, const char *symbol)
 		
 		s = getenv("GLSL_DEBUGGER_LIBDLSYM");
 		if (!s) {
-			dbgPrint(DBGLVL_ERROR, "Strange, GLSL_DEBUGGER_LIBDLSYM is not set??\n");
+			UT_NOTIFY_VA(LV_ERROR, "GLSL_DEBUGGER_LIBDLSYM is not set?");
 			exit(1);
 		}
         
 	    if (! (origDlsymHandle = dlopen(s, RTLD_LAZY | RTLD_DEEPBIND))) {
-    	    dbgPrint(DBGLVL_ERROR, "getting origDlsymHandle failed %s: %s\n",
+    	    UT_NOTIFY_VA(LV_ERROR, "getting origDlsymHandle failed %s: %s",
 			         s, dlerror());
     	}
 		dlclose(origDlsymHandle);
@@ -1293,7 +1280,7 @@ void *dlsym(void *handle, const char *symbol)
 		if (s) {
 			g.origdlsym = (void *(*)(void *, const char *))(intptr_t)strtoll(s, NULL, 16);
 		} else {
-			dbgPrint(DBGLVL_ERROR, "Strange, GLSL_DEBUGGER_DLSYM is not set??\n");
+			UT_NOTIFY_VA(LV_ERROR, "GLSL_DEBUGGER_DLSYM is not set?");
 			exit(1);
 		}
 		unsetenv("GLSL_DEBUGGER_DLSYM");

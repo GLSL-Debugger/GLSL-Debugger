@@ -38,14 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif /* _WIN32 */
 
-#include "GL/gl.h"
-#include "GL/glext.h"
-#ifndef _WIN32
-#include "GL/glx.h"
-#include "GL/glxext.h"
-#else
-#include "GL/wglext.h"
-#endif /* _WIN32 */
+#include <stdint.h>
 
 enum DBG_ERROR_CODES {
 	DBG_NO_ERROR = 0,

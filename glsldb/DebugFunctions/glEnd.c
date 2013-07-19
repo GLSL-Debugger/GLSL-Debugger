@@ -40,8 +40,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 
 #define DBGLIB_EXTERNAL
-
-#include "../debuglib.h"
+#include "GL/gl.h"
+#include "GL/glext.h"
+typedef GLint GLfixed;
+#include "../DebugLib/debuglib.h"
 #include "../DebugLib/debuglibInternal.h"
 #include "../utils/dbgprint.h"
 

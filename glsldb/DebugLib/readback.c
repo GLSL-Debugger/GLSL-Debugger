@@ -82,7 +82,7 @@ static struct {
 	/*GLuint dbgStencilBuffer;*/
 	
 	/* fraembuffer saved state */
-	GLuint activeFBO;
+	GLint activeFBO;
 	GLint activeDrawbuffer;
 	GLint activeReadbuffer;
 	GLboolean activeColorMask[4];
@@ -1237,12 +1237,7 @@ static void saveCopyState(pixelCopyState *savedState)
     ORIG_GL(glGetBooleanv)(GL_TEXTURE_3D, &savedState->texture_3D);
     
     /* Fragment Program */
-    if (checkGLVersionSupported(2, 0)) {
-        ORIG_GL(glGetIntegerv)(GL_CURRENT_PROGRAM, &savedState->shader_handle);
-    } else {
-        savedState->shader_handle = ORIG_GL(glGetHandleARB)(GL_PROGRAM_OBJECT_ARB);
-    }
-
+    ORIG_GL(glGetIntegerv)(GL_CURRENT_PROGRAM, &savedState->shader_handle);
 }
 
 static void restoreCopyState(pixelCopyState *savedState)
@@ -1325,11 +1320,7 @@ static void restoreCopyState(pixelCopyState *savedState)
     }
     
     /* Fragment Program */
-    if (checkGLVersionSupported(2, 0)) {
-        ORIG_GL(glUseProgram)(savedState->shader_handle);
-    } else {
-        ORIG_GL(glUseProgramObjectARB)(savedState->shader_handle);
-    }
+    ORIG_GL(glUseProgram)(savedState->shader_handle);
 }
 
 typedef enum {
@@ -1386,11 +1377,7 @@ static void setCopyState(copyStateTarget csTarget)
     ORIG_GL(glDisable)(GL_TEXTURE_3D);
 
     /* Fragment Program */
-    if (checkGLVersionSupported(2, 0)) {
-        ORIG_GL(glUseProgram)(0);
-    } else {
-        ORIG_GL(glUseProgramObjectARB)(0);
-    }
+    ORIG_GL(glUseProgram)(0);
 }
 
 /*
