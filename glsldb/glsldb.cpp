@@ -341,7 +341,6 @@ QStringList parseArguments(int argc, char** argv)
 				setNotifyLevel(atoi(optarg));
 				break;
 			default:
-				std::cout << "def" << std::endl;
 				abort = true;
 		}
 		if(abort)

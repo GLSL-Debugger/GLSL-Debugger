@@ -1195,25 +1195,33 @@ void (*DEBUGLIB_EXTERNAL_getOrigFunc(const char *fname))(void)
 
 int checkGLExtensionSupported(const char *extension)
 {
-    const GLubyte *extString = NULL;
+	// statics are set to zero
+    static Hash extensions;
+    static int dummy = 1;
 	
 	//UT_NOTIFY_VA(LV_INFO, "EXTENSION STRING: %s", extString);
-	
-	/* check support, take care of substrings! */
-	int i = 0;
-	while(1) {
-		extString = (char *)ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
-		if(!extString)
-			break;
-		int s = strcmp((const char*)extString, extension);
-		if (s == 0) {
-			UT_NOTIFY_VA(LV_INFO, "found: %s", extension);
-			return 1;
+	if(!extensions.table) {
+		UT_NOTIFY(LV_TRACE, "Creating extension hashes");
+		hash_create(&extensions, hashString, compString, 512, 0);
+		int i = 0;
+		while(1) {
+			const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i++);
+			if(!name)
+				break;
+			// we don't need to store any relevant data. we just want a quick 
+			// string lookup.
+			hash_insert(&extensions, name, &dummy);
 		}
-		++i;
-	 }
-	 UT_NOTIFY_VA(LV_INFO, "not found: %s", extension);
-	 return 0;
+	}
+
+	// check support
+	void *data = hash_find(&extensions, extension);
+	if(!data) {
+		UT_NOTIFY_VA(LV_INFO, "not found: %s", extension);
+		return 0;
+	}
+	UT_NOTIFY_VA(LV_INFO, "found: %s", extension);
+	return 1;
 }
 
 int checkGLVersionSupported(int majorVersion, int minorVersion)

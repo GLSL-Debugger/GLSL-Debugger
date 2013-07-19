@@ -2172,7 +2172,7 @@ pcErrorCode ProgramControl::executeContinueOnError(void)
 {
 #ifdef _WIN32
 	::SwitchToThread();
-	::SetEvent(this->hEvtDebugee);
+	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
 	sched_yield();
     ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
@@ -2228,7 +2228,7 @@ pcErrorCode ProgramControl::detachFromProgram(void)
             retval = PCE_EXIT;
         }
 
-        //::SetEvent(this->hEvtDebugee);
+        //::SetEvent(_hEvtDebuggee);
         //this->closeEvents();
         this->stop();   // Ensure consistent state.
         this->checkChildStatus();

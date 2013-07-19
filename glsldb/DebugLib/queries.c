@@ -51,12 +51,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern Globals G;
 
-static int hashUInt(void *key, int numBuckets)
+static int hashUInt(const void *key, int numBuckets)
 {
 	return *(GLuint*)key % numBuckets;
 }
 
-static int compUInt(void *key1, void *key2)
+static int compUInt(const void *key1, const void *key2)
 {
 	return *(GLuint*)key1 == *(GLuint*)key2;
 }
