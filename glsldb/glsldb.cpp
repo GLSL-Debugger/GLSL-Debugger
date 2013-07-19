@@ -289,11 +289,11 @@ void handler(int UNUSED sig)
 {
 	void *buf[MAX_BACKTRACE_DEPTH];
 	int size = backtrace(buf, MAX_BACKTRACE_DEPTH);
-	fprintf(stderr, "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************\n");
+	std::cerr << "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************" << std::endl;
 	backtrace_symbols_fd(buf, size, STDERR_FILENO);
-	fprintf(stderr, "**************** SEGMENTATION FAULT - END BACKTRACE   ****************\n");
+	std::cerr << "**************** SEGMENTATION FAULT - END BACKTRACE   ****************" << std::endl;
 	if(size == MAX_BACKTRACE_DEPTH)
-		fprintf(stderr, "Warning: backtrace might have been truncated");
+		std::cerr << "Warning: backtrace might have been truncated" << std::endl;
 	exit(EXIT_FAILURE);
 }
 #endif

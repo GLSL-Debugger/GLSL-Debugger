@@ -43,7 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "debuglibInternal.h"
 #include "queries.h"
 #include "../glenumerants/glenumerants.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 
 #ifdef _WIN32
 #include "trampolines.h"
@@ -80,7 +80,7 @@ void interruptAndSaveQueries(void)
 	GLint value;
 	int i, n;
 
-	dbgPrint(DBGLVL_INFO, "interruptAndSaveQueries called\n");
+	UT_NOTIFY_VA(LV_INFO, "interruptAndSaveQueries called");
 	/* reset state of hashed but not restarted queries */
 	n = hash_count(&G.queries);
 	for (i = 0; i < n; i++) {
@@ -104,7 +104,7 @@ void interruptAndSaveQueries(void)
 			activeQuery->value = value;
 			activeQuery->target = GL_SAMPLES_PASSED;
 			activeQuery->interrupted = 1;
-			dbgPrint(DBGLVL_INFO, "interruptAndSaveQuery: id=%i target=%s value=%i\n",  
+			UT_NOTIFY_VA(LV_INFO, "interruptAndSaveQuery: id=%i target=%s value=%i",  
 			         activeQuery->id, lookupEnum(activeQuery->target), activeQuery->value);
 			hash_insert(&G.queries, &activeQuery->id, activeQuery);
 		}
@@ -227,14 +227,14 @@ void restartQueries(void)
 	int i;
 	int n = hash_count(&G.queries);
 	
-	dbgPrint(DBGLVL_INFO, "restartQueries: %i\n", n);
+	UT_NOTIFY_VA(LV_INFO, "restartQueries: %i", n);
 	for (i = 0; i < n; i++) {
 		Query *q = hash_element(&G.queries, i);
-		dbgPrint(DBGLVL_INFO, "restarting query %i: id=%i target=%s value=%i interrupted=%i\n",
+		UT_NOTIFY_VA(LV_INFO, "restarting query %i: id=%i target=%s value=%i interrupted=%i",
 		         i, q->id, lookupEnum(q->target), q->value, q->interrupted);
 		if (q->interrupted) {
 			if (checkGLVersionSupported(1, 5)) {
-				dbgPrint(DBGLVL_INFO, "restarting query target=%s id=%i!\n",
+				UT_NOTIFY_VA(LV_INFO, "restarting query target=%s id=%i!",
 						lookupEnum(q->target), q->id);
 				ORIG_GL(glBeginQuery)(q->target, q->id);
 			} else if (checkGLExtensionSupported("GL_ARB_occlusion_query")) {

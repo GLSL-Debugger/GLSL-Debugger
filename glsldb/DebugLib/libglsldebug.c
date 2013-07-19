@@ -146,7 +146,7 @@ static int getShmid()
 	if (s) {
 		return atoi(s);
 	} else {
-		dbgPrint(DBGLVL_ERROR, "Oh my god! No Shmid! Set GLSL_DEBUGGER_SHMID!\n");
+		UT_NOTIFY_VA(LV_ERROR, "Oh my god! No Shmid! Set GLSL_DEBUGGER_SHMID!");
 		exit(1);
 	}
 }
@@ -188,10 +188,10 @@ static void setLogging(void)
 #endif /* !_WIN32 */
 		level = atoi(s);
 		setMaxDebugOutputLevel(level);
-		dbgPrint(DBGLVL_INFO, "Log level set to %i\n", level);
+		UT_NOTIFY_VA(LV_INFO, "Log level set to %i", level);
     } else {
 		setMaxDebugOutputLevel(DBGLVL_ERROR);
-		dbgPrint(DBGLVL_WARNING, "Log level not set!\n");
+		UT_NOTIFY_VA(LV_WARN, "Log level not set!\n");
 	}
 }
 
@@ -202,7 +202,7 @@ static void addDbgFunction(const char *soFile)
 	const char *provides = NULL; 
 	
 	if (!(handle = openLibrary(soFile))) {
-		dbgPrint(DBGLVL_WARNING, "Opening dbgPlugin \"%s\" failed\n", soFile);
+		UT_NOTIFY_VA(LV_WARN, "Opening dbgPlugin \"%s\" failed", soFile);
 		return;
 	}
 #ifdef _WIN32
@@ -210,8 +210,8 @@ static void addDbgFunction(const char *soFile)
 #else /* _WIN32 */
 	if (!(provides = g.origdlsym(handle, "provides"))) {
 #endif /* _WIN32 */
-        dbgPrint(DBGLVL_WARNING, "Could not determine what \"%s\" provides!\n"
-		                         "Export the " "\"provides\"-string!\n", soFile);
+        UT_NOTIFY_VA(LV_WARN, "Could not determine what \"%s\" provides!\n"
+		                         "Export the " "\"provides\"-string!", soFile);
 		closeLibrary(handle);
 		return;
 	}
@@ -228,7 +228,7 @@ static void addDbgFunction(const char *soFile)
 	g.dbgFunctions = realloc(g.dbgFunctions,
 	                         g.numDbgFunctions*sizeof(DbgFunction));
 	if (!g.dbgFunctions) {
-		dbgPrint(DBGLVL_ERROR, "Allocating g.dbgFunctions failed: %s (%d)\n",
+		UT_NOTIFY_VA(LV_ERROR, "Allocating g.dbgFunctions failed: %s (%d)",
 				strerror(errno), g.numDbgFunctions*sizeof(DbgFunction));
 		closeLibrary(handle);
 		exit(1);
@@ -289,20 +289,20 @@ static void loadDbgFunctions(void)
 #endif /* !_WIN32 */
 
 	if (!dbgFctsPath || dbgFctsPath[0] == '\0') {
-		dbgPrint(DBGLVL_ERROR, "No dbgFctsPath! Set GLSL_DEBUGGER_DBGFCTNS_PATH!\n");
+		UT_NOTIFY_VA(LV_ERROR, "No dbgFctsPath! Set GLSL_DEBUGGER_DBGFCTNS_PATH!");
 		exit(1);
 	}
 	
 #if ! defined WIN32
 	if ((dp = opendir(dbgFctsPath)) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "cannot open so directory \"%s\"\n", dbgFctsPath);
+		UT_NOTIFY_VA(LV_ERROR, "cannot open so directory \"%s\"", dbgFctsPath);
 		exit(1);
 	}
 
 	while((entry = readdir(dp))) {
 		if (endsWith(entry->d_name, SO_EXTENSION)) {
 			if (! (file = (char *)malloc(strlen(dbgFctsPath) + strlen(entry->d_name) + 2))) {
-				dbgPrint(DBGLVL_ERROR, "not enough memory for file template\n");
+				UT_NOTIFY_VA(LV_ERROR, "not enough memory for file template");
 				exit(1);
 			}
 			strcpy(file, dbgFctsPath);
@@ -320,25 +320,25 @@ static void loadDbgFunctions(void)
 	closedir(dp);
 #else
 	if (! (files = (char *)malloc(strlen(dbgFctsPath) + 3 + strlen(SO_EXTENSION)))) {
-		dbgPrint(DBGLVL_ERROR, "not enough memory for file template\n");
+		UT_NOTIFY_VA(LV_ERROR, "not enough memory for file template");
 		exit(1);
 	}
 	if (!(cwd = _getcwd(NULL, 512))) {
-		dbgPrint(DBGLVL_ERROR, "Failed to get current working directory\n");
+		UT_NOTIFY_VA(LV_ERROR, "Failed to get current working directory");
 		exit(1);
 	}
 	if (_chdir(dbgFctsPath) != 0) {
-		dbgPrint(DBGLVL_ERROR, "directory '%s' not found\n", dbgFctsPath);
+		UT_NOTIFY_VA(LV_ERROR, "directory '%s' not found", dbgFctsPath);
 		exit(1);
 	}
 	strcpy(files, ".\\*.*");
 	if ((handle = _findfirst(files, &fd)) == -1) {
-		dbgPrint(DBGLVL_WARNING, "no dbg functions found in %s\n", files);
+		UT_NOTIFY_VA(LV_WARN, "no dbg functions found in %s", files);
 		return;
 	}
 	/* restore working directory */
 	if (_chdir(cwd) != 0) {
-		dbgPrint(DBGLVL_ERROR, "Failed to restore working directory\n");
+		UT_NOTIFY_VA(LV_ERROR, "Failed to restore working directory");
 		exit(1);
 	}
 	free(cwd);
@@ -347,7 +347,7 @@ static void loadDbgFunctions(void)
 	do {
 		if (endsWith(fd.name, SO_EXTENSION)) {
 			if (! (file = (char *)malloc(strlen(dbgFctsPath) + strlen(fd.name) + 2))) {
-				dbgPrint(DBGLVL_ERROR, "not enough memory for file template\n");
+				UT_NOTIFY_VA(LV_ERROR, "not enough memory for file template");
 				exit(1);
 			}
 			strcpy(file, dbgFctsPath);
@@ -379,9 +379,9 @@ __declspec(dllexport) BOOL __cdecl uninitialiseDll(void) {
 	
     /* We must detach first, as trampolines use events. */
     if (detachTrampolines()) {
-        dbgPrint(DBGLVL_INFO, "Trampolines detached.\n");
+        UT_NOTIFY_VA(LV_INFO, "Trampolines detached");
     } else {
-        dbgPrint(DBGLVL_WARNING, "Detaching trampolines failed.\n");
+        UT_NOTIFY_VA(LV_WARN, "Detaching trampolines failed");
         retval = FALSE;
     }
 
@@ -415,7 +415,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 #ifdef DEBUG
       //AllocConsole();     /* Force availability of console in debug mode. */
-            dbgPrint(DBGLVL_DEBUG, "I am in Debug mode.\n");
+            UT_NOTIFY_VA(DBGLVL_DEBUG, "I am in Debug mode.");
            
             //_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
       //      if (_CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, "", "This is the "
@@ -440,7 +440,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
             if (!attachTrampolines()) {
                 return FALSE;
             } else {
-                dbgPrint(DBGLVL_INFO, "attaching has worked!\n");
+                UT_NOTIFY_VA(LV_INFO, "attaching has worked!");
             }
 
             /* Attach to shared mem segment */
@@ -490,7 +490,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
             break;
 
         case DLL_PROCESS_DETACH:
-            dbgPrint(DBGLVL_INFO, "DLL_PROCESS_DETACH\n");
+            UT_NOTIFY_VA(LV_INFO, "DLL_PROCESS_DETACH");
             EnterCriticalSection(&G.lock);
             retval = uninitialiseDll();
             DeleteCriticalSection(&G.lock);
@@ -511,14 +511,14 @@ void __attribute__ ((constructor)) debuglib_init(void)
 	
 #ifdef USE_DLSYM_HARDCODED_LIB	
 	if (!(g.libgl = openLibrary(LIBGL))) {
-		dbgPrint(DBGLVL_ERROR, "Error opening OpenGL library\n");
+		UT_NOTIFY_VA(LV_ERROR, "Error opening OpenGL library");
 		exit(1);
 	}
 #endif
 	
 	/* attach to shared mem segment */
 	if (!(g.fcalls = shmat(getShmid(), NULL, 0))) {
-		dbgPrint(DBGLVL_ERROR, "Could not attach to shared memory segment: %s\n", strerror(errno));
+		UT_NOTIFY_VA(LV_ERROR, "Could not attach to shared memory segment: %s", strerror(errno));
 		exit(1);
 	}
 
@@ -536,7 +536,7 @@ void __attribute__ ((constructor)) debuglib_init(void)
 	if (!G.origGlXGetProcAddress) {
 		G.origGlXGetProcAddress = (void (*(*)(const GLubyte*))(void))g.origdlsym(g.libgl, "glXGetProcAddressARB");
 		if (!G.origGlXGetProcAddress) {
-			dbgPrint(DBGLVL_ERROR, "Hmm, cannot resolve glXGetProcAddress\n");
+			UT_NOTIFY_VA(LV_ERROR, "Hmm, cannot resolve glXGetProcAddress");
 			exit(1);
 		}
 	}
@@ -548,7 +548,7 @@ void __attribute__ ((constructor)) debuglib_init(void)
 	if (!G.origGlXGetProcAddress) {
 		G.origGlXGetProcAddress = g.origdlsym(RTLD_NEXT, "glXGetProcAddressARB");
 		if (!G.origGlXGetProcAddress) {
-			dbgPrint(DBGLVL_ERROR, "Hmm, cannot resolve glXGetProcAddress\n");
+			UT_NOTIFY_VA(LV_ERROR, "Hmm, cannot resolve glXGetProcAddress");
 			exit(1);
 		}
 	}
@@ -602,7 +602,7 @@ DbgRec *getThreadRecord(DWORD pid)
 	}
 	if (i == SHM_MAX_THREADS) {
 		/* TODO */
-		dbgPrint(DBGLVL_ERROR, "Error: max. number of debugable threads exceeded!\n");
+		UT_NOTIFY_VA(LV_ERROR, "Error: max. number of debugable threads exceeded!");
 		exit(1);
 	}
 	return &g.fcalls[i];
@@ -688,7 +688,7 @@ void storeFunctionCall(const char *fname, int numArgs, ...)
 	strncpy(rec->fname, fname, SHM_MAX_FUNCNAME);
 	rec->numItems = numArgs;
 
-	dbgPrint(DBGLVL_INFO, "STORE CALL: %s(", rec->fname);
+	dbgPrintNoPrefix(DBGLVL_INFO, "STORE CALL: %s(", rec->fname);
 	va_start(argp, numArgs);
 	for (i = 0; i < numArgs; i++) {
 		rec->items[2*i] = (ALIGNED_DATA)va_arg(argp, void*);
@@ -709,7 +709,7 @@ void storeResult(void *result, int type)
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
 
-	dbgPrint(DBGLVL_INFO, "STORE RESULT: ");
+	dbgPrintNoPrefix(DBGLVL_INFO, "STORE RESULT: ");
 	printArgument(result, type);
 	dbgPrintNoPrefix(DBGLVL_INFO, "\n");
 	rec->result = DBG_RETURN_VALUE;
@@ -729,9 +729,9 @@ void storeResultOrError(unsigned int error, void *result, int type)
 
 	if (error) {
 		setErrorCode(error);
-		dbgPrint(DBGLVL_WARNING, "NO RESULT STORED: %u\n", error);
+		UT_NOTIFY_VA(LV_WARN, "NO RESULT STORED: %u", error);
 	} else {
-		dbgPrint(DBGLVL_INFO, "STORE RESULT: ");
+		dbgPrintNoPrefix(DBGLVL_INFO, "STORE RESULT: ");
 		printArgument(result, type);
 		dbgPrintNoPrefix(DBGLVL_INFO, "\n");
 		rec->result = DBG_RETURN_VALUE;
@@ -742,16 +742,16 @@ void storeResultOrError(unsigned int error, void *result, int type)
 
 void stop(void)
 {
-	dbgPrint(DBGLVL_DEBUG, "RAISED STOP\n");
+	UT_NOTIFY_VA(DBGLVL_DEBUG, "RAISED STOP");
 #ifdef _WIN32
 	if (!SetEvent(g.hEvtDebugger)) {
-		dbgPrint(DBGLVL_ERROR, "could not signal Debugger: %u\n", GetLastError());
+		UT_NOTIFY_VA(LV_ERROR, "could not signal Debugger: %u", GetLastError());
 	}
 	if (WaitForSingleObject(g.hEvtDebugee, INFINITE) != WAIT_OBJECT_0) {
-		dbgPrint(DBGLVL_ERROR, "Waiting for continue event failed: %u\n",
+		UT_NOTIFY_VA(LV_ERROR, "Waiting for continue event failed: %u",
 		         GetLastError());
 	} else {
-		dbgPrint(DBGLVL_INFO, "continued...\n");
+		UT_NOTIFY_VA(LV_INFO, "continued...");
 	}
 #else /* _WIN32 */
 	raise(SIGSTOP);
@@ -830,17 +830,17 @@ static void shaderStep(void)
 	const char *fshader = (const char *)rec->items[2];
 	int target = (int)rec->items[3];
 
-	dbgPrint(DBGLVL_COMPILERINFO, "SHADER STEP: v=%p g=%p f=%p target=%i\n",
+	UT_NOTIFY_VA(LV_INFO, "SHADER STEP: v=%p g=%p f=%p target=%i",
 	         vshader, gshader, fshader, target);
 			
-	dbgPrint(DBGLVL_COMPILERINFO, "############# V-Shader ##############\n%s\n"
-	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n",
+	UT_NOTIFY_VA(LV_INFO, "############# V-Shader ##############\n%s"
+	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
 	         vshader);
-	dbgPrint(DBGLVL_COMPILERINFO, "############# G-Shader ##############\n%s\n"
-	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n",
+	UT_NOTIFY_VA(LV_INFO, "############# G-Shader ##############\n%s"
+	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
 	         gshader);
-	dbgPrint(DBGLVL_COMPILERINFO, "############# F-Shader ##############\n%s\n"
-	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n",
+	UT_NOTIFY_VA(LV_INFO, "############# F-Shader ##############\n%s"
+	                              "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
 	         fshader);
 	
 	if (target == DBG_TARGET_GEOMETRY_SHADER ||
@@ -942,7 +942,7 @@ static void shaderStep(void)
 			rec->items[2] = (ALIGNED_DATA)height;
 		}
 	} else {
-		dbgPrint(DBGLVL_COMPILERINFO, "\n");
+		UT_NOTIFY_VA(DBGLVL_COMPILERINFO, "\n");
 		setErrorCode(DBG_ERROR_INVALID_DBG_TARGET);
 	}
 }
@@ -956,7 +956,7 @@ int getDbgOperation(void)
 	DWORD pid = GetCurrentProcessId();
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
-    dbgPrint(DBGLVL_INFO, "OPERATION: %li\n", rec->operation);
+    UT_NOTIFY_VA(LV_INFO, "OPERATION: %li", rec->operation);
 	return rec->operation;
 }
 
@@ -1105,7 +1105,7 @@ void executeDefaultDbgOperation(int op)
 			restartQueries();
 			break;
 		default:
-			dbgPrint(DBGLVL_INFO, "HMM, UNKNOWN DEBUG OPERATION %i\n", op);
+			UT_NOTIFY_VA(LV_INFO, "unknown debug operation %i", op);
 			break;
 	}
 }
@@ -1129,7 +1129,7 @@ void (*getDbgFunction(void))(void)
 	
 	for (i = 0; i < g.numDbgFunctions; i++) {
 		if (!strcmp(g.dbgFunctions[i].fname, rec->fname)) {
-			dbgPrint(DBGLVL_INFO, "found special detour for %s\n", rec->fname);
+			UT_NOTIFY_VA(LV_INFO, "found special detour for %s", rec->fname);
 			return g.dbgFunctions[i].function;
 		}
 	}
@@ -1164,7 +1164,7 @@ void (*getOrigFunc(const char *fname))(void)
 			if (!origFunc) {
 				origFunc = G.origGlXGetProcAddress((const GLubyte *)fname);
 				if (!origFunc) {
-					dbgPrint(DBGLVL_ERROR, "Error: Cannot resolve %s\n", fname);
+					UT_NOTIFY_VA(LV_ERROR, "Cannot resolve %s", fname);
 					exit(1); /* TODO: proper error handling */
 				}
 			}
@@ -1178,7 +1178,7 @@ void (*getOrigFunc(const char *fname))(void)
 		} else if (!strcmp(fname, "glEnd")) {
 			G.errorCheckAllowed = 1;
 		}
-		dbgPrint(DBGLVL_INFO, "ORIG_GL: %s (%p)\n", fname, result);
+		UT_NOTIFY_VA(LV_INFO, "ORIG_GL: %s (%p)", fname, result);
 		return (void (*)(void))result;
 	}
 }

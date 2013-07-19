@@ -45,7 +45,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glstate.h"
 #include "shader.h"
 #include "../glenumerants/glenumerants.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 #include "pfm.h"
 
 #ifdef _WIN32
@@ -338,9 +338,9 @@ static int setDbgRenderState(int target, int alphaTestOption,
 		ORIG_GL(glDrawBuffer)(GL_COLOR_ATTACHMENT0_EXT);
 		ORIG_GL(glReadBuffer)(GL_COLOR_ATTACHMENT0_EXT);
 		ORIG_GL(glColorMask)(GL_TRUE, GL_FALSE, GL_FALSE, g.activeColorMask[3]);
-		dbgPrint(DBGLVL_INFO, "setDbgRenderState: stencilTestOption: %i "
+		UT_NOTIFY_VA(LV_INFO, "setDbgRenderState: stencilTestOption: %i "
 				              "alphaTestOption: %i depthTestOption: %i "
-							  "blendingOption: %i\n",
+							  "blendingOption: %i",
 		         stencilTestOption, alphaTestOption, depthTestOption,
 		         blendingOption);
 		switch (stencilTestOption) {
@@ -395,19 +395,19 @@ static int setDbgRenderState(int target, int alphaTestOption,
 /* save transform feedback state */
 static void saveTransformFeedbackState(TFBState *tfbState)
 {
-	dbgPrint(DBGLVL_INFO, "Saving TFB state:\n");
+	UT_NOTIFY_VA(LV_INFO, "Saving TFB state:");
 
 #if 0
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_BUFFER_MODE_NV,
 	                       &tfbState->mode);
-	dbgPrint(DBGLVL_INFO,"\tmode: %i\n", tfbState->mode);
+	UT_NOTIFY_VA(DBGLVL_INFO,"\tmode: %i\n", tfbState->mode);
 	
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_ATTRIBS_NV, &tfbState->attribs);
-	dbgPrint(DBGLVL_INFO,"\tattribs: %i\n", tfbState->attribs);
+	UT_NOTIFY_VA(DBGLVL_INFO,"\tattribs: %i\n", tfbState->attribs);
 	
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_NV,
 	                       &tfbState->buffer_binding);
-	dbgPrint(DBGLVL_INFO,"\tbuffer_binding: %i\n", tfbState->buffer_binding);
+	UT_NOTIFY_VA(DBGLVL_INFO,"\tbuffer_binding: %i\n", tfbState->buffer_binding);
 	
 	ORIG_GL(glGetIntegerIndexedvEXT)(GL_TRANSFORM_FEEDBACK_RECORD_NV,XXXXXX);
 
@@ -418,14 +418,14 @@ static void saveTransformFeedbackState(TFBState *tfbState)
 	
 	ORIG_GL(glGetIntegerIndexedvEXT)(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE_NV,XXXXXX);
 #else
-	dbgPrint(DBGLVL_INFO, "\tTODO!!!!!!!!!!!!!!!!!!!!!!!\n");
+	UT_NOTIFY_VA(LV_INFO, "\tTODO!!!!!!!!!!!!!!!!!!!!!!!");
 #endif
 }
 
 static void restoreTransformFeedbackState(TFBState *tfbState)
 {
-	dbgPrint(DBGLVL_INFO, "Restoring TFB state:\n");
-	dbgPrint(DBGLVL_INFO, "\tTODO!!!!!!!!!!!!!!!!!!!!!!!\n");
+	UT_NOTIFY_VA(LV_INFO, "Restoring TFB state:\n");
+	UT_NOTIFY_VA(LV_INFO, "\tTODO!!!!!!!!!!!!!!!!!!!!!!!");
 }
 
 static int restoreDbgRenderState(int target)
@@ -507,7 +507,7 @@ static void setDbgOutputTargetVertexData(void)
 			ORIG_GL(glBindBufferBaseEXT)(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0, g.tfbBuffer);
 			break;
 		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+			UT_NOTIFY_VA(LV_ERROR, "Unhandled TFB version!");
 			setErrorCode(DBG_ERROR_INVALID_OPERATION);
 			return;
 	}
@@ -533,7 +533,7 @@ int beginTransformFeedback(int primitiveType)
 	int error;
 
 	DMARK
-	dbgPrint(DBGLVL_INFO, "glBeginTransformFeedback expecting %s\n",
+	UT_NOTIFY_VA(LV_INFO, "glBeginTransformFeedback expecting %s",
 	        lookupEnum(primitiveType));
 	
 	switch (getTFBVersion()) {
@@ -568,7 +568,7 @@ int beginTransformFeedback(int primitiveType)
 			error = glError();
 			break;
 		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+			UT_NOTIFY_VA(LV_ERROR, "Unhandled TFB version!");
 			error = GL_INVALID_OPERATION;
 	}
 
@@ -616,7 +616,7 @@ int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data
 			}
 			break;
 		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+			UT_NOTIFY_VA(LV_ERROR, "Unhandled TFB version!");
 			return GL_INVALID_OPERATION;
 	}
 
@@ -633,12 +633,12 @@ int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data
 	if (error) {
 		return error;
 	}
-	dbgPrint(DBGLVL_INFO, "PRIMITIVES GENERATED/WRITTEN = %d/%d\n",
+	UT_NOTIFY_VA(LV_INFO, "PRIMITIVES GENERATED/WRITTEN = %d/%d",
 	        primitivesGenerated, primitivesWritten);
 
 	if (primitivesWritten != primitivesGenerated) {
-		dbgPrint(DBGLVL_WARNING, "PRIMITIVES GENERATED > PRIMITIVES WRITTEN -> "
-		                "FEEDBACKBUFFER TOO SMALL!\n");
+		UT_NOTIFY_VA(LV_WARN, "PRIMITIVES GENERATED > PRIMITIVES WRITTEN -> "
+		                "FEEDBACKBUFFER TOO SMALL!");
 	}
 
 	*numPrimitives = primitivesWritten;
@@ -731,7 +731,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 		return;
 	}
 
-	dbgPrint(DBGLVL_INFO, "ACTIVE BUFFER: %s r=%i g=%i b=%i a=%i i=%i d=%i s=%i\n",
+	UT_NOTIFY_VA(LV_INFO, "ACTIVE BUFFER: %s r=%i g=%i b=%i a=%i i=%i d=%i s=%i",
 			lookupEnum(g.activeDrawbuffer), g.activeRedBits, g.activeGreenBits,
 			g.activeBlueBits, g.activeAlphaBits, g.activeIndexBits,
 			g.activeDepthBits, g.activeStencilBits);
@@ -739,7 +739,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	/* store color buffer content */
 	if (!(g.colorBuffer =
 	          (GLfloat*)malloc(4*viewport[2]*viewport[3]*sizeof(GLfloat)))) {
-		dbgPrint(DBGLVL_WARNING, "ALLOCATION OF COLOR BUFFER BACKUP FAILED\n");
+		UT_NOTIFY_VA(LV_WARN, "ALLOCATION OF COLOR BUFFER BACKUP FAILED");
 		setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 		return;
 	}
@@ -755,7 +755,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	if (g.activeDepthBits) {
 		if (!(g.depthBuffer =
 				  (GLfloat*)malloc(viewport[2]*viewport[3]*sizeof(GLfloat)))) {
-			dbgPrint(DBGLVL_WARNING, "ALLOCATION OF DEPTH BUFFER BACKUP FAILED\n");
+			UT_NOTIFY_VA(LV_WARN, "ALLOCATION OF DEPTH BUFFER BACKUP FAILED");
 			free(g.colorBuffer);
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 			return;
@@ -776,7 +776,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	if (g.activeStencilBits) {
 		if (!(g.stencilBuffer =
 				  (GLint*)malloc(viewport[2]*viewport[3]*sizeof(GLint)))) {
-			dbgPrint(DBGLVL_WARNING, "ALLOCATION OF STENCIL BUFFER BACKUP FAILED\n");
+			UT_NOTIFY_VA(LV_WARN, "ALLOCATION OF STENCIL BUFFER BACKUP FAILED");
 			free(g.colorBuffer);
 			free(g.depthBuffer);
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
@@ -831,7 +831,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 			case 8: internalFormat = GL_STENCIL_INDEX8_EXT; break;
 			case 16: internalFormat = GL_STENCIL_INDEX16_EXT; break;
 			default:
-				 dbgPrint(DBGLVL_WARNING, "UNSUPPORTED STENCIL BUFFER BIT DEPTH: %i\n",
+				 UT_NOTIFY_VA(DBGLVL_WARNING, "UNSUPPORTED STENCIL BUFFER BIT DEPTH: %i\n",
 				         g.activeStencilBits);
 				 setErrorCode(DBG_ERROR_INVALID_VALUE);
 				 return;
@@ -1047,8 +1047,8 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 		case 3: format = GL_RGB; break;
 		case 4: format = GL_RGBA; break;
 		default:
-			dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
-							"Error: requested %i components\n",
+			UT_NOTIFY_VA(LV_WARN, "readBackRenderBuffer "
+							"Error: requested %i components",
 					numComponents);
 			return DBG_ERROR_READBACK_INVALID_COMPONENTS;
 	}
@@ -1063,15 +1063,15 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 			formatSize = sizeof(GLuint);
 			break;
 		default:
-			dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
-							"Error: requested format %i invalid\n",
+			UT_NOTIFY_VA(LV_WARN, "readBackRenderBuffer "
+							"Error: requested format %i invalid",
 					format);
 			return DBG_ERROR_READBACK_INVALID_FORMAT;
 	}
 
 	if (!(*buffer = malloc(numComponents*viewport[2]*viewport[3]*formatSize)) ||
 		!(line = malloc(numComponents*viewport[2]*formatSize))) {
-		dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer: Allocation of %i bytes failed\n",
+		UT_NOTIFY_VA(LV_WARN, "readBackRenderBuffer: Allocation of %i bytes failed",
 		        numComponents*viewport[2]*viewport[3]*formatSize);
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
@@ -1440,9 +1440,9 @@ void clearRenderBuffer(void)
 	ORIG_GL(glRasterPos2i)(viewport[0], viewport[1]);
 	ORIG_GL(glWindowPos2i)(viewport[0], viewport[1]);
 	
-	dbgPrint(DBGLVL_INFO, "clearRenderBuffer: clearRGB: %li (%f %f %f) "
+	UT_NOTIFY_VA(LV_INFO, "clearRenderBuffer: clearRGB: %li (%f %f %f) "
 	                      "clearAlpha: %li (%f) "
-	                      "clearDepth: %li (%f) clearStencil: %li (%i)\n",
+	                      "clearDepth: %li (%f) clearStencil: %li (%i)",
 	         rec->items[0] & DBG_CLEAR_RGB, *(float*)&rec->items[1],
 	         *(float*)&rec->items[2], *(float*)&rec->items[3],
 	         rec->items[0] & DBG_CLEAR_ALPHA, *(float*)&rec->items[4],
@@ -1524,7 +1524,7 @@ void clearRenderBuffer(void)
     } else {
         ORIG_GL(glStencilMask)(GL_FALSE);
     }
-    dbgPrint(DBGLVL_INFO, "glClear: %s\n",dissectBitfield(clearBits));
+    UT_NOTIFY_VA(LV_INFO, "glClear: %s",dissectBitfield(clearBits));
 	ORIG_GL(glClear)(clearBits);
 
 	/* copy color buffer content */

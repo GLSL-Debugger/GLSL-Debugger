@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../GL/glext.h"
 
 #include "streamRecording.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 
 static int getTypeSize(GLenum type)
 {
@@ -68,7 +68,7 @@ static int getTypeSize(GLenum type)
         case GL_4_BYTES:
             return 4*sizeof(GLbyte);
         default:
-            dbgPrint(DBGLVL_INFO, "size of unkown type requested %i\n", type);
+            UT_NOTIFY_VA(LV_INFO, "size of unkown type requested %i", type);
             exit(1);
     }
 }
@@ -130,7 +130,7 @@ int glMaterialfv_getArg2Size(GLenum face, GLenum pname, const GLfloat *params)
         case GL_COLOR_INDEXES:
             return 3*sizeof(GLfloat);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glMaterialfv_getArg2Size: invalid pname\n");
+			UT_NOTIFY_VA(LV_WARN, "invalid pname");
 			exit(1);
     }
 }
@@ -151,7 +151,7 @@ int glMaterialiv_getArg2Size(GLenum face, GLenum pname, const GLint *params)
         case GL_COLOR_INDEXES:
             return 3*sizeof(GLint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glMaterialfv_getArg2Size: invalid pname\n");
+			UT_NOTIFY_VA(LV_WARN, "invalid pname");
 			exit(1);
     }
 }
@@ -167,7 +167,7 @@ int glDrawElements_getArg3Size(GLenum mode, GLsizei count, GLenum type, const GL
 		case GL_UNSIGNED_INT:
 			return count*sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glDrawElements_getArg3Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        mode);
 			exit(1);
 	}
@@ -185,7 +185,7 @@ int glDrawRangeElements_getArg5Size(GLenum mode, GLuint start, GLuint end,
 		case GL_UNSIGNED_INT:
 			return count*sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glDrawRangeElements_getArg5Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        mode);
 			exit(1);
 	}
@@ -235,7 +235,7 @@ int glDrawRangeElementsEXT_getArg5Size(GLenum mode, GLuint start, GLuint end,
 		case GL_UNSIGNED_INT:
 			return count*sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glDrawRangeElementsEXT_getArg3Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        mode);
 			exit(1);
 	}
@@ -365,7 +365,7 @@ int glDrawElementsInstancedEXT_getArg3Size(GLenum mode, GLsizei count, GLenum ty
 		case GL_UNSIGNED_INT:
 			return count*sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glDrawElementsInstancedEXT_getArg3Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        mode);
 			exit(1);
 	}
@@ -976,7 +976,7 @@ int glClearBufferiv_getArg2Size(GLenum buffer, GLint drawBuffer, const GLint *va
 		case GL_STENCIL:
 			return sizeof(GLint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glClearBufferiv_getArg2Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        buffer);
 			exit(1);
 	}
@@ -993,7 +993,7 @@ int glClearBufferuiv_getArg2Size(GLenum buffer, GLint drawBuffer, const GLuint *
 		case GL_STENCIL:
 			return sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glClearBufferuiv_getArg2Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        buffer);
 			exit(1);
 	}
@@ -1010,7 +1010,7 @@ int glClearBufferfv_getArg2Size(GLenum buffer, GLint drawBuffer, const GLfloat *
 		case GL_STENCIL:
 			return sizeof(GLfloat);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glClearBufferfv_getArg2Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        buffer);
 			exit(1);
 	}
@@ -1027,7 +1027,7 @@ int glDrawElementsInstanced_getArg3Size(GLenum mode, GLsizei count, GLenum type,
 		case GL_UNSIGNED_INT:
 			return count*sizeof(GLuint);
 		default:
-			dbgPrint(DBGLVL_WARNING, "glDrawElementsInstanced_getArg3Size: invalid type %i\n",
+			UT_NOTIFY_VA(LV_WARN, "invalid type %i",
 			        mode);
 			exit(1);
 	}

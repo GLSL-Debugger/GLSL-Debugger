@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 
 #include "debuglibInternal.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 
 #ifdef _WIN32
 #include "trampolines.h"
@@ -54,7 +54,7 @@ void setErrorCode(int error)
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
 
-	dbgPrint(DBGLVL_INFO, "STORE ERROR: %i\n", error);
+	UT_NOTIFY_VA(LV_INFO, "STORE ERROR: %i", error);
 	rec->result = DBG_ERROR_CODE;
 	rec->items[0] = (ALIGNED_DATA)error;
 }
@@ -94,7 +94,7 @@ int glError(void)
 {
 	GLenum error = ORIG_GL(glGetError)();
 	if (error != GL_NO_ERROR) {
-		dbgPrint(DBGLVL_INFO, "GL ERROR: %s (%i)\n", decodeError(error), error);
+		UT_NOTIFY_VA(LV_INFO, "GL ERROR: %s (%i)", decodeError(error), error);
 		return error;
 	}
 	return GL_NO_ERROR;
