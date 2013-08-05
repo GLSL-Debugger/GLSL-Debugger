@@ -35,15 +35,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 
-#include <GL/glx.h>
-#include <GL/glxext.h>
+#include "../GL/glx.h"
+#include "../GL/glxext.h"
 
 /*#include "glenumerants.h"*/
 
-#ifdef GLX_VERSION_1_4
-#  define GLX_SAMPLE_BUFFERS                 100000
-#  define GLX_SAMPLES                        100001
-#endif
+//#ifdef GLX_VERSION_1_4
+//#  define GLX_SAMPLE_BUFFERS                 100000
+//#  define GLX_SAMPLES                        100001
+//#endif
 
 #include "glxenumerants.h"
 

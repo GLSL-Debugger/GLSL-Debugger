@@ -41,10 +41,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif /* _WIN32 */
 #include "debuglibExport.h"
-#include "../debuglib.h"
+#include "debuglib.h"
 #include "streamRecorder.h"
 #include "queries.h"
 #include "../utils/hash.h"
+#include "GL/glx.h"
+
 #include "functionPointerTypes.inc"
 
 #define TRANSFORM_FEEDBACK_BUFFER_SIZE (1<<24)

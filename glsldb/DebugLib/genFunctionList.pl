@@ -125,7 +125,7 @@ sub createHeader
 	#print "} glFunctions[] = {\n";
 	
 	print "#include <stdlib.h>\n";
-	print "#include \"../debuglib.h\"\n";
+	print "#include \"debuglib.h\"\n";
 	print "GLFunctionList glFunctions[] = {\n";
 }
 

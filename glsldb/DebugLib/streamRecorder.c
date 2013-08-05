@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "streamRecorder.h"
 #include "replayFunction.h"
-#include "../utils/dbgprint.h"
+#include "utils/notify.h"
 
 void initStreamRecorder(StreamRecorder *rec)
 {
@@ -53,19 +53,19 @@ void recordFunctionCall(StreamRecorder *rec, const char *fname, int numArgs, ...
 	va_list argp;
 	StoredCall *newCall;
 	
-	dbgPrint(DBGLVL_INFO, "RECORD CALL: %s\n", fname);
+	UT_NOTIFY_VA(LV_INFO, "RECORD CALL: %s", fname);
 
 	rec->numCalls++;
 	newCall =  malloc(sizeof(StoredCall));
 	if (!newCall) {
-		dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
+		UT_NOTIFY_VA(LV_ERROR, "Allocation of recorded call failed");
 		exit(1); /* TODO: proper error handling */
 	}
 	newCall->fname = strdup(fname);
 	newCall->numArguments = numArgs;
 	newCall->arguments = malloc(numArgs*sizeof(sizeof(void*)));
 	if (!newCall->fname || !newCall->arguments) {
-		dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
+		UT_NOTIFY_VA(LV_ERROR, "Allocation of recorded call failed");
 		exit(1); /* TODO: proper error handling */
 	}
 	va_start(argp, numArgs);
@@ -74,7 +74,7 @@ void recordFunctionCall(StreamRecorder *rec, const char *fname, int numArgs, ...
 		int size = (int)va_arg(argp, int);
 		newCall->arguments[i] = malloc(size);
 		if (!newCall->arguments[i]) {
-			dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
+			UT_NOTIFY_VA(LV_ERROR, "Allocation of recorded call failed");
 			exit(1); /* TODO: proper error handling */
 		}
 		memcpy(newCall->arguments[i], ptr, size);

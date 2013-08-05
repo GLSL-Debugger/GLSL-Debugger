@@ -52,6 +52,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mainWindow.qt.h"
 #include "notify.h"
 #include "build-config.h"
+#include "FunctionsMap.h"
 
 extern "C" {
   #include "GL/gl.h"
@@ -288,11 +289,11 @@ void handler(int UNUSED sig)
 {
 	void *buf[MAX_BACKTRACE_DEPTH];
 	int size = backtrace(buf, MAX_BACKTRACE_DEPTH);
-	fprintf(stderr, "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************\n");
+	std::cerr << "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************" << std::endl;
 	backtrace_symbols_fd(buf, size, STDERR_FILENO);
-	fprintf(stderr, "**************** SEGMENTATION FAULT - END BACKTRACE   ****************\n");
+	std::cerr << "**************** SEGMENTATION FAULT - END BACKTRACE   ****************" << std::endl;
 	if(size == MAX_BACKTRACE_DEPTH)
-		fprintf(stderr, "Warning: backtrace might have been truncated");
+		std::cerr << "Warning: backtrace might have been truncated" << std::endl;
 	exit(EXIT_FAILURE);
 }
 #endif
@@ -368,6 +369,8 @@ int main(int argc, char **argv)
 
 #ifdef _WIN32
 	app.setStyle("windowsxp");
+#else /* _WIN32 */
+    app.setStyle("cleanlooks");
 #endif /* _WIN32 */
 
 	QCoreApplication::setOrganizationName("VIS");
@@ -380,6 +383,9 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(DBGLVL_DEBUG);
 
 	UT_NOTIFY(LV_INFO, "Application startup.");
+	// we'll need that later...
+	FunctionsMap& map = FunctionsMap::instance();
+	map.initialize();
 
     MainWindow mainWin(argv[0], al);
 

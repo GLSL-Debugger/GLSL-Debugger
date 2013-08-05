@@ -135,9 +135,9 @@ private:
     
     /* remote program control */
 #ifndef _WIN32
-    pid_t debuggedProgramPID;
+    pid_t _debuggeePID;
 #else /* _WIN32 */
-	DWORD debuggedProgramPID;
+	DWORD _debuggeePID;
 #endif /* _WIN32 */
 	pcErrorCode dbgCommandExecute(void);
 	pcErrorCode dbgCommandExecuteToDrawCall(void);
@@ -201,29 +201,29 @@ private:
 #endif /* _WIN32 */
 
     int shmid;
-    DbgRec *fcalls;
-    char *debuglib;
-    char *dbgFunctionsPath;
-    char *libdlsym;
-    char *logdir;
+    DbgRec *_fcalls;
+    std::string _path_dbglib;
+    std::string _path_dbgfuncs;
+    std::string _path_libdlsym;
+    std::string _path_log;
 
 #ifdef _WIN32
 	void createEvents(const DWORD processId);
 	void closeEvents(void);
 
 	/* Signal debugee. */
-	HANDLE hEvtDebugee; 
+	HANDLE _hEvtDebuggee; 
 
 	/* Wait for debugee signaling me. */
-	HANDLE hEvtDebugger;
+	HANDLE _hEvtDebugger;
 
 	/* Process handle of the debugged program. */
-	HANDLE hDebuggedProgram;
+	HANDLE _hDebuggedProgram;
 
     /** Handles for process we attached to, but did not create ourself. */
-    ATTACHMENT_INFORMATION ai;
+    ATTACHMENT_INFORMATION _ai;
 
-	HANDLE hShMem;
+	HANDLE _hShMem;
 
 
 #endif /* _WIN32 */

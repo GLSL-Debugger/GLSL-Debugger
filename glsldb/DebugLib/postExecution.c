@@ -32,7 +32,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "postExecution.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 #include "queries.h"
 
 extern Globals G;
@@ -44,7 +44,7 @@ void glGetQueryObjectiv_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjectiv_POSTEXECUTE %u %i %i error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -55,7 +55,7 @@ void glGetQueryObjectuiv_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjectuiv_POSTEXECUTE %u %i %u error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -66,7 +66,7 @@ void glGetQueryObjectivARB_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjectivARB_POSTEXECUTE %u %i %i error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -77,7 +77,7 @@ void glGetQueryObjectuivARB_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjectuivARB_POSTEXECUTE %u %i %u error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -88,7 +88,7 @@ void glGetOcclusionQueryivNV_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetOcclusionQueryivNV_POSTEXECUTE %u %i %i error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -99,7 +99,7 @@ void glGetOcclusionQueryuivNV_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetOcclusionQueryuivNV_POSTEXECUTE %u %i %u error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -110,7 +110,7 @@ void glGetQueryObjecti64vEXT_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjecti64vEXT_POSTEXECUTE %u %i %li error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %li error:%i",
 			 *id, *pname, **params, *error);
 }
 
@@ -121,7 +121,7 @@ void glGetQueryObjectui64vEXT_POSTEXECUTE(GLuint *id, GLenum *pname,
 	if (q != NULL) {
 		**params += q->value;
 	}
-	dbgPrint(DBGLVL_INFO, "glGetQueryObjecti64vEXT_POSTEXECUTE %u %i %lu error:%i\n",
+	UT_NOTIFY_VA(LV_INFO, "%u %i %lu error:%i",
 			 *id, *pname, **params, *error);
 }
 

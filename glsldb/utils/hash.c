@@ -72,7 +72,7 @@ void hash_free(Hash *hash)
 	hash->numBuckets = 0;
 }
 
-int hash_insert(Hash *hash, void *key, void *data)
+int hash_insert(Hash *hash, const void *key, void *data)
 {
 	int n = hash->hashFunc(key, hash->numBuckets);
 	HashNode *node = hash->table[n];
@@ -123,7 +123,7 @@ void hash_remove(Hash *hash, void *key)
 	}
 }
 
-void *hash_find(Hash *hash, void *key)
+void *hash_find(Hash *hash, const void *key)
 {
 	HashNode *node = hash->table[hash->hashFunc(key, hash->numBuckets)];
 	while (node) {
@@ -172,17 +172,17 @@ void *hash_element(Hash *hash, int n)
 
 /* some common hash and comparison functions */
 
-int hashInt(void *key, int numBuckets)
+int hashInt(const void *key, int numBuckets)
 {
 	return *(int*)key % numBuckets;
 }
 
-int compInt(void *key1, void *key2)
+int compInt(const void *key1, const void *key2)
 {
 	return *(int*)key1 == *(int*)key2;
 }
 
-int hashString(void *key, int numBuckets)
+int hashString(const void *key, int numBuckets)
 {
 	char *s = (char *)key;
 	/* universal hash function, R. Sedgewick, Algorithms in C++, p. 593 */
@@ -193,7 +193,7 @@ int hashString(void *key, int numBuckets)
 	return (h < 0) ? (h + numBuckets) : h;
 }
 
-int compString(void *key1, void *key2)
+int compString(const void *key1, const void *key2)
 {
 	return !strcmp((const char*)key1, (const char*)key2);
 }
