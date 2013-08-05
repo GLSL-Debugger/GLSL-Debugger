@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -39,6 +39,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../DebugLib/debuglibExport.h"
 
+#ifndef UNUSED_ARG
+    #define UNUSED_ARG(x) (void) x;
+#endif
+
 /**
  * Output debug messages on stderr and on Windows additionally on the
  * output window of the attached debugger.
@@ -48,24 +52,24 @@ extern "C" {
 #endif /* _CPP */
 
 enum DBG_LEVELS {
-	DBGLVL_ERROR = 0,
-	DBGLVL_WARNING,
-	DBGLVL_INFO,
-	DBGLVL_INTERNAL_WARNING,
-	DBGLVL_COMPILERINFO,
-	DBGLVL_DEBUG
+    DBGLVL_ERROR = 0,
+    DBGLVL_WARNING,
+    DBGLVL_INFO,
+    DBGLVL_INTERNAL_WARNING,
+    DBGLVL_COMPILERINFO,
+    DBGLVL_DEBUG
 };
 
-#if defined DEBUG 
+#if defined DEBUG
 #  define dbgPrint(LEVEL, ...) \
-	_dbgPrint_(LEVEL, 1, __VA_ARGS__) 
+    _dbgPrint_(LEVEL, 1, __VA_ARGS__)
 #  define dbgPrintNoPrefix(LEVEL, ...) \
-	_dbgPrint_(LEVEL, 0, __VA_ARGS__) 
+    _dbgPrint_(LEVEL, 0, __VA_ARGS__)
 #else
 #  define dbgPrint(LEVEL, ...) \
-	((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 1, __VA_ARGS__) : 0))
+    ((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 1, __VA_ARGS__) : 0))
 #  define dbgPrintNoPrefix(LEVEL, ...) \
-	((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 0, __VA_ARGS__) : 0))
+    ((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 0, __VA_ARGS__) : 0))
 #endif
 
 DBGLIBLOCAL void setMaxDebugOutputLevel(int level);
@@ -84,5 +88,5 @@ DBGLIBLOCAL int _dbgPrint_(int level, int printPrefix, const char *fmt, ...);
 #ifdef __cplusplus
 }
 #endif /* _CPP */
-	
+
 #endif /* _DBGPRINT_H */

@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,11 +40,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 /* C99 sucks */
 inline static int round(double x) {
-	int y;
-	y = (int)(x + 0.5);
-	while ((double)y < x - 0.5) y++;
-	while ((double)y > x + 0.5) y--;
-	return y;
+    int y;
+    y = (int)(x + 0.5);
+    while ((double)y < x - 0.5) y++;
+    while ((double)y > x + 0.5) y--;
+    return y;
 }
 #endif /* _WIN32 */
 
@@ -68,12 +68,13 @@ CurveView::CurveView(QWidget *parent)
     m_nTickSpace[1]       = 20;
 
     m_nBase = -1;
-    
+
     updateGeometries();
 }
 
 void CurveView::setBase(int base)
 {
+    UNUSED_ARG(base)
     m_nBase = 0;
     viewport()->update();
 }
@@ -123,20 +124,24 @@ QRect CurveView::visualRect(const QModelIndex &index) const
 
 void CurveView::scrollTo(const QModelIndex &index, ScrollHint hint)
 {
-
+    UNUSED_ARG(index)
+    UNUSED_ARG(hint)
 }
 
 QModelIndex CurveView::indexAt(const QPoint &point) const
 {
+    UNUSED_ARG(point)
     return QModelIndex();
 }
 
 QModelIndex CurveView::moveCursor(QAbstractItemView::CursorAction cursorAction,
                                   Qt::KeyboardModifiers modifiers)
 {
+    UNUSED_ARG(cursorAction)
+    UNUSED_ARG(modifiers)
     return QModelIndex();
 }
-    
+
 int CurveView::horizontalOffset() const
 {
     return horizontalScrollBar()->value();
@@ -146,19 +151,21 @@ int CurveView::verticalOffset() const
 {
     return verticalScrollBar()->value();
 }
-    
+
 bool CurveView::isIndexHidden(const QModelIndex &index) const
 {
+    UNUSED_ARG(index)
     return false;
 }
 
 void CurveView::setSelection(const QRect&, QItemSelectionModel::SelectionFlags command)
 {
-
+    UNUSED_ARG(command)
 }
-    
+
 QRegion CurveView::visualRegionForSelection(const QItemSelection &selection) const
 {
+    UNUSED_ARG(selection)
     return QRegion();
 }
 
@@ -183,9 +190,9 @@ void CurveView::paintEvent(QPaintEvent *event)
     painter.fillRect(event->rect(), background);
     painter.setPen(foreground);
 
-    QRect dataRect = QRect(m_nMargin + m_nLabelSize[0], 
-                           m_nMargin, 
-                           m_nDrawArea[0], 
+    QRect dataRect = QRect(m_nMargin + m_nLabelSize[0],
+                           m_nMargin,
+                           m_nDrawArea[0],
                            m_nDrawArea[1]);
 
     painter.save();
@@ -194,7 +201,7 @@ void CurveView::paintEvent(QPaintEvent *event)
 
     QModelIndex lastIndex = model()->index(model()->rowCount()-1, m_nBase, rootIndex());
     int numIterations = model()->data(lastIndex).toInt();
-    
+
     /* x-axis */
     painter.drawLine(0, m_nDrawArea[1], m_nDrawArea[0] + m_nAxisArrow[0], m_nDrawArea[1]);
     painter.drawLine(m_nDrawArea[0], m_nDrawArea[1] + m_nAxisArrow[1],
@@ -225,7 +232,7 @@ void CurveView::paintEvent(QPaintEvent *event)
         painter.restore();
         return;
     }
-    
+
     /* x-ticks */
     tx = (int) floor(m_nDrawArea[0]/(float)m_nTickSpace[0]);
     int iterPerTickX = (int) ceil(numIterations / (float) tx);
@@ -240,10 +247,10 @@ void CurveView::paintEvent(QPaintEvent *event)
     /* y-ticks */
     ty = (int) floor(m_nDrawArea[1]/(float)m_nTickSpace[1]);
     int iterPerTickY = (int) ceil(maxValue / (float) ty);
-    
+
     for (i=0; i<=maxValue; i += iterPerTickY) {
         int dy = (int) round((m_nDrawArea[1]*i)/(float)maxValue);
-        
+
         painter.drawLine(-m_nTickSize[1], m_nDrawArea[1]-dy, m_nTickSize[1], m_nDrawArea[1]-dy);
         painter.drawText(-m_nLabelSize[0]-2*m_nTickSize[1], m_nDrawArea[1]-dy-m_nLabelSize[1]/2,
                 m_nLabelSize[0], m_nLabelSize[1], Qt::AlignRight|Qt::AlignVCenter,
@@ -258,34 +265,34 @@ void CurveView::paintEvent(QPaintEvent *event)
     while (iter != m_qMapping.constEnd()) {
         painter.save();
         painter.setPen(iter.value());
-        
+
         for (int row = 0; row < model()->rowCount(rootIndex()); ++row) {
             QModelIndex index = model()->index(row, m_nBase, rootIndex());
             int xValue = model()->data(index).toInt();
-            
+
             index = model()->index(row, iter.key(), rootIndex());
             int yValue = model()->data(index).toInt();
-            
+
             if (xValue == xOld+1) {
                 painter.drawLine((m_nDrawArea[0]*xOld)/(numIterations),
                         m_nDrawArea[1]-(m_nDrawArea[1]*yOld)/maxValue,
                         (m_nDrawArea[0]*xValue)/(numIterations),
                         m_nDrawArea[1]-(m_nDrawArea[1]*yValue)/maxValue);
             } else {
-                painter.drawPoint((m_nDrawArea[0]*xValue)/(numIterations), 
+                painter.drawPoint((m_nDrawArea[0]*xValue)/(numIterations),
                         m_nDrawArea[1]-(m_nDrawArea[1]*yValue)/maxValue);
             }
             xOld = xValue;
             yOld = yValue;
         }
-        
+
         painter.restore();
         ++iter;
     }
-        
+
     painter.restore();
 }
-    
+
 void CurveView::updateGeometries()
 {
 
@@ -306,7 +313,7 @@ void CurveView::updateGeometries()
     } else {
         m_nDrawArea[1] = m_nDrawAreaMinimum[1];
     }
-    
+
     horizontalScrollBar()->setPageStep(viewport()->width());
     horizontalScrollBar()->setRange(0, qMax(0, m_nTotalSize[0] - viewport()->width()));
     verticalScrollBar()->setPageStep(viewport()->height());
@@ -315,6 +322,7 @@ void CurveView::updateGeometries()
 
 void CurveView::resizeEvent(QResizeEvent *event)
 {
+    UNUSED_ARG(event)
     updateGeometries();
 }
 

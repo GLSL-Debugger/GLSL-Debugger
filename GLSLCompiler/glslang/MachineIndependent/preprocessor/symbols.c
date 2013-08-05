@@ -1,36 +1,37 @@
-//
-//Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//
-//    Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//    Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
 
@@ -56,7 +57,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -74,9 +75,10 @@ NVIDIA SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT,
 TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
 NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \****************************************************************************/
-//
-// symbols.c
-//
+/*
+ * symbols.c
+ */
+
 
 #include <assert.h>
 #include <stdlib.h>
@@ -85,9 +87,9 @@ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "slglobals.h"
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// Symbol Table Variables: ///////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// Symbol Table Variables: ////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////*/
 
 Scope *ScopeList = NULL;
 Scope *CurrentScope = NULL;
@@ -117,7 +119,7 @@ Scope *NewScopeInPool(MemoryPool *pool)
     lScope->parent = NULL;
     lScope->funScope = NULL;
     lScope->symbols = NULL;
-    
+
     lScope->level = 0;
 
     lScope->programs = NULL;
@@ -127,7 +129,7 @@ Scope *NewScopeInPool(MemoryPool *pool)
     ScopeList = lScope;
     mem_AddCleanup(pool, unlinkScope, lScope);
     return lScope;
-} // NewScope
+} /* NewScope */
 
 /*
  * PushScope()
@@ -160,7 +162,7 @@ void PushScope(Scope *fScope)
     }
     fScope->parent = CurrentScope;
     CurrentScope = fScope;
-} // PushScope
+} /* PushScope */
 
 /*
  * PopScope()
@@ -175,7 +177,7 @@ Scope *PopScope(void)
     if (CurrentScope)
         CurrentScope = CurrentScope->parent;
     return lScope;
-} // PopScope
+} /* PopScope */
 
 /*
  * NewSymbol() - Allocate a new symbol node;
@@ -195,14 +197,14 @@ Symbol *NewSymbol(SourceLoc *loc, Scope *fScope, int name, symbolkind kind)
     lSymb->name = name;
     lSymb->loc = *loc;
     lSymb->kind = kind;
-    
-    // Clear union area:
+
+    /* Clear union area: */
 
     pch = (char *) &lSymb->details;
     for (ii = 0; ii < sizeof(lSymb->details); ii++)
         *pch++ = 0;
     return lSymb;
-} // NewSymbol
+} /* NewSymbol */
 
 /*
  * lAddToTree() - Using a binary tree is not a good idea for basic atom values because they
@@ -243,7 +245,7 @@ static void lAddToTree(Symbol **fSymbols, Symbol *fSymb)
     } else {
         *fSymbols = fSymb;
     }
-} // lAddToTree
+} /* lAddToTree */
 
 
 /*
@@ -260,7 +262,7 @@ Symbol *AddSymbol(SourceLoc *loc, Scope *fScope, int atom, symbolkind kind)
     lSymb = NewSymbol(loc, fScope, atom, kind);
     lAddToTree(&fScope->symbols, lSymb);
     return lSymb;
-} // AddSymbol
+} /* AddSymbol */
 
 
 /*********************************************************************************************/
@@ -294,7 +296,7 @@ Symbol *LookUpLocalSymbol(Scope *fScope, int atom)
         }
     }
     return NULL;
-} // LookUpLocalSymbol
+} /* LookUpLocalSymbol */
 
 /*
  * LookUpSymbol()
@@ -314,5 +316,5 @@ Symbol *LookUpSymbol(Scope *fScope, int atom)
         fScope = fScope->parent;
     }
     return NULL;
-} // LookUpSymbol
+} /* LookUpSymbol */
 

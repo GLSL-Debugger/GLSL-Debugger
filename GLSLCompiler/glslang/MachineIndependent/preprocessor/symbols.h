@@ -1,36 +1,37 @@
-//
-//Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-//All rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//
-//    Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//
-//    Redistributions in binary form must reproduce the above
-//    copyright notice, this list of conditions and the following
-//    disclaimer in the documentation and/or other materials provided
-//    with the distribution.
-//
-//    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-//COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-//INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-//BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-//LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-//ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//POSSIBILITY OF SUCH DAMAGE.
-//
+/*
+Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
 
@@ -56,7 +57,7 @@ Except as expressly stated in this notice, no other rights or licenses
 express or implied, are granted by NVIDIA herein, including but not
 limited to any patent rights that may be infringed by your derivative
 works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder. 
+incorporated. No hardware is licensed hereunder.
 
 THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
@@ -74,9 +75,10 @@ NVIDIA SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT,
 TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
 NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \****************************************************************************/
-//
-// symbols.h
-//
+/*
+ * symbols.h
+ */
+
 
 #if !defined(__SYMBOLS_H)
 #define __SYMBOLS_H 1
@@ -87,7 +89,7 @@ typedef enum symbolkind {
    MACRO_S
 } symbolkind;
 
-// Typedefs for things defined here in "symbols.h":
+/* Typedefs for things defined here in "symbols.h": */
 
 typedef struct Scope_Rec Scope;
 typedef struct Symbol_Rec Symbol;
@@ -98,27 +100,27 @@ typedef struct SymbolList_Rec {
 } SymbolList;
 
 struct Scope_Rec {
-    Scope *next, *prev;     // doubly-linked list of all scopes
+    Scope *next, *prev;     /* doubly-linked list of all scopes */
     Scope *parent;
-    Scope *funScope;        // Points to base scope of enclosing function
-    MemoryPool *pool;       // pool used for allocation in this scope
+    Scope *funScope;        /* Points to base scope of enclosing function */
+    MemoryPool *pool;       /* pool used for allocation in this scope */
     Symbol *symbols;
-    
-	int level;              // 0 = super globals, 1 = globals, etc.
 
-    // Only used at global scope (level 1):
-    SymbolList *programs;   // List of programs for this compilation.
+    int level;              /* 0 = super globals, 1 = globals, etc. */
+
+    /* Only used at global scope (level 1): */
+    SymbolList *programs;   /* List of programs for this compilation. */
 };
 
 
-// Symbol table is a simple binary tree.
+/* Symbol table is a simple binary tree. */
 
-#include "cpp.h"        // to get MacroSymbol def
+#include "cpp.h"        /* to get MacroSymbol def */
 
 struct Symbol_Rec {
     Symbol *left, *right;
     Symbol *next;
-    int name;       // Name atom
+    int name;       /* Name atom */
     SourceLoc loc;
     symbolkind kind;
     union {
@@ -141,5 +143,4 @@ Symbol *LookUpSymbol(Scope *fScope, int atom);
 void CPPErrorToInfoLog(char *);
 
 
-#endif // !defined(__SYMBOLS_H)
-
+#endif /* !defined(__SYMBOLS_H) */

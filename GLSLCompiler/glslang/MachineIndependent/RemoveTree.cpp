@@ -40,51 +40,51 @@
 
 bool RemoveAggregate(bool, TIntermAggregate* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
     node = NULL;
 
-	return true;
+    return true;
 }
 
 bool RemoveBinary(bool, TIntermBinary* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 
-	return true;
+    return true;
 }
 
 void RemoveConstantUnion(TIntermConstantUnion* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 }
 
 bool RemoveSelection(bool, TIntermSelection* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 
-	return true;
+    return true;
 }
 
 bool RemoveSwitch(bool, TIntermSwitch* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 
-	return true;
+    return true;
 }
 
 bool RemoveCase(bool, TIntermCase* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 
-	return true;
+    return true;
 }
 
-void RemoveSymbol(TIntermSymbol* node, TIntermTraverser* it)
+void RemoveSymbol(TIntermSymbol* node, TIntermTraverser*)
 {
-	delete node;
+    delete node;
 }
 
-void RemoveFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
+void RemoveFuncParam(TIntermFuncParam* node, TIntermTraverser*)
 {
     delete node;
 }
@@ -93,38 +93,38 @@ bool RemoveUnary(bool, TIntermUnary* node, TIntermTraverser*)
 {
     delete node;
 
-	return true;
+    return true;
 }
 
-bool RemoveLoop(bool, TIntermLoop* node, TIntermTraverser* it)
+bool RemoveLoop(bool, TIntermLoop* node, TIntermTraverser*)
 {
     delete node;
 
     return true;
 }
 
-bool RemoveBranch(bool, TIntermBranch* node, TIntermTraverser* it)
+bool RemoveBranch(bool, TIntermBranch* node, TIntermTraverser*)
 {
     delete node;
 
     return true;
 }
 
-bool RemoveDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
+bool RemoveDeclaration(TIntermDeclaration* node, TIntermTraverser*)
 {
     delete node;
 
     return true;
 }
 
-bool RemoveSpecification(TIntermSpecification* node, TIntermTraverser* it)
+bool RemoveSpecification(TIntermSpecification* node, TIntermTraverser*)
 {
     delete node;
 
     return true;
 }
 
-void RemoveParameter(TIntermParameter* node, TIntermTraverser* it)
+void RemoveParameter(TIntermParameter* node, TIntermTraverser*)
 {
     delete node;
 }

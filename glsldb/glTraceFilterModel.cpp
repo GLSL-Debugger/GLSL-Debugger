@@ -547,8 +547,9 @@ void GlTraceFilterModel::constructHashMap() {
 }
 
 bool GlTraceFilterModel::isFunctionVisible(const QString &fname) {
-	if (functionHash[fname] != NULL) {
-		return (functionHash[fname]->showInTrace == Qt::Checked);
+	GlTraceFilterItem *item = functionHash.value(fname, NULL);
+	if (item) {
+		return (item->showInTrace == Qt::Checked);
 	}
 	return true;
 }
