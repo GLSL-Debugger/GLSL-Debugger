@@ -42,6 +42,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtOpenGL/QGLFormat>
 #include <QtCore/QSettings>
 
+#if defined GLSLDB_LINUX || GLSLDB_OSX
+#include "GL/glx.h"
+#endif 
 
 void GlTraceFilterModel::GlTraceFilterItem::appendChild(GlTraceFilterModel::GlTraceFilterItem *item) {
 	childItems.append(item);

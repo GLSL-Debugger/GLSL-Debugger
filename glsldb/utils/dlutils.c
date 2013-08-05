@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 
 #include "dlutils.h"
-#include "dbgprint.h"
+#include "notify.h"
 
 LibraryHandle openLibrary(const char *library)
 {
@@ -48,12 +48,12 @@ LibraryHandle openLibrary(const char *library)
 	
 #ifdef _WIN32
 	if (! (handle = LoadLibraryExA(library, NULL, LOAD_IGNORE_CODE_AUTHZ_LEVEL))) {
-        dbgPrint(DBGLVL_WARNING, "Cannot open library %s: %u\n", library, GetLastError);
+        UT_NOTIFY_VA(LV_WARN, "Cannot open library %s: %u\n", library, GetLastError);
 		return NULL;
 	}
 #else
 	if (! (handle = dlopen(library, RTLD_LAZY | RTLD_GLOBAL))) {
-		dbgPrint(DBGLVL_WARNING, "%s: %s\n", library, dlerror());
+		UT_NOTIFY_VA(LV_WARN, "%s: %s\n", library, dlerror());
 		return NULL;
 	}
 #endif
@@ -74,7 +74,7 @@ void *resolveSymbol(LibraryHandle handle, const char *symbol)
 	void *ret;
 #ifdef _WIN32
 	if (! (ret = GetProcAddress(handle, symbol))) {
-        dbgPrint(DBGLVL_WARNING, "Error resolving symbol %s: %u\n", symbol, GetLastError());
+        UT_NOTIFY_VA(LV_WARN, "Unable to resolve symbol %s: %u\n", symbol, GetLastError());
 	}
 	return ret;
 #else
@@ -82,7 +82,7 @@ void *resolveSymbol(LibraryHandle handle, const char *symbol)
 
 	ret = dlsym(handle, symbol);
 	if ((error = dlerror())) {
-		dbgPrint(DBGLVL_WARNING, "Error resolving symbol %s: %s\n",
+		UT_NOTIFY_VA(LV_WARN, "Unable to resolve symbol %s: %s\n",
 		         symbol, error);
 		return NULL;
 	}

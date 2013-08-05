@@ -58,7 +58,7 @@ void utils_notify_shutdown()
 		utils_notify_settings.file = 0;
 	}
 }
-void utils_notify_va(const severity_t sev, const char* filename, unsigned int line, const char *fmt, ...)
+void utils_notify_va(const severity_t sev, const char* path, const char* func, unsigned int line, const char *fmt, ...)
 {
 	if(sev > utils_notify_settings.level)
 		return;
@@ -95,7 +95,9 @@ void utils_notify_va(const severity_t sev, const char* filename, unsigned int li
 			break;
 	}
 
-	snprintf(prefix, 128, "%s%s%s::%d: ", t, p, filename, line);
+	char *filename = strrchr(path, '/');
+
+	snprintf(prefix, 128, "%s%s%s:%s()::%d: ", t, p, filename+1, func, line);
 	
 	va_start(list, fmt);
     vsnprintf(msg, MAX_NOTIFY_SIZE, fmt, list);
