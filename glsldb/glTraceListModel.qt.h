@@ -86,7 +86,7 @@ class GlTraceListModel : public QAbstractListModel
      ~GlTraceListModel();
 
      void    clear(void);
-     void    resetLayout(void) { layoutChanged(); }
+     void    resetLayout(void) { layoutAboutToBeChanged(); layoutChanged(); }
 
      void addGlTraceItem(const GlTraceListItem::IconType type, const QString & text);
      void addGlTraceWarningItem(const QString & text);
