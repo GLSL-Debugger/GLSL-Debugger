@@ -42,6 +42,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtOpenGL/QGLFormat>
 #include <QtCore/QSettings>
 
+#if defined GLSLDB_LINUX || GLSLDB_OSX
+#include "GL/glx.h"
+#endif 
 
 void GlTraceFilterModel::GlTraceFilterItem::appendChild(GlTraceFilterModel::GlTraceFilterItem *item) {
 	childItems.append(item);
@@ -179,6 +182,7 @@ GlTraceFilterModel::~GlTraceFilterModel() {
 void GlTraceFilterModel::resetToDefaults(void)
 {
     if (rootItem) {
+    	layoutAboutToBeChanged();
         rootItem->setChildsToggleStateRecursive(Qt::Checked);
         layoutChanged();
     }
@@ -271,6 +275,7 @@ void GlTraceFilterModel::load(void)
     settings.beginGroup("GLTRACE/");
 
     if (rootItem) {
+    	layoutAboutToBeChanged();
         rootItem->loadRecursive(settings);
     }
 
@@ -442,6 +447,7 @@ bool GlTraceFilterModel::setData (const QModelIndex & index, const QVariant & va
 					(static_cast<GlTraceFilterItem*>(index.parent().internalPointer()))->checkChildsToggleState();
 					emit dataChanged(index.parent(),index.parent());
 				} else {
+				    layoutAboutToBeChanged();
 					(static_cast<GlTraceFilterItem*>(index.internalPointer()))->setChildsToggleState(value.toInt());
                     layoutChanged();
 				}

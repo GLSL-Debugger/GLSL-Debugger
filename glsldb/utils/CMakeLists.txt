@@ -5,6 +5,7 @@ set(SRC
 	dbgprint.c 
 	pfm.c 
 	sync.c 
+	notify.c
 )
 
 add_library(utils STATIC ${SRC})

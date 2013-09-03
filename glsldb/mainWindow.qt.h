@@ -76,7 +76,7 @@ class MainWindow : public QMainWindow, public Ui::MainWindow  {
     Q_OBJECT
 
 public:
-    MainWindow(char *pname, char **progArgs);
+    MainWindow(char *pname, const QStringList& args);
     ~MainWindow();
 
 

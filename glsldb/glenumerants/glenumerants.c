@@ -40,21 +40,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif /* _WIN32 */
 
-#include "glenumerants.h"
-#include "enumerants.h"
 
 #if (defined(GLSLDB_LINUX) || defined(GLSLDB_OSX))
-#  include "GL/glx.h"
-#  include "GL/glxext.h"
+#  include "../GL/glx.h"
+#  include "../GL/glxext.h"
 
 /*#include "glenumerants.h"*/
 
-#  ifdef GLX_VERSION_1_4
-#    define GLX_SAMPLE_BUFFERS                 100000
-#    define GLX_SAMPLES                        100001
-#  endif
+//#  ifdef GLX_VERSION_1_4
+//#    define GLX_SAMPLE_BUFFERS                 100000
+//#    define GLX_SAMPLES                        100001
+//#  endif
+#include "glenumerants.h"
 
-#  include "glxenumerants.h"
+#include "enumerants.h"
+
+#include "glxenumerants.h"
 #endif
 
 #ifdef GLSLDB_WIN32

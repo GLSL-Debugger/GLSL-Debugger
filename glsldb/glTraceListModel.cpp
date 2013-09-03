@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-    list of conditions and the following disclaimer in the documentation and/or
-    other materials provided with the distribution.
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-    of its contributors may be used to endorse or promote products derived from
-    this software without specific prior written permission.
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -81,8 +81,8 @@ void GlTraceListItem::setIconType(IconType type)
 GlTraceListFilterModel::GlTraceListFilterModel(GlTraceFilterModel *traceFilter, QObject *parent)
     : QSortFilterProxyModel(parent)
 {
-    m_GlTraceFilterModel = traceFilter;
-    currentShown = false;
+	m_GlTraceFilterModel = traceFilter;
+	currentShown = false;
 }
 
 bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow, const
@@ -95,12 +95,12 @@ bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow, const
     return (!(text.startsWith(QString("glXGetProcAddressARB("))));
     */
     //return true;
-    return m_GlTraceFilterModel->isFunctionVisible(text.left(text.indexOf("(")))
-        || dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(index);
+	return m_GlTraceFilterModel->isFunctionVisible(text.left(text.indexOf("(")))
+		|| dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(index);
 }
 
 void GlTraceListFilterModel::showCurrentItemAnyway(bool show) {
-    currentShown = show;
+	currentShown = show;
 }
 
 GlTraceListModel::GlTraceListModel(int maxListEntries, GlTraceFilterModel *traceFilter, QObject *parent)
@@ -110,7 +110,7 @@ GlTraceListModel::GlTraceListModel(int maxListEntries, GlTraceFilterModel *trace
     m_pData = new GlTraceListItem[maxListEntries];
     m_iFirst = 0;
     m_iNum   = 0;
-    m_pTraceFilterModel = traceFilter;
+	m_pTraceFilterModel = traceFilter;
 }
 
 GlTraceListModel::~GlTraceListModel()
@@ -120,10 +120,10 @@ GlTraceListModel::~GlTraceListModel()
 
 void GlTraceListModel::clear(void)
 {
-    beginResetModel();
+    layoutAboutToBeChanged();
     m_iFirst = 0;
     m_iNum   = 0;
-    endResetModel();
+    layoutChanged();
 }
 
 int  GlTraceListModel::getNextIndex(void)
@@ -133,9 +133,8 @@ int  GlTraceListModel::getNextIndex(void)
     m_iNum++;
     if (m_iNum > m_iMax) {
         m_iNum = m_iMax;
-        beginRemoveRows(QModelIndex(), 0, 0);
+
         m_iFirst++;
-        endRemoveRows();
         if (m_iFirst >= m_iMax) {
             m_iFirst = 0;
         }
@@ -152,72 +151,60 @@ int  GlTraceListModel::getNextIndex(void)
     return idx;
 }
 
-int GlTraceListModel::getLastRowIndex(void)
-{
-    return m_iNum - 1;
-}
-
 void GlTraceListModel::addGlTraceItem(const  GlTraceListItem::IconType type, const QString & text)
 {
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-    int newRow = getLastRowIndex();
-    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(type);
     m_pData[idx].setText(text);
-    endInsertRows();
+    layoutChanged();
 }
 
 void GlTraceListModel::addGlTraceWarningItem(const QString & text)
 {
-    UNUSED_ARG(text)
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-    int newRow = getLastRowIndex();
-    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(GlTraceListItem::IT_WARNING);
-    endInsertRows();
+    layoutChanged();
 }
 
 void GlTraceListModel::addGlTraceErrorItem(const QString & text)
 {
-    UNUSED_ARG(text)
+    layoutAboutToBeChanged();
     int idx = getNextIndex();
-    int newRow = getLastRowIndex();
-    beginInsertRows(QModelIndex(), newRow, newRow);
     m_pData[idx].setIconType(GlTraceListItem::IT_ERROR);
-    endInsertRows();
+    layoutChanged();
 }
 
 void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType type, int offset)
 {
     int idx;
-    int rowIdx = m_iNum + offset;
 
-    idx = m_iFirst + rowIdx;
+    idx = m_iFirst + m_iNum + offset;
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
 
     if ( 0 <= idx && idx < m_iMax) {
+        layoutAboutToBeChanged();
         m_pData[idx].setIconType(type);
-        QModelIndex dataIndex = createIndex(rowIdx, 0);
-        dataChanged(dataIndex, dataIndex);
+        layoutChanged();
     }
 }
 
 void GlTraceListModel::setCurrentGlTraceText(const QString &text, int offset)
 {
     int idx;
-    int rowIdx = m_iNum + offset;
 
-    idx = m_iFirst + rowIdx;
+    idx = m_iFirst + m_iNum + offset;
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
 
     if ( 0 <= idx && idx < m_iMax) {
+        layoutAboutToBeChanged();
         m_pData[idx].setText(text);
-        QModelIndex dataIndex = createIndex(rowIdx, 0);
-        dataChanged(dataIndex, dataIndex);
+        layoutChanged();
     }
 }
 
@@ -239,22 +226,21 @@ QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
     if (idx >= m_iMax) {
         idx -= m_iMax;
     }
-
     switch (role) {
-        case Qt::ForegroundRole:
-            if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-                return QVariant();
-            } else {
-                return QBrush(QColor(128,128,128));
-            }
-        case Qt::FontRole:
-            if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-                return QVariant();
-            } else {
-                QFont f;
-                f.setItalic(true);
-                return f;
-            }
+		case Qt::ForegroundRole:
+			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
+				return QVariant();
+			} else {
+				return QBrush(QColor(128,128,128));
+			}
+		case Qt::FontRole:
+			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
+				return QVariant();
+			} else {
+				QFont f;
+				f.setItalic(true);
+				return f;
+			}
         case Qt::DisplayRole:
             return m_pData[idx].getText();
         case Qt::DecorationRole:
@@ -265,11 +251,11 @@ QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
 }
 
 bool GlTraceListModel::isCurrentCall(const QModelIndex &index) {
-    if ((m_iFirst + index.row()) % m_iMax == (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
-        return true;
-    } else {
-        return false;
-    }
+	if ((m_iFirst + index.row()) % m_iMax == (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void GlTraceListItem::outputTXT(QTextStream &out) const

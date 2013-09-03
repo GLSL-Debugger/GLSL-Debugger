@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "debuglib.h"
 #include "debuglibInternal.h"
 #include "memory.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 
 void allocMem(void)
 {
@@ -57,7 +57,7 @@ void allocMem(void)
 	for (i = 0; i < rec->numItems; i++) {
 		rec->items[i] = (ALIGNED_DATA)malloc(rec->items[i]*sizeof(char));
 		if (!rec->items[i]) {
-			dbgPrint(DBGLVL_WARNING, "allocMem: Allocation of scratch mem failed\n");
+			UT_NOTIFY_VA(LV_WARN, "Allocation of scratch mem failed");
 			for (i--; i >= 0; i--) {
 				free((void*)rec->items[i]);
 			}
