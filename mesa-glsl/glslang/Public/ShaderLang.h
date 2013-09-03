@@ -240,9 +240,9 @@ SH_IMPORT_EXPORT const char* getDbgRsPosition(DbgRsTargetPosition p);
 
 //
 // ShHandle held by but opaque to the driver.  It is allocated,
-// managed, and de-allocated by the compiler/linker. It's contents
+// managed, and de-allocated by the compiler/linker. It's contents 
 // are defined by and used by the compiler and linker.  For example,
-// symbol table information and object code passed from the compiler
+// symbol table information and object code passed from the compiler 
 // to the linker can be stored where ShHandle points.
 //
 // If handle creation fails, 0 will be returned.
@@ -344,7 +344,7 @@ typedef struct ShVariable {
 
     int isMatrix;
     int matrixSize[2];
-
+    
     int isArray;
     int arraySize[MAX_ARRAYS];
 
@@ -377,7 +377,7 @@ void freeShVariableList(ShVariableList *vl);
 // The return value of ShCompile is boolean, indicating
 // success or failure.
 //
-// The info-log should be written by ShCompile into
+// The info-log should be written by ShCompile into 
 // ShHandle, so it can answer future queries.
 //
 SH_IMPORT_EXPORT int ShCompile(
@@ -392,7 +392,7 @@ SH_IMPORT_EXPORT int ShCompile(
 
 //
 // Advancing the debugger
-//
+// 
 SH_IMPORT_EXPORT DbgResult* ShDebugJumpToNext(
         const ShHandle,
         int debugOptions,
@@ -426,7 +426,7 @@ SH_IMPORT_EXPORT int ShLink(
     const int numHandles,
     ShHandle uniformMap,          // updated with new uniforms
     short int** uniformsAccessed,  // returned with indexes of uniforms accessed
-    int* numUniformsAccessed);
+    int* numUniformsAccessed); 	
 
 SH_IMPORT_EXPORT int ShLinkExt(
     const ShHandle,               // linker object

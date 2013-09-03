@@ -50,7 +50,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "shader.h"
 #include "../utils/dbgprint.h"
 #include "../utils/notify.h"
-#include "../../GLSLCompiler/glslang/Public/ResourceLimits.h"
+#include "ResourceLimits.h"
 
 #ifdef _WIN32
 #include "trampolines.h"
@@ -379,7 +379,7 @@ static int shaderBaseTypeSize(GLenum t)
 static void allocateUniformStorage(ActiveUniform *v)
 {
 	int size = shaderTypeSize(v->type);
-	
+
 	/* error check in getUniform */
 	v->value = malloc(size*v->size);
 }
@@ -795,7 +795,7 @@ static int getActiveUniforms(ShaderProgram *shader)
 	char *name = NULL;
 	int i, error, numBaseUniforms, n;
 	ActiveUniform *baseUniforms = NULL;
-	
+
 	ORIG_GL(glGetProgramiv)(shader->programHandle, GL_ACTIVE_UNIFORMS,
 	                        &numBaseUniforms);
 	ORIG_GL(glGetProgramiv)(shader->programHandle, GL_ACTIVE_UNIFORM_MAX_LENGTH,
@@ -811,7 +811,7 @@ static int getActiveUniforms(ShaderProgram *shader)
 		shader->numUniforms = 0;
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
-	
+
 	UT_NOTIFY_VA(LV_INFO, "ACTIVE UNIFORMS: %i", numBaseUniforms);
 
 	if (!(baseUniforms = (ActiveUniform*)malloc(numBaseUniforms*sizeof(ActiveUniform)))) {
@@ -822,7 +822,7 @@ static int getActiveUniforms(ShaderProgram *shader)
 	}
 
 	shader->numUniforms = 0;
-	
+
 	for (i = 0; i < numBaseUniforms; i++) {
 		ActiveUniform *u = &baseUniforms[i];
 		ORIG_GL(glGetActiveUniform)(shader->programHandle, i, maxLength, NULL,
@@ -852,19 +852,19 @@ static int getActiveUniforms(ShaderProgram *shader)
 	}
 
 	free(name);
-	
+
 	if (!(shader->uniforms = (ActiveUniform*)malloc(shader->numUniforms*sizeof(ActiveUniform)))) {
 		UT_NOTIFY_VA(LV_ERROR, "Allocation failed: uniforms");
 		shader->numUniforms = 0;
 		free(baseUniforms);
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
-	
+
 	n = 0;
 	for (i = 0; i < numBaseUniforms; i++) {
 		ActiveUniform *bu = &baseUniforms[i];
 		if (!bu->builtin) {
-			
+
 			if (bu->size == 1) {
 				ActiveUniform *u = &shader->uniforms[n];
 				u->type = bu->type;
@@ -895,7 +895,7 @@ static int getActiveUniforms(ShaderProgram *shader)
 					return error;
 				}
 				n++;
-			} else {			
+			} else {
 				int j;
 				for (j = 0; j < bu->size; j++) {
 					ActiveUniform *u = &shader->uniforms[n];
@@ -957,8 +957,8 @@ static int getActiveAttributes(ShaderProgram *shader)
 		shader->numAttributes = 0;
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
-	
-	UT_NOTIFY_VA(LV_INFO, "ACTIVE ATTRIBS: %i", shader->numAttributes);	
+
+	UT_NOTIFY_VA(LV_INFO, "ACTIVE ATTRIBS: %i", shader->numAttributes);
 	if (!(shader->attributes = (ActiveAttribute*)malloc(shader->numAttributes*
 	                                              sizeof(ActiveAttribute)))) {
 		UT_NOTIFY_VA(LV_ERROR, "Allocation failed: attributes");
@@ -966,7 +966,7 @@ static int getActiveAttributes(ShaderProgram *shader)
 		free(name);
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
-	
+
 	for (i = 0; i < shader->numAttributes; i++) {
 		ActiveAttribute *a = &shader->attributes[i];
 		ORIG_GL(glGetActiveAttrib)(shader->programHandle, i, maxLength, NULL,
@@ -977,7 +977,7 @@ static int getActiveAttributes(ShaderProgram *shader)
 			free(name);
 			return error;
 		}
-		
+
 		if (!(a->name = strdup(name))) {
 			UT_NOTIFY_VA(DBGLVL_ERROR, "Allocation failed: attribute name");
 			shader->numAttributes = i;
@@ -988,7 +988,7 @@ static int getActiveAttributes(ShaderProgram *shader)
 			a->builtin = 1;
 			a->location = -1;
 		} else {
-			a->builtin = 0;	
+			a->builtin = 0;
 			a->location = ORIG_GL(glGetAttribLocation)(shader->programHandle,
 													   a->name);
 			error = glError();
@@ -1063,7 +1063,7 @@ static int getShaderObjects(ShaderProgram *shader)
 		free(objects);
         return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
     }
-	
+
 	/* get attached shader objects */
    	ORIG_GL(glGetAttachedShaders)(shader->programHandle, shader->numObjects, NULL,
 	        objects);
@@ -1076,8 +1076,8 @@ static int getShaderObjects(ShaderProgram *shader)
 	/* for each shader object: get source and type */
     for (i = 0; i < shader->numObjects; i++) {
 
-		shader->objects[i].handle = objects[i];	
-		
+		shader->objects[i].handle = objects[i];
+
        	ORIG_GL(glGetShaderiv)(shader->objects[i].handle, GL_SHADER_SOURCE_LENGTH,
 		        &shader->objects[i].srcLength);
        	ORIG_GL(glGetShaderiv)(shader->objects[i].handle, GL_SHADER_TYPE,
@@ -1087,14 +1087,14 @@ static int getShaderObjects(ShaderProgram *shader)
 			free(objects);
 			return error;
 		}
-		
+
 		if (!(shader->objects[i].src =
 					(char*)malloc((shader->objects[i].srcLength + 1)*sizeof(char)))) {
 			UT_NOTIFY_VA(LV_ERROR, "not enough memory for src string");
 			free(objects);
 			return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 		}
-		
+
        	ORIG_GL(glGetShaderSource)(shader->objects[i].handle,
 		                           shader->objects[i].srcLength,
 		                           NULL, shader->objects[i].src);
@@ -1120,7 +1120,7 @@ static int getCurrentShader(ShaderProgram *shader)
 	if (error) {
 		return error;
 	}
-	
+
 	if (shader->programHandle == 0) {
 		return 0;
 	}
@@ -1130,7 +1130,7 @@ static int getCurrentShader(ShaderProgram *shader)
 	if (error) {
 		return error;
 	}
-	
+
 	/* get active uniforms and attributes */
 	error = getActiveUniforms(shader);
 	if (error) {
@@ -1204,7 +1204,7 @@ static int getShaderResources(ShaderProgram *shader, struct TBuiltInResource *re
 
 	resources->framebufferObjectsSupported =
 		checkGLExtensionSupported("GL_EXT_framebuffer_object");
-	
+
 	resources->geoShaderSupported =
 	    checkGLExtensionSupported("GL_EXT_geometry_shader4");
 
@@ -1233,7 +1233,7 @@ static int getShaderResources(ShaderProgram *shader, struct TBuiltInResource *re
 		default:
 			return DBG_ERROR_INVALID_VALUE;
 	}
-	
+
 	return glError();
 }
 
@@ -1314,7 +1314,7 @@ void getShaderCode(void)
     int numSourceStrings[3] = {0, 0, 0};
     int lenSourceStrings[3] = {0, 0, 0};
 	int error;
-	
+
 	ShaderProgram shader;
     DbgRec* rec;
     int i, j;
@@ -1337,7 +1337,7 @@ void getShaderCode(void)
 		setErrorCode(error);
 		return;
 	}
-	
+
 	if (shader.programHandle == 0) {
 		rec->result = DBG_SHADER_CODE;
     	rec->numItems = 0;
@@ -1361,8 +1361,8 @@ void getShaderCode(void)
 			return;
         }
         source[typeId] = tmpAlloc;
-		source[typeId][numSourceStrings[typeId] - 1] = shader.objects[i].src; 
-        UT_NOTIFY_VA(LV_INFO, "source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1, 
+		source[typeId][numSourceStrings[typeId] - 1] = shader.objects[i].src;
+        UT_NOTIFY_VA(LV_INFO, "source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1,
             shader.objects[i].src);
 	}
 
@@ -1423,7 +1423,7 @@ void getShaderCode(void)
 		setErrorCode(error);
 		return;
 	}
-	
+
 	/* set results */
 	rec->result = DBG_SHADER_CODE;
     rec->numItems = 3;
@@ -1463,7 +1463,7 @@ void storeActiveShader(void)
 void restoreActiveShader(void)
 {
 	int error;
-	
+
 	ORIG_GL(glUseProgram)(g.storedShader.programHandle);
 	error = glError();
 	if (error) {
@@ -1574,14 +1574,14 @@ static void freeDbgShader(void)
 }
 
 int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
-                  int target, int forcePointPrimitiveMode) 
+                  int target, int forcePointPrimitiveMode)
 {
 	int haveGeometryShader =  checkGLExtensionSupported("EXT_geometry_shader4");
 	GLint status;
 	int i, error;
 
 	freeDbgShader();
-	
+
 	g.dbgShaderHandle = ORIG_GL(glCreateProgram)();
 	error = glError();
 	if (error) {
@@ -1590,7 +1590,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 
 	UT_NOTIFY_VA(LV_INFO, "SET DBG SHADER: %p, %p, %p %i",
 	         vshader, gshader, fshader, target);
-	
+
 	if (vshader) {
 		error = attachShaderObject(g.dbgShaderHandle, GL_VERTEX_SHADER, vshader);
 		if (error) {
@@ -1614,7 +1614,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 			return error;
 		}
 	}
-	
+
 	/* copy execution environment of previous active shader */
 	/* pre-link part */
 	if (g.storedShader.programHandle == 0) {
@@ -1622,7 +1622,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 		freeDbgShader();
 		return DBG_ERROR_NO_STORED_SHADER;
 	}
-	
+
 	for (i = 0; i < g.storedShader.numAttributes; i++) {
 		ActiveAttribute *a = &g.storedShader.attributes[i];
 		if (!a->builtin) {
@@ -1654,7 +1654,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 			UT_NOTIFY_VA(LV_INFO, "BINDATTRIBLOCATION: %s -> %i", a->name, a->location);
 		}
 	}
-	
+
 	/* if geometry shader is supported, set program parameters */
 	if (haveGeometryShader && gshader) {
 		DMARK
@@ -1686,7 +1686,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 			return error;
 		}
 	}
-	
+
 	/* TODO: other state (point size, geometry shader, etc.) !!! */
 
 	/* if debug target is vertex or geometry shader, force varyings active that
@@ -1719,7 +1719,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 				return DBG_ERROR_INVALID_OPERATION;
 		}
 	}
-	
+
 	/* link debug shader */
 	ORIG_GL(glLinkProgram)(g.dbgShaderHandle);
 	ORIG_GL(glGetProgramiv)(g.dbgShaderHandle, GL_LINK_STATUS, &status);
@@ -1735,7 +1735,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 		freeDbgShader();
 		return DBG_ERROR_DBG_SHADER_LINK_FAILED;
 	}
-	
+
 	/* if debug target is vertex or geometry shader, specify varyings that
 	 * are used in transform feedback
 	*/
@@ -1769,7 +1769,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 				return DBG_ERROR_INVALID_OPERATION;
 		}
 	}
-	
+
 	/* activate debug shader */
 	ORIG_GL(glUseProgram)(g.dbgShaderHandle);
 	error = glError();
@@ -1777,7 +1777,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 		freeDbgShader();
 		return error;
 	}
-	
+
 	/* copy execution environment of previous active shader */
 	/* post-link part */
 	for (i = 0; i < g.storedShader.numUniforms; i++) {
@@ -1792,8 +1792,8 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 	}
 
 	/* TODO: other state (GL_EXT_bindable_uniform etc.) !!! */
-		
-	return DBG_NO_ERROR;	
+
+	return DBG_NO_ERROR;
 }
 
 /*
@@ -1821,7 +1821,7 @@ void setDbgShader(void)
 	const char *gshader = (const char *)rec->items[1];
 	const char *fshader = (const char *)rec->items[2];
 	int target = (int)rec->items[3];
-	
+
 	setErrorCode(loadDbgShader(vshader, gshader, fshader, target, 0));
 }
 

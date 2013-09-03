@@ -46,12 +46,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glCallStatistics.qt.h"
 #include "jumpToDialog.qt.h"
 
-#ifdef USE_MESA
-#include "main/mtypes.h"
-#else
 #include "ShHandle.h"
 #include "ShaderLang.h"
-#endif
 
 #include "progControl.qt.h"
 #include "shVarModel.qt.h"
@@ -87,7 +83,7 @@ private slots:
     /****************
      * auto connect *
      ****************/
-    
+
     /* general */
     void on_aQuit_triggered();
     void on_aOpen_triggered();
@@ -103,7 +99,7 @@ private slots:
     /* statistics */
     void on_cbGlstCallOrigin_currentIndexChanged(int);
     void on_cbGlstPfMode_currentIndexChanged(int);
-    
+
     /* glTrace */
     void on_tbExecute_clicked();
     void on_tbStep_clicked();
@@ -119,7 +115,7 @@ private slots:
     void on_tbToggleHaltOnError_clicked(bool);
     void on_tbGlTraceSettings_clicked();
     void on_tbSave_clicked();
-    
+
     /* shader */
 	void on_twShader_currentChanged(int selection);
     void on_tbShaderExecute_clicked();
@@ -137,7 +133,7 @@ private slots:
     /****************
      * self connect *
      ****************/
-    
+
     void setRunLevel(int);
     void updateWatchItemData(ShVarItem*);
     void watchSelectionChanged(const QItemSelection&, const QItemSelection&);
@@ -154,13 +150,13 @@ private:
     void closeEvent(QCloseEvent *event);
 
 	void killProgram(int hard);
-	
+
     void setErrorStatus(pcErrorCode);
     void setStatusBarText(QString);
 	void setShaderCodeText(char *shaders[3]);
 	void leaveDBGState();
 	void cleanupDBGShader();
-    bool getDebugImage(DbgCgOptions option, ShChangeableList *cl, 
+    bool getDebugImage(DbgCgOptions option, ShChangeableList *cl,
                        int rbFormat, bool *coverage, PixelBox **fbData);
 	bool getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 	                        bool *coverage, VertexBox *vdata);
@@ -175,13 +171,13 @@ private:
     void setGlTraceItemText(const char *text);
 	void setGlTraceItemIconType(const GlTraceListItem::IconType type);
     void clearGlTraceItemList(void);
-	
+
 	pcErrorCode getNextCall();
     pcErrorCode nextStep(const FunctionCall *fCall);
 	pcErrorCode recordCall();
 	void recordDrawCall();
 	void waitForEndOfExecution();
-    
+
     /* Workspace */
     QWorkspace *workspace;
     int    currentRunLevel;
@@ -192,7 +188,7 @@ private:
 
 	/* watch window controls */
 	QActionGroup *agWatchControl;
-	
+
     /* Dock Widget: GL Buffer View */
     QScrollArea *sBVArea;
     QLabel      *lBVLabel;
@@ -202,7 +198,7 @@ private:
 
 	/* per fragment tests */
 	FragmentTestDialog *m_pftDialog;
-	
+
     QStringList dbgProgArgs;
     QString workDir;
     ProgramControl *pc;
@@ -211,11 +207,11 @@ private:
 
 	/* == 1 if we are inside a glNewList-glEndList block */
 	bool m_bInDLCompilation;
-	
+
     void setGlStatisticTabs(int n, int m);
 	void resetPerFrameStatistics(void);
 	void resetAllStatistics(void);
-    
+
     GlCallStatistics    *m_pGlCallSt;
     GlCallStatistics    *m_pGlExtSt;
     GlCallStatistics    *m_pGlCallPfst;
@@ -248,7 +244,7 @@ private:
 	VertexBox *m_pGeometryMap;
 	VertexBox *m_pVertexCount;
 	//GeoShaderDataModel *m_pGeoDataModel;
-	
+
     bool *m_pCoverage;
 
     enum CoverageMapStatus {
@@ -268,11 +264,11 @@ private:
 	void addToWatchWindowGeoDataTree(WatchView *watchView, QModelIndexList &list);
 	void addToWatchWindowVertexTable(WatchView *watchView, QModelIndexList &list);
 	void addToWatchWindowFragment(WatchView *watchView, QModelIndexList &list);
-	
+
 	int m_selectedPixel[2];
 
     /* MRU program. */
-    bool loadMruProgram(QString& outProgram, QString& outArguments, 
+    bool loadMruProgram(QString& outProgram, QString& outArguments,
         QString& outWorkDir);
     bool saveMruProgram(const QString& program, const QString& arguments,
         const QString& workDir);

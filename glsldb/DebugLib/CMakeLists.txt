@@ -25,34 +25,34 @@ set(GLSLDEBUG_SRC
 	preExecution.c
 	postExecution.c
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genGetProcAddressHook.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE genGetProcAddressHook.pl
 	OUTPUT_FILE getProcAddressHook.inc
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionPointerTypes.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE genFunctionPointerTypes.pl
 	OUTPUT_FILE functionPointerTypes.inc
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genReplayFunc.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE genReplayFunc.pl
 	OUTPUT_FILE replayFunction.c
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionList.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE genFunctionList.pl
 	OUTPUT_FILE functionList.c
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE mergeAllowedInBeginEndList.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE mergeAllowedInBeginEndList.pl
 	OUTPUT_FILE functionsAllowedInBeginEnd.pl
 )
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionHooks.pl 
+execute_process(COMMAND perl
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	INPUT_FILE genFunctionHooks.pl
 	OUTPUT_FILE functionHooks.inc
 )
 
@@ -61,8 +61,14 @@ include_directories(${PROJECT_SOURCE_DIR}/glsldb
 	${X11_INCLUDE_DIR}
 )
 
+if(DEFINED USE_MESA)
+    include_directories(${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Public)
+else()
+    include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
+endif()
+
 # FIXME
-# The makefiles have a target to generate a list of allowed functions between begin/end. 
+# The makefiles have a target to generate a list of allowed functions between begin/end.
 add_library(functionList SHARED functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})

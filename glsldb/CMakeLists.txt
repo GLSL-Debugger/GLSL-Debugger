@@ -36,15 +36,18 @@ set(SRC
 include_directories(${OPENGL_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
 	${QT_INCLUDE_DIR}
-	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
 	${CMAKE_CURRENT_SOURCE_DIR}/utils
 	${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
 	${GLEW_INCLUDE_DIR}
 )
 
 if(DEFINED USE_MESA)
-    include_directories(${PROJECT_SOURCE_DIR}/glsl-mesa/Public)
-    set(GLSL_LIBRARIES glslmesa)
+
+    include_directories(
+    	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Public
+    	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Include
+    )
+    set(GLSL_LIBRARIES glsl_mesa)
 else()
     include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
     set(GLSL_LIBRARIES glslang)

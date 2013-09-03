@@ -1033,6 +1033,9 @@ static DbgRsTargetPosition setPositionLoop(LoopT t)
             exit(1);
             break;
     }
+
+    // Never happens. Only warning
+    return DBG_RS_POSITION_DUMMY;
 }
 
 static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)

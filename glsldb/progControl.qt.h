@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 #include "errorCodes.h"
 #include "functionCall.h"
-#include "../GLSLCompiler/glslang/Public/ResourceLimits.h"
+#include "ResourceLimits.h"
 #include "attachToProcess.qt.h"
 
 
@@ -58,7 +58,7 @@ class ProgramControl {
 public:
     ProgramControl(const char *pname);
     ~ProgramControl();
-    
+
     /* remote program control */
     pcErrorCode runProgram(char **debuggedProgramArgs, char *workDir = NULL);
 #ifdef _WIN32
@@ -79,7 +79,7 @@ public:
 	pcErrorCode checkExecuteState(int *state);
 	pcErrorCode executeContinueOnError(void);
 	pcErrorCode stop(void);
-	
+
 	pcErrorCode callOrigFunc(const FunctionCall *fCall = 0);
     pcErrorCode callDone(void);
     pcErrorCode overwriteFuncArguments(const FunctionCall *fCall);
@@ -91,12 +91,12 @@ public:
 
 	pcErrorCode saveAndInterruptQueries(void);
 	pcErrorCode restartQueries(void);
-	
+
     pcErrorCode initRecording(void);
     pcErrorCode recordCall(void);
     pcErrorCode replay(int target);
     pcErrorCode endReplay(void);
-	
+
     pcErrorCode getShaderCode(char *shaders[3],
 							TBuiltInResource *resource,
 							char **serializedUniforms,
@@ -113,26 +113,26 @@ public:
 								 int numFloatsPerVertex,
 	                             int *numPrimitives, int *numVertices,
 	                             float **vertexData);
-	
+
 	/* obsolete? */
     pcErrorCode setDbgShaderCode(char *shaders[3], int target);
-	
+
 	pcErrorCode initializeRenderBuffer(bool copyRGB, bool copyAlpha,
 	                                   bool copyDepth, bool copyStencil,
 	                                   float red, float green, float blue,
 	                                   float alpha, float depth, int stencil);
 	pcErrorCode readBackActiveRenderBuffer(int numComponents, int *width,
 	                                       int *heigh, float **image);
-	
+
 	pcErrorCode insertGlEnd(void);
 
 private:
     unsigned int getArgumentSize(int type);
-    
+
     /* process environment communication */
     void buildEnvVars(const char *pname);
     void setDebugEnvVars(void);
-    
+
     /* remote program control */
 #ifndef _WIN32
     pid_t _debuggeePID;
@@ -212,7 +212,7 @@ private:
 	void closeEvents(void);
 
 	/* Signal debugee. */
-	HANDLE _hEvtDebuggee; 
+	HANDLE _hEvtDebuggee;
 
 	/* Wait for debugee signaling me. */
 	HANDLE _hEvtDebugger;

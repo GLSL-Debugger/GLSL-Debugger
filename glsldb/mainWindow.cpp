@@ -132,7 +132,7 @@ MainWindow::MainWindow(char *pname, const QStringList& args)
 
 	/* per frgamnet operations */
 	m_pftDialog = new FragmentTestDialog(this);
-	
+
     pc = new ProgramControl(pname);
 
     m_pCurrentCall = NULL;
@@ -177,11 +177,11 @@ MainWindow::MainWindow(char *pname, const QStringList& args)
 	m_serializedUniforms.count = 0;
 
 	m_primitiveMode = GL_NONE;
-	
+
 	m_pGeometryMap = NULL;
 	m_pVertexCount = NULL;
 	//m_pGeoDataModel = NULL;
-	
+
     m_pCoverage = NULL;
 
 	m_selectedPixel[0] = -1;
@@ -279,7 +279,7 @@ void MainWindow::on_aOpen_triggered()
 
     if (dbgProgArgs.size() != 0) {
         QString arguments = QString("");
-        
+
         dOpenProgram->leProgram->setText(dbgProgArgs[0]);
 
         for (i=1; i<dbgProgArgs.size(); i++) {
@@ -295,7 +295,7 @@ void MainWindow::on_aOpen_triggered()
     } else {
         /* Set MRU program, if no old value was available. */
         QString program, arguments, workDir;
-        
+
         if (this->loadMruProgram(program, arguments, workDir)) {
             dOpenProgram->leProgram->setText(program);
             dOpenProgram->leArguments->setText(arguments);
@@ -309,7 +309,7 @@ void MainWindow::on_aOpen_triggered()
         if (!(dOpenProgram->leProgram->text().isEmpty())) {
             dbgProgArgs.clear();
             dbgProgArgs.append(dOpenProgram->leProgram->text());
-            dbgProgArgs += 
+            dbgProgArgs +=
                 dOpenProgram->leArguments->text().split(
                         QRegExp("\\s+"), QString::SkipEmptyParts);
 			/* cleanup dbg state */
@@ -336,7 +336,7 @@ void MainWindow::on_aOpen_triggered()
     delete dOpenProgram;
 }
 
-void MainWindow::on_aAttach_triggered() 
+void MainWindow::on_aAttach_triggered()
 {
     UT_NOTIFY(LV_TRACE, "Quitting application");
 
@@ -356,7 +356,7 @@ void MainWindow::on_aAttach_triggered()
             this->killProgram(1);
             this->setRunLevel(RL_SETUP);
             this->setErrorStatus(PCE_NONE);
-            this->setStatusBarText(QString("New program: ") 
+            this->setStatusBarText(QString("New program: ")
                 + QString(process->GetExe()));
             this->clearGlTraceItemList();
 
@@ -389,7 +389,7 @@ void MainWindow::on_aAbout_triggered()
     dlg.exec();
 }
 
-    
+
 void MainWindow::setGlStatisticTabs(int n, int m)
 {
     while(twGlStatistics->count() > 0) {
@@ -443,9 +443,9 @@ void MainWindow::on_tbBVCapture_clicked()
     int width, height;
     float *imageData;
     pcErrorCode error;
-    
+
     error = pc->readBackActiveRenderBuffer(3, &width, &height, &imageData);
-    
+
     if (error == PCE_NONE) {
         PixelBoxFloat imageBox(width, height, 3, imageData);
         lBVLabel->setPixmap(QPixmap::fromImage(imageBox.getByteImage(PixelBox::FBM_CLAMP)));
@@ -476,7 +476,7 @@ void MainWindow::on_tbBVSave_clicked()
         QImage img = lBVLabel->pixmap()->toImage();
         if (!img.isNull()) {
             QFileDialog *sDialog = new QFileDialog(this, QString("Save image"));
-            
+
             sDialog->setAcceptMode(QFileDialog::AcceptSave);
             sDialog->setFileMode(QFileDialog::AnyFile);
             QStringList formatDesc;
@@ -493,7 +493,7 @@ void MainWindow::on_tbBVSave_clicked()
             }
 
             sDialog->setDirectory(directory);
-            
+
             if (sDialog->exec()) {
                 QStringList files = sDialog->selectedFiles();
                 QString selected;
@@ -543,9 +543,9 @@ void MainWindow::on_cbGlstPfMode_currentIndexChanged(int m)
 pcErrorCode MainWindow::getNextCall()
 {
 	m_pCurrentCall = pc->getCurrentCall();
-	if (!m_bHaveValidShaderCode && m_pCurrentCall->isDebuggableDrawCall()) { 
+	if (!m_bHaveValidShaderCode && m_pCurrentCall->isDebuggableDrawCall()) {
 		/* current call is a drawcall and we don't have valid shader code;
-		 * call debug function that reads back the shader code 
+		 * call debug function that reads back the shader code
 		 */
 		for (int i = 0; i < 3; i++) {
 			delete [] m_pShaders[i];
@@ -576,10 +576,10 @@ void MainWindow::on_tbExecute_clicked()
     UT_NOTIFY(LV_TRACE, "Executing");
     delete m_pCurrentCall;
     m_pCurrentCall = NULL;
-    
+
     /* Cleanup shader debugging */
     cleanupDBGShader();
-    
+
     if (currentRunLevel == RL_SETUP) {
         int i;
         char **args;
@@ -591,7 +591,7 @@ void MainWindow::on_tbExecute_clicked()
 		resetAllStatistics();
 
 		m_bHaveValidShaderCode = false;
-		
+
         /* Build arguments */
         args = new char*[dbgProgArgs.size()+1];
         for (i=0; i<dbgProgArgs.size(); i++) {
@@ -631,10 +631,10 @@ void MainWindow::on_tbExecute_clicked()
     } else {
 		/* cleanup dbg state */
 		leaveDBGState();
-    
+
         /* Stop already running progs */
         killProgram(1);
-		
+
         setRunLevel(RL_SETUP);
     }
 }
@@ -647,7 +647,7 @@ void MainWindow::addGlTraceItem()
     QIcon icon;
     QString iconText;
     GlTraceListItem::IconType iconType;
-    
+
     if (currentRunLevel == RL_TRACE_EXECUTE_NO_DEBUGABLE ||
         currentRunLevel == RL_TRACE_EXECUTE_IS_DEBUGABLE ) {
         iconType = GlTraceListItem::IT_ACTUAL;
@@ -678,7 +678,7 @@ void MainWindow::addGlTraceItem()
     if (m_pCurrentCall->isDebuggable()) {
 
     }
-    
+
     if (m_pGlTraceModel) {
         m_pGlTraceModel->addGlTraceItem(iconType, callString);
     }
@@ -715,7 +715,7 @@ void MainWindow::setGlTraceItemText(const char *text)
         m_pGlTraceModel->setCurrentGlTraceText(text, -1);
     }
 }
-    
+
 void MainWindow::clearGlTraceItemList(void)
 {
     if (m_pGlTraceModel) {
@@ -779,10 +779,10 @@ pcErrorCode MainWindow::nextStep(const FunctionCall *fCall)
     if ((fCall && fCall->isShaderSwitch()) ||
         m_pCurrentCall->isShaderSwitch() ) {
 		/* current call is a glsl shader switch */
-      
+
 		/* call shader switch */
 		error = pc->callOrigFunc(fCall);
-		
+
 		if (error != PCE_NONE) {
 			if (isErrorCritical(error)) {
 				return error;
@@ -866,7 +866,7 @@ void MainWindow::singleStep()
 	leaveDBGState();
 
 	setGlTraceItemIconType(GlTraceListItem::IT_OK);
-    
+
     pcErrorCode error = nextStep(NULL);
 
     delete m_pCurrentCall;
@@ -905,11 +905,11 @@ void MainWindow::on_tbSkip_clicked()
 
 	/* cleanup dbg state */
 	leaveDBGState();
-	
+
 	setGlTraceItemIconType(GlTraceListItem::IT_ERROR);
-    
+
     pcErrorCode error = pc->callDone();
-    
+
     delete m_pCurrentCall;
     m_pCurrentCall = NULL;
 
@@ -935,12 +935,12 @@ void MainWindow::on_tbEdit_clicked()
 {
     EditCallDialog *dialog = new EditCallDialog(m_pCurrentCall);
     dialog->exec();
-    
+
     if (dialog->result() == QDialog::Accepted) {
         const FunctionCall *editCall = dialog->getChangedFunction();
-        
+
 		resetPerFrameStatistics();
-        
+
         if ((*(FunctionCall*)editCall) != *m_pCurrentCall) {
 
 			char *callString = editCall->getCallString();
@@ -1035,7 +1035,7 @@ void MainWindow::on_tbJumpToDrawCall_clicked()
 	leaveDBGState();
 
 	setRunLevel(RL_TRACE_EXECUTE_RUN);
-		
+
 	if (tbToggleNoTrace->isChecked()) {
     	delete m_pCurrentCall;
 	    m_pCurrentCall = NULL;
@@ -1049,7 +1049,7 @@ void MainWindow::on_tbJumpToDrawCall_clicked()
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
 		m_bHaveValidShaderCode = false;
-		
+
 		pcErrorCode error = pc->executeToDrawCall(tbToggleHaltOnError->isChecked());
 		setErrorStatus(error);
         if (error != PCE_NONE) {
@@ -1119,7 +1119,7 @@ void MainWindow::on_tbJumpToShader_clicked()
 				return;
 			}
 		}
-		
+
 		while (currentRunLevel == RL_TRACE_EXECUTE_RUN &&
 				(!m_pCurrentCall || (m_pCurrentCall && !m_pCurrentCall->isShaderSwitch()))) {
 			singleStep();
@@ -1130,7 +1130,7 @@ void MainWindow::on_tbJumpToShader_clicked()
 			qApp->processEvents(QEventLoop::AllEvents);
 		}
 	}
-    
+
     setRunLevel(RL_TRACE_EXECUTE);
 	setGlTraceItemIconType(GlTraceListItem::IT_ACTUAL);
 }
@@ -1148,7 +1148,7 @@ void MainWindow::on_tbJumpToUserDef_clicked()
 
         setRunLevel(RL_TRACE_EXECUTE_RUN);
         targetName = pJumpToDialog->getTargetFuncName();
-   
+
 
 		if (tbToggleNoTrace->isChecked()) {
 			delete m_pCurrentCall;
@@ -1174,7 +1174,7 @@ void MainWindow::on_tbJumpToUserDef_clicked()
 			}
 			waitForEndOfExecution(); /* last statement!! */
 		} else {
-			
+
 			singleStep();
 			if (currentRunLevel == RL_SETUP) {
 				/* something was wrong in step */
@@ -1182,7 +1182,7 @@ void MainWindow::on_tbJumpToUserDef_clicked()
 			}
 
 			while (currentRunLevel == RL_TRACE_EXECUTE_RUN &&
-				   (!m_pCurrentCall || (m_pCurrentCall && 
+				   (!m_pCurrentCall || (m_pCurrentCall &&
 										targetName.compare(m_pCurrentCall->getName())))) {
 				singleStep();
 				if (currentRunLevel == RL_SETUP) {
@@ -1219,7 +1219,7 @@ void MainWindow::on_tbRun_clicked()
 		qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
 		m_bHaveValidShaderCode = false;
-		
+
 		pcErrorCode error = pc->execute(tbToggleHaltOnError->isChecked());
 		setErrorStatus(error);
 		if (isErrorCritical(error)) {
@@ -1378,7 +1378,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 			target = DBG_TARGET_GEOMETRY_SHADER;
             break;
         default:
-            QMessageBox::critical(this, "Internal Error", 
+            QMessageBox::critical(this, "Internal Error",
                 "MainWindow::getDebugVertexData called when debugging "
                 "non-vertex/geometry shader<br>Please report this probem to "
                 "<A HREF=\"mailto:glsldevil@vis.uni-stuttgart.de\">"
@@ -1403,7 +1403,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 		case DBG_CG_CHANGEABLE:
 		case DBG_CG_COVERAGE:
 		case DBG_CG_SELECTION_CONDITIONAL:
-		case DBG_CG_LOOP_CONDITIONAL:	
+		case DBG_CG_LOOP_CONDITIONAL:
 			if (target == DBG_TARGET_GEOMETRY_SHADER) {
 				elementsPerVertex = 1;
 				forcePointPrimitiveMode = 1;
@@ -1422,7 +1422,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
                                  forcePointPrimitiveMode, elementsPerVertex,
 	                             &numPrimitives, &numVertices, &data);
 
-	/////// DEBUG 
+	/////// DEBUG
     UT_NOTIFY(LV_DEBUG, ">>>>> DEBUG CG: ");
 	switch (option) {
 		case DBG_CG_GEOMETRY_MAP:
@@ -1486,7 +1486,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 	return true;
 }
 
-bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl, 
+bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
                                int rbFormat, bool *coverage, PixelBox **fbData)
 {
     int width, height, channels;
@@ -1500,7 +1500,7 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
     };
 
 	if (currentRunLevel != RL_DBG_FRAGMENT_SHADER) {
-        QMessageBox::critical(this, "Internal Error", 
+        QMessageBox::critical(this, "Internal Error",
             "MainWindow::getDebugImage called when debugging "
             "debugging non-fragment shader<br>Please report this probem to "
             "<A HREF=\"mailto:glsldevil@vis.uni-stuttgart.de\">"
@@ -1528,12 +1528,12 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
         default:
             channels = 3;
     }
-    
+
 	UT_NOTIFY(LV_TRACE, "Init buffers...");
 	switch (option) {
 		case DBG_CG_ORIGINAL_SRC:
 			error = pc->initializeRenderBuffer(true, true, true, true,
-			                                   0.0, 0.0, 0.0, 0.0, 0.0, 0); 
+			                                   0.0, 0.0, 0.0, 0.0, 0.0, 0);
 			break;
 		case DBG_CG_COVERAGE:
 		case DBG_CG_SELECTION_CONDITIONAL:
@@ -1631,7 +1631,7 @@ void MainWindow::updateWatchItemData(ShVarItem *watchItem)
 
     cl.numChangeables = 0;
     cl.changeables = NULL;
-    
+
     ShChangeable *watchItemCgbl = watchItem->getShChangeable();
     addShChangeable(&cl, watchItemCgbl);
 
@@ -1735,7 +1735,7 @@ void MainWindow::updateWatchListData(CoverageMapStatus cmstatus, bool forceUpdat
         ShVarItem *item = watchItems[i];
 
         UT_NOTIFY_VA(LV_TRACE, ">>>>>>>>>>>>>>updateWatchListData: %s (%i, %i, %i, %i)\n",
-				qPrintable(item->getFullName()), 
+				qPrintable(item->getFullName()),
                 item->isChanged(), item->hasEnteredScope(), item->isInScope(), item->isInScopeStack());
 
         if (forceUpdate) {
@@ -1790,7 +1790,7 @@ void MainWindow::updateWatchItemsCoverage(bool *coverage)
 {
     QList<ShVarItem*> watchItems;
     int i;
-    
+
     if (m_pShVarModel) {
         watchItems = m_pShVarModel->getAllWatchItemPointers();
     }
@@ -1819,7 +1819,7 @@ void MainWindow::resetWatchListData(void)
 {
     QList<ShVarItem*> watchItems;
     int i;
-    
+
 	if (m_pShVarModel) {
 		watchItems = m_pShVarModel->getAllWatchItemPointers();
 		for (i=0; i<watchItems.count(); i++) {
@@ -1851,7 +1851,7 @@ void MainWindow::resetWatchListData(void)
 void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCovermap)
 {
     bool updateGUI = true;
-    
+
     switch (action) {
         case DBG_BH_RESET:
         case DBG_BH_JUMPINTO:
@@ -1894,7 +1894,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         delete[] m_pCoverage;
                         m_pCoverage = pCoverageBox->getCoverageFromData(&nNewCoverageMap);
                         updateWatchItemsCoverage(m_pCoverage);
-                        
+
                         if (nNewCoverageMap == nOldCoverageMap) {
                             cmstatus = COVERAGEMAP_UNCHANGED;
                         } else if (nNewCoverageMap > nOldCoverageMap) {
@@ -1903,7 +1903,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             cmstatus = COVERAGEMAP_SHRINKED;
                         }
                         nOldCoverageMap = nNewCoverageMap;
-                        
+
                         delete pCoverageBox;
                     } else if ((currentRunLevel == RL_DBG_GEOMETRY_SHADER |
 					            currentRunLevel == RL_DBG_VERTEX_SHADER) &&
@@ -1929,7 +1929,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         delete[] m_pCoverage;
 						m_pCoverage = newCoverage;
                         updateWatchItemsCoverage(m_pCoverage);
-                        
+
                         if (coverageChanged) {
                             UT_NOTIFY(LV_INFO, "cmstatus = COVERAGEMAP_GROWN");
                             cmstatus = COVERAGEMAP_GROWN;
@@ -1937,7 +1937,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             UT_NOTIFY(LV_INFO, "cmstatus = COVERAGEMAP_UNCHANGED");
                             cmstatus = COVERAGEMAP_UNCHANGED;
                         }
-                        
+
                         delete pCoverageBox;
                     }
                 }
@@ -1954,7 +1954,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                 msg.append("<br>Please report this probem to "
                     "<A HREF=\"mailto:glsldevil@vis.uni-stuttgart.de\">"
                     "glsldevil@vis.uni-stuttgart.de</A>.");
-                QMessageBox::critical(this, "Internal Error", msg, 
+                QMessageBox::critical(this, "Internal Error", msg,
                     QMessageBox::Ok);
                 return;
                 } break;
@@ -1964,18 +1964,18 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
             tbShaderStep->setEnabled(false);
             tbShaderStepOver->setEnabled(false);
 		}
-		
+
 
         /* Process watch list */
         if (updateWatchData) {
-            UT_NOTIFY(LV_INFO, "updateWatchData " << cmstatus 
-                << " emitVertex: " << dr->passedEmitVertex 
+            UT_NOTIFY(LV_INFO, "updateWatchData " << cmstatus
+                << " emitVertex: " << dr->passedEmitVertex
                 << " discard: " << dr->passedDiscard);
             updateWatchListData(cmstatus, dr->passedEmitVertex || dr->passedDiscard);
         }
 
 		VertexBox vbCondition;
-		
+
         /* Process position dependent requests */
         switch(dr->position) {
             case DBG_RS_POSITION_SELECTION_IF_CHOOSE:
@@ -1989,14 +1989,14 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 if (getDebugImage(DBG_CG_SELECTION_CONDITIONAL,
 											NULL, GL_FLOAT, m_pCoverage, (PixelBox**)&imageBox)) {
                                 } else {
-                                    QMessageBox::warning(this, "Warning", 
+                                    QMessageBox::warning(this, "Warning",
                                         "An error occurred while retrieving "
                                         "the selection image.");
 									delete imageBox;
                                     return;
                                 }
-                                sDialog = new SelectionDialog(imageBox, 
-                                        dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE, 
+                                sDialog = new SelectionDialog(imageBox,
+                                        dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE,
                                         this);
 								delete imageBox;
                             }
@@ -2005,7 +2005,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             {
                                 if (getDebugVertexData(DBG_CG_SELECTION_CONDITIONAL, NULL, m_pCoverage, &vbCondition)) {
                                 } else {
-                                    QMessageBox::warning(this, "Warning", 
+                                    QMessageBox::warning(this, "Warning",
                                         "An error occurred while retrieving "
                                         "the selection condition.");
         							cleanupDBGShader();
@@ -2020,9 +2020,9 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 }
 
                                 sDialog = new SelectionDialog(&vbCondition, watchItems,
-										                      m_primitiveMode, m_dShResources.geoOutputType, 
+										                      m_primitiveMode, m_dShResources.geoOutputType,
 															  m_pGeometryMap, m_pVertexCount,
-                                                              dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE, 
+                                                              dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE,
                                                               this);
                             }
                             break;
@@ -2031,7 +2031,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 /* Get condition for each vertex */
                                 if (getDebugVertexData(DBG_CG_SELECTION_CONDITIONAL, NULL, m_pCoverage, &vbCondition)) {
                                 } else {
-                                    QMessageBox::warning(this, "Warning", 
+                                    QMessageBox::warning(this, "Warning",
                                         "An error occurred while retrieving "
                                         "the selection condition.");
         							cleanupDBGShader();
@@ -2046,13 +2046,13 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                 }
 
                                 sDialog = new SelectionDialog(&vbCondition, watchItems,
-                                                              dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE, 
+                                                              dr->position == DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE,
                                                               this);
                             }
                             break;
                         default:
                             // TODO: Is this an internal error?
-                            QMessageBox::warning(this, "Warning", 
+                            QMessageBox::warning(this, "Warning",
                                 "The current run level is invalid for "
                                 "SelectionDialog.");
                     }
@@ -2077,19 +2077,19 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         case RL_DBG_FRAGMENT_SHADER:
                             {
                                 PixelBoxFloat *loopCondition = NULL;
-                                
+
                                 if (updateCovermap) {
                                     /* First get image of loop condition */
                                     if (!getDebugImage(DBG_CG_LOOP_CONDITIONAL,
 												NULL, GL_FLOAT, m_pCoverage, (PixelBox**)&loopCondition)) {
-                                        QMessageBox::warning(this, "Warning", 
+                                        QMessageBox::warning(this, "Warning",
                                             "An error occurred while retrieving "
                                             "the loop image.");
 										delete loopCondition;
                                         return;
                                     }
                                 }
-                                
+
                                 /* Add data to the loop storage */
                                 if (dr->loopIteration == 0) {
                                     UT_NOTIFY(LV_INFO, "==> new loop encountered");
@@ -2104,7 +2104,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                         }
                                     } else {
                                         /* TODO error handling */
-                                        QMessageBox::warning(this, "Warning", 
+                                        QMessageBox::warning(this, "Warning",
                                             "An error occurred while trying to "
                                             "get loop count data.");
                                         ShaderStep(DBG_BH_SELECTION_JUMP_OVER);
@@ -2120,14 +2120,14 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             {
                                 VertexBox loopCondition;
                                 if (!(getDebugVertexData(DBG_CG_LOOP_CONDITIONAL, NULL, m_pCoverage, &loopCondition))) {
-                                    QMessageBox::warning(this, "Warning", 
+                                    QMessageBox::warning(this, "Warning",
                                         "An error occurred while trying to "
                                         "get the loop count condition.");
         							cleanupDBGShader();
 	        						setRunLevel(RL_DBG_RESTART);
                                     return;
                                 }
-                                
+
                                 /* Add data to the loop storage */
                                 if (dr->loopIteration == 0) {
                                     UT_NOTIFY(LV_INFO, "==> new loop encountered\n");
@@ -2142,7 +2142,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                                         }
                                     } else {
                                         /* TODO error handling */
-                                        QMessageBox::warning(this, "Warning", 
+                                        QMessageBox::warning(this, "Warning",
                                             "An error occurred while trying to "
                                             "get the loop data.");
                                         ShaderStep(DBG_BH_SELECTION_JUMP_OVER);
@@ -2152,7 +2152,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                             }
                             break;
                     }
-                    
+
                     if (updateGUI) {
                         LoopDialog *lDialog;
                         switch (currentRunLevel) {
@@ -2237,48 +2237,48 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         "current run level does not allow for shader "
                         "stepping.");
             }
-            
+
             /* Mark actual debug position */
             if (document && edit) {
                 QTextCharFormat highlight;
                 QTextCursor cursor(document);
-                
+
                 cursor.setPosition(0, QTextCursor::MoveAnchor);
                 cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor, 1);
                 highlight.setBackground(Qt::white);
                 cursor.mergeCharFormat(highlight);
-                
+
                 /* Highlight the actual statement */
                 cursor.setPosition(0, QTextCursor::MoveAnchor);
-                cursor.movePosition(QTextCursor::Down, 
+                cursor.movePosition(QTextCursor::Down,
                         QTextCursor::MoveAnchor, dr->range.left.line-1);
-                cursor.movePosition(QTextCursor::Right, 
+                cursor.movePosition(QTextCursor::Right,
                         QTextCursor::MoveAnchor, dr->range.left.colum-1);
                 cursor.setPosition(0, QTextCursor::KeepAnchor);
-                cursor.movePosition(QTextCursor::Down, 
+                cursor.movePosition(QTextCursor::Down,
                         QTextCursor::KeepAnchor, dr->range.right.line-1);
-                cursor.movePosition(QTextCursor::Right, 
+                cursor.movePosition(QTextCursor::Right,
                         QTextCursor::KeepAnchor, dr->range.right.colum);
                 highlight.setBackground(Qt::yellow);
                 cursor.mergeCharFormat(highlight);
-                
+
                 /* Ensure the highlighted line is visible */
                 QTextCursor cursorVisible = edit->textCursor();
                 cursorVisible.setPosition(0, QTextCursor::MoveAnchor);
-                cursorVisible.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, 
+                cursorVisible.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor,
                         MAX(dr->range.left.line-3, 0));
                 edit->setTextCursor(cursorVisible);
                 edit->ensureCursorVisible();
                 cursorVisible.setPosition(0, QTextCursor::KeepAnchor);
-                cursorVisible.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, 
+                cursorVisible.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor,
                         dr->range.right.line+1);
                 edit->setTextCursor(cursorVisible);
                 edit->ensureCursorVisible();
-                
+
                 /* Unselect visible cursor */
                 QTextCursor cursorSet = edit->textCursor();
                 cursorSet.setPosition(0, QTextCursor::MoveAnchor);
-                cursorSet.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, 
+                cursorSet.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor,
                         dr->range.left.line-1);
                 edit->setTextCursor(cursorSet);
                 qApp->processEvents();
@@ -2296,12 +2296,12 @@ pcErrorCode MainWindow::recordCall()
 	resetPerFrameStatistics();
 
 	setGlTraceItemIconType(GlTraceListItem::IT_RECORD);
-    
+
     pcErrorCode error = pc->recordCall();
 	/* TODO: error handling!!!!!! */
 
 	error = pc->callDone();
-	
+
     delete m_pCurrentCall;
     m_pCurrentCall = NULL;
 
@@ -2328,15 +2328,15 @@ void MainWindow::recordDrawCall()
 	pc->initRecording();
 	if (!strcmp(m_pCurrentCall->getName(), "glBegin")) {
 		while (currentRunLevel == RL_DBG_RECORD_DRAWCALL &&
-				(!m_pCurrentCall || 
-		             (m_pCurrentCall && 
+				(!m_pCurrentCall ||
+		             (m_pCurrentCall &&
 		              strcmp(m_pCurrentCall->getName(), "glEnd")))) {
 			if (recordCall() != PCE_NONE) {
 				return;
 			}
 			qApp->processEvents(QEventLoop::AllEvents);
 		}
-		if (!m_pCurrentCall || 
+		if (!m_pCurrentCall ||
 		    strcmp(m_pCurrentCall->getName(), "glEnd") ||
 		    recordCall() != PCE_NONE) {
 			if (currentRunLevel == RL_DBG_RECORD_DRAWCALL) {
@@ -2401,7 +2401,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 
         /* clean up debug run */
         cleanupDBGShader();
-        
+
         setRunLevel(RL_DBG_RESTART);
         return;
     }
@@ -2415,7 +2415,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 			return;
 		}
 	}
-	
+
 	/* setup debug render target */
 	switch (type) {
 		case 0:
@@ -2444,8 +2444,8 @@ void MainWindow::on_tbShaderExecute_clicked()
         	setRunLevel(RL_DBG_RESTART);
 			return;
 		}
-	} 
-	
+	}
+
 	/* record stream, store currently active shader program,
 	 * and enter debug state only when shader is executed the first time
 	 * and not after restart.
@@ -2466,7 +2466,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 			return;
 		}
 	}
-	
+
     switch (type) {
         case 0: /* Vertex shaders */
 			if (m_pShaders[0]) {
@@ -2504,9 +2504,9 @@ void MainWindow::on_tbShaderExecute_clicked()
 		setRunLevel(RL_SETUP);
 		return;
     }
-	
+
 	shaderCode = m_pShaders[type];
-   
+
 	if (! ShCompile(m_dShCompiler, &shaderCode, 1, EShOptNone, &m_dShResources, debugOptions, &m_dShVariableList)) {
 		const char *err = ShGetInfoLog(m_dShCompiler);
 		Dialog_CompilerError dlgCompilerError(this);
@@ -2519,10 +2519,10 @@ void MainWindow::on_tbShaderExecute_clicked()
 	}
 
     m_pShVarModel = new ShVarModel(&m_dShVariableList, this, qApp);
-    connect(m_pShVarModel, SIGNAL(newWatchItem(ShVarItem*)), 
+    connect(m_pShVarModel, SIGNAL(newWatchItem(ShVarItem*)),
             this, SLOT(updateWatchItemData(ShVarItem*)));
     QItemSelectionModel *selectionModel = new QItemSelectionModel(m_pShVarModel->getFilterModel(ShVarModel::TV_WATCH_LIST));
-    
+
     m_pShVarModel->attach(tvShVarAll, ShVarModel::TV_ALL);
     m_pShVarModel->attach(tvShVarBuiltIn, ShVarModel::TV_BUILTIN);
     m_pShVarModel->attach(tvShVarScope, ShVarModel::TV_SCOPE);
@@ -2530,9 +2530,9 @@ void MainWindow::on_tbShaderExecute_clicked()
     m_pShVarModel->attach(tvWatchList, ShVarModel::TV_WATCH_LIST);
 
     tvWatchList->setSelectionModel(selectionModel);
-	
+
     /* Watchview feedback for selection tracking */
-    connect(tvWatchList->selectionModel(), 
+    connect(tvWatchList->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
             this, SLOT(watchSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
@@ -2541,7 +2541,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 			m_serializedUniforms.count);
 
     ShaderStep(DBG_BH_JUMPINTO);
-	
+
 	if (currentRunLevel != RL_DBG_VERTEX_SHADER &&
 	    currentRunLevel != RL_DBG_GEOMETRY_SHADER &&
 	    currentRunLevel != RL_DBG_FRAGMENT_SHADER) {
@@ -2555,7 +2555,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 		m_pVertexCount = new VertexBox();
         UT_NOTIFY(LV_INFO, "Get GEOMETRY_MAP:");
 		if (getDebugVertexData(DBG_CG_GEOMETRY_MAP, NULL, NULL, m_pGeometryMap)) {
-			/* TODO: build geometry model */	
+			/* TODO: build geometry model */
 		} else {
 			cleanupDBGShader();
 			setRunLevel(RL_DBG_RESTART);
@@ -2563,7 +2563,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 		}
         UT_NOTIFY(LV_INFO, "Get VERTEX_COUNT:");
 		if (getDebugVertexData(DBG_CG_VERTEX_COUNT, NULL, NULL, m_pVertexCount)) {
-			/* TODO: build geometry model */	
+			/* TODO: build geometry model */
 		} else {
 			cleanupDBGShader();
 			setRunLevel(RL_DBG_RESTART);
@@ -2574,7 +2574,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 		//			m_dShResources.geoOutputType, m_pGeometryMap, m_pVertexCount);
 
 	}
-	
+
 }
 
 void MainWindow::on_tbShaderReset_clicked()
@@ -2673,7 +2673,7 @@ QModelIndexList MainWindow::cleanupSelectionList(QModelIndexList input)
     //    }
     //}
 
-    /* 
+    /*
      * Add directly selected items in reverse order such that getting them
      * from the stack restores the original order. This is also required
      * for all following push operations.
@@ -2685,7 +2685,7 @@ QModelIndexList MainWindow::cleanupSelectionList(QModelIndexList input)
     while (!stack.isEmpty()) {
         QModelIndex idx = stack.pop();
         ShVarItem *item = this->m_pShVarModel->getWatchItemPointer(idx);
-        
+
         // Item might be NULL because 'idx' can become invalid during recursion
         // which causes the parent removal to crash.
         if (item != NULL) {
@@ -2693,7 +2693,7 @@ QModelIndexList MainWindow::cleanupSelectionList(QModelIndexList input)
                 stack.push(idx.child(c, idx.column()));
             }
 
-            if ((item->childCount() == 0) && item->isSelectable() 
+            if ((item->childCount() == 0) && item->isSelectable()
                     && !output.contains(idx)) {
                 output << idx;
             }
@@ -2707,7 +2707,7 @@ WatchView* MainWindow::newWatchWindowFragment(QModelIndexList &list)
 {
 	WatchVector *window = NULL;
     int i;
-	
+
 	for (i=0; i<list.count(); i++) {
 		ShVarItem *item = m_pShVarModel->getWatchItemPointer(list[i]);
 		if (item) {
@@ -2747,7 +2747,7 @@ WatchView* MainWindow::newWatchWindowVertexTable(QModelIndexList &list)
 {
 	WatchTable *window = NULL;
     int i;
-	
+
 	for (i=0; i<list.count(); i++) {
 		ShVarItem *item = m_pShVarModel->getWatchItemPointer(list[i]);
 		if (item) {
@@ -2768,7 +2768,7 @@ WatchView* MainWindow::newWatchWindowGeoDataTree(QModelIndexList &list)
 {
 	WatchGeoDataTree *window = NULL;
     int i;
-	
+
 	for (i = 0; i < list.count(); i++) {
 		ShVarItem *item = m_pShVarModel->getWatchItemPointer(list[i]);
 		if (item) {
@@ -2793,7 +2793,7 @@ WatchView* MainWindow::newWatchWindowGeoDataTree(QModelIndexList &list)
 void MainWindow::on_tbWatchWindow_clicked()
 {
     QModelIndexList list = cleanupSelectionList(tvWatchList->selectionModel()->selectedRows(0));
-    
+
     if (m_pShVarModel && !list.isEmpty()) {
     	WatchView *window = NULL;
 		switch (currentRunLevel) {
@@ -2882,7 +2882,7 @@ void MainWindow::on_tbWatchWindowAdd_clicked()
 				addToWatchWindowFragment(window, list);
 				break;
 			default:
-                QMessageBox::critical(this, "Internal Error", 
+                QMessageBox::critical(this, "Internal Error",
                     "on_tbWatchWindowAdd_clicked was called on an invalid "
                     "run level.<br>Please report this probem to "
                     "<A HREF=\"mailto:glsldevil@vis.uni-stuttgart.de\">"
@@ -2910,7 +2910,7 @@ void MainWindow::updateWatchGui(int s)
 		tbWatchWindow->setEnabled(true);
 		if (workspace->activeWindow()) {
 			tbWatchWindowAdd->setEnabled(true);
-		} else { 
+		} else {
 			tbWatchWindowAdd->setEnabled(false);
 		}
 		tbWatchDelete->setEnabled(true);
@@ -2918,7 +2918,7 @@ void MainWindow::updateWatchGui(int s)
 		tbWatchWindow->setEnabled(true);
 		if (workspace->activeWindow()) {
 			tbWatchWindowAdd->setEnabled(true);
-		} else { 
+		} else {
 			tbWatchWindowAdd->setEnabled(false);
 		}
 		tbWatchDelete->setEnabled(true);
@@ -2931,7 +2931,7 @@ void MainWindow::on_tbWatchDelete_clicked()
 
     if (!tvWatchList) return;
     if (!m_pShVarModel) return;
-    
+
     QModelIndexList list;
     do {
         list = tvWatchList->selectionModel()->selectedIndexes();
@@ -2941,7 +2941,7 @@ void MainWindow::on_tbWatchDelete_clicked()
     } while (list.count() != 0);
 
     updateWatchGui(cleanupSelectionList(tvWatchList->selectionModel()->selectedRows()).count());
-    
+
     /* Now update all windows to update themselves if necessary */
     QWidgetList windowList = workspace->windowList();
 
@@ -2951,7 +2951,7 @@ void MainWindow::on_tbWatchDelete_clicked()
     }
 }
 
-void MainWindow::watchSelectionChanged(const QItemSelection& selected, 
+void MainWindow::watchSelectionChanged(const QItemSelection& selected,
                                        const QItemSelection& deselected)
 {
     UNUSED_ARG(selected)
@@ -2976,7 +2976,7 @@ void MainWindow::changedActiveWindow(QWidget *w)
 void MainWindow::leaveDBGState()
 {
 	pcErrorCode error = PCE_NONE;
-	
+
 	switch (currentRunLevel) {
 		case RL_DBG_RESTART:
 		case RL_DBG_RECORD_DRAWCALL:
@@ -3015,7 +3015,7 @@ void MainWindow::cleanupDBGShader()
 {
 	QList<ShVarItem*> watchItems;
 	int i;
-	
+
 	pcErrorCode error = PCE_NONE;
 
 	/* remove debug markers from code display */
@@ -3038,25 +3038,18 @@ void MainWindow::cleanupDBGShader()
 	if (document && edit) {
 		QTextCharFormat highlight;
 		QTextCursor cursor(document);
-		
+
 		cursor.setPosition(0, QTextCursor::MoveAnchor);
 		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor, 1);
 		highlight.setBackground(Qt::white);
 		cursor.mergeCharFormat(highlight);
 	}
-	
+
 	lWatchSelectionPos->setText("No Selection");
 	m_selectedPixel[0] = -1;
 	m_selectedPixel[1] = -1;
 
-    /* remove debug markers from code display */
-    QTextDocument *document = NULL;
-    QTextEdit     *edit = NULL;
     switch (currentRunLevel) {
-        case RL_DBG_VERTEX_SHADER:
-            document = teVertexShader->document();
-            edit = teVertexShader;
-            break;
         case RL_DBG_GEOMETRY_SHADER:
 			//delete m_pGeoDataModel;
         case RL_DBG_VERTEX_SHADER:
@@ -3064,7 +3057,7 @@ void MainWindow::cleanupDBGShader()
             while (!m_qLoopData.isEmpty()) {
                 delete m_qLoopData.pop();
             }
-			
+
 			if (m_pShVarModel) {
 				/* free data boxes */
 				watchItems = m_pShVarModel->getAllWatchItemPointers();
@@ -3084,11 +3077,11 @@ void MainWindow::cleanupDBGShader()
 						delete vb;
 					}
 				}
-				
+
 				/* Watchview feedback for selection tracking */
-				disconnect(tvWatchList->selectionModel(), 
+				disconnect(tvWatchList->selectionModel(),
 						   SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-						   this, 
+						   this,
 						   SLOT(watchSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 				/* reset shader debuging */
@@ -3102,7 +3095,7 @@ void MainWindow::cleanupDBGShader()
 				delete m_pShVarModel;
 				m_pShVarModel = NULL;
 			}
-			
+
 			if (m_dShCompiler) {
 				ShDestruct(m_dShCompiler);
 				m_dShCompiler = 0;
@@ -3124,7 +3117,7 @@ void MainWindow::cleanupDBGShader()
 				default:
 					error = PCE_NONE;
 			}
-				
+
 			setErrorStatus(error);
 			if (error != PCE_NONE) {
 				if (isErrorCritical(error)) {
@@ -3147,7 +3140,7 @@ void MainWindow::setRunLevel(int rl)
     QString title = QString(MAIN_WINDOW_TITLE);
     UT_NOTIFY(LV_INFO, "new level: " << rl << " " << (m_pCurrentCall ?
 			m_pCurrentCall->getName() : NULL));
-    
+
     switch (rl) {
         case RL_INIT: // Program start
             currentRunLevel = RL_INIT;
@@ -3370,7 +3363,7 @@ void MainWindow::setRunLevel(int rl)
             tbShaderStepOver->setEnabled(false);
             twShader->setTabIcon(0, QIcon());
             twShader->setTabIcon(1, QIcon());
-            twShader->setTabIcon(2, QIcon()); 
+            twShader->setTabIcon(2, QIcon());
             updateWatchGui(0);
             setGuiUpdates(true);
             break;
@@ -3495,7 +3488,7 @@ void MainWindow::setRunLevel(int rl)
 			tbToggleHaltOnError->setEnabled(false);
             tbGlTraceSettings->setEnabled(false);
             tbSave->setEnabled(true);
-            
+
 			if (m_bHaveValidShaderCode) {
 				switch (twShader->currentIndex()) {
 					case 0:
@@ -3540,7 +3533,7 @@ void MainWindow::setRunLevel(int rl)
             updateWatchGui(0);
             setGuiUpdates(true);
             break;
-		case RL_DBG_RESTART: 
+		case RL_DBG_RESTART:
 			currentRunLevel = rl;
             title.append(" - ");
             title.append(dbgProgArgs[0]);
@@ -3622,7 +3615,7 @@ void MainWindow::setRunLevel(int rl)
             break;
     }
 }
-    
+
 void MainWindow::setErrorStatus(pcErrorCode error)
 {
     QPalette palette;
@@ -3759,7 +3752,7 @@ void MainWindow::resetAllStatistics(void)
 	m_pWglExtPfst->resetStatistic();
 }
 
-bool MainWindow::loadMruProgram(QString& outProgram, QString& outArguments, 
+bool MainWindow::loadMruProgram(QString& outProgram, QString& outArguments,
         QString& outWorkDir) {
 	QSettings settings;
 	outProgram = settings.value("MRU/Program", "").toString();
@@ -3769,12 +3762,12 @@ bool MainWindow::loadMruProgram(QString& outProgram, QString& outArguments,
 }
 
 
-bool MainWindow::saveMruProgram(const QString& program, 
+bool MainWindow::saveMruProgram(const QString& program,
         const QString& arguments, const QString& workDir) {
 	QSettings settings;
 	settings.setValue("MRU/Program", program);
     settings.setValue("MRU/Arguments", arguments);
-    settings.setValue("MRU/WorkDir", workDir); 
+    settings.setValue("MRU/WorkDir", workDir);
     return true;
 }
 

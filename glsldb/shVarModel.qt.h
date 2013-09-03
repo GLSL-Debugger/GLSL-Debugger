@@ -157,7 +157,7 @@ public:
     QVariant data(int column) const;
     void setData(int i_nColumn, QVariant i_qData);
 
-    //ShChangeable* getShChangeable(void);
+    ShChangeable* getShChangeable(void);
 
 	void       setPixelBoxPointer(PixelBox *fb);
     PixelBox*  getPixelBoxPointer(void);
@@ -199,7 +199,7 @@ class ShVarModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    ShVarModel( void ShVariableList *i_pVL, QObject *i_qParent, QCoreApplication *i_qApp);
+    ShVarModel(ShVariableList *i_pVL, QObject *i_qParent, QCoreApplication *i_qApp);
     ~ShVarModel();
 
     QModelIndex index(int i_nRow, int i_nColumn, const QModelIndex &i_qParent = QModelIndex()) const;
@@ -210,7 +210,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &i_qIndex) const;
     QVariant headerData(int i_nSection, Qt::Orientation i_qOrientation, int i_nRole) const;
 
-    void setChangedAndScope(void ShChangeableList &i_pCL, DbgRsScope &i_pSL, DbgRsScope &i_pSSL);
+    void setChangedAndScope(ShChangeableList &i_pCL, DbgRsScope &i_pSL, DbgRsScope &i_pSSL);
 
 	void setCurrentValues(int key0, int key1);
 	void setCurrentValues(int key0);
@@ -250,7 +250,7 @@ private slots:
 private:
     QModelIndex getIndex(ShVarItem *i_qItem, int i_nColumn);
 
-    void setupModelData(const void /* ShVariableList*/ *i_pVL, ShVarItem *i_qParent);
+    void setupModelData(const ShVariableList *i_pVL, ShVarItem *i_qParent);
 
     void setRecursiveWatched(ShVarItem *i_qItem);
     void setRecursiveExpand(ShVarItem *i_qItem);
