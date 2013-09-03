@@ -2,6 +2,7 @@
 #define FUNCTIONSMAP_H
 
 #include <unordered_map>
+#include <string>
 
 #include "debuglib.h"
 

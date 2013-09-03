@@ -5,7 +5,6 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  6.5.2
  *
  * Copyright (C) 1999-2006  Brian Paul   All Rights Reserved.
  *
@@ -92,15 +91,6 @@ struct dd_function_table {
     * made.
     */
    void (*UpdateState)( struct gl_context *ctx, GLbitfield new_state );
-
-   /**
-    * Get the width and height of the named buffer/window.
-    *
-    * Mesa uses this to determine when the driver's window size has changed.
-    * XXX OBSOLETE: this function will be removed in the future.
-    */
-   void (*GetBufferSize)( struct gl_framebuffer *buffer,
-                          GLuint *width, GLuint *height );
 
    /**
     * Resize the given framebuffer to the given size.
@@ -249,10 +239,16 @@ struct dd_function_table {
 
    /**
     * Called by glCopyTex[Sub]Image[123]D().
+    *
+    * This function should copy a rectangular region in the rb to a single
+    * destination slice, specified by @slice.  In the case of 1D array
+    * textures (where one GL call can potentially affect multiple destination
+    * slices), core mesa takes care of calling this function multiple times,
+    * once for each scanline to be copied.
     */
    void (*CopyTexSubImage)(struct gl_context *ctx, GLuint dims,
                            struct gl_texture_image *texImage,
-                           GLint xoffset, GLint yoffset, GLint zoffset,
+                           GLint xoffset, GLint yoffset, GLint slice,
                            struct gl_renderbuffer *rb,
                            GLint x, GLint y,
                            GLsizei width, GLsizei height);

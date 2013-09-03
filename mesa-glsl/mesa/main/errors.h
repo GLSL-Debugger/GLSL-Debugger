@@ -1,6 +1,5 @@
 /*
  * Mesa 3-D graphics library
- * Version:  7.5
  *
  * Copyright (C) 1999-2008  Brian Paul   All Rights Reserved.
  *
@@ -102,7 +101,7 @@ _mesa_DebugMessageControlARB(GLenum source, GLenum type, GLenum severity,
                              GLboolean enabled);
 void GLAPIENTRY
 _mesa_DebugMessageCallbackARB(GLDEBUGPROCARB callback,
-                              const GLvoid *userParam);
+                              const void *userParam);
 
 #ifdef __cplusplus
 }

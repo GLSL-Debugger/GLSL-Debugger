@@ -43,9 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QSortFilterProxyModel>
 #include <QtCore/QCoreApplication>
 
-//#ifndef USE_MESA
-    #include "ShaderLang.h"
-//#endif
+#include "ShaderLang.h"
 
 #include "pixelBox.qt.h"
 #include "vertexBox.qt.h"
@@ -67,7 +65,7 @@ class TypedUniformData : public UniformData
 			memcpy(m_data, data, sizeof(T)*numElements);
 			m_numElements = numElements;
 		}
-		
+
 		~TypedUniformData()
 		{
 			delete [] m_data;
@@ -94,7 +92,7 @@ class Uniform
 
 		Uniform();
 		~Uniform();
-	
+
 		int initialize(const char* serializedUniform);
 
 		QString name() const
@@ -151,11 +149,11 @@ public:
 
     ShVarItem *child(int i_nRow);
     ShVarItem *parent();
-    
+
     int childCount() const;
     int columnCount() const;
     int row() const;
-    
+
     QVariant data(int column) const;
     void setData(int i_nColumn, QVariant i_qData);
 
@@ -169,7 +167,7 @@ public:
 
 	void       setCurrentPointer(VertexBox *vb);
 	VertexBox* getCurrentPointer(void);
-	
+
     bool      isChanged(void);
     bool      isSelectable(void);
 	bool      isInScope(void);
@@ -201,7 +199,7 @@ class ShVarModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    ShVarModel( void /*ShVariableList*/ *i_pVL, QObject *i_qParent, QCoreApplication *i_qApp);
+    ShVarModel( void ShVariableList *i_pVL, QObject *i_qParent, QCoreApplication *i_qApp);
     ~ShVarModel();
 
     QModelIndex index(int i_nRow, int i_nColumn, const QModelIndex &i_qParent = QModelIndex()) const;
@@ -212,7 +210,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &i_qIndex) const;
     QVariant headerData(int i_nSection, Qt::Orientation i_qOrientation, int i_nRole) const;
 
-    void setChangedAndScope(void /*ShChangeableList*/ &i_pCL, DbgRsScope &i_pSL, DbgRsScope &i_pSSL);
+    void setChangedAndScope(void ShChangeableList &i_pCL, DbgRsScope &i_pSL, DbgRsScope &i_pSSL);
 
 	void setCurrentValues(int key0, int key1);
 	void setCurrentValues(int key0);
@@ -229,7 +227,7 @@ public:
         TV_WATCH_LIST,
 		TV_UNIFORM
     } tvDisplayRole;
-    
+
     void attach(QTreeView *view, tvDisplayRole role);
     void detach(QAbstractItemView *view);
 
@@ -251,14 +249,14 @@ private slots:
 
 private:
     QModelIndex getIndex(ShVarItem *i_qItem, int i_nColumn);
-    
+
     void setupModelData(const void /* ShVariableList*/ *i_pVL, ShVarItem *i_qParent);
 
     void setRecursiveWatched(ShVarItem *i_qItem);
     void setRecursiveExpand(ShVarItem *i_qItem);
     void setItemWatched(const QModelIndex & i_qIndex);
     void unsetRecursiveWatched(ShVarItem *i_qItem);
-    
+
     void clearChanged(ShVarItem *i_qItem);
     void setRecursiveScope(ShVarItem *i_qItem, ShVarItem::Scope scope);
     void setRecursiveChanged(ShVarItem *i_qItem);

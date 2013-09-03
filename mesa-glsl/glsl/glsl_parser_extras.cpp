@@ -28,6 +28,7 @@
 extern "C" {
 #include "main/core.h" /* for struct gl_context */
 #include "main/context.h"
+#include "main/shaderobj.h"
 }
 
 #include "ralloc.h"
@@ -70,10 +71,12 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->loop_nesting_ast = NULL;
    this->switch_state.switch_nesting_ast = NULL;
 
+   this->struct_specifier_depth = 0;
    this->num_builtins_to_link = 0;
 
    /* Set default language version and extensions */
-   this->language_version = 110;
+   this->language_version = ctx->Const.ForceGLSLVersion ?
+                            ctx->Const.ForceGLSLVersion : 110;
    this->es_shader = false;
    this->ARB_texture_rectangle_enable = true;
 
@@ -226,6 +229,19 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
    if (ident) {
       if (strcmp(ident, "es") == 0) {
          es_token_present = true;
+      } else if (version >= 150) {
+         if (strcmp(ident, "core") == 0) {
+            /* Accept the token.  There's no need to record that this is
+             * a core profile shader since that's the only profile we support.
+             */
+         } else if (strcmp(ident, "compatibility") == 0) {
+            _mesa_glsl_error(locp, this,
+                             "The compatibility profile is not supported.\n");
+         } else {
+            _mesa_glsl_error(locp, this,
+                             "\"%s\" is not a valid shading language profile; "
+                             "if present, it must be \"core\".\n", ident);
+         }
       } else {
          _mesa_glsl_error(locp, this,
                           "Illegal text following version number\n");
@@ -289,6 +305,41 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
    }
 }
 
+extern "C" {
+
+/**
+ * The most common use of _mesa_glsl_shader_target_name(), which is
+ * shared with C code in Mesa core to translate a GLenum to a short
+ * shader stage name in debug printouts.
+ *
+ * It recognizes the PROGRAM variants of the names so it can be used
+ * with a struct gl_program->Target, not just a struct
+ * gl_shader->Type.
+ */
+const char *
+_mesa_glsl_shader_target_name(GLenum type)
+{
+   switch (type) {
+   case GL_VERTEX_SHADER:
+   case GL_VERTEX_PROGRAM_ARB:
+      return "vertex";
+   case GL_FRAGMENT_SHADER:
+   case GL_FRAGMENT_PROGRAM_ARB:
+      return "fragment";
+   case GL_GEOMETRY_SHADER:
+      return "geometry";
+   default:
+      assert(!"Should not get here.");
+      return "unknown";
+   }
+}
+
+} /* extern "C" */
+
+/**
+ * Overloaded C++ variant usable within the compiler for translating
+ * our internal enum into short stage names.
+ */
 const char *
 _mesa_glsl_shader_target_name(enum _mesa_glsl_parser_targets target)
 {
@@ -466,6 +517,7 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    EXT(OES_standard_derivatives,       false, false, true,  false,  true,     OES_standard_derivatives),
    EXT(ARB_texture_cube_map_array,     true,  false, true,  true,  false,     ARB_texture_cube_map_array),
    EXT(ARB_shading_language_packing,   true,  false, true,  true,  false,     ARB_shading_language_packing),
+   EXT(ARB_shading_language_420pack,   true,  true,  true,  true,  false,     ARB_shading_language_420pack),
    EXT(ARB_texture_multisample,        true,  false, true,  true,  false,     ARB_texture_multisample),
    EXT(ARB_texture_query_lod,          false, false, true,  true,  false,     ARB_texture_query_lod),
    EXT(ARB_gpu_shader5,                true,  true,  true,  true,  false,     ARB_gpu_shader5),
@@ -612,6 +664,194 @@ _mesa_glsl_process_extension(const char *name, YYLTYPE *name_locp,
 
    return true;
 }
+
+
+/**
+ * Returns the name of the type of a column of a matrix. E.g.,
+ *
+ *    "mat3"   -> "vec3"
+ *    "mat4x2" -> "vec2"
+ */
+static const char *
+_mesa_ast_get_matrix_column_type_name(const char *matrix_type_name)
+{
+   static const char *vec_name[] = { "vec2", "vec3", "vec4" };
+
+   /* The number of elements in a row of a matrix is specified by the last
+    * character of the matrix type name.
+    */
+   long rows = strtol(matrix_type_name + strlen(matrix_type_name) - 1,
+                      NULL, 10);
+   return vec_name[rows - 2];
+}
+
+/**
+ * Recurses through <type> and <expr> if <expr> is an aggregate initializer
+ * and sets <expr>'s <constructor_type> field to <type>. Gives later functions
+ * (process_array_constructor, et al) sufficient information to do type
+ * checking.
+ *
+ * Operates on assignments involving an aggregate initializer. E.g.,
+ *
+ * vec4 pos = {1.0, -1.0, 0.0, 1.0};
+ *
+ * or more ridiculously,
+ *
+ * struct S {
+ *     vec4 v[2];
+ * };
+ *
+ * struct {
+ *     S a[2], b;
+ *     int c;
+ * } aggregate = {
+ *     {
+ *         {
+ *             {
+ *                 {1.0, 2.0, 3.0, 4.0}, // a[0].v[0]
+ *                 {5.0, 6.0, 7.0, 8.0}  // a[0].v[1]
+ *             } // a[0].v
+ *         }, // a[0]
+ *         {
+ *             {
+ *                 {1.0, 2.0, 3.0, 4.0}, // a[1].v[0]
+ *                 {5.0, 6.0, 7.0, 8.0}  // a[1].v[1]
+ *             } // a[1].v
+ *         } // a[1]
+ *     }, // a
+ *     {
+ *         {
+ *             {1.0, 2.0, 3.0, 4.0}, // b.v[0]
+ *             {5.0, 6.0, 7.0, 8.0}  // b.v[1]
+ *         } // b.v
+ *     }, // b
+ *     4 // c
+ * };
+ *
+ * This pass is necessary because the right-hand side of <type> e = { ... }
+ * doesn't contain sufficient information to determine if the types match.
+ */
+void
+_mesa_ast_set_aggregate_type(const ast_type_specifier *type,
+                             ast_expression *expr,
+                             _mesa_glsl_parse_state *state)
+{
+   void *ctx = state;
+   ast_aggregate_initializer *ai = (ast_aggregate_initializer *)expr;
+   ai->constructor_type = (ast_type_specifier *)type;
+
+   bool is_declaration = ai->constructor_type->structure != NULL;
+   if (!is_declaration) {
+      /* Look up <type> name in the symbol table to see if it's a struct. */
+      const ast_type_specifier *struct_type =
+         state->symbols->get_type_ast(type->type_name);
+      ai->constructor_type->structure =
+         struct_type ? new(ctx) ast_struct_specifier(*struct_type->structure)
+                     : NULL;
+   }
+
+   /* If the aggregate is an array, recursively set its elements' types. */
+   if (type->is_array) {
+      /* We want to set the element type which is not an array itself, so make
+       * a copy of the array type and set its is_array field to false.
+       *
+       * E.g., if <type> if struct S[2] we want to set each element's type to
+       * struct S.
+       *
+       * FINISHME: Update when ARB_array_of_arrays is supported.
+       */
+      const ast_type_specifier *non_array_type =
+         new(ctx) ast_type_specifier(type, false, NULL);
+
+      for (exec_node *expr_node = ai->expressions.head;
+           !expr_node->is_tail_sentinel();
+           expr_node = expr_node->next) {
+         ast_expression *expr = exec_node_data(ast_expression, expr_node,
+                                               link);
+
+         if (expr->oper == ast_aggregate)
+            _mesa_ast_set_aggregate_type(non_array_type, expr, state);
+      }
+
+   /* If the aggregate is a struct, recursively set its fields' types. */
+   } else if (ai->constructor_type->structure) {
+      ai->constructor_type->structure->is_declaration = is_declaration;
+      exec_node *expr_node = ai->expressions.head;
+
+      /* Iterate through the struct's fields' declarations. E.g., iterate from
+       * "float a, b" to "int c" in the struct below.
+       *
+       *     struct {
+       *         float a, b;
+       *         int c;
+       *     } s;
+       */
+      for (exec_node *decl_list_node =
+              ai->constructor_type->structure->declarations.head;
+           !decl_list_node->is_tail_sentinel();
+           decl_list_node = decl_list_node->next) {
+         ast_declarator_list *decl_list = exec_node_data(ast_declarator_list,
+                                                         decl_list_node, link);
+
+         for (exec_node *decl_node = decl_list->declarations.head;
+              !decl_node->is_tail_sentinel() && !expr_node->is_tail_sentinel();
+              decl_node = decl_node->next, expr_node = expr_node->next) {
+            ast_declaration *decl = exec_node_data(ast_declaration, decl_node,
+                                                   link);
+            ast_expression *expr = exec_node_data(ast_expression, expr_node,
+                                                  link);
+
+            bool is_array = decl_list->type->specifier->is_array;
+            ast_expression *array_size = decl_list->type->specifier->array_size;
+
+            /* Recognize variable declarations with the bracketed size attached
+             * to the type rather than the variable name as arrays. E.g.,
+             *
+             *     float a[2];
+             *     float[2] b;
+             *
+             * are both arrays, but <a>'s array_size is decl->array_size, while
+             * <b>'s array_size is decl_list->type->specifier->array_size.
+             */
+            if (!is_array) {
+               /* FINISHME: Update when ARB_array_of_arrays is supported. */
+               is_array = decl->is_array;
+               array_size = decl->array_size;
+            }
+
+            /* Declaration shadows the <type> parameter. */
+            ast_type_specifier *type =
+               new(ctx) ast_type_specifier(decl_list->type->specifier,
+                                           is_array, array_size);
+
+            if (expr->oper == ast_aggregate)
+               _mesa_ast_set_aggregate_type(type, expr, state);
+         }
+      }
+   } else {
+      /* If the aggregate is a matrix, set its columns' types. */
+      const char *name;
+      const glsl_type *const constructor_type =
+         ai->constructor_type->glsl_type(&name, state);
+
+      if (constructor_type->is_matrix()) {
+         for (exec_node *expr_node = ai->expressions.head;
+              !expr_node->is_tail_sentinel();
+              expr_node = expr_node->next) {
+            ast_expression *expr = exec_node_data(ast_expression, expr_node,
+                                                  link);
+
+            /* Declaration shadows the <type> parameter. */
+            ast_type_specifier *type = new(ctx)
+               ast_type_specifier(_mesa_ast_get_matrix_column_type_name(name));
+
+            if (expr->oper == ast_aggregate)
+               _mesa_ast_set_aggregate_type(type, expr, state);
+         }
+      }
+   }
+}
+
 
 void
 _mesa_ast_type_qualifier_print(const struct ast_type_qualifier *q)
@@ -812,6 +1052,19 @@ ast_expression::print(void) const
       break;
    }
 
+   case ast_aggregate: {
+      printf("{ ");
+      foreach_list_const(n, & this->expressions) {
+	 if (n != this->expressions.get_head())
+	    printf(", ");
+
+	 ast_node *ast = exec_node_data(ast_node, n, link);
+	 ast->print();
+      }
+      printf("} ");
+      break;
+   }
+
    default:
       assert(0);
       break;
@@ -909,7 +1162,7 @@ ast_declaration::print(void) const
 }
 
 
-ast_declaration::ast_declaration(const char *identifier, int is_array,
+ast_declaration::ast_declaration(const char *identifier, bool is_array,
 				 ast_expression *array_size,
 				 ast_expression *initializer)
 {
@@ -946,7 +1199,6 @@ ast_declarator_list::ast_declarator_list(ast_fully_specified_type *type)
 {
    this->type = type;
    this->invariant = false;
-   this->ubo_qualifiers_valid = false;
 }
 
 void
@@ -974,6 +1226,7 @@ ast_jump_statement::print(void) const
 
 
 ast_jump_statement::ast_jump_statement(int mode, ast_expression *return_value)
+   : opt_return_value(NULL)
 {
    this->mode = ast_jump_modes(mode);
 
@@ -1186,8 +1439,91 @@ ast_struct_specifier::ast_struct_specifier(const char *identifier,
    }
    name = identifier;
    this->declarations.push_degenerate_list_at_head(&declarator_list->link);
+   is_declaration = true;
 }
 
+extern "C" {
+
+void
+_mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
+                          bool dump_ast, bool dump_hir)
+{
+   struct _mesa_glsl_parse_state *state =
+      new(shader) _mesa_glsl_parse_state(ctx, shader->Type, shader);
+   const char *source = shader->Source;
+
+   state->error = glcpp_preprocess(state, &source, &state->info_log,
+                             &ctx->Extensions, ctx);
+
+   if (!state->error) {
+     _mesa_glsl_lexer_ctor(state, source);
+     _mesa_glsl_parse(state);
+     _mesa_glsl_lexer_dtor(state);
+   }
+
+   if (dump_ast) {
+      foreach_list_const(n, &state->translation_unit) {
+         ast_node *ast = exec_node_data(ast_node, n, link);
+         ast->print();
+      }
+      printf("\n\n");
+   }
+
+   ralloc_free(shader->ir);
+   shader->ir = new(shader) exec_list;
+   if (!state->error && !state->translation_unit.is_empty())
+      _mesa_ast_to_hir(shader->ir, state);
+
+   if (!state->error) {
+      validate_ir_tree(shader->ir);
+
+      /* Print out the unoptimized IR. */
+      if (dump_hir) {
+         _mesa_print_ir(shader->ir, state);
+      }
+   }
+
+
+   if (!state->error && !shader->ir->is_empty()) {
+      struct gl_shader_compiler_options *options =
+         &ctx->ShaderCompilerOptions[_mesa_shader_type_to_index(shader->Type)];
+
+      /* Do some optimization at compile time to reduce shader IR size
+       * and reduce later work if the same shader is linked multiple times
+       */
+      while (do_common_optimization(shader->ir, false, false, 32, options))
+         ;
+
+      validate_ir_tree(shader->ir);
+   }
+
+   if (shader->InfoLog)
+      ralloc_free(shader->InfoLog);
+
+   shader->symbols = state->symbols;
+   shader->CompileStatus = !state->error;
+   shader->InfoLog = state->info_log;
+   shader->Version = state->language_version;
+   shader->InfoLog = state->info_log;
+   shader->IsES = state->es_shader;
+
+   memcpy(shader->builtins_to_link, state->builtins_to_link,
+          sizeof(shader->builtins_to_link[0]) * state->num_builtins_to_link);
+   shader->num_builtins_to_link = state->num_builtins_to_link;
+
+   if (shader->UniformBlocks)
+      ralloc_free(shader->UniformBlocks);
+   shader->NumUniformBlocks = state->num_uniform_blocks;
+   shader->UniformBlocks = state->uniform_blocks;
+   ralloc_steal(shader, shader->UniformBlocks);
+
+   /* Retain any live IR, but trash the rest. */
+   reparent_ir(shader->ir, shader->ir);
+
+   ralloc_free(state);
+}
+
+} /* extern "C" */
 /**
  * Do the set of common optimizations passes
  *

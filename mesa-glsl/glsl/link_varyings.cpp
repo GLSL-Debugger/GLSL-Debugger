@@ -31,6 +31,7 @@
 
 #include "main/mtypes.h"
 #include "glsl_symbol_table.h"
+#include "glsl_parser_extras.h"
 #include "ir_optimization.h"
 #include "linker.h"
 #include "link_varyings.h"
@@ -47,9 +48,10 @@ cross_validate_outputs_to_inputs(struct gl_shader_program *prog,
 				 gl_shader *producer, gl_shader *consumer)
 {
    glsl_symbol_table parameters;
-   /* FINISHME: Figure these out dynamically. */
-   const char *const producer_stage = "vertex";
-   const char *const consumer_stage = "fragment";
+   const char *const producer_stage =
+      _mesa_glsl_shader_target_name(producer->Type);
+   const char *const consumer_stage =
+      _mesa_glsl_shader_target_name(consumer->Type);
 
    /* Find all shader outputs in the "producer" stage.
     */
@@ -1111,16 +1113,12 @@ assign_varying_locations(struct gl_context *ctx,
       }
    }
 
-   unsigned varying_vectors = 0;
-
    if (consumer) {
       foreach_list(node, consumer->ir) {
          ir_variable *const var = ((ir_instruction *) node)->as_variable();
 
-         if ((var == NULL) || (var->mode != ir_var_shader_in))
-            continue;
-
-         if (var->is_unmatched_generic_inout) {
+         if (var && var->mode == ir_var_shader_in &&
+             var->is_unmatched_generic_inout) {
             if (prog->Version <= 120) {
                /* On page 25 (page 31 of the PDF) of the GLSL 1.20 spec:
                 *
@@ -1135,53 +1133,57 @@ assign_varying_locations(struct gl_context *ctx,
                 * "glsl1-varying read but not written" in piglit.
                 */
 
-               linker_error(prog, "fragment shader varying %s not written "
-                            "by vertex shader\n.", var->name);
+               linker_error(prog, "%s shader varying %s not written "
+                            "by %s shader\n.",
+                            _mesa_glsl_shader_target_name(consumer->Type),
+			    var->name,
+                            _mesa_glsl_shader_target_name(producer->Type));
             }
 
             /* An 'in' variable is only really a shader input if its
              * value is written by the previous stage.
              */
             var->mode = ir_var_auto;
-         } else if (is_varying_var(consumer->Type, var)) {
-            /* The packing rules are used for vertex shader inputs are also
-             * used for fragment shader inputs.
-             */
-            varying_vectors += count_attribute_slots(var->type);
          }
+      }
+   }
+
+   return true;
+}
+
+bool
+check_against_varying_limit(struct gl_context *ctx,
+                            struct gl_shader_program *prog,
+                            gl_shader *consumer)
+{
+   unsigned varying_vectors = 0;
+
+   foreach_list(node, consumer->ir) {
+      ir_variable *const var = ((ir_instruction *) node)->as_variable();
+
+      if (var && var->mode == ir_var_shader_in &&
+          is_varying_var(consumer->Type, var)) {
+         /* The packing rules used for vertex shader inputs are also
+          * used for fragment shader inputs.
+          */
+         varying_vectors += count_attribute_slots(var->type);
       }
    }
 
    if (ctx->API == API_OPENGLES2 || prog->IsES) {
       if (varying_vectors > ctx->Const.MaxVarying) {
-         if (ctx->Const.GLSLSkipStrictMaxVaryingLimitCheck) {
-            linker_warning(prog, "shader uses too many varying vectors "
-                           "(%u > %u), but the driver will try to optimize "
-                           "them out; this is non-portable out-of-spec "
-                           "behavior\n",
-                           varying_vectors, ctx->Const.MaxVarying);
-         } else {
-            linker_error(prog, "shader uses too many varying vectors "
-                         "(%u > %u)\n",
-                         varying_vectors, ctx->Const.MaxVarying);
-            return false;
-         }
+         linker_error(prog, "shader uses too many varying vectors "
+                      "(%u > %u)\n",
+                      varying_vectors, ctx->Const.MaxVarying);
+         return false;
       }
    } else {
       const unsigned float_components = varying_vectors * 4;
       if (float_components > ctx->Const.MaxVarying * 4) {
-         if (ctx->Const.GLSLSkipStrictMaxVaryingLimitCheck) {
-            linker_warning(prog, "shader uses too many varying components "
-                           "(%u > %u), but the driver will try to optimize "
-                           "them out; this is non-portable out-of-spec "
-                           "behavior\n",
-                           float_components, ctx->Const.MaxVarying * 4);
-         } else {
-            linker_error(prog, "shader uses too many varying components "
-                         "(%u > %u)\n",
-                         float_components, ctx->Const.MaxVarying * 4);
-            return false;
-         }
+         linker_error(prog, "shader uses too many varying components "
+                      "(%u > %u)\n",
+                      float_components, ctx->Const.MaxVarying * 4);
+         return false;
       }
    }
 

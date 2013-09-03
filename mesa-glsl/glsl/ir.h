@@ -36,6 +36,8 @@
 #include "ir_hierarchical_visitor.h"
 #include "main/mtypes.h"
 
+#ifdef __cplusplus
+
 /**
  * \defgroup IR Intermediate representation nodes
  *
@@ -469,6 +471,14 @@ public:
    unsigned explicit_index:1;
 
    /**
+    * Was an initial binding explicitly set in the shader?
+    *
+    * If so, constant_value contains an integer ir_constant representing the
+    * initial binding point.
+    */
+   unsigned explicit_binding:1;
+
+   /**
     * Does this variable have an initializer?
     *
     * This is used by the linker to cross-validiate initializers of global
@@ -524,6 +534,13 @@ public:
     * output index for dual source blending.
     */
    int index;
+
+   /**
+    * Initial binding point for a sampler or UBO.
+    *
+    * For array types, this represents the binding point for the first element.
+    */
+   int binding;
 
    /**
     * Built-in state that backs this uniform
@@ -2049,5 +2066,15 @@ do_set_program_inouts(exec_list *instructions, struct gl_program *prog,
 extern char *
 prototype_string(const glsl_type *return_type, const char *name,
 		 exec_list *parameters);
+
+extern "C" {
+#endif /* __cplusplus */
+
+extern void _mesa_print_ir(struct exec_list *instructions,
+                           struct _mesa_glsl_parse_state *state);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* IR_H */

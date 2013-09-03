@@ -72,7 +72,8 @@ public:
    hash_table *interface_namespace;
 
    flatten_named_interface_blocks_declarations(void *mem_ctx)
-      : mem_ctx(mem_ctx)
+      : mem_ctx(mem_ctx),
+        interface_namespace(NULL)
    {
    }
 
@@ -193,6 +194,8 @@ flatten_named_interface_blocks_declarations::handle_rvalue(ir_rvalue **rvalue)
       return;
 
    ir_variable *var = ir->variable_referenced();
+   if (var == NULL)
+      return;
 
    if (!var->is_interface_instance())
       return;

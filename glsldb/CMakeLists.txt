@@ -25,7 +25,7 @@ qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
 qt4_add_resources(RES_OUTFILES ${RES_FILES})
 
-set(SRC	
+set(SRC
 	${SRC_C}
 	${SRC_CPP}
 	${MOC_OUTFILES}
@@ -33,7 +33,7 @@ set(SRC
 	${RES_OUTFILES}
 )
 
-include_directories(${OPENGL_INCLUDE_DIR} 
+include_directories(${OPENGL_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
 	${QT_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
@@ -43,8 +43,7 @@ include_directories(${OPENGL_INCLUDE_DIR}
 )
 
 if(DEFINED USE_MESA)
-    include_directories(${PROJECT_SOURCE_DIR}/glsl-mesa/glsl)
-    include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
+    include_directories(${PROJECT_SOURCE_DIR}/glsl-mesa/Public)
     set(GLSL_LIBRARIES glslmesa)
 else()
     include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
@@ -57,9 +56,9 @@ if(GLSLDB_LINUX)
 endif()
 
 add_executable(glsldb ${SRC})
-target_link_libraries(glsldb 
-	${QT_LIBRARIES} 
-	${CMAKE_THREAD_LIBS_INIT} 
+target_link_libraries(glsldb
+	${QT_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
     ${GLSL_LIBRARIES}
 	glenumerants
 	functionList

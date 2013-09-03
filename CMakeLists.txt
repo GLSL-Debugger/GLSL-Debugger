@@ -4,7 +4,7 @@ project(glsldb)
 # DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Maintainer")
 
-# path to custom modules 
+# path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
 set(MNT_C_FLAGS "")
@@ -74,9 +74,7 @@ if(DEFINED USE_MESA)
     add_definitions(-DUSE_MESA)
     add_subdirectory(mesa-glsl)
 else()
-    #add_subdirectory(GLSLCompiler)
+    add_subdirectory(GLSLCompiler)
 endif()
-
-add_subdirectory(GLSLCompiler)
 
 add_subdirectory(glsldb)
