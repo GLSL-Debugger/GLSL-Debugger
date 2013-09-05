@@ -1365,8 +1365,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
     };
 
     char *debugCode = NULL;
-    debugCode = ShDebugGetProg(m_dShCompiler, cl, &m_dShVariableList,
-                            option);
+    debugCode = ShDebugGetProg(m_dShCompiler, cl, &m_dShVariableList, option);
     switch (currentRunLevel) {
         case RL_DBG_VERTEX_SHADER:
             shaders[0] = debugCode;

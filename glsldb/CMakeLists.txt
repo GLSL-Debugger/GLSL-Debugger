@@ -47,7 +47,7 @@ if(DEFINED USE_MESA)
     	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Public
     	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Include
     )
-    set(GLSL_LIBRARIES glsl_mesa)
+    set(GLSL_LIBRARIES glsl_mesa_interface)
 else()
     include_directories(${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public)
     set(GLSL_LIBRARIES glslang)
