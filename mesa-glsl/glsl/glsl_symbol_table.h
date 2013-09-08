@@ -73,7 +73,7 @@ public:
       ralloc_set_destructor(table, NULL);
       ralloc_free(table);
    }
-   
+
    glsl_symbol_table();
    ~glsl_symbol_table();
 
@@ -120,6 +120,11 @@ public:
    const glsl_type *get_interface(const char *name,
                                   enum ir_variable_mode mode);
    /*@}*/
+
+   /**
+    * Get avaliable names names from symbol table
+    */
+   struct _mesa_symbol_desc* get_descs(int scope_depth);
 
 private:
    symbol_table_entry *get_entry(const char *name);
