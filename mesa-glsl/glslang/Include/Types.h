@@ -62,7 +62,7 @@ inline TTypeList* NewPoolTTypeList()
 
 //
 // This is a workaround for a problem with the yacc stack,  It can't have
-// types that it thinks have non-trivial constructors.  It should 
+// types that it thinks have non-trivial constructors.  It should
 // just be used while recognizing the grammar, not anything else.  Pointers
 // could be used, but also trying to avoid lots of memory management overhead.
 //
@@ -158,7 +158,7 @@ typedef std::map<TTypeList*, TTypeList*>::iterator TStructureMapIterator;
 class TType {
 public:
     POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
-    explicit TType(TBasicType t, TQualifier q = EvqTemporary, TVaryingModifier vm = EvmNone, 
+    explicit TType(TBasicType t, TQualifier q = EvqTemporary, TVaryingModifier vm = EvmNone,
             int s = 1, int mS1 = 1, int mS2 = 1, bool m = false, bool a = false) :
         type(t), qualifier(q), varyingModifier(vm), size(s), matrix(m), array(a),
         structure(0), structureSize(0), arrayInformationType(0), fieldName(0), mangled(0), typeName(0), specified(0) {
@@ -171,7 +171,7 @@ public:
             }
         }
     explicit TType(const TPublicType &p) :
-        type(p.type), qualifier(p.qualifier), varyingModifier(p.varyingModifier), size(p.size), matrix(p.matrix), 
+        type(p.type), qualifier(p.qualifier), varyingModifier(p.varyingModifier), size(p.size), matrix(p.matrix),
         array(p.array),
         structure(0), structureSize(0), arrayInformationType(0), fieldName(0), mangled(0), typeName(0), specified(0) {
             int i;
@@ -200,7 +200,7 @@ public:
         }
     explicit TType() { }
     virtual ~TType() {}
-    
+
     TType(const TType& type) { *this = type; }
 
     void copyType(const TType& copyOf, TStructureMap& remapper)
@@ -219,7 +219,7 @@ public:
             maxArraySize[i] = copyOf.maxArraySize[i];
         }
         specified = copyOf.specified;
-        
+
         TStructureMapIterator iter;
         if (copyOf.structure) {
 	        if ((iter = remapper.find(structure)) == remapper.end()) {
@@ -236,31 +236,31 @@ public:
             }
         } else
             structure = 0;
-        
+
         fieldName = 0;
         if (copyOf.fieldName)
             fieldName = NewPoolTString(copyOf.fieldName->c_str());
         typeName = 0;
         if (copyOf.typeName)
             typeName = NewPoolTString(copyOf.typeName->c_str());
-        
+
         mangled = 0;
         if (copyOf.mangled)
             mangled = NewPoolTString(copyOf.mangled->c_str());
-        
+
         structureSize = copyOf.structureSize;
         assert(copyOf.arrayInformationType == 0);
         arrayInformationType = 0; // arrayInformationType should not be set for builtIn symbol table level
     }
-    
+
     TType* clone(TStructureMap& remapper)
     {
         TType *newType = new TType();
         newType->copyType(*this, remapper);
-        
+
         return newType;
     }
-    
+
     virtual void setType(TBasicType t, int s = 1, int mS1 = 1, int mS2 = 1, bool m = false, bool a = false, int aS = 0)
     {
         type = t;
@@ -269,46 +269,46 @@ public:
         matrixSize[0] = mS1;
         matrixSize[1] = mS2;
         array = a;
-        arraySize[0] = aS; 
+        arraySize[0] = aS;
     }
     virtual void setType(TBasicType t, int s = 1, int mS1 = 1, int mS2 = 1, bool m = false, TType* userDef = 0)
-    { 
+    {
         type = t;
         size = s;
         matrix = m;
         matrixSize[0] = mS1;
         matrixSize[1] = mS2;
         if (userDef)
-            structure = userDef->getStruct(); 
+            structure = userDef->getStruct();
         // leave array information intact.
     }
 
     virtual void setTypeName(const TString& n) { typeName = NewPoolTString(n.c_str()); }
     virtual void setFieldName(const TString& n) { fieldName = NewPoolTString(n.c_str()); }
     virtual const TString& getTypeName() const
-    { 
-        assert(typeName);    		
-        return *typeName; 
+    {
+        assert(typeName);
+        return *typeName;
     }
-    
+
     virtual const TString& getFieldName() const
-    { 
+    {
         assert(fieldName);
-        return *fieldName; 
+        return *fieldName;
     }
-    
+
     virtual TBasicType getBasicType() const { return type; }
     virtual TQualifier getQualifier() const { return qualifier; }
     virtual TVaryingModifier getVaryingModifier() const { return varyingModifier; }
     virtual void changeQualifier(TQualifier q) { qualifier = q; }
     virtual void changeVaryingModifier(TVaryingModifier vm) { varyingModifier = vm; }
     virtual void addVaryingModifier(TVaryingModifier vm) { varyingModifier |= vm; }
-    
+
     // One-dimensional size of single instance type
-    virtual int getNominalSize() const { return size; }  
-    
+    virtual int getNominalSize() const { return size; }
+
     // Full-dimensional size of single instance of type
-    virtual int getInstanceSize() const  
+    virtual int getInstanceSize() const
     {
         if (matrix) {
             return matrixSize[0] * matrixSize[1];
@@ -319,7 +319,7 @@ public:
 
     // Get matrix sizes
     virtual int getMatrixSize(int i) const { return i==0?matrixSize[0]:matrixSize[1]; }
-    
+
     virtual bool isMatrix() const { return matrix ? true : false; }
     virtual bool isArray() const  { return array ? true : false; }
     int getArraySize(int i = 0) const { return arraySize[i]; }
@@ -338,12 +338,12 @@ public:
         }
         return n;
     }
-    void clearArrayness() { 
+    void clearArrayness() {
         int i;
-        array = false; 
+        array = false;
         for (i=0; i<MAX_ARRAYS; i++) {
             arraySize[i] = -1;
-            maxArraySize[i] = 0; 
+            maxArraySize[i] = 0;
         }
     }
     void setArrayInformationType(TType* t) { arrayInformationType = t; }
@@ -395,32 +395,32 @@ public:
     const char* getQualifierString(EShLanguage l = EShLangFragment) const { return ::getQualifierString(qualifier, l); }
     const char* getVaryingModifierString() const { return ::getVaryingModifierString(varyingModifier); }
     TTypeList* getStruct() { return structure; }
-    
+
     int getObjectSize() const
     {
         int totalSize;
-        
+
         if (getBasicType() == EbtStruct)
             totalSize = getStructSize();
         else if (matrix)
             totalSize = matrixSize[0] * matrixSize[1];
-        else 
+        else
             totalSize = size;
-        
+
         if (isArray())
             totalSize *= Max(getArraySize(), getMaxArraySize());
-        
+
         return totalSize;
     }
-    
+
     TTypeList* getStruct() const { return structure; }
     TString& getMangledName() {
         if (!mangled) {
             mangled = NewPoolTString("");
-            buildMangledName(*mangled);            
+            buildMangledName(*mangled);
             *mangled += ';' ;
         }
-        
+
         return *mangled;
     }
     bool sameElementType(const TType& right) const {
@@ -439,7 +439,7 @@ public:
                 matrix == right.matrix &&
                 (matrix || size == right.size) &&
                 (!matrix || (matrixSize[0] == right.matrixSize[0] && matrixSize[1] == right.matrixSize[1])) &&
-                array == right.array  && 
+                array == right.array  &&
                 structure == right.structure;
 
         } else {
@@ -454,7 +454,7 @@ public:
                 matrix == right.matrix &&
                 (matrix || size == right.size) &&
                 (!matrix || (matrixSize[0] == right.matrixSize[0] && matrixSize[1] == right.matrixSize[1])) &&
-                array == right.array  && 
+                array == right.array  &&
                 structure == right.structure;
         }
     }
@@ -466,7 +466,7 @@ public:
 
     bool isSpecified() { return specified; }
     void setSpecified(bool sp) { specified = sp; }
-        
+
 
     variableType getShBasicType(void) {
         switch (type) {
@@ -546,7 +546,7 @@ public:
                 exit(1);
         }
     }
-    
+
     variableQualifier getShQualifier(void) {
         switch (qualifier) {
             case EvqTemporary:
@@ -595,32 +595,32 @@ public:
     variableVaryingModifier getShVaryingModifier(void) {
         return varyingModifier;
     }
-    
+
     ShVariable* getShVariable(void) {
         int i;
         ShVariable *v = (ShVariable*) malloc(sizeof(ShVariable));
-        
+
         // Type has no identifier! To be filled in later by TVariable
         v->uniqueId = -1;
-        
+
         v->builtin = false;
-        
+
         if (!fieldName) {
             v->name = NULL;
         } else {
             v->name = (char*) malloc(strlen(fieldName->c_str())+1);
             strcpy(v->name, fieldName->c_str());
         }
-        
+
         // Type of variable (SH_FLOAT/SH_INT/SH_BOOL/SH_STRUCT)
         v->type = getShBasicType();
-        
+
         // Qualifier of variable
         v->qualifier = getShQualifier();
 
         // Varying modifier
         v->varyingModifier = getShVaryingModifier();
-        
+
         // Scalar/Vector size
         v->size = getNominalSize();
 
@@ -644,7 +644,7 @@ public:
             v->structSize = (int)structure->size();
             v->structSpec = (ShVariable**) malloc(v->structSize *
                     sizeof(ShVariable*));
-            
+
             if (strlen(typeName->c_str()) != 0) {
                 v->structName = (char*) malloc(strlen(typeName->c_str())+1);
                 strcpy(v->structName, typeName->c_str());
@@ -652,7 +652,7 @@ public:
                 v->structName = (char*) malloc(strlen(UNNAMED_STRUCT)+1);
                 strcpy(v->structName, UNNAMED_STRUCT);
             }
-            
+
             TTypeList::iterator tli = structure->begin();
             i = 0;
             while (tli != structure->end()) {
@@ -680,7 +680,7 @@ protected:
     unsigned int array   ;//: 1;
     int arraySize[MAX_ARRAYS];
     int matrixSize[2];
-    
+
 
     TTypeList* structure;      // 0 unless this is a struct
     mutable int structureSize;
@@ -689,7 +689,7 @@ protected:
     TString *fieldName;         // for structure field names
     TString *mangled;
     TString *typeName;          // for structure field type name
-    
+
     bool specified;
 };
 

@@ -327,7 +327,8 @@ typedef enum {
     SH_VM_INVARIANT = 1,
     SH_VM_FLAT = 2,
     SH_VM_CENTROID = 4,
-    SH_VM_NOPERSPECTIVE = 8
+    SH_VM_NOPERSPECTIVE = 8,
+    SH_VM_SMOOTH = 16
 } variableVMTypes;
 
 typedef int variableVaryingModifier;

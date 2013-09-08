@@ -19,6 +19,7 @@ cmake_install.cmake
 Makefile
 
 # output & generated stuff
+Build/
 bin
 lib
 GLSLCompiler/glslang/MachineIndependent/Gen_glslang.cpp
