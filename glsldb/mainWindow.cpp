@@ -746,7 +746,7 @@ void MainWindow::setShaderCodeText(char *shaders[3])
 				teGeometryShader);
 		/* the document becomes owner of the highlighter, so it get's freed */
 		GlslSyntaxHighlighter *highlighter;
-		highlighter= new GlslSyntaxHighlighter(newDoc);
+		highlighter = new GlslSyntaxHighlighter(newDoc);
 		teGeometryShader->setDocument(newDoc);
 		teGeometryShader->setTabStopWidth(30);
 	} else {
@@ -761,7 +761,7 @@ void MainWindow::setShaderCodeText(char *shaders[3])
 				teFragmentShader);
 		/* the document becomes owner of the highlighter, so it get's freed */
 		GlslSyntaxHighlighter *highlighter;
-		highlighter= new GlslSyntaxHighlighter(newDoc);
+		highlighter = new GlslSyntaxHighlighter(newDoc);
 		teFragmentShader->setDocument(newDoc);
 		teFragmentShader->setTabStopWidth(30);
 	} else {

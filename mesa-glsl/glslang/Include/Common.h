@@ -135,7 +135,7 @@ inline TSourceRange addRange(TSourceRange a, TSourceRange b)
 
     #include <assert.h>
 
-#include "PoolAlloc.h"
+//#include "PoolAlloc.h"
 
 //
 // Put POOL_ALLOCATOR_NEW_DELETE in base classes to make them use this scheme.
@@ -157,48 +157,48 @@ inline TSourceRange addRange(TSourceRange a, TSourceRange b)
 //
 // Pool version of string.
 //
-typedef pool_allocator<char> TStringAllocator;
-typedef std::basic_string <char, std::char_traits<char>, TStringAllocator > TString;
-inline TString* NewPoolTString(const char* s)
-{
-    void* memory = GlobalPoolAllocator.allocate(sizeof(TString));
-    return new(memory) TString(s);
-}
+//typedef pool_allocator<char> TStringAllocator;
+//typedef std::basic_string <char, std::char_traits<char>, TStringAllocator > TString;
+//inline TString* NewPoolTString(const char* s)
+//{
+//    void* memory = GlobalPoolAllocator.allocate(sizeof(TString));
+//    return new(memory) TString(s);
+//}
 
 //
 // Pool allocator versions of vectors, lists, and maps
 //
-template <class T> class TVector : public std::vector<T, pool_allocator<T> > {
-public:
-    typedef typename std::vector<T, pool_allocator<T> >::size_type size_type;
-    TVector() : std::vector<T, pool_allocator<T> >() {}
-    TVector(const pool_allocator<T>& a) : std::vector<T, pool_allocator<T> >(a) {}
-    TVector(size_type i): std::vector<T, pool_allocator<T> >(i) {}
-};
-
-template <class T> class TList   : public TBaseList  <T, pool_allocator<T> > {
-public:
-    typedef typename TBaseList<T, pool_allocator<T> >::size_type size_type;
-    TList() : TBaseList<T, pool_allocator<T> >() {}
-    TList(const pool_allocator<T>& a) : TBaseList<T, pool_allocator<T> >(a) {}
-    TList(size_type i): TBaseList<T, pool_allocator<T> >(i) {}
-};
+//template <class T> class TVector : public std::vector<T, pool_allocator<T> > {
+//public:
+//    typedef typename std::vector<T, pool_allocator<T> >::size_type size_type;
+//    TVector() : std::vector<T, pool_allocator<T> >() {}
+//    TVector(const pool_allocator<T>& a) : std::vector<T, pool_allocator<T> >(a) {}
+//    TVector(size_type i): std::vector<T, pool_allocator<T> >(i) {}
+//};
+//
+//template <class T> class TList   : public TBaseList  <T, pool_allocator<T> > {
+//public:
+//    typedef typename TBaseList<T, pool_allocator<T> >::size_type size_type;
+//    TList() : TBaseList<T, pool_allocator<T> >() {}
+//    TList(const pool_allocator<T>& a) : TBaseList<T, pool_allocator<T> >(a) {}
+//    TList(size_type i): TBaseList<T, pool_allocator<T> >(i) {}
+//};
 
 // This is called TStlSet, because TSet is taken by an existing compiler class.
-template <class T, class CMP> class TStlSet : public std::set<T, CMP, pool_allocator<T> > {
-    // No pool allocator versions of constructors in std::set.
-};
+//template <class T, class CMP> class TStlSet : public std::set<T, CMP, pool_allocator<T> > {
+//    // No pool allocator versions of constructors in std::set.
+//};
 
 
-template <class K, class D, class CMP = std::less<K> >
-class TMap : public TBaseMap<K, D, CMP, pool_allocator<std::pair<const K, D> > > {
-public:
-    typedef pool_allocator<std::pair <const K, D> > tAllocator;
-
-    TMap() : TBaseMap<K, D, CMP, tAllocator >() {}
-    // use correct two-stage name lookup supported in gcc 3.4 and above
-    TMap(const tAllocator& a) : TBaseMap<K, D, CMP, tAllocator>(TBaseMap<K, D, CMP, tAllocator >::key_compare(), a) {}
-};
+//template <class K, class D, class CMP = std::less<K> >
+//class TMap : public TBaseMap<K, D, CMP, pool_allocator<std::pair<const K, D> > > {
+//public:
+//    typedef pool_allocator<std::pair <const K, D> > tAllocator;
+//
+//    TMap() : TBaseMap<K, D, CMP, tAllocator >() {}
+//    // use correct two-stage name lookup supported in gcc 3.4 and above
+//    TMap(const tAllocator& a) : TBaseMap<K, D, CMP, tAllocator>(TBaseMap<K, D, CMP, tAllocator >::key_compare(), a) {}
+//};
 
 //
 // Persistent string memory.  Should only be used for strings that survive
@@ -215,46 +215,29 @@ template <class T> T Max(const T a, const T b) { return a > b ? a : b; }
 //
 // Create a TString object from an integer.
 //
-inline const TString String(const int i, const int base = 10)
-{
-    char text[16];     // 32 bit ints are at most 10 digits in base 10
-
-#ifdef _WIN32
-    _itoa(i, text, base);
-#else
-    UNUSED_ARG(base)
-    // we assume base 10 for all cases
-    sprintf(text, "%d", i);
-#endif
-
-    return text;
-}
+//inline const TString String(const int i, const int base = 10)
+//{
+//    char text[16];     // 32 bit ints are at most 10 digits in base 10
+//
+//#ifdef _WIN32
+//    _itoa(i, text, base);
+//#else
+//    UNUSED_ARG(base)
+//    // we assume base 10 for all cases
+//    sprintf(text, "%d", i);
+//#endif
+//
+//    return text;
+//}
 
 const unsigned int SourceLocLineMask = 0xffff;
 const unsigned int SourceLocStringShift = 16;
 
-__inline TPersistString FormatSourceRange(const TSourceRange range)
-{
-    char locText[128];
-
-    sprintf(locText, "%4d:%3d - %4d:%3d", range.left.line, range.left.colum,
-                                        range.right.line, range.right.colum);
-    /*
-    int string = loc >> SourceLocStringShift;
-    int line = loc & SourceLocLineMask;
-
-    if (line)
-        sprintf(locText, "%d:%d", string, line);
-    else
-        sprintf(locText, "%d:? ", string);
-    */
-
-    return TPersistString(locText);
-}
 
 
-typedef TMap<TString, TString> TPragmaTable;
-typedef TMap<TString, TString>::tAllocator TPragmaTableAllocator;
+
+//typedef TMap<TString, TString> TPragmaTable;
+//typedef TMap<TString, TString>::tAllocator TPragmaTableAllocator;
 
 //
 // Extension handling inside intermediate representation
@@ -266,7 +249,7 @@ typedef enum {
     EBhDisable
 } TBehavior;
 
-typedef std::pair<TString, TBehavior> TExtensionPair;
-typedef TList<TExtensionPair> TExtensionList;
+//typedef std::pair<TString, TBehavior> TExtensionPair;
+//typedef TList<TExtensionPair> TExtensionList;
 
 #endif // _COMMON_INCLUDED_

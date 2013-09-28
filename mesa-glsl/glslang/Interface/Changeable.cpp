@@ -7,6 +7,7 @@
 #include "ShaderLang.h"
 #include "glsldb/utils/notify.h"
 #include <string.h>
+#include "ir.h"
 
 static const char* getShTypeString(ShVariable *v)
 {
@@ -197,11 +198,12 @@ ShChangeable* createShChangeable(int id)
         UT_NOTIFY(LV_ERROR, "not enough memory for cgb\n");
     }
     cgb->id = id;
+    cgb->data = NULL;
     cgb->numIndices = 0;
     cgb->indices = NULL;
-
     return cgb;
 }
+
 
 ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
 {
@@ -216,6 +218,7 @@ ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
 
     return idx;
 }
+
 
 
 void addShChangeable(ShChangeableList *cl, ShChangeable *c)
@@ -241,6 +244,7 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
                 cl->numChangeables*sizeof(ShChangeable*));
 
     copy = createShChangeable(c->id);
+    copy->data = c->data;
 
     // add all indices
     for (i=0; i<c->numIndices; i++) {
@@ -257,7 +261,6 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
 
     cl->changeables[cl->numChangeables-1] = copy;
 }
-
 
 void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
 {

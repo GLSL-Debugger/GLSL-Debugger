@@ -56,6 +56,8 @@
 // and the shading language compiler/linker.
 //
 
+class ir_instruction;
+
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -100,6 +102,8 @@ typedef enum {
     EShOptFull,         // Optimizations that will take more time
 } EShOptimizationLevel;
 
+
+/*
 //
 // Build a table for bindings.  This can be used for locating
 // attributes, uniforms, globals, etc., as needed.
@@ -114,6 +118,7 @@ typedef struct {
 	ShBinding* bindings;  // array of bindings
 } ShBindingTable;
 
+*/
 //
 // Typedefs for changeables
 //
@@ -124,6 +129,7 @@ typedef enum {
     SH_CGB_SWIZZLE
 } ShChangeableType;
 
+
 typedef struct {
     ShChangeableType type;
     int index;
@@ -131,9 +137,11 @@ typedef struct {
 
 typedef struct {
     int id;
+    ir_instruction *data;
     int numIndices;
     ShChangeableIndex **indices;
 } ShChangeable;
+
 
 typedef struct {
     int numChangeables;
@@ -447,9 +455,9 @@ SH_IMPORT_EXPORT void ShSetEncryptionMethod(ShHandle);
 //
 SH_IMPORT_EXPORT const char* ShGetInfoLog(const ShHandle);
 SH_IMPORT_EXPORT const void* ShGetExecutable(const ShHandle);
-SH_IMPORT_EXPORT int ShSetVirtualAttributeBindings(const ShHandle, const ShBindingTable*);   // to detect user aliasing
-SH_IMPORT_EXPORT int ShSetFixedAttributeBindings(const ShHandle, const ShBindingTable*);     // to force any physical mappings
-SH_IMPORT_EXPORT int ShGetPhysicalAttributeBindings(const ShHandle, const ShBindingTable**); // for all attributes
+//SH_IMPORT_EXPORT int ShSetVirtualAttributeBindings(const ShHandle, const ShBindingTable*);   // to detect user aliasing
+//SH_IMPORT_EXPORT int ShSetFixedAttributeBindings(const ShHandle, const ShBindingTable*);     // to force any physical mappings
+//SH_IMPORT_EXPORT int ShGetPhysicalAttributeBindings(const ShHandle, const ShBindingTable**); // for all attributes
 //
 // Tell the linker to never assign a vertex attribute to this list of physical attributes
 //

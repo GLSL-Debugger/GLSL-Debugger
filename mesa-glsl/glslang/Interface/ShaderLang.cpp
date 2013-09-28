@@ -6,6 +6,7 @@
 
 #include "ShaderLang.h"
 #include "ShaderHolder.h"
+#include "Program.h"
 
 // Mesa includes
 #include "glsl/standalone_scaffolding.h"
@@ -13,6 +14,8 @@
 #include "glsl/glsl_symbol_table.cpp"
 #include "glsl/program.h"
 #include "glsl/ralloc.h"
+#include "mesa/main/mtypes.h"
+
 
 #include "glsldb/utils/notify.h"
 
@@ -24,6 +27,13 @@
 int glsl_es = 0;
 int glsl_version = 150;
 struct gl_context *main_context;
+
+
+static struct {
+	DbgResult result;
+	unsigned int position;
+} g;
+
 
 variableQualifier qualifierToNative(unsigned mode)
 {
@@ -220,6 +230,7 @@ ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
 	holder->language = language;
 	holder->debugOptions = debugOptions;
 	holder->program = NULL;
+	//holder->parse_context = NULL;
 	return reinterpret_cast< void* >( holder );
 }
 
@@ -278,9 +289,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 		const int numStrings, const EShOptimizationLevel optLevel,
 		const TBuiltInResource* resources, int debugOptions, ShVariableList *vl)
 {
-	// I'm not sure about it. In s3 compiler it was passed to context, in mesa
-	// I do not see anything like hardware limits for context.
-	// Mesa knows about limits somehow, I think.
+	// TODO: may be added to context.
 	UNUSED_ARG(resources)
 	// Also do not see something like in mesa yet.
 	UNUSED_ARG(optLevel)
@@ -350,9 +359,38 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 
 DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 {
-	DbgResult *result = NULL;
+	DbgResult* result = NULL;
+
+	if( handle == NULL )
+		return 0;
+
+	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
+	struct gl_shader* shader = holder->program->Shaders[0];
+//
+//	switch( holder->language ){
+//		case EShLangVertex:
+//			shader =  holder->program->_LinkedShaders[MESA_SHADER_VERTEX];
+//			break;
+//		case EShLangFragment:
+//			shader = holder->program->_LinkedShaders[MESA_SHADER_FRAGMENT];
+//			break;
+//		case EShLangGeometry:
+//			shader = holder->program->_LinkedShaders[MESA_SHADER_GEOMETRY];
+//			break;
+//	}
+
+	result = ShaderTraverse( shader, debugOptions, dbgBh );
+
+
+
+/*
+	s->
+
+	struct gl_program_machine* machine = new_machine();
+	_mesa_execute_program_steps(main_context, holder->program, machine, g.position, g.position + 1);
+	g.position++;
+*/
 	/*
-	 TShHandleBase* base = reinterpret_cast<TShHandleBase*>(handle);
 	 TCompiler* compiler = base->getAsCompiler();
 	 if (compiler == 0)
 	 return NULL;

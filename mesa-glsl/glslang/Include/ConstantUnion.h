@@ -39,7 +39,7 @@
 class constUnion {
 public:
 
-    POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)        
+    //POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
     void setIConst(int i) {iConst = i; type = EbtInt; }
     void setUIConst(int i) {iConst = i; type = EbtUInt; }
     void setFConst(float f) {fConst = f; type = EbtFloat; }
@@ -89,17 +89,17 @@ public:
             case EbtUInt:
                 if (constant.iConst == iConst)
                     return true;
-                
+
                 break;
             case EbtFloat:
                 if (constant.fConst == fConst)
                     return true;
-                
+
                 break;
             case EbtBool:
                 if (constant.bConst == bConst)
                     return true;
-                
+
                 break;
             default:
                 return false;
@@ -129,7 +129,7 @@ public:
     }
 
     bool operator>(const constUnion& constant) const
-    { 
+    {
         assert(type == constant.type);
         switch (type) {
         case EbtInt:
@@ -152,7 +152,7 @@ public:
     }
 
     bool operator<(const constUnion& constant) const
-    { 
+    {
         assert(type == constant.type);
         switch (type) {
         case EbtInt:
@@ -175,7 +175,7 @@ public:
     }
 
     constUnion operator+(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -189,7 +189,7 @@ public:
     }
 
     constUnion operator-(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -203,13 +203,13 @@ public:
     }
 
     constUnion operator*(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
         case EbtInt: returnValue.setIConst(iConst * constant.iConst); break;
         case EbtUInt: returnValue.setUIConst(iConst * constant.iConst); break;
-        case EbtFloat: returnValue.setFConst(fConst * constant.fConst); break; 
+        case EbtFloat: returnValue.setFConst(fConst * constant.fConst); break;
         default: assert(false && "Default missing");
         }
 
@@ -217,7 +217,7 @@ public:
     }
 
     constUnion operator%(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -230,7 +230,7 @@ public:
     }
 
     constUnion operator>>(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -243,7 +243,7 @@ public:
     }
 
     constUnion operator<<(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -256,7 +256,7 @@ public:
     }
 
     constUnion operator&(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -269,7 +269,7 @@ public:
     }
 
     constUnion operator|(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -282,7 +282,7 @@ public:
     }
 
     constUnion operator^(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -295,7 +295,7 @@ public:
     }
 
     constUnion operator&&(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {
@@ -307,7 +307,7 @@ public:
     }
 
     constUnion operator||(const constUnion& constant) const
-    { 
+    {
         constUnion returnValue;
         assert(type == constant.type);
         switch (type) {

@@ -46,9 +46,7 @@
 #ifndef SH_EXPORTING
 	#define SH_EXPORTING
 #endif
-#include "../Public/ShaderLang.h"
-
-#include "InfoSink.h"
+#include "ShaderLang.h"
 
 class TCompiler;
 class TLinker;
@@ -77,8 +75,8 @@ public:
 	virtual ~TUniformMap() { }
 	virtual TUniformMap* getAsUniformMap() { return this; }
 	virtual int getLocation(const char* name) = 0;
-	virtual TInfoSink& getInfoSink() { return infoSink; }
-	TInfoSink infoSink;
+//	virtual TInfoSink& getInfoSink() { return infoSink; }
+//	TInfoSink infoSink;
 };
 class TIntermNode;
 
@@ -86,32 +84,32 @@ class TIntermNode;
 // The base class for the machine dependent compiler to derive from
 // for managing object code from the compile.
 //
-class TCompiler : public TShHandleBase {
-public:
-	TCompiler(EShLanguage l, TInfoSink& sink) : infoSink(sink) , language(l), haveValidObjectCode(false), parseContext(NULL) { }
-	virtual ~TCompiler() { }
-	EShLanguage getLanguage() { return language; }
-	virtual TInfoSink& getInfoSink() { return infoSink; }
-
-	virtual bool compile(TIntermNode* root) = 0;
-	virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl,
-			ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) = 0;
-
-	virtual TCompiler* getAsCompiler() { return this; }
-	virtual bool linkable() { return haveValidObjectCode; }
-
-	TInfoSink& infoSink;
-
-	/* Added in order to allow multiple tree traversals */
-	TParseContext* getParseContext() { return parseContext; }
-	void setParseContext(TParseContext* pC) { parseContext = pC; }
-protected:
-	EShLanguage language;
-	bool haveValidObjectCode;
-
-	/* Store TParseContext for further usage */
-	TParseContext* parseContext;
-};
+//class TCompiler : public TShHandleBase {
+//public:
+//	TCompiler(EShLanguage l, TInfoSink& sink) : infoSink(sink) , language(l), haveValidObjectCode(false), parseContext(NULL) { }
+//	virtual ~TCompiler() { }
+//	EShLanguage getLanguage() { return language; }
+//	virtual TInfoSink& getInfoSink() { return infoSink; }
+//
+//	virtual bool compile(TIntermNode* root) = 0;
+//	virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl,
+//			ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) = 0;
+//
+//	virtual TCompiler* getAsCompiler() { return this; }
+//	virtual bool linkable() { return haveValidObjectCode; }
+//
+//	TInfoSink& infoSink;
+//
+//	/* Added in order to allow multiple tree traversals */
+//	TParseContext* getParseContext() { return parseContext; }
+//	void setParseContext(TParseContext* pC) { parseContext = pC; }
+//protected:
+//	EShLanguage language;
+//	bool haveValidObjectCode;
+//
+//	/* Store TParseContext for further usage */
+//	TParseContext* parseContext;
+//};
 
 //
 //
@@ -119,75 +117,75 @@ protected:
 //
 void clearTraverseDebugJump(void);
 
-class TTraverseDebugJump : public TCompiler {
-public:
-	TTraverseDebugJump(EShLanguage l, int dOptions, int dbgBh) :
-		TCompiler(l, infoSink), debugOptions(dOptions), dbgBehaviour(dbgBh) { }
-	DbgResult* process(TIntermNode* root);
-	bool compile(TIntermNode* root) {
-		UNUSED_ARG(root)
-		return 0;
-	};
-	bool compileDbg(TIntermNode* root, ShChangeableList *cgbl,
-			ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) {
-		UNUSED_ARG(root)
-		UNUSED_ARG(cgbl)
-		UNUSED_ARG(vl)
-		UNUSED_ARG(dbgCgOptions)
-		UNUSED_ARG(code)
-		return 0;
-	}
-	TInfoSink infoSink;
-	int debugOptions;
-protected:
-	TString m_debugProgram;
-	int dbgBehaviour;
-};
+//class TTraverseDebugJump : public TCompiler {
+//public:
+//	TTraverseDebugJump(EShLanguage l, int dOptions, int dbgBh) :
+//		TCompiler(l, infoSink), debugOptions(dOptions), dbgBehaviour(dbgBh) { }
+//	DbgResult* process(TIntermNode* root);
+//	bool compile(TIntermNode* root) {
+//		UNUSED_ARG(root)
+//		return 0;
+//	};
+//	bool compileDbg(TIntermNode* root, ShChangeableList *cgbl,
+//			ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code) {
+//		UNUSED_ARG(root)
+//		UNUSED_ARG(cgbl)
+//		UNUSED_ARG(vl)
+//		UNUSED_ARG(dbgCgOptions)
+//		UNUSED_ARG(code)
+//		return 0;
+//	}
+//	TInfoSink infoSink;
+//	int debugOptions;
+//protected:
+//	TString m_debugProgram;
+//	int dbgBehaviour;
+//};
 
 //
 // Link operations are base on a list of compile results...
 //
-typedef TVector<TCompiler*> TCompilerList;
-typedef TVector<TShHandleBase*> THandleList;
+//typedef TVector<TCompiler*> TCompilerList;
+//typedef TVector<TShHandleBase*> THandleList;
 
 //
 // The base class for the machine dependent linker to derive from
 // to manage the resulting executable.
 //
 
-class TLinker : public TShHandleBase {
-public:
-	TLinker(EShExecutable e, TInfoSink& iSink) :
-		infoSink(iSink),
-		executable(e),
-		haveReturnableObjectCode(false),
-		appAttributeBindings(0),
-		fixedAttributeBindings(0),
-		excludedAttributes(0),
-		excludedCount(0),
-		uniformBindings(0) { }
-	virtual TLinker* getAsLinker() { return this; }
-	virtual ~TLinker() { }
-	virtual bool link(TCompilerList&, TUniformMap*) = 0;
-	virtual bool link(THandleList&) { return false; }
-	virtual void setAppAttributeBindings(const ShBindingTable* t)   { appAttributeBindings = t; }
-	virtual void setFixedAttributeBindings(const ShBindingTable* t) { fixedAttributeBindings = t; }
-	virtual void getAttributeBindings(ShBindingTable const **t) const = 0;
-	virtual void setExcludedAttributes(const int* attributes, int count) { excludedAttributes = attributes; excludedCount = count; }
-	virtual ShBindingTable* getUniformBindings() const  { return uniformBindings; }
-	virtual const void* getObjectCode() const { return 0; } // a real compiler would be returning object code here
-	virtual TInfoSink& getInfoSink() { return infoSink; }
-	TInfoSink& infoSink;
-protected:
-	EShExecutable executable;
-	bool haveReturnableObjectCode;  // true when objectCode is acceptable to send to driver
-
-	const ShBindingTable* appAttributeBindings;
-	const ShBindingTable* fixedAttributeBindings;
-	const int* excludedAttributes;
-	int excludedCount;
-	ShBindingTable* uniformBindings;                // created by the linker
-};
+//class TLinker : public TShHandleBase {
+//public:
+//	TLinker(EShExecutable e, TInfoSink& iSink) :
+//		infoSink(iSink),
+//		executable(e),
+//		haveReturnableObjectCode(false),
+//		appAttributeBindings(0),
+//		fixedAttributeBindings(0),
+//		excludedAttributes(0),
+//		excludedCount(0),
+//		uniformBindings(0) { }
+//	virtual TLinker* getAsLinker() { return this; }
+//	virtual ~TLinker() { }
+//	virtual bool link(TCompilerList&, TUniformMap*) = 0;
+//	virtual bool link(THandleList&) { return false; }
+//	virtual void setAppAttributeBindings(const ShBindingTable* t)   { appAttributeBindings = t; }
+//	virtual void setFixedAttributeBindings(const ShBindingTable* t) { fixedAttributeBindings = t; }
+//	virtual void getAttributeBindings(ShBindingTable const **t) const = 0;
+//	virtual void setExcludedAttributes(const int* attributes, int count) { excludedAttributes = attributes; excludedCount = count; }
+//	virtual ShBindingTable* getUniformBindings() const  { return uniformBindings; }
+//	virtual const void* getObjectCode() const { return 0; } // a real compiler would be returning object code here
+//	virtual TInfoSink& getInfoSink() { return infoSink; }
+//	TInfoSink& infoSink;
+//protected:
+//	EShExecutable executable;
+//	bool haveReturnableObjectCode;  // true when objectCode is acceptable to send to driver
+//
+//	const ShBindingTable* appAttributeBindings;
+//	const ShBindingTable* fixedAttributeBindings;
+//	const int* excludedAttributes;
+//	int excludedCount;
+//	ShBindingTable* uniformBindings;                // created by the linker
+//};
 
 //
 // This is the interface between the machine independent code

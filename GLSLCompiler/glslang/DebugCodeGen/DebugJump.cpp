@@ -43,7 +43,7 @@
 #include "dbgprint.h"
 
 #define MAIN_FUNC_SIGNATURE "main("
-#define VERBOSE -10
+#define VERBOSE 10
 
 #define VPRINT(level, ...) { if (level < VERBOSE) \
                                 dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
@@ -1970,6 +1970,75 @@ static void ScopeStackTraverseDummy(TIntermDummy* node, TIntermTraverser* it)
     addScopeToScopeStack(node->getScope());
 }
 
+static void Printer(TIntermConstantUnion* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "constant union\n" );
+}
+
+static void Printer(TIntermSymbol* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "symbol\n" );
+}
+
+static void Printer(TIntermFuncParam* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "func param\n" );
+}
+
+static void Printer(TIntermFuncDeclaration* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "func declaration\n" );
+}
+
+static bool Printer(TIntermSpecification* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "specification\n" );
+	return true;
+}
+
+static void Printer(TIntermParameter* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(node)
+	UNUSED_ARG(it)
+	VPRINT( -1, "parameter\n" );
+}
+
+static void Printer(TIntermNode* node, TIntermTraverser* it)
+{
+	UNUSED_ARG(it)
+
+#define TPRINT( func, name ) if( node->func() ) VPRINT( -1, "%s\n", name );
+
+	TPRINT(getAsTyped, "typed")
+	TPRINT(getAsConstantUnion, "constant union")
+	TPRINT(getAsAggregate, "aggregate")
+	TPRINT(getAsBinaryNode, "binary")
+	TPRINT(getAsUnaryNode, "unary")
+	TPRINT(getAsBranchNode, "branch")
+	TPRINT(getAsSelectionNode, "selection")
+	TPRINT(getAsSwitchNode, "switch")
+	TPRINT(getAsCaseNode, "case")
+	TPRINT(getAsLoopNode, "loop")
+	TPRINT(getAsSymbolNode, "symbol")
+	TPRINT(getAsFuncParamNode, "func param")
+	TPRINT(getAsParameterNode, "parameter")
+	TPRINT(getAsDeclarationNode, "declaration")
+    TPRINT(getAsFuncDeclarationNode, "func declaration")
+    TPRINT(getAsSpecificationNode, "specification")
+    TPRINT(getAsDummy, "dummy")
+}
+
+
 //
 //  Generate code from the given parse tree
 //
@@ -2022,17 +2091,17 @@ DbgResult* TTraverseDebugJump::process(TIntermNode *root)
 
     g.it->visitAggregate = TraverseAggregate;
     g.it->visitBinary = TraverseBinary;
-    g.it->visitConstantUnion = 0;
+    g.it->visitConstantUnion = Printer;
     g.it->visitSelection = TraverseSelection;
     g.it->visitLoop = TraverseLoop;
-    g.it->visitSymbol = 0;
-    g.it->visitFuncParam = 0;
+    g.it->visitSymbol = Printer;
+    g.it->visitFuncParam = Printer;
     g.it->visitUnary = TraverseUnary;
     g.it->visitBranch = TraverseBranch;
     g.it->visitDeclaration = TraverseDeclaration;
-    g.it->visitFuncDeclaration = 0;
-    g.it->visitSpecification = 0;
-    g.it->visitParameter = 0;
+    g.it->visitFuncDeclaration = Printer;
+    g.it->visitSpecification = Printer;
+    g.it->visitParameter = Printer;
     g.it->visitDummy = TraverseDummy;
 
     m_debugProgram = "";

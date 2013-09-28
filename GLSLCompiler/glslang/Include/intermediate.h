@@ -36,7 +36,7 @@
 // Definition of the in-memory high-level intermediate representation
 // of shaders.  This is a tree that parser creates.
 //
-// Nodes in the tree are defined as a hierarchy of classes derived from 
+// Nodes in the tree are defined as a hierarchy of classes derived from
 // TIntermNode. Each is a node in a tree.  There is no preset branching factor;
 // each node can have it's own type of list of children.
 //
@@ -58,16 +58,16 @@ enum TOperator {
     EOpDeclaration,     // denotes a list of statements, or parameters, etc.
     EOpSpecification,   // denotes a stucture definition
     EOpParameter,       // denotes a parameter definition
-    EOpFunctionCall,    
+    EOpFunctionCall,
     EOpFunction,        // for function definition
     EOpParameters,      // an aggregate listing the parameters to a function
-    EOpInstances,       // an aggregate listing the directly defined instances 
+    EOpInstances,       // an aggregate listing the directly defined instances
                         //    of a struct
 
     //
     // Unary operators
     //
-    
+
     EOpNegative,
     EOpLogicalNot,
     EOpVectorLogicalNot,
@@ -185,9 +185,9 @@ enum TOperator {
 
     EOpAny,
     EOpAll,
-    
+
     EOpItof,         // pack/unpack only
-    EOpFtoi,         // pack/unpack only    
+    EOpFtoi,         // pack/unpack only
     EOpSkipPixels,   // pack/unpack only
     EOpReadInput,    // unpack only
     EOpWritePixel,   // unpack only
@@ -195,7 +195,7 @@ enum TOperator {
     EOpBitmapMsb,    // unpack only
     EOpWriteOutput,  // pack only
     EOpReadPixel,    // pack only
-    
+
     //
     // Branch
     //
@@ -239,7 +239,7 @@ enum TOperator {
     //
     // moves
     //
-    
+
     EOpAssign,
     EOpAddAssign,
     EOpSubAssign,
@@ -342,7 +342,7 @@ public:
     scopeList* getScope(void) { return scope; }
     void setScope(scopeList *s) { scope = s; }
     ShChangeableList* getCgbList(void) { return &cgbl; }
-    
+
     bool isAtomic(void)     { return atomic == true; }
     void setNonAtomic(void) { atomic = false; }
 
@@ -355,18 +355,18 @@ public:
 
     bool containsDiscard(void)    { return discard == true; }
     void setContainsDiscard(void) { discard = true; }
-    
+
     void setTarget(void)      { target = true; }
     void unsetTarget(void)    { target = false; }
     bool isTarget(void)       { return target; }
 
     void setDbgOverwrite(TDebugOverwrite o) { dbgOverwrite = o; }
     TDebugOverwrite getDbgOverwrite(void)   { return dbgOverwrite; }
-    
+
     void copyCPPExtensionChanges(TExtensionList&);
     void moveCPPExtensionChanges(TExtensionList&);
     TExtensionList& getCPPExtensionList(void) { return extensionList; }
-    
+
     virtual ~TIntermNode() { }
 protected:
     TSourceRange range;
@@ -405,7 +405,7 @@ public:
     virtual void setType(const TType& t) { type = t; }
     virtual TType getType() const { return type; }
     virtual TType* getTypePointer() { return &type; }
-    
+
     virtual TBasicType getBasicType() const { return type.getBasicType(); }
     virtual TQualifier getQualifier() const { return type.getQualifier(); }
     virtual int getNominalSize() const { return type.getNominalSize(); }
@@ -450,8 +450,8 @@ enum LoopT {
 //
 class TIntermLoop : public TIntermNode {
 public:
-    TIntermLoop(TIntermNode* aBody, TIntermNode *aInit, TIntermTyped* aTest, 
-                TIntermTyped* aTerminal, LoopT aLoopType) : 
+    TIntermLoop(TIntermNode* aBody, TIntermNode *aInit, TIntermTyped* aTest,
+                TIntermTyped* aTerminal, LoopT aLoopType) :
         init(aInit),
         body(aBody),
         test(aTest),
@@ -469,7 +469,7 @@ public:
     LoopT         getLoopType(void) { return loopType; }
     virtual DbgStateLoop getDbgInternalState() { return dbgState; }
     virtual void setDbgInternalState(DbgStateLoop ds) { dbgState = ds; }
-    
+
     virtual int  getDbgIter(void) { return dbgIteration; }
     virtual void setDbgIter(int i) { dbgIteration = i; }
     virtual void addDbgIter(int i) { dbgIteration += i; }
@@ -483,11 +483,11 @@ public:
 protected:
     TIntermNode* init;
     TIntermNode* body;       // code to loop over
-    TIntermTyped* test;      // exit condition associated with loop, 
+    TIntermTyped* test;      // exit condition associated with loop,
                              // could be 0 for 'for' loops
     TIntermTyped* terminal;  // exists for for-loops
     LoopT loopType;
-    
+
     DbgStateLoop dbgState;   // internal state used for debugging
     int dbgIteration;        // loop iteration that is currently debugged
     char *dbgLoopIter;       // name of the temporary variable used
@@ -518,8 +518,8 @@ public:
 	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
 	// per process globalpoolallocator, then it causes increased memory usage per compile
 	// it is essential to use "symbol = sym" to assign to symbol
-    TIntermSymbol(int i, const TString& sym, const TType& t) : 
-        TIntermTyped(t), id(i)  { symbol = sym;} 
+    TIntermSymbol(int i, const TString& sym, const TType& t) :
+        TIntermTyped(t), id(i)  { symbol = sym;}
     virtual int getId() const { return id; }
     virtual const TString& getSymbol() const { return symbol;  }
     virtual void traverse(TIntermTraverser*);
@@ -537,8 +537,8 @@ public:
 	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
 	// per process globalpoolallocator, then it causes increased memory usage per compile
 	// it is essential to use "symbol = sym" to assign to symbol
-    TIntermFuncParam(int i, const TString& sym, const TType& t) : 
-        TIntermTyped(t), id(i)  { symbol = sym;} 
+    TIntermFuncParam(int i, const TString& sym, const TType& t) :
+        TIntermTyped(t), id(i)  { symbol = sym;}
     virtual int getId() const { return id; }
     virtual const TString& getSymbol() const { return symbol;  }
     virtual void traverse(TIntermTraverser*);
@@ -571,7 +571,7 @@ public:
     virtual bool promote(TInfoSink&) { return true; }
 protected:
     TIntermOperator(TOperator o) : TIntermTyped(TType(EbtFloat)), op(o) {}
-    TIntermOperator(TOperator o, TType& t) : TIntermTyped(t), op(o) {}   
+    TIntermOperator(TOperator o, TType& t) : TIntermTyped(t), op(o) {}
     TOperator op;
 };
 
@@ -810,7 +810,7 @@ public:
 
 
 //
-// For traversing the tree.  User should derive from this, 
+// For traversing the tree.  User should derive from this,
 // put their traversal specific data in it, and then pass
 // it to a Traverse method.
 //
@@ -821,9 +821,9 @@ class TIntermTraverser {
 public:
     POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
 
-    TIntermTraverser() : 
-        visitSymbol(0), 
-        visitFuncParam(0), 
+    TIntermTraverser() :
+        visitSymbol(0),
+        visitFuncParam(0),
         visitConstantUnion(0),
         visitDeclaration(0),
         visitFuncDeclaration(0),

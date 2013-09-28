@@ -37,7 +37,7 @@
 
 #include <string.h>
 
-#include "Public/ShaderLang.h"
+#include "ShaderLang.h"
 
 //
 // Basic type.  Arrays, vectors, etc., are orthogonal to this.
@@ -87,7 +87,7 @@ enum TBasicType {
 };
 
 __inline bool IsSampler(TBasicType type)
-{   
+{
     return type > EbtGuardSamplerBegin && type < EbtGuardSamplerEnd;
 }
 
@@ -102,7 +102,7 @@ enum TQualifier {
     EvqGlobal,        // For globals read/write
     EvqConst,         // User defined constants and non-output parameters in functions
     EvqConstNoValue,  // Constants that do not have a constantUnion assigned (necessary for non-constant initializers)
-    EvqAttribute,     // Readonly 
+    EvqAttribute,     // Readonly
     EvqVaryingIn,     // readonly, fragment shaders only
     EvqVaryingOut,    // vertex shaders only  read/write
     EvqUniform,       // Readonly, vertex and fragment
@@ -122,7 +122,7 @@ enum TQualifier {
     EvqPosition,
     EvqPointSize,
     EvqClipVertex,
-    
+
     // built-ins read by vertex shader (EXT_gpu_shader4)
     EvqVertexID,
     EvqInstanceID,
@@ -137,7 +137,7 @@ enum TQualifier {
 
     // built-ins read by geometry shader (EXT_geometry_shader4)
     EvqPrimitiveIDIn,
-    
+
     // built-ins written by geometry shader (EXT_geometry_shader4)
     EvqLayer,
 
@@ -163,7 +163,7 @@ enum TVMTypes {
 //
 // This is just for debug print out, carried along with the definitions above.
 //
-__inline const char* getVaryingModifierString(TVaryingModifier vm) 
+__inline const char* getVaryingModifierString(TVaryingModifier vm)
 {
     char *buf = new char[1024];
     buf[0] = '\0';
@@ -193,7 +193,7 @@ __inline const char* getVaryingModifierString(TVaryingModifier vm)
     return buf;
 }
 
-__inline const char* getQualifierString(TQualifier q, EShLanguage l) 
+__inline const char* getQualifierString(TQualifier q, EShLanguage l)
 {
     switch (q) {
     case EvqTemporary:      return "Temporary";      break;
@@ -202,7 +202,7 @@ __inline const char* getQualifierString(TQualifier q, EShLanguage l)
     case EvqConstNoValue:   return "const";          break;
     case EvqConstReadOnly:  return "const";          break;
     case EvqAttribute:      return "attribute";      break;
-    case EvqVaryingIn:      
+    case EvqVaryingIn:
             if (l == EShLangGeometry) {
                             return "varying in";
             } else {
