@@ -38,6 +38,28 @@
 
 #ifdef __cplusplus
 
+#ifdef IR_AST_LOCATION
+typedef struct IRASTLOC {
+   int first_line;
+   int first_column;
+   int last_line;
+   int last_column;
+   unsigned source;
+} IRASTLOC; // YYLTYPE
+
+#define COPY_AST_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(IRASTLOC));
+#define COPY_AST_LOCATION_HERE(src) COPY_AST_LOCATION( this->yy_location, src )
+#define COPY_RETURN_AST_LOCATION( type, src, func ) \
+   type* c = func;                                   \
+   COPY_AST_LOCATION(c->yy_location, src)           \
+   return c;
+#else
+#define COPY_AST_LOCATION(tgt, src)
+#define COPY_AST_LOCATION_HERE(src)
+#define COPY_RETURN_AST_LOCATION( type, src, func ) return func;
+#endif
+
+
 /**
  * \defgroup IR Intermediate representation nodes
  *
@@ -84,12 +106,29 @@ enum ir_node_type {
    ir_type_max /**< maximum ir_type enum number, for validation */
 };
 
+#ifdef IR_DEBUG_STATE
+enum ir_dbg_state {
+   ir_dbg_state_unset,
+   ir_dbg_state_path, /* path of trace */
+   ir_dbg_state_target, /* leaf of trace */
+   ir_dbg_state_end
+};
+#endif
+
 /**
  * Base class of all IR instructions
  */
 class ir_instruction : public exec_node {
 public:
    enum ir_node_type ir_type;
+
+#ifdef IR_AST_LOCATION
+   struct IRASTLOC yy_location;
+#endif
+
+#ifdef IR_DEBUG_STATE
+   enum ir_dbg_state debug_state;
+#endif
 
    /**
     * GCC 4.7+ and clang warn when deleting an ir_instruction unless
@@ -119,6 +158,7 @@ public:
    /*@{*/
    virtual class ir_variable *          as_variable()         { return NULL; }
    virtual class ir_function *          as_function()         { return NULL; }
+   virtual class ir_function_signature *as_function_signature() { return NULL; }
    virtual class ir_dereference *       as_dereference()      { return NULL; }
    virtual class ir_dereference_array *	as_dereference_array() { return NULL; }
    virtual class ir_dereference_variable *as_dereference_variable() { return NULL; }
@@ -140,6 +180,9 @@ protected:
    ir_instruction()
    {
       ir_type = ir_type_unset;
+#ifdef IR_DEBUG_STATE
+      debug_state = ir_dbg_state_unset;
+#endif
    }
 };
 
@@ -605,6 +648,11 @@ public:
    ir_function_signature *clone_prototype(void *mem_ctx,
 					  struct hash_table *ht) const;
 
+   virtual ir_function_signature *as_function_signature()
+   {
+      return this;
+   }
+
    virtual void accept(ir_visitor *v)
    {
       v->visit(this);
@@ -791,6 +839,7 @@ public:
       : condition(condition)
    {
       ir_type = ir_type_if;
+      COPY_AST_LOCATION_HERE( condition->yy_location );
    }
 
    virtual ir_if *clone(void *mem_ctx, struct hash_table *ht) const;
@@ -1390,6 +1439,7 @@ public:
       : value(value)
    {
       this->ir_type = ir_type_return;
+      COPY_AST_LOCATION_HERE( value->yy_location );
    }
 
    virtual ir_return *clone(void *mem_ctx, struct hash_table *) const;

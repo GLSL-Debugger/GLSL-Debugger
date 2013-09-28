@@ -159,6 +159,7 @@ ir_assignment::ir_assignment(ir_dereference *lhs, ir_rvalue *rhs,
    this->rhs = rhs;
    this->lhs = lhs;
    this->write_mask = write_mask;
+   COPY_AST_LOCATION_HERE( lhs->yy_location );
 
    if (lhs->type->is_scalar() || lhs->type->is_vector()) {
       int lhs_components = 0;
@@ -177,6 +178,7 @@ ir_assignment::ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs,
    this->ir_type = ir_type_assignment;
    this->condition = condition;
    this->rhs = rhs;
+   COPY_AST_LOCATION_HERE( lhs->yy_location );
 
    /* If the RHS is a vector type, assume that all components of the vector
     * type are being written to the LHS.  The write mask comes from the RHS
@@ -212,6 +214,7 @@ ir_expression::ir_expression(int op, const struct glsl_type *type,
       assert(this->operands[i] == NULL);
    }
 #endif
+   COPY_AST_LOCATION_HERE( op0->yy_location );
 }
 
 ir_expression::ir_expression(int op, ir_rvalue *op0)
@@ -223,6 +226,7 @@ ir_expression::ir_expression(int op, ir_rvalue *op0)
    this->operands[1] = NULL;
    this->operands[2] = NULL;
    this->operands[3] = NULL;
+   COPY_AST_LOCATION_HERE( op0->yy_location );
 
    assert(op <= ir_last_unop);
 
@@ -328,6 +332,7 @@ ir_expression::ir_expression(int op, ir_rvalue *op0, ir_rvalue *op1)
    this->operands[1] = op1;
    this->operands[2] = NULL;
    this->operands[3] = NULL;
+   COPY_AST_LOCATION_HERE( op0->yy_location );
 
    assert(op > ir_last_unop);
 
@@ -622,6 +627,7 @@ ir_constant::ir_constant(const ir_constant *c, unsigned i)
 {
    this->ir_type = ir_type_constant;
    this->type = c->type->get_base_type();
+   COPY_AST_LOCATION_HERE( c->yy_location );
 
    switch (this->type->base_type) {
    case GLSL_TYPE_UINT:  this->value.u[0] = c->value.u[i]; break;
@@ -1233,6 +1239,7 @@ ir_dereference_variable::ir_dereference_variable(ir_variable *var)
    this->ir_type = ir_type_dereference_variable;
    this->var = var;
    this->type = var->type;
+   COPY_AST_LOCATION_HERE( var->yy_location );
 }
 
 
@@ -1242,6 +1249,7 @@ ir_dereference_array::ir_dereference_array(ir_rvalue *value,
    this->ir_type = ir_type_dereference_array;
    this->array_index = array_index;
    this->set_array(value);
+   COPY_AST_LOCATION_HERE( value->yy_location );
 }
 
 
@@ -1253,6 +1261,7 @@ ir_dereference_array::ir_dereference_array(ir_variable *var,
    this->ir_type = ir_type_dereference_array;
    this->array_index = array_index;
    this->set_array(new(ctx) ir_dereference_variable(var));
+   COPY_AST_LOCATION_HERE( var->yy_location );
 }
 
 
@@ -1284,6 +1293,7 @@ ir_dereference_record::ir_dereference_record(ir_rvalue *value,
    this->record = value;
    this->field = ralloc_strdup(this, field);
    this->type = this->record->type->field_type(field);
+   COPY_AST_LOCATION_HERE( value->yy_location );
 }
 
 
@@ -1296,6 +1306,7 @@ ir_dereference_record::ir_dereference_record(ir_variable *var,
    this->record = new(ctx) ir_dereference_variable(var);
    this->field = ralloc_strdup(this, field);
    this->type = this->record->type->field_type(field);
+   COPY_AST_LOCATION_HERE( var->yy_location );
 }
 
 bool
@@ -1414,6 +1425,8 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, unsigned x, unsigned y, unsigned z,
    const unsigned components[4] = { x, y, z, w };
    this->ir_type = ir_type_swizzle;
    this->init_mask(components, count);
+
+   COPY_AST_LOCATION_HERE( val->yy_location );
 }
 
 ir_swizzle::ir_swizzle(ir_rvalue *val, const unsigned *comp,
@@ -1422,6 +1435,7 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, const unsigned *comp,
 {
    this->ir_type = ir_type_swizzle;
    this->init_mask(comp, count);
+   COPY_AST_LOCATION_HERE( val->yy_location );
 }
 
 ir_swizzle::ir_swizzle(ir_rvalue *val, ir_swizzle_mask mask)
@@ -1431,6 +1445,7 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, ir_swizzle_mask mask)
    this->mask = mask;
    this->type = glsl_type::get_instance(val->type->base_type,
 					mask.num_components, 1);
+   COPY_AST_LOCATION_HERE( val->yy_location );
 }
 
 #define X 1

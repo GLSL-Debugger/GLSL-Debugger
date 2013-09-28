@@ -28,13 +28,11 @@
 
 #include <new>
 
-extern "C" {
-#include "program/symbol_table.h"
-}
 #include "ir.h"
 #include "glsl_types.h"
 
 class symbol_table_entry;
+struct _mesa_symbol_desc;
 
 /**
  * Facade class for _mesa_symbol_table
