@@ -7,7 +7,15 @@
 #include "ShaderLang.h"
 #include "glsldb/utils/notify.h"
 #include <string.h>
+#include <map>
 #include "ir.h"
+
+namespace {
+	std::map< int, ShVariable* > VariablesById;
+	std::map< ir_variable*, ShVariable* > VariablesBySource;
+	unsigned int VariablesCount = 0;
+}
+
 
 static const char* getShTypeString(ShVariable *v)
 {
@@ -89,6 +97,42 @@ static const char* getShTypeString(ShVariable *v)
     }
 }
 
+
+variableQualifier qualifierToNative(unsigned mode)
+{
+	switch( mode ){
+		case ir_var_uniform:
+			return SH_UNIFORM;
+		case ir_var_shader_in:
+			return SH_VARYING_IN;
+		case ir_var_shader_out:
+			return SH_VARYING_OUT;
+		case ir_var_function_in:
+			return SH_PARAM_IN;
+		case ir_var_function_out:
+			return SH_PARAM_OUT;
+		case ir_var_function_inout:
+			return SH_PARAM_INOUT;
+		case ir_var_const_in: /**< "in" param that must be a constant expression */
+			return SH_PARAM_CONST;
+		case ir_var_system_value: /**< Ex: front-face, instance-id, etc. */
+			return SH_BUILTIN_READ;
+		case ir_var_temporary: /**< Temporary variable generated during compilation. */
+			return SH_TEMPORARY;
+			/* TODO: not sure about origin
+			 ir_var_auto = 0,     // < Function local variables and globals.
+			 SH_UNSET,
+			 SH_GLOBAL,
+			 SH_CONST,
+			 SH_ATTRIBUTE,
+			 SH_BUILTIN_WRITE
+			 */
+		default:
+			return SH_GLOBAL;
+	}
+	return SH_GLOBAL;
+}
+
 bool ShIsSampler(variableType v)
 {
     if (v < SH_SAMPLER_GUARD_BEGIN || SH_SAMPLER_GUARD_END < v) {
@@ -98,41 +142,41 @@ bool ShIsSampler(variableType v)
     }
 }
 
-static const char* getShQualifierString(variableQualifier q)
-{
-    switch (q) {
-        case SH_UNSET:
-            return "";
-        case SH_TEMPORARY:
-            return "temporary";
-        case SH_GLOBAL:
-            return "global";
-        case SH_CONST:
-            return "const";
-        case SH_ATTRIBUTE:
-            return "attribute";
-        case SH_VARYING_IN:
-            return "varying_in";
-        case SH_VARYING_OUT:
-            return "varying_out";
-        case SH_UNIFORM:
-            return "uniform";
-        case SH_PARAM_IN:
-            return "parameter_in";
-        case SH_PARAM_OUT:
-            return "parameter_out";
-        case SH_PARAM_INOUT:
-            return "parameter_inout";
-        case SH_PARAM_CONST:
-            return "parameter_const";
-        case SH_BUILTIN_READ:
-            return "builtin_read";
-        case SH_BUILTIN_WRITE:
-            return "builtin_write";
-        default:
-            return "unknown";
-    }
-}
+//static const char* getShQualifierString(variableQualifier q)
+//{
+//    switch (q) {
+//        case SH_UNSET:
+//            return "";
+//        case SH_TEMPORARY:
+//            return "temporary";
+//        case SH_GLOBAL:
+//            return "global";
+//        case SH_CONST:
+//            return "const";
+//        case SH_ATTRIBUTE:
+//            return "attribute";
+//        case SH_VARYING_IN:
+//            return "varying_in";
+//        case SH_VARYING_OUT:
+//            return "varying_out";
+//        case SH_UNIFORM:
+//            return "uniform";
+//        case SH_PARAM_IN:
+//            return "parameter_in";
+//        case SH_PARAM_OUT:
+//            return "parameter_out";
+//        case SH_PARAM_INOUT:
+//            return "parameter_inout";
+//        case SH_PARAM_CONST:
+//            return "parameter_const";
+//        case SH_BUILTIN_READ:
+//            return "builtin_read";
+//        case SH_BUILTIN_WRITE:
+//            return "builtin_write";
+//        default:
+//            return "unknown";
+//    }
+//}
 
 //
 //
@@ -198,7 +242,6 @@ ShChangeable* createShChangeable(int id)
         UT_NOTIFY(LV_ERROR, "not enough memory for cgb\n");
     }
     cgb->id = id;
-    cgb->data = NULL;
     cgb->numIndices = 0;
     cgb->indices = NULL;
     return cgb;
@@ -244,7 +287,6 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
                 cl->numChangeables*sizeof(ShChangeable*));
 
     copy = createShChangeable(c->id);
-    copy->data = c->data;
 
     // add all indices
     for (i=0; i<c->numIndices; i++) {
@@ -260,6 +302,44 @@ void copyShChangeable(ShChangeableList *cl, ShChangeable *c)
     }
 
     cl->changeables[cl->numChangeables-1] = copy;
+}
+
+static bool isEqualShChangeable(ShChangeable *a, ShChangeable *b)
+{
+    int i;
+
+    if (a->id != b->id) return false;
+    if (a->numIndices != b->numIndices) return false;
+
+    for (i=0; i<a->numIndices; i++) {
+        if (a->indices[i]->type != b->indices[i]->type) return false;
+        if (a->indices[i]->index != b->indices[i]->index) return false;
+    }
+
+    return true;
+}
+
+
+void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
+{
+    int i, j;
+
+    if (!clout || !clin) return;
+
+    for (i = 0; i < clin->numChangeables; i++) {
+        // copy only if not already in list
+        bool alreadyInList = false;
+        for (j=0; j<clout->numChangeables; j++) {
+            if (isEqualShChangeable(clout->changeables[j],
+                                    clin->changeables[i])) {
+                alreadyInList = true;
+                break;
+            }
+        }
+        if (!alreadyInList) {
+            copyShChangeable(clout, clin->changeables[i]);
+        }
+    }
 }
 
 void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
@@ -304,6 +384,26 @@ void addShVariable(ShVariableList *vl, ShVariable *v, int builtin)
     vl->variables = (ShVariable**) realloc(vl->variables,
             vl->numVariables*sizeof(ShVariable*));
     vl->variables[vl->numVariables-1] = v;
+}
+
+ShVariable* findShVariableFromId(ShVariableList *vl, int id)
+{
+    ShVariable **vp = NULL;
+    int i;
+
+    if (!vl) {
+        return NULL;
+    }
+
+    vp = vl->variables;
+
+    for (i=0; i < vl->numVariables; i++) {
+        if (vp[i]->uniqueId == id) {
+            return vp[i];
+        }
+    }
+
+    return NULL;
 }
 
 char* ShGetTypeString(const ShVariable *v)
@@ -470,6 +570,19 @@ ShVariable* copyShVariable(ShVariable *src)
 void freeShVariable(ShVariable **var)
 {
     if (var && *var) {
+    	// Remove variable from storages
+    	std::map< int, ShVariable* >::iterator iit = VariablesById.find( (*var)->uniqueId );
+    	if( iit != VariablesById.end() )
+    		VariablesById.erase(iit);
+
+    	for( std::map< ir_variable*, ShVariable* >::iterator it = VariablesBySource.begin(),
+    			end = VariablesBySource.end(); it != end; ++ it ){
+    		if( it->second != *var )
+    			continue;
+    		it = VariablesBySource.erase( it );
+    		break;
+    	}
+
         int i;
         free((*var)->name);
         for (i = 0; i < (*var)->structSize; i++) {
@@ -493,4 +606,111 @@ void freeShVariableList(ShVariableList *vl)
 }
 
 
+ShVariable* glsltypeToShVariable(const struct glsl_type* vtype, const char* name,
+		variableQualifier qualifier, unsigned modifier = SH_VM_NONE)
+{
+	ShVariable *v = NULL;
+	v = (ShVariable*)malloc( sizeof(ShVariable) );
 
+	// Type has no identifier! To be filled in later by TVariable
+	v->uniqueId = -1;
+	v->builtin = false;
+	v->name = strdup( name );
+
+#define SET_TYPE(glsl, native) \
+    case glsl: \
+        v->type = native; \
+        break;
+
+	// Type of variable (SH_FLOAT/SH_INT/SH_BOOL/SH_STRUCT)
+	switch( vtype->base_type ){
+		SET_TYPE( GLSL_TYPE_UINT, SH_UINT )
+		SET_TYPE( GLSL_TYPE_INT, SH_INT )
+		SET_TYPE( GLSL_TYPE_FLOAT, SH_FLOAT )
+		SET_TYPE( GLSL_TYPE_BOOL, SH_BOOL )
+		SET_TYPE( GLSL_TYPE_SAMPLER, SH_SAMPLER_GUARD_BEGIN )
+		SET_TYPE( GLSL_TYPE_STRUCT, SH_STRUCT )
+		SET_TYPE( GLSL_TYPE_ARRAY, SH_ARRAY )
+		default:
+			UT_NOTIFY_VA( LV_ERROR, "Type does not defined %x", vtype->gl_type );
+			break;
+	}
+
+	// Qualifier of variable
+	v->qualifier = qualifier;
+
+	// Varying modifier
+	v->varyingModifier = modifier;
+
+	// Scalar/Vector size
+	v->size = vtype->components();
+
+	// Matrix handling
+	v->isMatrix = vtype->is_matrix();
+	v->matrixSize[0] = vtype->vector_elements;
+	v->matrixSize[1] = vtype->matrix_columns;
+
+	// Array handling
+	v->isArray = vtype->is_array();
+	for( int i = 0; i < MAX_ARRAYS; i++ ){
+		v->arraySize[i] = vtype->array_size();
+	}
+
+	if( vtype->base_type == GLSL_TYPE_STRUCT ){
+		//
+		// Append structure to ShVariable
+		//
+		v->structSize = vtype->length;
+		v->structSpec = (ShVariable**)malloc( v->structSize * sizeof(ShVariable*) );
+		v->structName = strdup( vtype->name );
+		for( int i = 0; i < v->structSize; ++i ){
+			struct glsl_struct_field* field = &vtype->fields.structure[i];
+			v->structSpec[i] = glsltypeToShVariable( field->type, field->name,
+					qualifier );
+		}
+	}else{
+		v->structName = NULL;
+		v->structSize = 0;
+		v->structSpec = NULL;
+	}
+
+	return v;
+}
+
+ShVariable* irToShVariable( ir_variable* variable )
+{
+	if( !variable ) // This is not a variable
+		return NULL;
+	std::map< ir_variable*, ShVariable* >::iterator it = VariablesBySource.find( variable );
+	if ( it != VariablesBySource.end() )
+		return it->second;
+
+	const struct glsl_type* vtype = variable->type;
+	variableQualifier qualifier = qualifierToNative( variable->mode );
+	unsigned modifier = 0;
+	modifier |= variable->invariant ? SH_VM_INVARIANT : SH_VM_NONE;
+	modifier |=
+			( variable->interpolation & INTERP_QUALIFIER_FLAT ) ? SH_VM_FLAT : SH_VM_NONE;
+	modifier |=
+			( variable->interpolation & INTERP_QUALIFIER_SMOOTH ) ?
+					SH_VM_SMOOTH : SH_VM_NONE;
+	modifier |=
+			( variable->interpolation & INTERP_QUALIFIER_NOPERSPECTIVE ) ?
+					SH_VM_NOPERSPECTIVE : SH_VM_NONE;
+	modifier |= variable->centroid ? SH_VM_CENTROID : SH_VM_NONE;
+	ShVariable* var = glsltypeToShVariable( vtype, variable->name, qualifier, modifier );
+	var->uniqueId = VariablesCount++;
+	VariablesById[var->uniqueId] = var;
+	VariablesBySource[variable] = var;
+
+	return var;
+}
+
+
+ShVariable* findShVariableFromSource(ir_variable* variable)
+{
+	std::map< ir_variable*, ShVariable* >::iterator it = VariablesBySource.find( variable );
+	if ( it != VariablesBySource.end() )
+		return it->second;
+	return NULL;
+}

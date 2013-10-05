@@ -56,7 +56,9 @@
 // and the shading language compiler/linker.
 //
 
+class exec_list;
 class ir_instruction;
+class ir_variable;
 
 #ifdef __cplusplus
     extern "C" {
@@ -137,7 +139,6 @@ typedef struct {
 
 typedef struct {
     int id;
-    ir_instruction *data;
     int numIndices;
     ShChangeableIndex **indices;
 } ShChangeable;
@@ -377,11 +378,16 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 //
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
+int addShVariableIr( ShVariableList *vl, ir_instruction* ir );
+int addShVariableList( ShVariableList *vl, exec_list* list, bool globals_only = false );
+ShVariable* irToShVariable( ir_variable* variable );
 ShVariable* findShVariableFromId(ShVariableList *vl, int id);
+ShVariable* findShVariableFromSource(ir_variable* variable);
 ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
 ShVariable* copyShVariable(ShVariable *src);
 void freeShVariable(ShVariable **var);
 void freeShVariableList(ShVariableList *vl);
+
 
 //
 // The return value of ShCompile is boolean, indicating

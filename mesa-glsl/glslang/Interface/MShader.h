@@ -12,8 +12,8 @@
 
 struct exec_list;
 
-
-void appendToChangeableList( ShChangeableList* table, exec_list* symbols, enum ir_node_type = ir_type_max );
+bool containsDiscard( ir_instruction* );
+bool containsDiscard( exec_list* );
 
 
 #endif /* MESA_INTERFACE_SHADER_H_ */

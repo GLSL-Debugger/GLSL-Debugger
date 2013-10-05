@@ -59,6 +59,7 @@ struct glsl_switch_state {
 const char *
 glsl_compute_version_string(void *mem_ctx, bool is_es, unsigned version);
 
+#ifndef YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE {
    int first_line;
    int first_column;
@@ -68,6 +69,7 @@ typedef struct YYLTYPE {
 } YYLTYPE;
 # define YYLTYPE_IS_DECLARED 1
 # define YYLTYPE_IS_TRIVIAL 1
+#endif
 
 struct _mesa_glsl_parse_state {
    _mesa_glsl_parse_state(struct gl_context *_ctx, GLenum target,

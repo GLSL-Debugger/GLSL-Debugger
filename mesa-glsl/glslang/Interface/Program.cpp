@@ -39,17 +39,15 @@
 #include "glsl/glsl_symbol_table.h"
 #include "glsl/list.h"
 #include "IRStack.h"
+#include "IRScope.h"
 
 #include "mesa-glsl/glslang/Include/ShHandle.h"
 #include "mesa-glsl/glslang/Include/intermediate.h"
-//#include <MachineIndependent/SymbolTable.h>
-//#include <MachineIndependent/localintermediate.h>
-//#include <MachineIndependent/ParseHelper.h>
 #include "glsldb/utils/dbgprint.h"
 
 
-#define MAIN_FUNC_SIGNATURE "main("
-#define VERBOSE -10
+#define MAIN_FUNC_SIGNATURE "main"
+#define VERBOSE 10
 
 #define VPRINT(level, ...) { if (level < VERBOSE) \
                                 dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
@@ -64,15 +62,6 @@ enum OTOperation {
     OTOpFinished             // Reached end of program, stop debugging
 };
 
-
-__inline std::string FormatSourceRange(const struct IRASTLOC& range)
-{
-    char locText[128];
-
-    sprintf(locText, "%4d:%3d - %4d:%3d", range.first_line, range.first_column,
-                                        range.last_line, range.last_column);
-    return std::string(locText);
-}
 
 class TOutputDebugJumpTraverser : public TIntermTraverser {
 public:
@@ -240,8 +229,7 @@ static void clearGlobalChangeables(void)
     g.result.cgbls.changeables = NULL;
 }
 
-inline static ir_function* getFunctionBySignature(
-					const char *sig, struct gl_shader* shader)
+ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader )
 // Assumption: 1. roots hold all function definitions.
 //                for single file shaders this should hold.
 // Todo: Add solution for multiple files compiled in one shader.
@@ -250,7 +238,7 @@ inline static ir_function* getFunctionBySignature(
     return shader->symbols->get_function(sig);
 }
 
-static DbgRsRange setDbgResultRange(const IRASTLOC& range)
+static DbgRsRange setDbgResultRange(const YYLTYPE& range)
 {
     DbgRsRange r;
     r.left.line = range.first_line;
@@ -294,13 +282,13 @@ static void processDebugable(ir_instruction *node, OTOperation *op)
                     	case ir_type_assignment:
                     		g.result.position = DBG_RS_POSITION_ASSIGMENT;
                     		g.result.range = setDbgResultRange(node->yy_location);
-                    		setGobalScope(node->getScope());
+                    		setGobalScope( get_scope(node) );
                     		break;
                     	case ir_type_expression:
                     	{
                     		ir_expression* exp = node->as_expression();
                     		g.result.range = setDbgResultRange(node->yy_location);
-                    		setGobalScope(node->getScope());
+                    		setGobalScope( get_scope(node) );
                     		if( exp->operation < ir_last_unop ){
                     			g.result.position = DBG_RS_POSITION_UNARY;
                     		}else if( exp->operation < ir_last_binop ){
@@ -384,7 +372,7 @@ static void processDebugable(ir_instruction *node, OTOperation *op)
                     		for( unsigned i = 0; i < ops; ++i ){
                     			if( exp->operands[i] &&
                     			    exp->operands[i]->debug_state != ir_dbg_state_unset)
-                    				newState = DbgStPath;
+                    				newState = ir_dbg_state_path;
                     		}
                     	}
 //                    } else if (node->getAsSelectionNode()) {
@@ -424,33 +412,32 @@ static void processDebugable(ir_instruction *node, OTOperation *op)
             break;
     }
 }
-
-static void copyCgbParameterList( ShChangeableList* cl, ir_function* func )
-{
-	foreach_iter( exec_list_iterator, iter, func->signatures ){
-	      ir_function_signature* fs =
-	    		  ((ir_instruction *)iter.get())->as_function_signature();
-	      appendToChangeableList( cl, &fs->parameters, ir_type_variable );
-	}
-}
-
-static void copyCgbList( ShChangeableList* cl, ir_instruction* ir )
-{
-	// Not sure what is above mean and if I did it right.
-	// Provide an example please.
-	printf("You see this? You doing something not processed correctly.");
-
-	ir_function* funcDec = ir->as_function();
-	if( !funcDec )
-		return;
-
-	foreach_iter( exec_list_iterator, iter, funcDec->signatures ){
-	      ir_function_signature* fs =
-	    		  ((ir_instruction *)iter.get())->as_function_signature();
-	      appendToChangeableList( cl, &fs->body, ir_type_variable );
-	}
-}
-
+//
+//static void copyCgbParameterList( ShChangeableList* cl, ir_function* func )
+//{
+//	foreach_iter( exec_list_iterator, iter, func->signatures ){
+//	      ir_function_signature* fs =
+//	    		  ((ir_instruction *)iter.get())->as_function_signature();
+//	      appendToChangeableList( cl, &fs->parameters, ir_type_variable );
+//	}
+//}
+//
+//static void copyCgbList( ShChangeableList* cl, ir_instruction* ir )
+//{
+//	// Not sure what is above mean and if I did it right.
+//	// Provide an example please.
+//	printf("You see this? You doing something not processed correctly.");
+//
+//	ir_function* funcDec = ir->as_function();
+//	if( !funcDec )
+//		return;
+//
+//	foreach_iter( exec_list_iterator, iter, funcDec->signatures ){
+//	      ir_function_signature* fs =
+//	    		  ((ir_instruction *)iter.get())->as_function_signature();
+//	      appendToChangeableList( cl, &fs->body, ir_type_variable );
+//	}
+//}
 
 static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
 {
@@ -502,6 +489,10 @@ static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
         case ir_type_call:
         {
         	ir_call* node = raw_node->as_call();
+        	ir_function_signature* fs = node->callee;
+        	ShChangeableList* cl = &(g.result.cgbls);
+        	ShChangeableList* node_cgbl = get_changeable_list(node);
+
         	VPRINT(2, "processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
                     FormatSourceRange(node->yy_location).c_str(),
                     node->callee_name(), node->callee->is_builtin,
@@ -516,23 +507,19 @@ static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
                                 // no changeable has to be copied in first place,
                                 // as we jump into this function
 
-                                // find function declaration
-                            	ir_function* funcDec = getFunctionBySignature(
-                            							node->callee_name(), oit->shader);
-                                VPRINT(2, "\t ---- push %p on stack ----\n", funcDec);
-                                oit->parseStack.push(funcDec);
+                                VPRINT(2, "\t ---- push %p on stack ----\n", fs);
+                                oit->parseStack.push(fs);
                                 oit->operation = OTOpTargetSet;
 
                                 // add local parameters of called function first
-                                copyCgbParameterList( &(g.result.cgbls), funcDec );
-
-                                Traverse(funcDec, oit);
+                                copyShChangeableList(cl, get_changeable_paramerers_list(fs));
+                                Traverse(fs, oit);
 
                                 // if parsing ends up here and a target is still beeing
                                 // searched, a wierd function was called, but anyway,
                                 // let's copy the appropriate changeables
                                 if (oit->operation == OTOpTargetSet)
-                                	copyCgbList( &(g.result.cgbls), funcDec );
+                                	copyShChangeableList(cl, node_cgbl);
                             } else {
                                 node->debug_state = ir_dbg_state_unset;
                                 oit->operation = OTOpTargetSet;
@@ -544,16 +531,16 @@ static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
                                 // else
                                 // -> copy all, since user wants to jump over this func
                                 if (oit->finishedDbgFunction == true) {
-                                    copyShChangeableList(&(g.result.cgbls), node->getCgbParameterList());
+                                	copyShChangeableList(cl, get_changeable_paramerers_list(node));
                                     oit->finishedDbgFunction = false;
                                 } else {
-                                    copyShChangeableList(&(g.result.cgbls), node->getCgbList());
-                                    // Check if this function call would have emitted a vertex
-                                    if (node->containsEmitVertex()) {
-                                        g.result.passedEmitVertex = true;
-                                        VPRINT(6, "passed Emit %i\n", __LINE__);
-                                    }
-                                    if (node->containsDiscard()) {
+                                	copyShChangeableList(cl, node_cgbl);
+//                                    // Check if this function call would have emitted a vertex
+//                                    if (node->containsEmitVertex()) {
+//                                        g.result.passedEmitVertex = true;
+//                                        VPRINT(6, "passed Emit %i\n", __LINE__);
+//                                    }
+                                	if( containsDiscard( &fs->body ) ){
                                         g.result.passedDiscard = true;
                                         VPRINT(6, "passed Discard %i\n", __LINE__);
                                     }
@@ -571,23 +558,23 @@ static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
                             exit(1);
                             break;
                         case ir_dbg_state_unset:
-//                            if (! node->callee->is_builtin) {
-//                                node->debug_state = ir_dbg_state_target;
-//                                VPRINT(3, "\t -------- set target ---------\n");
-//                                g.result.position = DBG_RS_POSITION_FUNCTION_CALL;
-//                                g.result.range = setDbgResultRange(node->yy_location);
-//                                setGobalScope(node->getScope());
-//                                oit->operation = OTOpDone;
-//                            } else {
+                            if (! node->callee->is_builtin) {
+                                node->debug_state = ir_dbg_state_target;
+                                VPRINT(3, "\t -------- set target ---------\n");
+                                g.result.position = DBG_RS_POSITION_FUNCTION_CALL;
+                                g.result.range = setDbgResultRange(node->yy_location);
+                                setGobalScope( get_scope(node) );
+                                oit->operation = OTOpDone;
+                            } else {
 //                                if (node->containsEmitVertex()) {
 //                                    g.result.passedEmitVertex = true;
 //                                    VPRINT(6, "passed Emit %i\n", __LINE__);
 //                                }
-//                                if (node->containsDiscard()) {
-//                                    g.result.passedDiscard = true;
-//                                    VPRINT(6, "passed Discard %i\n", __LINE__);
-//                                }
-//                            }
+                                if ( containsDiscard( &(node->callee->body) ) ) {
+                                    g.result.passedDiscard = true;
+                                    VPRINT(6, "passed Discard %i\n", __LINE__);
+                                }
+                            }
                             break;
                         default:
                             break;
@@ -642,6 +629,7 @@ static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
     TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
 
     ir_instruction* ir = (ir_instruction*)node;
+    ShChangeableList* cl = &(g.result.cgbls);
 
     VPRINT(2, "processAssignment L:%s DbgSt:%i\n",
             FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
@@ -652,14 +640,14 @@ static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
     		if (!(oit->dbgBehaviour & DBG_BH_JUMPINTO)) {
     			// do not visit children
     			// add all changeables of this node to the list
-    			copyShChangeableList(&(g.result.cgbls), node->getCgbList());
+    			copyShChangeableList(cl, get_changeable_list(node));
 
     			// Check if this operation would have emitted a vertex
-    			if (node->containsEmitVertex()) {
-    				g.result.passedEmitVertex = true;
-    				VPRINT(6, "passed Emit %i\n", __LINE__);
-    			}
-    			if (node->containsDiscard()) {
+//    			if (node->containsEmitVertex()) {
+//    				g.result.passedEmitVertex = true;
+//    				VPRINT(6, "passed Emit %i\n", __LINE__);
+//    			}
+    			if ( containsDiscard(node) ) {
     				g.result.passedDiscard = true;
     				VPRINT(6, "passed Discard %i\n", __LINE__);
     			}
@@ -680,13 +668,13 @@ static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
     			// if no target was found so far
     			// all changeables need to be added to the list
     			if (oit->operation == OTOpTargetSet) {
-    				copyShChangeableList(&(g.result.cgbls), node->getCgbList());
+    				copyShChangeableList(cl, get_changeable_list(node));
     				// Check if this operation would have emitted a vertex
-    				if (node->containsEmitVertex()) {
-    					g.result.passedEmitVertex = true;
-    					VPRINT(6, "passed Emit %i\n", __LINE__);
-    				}
-    				if (node->containsDiscard()) {
+//    				if (node->containsEmitVertex()) {
+//    					g.result.passedEmitVertex = true;
+//    					VPRINT(6, "passed Emit %i\n", __LINE__);
+//    				}
+    				if( containsDiscard(node) ){
     					g.result.passedDiscard = true;
     					VPRINT(6, "passed Discard %i\n", __LINE__);
     				}
@@ -711,13 +699,13 @@ static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
     		// -> add only changed variables of this assigment, i.e.
     		//    changeables of the left branch
     		if (oit->operation == OTOpTargetSet) {
-    			copyShChangeableList(&(g.result.cgbls), node->getLeft()->getCgbList());
+    			copyShChangeableList(cl, get_changeable_list(node->lhs));
     			// Check if this operation would have emitted a vertex
-    			if (node->getLeft()->containsEmitVertex()) {
-    				g.result.passedEmitVertex = true;
-    				VPRINT(6, "passed Emit %i\n", __LINE__);
-    			}
-    			if (node->getLeft()->containsDiscard()) {
+//    			if (node->getLeft()->containsEmitVertex()) {
+//    				g.result.passedEmitVertex = true;
+//    				VPRINT(6, "passed Emit %i\n", __LINE__);
+//    			}
+    			if( containsDiscard(node->lhs) ) {
     				g.result.passedDiscard = true;
     				VPRINT(6, "passed Discard %i\n", __LINE__);
     			}
@@ -1632,6 +1620,7 @@ static bool TraverseUnary(ir_expression* node, TIntermTraverser* it)
 //    processDebugable(node, &oit->operation);
 //}
 
+
 void clearTraverseDebugJump(void)
 {
     delete g.it;
@@ -1646,66 +1635,72 @@ public:
     bool passedTarget;
 };
 
-//static bool ScopeStackTraverseAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTraverser* it)
-//{
-//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-//
-////    VPRINT(-2, "processAggregate L:%s N:%s UD:%i DbgSt:%i Passed:%i\n",
-////            FormatSourceRange(node->getRange()).c_str(),
-////            node->getName().c_str(),
-////            (int) node->isUserDefined(),
-////            node->getDebugState(),
-////            sit->passedTarget);
-//
-//    if (node->getOp() == EOpFunction) {
-//        if (node->getDebugState() != DbgStNone) {
-//            sit->passedTarget = false;
-//        }
-//    }
-//
-//
-//    if (sit->passedTarget) {
-//        return false;
-//    }
-//
-//    if (node->getDebugState() == DbgStTarget) {
-//        addScopeToScopeStack(node->getScope());
-//        sit->passedTarget = true;
-//        return false;
-//    }
-//
-//    if (node->getDebugState() == DbgStNone) {
-//        return false;
-//    } else {
-//        addScopeToScopeStack(node->getScope());
-//        return true;
-//    }
-//}
-//
-//static bool ScopeStackTraverseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraverser* it)
-//{
-//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-//
-//    VPRINT(-2, "processBinary L:%s DbgSt:%i Passed:%i\n",
-//            FormatSourceRange(node->getRange()).c_str(),
-//            node->getDebugState(),
-//            sit->passedTarget);
-//
-//
-//    if (sit->passedTarget) {
-//        return false;
-//    }
-//
-//    if (node->getDebugState() == DbgStTarget) {
-//        addScopeToScopeStack(node->getScope());
-//        sit->passedTarget = true;
-//        return false;
-//    }
-//
-//    addScopeToScopeStack(node->getScope());
-//    return true;
-//}
-//
+static bool ScopeStackTraverseAggregate( ir_instruction* raw_node, TIntermTraverser* it)
+{
+    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+
+    switch (raw_node->ir_type) {
+    	case ir_type_function:
+    	{
+    		ir_function* node = raw_node->as_function();
+    		ir_function_signature* sign = (ir_function_signature*)node->signatures.head;
+    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
+    				FormatSourceRange(node->yy_location).c_str(),
+    				node->name, sign->is_builtin, node->debug_state, sit->passedTarget );
+
+    		if( node->debug_state != ir_dbg_state_unset )
+    			sit->passedTarget = false;
+
+    		break;
+    	}
+    	case ir_type_call:
+    	{
+    		ir_call* node = raw_node->as_call();
+    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
+    				FormatSourceRange(node->yy_location).c_str(),
+    				node->callee_name(), node->callee->is_builtin,
+    				node->debug_state, sit->passedTarget );
+    		break;
+    	}
+    	default:
+    		break;
+    }
+
+    if( sit->passedTarget || raw_node->debug_state == ir_dbg_state_unset )
+        return false;
+
+    addScopeToScopeStack( get_scope(raw_node) );
+
+    if( raw_node->debug_state == ir_dbg_state_target ){
+        sit->passedTarget = true;
+        return false;
+    }
+
+    return true;
+}
+
+static bool ScopeStackTraverseExpression( ir_expression* raw_node, TIntermTraverser* it)
+{
+    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+    ir_instruction* node = (ir_instruction*)raw_node;
+
+    VPRINT(-2, "processExpression Op:%i L:%s DbgSt:%i Passed:%i\n",
+    		raw_node->operation, FormatSourceRange(node->yy_location).c_str(),
+    		node->debug_state, sit->passedTarget);
+
+    if (sit->passedTarget)
+        return false;
+
+    addScopeToScopeStack( get_scope(node) );
+
+    if (node->debug_state == ir_dbg_state_target ) {
+        sit->passedTarget = true;
+        return false;
+    }
+
+    return true;
+}
+
 //static bool ScopeStackTraverseSelection(bool /* preVisit */, TIntermSelection* node, TIntermTraverser* it)
 //{
 //    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
@@ -1764,7 +1759,7 @@ public:
 //    }
 //    return true;
 //}
-//
+
 //static bool ScopeStackTraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 //{
 //    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
@@ -1841,31 +1836,7 @@ public:
 //    }
 //    return true;
 //}
-//
-//static bool ScopeStackTraverseUnary(bool,  TIntermUnary* node, TIntermTraverser* it)
-//{
-//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-//
-//    VPRINT(-2, "processUnary L:%d DbgSt:%i Passed:%i\n",
-//            FormatSourceRange(node->getRange()).c_str(),
-//            node->getDebugState(),
-//            sit->passedTarget);
-//
-//
-//    if (sit->passedTarget) {
-//        return false;
-//    }
-//
-//    if (node->getDebugState() == DbgStTarget) {
-//        addScopeToScopeStack(node->getScope());
-//        sit->passedTarget = true;
-//        return false;
-//    }
-//
-//    addScopeToScopeStack(node->getScope());
-//    return true;
-//}
-//
+
 //static bool ScopeStackTraverseBranch(bool /* previsit*/, TIntermBranch* node, TIntermTraverser* it)
 //{
 //    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
@@ -1883,31 +1854,30 @@ public:
 //    addScopeToScopeStack(node->getScope());
 //    return true;
 //}
-//
-//static bool ScopeStackTraverseDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
-//{
-//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-//
-//    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n",
-//            FormatSourceRange(node->getRange()).c_str(),
-//            node->getDebugState(),
-//            sit->passedTarget);
-//
-//
-//    if (sit->passedTarget) {
-//        return false;
-//    }
-//
-//    if (node->getDebugState() == DbgStTarget) {
-//        addScopeToScopeStack(node->getScope());
-//        sit->passedTarget = true;
-//        return false;
-//    }
-//
-//    addScopeToScopeStack(node->getScope());
-//    return true;
-//}
-//
+
+static bool ScopeStackTraverseDeclaration(ir_variable* node, TIntermTraverser* it)
+{
+    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+
+    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n",
+            FormatSourceRange(node->yy_location).c_str(),
+            node->debug_state,
+            sit->passedTarget);
+
+
+    if (sit->passedTarget)
+        return false;
+
+    addScopeToScopeStack( get_scope(node) );
+
+    if (node->debug_state == ir_dbg_state_target) {
+        sit->passedTarget = true;
+        return false;
+    }
+
+    return true;
+}
+
 //static void ScopeStackTraverseDummy(TIntermDummy* node, TIntermTraverser* it)
 //{
 //    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
@@ -2059,19 +2029,19 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
     itScopeStack.debugVisit = false;
     itScopeStack.rightToLeft = false;
 
-//    itScopeStack.visitAggregate = ScopeStackTraverseAggregate;
-//    itScopeStack.visitBinary = ScopeStackTraverseBinary;
-//    itScopeStack.visitConstantUnion = 0;
+    itScopeStack.visitAggregate = ScopeStackTraverseAggregate;
+    itScopeStack.visitBinary = ScopeStackTraverseExpression;
+    itScopeStack.visitConstantUnion = 0;
 //    itScopeStack.visitSelection = ScopeStackTraverseSelection;
 //    itScopeStack.visitLoop = ScopeStackTraverseLoop;
-//    itScopeStack.visitSymbol = 0;
-//    itScopeStack.visitFuncParam = 0;
-//    itScopeStack.visitUnary = ScopeStackTraverseUnary;
+    itScopeStack.visitSymbol = 0;
+    itScopeStack.visitFuncParam = 0;
+    itScopeStack.visitUnary = ScopeStackTraverseExpression;
 //    itScopeStack.visitBranch = ScopeStackTraverseBranch;
-//    itScopeStack.visitDeclaration = ScopeStackTraverseDeclaration;
-//    itScopeStack.visitFuncDeclaration = 0;
-//    itScopeStack.visitSpecification = 0;
-//    itScopeStack.visitParameter = 0;
+    itScopeStack.visitDeclaration = ScopeStackTraverseDeclaration;
+    itScopeStack.visitFuncDeclaration = 0;
+    itScopeStack.visitSpecification = 0;
+    itScopeStack.visitParameter = 0;
 //    itScopeStack.visitDummy = ScopeStackTraverseDummy;
 
     TraverseList( list, &itScopeStack );

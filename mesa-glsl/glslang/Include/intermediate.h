@@ -835,6 +835,7 @@ public:
         visitSwitch(0),
         visitCase(0),
         visitAggregate(0),
+        visitAssignment(0),
         visitLoop(0),
         visitBranch(0),
         visitDummy(0),
@@ -845,10 +846,10 @@ public:
         rightToLeft(false) {}
 
     void (*visitSymbol)(TIntermSymbol*, TIntermTraverser*);
-    void (*visitFuncParam)(ir_variable*, TIntermTraverser*);
+    bool (*visitFuncParam)(ir_variable*, TIntermTraverser*);
     void (*visitConstantUnion)(TIntermConstantUnion*, TIntermTraverser*);
     bool (*visitDeclaration)(ir_variable*, TIntermTraverser*);
-    void (*visitFuncDeclaration)(ir_function*, TIntermTraverser*);
+    bool (*visitFuncDeclaration)(ir_function*, TIntermTraverser*);
     bool (*visitSpecification)(TIntermSpecification*, TIntermTraverser*);
     void (*visitParameter)(TIntermParameter*, TIntermTraverser*);
     bool (*visitBinary)(ir_expression*, TIntermTraverser*);

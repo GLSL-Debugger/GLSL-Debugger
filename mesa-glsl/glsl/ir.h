@@ -39,15 +39,20 @@
 #ifdef __cplusplus
 
 #ifdef IR_AST_LOCATION
-typedef struct IRASTLOC {
+
+#ifndef YYSTYPE_IS_DECLARED
+typedef struct YYLTYPE {
    int first_line;
    int first_column;
    int last_line;
    int last_column;
    unsigned source;
-} IRASTLOC; // YYLTYPE
+} YYLTYPE;
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
 
-#define COPY_AST_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(IRASTLOC));
+#define COPY_AST_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(YYLTYPE));
 #define COPY_AST_LOCATION_HERE(src) COPY_AST_LOCATION( this->yy_location, src )
 #define COPY_RETURN_AST_LOCATION( type, src, func ) \
    type* c = func;                                   \
@@ -123,7 +128,7 @@ public:
    enum ir_node_type ir_type;
 
 #ifdef IR_AST_LOCATION
-   struct IRASTLOC yy_location;
+   YYLTYPE yy_location;
 #endif
 
 #ifdef IR_DEBUG_STATE

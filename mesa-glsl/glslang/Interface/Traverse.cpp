@@ -44,8 +44,8 @@ void Traverse( ir_instruction* node, TIntermTraverser* it )
 #define visit(name, var) \
 	if( it->visit##name ) visit = it->visit##name(var, it);
 
-	node->print();
-	printf("\n");
+//	node->print();
+//	printf("\n");
 	switch( node->ir_type ){
 		case ir_type_unset:
 			break;
@@ -74,15 +74,18 @@ void Traverse( ir_instruction* node, TIntermTraverser* it )
 		{
 			ir_function_signature* fs = node->as_function_signature();
 			visit(Aggregate, fs)
-			foreach_iter( exec_list_iterator, iter, fs->parameters ){
-				ir_variable* ir = ((ir_instruction *)iter.get())->as_variable();
-				if( !ir ){
-					printf("Suddenly func parameter is not only ir_variable, it is %d. Please report it",
-							((ir_instruction*)iter.get())->ir_type);
-					exit(1);
+			if( visit ){
+				foreach_iter( exec_list_iterator, iter, fs->parameters ){
+					ir_variable* ir = ((ir_instruction *)iter.get())->as_variable();
+					if( !ir ){
+						printf("Suddenly func parameter is not only ir_variable, it is %d. Please report it",
+								((ir_instruction*)iter.get())->ir_type);
+						exit(1);
+					}
+					visit(FuncParam, ir)
 				}
-				visit(FuncParam, ir)
 			}
+			// FIXME: Does it need to be processed in aggregate? Now only parameters is processed
 			++it->depth;
 			TraverseList( &fs->body, it );
 			--it->depth;
@@ -91,8 +94,8 @@ void Traverse( ir_instruction* node, TIntermTraverser* it )
 		case ir_type_assignment:
 		{
 			ir_assignment* a = node->as_assignment();
-			visit(Assignment, it)
-			if(  ){
+			visit(Assignment, a)
+			if( visit ){
 				++it->depth;
 				if( a->condition ){
 					printf("WHOA! A conditional assignment. Not sure how it must be processed, show your example, please.");
@@ -145,7 +148,7 @@ void Traverse( ir_instruction* node, TIntermTraverser* it )
 				printf("TODO: Quad operation not processed.");
 				//visit(Unary, e);
 			}
-
+			break;
 		}
 		default:
 			printf("unsupported type\n");

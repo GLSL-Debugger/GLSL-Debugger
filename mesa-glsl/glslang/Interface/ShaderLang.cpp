@@ -28,140 +28,11 @@ int glsl_es = 0;
 int glsl_version = 150;
 struct gl_context *main_context;
 
-
 static struct {
 	DbgResult result;
 	unsigned int position;
 } g;
 
-
-variableQualifier qualifierToNative(unsigned mode)
-{
-	switch( mode ){
-		case ir_var_uniform:
-			return SH_UNIFORM;
-		case ir_var_shader_in:
-			return SH_VARYING_IN;
-		case ir_var_shader_out:
-			return SH_VARYING_OUT;
-		case ir_var_function_in:
-			return SH_PARAM_IN;
-		case ir_var_function_out:
-			return SH_PARAM_OUT;
-		case ir_var_function_inout:
-			return SH_PARAM_INOUT;
-		case ir_var_const_in: /**< "in" param that must be a constant expression */
-			return SH_PARAM_CONST;
-		case ir_var_system_value: /**< Ex: front-face, instance-id, etc. */
-			return SH_BUILTIN_READ;
-		case ir_var_temporary: /**< Temporary variable generated during compilation. */
-			return SH_TEMPORARY;
-			/* TODO: not sure about origin
-			 ir_var_auto = 0,     // < Function local variables and globals.
-			 SH_UNSET,
-			 SH_GLOBAL,
-			 SH_CONST,
-			 SH_ATTRIBUTE,
-			 SH_BUILTIN_WRITE
-			 */
-		default:
-			return SH_GLOBAL;
-	}
-	return SH_GLOBAL;
-}
-
-ShVariable* glsltypeToShVariable(const struct glsl_type* vtype, const char* name,
-		variableQualifier qualifier, unsigned modifier = SH_VM_NONE)
-{
-	ShVariable *v = NULL;
-	v = (ShVariable*)malloc( sizeof(ShVariable) );
-
-	// Type has no identifier! To be filled in later by TVariable
-	v->uniqueId = -1;
-	v->builtin = false;
-	v->name = strdup( name );
-
-#define SET_TYPE(glsl, native) \
-    case glsl: \
-        v->type = native; \
-        break;
-
-	// Type of variable (SH_FLOAT/SH_INT/SH_BOOL/SH_STRUCT)
-	switch( vtype->base_type ){
-		SET_TYPE( GLSL_TYPE_UINT, SH_UINT )
-		SET_TYPE( GLSL_TYPE_INT, SH_INT )
-		SET_TYPE( GLSL_TYPE_FLOAT, SH_FLOAT )
-		SET_TYPE( GLSL_TYPE_BOOL, SH_BOOL )
-		SET_TYPE( GLSL_TYPE_SAMPLER, SH_SAMPLER_GUARD_BEGIN )
-		SET_TYPE( GLSL_TYPE_STRUCT, SH_STRUCT )
-		SET_TYPE( GLSL_TYPE_ARRAY, SH_ARRAY )
-		default:
-			UT_NOTIFY_VA( LV_ERROR, "Type does not defined %x", vtype->gl_type );
-			break;
-	}
-
-	// Qualifier of variable
-	v->qualifier = qualifier;
-
-	// Varying modifier
-	v->varyingModifier = modifier;
-
-	// Scalar/Vector size
-	v->size = vtype->components();
-
-	// Matrix handling
-	v->isMatrix = vtype->is_matrix();
-	v->matrixSize[0] = vtype->vector_elements;
-	v->matrixSize[1] = vtype->matrix_columns;
-
-	// Array handling
-	v->isArray = vtype->is_array();
-	for( int i = 0; i < MAX_ARRAYS; i++ ){
-		v->arraySize[i] = vtype->array_size();
-	}
-
-	if( vtype->base_type == GLSL_TYPE_STRUCT ){
-		//
-		// Append structure to ShVariable
-		//
-		v->structSize = vtype->length;
-		v->structSpec = (ShVariable**)malloc( v->structSize * sizeof(ShVariable*) );
-		v->structName = strdup( vtype->name );
-		for( int i = 0; i < v->structSize; ++i ){
-			struct glsl_struct_field* field = &vtype->fields.structure[i];
-			v->structSpec[i] = glsltypeToShVariable( field->type, field->name,
-					qualifier );
-		}
-	}else{
-		v->structName = NULL;
-		v->structSize = 0;
-		v->structSpec = NULL;
-	}
-
-	return v;
-}
-
-ShVariable* symbolToShVariable(_mesa_symbol_desc* symbol)
-{
-	symbol_table_entry* data = (symbol_table_entry*)symbol->data;
-	ir_variable* variable = data->v;
-	if( !variable ) // This is not a variable
-		return NULL;
-	const struct glsl_type* vtype = variable->type;
-	variableQualifier qualifier = qualifierToNative( variable->mode );
-	unsigned modifier = 0;
-	modifier |= variable->invariant ? SH_VM_INVARIANT : SH_VM_NONE;
-	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_FLAT ) ? SH_VM_FLAT : SH_VM_NONE;
-	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_SMOOTH ) ?
-					SH_VM_SMOOTH : SH_VM_NONE;
-	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_NOPERSPECTIVE ) ?
-					SH_VM_NOPERSPECTIVE : SH_VM_NONE;
-	modifier |= variable->centroid ? SH_VM_CENTROID : SH_VM_NONE;
-	return glsltypeToShVariable( vtype, variable->name, qualifier, modifier );
-}
 
 static void initialize_context(struct gl_context *ctx, gl_api api)
 {
@@ -278,6 +149,57 @@ int __fastcall ShFinalize( )
 	return 1;
 }
 
+
+int addShVariableList( ShVariableList *vl, exec_list* list, bool globals_only )
+{
+	int count = 0;
+	foreach_iter( exec_list_iterator, iter, *list ){
+		ir_instruction* ir = (ir_instruction *)iter.get();
+		if( globals_only && ir->ir_type != ir_type_variable )
+			continue;
+		count += addShVariableIr( vl, ir );
+	}
+
+	return count;
+}
+
+
+int addShVariableIr( ShVariableList *vl, ir_instruction* ir )
+{
+	switch( ir->ir_type ){
+		case ir_type_variable:
+		{
+			ShVariable* sh = irToShVariable( ir->as_variable() );
+			if( sh && sh->qualifier != SH_TEMPORARY ){
+				addShVariable( vl, sh, strncmp( sh->name, "gl_", 3 ) == 0 );
+				return 1;
+			}
+			break;
+		}
+		case ir_type_function:
+		{
+			ir_function* f = ir->as_function();
+			return addShVariableList( vl, &f->signatures );
+			break;
+		}
+		case ir_type_function_signature:
+		{
+			ir_function_signature* fs = ir->as_function_signature();
+			int count = 0;
+			foreach_iter( exec_list_iterator, iter, fs->parameters ) {
+				ir_instruction* ir = (ir_instruction *)iter.get();
+				count += addShVariableIr( vl, ir );
+			}
+			return count + addShVariableList( vl, &fs->body );
+			break;
+		}
+		default:
+			break;
+	}
+	return 0;
+}
+
+
 //
 // Do an actual compile on the given strings.  The result is left
 // in the given compile object.
@@ -343,15 +265,13 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 			break;
 		}
 
-		_mesa_symbol_desc* symbols = shader->symbols->get_descs( 2 );
-		while( symbols != NULL ){
-			_mesa_symbol_desc* old = symbols;
-			ShVariable* sh = symbolToShVariable( symbols );
-			if( sh && sh->qualifier != SH_TEMPORARY )
-				addShVariable( vl, sh, strncmp( sh->name, "gl_", 3 ) == 0 );
-			symbols = symbols->next;
-			free( old );
-		}
+		// Recursively add global variables from ir tree
+		addShVariableList( vl, shader->ir, true );
+
+		// Traverse tree for scope and variable processing
+		// Each node gets data holding list of variables changes with this
+		// operation and about scope information
+		ShaderVarTraverse( shader, vl );
 	}
 
 	return success ? 1 : 0;
@@ -380,39 +300,6 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 //	}
 
 	result = ShaderTraverse( shader, debugOptions, dbgBh );
-
-
-
-/*
-	s->
-
-	struct gl_program_machine* machine = new_machine();
-	_mesa_execute_program_steps(main_context, holder->program, machine, g.position, g.position + 1);
-	g.position++;
-*/
-	/*
-	 TCompiler* compiler = base->getAsCompiler();
-	 if (compiler == 0)
-	 return NULL;
-
-	 TParseContext* parseContext = compiler->getParseContext();
-
-	 compiler->infoSink.info.erase();
-	 compiler->infoSink.debug.erase();
-
-	 TCompiler* traverser =
-	 ConstructTraverseDebugJump(compiler->getLanguage(),
-	 debugOptions,
-	 dbgBh);
-
-	 result = ((TTraverseDebugJump*)traverser)->process(parseContext->treeRoot);
-
-	 TIntermediate intermediate(compiler->infoSink);
-	 intermediate.outputTree(parseContext->treeRoot);
-	 dbgPrint(DBGLVL_COMPILERINFO, "%s\n", ShGetInfoLog(compiler));
-
-	 delete traverser;
-	 */
 	return result;
 
 }
@@ -423,13 +310,12 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableList *vl,
 		DbgCgOptions dbgCgOptions)
 {
-	char *prog = NULL;
+	if( handle == NULL )
+		return 0;
+
+	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
+	struct gl_shader* shader = holder->program->Shaders[0];
 	/*
-	 TO_PROGRAM(handle);
-
-	 program->Shaders
-
-	 TShHandleBase* base = reinterpret_cast<TShHandleBase*>(handle);
 	 TCompiler* compiler = base->getAsCompiler();
 	 if (compiler == 0)
 	 return NULL;
