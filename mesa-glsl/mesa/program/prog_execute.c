@@ -272,7 +272,7 @@ fetch_vector4_deriv(struct gl_context * ctx,
       result[1] = deriv[GET_SWZ(source->Swizzle, 1)];
       result[2] = deriv[GET_SWZ(source->Swizzle, 2)];
       result[3] = deriv[GET_SWZ(source->Swizzle, 3)];
-
+      
       if (source->Abs) {
          result[0] = FABSF(result[0]);
          result[1] = FABSF(result[1]);
@@ -566,14 +566,6 @@ store_vector4ui(const struct prog_instruction *inst,
 }
 
 
-GLboolean
-_mesa_execute_program(struct gl_context * ctx,
-                      const struct gl_program *program,
-                      struct gl_program_machine *machine)
-{
-    const GLuint numInst = program->NumInstructions;
-    return _mesa_execute_program_steps(ctx, program, machine, 0, numInst);
-}
 
 /**
  * Execute the given vertex/fragment program.
@@ -584,13 +576,14 @@ _mesa_execute_program(struct gl_context * ctx,
  * \return GL_TRUE if program completed or GL_FALSE if program executed KIL.
  */
 GLboolean
-_mesa_execute_program_steps(struct gl_context *ctx,
+_mesa_execute_program(struct gl_context * ctx,
                       const struct gl_program *program,
-                      struct gl_program_machine *machine,
-                      GLuint first_step, const GLuint numInst)
+                      struct gl_program_machine *machine)
 {
+   const GLuint numInst = program->NumInstructions;
    const GLuint maxExec = 65536;
-   GLuint pc, numExec = first_step;
+   GLuint pc, numExec = 0;
+
    machine->CurProgram = program;
 
    if (DEBUG_PROG) {
@@ -604,7 +597,7 @@ _mesa_execute_program_steps(struct gl_context *ctx,
       machine->EnvParams = ctx->FragmentProgram.Parameters;
    }
 
-   for (pc = first_step; pc < numInst; pc++) {
+   for (pc = 0; pc < numInst; pc++) {
       const struct prog_instruction *inst = program->Instructions + pc;
 
       if (DEBUG_PROG) {
@@ -815,7 +808,7 @@ _mesa_execute_program_steps(struct gl_context *ctx,
             }
             else {
                q[0] = LDEXPF(1.0, (int) floor_t0);
-               /* Note: GL_NV_vertex_program expects
+               /* Note: GL_NV_vertex_program expects 
                 * result.z = result.x * APPX(result.y)
                 * We do what the ARB extension says.
                 */
@@ -1682,12 +1675,12 @@ _mesa_execute_program_steps(struct gl_context *ctx,
 
       numExec++;
       if (numExec > maxExec) {
-	      static GLboolean reported = GL_FALSE;
-	      if (!reported) {
-	          _mesa_problem(ctx, "Infinite loop detected in fragment program");
-	          reported = GL_TRUE;
-	      }
-          return GL_TRUE;
+	 static GLboolean reported = GL_FALSE;
+	 if (!reported) {
+	    _mesa_problem(ctx, "Infinite loop detected in fragment program");
+	    reported = GL_TRUE;
+	 }
+         return GL_TRUE;
       }
 
    } /* for pc */

@@ -88,7 +88,7 @@ struct symbol_header {
 struct scope_level {
     /** Link to next (inner) scope level. */
     struct scope_level *next;
-
+    
     /** Linked list of symbols with the same scope. */
     struct symbol *symbols;
 };
@@ -187,7 +187,7 @@ void
 _mesa_symbol_table_push_scope(struct _mesa_symbol_table *table)
 {
     struct scope_level *const scope = calloc(1, sizeof(*scope));
-
+    
     scope->next = table->current_scope;
     table->current_scope = scope;
     table->depth++;
@@ -207,7 +207,7 @@ _mesa_symbol_table_iterator_ctor(struct _mesa_symbol_table *table,
 {
     struct _mesa_symbol_table_iterator *iter = calloc(1, sizeof(*iter));
     struct symbol_header *const hdr = find_symbol(table, name);
-
+    
     iter->name_space = name_space;
 
     if (hdr != NULL) {
@@ -319,40 +319,6 @@ _mesa_symbol_table_find_symbol(struct _mesa_symbol_table *table,
     }
 
     return NULL;
-}
-
-/**
- * Get symbols names from table
- *
- * \param symtab      Target table
- * \param scope_depth Depth to which names will be retrieved. 1 for current
- *                    scope, 2 for current and upper scope, and so on.
- *                    Negative number for all avaliable contexts.
- * \return            List of symbols desc
- */
-struct _mesa_symbol_desc*
-_mesa_symbol_table_get_symbols_desc(struct _mesa_symbol_table *symtab,
-                                    int scope_depth)
-{
-	int size = 0;
-	struct _mesa_symbol_desc* desc = NULL;
-	struct scope_level* scope = symtab->current_scope;
-	while (scope != NULL && scope_depth != 0) {
-        struct symbol *sym;
-        for( sym = scope->symbols
-		             ; sym != NULL
-		             ; sym = sym->next_with_same_scope) {
-        	struct symbol_header *const hdr = sym->hdr;
-        	struct _mesa_symbol_desc* new_desc = MALLOC_STRUCT(_mesa_symbol_desc);
-        	new_desc->next = desc;
-        	new_desc->name = hdr->name;
-        	new_desc->data = sym->data;
-        	desc = new_desc;
-		}
-		scope = scope->next;
-	}
-
-	return desc;
 }
 
 

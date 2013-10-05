@@ -269,8 +269,3 @@ symbol_table_entry *glsl_symbol_table::get_entry(const char *name)
    return (symbol_table_entry *)
       _mesa_symbol_table_find_symbol(table, -1, name);
 }
-
-struct _mesa_symbol_desc* glsl_symbol_table::get_descs(int scope_depth)
-{
-	return _mesa_symbol_table_get_symbols_desc(table, scope_depth);
-}

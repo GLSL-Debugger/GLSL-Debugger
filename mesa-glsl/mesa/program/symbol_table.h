@@ -26,14 +26,6 @@
 struct _mesa_symbol_table;
 struct _mesa_symbol_table_iterator;
 
-struct _mesa_symbol_desc
-{
-	const char* name;
-	void* data;
-	struct _mesa_symbol_desc* next;
-};
-
-
 extern void _mesa_symbol_table_push_scope(struct _mesa_symbol_table *table);
 
 extern void _mesa_symbol_table_pop_scope(struct _mesa_symbol_table *table);
@@ -51,9 +43,6 @@ extern int _mesa_symbol_table_symbol_scope(struct _mesa_symbol_table *table,
 extern void *_mesa_symbol_table_find_symbol(
     struct _mesa_symbol_table *symtab, int name_space, const char *name);
 
-extern struct _mesa_symbol_desc* _mesa_symbol_table_get_symbols_desc(
-    struct _mesa_symbol_table *symtab, int scope_depth);
-
 extern struct _mesa_symbol_table *_mesa_symbol_table_ctor(void);
 
 extern void _mesa_symbol_table_dtor(struct _mesa_symbol_table *);
@@ -69,6 +58,5 @@ extern void *_mesa_symbol_table_iterator_get(
 
 extern int _mesa_symbol_table_iterator_next(
     struct _mesa_symbol_table_iterator *iter);
-
 
 #endif /* MESA_SYMBOL_TABLE_H */

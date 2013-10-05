@@ -87,11 +87,5 @@ _mesa_execute_program(struct gl_context *ctx,
                       const struct gl_program *program,
                       struct gl_program_machine *machine);
 
-extern GLboolean
-_mesa_execute_program_steps(struct gl_context *ctx,
-                      const struct gl_program *program,
-                      struct gl_program_machine *machine,
-                      GLuint first_step, const GLuint last_step);
-
 
 #endif /* PROG_EXECUTE_H */
