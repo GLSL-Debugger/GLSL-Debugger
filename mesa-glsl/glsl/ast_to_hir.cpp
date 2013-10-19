@@ -1581,7 +1581,7 @@ ast_expression::hir(exec_list *instructions,
        * tree.  This particular use must be at location specified in the grammar
        * as 'variable_identifier'.
        */
-      ir_variable *var = 
+      ir_variable *var =
 	 state->symbols->get_variable(this->primary_expression.identifier);
 
       if (var != NULL) {
@@ -3716,11 +3716,11 @@ ast_jump_statement::hir(exec_list *instructions,
 	    ir_constant *const true_val = new(ctx) ir_constant(true);
 	    ir_assignment *const set_break_var =
 	       new(ctx) ir_assignment(deref_is_break_var, true_val);
-	    
+
 	    instructions->push_tail(set_break_var);
 	 }
 	 else {
-	    ir_loop_jump *const jump = 
+	    ir_loop_jump *const jump =
 	       new(ctx) ir_loop_jump((mode == ast_break)
 				     ? ir_loop_jump::jump_break
 				     : ir_loop_jump::jump_continue);
@@ -3794,8 +3794,8 @@ ast_switch_statement::hir(exec_list *instructions,
 
    /* From page 66 (page 55 of the PDF) of the GLSL 1.50 spec:
     *
-    *    "The type of init-expression in a switch statement must be a 
-    *     scalar integer." 
+    *    "The type of init-expression in a switch statement must be a
+    *     scalar integer."
     */
    if (!test_expression->type->is_scalar() ||
        !test_expression->type->is_integer()) {
@@ -4095,6 +4095,10 @@ ast_iteration_statement::hir(exec_list *instructions,
     */
    bool saved_is_switch_innermost = state->switch_state.is_switch_innermost;
    state->switch_state.is_switch_innermost = false;
+
+#ifdef IR_AST_LOCATION
+   stmt->mode = (ir_iteration_modes)mode;
+#endif
 
    if (mode != ast_do_while)
       condition_to_hir(stmt, state);

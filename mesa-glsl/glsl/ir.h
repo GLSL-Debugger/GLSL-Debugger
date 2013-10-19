@@ -58,6 +58,13 @@ typedef struct YYLTYPE {
    type* c = func;                                   \
    COPY_AST_LOCATION(c->yy_location, src)           \
    return c;
+
+enum ir_iteration_modes {
+   ir_loop_for,
+   ir_loop_while,
+   ir_loop_do_while
+};
+
 #else
 #define COPY_AST_LOCATION(tgt, src)
 #define COPY_AST_LOCATION_HERE(src)
@@ -118,6 +125,36 @@ enum ir_dbg_state {
    ir_dbg_state_target, /* leaf of trace */
    ir_dbg_state_end
 };
+
+enum ir_dbg_state_internal_if {
+    ir_dbg_if_unset,             // not debugged so far
+    ir_dbg_if_init,              // already visited once
+    ir_dbg_if_condition,         // condition in process
+    ir_dbg_if_condition_passed,  // condition processed
+    ir_dbg_if_if,                // descided to debug true branch
+    ir_dbg_if_else,              // descided to debug false branch
+    ir_dbg_if_passed             // debugging is past selection
+};
+
+enum ir_dbg_state_internal_loop {
+    ir_dbg_loop_unset,
+    ir_dbg_loop_qyr_init,
+    ir_dbg_loop_qyr_test,
+    ir_dbg_loop_qyr_terminal,
+    ir_dbg_loop_wrk_init,
+    ir_dbg_loop_wrk_test,
+    ir_dbg_loop_wrk_body,
+    ir_dbg_loop_wrk_terminal,
+    ir_dbg_loop_select_flow,
+    ir_dbg_loop_passed
+};
+
+enum ir_dbg_overwrite {
+   ir_dbg_ow_unset,
+   ir_dbg_ow_original,
+   ir_dbg_ow_debug,
+   ir_dbg_ow_end
+};
 #endif
 
 /**
@@ -133,6 +170,8 @@ public:
 
 #ifdef IR_DEBUG_STATE
    enum ir_dbg_state debug_state;
+   enum ir_dbg_overwrite debug_overwrite;
+   bool debug_target;
 #endif
 
    /**
@@ -845,6 +884,10 @@ public:
    {
       ir_type = ir_type_if;
       COPY_AST_LOCATION_HERE( condition->yy_location );
+
+#ifdef IR_DEBUG_STATE
+      debug_state_internal = ir_dbg_if_unset;
+#endif
    }
 
    virtual ir_if *clone(void *mem_ctx, struct hash_table *ht) const;
@@ -866,6 +909,10 @@ public:
    exec_list  then_instructions;
    /** List of ir_instruction for the body of the else branch */
    exec_list  else_instructions;
+
+#ifdef IR_DEBUG_STATE
+   enum ir_dbg_state_internal_if debug_state_internal;
+#endif
 };
 
 
@@ -928,6 +975,15 @@ public:
     */
    int cmp;
    /*@}*/
+
+#ifdef IR_AST_LOCATION
+   enum ir_iteration_modes mode;
+#endif
+
+#ifdef IR_DEBUG_STATE
+   enum ir_dbg_state_internal_loop debug_state_internal;
+   int debug_iter;
+#endif
 };
 
 

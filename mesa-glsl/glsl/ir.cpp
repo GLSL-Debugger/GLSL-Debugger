@@ -1229,6 +1229,10 @@ ir_loop::ir_loop()
    this->to = NULL;
    this->increment = NULL;
    this->counter = NULL;
+
+#ifdef IR_DEBUG_STATE
+   debug_state_internal = ir_dbg_loop_unset;
+#endif
 }
 
 
