@@ -32,7 +32,7 @@ TIntermNode* getFunctionBySignature(const char *sig, TIntermNode* root)
     TIntermAggregate *aggregate;
     TIntermSequence sequence;
     TIntermSequence::iterator sit;
-    
+
     // Root must be aggregate
     if (!(aggregate = root->getAsAggregate())) {
         return NULL;
@@ -77,7 +77,7 @@ bool isChildofMain(TIntermNode *node, TIntermNode *root)
         dbgPrint(DBGLVL_ERROR, "CodeTools - main is not Aggregate\n");
         exit(1);
     }
-    
+
     TIntermSequence sequence = aggregate->getSequence();
     TIntermSequence::iterator sit;
 
@@ -165,7 +165,7 @@ int getFunctionDebugParameter(TIntermAggregate *node)
     }
 
     TIntermSequence funcDeclSeq = node->getSequence();
-    
+
     if (!funcDeclSeq[0] ||
         !funcDeclSeq[0]->getAsAggregate() ||
         !(funcDeclSeq[0]->getAsAggregate()->getOp() == EOpParameters)) {
@@ -174,7 +174,7 @@ int getFunctionDebugParameter(TIntermAggregate *node)
     }
     TIntermSequence funcDeclParamSeq = (funcDeclSeq[0]->getAsAggregate())->getSequence();
     TIntermSequence::iterator pD = funcDeclParamSeq.begin();
-    
+
     for (i=0; pD != funcDeclParamSeq.end(); ++pD, ++i) {
         if ((*pD)->getAsFuncParamNode()->getType().getQualifier() == EvqIn) {
             result = i;
@@ -213,22 +213,22 @@ bool getAtomicDebugParameter(TIntermAggregate *node, int pnum)
 {
     if (!node)
         return false;
-    
+
     if ( node->getOp() != EOpFunctionCall)
         return false;
-    
+
     TIntermSequence funcCallSeq = node->getSequence();
-    
+
     if ((int) funcCallSeq.size() < pnum) {
         dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
         exit(1);
     }
-    
+
     if (!funcCallSeq[pnum]->getAsTyped()) {
         dbgPrint(DBGLVL_ERROR, "CodeTools - in parameter is not of type TIntermTyped\n");
         exit(1);
     }
-    
+
     return funcCallSeq[pnum]->getAsTyped()->isAtomic();
 }
 
@@ -236,21 +236,21 @@ bool getHasSideEffectsDebugParameter(TIntermAggregate *node, int pnum)
 {
     if (!node)
         return false;
-    
+
     if ( node->getOp() != EOpFunctionCall)
         return false;
-    
+
     TIntermSequence funcCallSeq = node->getSequence();
-    
+
     if ((int) funcCallSeq.size() < pnum) {
         dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
         exit(1);
     }
-    
+
     if (!funcCallSeq[pnum]->getAsTyped()) {
         dbgPrint(DBGLVL_ERROR, "CodeTools - in parameter is not of type TIntermTyped\n");
         exit(1);
     }
-    
+
     return funcCallSeq[pnum]->getAsTyped()->hasSideEffects();
 }

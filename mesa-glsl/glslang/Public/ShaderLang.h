@@ -76,6 +76,7 @@ SH_IMPORT_EXPORT int __fastcall ShFinalize();
 // Types of languages the compiler can consume.
 //
 typedef enum {
+	EShLangNone,
 	EShLangVertex,
 	EShLangGeometry,
 	EShLangFragment,

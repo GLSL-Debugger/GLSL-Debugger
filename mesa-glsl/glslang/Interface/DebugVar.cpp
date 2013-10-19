@@ -33,6 +33,7 @@
 //
 
 #include <string.h>
+#include "CodeTools.h"
 #include "Program.h"
 #include "glsl/ir.h"
 #include "IRScope.h"

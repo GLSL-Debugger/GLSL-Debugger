@@ -10,6 +10,7 @@ add_library(glsl_mesa ${SRC_MESA})
 add_definitions(-DIR_AST_LOCATION -DIR_DEBUG_STATE)
 
 file(GLOB SRC_INTERFACE glslang/Interface/*.cpp)
+file(GLOB SRC_VISITORS glslang/Interface/Visitors/*.cpp)
 include_directories(
 		${PROJECT_SOURCE_DIR}
 		${PROJECT_SOURCE_DIR}/mesa-glsl
@@ -18,7 +19,7 @@ include_directories(
     	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Include
     )
 
-add_library(glsl_mesa_interface ${SRC_INTERFACE})
+add_library(glsl_mesa_interface ${SRC_INTERFACE} ${SRC_VISITORS})
 
 target_link_libraries(glsl_mesa_interface glsl_lib)
 

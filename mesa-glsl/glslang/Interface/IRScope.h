@@ -16,5 +16,8 @@ void set_scope( ir_instruction*, scopeList* );
 ShChangeableList* get_changeable_list( ir_instruction* );
 ShChangeableList* get_changeable_paramerers_list( ir_instruction* );
 
+void addScopeToScopeStack(DbgRsScope& stack, scopeList *s);
+void setDbgScope(DbgRsScope& target, scopeList *s);
+
 
 #endif /* __IRSCOPE_H_ */

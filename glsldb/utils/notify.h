@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-typedef enum 
+typedef enum
 {
     LV_FATAL = 0,
     LV_ERROR = 1,
@@ -30,7 +30,7 @@ typedef enum
         buf << msg;											\
         utils_notify_va(sev, __FILE__, __func__, __LINE__, buf.str().c_str());	\
     }														\
-    while(0) 
+    while(0)
 
 #else   // C
     #define UT_NOTIFY(sev, ...)                                 \
@@ -51,5 +51,5 @@ extern void utils_notify_shutdown();
 extern void utils_notify_va(const severity_t sev, const char* filename, const char* func, unsigned int line, const char *fmt, ...);
 #if defined(__cplusplus)
 }
-#endif 
+#endif
 #endif  // UT_NOTIFY_H

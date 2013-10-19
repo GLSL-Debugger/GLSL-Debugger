@@ -36,7 +36,7 @@
 #define _BASICTYPES_INCLUDED_
 
 #include <string.h>
-
+#include "ir.h"
 #include "ShaderLang.h"
 
 //
@@ -243,5 +243,41 @@ __inline const char* getQualifierString(TQualifier q, EShLanguage l)
     default:                return "unknown qualifier";
     }
 }
+
+__inline const char* getQualifierString(unsigned int mode, EShLanguage l)
+{
+	switch (mode) {
+		case ir_var_shader_in:
+			if (l == EShLangGeometry) {
+				return "varying in";
+			} else if (l == EShLangFragment) {
+				return "varying";
+			} else {
+				return "attribute";
+			}
+			break;
+		case ir_var_shader_out:
+			if (l == EShLangGeometry) {
+				return "varying out";
+				/* remove varying qualifier for varying outs in fargment shader to
+				 * avoid having to bind varying out names to render target */
+			} else if (l == EShLangFragment) {
+				return "";
+			} else {
+				return "varying";
+			}
+			break;
+		case ir_var_auto: return "Auto";                 break;
+		case ir_var_temporary:  return "Temporary";     break;
+		case ir_var_uniform:	return "uniform";        break;
+		case ir_var_function_in: return "in";            break;
+		case ir_var_const_in:	return "const in";       break;
+		case ir_var_function_out: return "out";          break;
+		case ir_var_function_inout: return "inout";      break;
+		case ir_var_system_value: return "System";       break;
+		default:                return "unknown qualifier";
+	}
+}
+
 
 #endif // _BASICTYPES_INCLUDED_

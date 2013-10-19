@@ -9,11 +9,23 @@
 
 #include "ir.h"
 #include "ShaderLang.h"
+#include <string>
 
 struct exec_list;
 
+std::string getCodeArraySize( const struct glsl_type* type );
+std::string getCodeString( ir_variable* var, bool withQualifier = false,
+							EShLanguage l = EShLangFragment );
+std::string getCodeString( const struct glsl_type* type );
+
+
 bool containsDiscard( ir_instruction* );
 bool containsDiscard( exec_list* );
+bool containsEmitVertex( ir_instruction* );
+bool containsEmitVertex( exec_list* );
 
+bool dbg_state_not_match( exec_list*, enum ir_dbg_state );
+
+char** dbg_iter_name( ir_loop* );
 
 #endif /* MESA_INTERFACE_SHADER_H_ */

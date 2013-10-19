@@ -38,8 +38,9 @@
 #include "glsl/ir.h"
 #include "glsl/glsl_symbol_table.h"
 #include "glsl/list.h"
-#include "IRStack.h"
+#include "Visitors/debugjump.h"
 #include "IRScope.h"
+#include "CodeTools.h"
 
 #include "mesa-glsl/glslang/Include/ShHandle.h"
 #include "mesa-glsl/glslang/Include/intermediate.h"
@@ -52,17 +53,18 @@
 #define VPRINT(level, ...) { if (level < VERBOSE) \
                                 dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
 
-enum OTOperation {
-    OTOpTargetUnset,         // Invalidate actual target
-    OTOpTargetSet,           // Look for new target
-    OTOpPathClear,           // Clear all path nodes, but not targets
-    OTOpPathBuild,           // Construct path from root to targets
-    OTOpReset,               // Reconstruct initial debug state
-    OTOpDone,                // Do no harm, i.e. don't change anything anymore
-    OTOpFinished             // Reached end of program, stop debugging
-};
+//enum OTOperation {
+//    OTOpTargetUnset,         // Invalidate actual target
+//    OTOpTargetSet,           // Look for new target
+//    OTOpPathClear,           // Clear all path nodes, but not targets
+//    OTOpPathBuild,           // Construct path from root to targets
+//    OTOpReset,               // Reconstruct initial debug state
+//    OTOpDone,                // Do no harm, i.e. don't change anything anymore
+//    OTOpFinished             // Reached end of program, stop debugging
+//};
 
 
+/*
 class TOutputDebugJumpTraverser : public TIntermTraverser {
 public:
     TOutputDebugJumpTraverser() :
@@ -76,9 +78,10 @@ public:
     int dbgBehaviour;
     bool finishedDbgFunction;
 };
+*/
 
 static struct {
-    TOutputDebugJumpTraverser *it;
+	ir_debugjump_traverser_visitor* it;
     DbgResult result;
 } g;
 
@@ -95,10 +98,10 @@ static struct {
 //
 // Delete the compiler made by ConstructCompiler
 //
-void DeleteTraverseDebugJump(TCompiler* compiler)
-{
-    delete compiler;
-}
+//void DeleteTraverseDebugJump(TCompiler* compiler)
+//{
+//    delete compiler;
+//}
 
 //
 // Some helper functions for easier scope handling
@@ -141,59 +144,15 @@ static void clearGlobalScopeStack(void)
 
 static void addScopeToScopeStack(scopeList *s)
 {
-    int i;
-
-    if (!s) {
-        return;
-    }
-
-    scopeList::iterator si = s->begin();
-
-    while (si != s->end()) {
-        for (i=0; i<g.result.scopeStack.numIds; i++) {
-            if (*si == g.result.scopeStack.ids[i]) {
-                goto NEXTINSCOPE;
-            }
-        }
-
-
-        g.result.scopeStack.numIds++;
-
-        g.result.scopeStack.ids = (int*) realloc(g.result.scopeStack.ids,
-                                                g.result.scopeStack.numIds*sizeof(int));
-        g.result.scopeStack.ids[g.result.scopeStack.numIds-1] = *si;
-
-NEXTINSCOPE:
-        si++;
-    }
+	addScopeToScopeStack(g.result.scopeStack, s);
 }
 
-static void setGobalScope(scopeList *s)
-{
-    if (!s) {
-        dbgPrint(DBGLVL_ERROR, "no scopeList\n");
-        exit(1);
-        return;
-    }
-
-    scopeList::iterator si = s->begin();
-
-    VPRINT(3, "SET GLOBAL SCOPE LIST:");
-
-    while (si != s->end()) {
-        g.result.scope.numIds++;
-        g.result.scope.ids = (int*) realloc(g.result.scope.ids,
-                                            g.result.scope.numIds*sizeof(int));
-        g.result.scope.ids[g.result.scope.numIds-1] = *si;
-        si++;
-
-        VPRINT(3, "%i ", *si);
-    }
-    VPRINT(3, "\n");
-
-    /* Add local scope to scope stack */
-    addScopeToScopeStack(s);
-}
+//static void setGobalScope(scopeList *s)
+//{
+//	setDbgScope(g.result.scope, s);
+//    /* Add local scope to scope stack */
+//    addScopeToScopeStack(s);
+//}
 
 //
 // Functions for keeping track of changes variables
@@ -228,520 +187,475 @@ static void clearGlobalChangeables(void)
     g.result.cgbls.numChangeables = 0;
     g.result.cgbls.changeables = NULL;
 }
+//
+//static DbgRsRange setDbgResultRange(const YYLTYPE& range)
+//{
+//    DbgRsRange r;
+//    r.left.line = range.first_line;
+//    r.left.colum = range.first_column;
+//    r.right.line = range.last_line;
+//    r.right.colum = range.last_column;
+//    return r;
+//}
 
-ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader )
-// Assumption: 1. roots hold all function definitions.
-//                for single file shaders this should hold.
-// Todo: Add solution for multiple files compiled in one shader.
-{
-    VPRINT(4, "Search for function [%s]\n", sig);
-    return shader->symbols->get_function(sig);
-}
-
-static DbgRsRange setDbgResultRange(const YYLTYPE& range)
-{
-    DbgRsRange r;
-    r.left.line = range.first_line;
-    r.left.colum = range.first_column;
-    r.right.line = range.last_line;
-    r.right.colum = range.last_column;
-    return r;
-}
-
-static void processDebugable(ir_instruction *node, OTOperation *op)
-// Default handling of a node that can be debugged
-{
-    enum ir_dbg_state newState;
-    VPRINT(3, "processDebugable L:%s Op:%i DbgSt:%i\n",
-    		FormatSourceRange(node->yy_location).c_str(), *op, node->debug_state);
-
-    switch (*op) {
-        case OTOpTargetUnset:
-            switch (node->debug_state) {
-                case ir_dbg_state_target:
-                    node->debug_state = ir_dbg_state_unset;
-                    *op = OTOpTargetSet;
-                    VPRINT(3, "\t ------- unset target --------\n");
-                    g.result.position = DBG_RS_POSITION_UNSET;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case OTOpTargetSet:
-            switch (node->debug_state) {
-                case ir_dbg_state_target:
-                    VPRINT(3, "\t ERROR! found target with DbgStTarget\n");
-                    exit(1);
-                    break;
-                case ir_dbg_state_unset:
-                    node->debug_state = ir_dbg_state_target;
-                    *op = OTOpDone;
-                    VPRINT(3, "\t -------- set target ---------\n");
-                    switch (node->ir_type) {
-                    	case ir_type_assignment:
-                    		g.result.position = DBG_RS_POSITION_ASSIGMENT;
-                    		g.result.range = setDbgResultRange(node->yy_location);
-                    		setGobalScope( get_scope(node) );
-                    		break;
-                    	case ir_type_expression:
-                    	{
-                    		ir_expression* exp = node->as_expression();
-                    		g.result.range = setDbgResultRange(node->yy_location);
-                    		setGobalScope( get_scope(node) );
-                    		if( exp->operation < ir_last_unop ){
-                    			g.result.position = DBG_RS_POSITION_UNARY;
-                    		}else if( exp->operation < ir_last_binop ){
-                    			// TODO: WHY?
-                    			g.result.position = DBG_RS_POSITION_ASSIGMENT;
-                    		}else {
-                    			// Dunno, lol
-                    		}
-                    		break;
-                    	}
-//                    } else if (node->getAsBranchNode()) {
-//                        g.result.position = DBG_RS_POSITION_BRANCH;
-//                        g.result.range = setDbgResultRange(node->getRange());
-//                        setGobalScope(node->getScope());
-//                    } else if (node->getAsDummy()) {
-//                        g.result.position = DBG_RS_POSITION_DUMMY;
-//                        g.result.range = setDbgResultRange(node->getRange());
-//                        setGobalScope(node->getScope());
+//void processDebugable(ir_instruction *node, OTOperation *op)
+//// Default handling of a node that can be debugged
+//{
+//    enum ir_dbg_state newState;
+//    VPRINT(3, "processDebugable L:%s Op:%i DbgSt:%i\n",
+//    		FormatSourceRange(node->yy_location).c_str(), *op, node->debug_state);
+//
+//    switch (*op) {
+//        case OTOpTargetUnset:
+//            switch (node->debug_state) {
+//                case ir_dbg_state_target:
+//                    node->debug_state = ir_dbg_state_unset;
+//                    *op = OTOpTargetSet;
+//                    VPRINT(3, "\t ------- unset target --------\n");
+//                    g.result.position = DBG_RS_POSITION_UNSET;
+//                    break;
+//                default:
+//                    break;
+//            }
+//            break;
+//        case OTOpTargetSet:
+//            switch (node->debug_state) {
+//                case ir_dbg_state_target:
+//                    VPRINT(3, "\t ERROR! found target with DbgStTarget\n");
+//                    exit(1);
+//                    break;
+//                case ir_dbg_state_unset:
+//                    node->debug_state = ir_dbg_state_target;
+//                    *op = OTOpDone;
+//                    VPRINT(3, "\t -------- set target ---------\n");
+//                    switch (node->ir_type) {
+//                    	case ir_type_assignment:
+//                    		g.result.position = DBG_RS_POSITION_ASSIGMENT;
+//                    		g.result.range = setDbgResultRange(node->yy_location);
+//                    		setGobalScope( get_scope(node) );
+//                    		break;
+//                    	case ir_type_expression:
+//                    	{
+//                    		ir_expression* exp = node->as_expression();
+//                    		g.result.range = setDbgResultRange(node->yy_location);
+//                    		setGobalScope( get_scope(node) );
+//                    		if( exp->operation < ir_last_unop ){
+//                    			g.result.position = DBG_RS_POSITION_UNARY;
+//                    		}else if( exp->operation < ir_last_binop ){
+//                    			// TODO: WHY?
+//                    			g.result.position = DBG_RS_POSITION_ASSIGMENT;
+//                    		}else {
+//                    			// Dunno, lol
+//                    		}
+//                    		break;
+//                    	}
+////                    } else if (node->getAsBranchNode()) {
+////                        g.result.position = DBG_RS_POSITION_BRANCH;
+////                        g.result.range = setDbgResultRange(node->getRange());
+////                        setGobalScope(node->getScope());
+////                    } else if (node->getAsDummy()) {
+////                        g.result.position = DBG_RS_POSITION_DUMMY;
+////                        g.result.range = setDbgResultRange(node->getRange());
+////                        setGobalScope(node->getScope());
+////                    }
+//                    	default:
+//                    		break;
 //                    }
-                    	default:
-                    		break;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case OTOpPathClear:
-            switch (node->debug_state) {
-                case ir_dbg_state_path:
-                    node->debug_state = ir_dbg_state_unset;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case OTOpPathBuild:
-            switch(node->debug_state) {
-                case ir_dbg_state_unset:
-                {
-                    /* Check children for DebugState */
-                    newState = ir_dbg_state_unset;
-                    switch (node->ir_type){
-                    	// Aggregate
-                    	// case ir_type_call:
-                    	case ir_type_function:
-                    	{
-                    		ir_function* f = node->as_function();
-                            foreach_iter( exec_list_iterator, iter, f->signatures ){
-                            	ir_instruction* ir = (ir_instruction *)iter.get();
-                            	VPRINT(6, "getDebugState: %i\n", ir->debug_state);
-                            	// TODO: We just throw away any states, choose only last?
-                            	if( ir->debug_state != ir_dbg_state_unset )
-                            		newState = ir_dbg_state_unset;
-                            }
-                            break;
-                    	}
-                    	case ir_type_variable:
-                    	{
-                    		ir_variable* v = node->as_variable();
-                    		/* Check optional initialization */
-                    		if( v->has_initializer ){
-                    			// TODO: So what? I don't see where I can get it
-//                        TIntermDeclaration *tn = node->getAsDeclarationNode();
-//                        if ( (tn->getInitialization()) &&
-//                            (tn->getInitialization()->getDebugState() !=
-//                                DbgStNone) ) {
-//                            newState = DbgStPath;
-//                        }
-                    		}
-                    		if( v->constant_initializer &&
-                    			v->constant_initializer->debug_state !=
-                    				ir_dbg_state_unset )
-                    			newState = ir_dbg_state_path;
-                    		break;
-                    	}
-                    	case ir_type_expression:
-                    	{
-                    		ir_expression* exp = node->as_expression();
-                    		unsigned ops = exp->get_num_operands();
-                    		for( unsigned i = 0; i < ops; ++i ){
-                    			if( exp->operands[i] &&
-                    			    exp->operands[i]->debug_state != ir_dbg_state_unset)
-                    				newState = ir_dbg_state_path;
-                    		}
-                    	}
-//                    } else if (node->getAsSelectionNode()) {
-//                        /* Check conditional branches */
-//                        TIntermSelection *sn = node->getAsSelectionNode();
-//                        if ( (sn->getTrueBlock() &&
-//                            sn->getTrueBlock()->getDebugState() != DbgStNone)
-//                                ||
-//                            (sn->getFalseBlock() &&
-//                            sn->getFalseBlock()->getDebugState() != DbgStNone)
-//                                ||
-//                            (sn->getCondition() &&
-//                            sn->getCondition()->getDebugState() != DbgStNone))
+//                    break;
+//                default:
+//                    break;
+//            }
+//            break;
+//        case OTOpPathClear:
+//            switch (node->debug_state) {
+//                case ir_dbg_state_path:
+//                    node->debug_state = ir_dbg_state_unset;
+//                    break;
+//                default:
+//                    break;
+//            }
+//            break;
+//        case OTOpPathBuild:
+//            switch(node->debug_state) {
+//                case ir_dbg_state_unset:
+//                {
+//                    /* Check children for DebugState */
+//                    newState = ir_dbg_state_unset;
+//                    switch (node->ir_type){
+//                    	// Aggregate
+//                    	// case ir_type_call:
+//                    	case ir_type_function:
+//                    	{
+//                    		ir_function* f = node->as_function();
+//                            foreach_iter( exec_list_iterator, iter, f->signatures ){
+//                            	ir_instruction* ir = (ir_instruction *)iter.get();
+//                            	VPRINT(6, "getDebugState: %i\n", ir->debug_state);
+//                            	// TODO: We just throw away any states, choose only last?
+//                            	if( ir->debug_state != ir_dbg_state_unset )
+//                            		newState = ir_dbg_state_unset;
+//                            }
+//                            break;
+//                    	}
+//                    	case ir_type_variable:
+//                    	{
+//                    		ir_variable* v = node->as_variable();
+//                    		/* Check optional initialization */
+//                         	if( v->constant_value &&
+//                    			v->constant_value->debug_state != ir_dbg_state_unset )
+//                    			newState = ir_dbg_state_path;
+//                    		else if( v->constant_initializer &&
+//                    				 v->constant_initializer->debug_state != ir_dbg_state_unset )
+//                    			newState = ir_dbg_state_path;
+//                    		break;
+//                    	}
+//                    	case ir_type_expression:
+//                    	{
+//                    		ir_expression* exp = node->as_expression();
+//                    		unsigned ops = exp->get_num_operands();
+//                    		for( unsigned i = 0; i < ops; ++i ){
+//                    			if( exp->operands[i] &&
+//                    			    exp->operands[i]->debug_state != ir_dbg_state_unset)
+//                    				newState = ir_dbg_state_path;
+//                    		}
+//                    		break;
+//                    	}
+//                    	case ir_type_if:
+//                    	{
+//                    		ir_if* irif = node->as_if();
+//            				if( dbg_state_not_match( &irif->then_instructions, ir_dbg_state_unset ) ||
+//            					dbg_state_not_match( &irif->else_instructions, ir_dbg_state_unset ) ||
+//            					irif->condition->debug_state != ir_dbg_state_unset )
+//                    		    newState = ir_dbg_state_path;
+//                    		break;
+//                    	}
+////                    } else if (node->getAsBranchNode()) {
+////                        TIntermBranch *bn = node->getAsBranchNode();
+////                        if (bn->getExpression() &&
+////                            bn->getExpression()->getDebugState() != DbgStNone) {
+////                            newState = DbgStPath;
+////                        }
+//                    	default:
+//                    		break;
+//                    }
+//                    node->debug_state = newState;
+//                    break;
+//                }
+//                default:
+//                    break;
+//            }
+//            break;
+//        case OTOpReset:
+//            node->debug_state = ir_dbg_state_unset;
+//            break;
+//        default:
+//            break;
+//    }
+//}
+
+
+//static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
+//{
+//    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//
+//
+//    switch (raw_node->ir_type) {
+//        case ir_type_function:
+//        {
+//        	ir_function* node = raw_node->as_function();
+//        	ir_function_signature* sign = (ir_function_signature*)node->signatures.head;
+//            VPRINT(2, "processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
+//                    FormatSourceRange(node->yy_location).c_str(),
+//                    node->name, sign->is_builtin, oit->operation, node->debug_state);
+//
+//            switch (oit->operation) {
+//                case OTOpTargetSet:
+//                    /* This marks the end of a function call */
+//                    if (node == oit->parseStack.top()) {
+//                        VPRINT(2, "\t ---- pop %p from stack ----\n", node);
+//                        oit->parseStack.pop();
+//                        /* Do not dirctly jump into next function after
+//                        * returning from a function */
+//                        oit->dbgBehaviour &= ~DBG_BH_JUMPINTO;
+//                        oit->finishedDbgFunction = true;
+//                        if (!oit->parseStack.empty())
 //                        {
-//                            newState = DbgStPath;
+//                            VPRINT(2, "\t ---- continue parsing at %pk ----\n",
+//                                    oit->parseStack.top());
+//                            oit->operation = OTOpTargetUnset;
+//                            Traverse(oit->parseStack.top(), oit);
+//                        } else {
+//                            VPRINT(2, "\t ---- stack empty, finished ----\n");
+//                            oit->operation = OTOpFinished;
 //                        }
-//                    } else if (node->getAsBranchNode()) {
-//                        TIntermBranch *bn = node->getAsBranchNode();
-//                        if (bn->getExpression() &&
-//                            bn->getExpression()->getDebugState() != DbgStNone) {
-//                            newState = DbgStPath;
-//                        }
-                    	default:
-                    		break;
-                    }
-                    node->debug_state = newState;
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
-        case OTOpReset:
-            node->debug_state = ir_dbg_state_unset;
-            break;
-        default:
-            break;
-    }
-}
+//                    } else {
+//                        VPRINT(3, "\t ERROR! unexpected stack order\n");
+//                        exit(1);
+//                    }
+//                    break;
+//                case OTOpTargetUnset:
+//                    break;
+//                default:
+//                    processDebugable(node, &oit->operation);
+//                    break;
+//            }
+//            return true;
+//        }
+//        case ir_type_call:
+//        {
+//        	ir_call* node = raw_node->as_call();
+//        	ir_function_signature* fs = node->callee;
+//        	ShChangeableList* cl = &(g.result.cgbls);
+//        	ShChangeableList* node_cgbl = get_changeable_list(node);
 //
-//static void copyCgbParameterList( ShChangeableList* cl, ir_function* func )
-//{
-//	foreach_iter( exec_list_iterator, iter, func->signatures ){
-//	      ir_function_signature* fs =
-//	    		  ((ir_instruction *)iter.get())->as_function_signature();
-//	      appendToChangeableList( cl, &fs->parameters, ir_type_variable );
-//	}
-//}
+//        	VPRINT(2, "processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
+//                    FormatSourceRange(node->yy_location).c_str(),
+//                    node->callee_name(), node->callee->is_builtin,
+//                    oit->operation, node->debug_state);
 //
-//static void copyCgbList( ShChangeableList* cl, ir_instruction* ir )
-//{
-//	// Not sure what is above mean and if I did it right.
-//	// Provide an example please.
-//	printf("You see this? You doing something not processed correctly.");
+//            VPRINT(2, "process node %s ...\n", node->callee_name());
+//            switch (oit->operation) {
+//                case OTOpTargetUnset:
+//                    switch (node->debug_state) {
+//                        case ir_dbg_state_target:
+//                            if (oit->dbgBehaviour == DBG_BH_JUMPINTO) {
+//                                // no changeable has to be copied in first place,
+//                                // as we jump into this function
 //
-//	ir_function* funcDec = ir->as_function();
-//	if( !funcDec )
-//		return;
+//                                VPRINT(2, "\t ---- push %p on stack ----\n", fs);
+//                                oit->parseStack.push(fs);
+//                                oit->operation = OTOpTargetSet;
 //
-//	foreach_iter( exec_list_iterator, iter, funcDec->signatures ){
-//	      ir_function_signature* fs =
-//	    		  ((ir_instruction *)iter.get())->as_function_signature();
-//	      appendToChangeableList( cl, &fs->body, ir_type_variable );
-//	}
-//}
-
-static bool TraverseAggregate(ir_instruction* raw_node, TIntermTraverser* it)
-{
-    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-
-
-    switch (raw_node->ir_type) {
-        case ir_type_function:
-        {
-        	ir_function* node = raw_node->as_function();
-        	ir_function_signature* sign = (ir_function_signature*)node->signatures.head;
-            VPRINT(2, "processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
-                    FormatSourceRange(node->yy_location).c_str(),
-                    node->name, sign->is_builtin, oit->operation, node->debug_state);
-
-            switch (oit->operation) {
-                case OTOpTargetSet:
-                    /* This marks the end of a function call */
-                    if (node == oit->parseStack.top()) {
-                        VPRINT(2, "\t ---- pop %p from stack ----\n", node);
-                        oit->parseStack.pop();
-                        /* Do not dirctly jump into next function after
-                        * returning from a function */
-                        oit->dbgBehaviour &= ~DBG_BH_JUMPINTO;
-                        oit->finishedDbgFunction = true;
-                        if (!oit->parseStack.empty())
-                        {
-                            VPRINT(2, "\t ---- continue parsing at %pk ----\n",
-                                    oit->parseStack.top());
-                            oit->operation = OTOpTargetUnset;
-                            Traverse(oit->parseStack.top(), oit);
-                        } else {
-                            VPRINT(2, "\t ---- stack empty, finished ----\n");
-                            oit->operation = OTOpFinished;
-                        }
-                    } else {
-                        VPRINT(3, "\t ERROR! unexpected stack order\n");
-                        exit(1);
-                    }
-                    break;
-                case OTOpTargetUnset:
-                    break;
-                default:
-                    processDebugable(node, &oit->operation);
-                    break;
-            }
-            return true;
-        }
-        case ir_type_call:
-        {
-        	ir_call* node = raw_node->as_call();
-        	ir_function_signature* fs = node->callee;
-        	ShChangeableList* cl = &(g.result.cgbls);
-        	ShChangeableList* node_cgbl = get_changeable_list(node);
-
-        	VPRINT(2, "processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
-                    FormatSourceRange(node->yy_location).c_str(),
-                    node->callee_name(), node->callee->is_builtin,
-                    oit->operation, node->debug_state);
-
-            VPRINT(2, "process node %s ...\n", node->callee_name());
-            switch (oit->operation) {
-                case OTOpTargetUnset:
-                    switch (node->debug_state) {
-                        case ir_dbg_state_target:
-                            if (oit->dbgBehaviour == DBG_BH_JUMPINTO) {
-                                // no changeable has to be copied in first place,
-                                // as we jump into this function
-
-                                VPRINT(2, "\t ---- push %p on stack ----\n", fs);
-                                oit->parseStack.push(fs);
-                                oit->operation = OTOpTargetSet;
-
-                                // add local parameters of called function first
-                                copyShChangeableList(cl, get_changeable_paramerers_list(fs));
-                                Traverse(fs, oit);
-
-                                // if parsing ends up here and a target is still beeing
-                                // searched, a wierd function was called, but anyway,
-                                // let's copy the appropriate changeables
-                                if (oit->operation == OTOpTargetSet)
-                                	copyShChangeableList(cl, node_cgbl);
-                            } else {
-                                node->debug_state = ir_dbg_state_unset;
-                                oit->operation = OTOpTargetSet;
-                                VPRINT(3, "\t ------- unset target --------\n");
-                                g.result.position = DBG_RS_POSITION_UNSET;
-
-                                // if parsing of the subfunction finished right now
-                                // -> copy only changed parameters to changeables
-                                // else
-                                // -> copy all, since user wants to jump over this func
-                                if (oit->finishedDbgFunction == true) {
-                                	copyShChangeableList(cl, get_changeable_paramerers_list(node));
-                                    oit->finishedDbgFunction = false;
-                                } else {
-                                	copyShChangeableList(cl, node_cgbl);
-//                                    // Check if this function call would have emitted a vertex
-//                                    if (node->containsEmitVertex()) {
-//                                        g.result.passedEmitVertex = true;
-//                                        VPRINT(6, "passed Emit %i\n", __LINE__);
+//                                // add local parameters of called function first
+//                                copyShChangeableList(cl, get_changeable_paramerers_list(fs));
+//                                Traverse(fs, oit);
+//
+//                                // if parsing ends up here and a target is still beeing
+//                                // searched, a wierd function was called, but anyway,
+//                                // let's copy the appropriate changeables
+//                                if (oit->operation == OTOpTargetSet)
+//                                	copyShChangeableList(cl, node_cgbl);
+//                            } else {
+//                                node->debug_state = ir_dbg_state_unset;
+//                                oit->operation = OTOpTargetSet;
+//                                VPRINT(3, "\t ------- unset target --------\n");
+//                                g.result.position = DBG_RS_POSITION_UNSET;
+//
+//                                // if parsing of the subfunction finished right now
+//                                // -> copy only changed parameters to changeables
+//                                // else
+//                                // -> copy all, since user wants to jump over this func
+//                                if (oit->finishedDbgFunction == true) {
+//                                	copyShChangeableList(cl, get_changeable_paramerers_list(node));
+//                                    oit->finishedDbgFunction = false;
+//                                } else {
+//                                	copyShChangeableList(cl, node_cgbl);
+////                                    // Check if this function call would have emitted a vertex
+////                                    if (node->containsEmitVertex()) {
+////                                        g.result.passedEmitVertex = true;
+////                                        VPRINT(6, "passed Emit %i\n", __LINE__);
+////                                    }
+//                                	if( containsDiscard( &fs->body ) ){
+//                                        g.result.passedDiscard = true;
+//                                        VPRINT(6, "passed Discard %i\n", __LINE__);
 //                                    }
-                                	if( containsDiscard( &fs->body ) ){
-                                        g.result.passedDiscard = true;
-                                        VPRINT(6, "passed Discard %i\n", __LINE__);
-                                    }
-                                }
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case OTOpTargetSet:
-                    switch (node->debug_state) {
-                        case ir_dbg_state_target:
-                            VPRINT(3, "\t ERROR! found target with DbgStTarget\n");
-                            exit(1);
-                            break;
-                        case ir_dbg_state_unset:
-                            if (! node->callee->is_builtin) {
-                                node->debug_state = ir_dbg_state_target;
-                                VPRINT(3, "\t -------- set target ---------\n");
-                                g.result.position = DBG_RS_POSITION_FUNCTION_CALL;
-                                g.result.range = setDbgResultRange(node->yy_location);
-                                setGobalScope( get_scope(node) );
-                                oit->operation = OTOpDone;
-                            } else {
-//                                if (node->containsEmitVertex()) {
-//                                    g.result.passedEmitVertex = true;
-//                                    VPRINT(6, "passed Emit %i\n", __LINE__);
 //                                }
-                                if ( containsDiscard( &(node->callee->body) ) ) {
-                                    g.result.passedDiscard = true;
-                                    VPRINT(6, "passed Discard %i\n", __LINE__);
-                                }
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                default:
-                    processDebugable(node, &oit->operation);
-                    break;
-            }
-            return true;
-        }
+//                            }
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                    break;
+//                case OTOpTargetSet:
+//                    switch (node->debug_state) {
+//                        case ir_dbg_state_target:
+//                            VPRINT(3, "\t ERROR! found target with DbgStTarget\n");
+//                            exit(1);
+//                            break;
+//                        case ir_dbg_state_unset:
+//                            if (! node->callee->is_builtin) {
+//                                node->debug_state = ir_dbg_state_target;
+//                                VPRINT(3, "\t -------- set target ---------\n");
+//                                g.result.position = DBG_RS_POSITION_FUNCTION_CALL;
+//                                g.result.range = setDbgResultRange(node->yy_location);
+//                                setGobalScope( get_scope(node) );
+//                                oit->operation = OTOpDone;
+//                            } else {
+////                                if (node->containsEmitVertex()) {
+////                                    g.result.passedEmitVertex = true;
+////                                    VPRINT(6, "passed Emit %i\n", __LINE__);
+////                                }
+//                                if ( containsDiscard( &(node->callee->body) ) ) {
+//                                    g.result.passedDiscard = true;
+//                                    VPRINT(6, "passed Discard %i\n", __LINE__);
+//                                }
+//                            }
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                    break;
+//                default:
+//                    processDebugable(node, &oit->operation);
+//                    break;
+//            }
+//            return true;
+//        }
         //case EOpConstructStruct:
         //    return true;
-        default:
-            switch (oit->operation) {
-                case OTOpPathClear:
-                case OTOpPathBuild:
-                case OTOpReset:
-                    processDebugable(raw_node, &oit->operation);
-                    break;
-                default:
-                    break;
-            }
-            return true;
-    }
-}
+//        default:
+//            switch (oit->operation) {
+//                case OTOpPathClear:
+//                case OTOpPathBuild:
+//                case OTOpReset:
+//                    processDebugable(raw_node, &oit->operation);
+//                    break;
+//                default:
+//                    break;
+//            }
+//            return true;
+//    }
+//}
 
-static bool TraverseBinary(ir_expression* node, TIntermTraverser* it)
-{
-    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//static bool TraverseBinary(ir_expression* node, TIntermTraverser* it)
+//{
+//    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//
+//    ir_instruction* ir = (ir_instruction*)node;
+//
+//    VPRINT(2, "processBinary L:%s DbgSt:%i\n",
+//            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+//
+//    switch (oit->operation) {
+//    	case OTOpPathClear:
+//    	case OTOpPathBuild:
+//    	case OTOpReset:
+//    		processDebugable(ir, &oit->operation);
+//    		break;
+//    	default:
+//    		break;
+//    }
+//    return true;
+//}
 
-    ir_instruction* ir = (ir_instruction*)node;
 
-    VPRINT(2, "processBinary L:%s DbgSt:%i\n",
-            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
-
-    switch (oit->operation) {
-    	case OTOpPathClear:
-    	case OTOpPathBuild:
-    	case OTOpReset:
-    		processDebugable(ir, &oit->operation);
-    		break;
-    	default:
-    		break;
-    }
-    return true;
-}
-
-
-static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
-{
-    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-
-    ir_instruction* ir = (ir_instruction*)node;
-    ShChangeableList* cl = &(g.result.cgbls);
-
-    VPRINT(2, "processAssignment L:%s DbgSt:%i\n",
-            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
-
-    processDebugable(ir, &oit->operation);
-    switch (oit->operation) {
-    	case OTOpTargetSet:
-    		if (!(oit->dbgBehaviour & DBG_BH_JUMPINTO)) {
-    			// do not visit children
-    			// add all changeables of this node to the list
-    			copyShChangeableList(cl, get_changeable_list(node));
-
-    			// Check if this operation would have emitted a vertex
-//    			if (node->containsEmitVertex()) {
-//    				g.result.passedEmitVertex = true;
-//    				VPRINT(6, "passed Emit %i\n", __LINE__);
+//static bool TraverseAssignment(ir_assignment* node, TIntermTraverser* it)
+//{
+//    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//
+//    ir_instruction* ir = (ir_instruction*)node;
+//    ShChangeableList* cl = &(g.result.cgbls);
+//
+//    VPRINT(2, "processAssignment L:%s DbgSt:%i\n",
+//            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+//
+//    processDebugable(ir, &oit->operation);
+//    switch (oit->operation) {
+//    	case OTOpTargetSet:
+//    		if (!(oit->dbgBehaviour & DBG_BH_JUMPINTO)) {
+//    			// do not visit children
+//    			// add all changeables of this node to the list
+//    			copyShChangeableList(cl, get_changeable_list(node));
+//
+//    			// Check if this operation would have emitted a vertex
+////    			if (node->containsEmitVertex()) {
+////    				g.result.passedEmitVertex = true;
+////    				VPRINT(6, "passed Emit %i\n", __LINE__);
+////    			}
+//    			if ( containsDiscard(node) ) {
+//    				g.result.passedDiscard = true;
+//    				VPRINT(6, "passed Discard %i\n", __LINE__);
 //    			}
-    			if ( containsDiscard(node) ) {
-    				g.result.passedDiscard = true;
-    				VPRINT(6, "passed Discard %i\n", __LINE__);
-    			}
-    			return false;
-    		} else {
-    			// visit children
-    			++it->depth;
-    			if (node->rhs)
-    				Traverse(node->rhs, it);
-
-    			// Since there cannot be a target in the left side anyway
-    			// it would be possible to skip traversal
-    			if (node->lhs)
-    				Traverse(node->lhs, it);
-
-    			--it->depth;
-
-    			// if no target was found so far
-    			// all changeables need to be added to the list
-    			if (oit->operation == OTOpTargetSet) {
-    				copyShChangeableList(cl, get_changeable_list(node));
-    				// Check if this operation would have emitted a vertex
-//    				if (node->containsEmitVertex()) {
-//    					g.result.passedEmitVertex = true;
-//    					VPRINT(6, "passed Emit %i\n", __LINE__);
+//    			return false;
+//    		} else {
+//    			// visit children
+//    			++it->depth;
+//    			if (node->rhs)
+//    				Traverse(node->rhs, it);
+//
+//    			// Since there cannot be a target in the left side anyway
+//    			// it would be possible to skip traversal
+//    			if (node->lhs)
+//    				Traverse(node->lhs, it);
+//
+//    			--it->depth;
+//
+//    			// if no target was found so far
+//    			// all changeables need to be added to the list
+//    			if (oit->operation == OTOpTargetSet) {
+//    				copyShChangeableList(cl, get_changeable_list(node));
+//    				// Check if this operation would have emitted a vertex
+////    				if (node->containsEmitVertex()) {
+////    					g.result.passedEmitVertex = true;
+////    					VPRINT(6, "passed Emit %i\n", __LINE__);
+////    				}
+//    				if( containsDiscard(node) ){
+//    					g.result.passedDiscard = true;
+//    					VPRINT(6, "passed Discard %i\n", __LINE__);
 //    				}
-    				if( containsDiscard(node) ){
-    					g.result.passedDiscard = true;
-    					VPRINT(6, "passed Discard %i\n", __LINE__);
-    				}
-    			}
-    			return false;
-    		}
-    	case OTOpTargetUnset:
-    		// visit children
-    		++it->depth;
-    		if (node->rhs)
-    			Traverse(node->rhs, it);
-
-    		// Since there cannot be a target in the left side anyway
-    		// it would be possible to skip traversal
-			if (node->lhs)
-				Traverse(node->lhs, it);
-
-    		--it->depth;
-
-    		// the old target was found inside left/right branch and
-    		// a new one is still being searched for
-    		// -> add only changed variables of this assigment, i.e.
-    		//    changeables of the left branch
-    		if (oit->operation == OTOpTargetSet) {
-    			copyShChangeableList(cl, get_changeable_list(node->lhs));
-    			// Check if this operation would have emitted a vertex
-//    			if (node->getLeft()->containsEmitVertex()) {
-//    				g.result.passedEmitVertex = true;
-//    				VPRINT(6, "passed Emit %i\n", __LINE__);
 //    			}
-    			if( containsDiscard(node->lhs) ) {
-    				g.result.passedDiscard = true;
-    				VPRINT(6, "passed Discard %i\n", __LINE__);
-    			}
-    		}
-    		return false;
-    	case OTOpPathClear:
-    	case OTOpReset:
-    		return true;
-    	case OTOpPathBuild:
-    	case OTOpDone:
-    		return false;
-    	default:
-    		return true;
-    }
-}
+//    			return false;
+//    		}
+//    	case OTOpTargetUnset:
+//    		// visit children
+//    		++it->depth;
+//    		if (node->rhs)
+//    			Traverse(node->rhs, it);
+//
+//    		// Since there cannot be a target in the left side anyway
+//    		// it would be possible to skip traversal
+//			if (node->lhs)
+//				Traverse(node->lhs, it);
+//
+//    		--it->depth;
+//
+//    		// the old target was found inside left/right branch and
+//    		// a new one is still being searched for
+//    		// -> add only changed variables of this assigment, i.e.
+//    		//    changeables of the left branch
+//    		if (oit->operation == OTOpTargetSet) {
+//    			copyShChangeableList(cl, get_changeable_list(node->lhs));
+//    			// Check if this operation would have emitted a vertex
+////    			if (node->getLeft()->containsEmitVertex()) {
+////    				g.result.passedEmitVertex = true;
+////    				VPRINT(6, "passed Emit %i\n", __LINE__);
+////    			}
+//    			if( containsDiscard(node->lhs) ) {
+//    				g.result.passedDiscard = true;
+//    				VPRINT(6, "passed Discard %i\n", __LINE__);
+//    			}
+//    		}
+//    		return false;
+//    	case OTOpPathClear:
+//    	case OTOpReset:
+//    		return true;
+//    	case OTOpPathBuild:
+//    	case OTOpDone:
+//    		return false;
+//    	default:
+//    		return true;
+//    }
+//}
 
-static bool TraverseDeclaration(ir_variable* node, TIntermTraverser* it)
-{
-    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-
-    VPRINT(2, "processDeclaration L:%s DbgSt:%i\n",
-		    	FormatSourceRange(node->yy_location).c_str(),
-			node->debug_state );
-
-    switch(oit->operation) {
-        case OTOpPathClear:
-        case OTOpPathBuild:
-        case OTOpReset:
-            processDebugable(node, &oit->operation);
-            break;
-        default:
-            break;
-    }
-
-    return true;
-}
+//static bool TraverseDeclaration(ir_variable* node, TIntermTraverser* it)
+//{
+//    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//
+//    VPRINT(2, "processDeclaration L:%s DbgSt:%i\n",
+//		    	FormatSourceRange(node->yy_location).c_str(),
+//			node->debug_state );
+//
+//    switch(oit->operation) {
+//        case OTOpPathClear:
+//        case OTOpPathBuild:
+//        case OTOpReset:
+//            processDebugable(node, &oit->operation);
+//            break;
+//        default:
+//            break;
+//    }
+//
+//    return true;
+//}
 
 //static bool TraverseSelection(bool /* preVisit */, TIntermSelection* node, TIntermTraverser* it)
 //{
@@ -1039,24 +953,24 @@ static bool TraverseDeclaration(ir_variable* node, TIntermTraverser* it)
 //    return true;
 //}
 
-static DbgRsTargetPosition setPositionLoop(LoopT t)
-{
-    switch (t) {
-        case LOOP_WHILE:
-            return DBG_RS_POSITION_LOOP_WHILE;
-        case LOOP_FOR:
-            return DBG_RS_POSITION_LOOP_FOR;
-        case LOOP_DO:
-            return DBG_RS_POSITION_LOOP_DO;
-        default:
-            dbgPrint(DBGLVL_ERROR, "CodeTools - setPositionLoop invalid loop type: %i\n", (int)t);
-            exit(1);
-            break;
-    }
-
-    // Never happens. Only warning
-    return DBG_RS_POSITION_DUMMY;
-}
+//static DbgRsTargetPosition setPositionLoop(LoopT t)
+//{
+//    switch (t) {
+//        case LOOP_WHILE:
+//            return DBG_RS_POSITION_LOOP_WHILE;
+//        case LOOP_FOR:
+//            return DBG_RS_POSITION_LOOP_FOR;
+//        case LOOP_DO:
+//            return DBG_RS_POSITION_LOOP_DO;
+//        default:
+//            dbgPrint(DBGLVL_ERROR, "CodeTools - setPositionLoop invalid loop type: %i\n", (int)t);
+//            exit(1);
+//            break;
+//    }
+//
+//    // Never happens. Only warning
+//    return DBG_RS_POSITION_DUMMY;
+//}
 
 //static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
 //{
@@ -1576,25 +1490,25 @@ static DbgRsTargetPosition setPositionLoop(LoopT t)
 //    return true;
 //}
 
-static bool TraverseUnary(ir_expression* node, TIntermTraverser* it)
-{
-    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
-    ir_instruction* ir = (ir_instruction*)node;
-
-    VPRINT(2, "processUnary L:%d DbgSt:%i\n",
-            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
-
-    switch(oit->operation) {
-    	case OTOpPathClear:
-    	case OTOpPathBuild:
-    	case OTOpReset:
-    		processDebugable(ir, &oit->operation);
-    		break;
-    	default:
-    		break;
-    }
-    return true;
-}
+//static bool TraverseUnary(ir_expression* node, TIntermTraverser* it)
+//{
+//    TOutputDebugJumpTraverser* oit = static_cast<TOutputDebugJumpTraverser*>(it);
+//    ir_instruction* ir = (ir_instruction*)node;
+//
+//    VPRINT(2, "processUnary L:%d DbgSt:%i\n",
+//            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+//
+//    switch(oit->operation) {
+//    	case OTOpPathClear:
+//    	case OTOpPathBuild:
+//    	case OTOpReset:
+//    		processDebugable(ir, &oit->operation);
+//    		break;
+//    	default:
+//    		break;
+//    }
+//    return true;
+//}
 
 
 
@@ -1901,6 +1815,8 @@ static bool ScopeStackTraverseDeclaration(ir_variable* node, TIntermTraverser* i
 //
 DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBehaviour )
 {
+	UNUSED_ARG(debugOptions)
+
     /* Setup scope if neccessary */
     initGlobalScope();
     initGlobalScopeStack();
@@ -1933,36 +1849,38 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
     clearGlobalScopeStack();
     clearGlobalChangeables();
 
-    if (!g.it) {
-        g.it = new TOutputDebugJumpTraverser();
-    }
+    if (!g.it)
+        g.it = new ir_debugjump_traverser_visitor(g.result);
+
+    g.it->vertexEmited = false;
+    g.it->discardPassed = false;
 
     exec_list* list = shader->ir;
     ir_instruction* root = (ir_instruction*)list->head;
 
-    g.it->root = root;
+    //g.it->root = root;
 
     g.it->preVisit = false;
     g.it->postVisit = false;
     g.it->debugVisit = true;
-    g.it->rightToLeft = false;
+//    g.it->rightToLeft = false;
 
     g.it->dbgBehaviour = dbgBehaviour;
 
-    g.it->visitAggregate = TraverseAggregate;
-    g.it->visitAssignment = TraverseAssignment;
-    g.it->visitBinary = TraverseBinary;
-    g.it->visitConstantUnion = 0;
-//    g.it->visitSelection = TraverseSelection;
-//    g.it->visitLoop = TraverseLoop;
-    g.it->visitSymbol = 0;
-    g.it->visitFuncParam = 0;
-    g.it->visitUnary = TraverseUnary;
-//    g.it->visitBranch = TraverseBranch;
-    g.it->visitDeclaration = TraverseDeclaration;
-    g.it->visitFuncDeclaration = 0;
-    g.it->visitSpecification = 0;
-    g.it->visitParameter = 0;
+//    g.it->visitAggregate = TraverseAggregate;
+//    g.it->visitAssignment = TraverseAssignment;
+//    g.it->visitBinary = TraverseBinary;
+//    g.it->visitConstantUnion = 0;
+////    g.it->visitSelection = TraverseSelection;
+////    g.it->visitLoop = TraverseLoop;
+//    g.it->visitSymbol = 0;
+//    g.it->visitFuncParam = 0;
+//    g.it->visitUnary = TraverseUnary;
+////    g.it->visitBranch = TraverseBranch;
+//    g.it->visitDeclaration = TraverseDeclaration;
+//    g.it->visitFuncDeclaration = 0;
+//    g.it->visitSpecification = 0;
+//    g.it->visitParameter = 0;
 //    g.it->visitDummy = TraverseDummy;
 
 
@@ -1981,14 +1899,16 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
             g.it->parseStack.pop();
         }
         VPRINT(1, "********* reset traverse **********\n");
-        TraverseList( list, g.it );
+        g.it->visit(list);
+        //TraverseList( list, g.it );
         return NULL;
     }
 
     /* Clear debug path, i.e remove all DbgStPath */
     g.it->operation = OTOpPathClear;
     VPRINT(1, "********* clear path traverse **********\n");
-    TraverseList( list, g.it );
+    g.it->visit(list);
+//    TraverseList( list, g.it );
 
     /* Initialize parsetree for debugging if necessary */
     g.it->operation = OTOpTargetUnset;
@@ -2004,7 +1924,7 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
 
     /* Advance the debug trace; move DbgStTarget */
     VPRINT(1, "********* jump traverse **********\n");
-    Traverse(g.it->parseStack.top(), g.it);
+    g.it->parseStack.top()->accept(g.it);
 
     if (g.it->operation == OTOpFinished) {
         /* Debugging finished at the end of the code */
@@ -2018,7 +1938,7 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
         g.it->postVisit = true;
         g.it->debugVisit = false;
         VPRINT(1, "********* create path traverse **********\n");
-        TraverseList( list, g.it );
+        g.it->visit(list);
     }
 
 

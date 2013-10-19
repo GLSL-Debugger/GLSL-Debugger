@@ -142,41 +142,41 @@ bool ShIsSampler(variableType v)
     }
 }
 
-//static const char* getShQualifierString(variableQualifier q)
-//{
-//    switch (q) {
-//        case SH_UNSET:
-//            return "";
-//        case SH_TEMPORARY:
-//            return "temporary";
-//        case SH_GLOBAL:
-//            return "global";
-//        case SH_CONST:
-//            return "const";
-//        case SH_ATTRIBUTE:
-//            return "attribute";
-//        case SH_VARYING_IN:
-//            return "varying_in";
-//        case SH_VARYING_OUT:
-//            return "varying_out";
-//        case SH_UNIFORM:
-//            return "uniform";
-//        case SH_PARAM_IN:
-//            return "parameter_in";
-//        case SH_PARAM_OUT:
-//            return "parameter_out";
-//        case SH_PARAM_INOUT:
-//            return "parameter_inout";
-//        case SH_PARAM_CONST:
-//            return "parameter_const";
-//        case SH_BUILTIN_READ:
-//            return "builtin_read";
-//        case SH_BUILTIN_WRITE:
-//            return "builtin_write";
-//        default:
-//            return "unknown";
-//    }
-//}
+static const char* getShQualifierString(variableQualifier q)
+{
+    switch (q) {
+        case SH_UNSET:
+            return "";
+        case SH_TEMPORARY:
+            return "temporary";
+        case SH_GLOBAL:
+            return "global";
+        case SH_CONST:
+            return "const";
+        case SH_ATTRIBUTE:
+            return "attribute";
+        case SH_VARYING_IN:
+            return "varying_in";
+        case SH_VARYING_OUT:
+            return "varying_out";
+        case SH_UNIFORM:
+            return "uniform";
+        case SH_PARAM_IN:
+            return "parameter_in";
+        case SH_PARAM_OUT:
+            return "parameter_out";
+        case SH_PARAM_INOUT:
+            return "parameter_inout";
+        case SH_PARAM_CONST:
+            return "parameter_const";
+        case SH_BUILTIN_READ:
+            return "builtin_read";
+        case SH_BUILTIN_WRITE:
+            return "builtin_write";
+        default:
+            return "unknown";
+    }
+}
 
 //
 //

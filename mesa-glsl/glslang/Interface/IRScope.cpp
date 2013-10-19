@@ -8,6 +8,12 @@
 #include "IRScope.h"
 #include <map>
 
+#include "glsldb/utils/dbgprint.h"
+
+#define VERBOSE 10
+#define VPRINT(level, ...) { if (level < VERBOSE) \
+                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
+
 
 namespace {
 	typedef std::map< ir_instruction*, scopeList* > ScopeMap;
@@ -62,3 +68,54 @@ ShChangeableList* get_changeable_paramerers_list( ir_instruction* ir )
 	return l;
 }
 
+void addScopeToScopeStack(DbgRsScope& stack, scopeList *s)
+{
+    int i;
+
+    if (!s) {
+        return;
+    }
+
+    scopeList::iterator si = s->begin();
+
+    while (si != s->end()) {
+        for (i=0; i<stack.numIds; i++) {
+            if (*si == stack.ids[i]) {
+                goto NEXTINSCOPE;
+            }
+        }
+
+
+        stack.numIds++;
+        stack.ids = (int*) realloc(stack.ids, stack.numIds*sizeof(int));
+        stack.ids[stack.numIds-1] = *si;
+
+NEXTINSCOPE:
+        si++;
+    }
+}
+
+void setDbgScope(DbgRsScope& scope, scopeList *s)
+{
+    if (!s) {
+        dbgPrint(DBGLVL_ERROR, "no scopeList\n");
+        exit(1);
+        return;
+    }
+
+    scopeList::iterator si = s->begin();
+
+    VPRINT(3, "SET GLOBAL SCOPE LIST:");
+
+    while (si != s->end()) {
+        scope.numIds++;
+        scope.ids = (int*) realloc(scope.ids, scope.numIds*sizeof(int));
+        scope.ids[scope.numIds-1] = *si;
+        si++;
+
+        VPRINT(3, "%i ", *si);
+    }
+    VPRINT(3, "\n");
+
+
+}

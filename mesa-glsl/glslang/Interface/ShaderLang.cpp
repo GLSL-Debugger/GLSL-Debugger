@@ -26,7 +26,6 @@
 // Variables
 int glsl_es = 0;
 int glsl_version = 150;
-struct gl_context *main_context;
 
 static struct {
 	DbgResult result;
@@ -34,26 +33,47 @@ static struct {
 } g;
 
 
-static void initialize_context(struct gl_context *ctx, gl_api api)
+static void initialize_context(struct gl_context *ctx, const TBuiltInResource* resources)
 {
-	initialize_context_to_defaults( ctx, api );
-
 	/* The standalone compiler needs to claim support for almost
 	 * everything in order to compile the built-in functions.
 	 */
 	ctx->Const.GLSLVersion = glsl_version;
 	ctx->Extensions.ARB_ES3_compatibility = true;
 
-	ctx->Const.MaxClipPlanes = 8;
-	ctx->Const.MaxDrawBuffers = 2;
+	/* 1.20 minimums. */
+	ctx->Const.MaxLights = resources->maxLights;
+	ctx->Const.MaxClipPlanes = resources->maxClipPlanes;
+	ctx->Const.MaxTextureUnits = resources->maxTextureUnits;
 
-	/* More than the 1.10 minimum to appease parser tests taken from
-	 * apps that (hopefully) already checked the number of coords.
-	 */
-	ctx->Const.MaxTextureCoordUnits = 4;
+	/* allow high amount */
+	ctx->Const.MaxTextureCoordUnits = resources->maxTextureCoords;
+
+	ctx->Const.VertexProgram.MaxAttribs = resources->maxVertexAttribs;
+	ctx->Const.VertexProgram.MaxUniformComponents = resources->maxVertexUniformComponents;
+	ctx->Const.FragmentProgram.MaxUniformComponents = resources->maxFragmentUniformComponents;
+	ctx->Const.MaxVarying = resources->maxVaryingFloats;
+	ctx->Const.MaxCombinedTextureImageUnits = resources->maxCombinedTextureImageUnits;
+	ctx->Const.VertexProgram.MaxTextureImageUnits = resources->maxVertexTextureImageUnits;
+//	ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
+//	ctx->Const.GeometryProgram.MaxTextureImageUnits = 16;
+
+	ctx->Const.MaxDrawBuffers = resources->maxDrawBuffers;
+	ctx->Const.MaxGeometryOutputVertices = resources->geoVerticesOut;
+	// I saw it in mailing-list in the latest mesa git, I think. Or not.
+	// But anyway I cannot find anything in current headers and we using only stable mesa now.
+	//	int geoVerticesIn;
+	//	int geoInputType;
+	//	int geoOutputType;
 
 	ctx->Driver.NewShader = _mesa_new_shader;
+
+	// Enable required extensions
+	ctx->Extensions.ARB_framebuffer_object = (GLboolean)resources->framebufferObjectsSupported;
+	ctx->Extensions.EXT_transform_feedback = (GLboolean)resources->transformFeedbackSupported;
+	ctx->Extensions.ARB_geometry_shader4 = (GLboolean)resources->geoShaderSupported;
 }
+
 
 void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 {
@@ -86,8 +106,6 @@ void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 //
 int ShInitialize( )
 {
-	main_context = new struct gl_context;
-	initialize_context( main_context, ( glsl_es ) ? API_OPENGLES2 : API_OPENGL_COMPAT );
 	return 1;
 }
 
@@ -101,7 +119,9 @@ ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
 	holder->language = language;
 	holder->debugOptions = debugOptions;
 	holder->program = NULL;
-	//holder->parse_context = NULL;
+	holder->ctx = new struct gl_context;
+	initialize_context_to_defaults( holder->ctx,
+					( glsl_es ) ? API_OPENGLES2 : API_OPENGL_COMPAT );
 	return reinterpret_cast< void* >( holder );
 }
 
@@ -124,14 +144,18 @@ void ShDestruct(ShHandle handle)
 		return;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
+
 	if( holder->program ){
 		for( unsigned i = 0; i < MESA_SHADER_TYPES; i++ )
 			ralloc_free( holder->program->_LinkedShaders[i] );
 		ralloc_free( holder->program );
 		holder->program = NULL;
 	}
-	delete holder;
-	holder = NULL;
+
+	if( holder->ctx )
+		delete holder->ctx, holder->ctx = NULL;
+
+	delete holder, holder = NULL;
 }
 
 //
@@ -142,10 +166,6 @@ int __fastcall ShFinalize( )
 	_mesa_glsl_release_types();
 	_mesa_glsl_release_functions();
 
-	if( main_context ){
-		delete main_context;
-		main_context = NULL;
-	}
 	return 1;
 }
 
@@ -211,9 +231,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 		const int numStrings, const EShOptimizationLevel optLevel,
 		const TBuiltInResource* resources, int debugOptions, ShVariableList *vl)
 {
-	// TODO: may be added to context.
-	UNUSED_ARG(resources)
-	// Also do not see something like in mesa yet.
+	// TODO: Can we use something like in mesa?.
 	UNUSED_ARG(optLevel)
 
 	if( handle == NULL )
@@ -223,6 +241,8 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 	vl->variables = NULL;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
+	initialize_context(holder->ctx, resources);
+
 	holder->program = rzalloc(NULL, struct gl_shader_program);
 	assert( holder->program != NULL );
 	holder->program->InfoLog = ralloc_strdup( holder->program, "" );
@@ -255,7 +275,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 				break;
 		}
 
-		compile_shader( main_context, shader, debugOptions );
+		compile_shader( holder->ctx, shader, debugOptions );
 
 		// TODO: informative names
 		if( !shader->CompileStatus ){
@@ -286,7 +306,8 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 	struct gl_shader* shader = holder->program->Shaders[0];
-//
+
+
 //	switch( holder->language ){
 //		case EShLangVertex:
 //			shader =  holder->program->_LinkedShaders[MESA_SHADER_VERTEX];
@@ -324,7 +345,7 @@ char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableLi
 	 // Generate code
 	 compiler->compileDbg(parseContext->treeRoot, cgbl, vl, dbgCgOptions, &prog);
 	 */
-	return prog;
+	return NULL;
 }
 
 //
@@ -349,7 +370,7 @@ int ShLink(const ShHandle linkHandle, const ShHandle compHandles[], const int nu
 	if( holder->program == 0 )
 		return 0;
 
-	link_shaders( main_context, holder->program );
+	link_shaders( holder->ctx, holder->program );
 	int status = ( holder->program->LinkStatus ) ? EXIT_SUCCESS : EXIT_FAILURE;
 
 	if( strlen( holder->program->InfoLog ) > 0 )

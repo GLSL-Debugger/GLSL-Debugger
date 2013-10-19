@@ -64,13 +64,13 @@ public:
     // generate original source code
     virtual bool compile(TIntermNode* root);
     // generate debugged source code
-    virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl, 
+    virtual bool compileDbg(TIntermNode* root, ShChangeableList *cgbl,
             ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code);
     TInfoSink infoSink;
     int debugOptions;
 protected:
     TString m_debugProgram;
-    
+
 };
 
 TString TType::getCodeString(bool withQualifier = false, EShLanguage l = EShLangFragment) const
@@ -172,7 +172,7 @@ void DeleteCompiler(TCompiler* compiler)
 
 class TOutputTraverser : public TIntermTraverser {
 public:
-    TOutputTraverser(TParseContext *pc, TInfoSink &i, TString &dbgProgram, 
+    TOutputTraverser(TParseContext *pc, TInfoSink &i, TString &dbgProgram,
                      EShLanguage l, ShVariableList *list, ShChangeableList *t, TIntermNodeStack *s)
         : parseContext(pc), infoSink(i), debugProgram(dbgProgram), language(l), vl(list), cgbl(t), dbgStack(s), dbgTargetProcessed(false), sequenceNoOperation(false), ignoreNextIdentation(false), sequenceUseComma(false), sequencePrintClosure(true)
         { }
@@ -208,7 +208,7 @@ static void outputExtensions(TIntermNode *node, TOutputTraverser* oit)
 {
     TExtensionList &list = node->getCPPExtensionList();
     TExtensionList::iterator iter;
-    
+
     if (!list.empty()) {
         oit->debugProgram += "\n";
         for (iter = list.begin(); iter != list.end(); iter++) {
@@ -229,7 +229,7 @@ static void processAggregateChildren(TIntermAggregate* node, TIntermTraverser* i
 
 
     oit->debugProgram += initation;
-    
+
     if (it->rightToLeft) {
         sit = sequence.end();
         while (sit != sequence.begin()) {
@@ -240,7 +240,7 @@ static void processAggregateChildren(TIntermAggregate* node, TIntermTraverser* i
             }
         }
     } else {
-        for (sit = sequence.begin(); 
+        for (sit = sequence.begin();
                 sit != sequence.end(); ++sit) {
             (*sit)->traverse(it);
             if (sit+1 != sequence.end()) {
@@ -248,14 +248,14 @@ static void processAggregateChildren(TIntermAggregate* node, TIntermTraverser* i
             }
         }
     }
-    
+
     oit->debugProgram += completion;
 }
 
 static bool OutputDeclarationDebugged(TIntermDeclaration* node, TIntermTraverser* it);
 static bool OutputDeclaration(TIntermDeclaration* node, TIntermTraverser* it);
 
-static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* it) 
+static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* it)
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
 
@@ -271,7 +271,7 @@ static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* i
             }
             (*sit)->traverse(it);
             if ( (*sit)->getAsDummy() != 0) {
-                
+
             } else if ( (*sit)->getAsAggregate() != 0 &&
                       ( ((*sit)->getAsAggregate()->getOp() == EOpSequence) ||
                         ((*sit)->getAsAggregate()->getOp() == EOpFunction)))
@@ -280,7 +280,7 @@ static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* i
             } else if ( ((*sit)->getAsLoopNode() == 0) &&
                         ((*sit)->getAsSwitchNode() == 0) &&
                         ((*sit)->getAsCaseNode() == 0) &&
-                        (!(((*sit)->getAsSelectionNode() != 0) && 
+                        (!(((*sit)->getAsSelectionNode() != 0) &&
                            !((*sit)->getAsSelectionNode()->isShort())) ) ) {
                 if (oit->sequenceNoOperation) {
                     oit->sequenceNoOperation  = false;
@@ -298,14 +298,14 @@ static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* i
             }
         }
     } else {
-        for (sit = sequence.begin(); 
+        for (sit = sequence.begin();
                 sit != sequence.end(); ++sit) {
             if ( (*sit)->getAsDummy() == 0) {
                 outputIndentation(oit, oit->depth);
             }
             (*sit)->traverse(it);
             if ( (*sit)->getAsDummy() != 0) {
-                
+
             } else if ( (*sit)->getAsAggregate() != 0 &&
                         ( ((*sit)->getAsAggregate()->getOp() == EOpSequence) ||
                           ((*sit)->getAsAggregate()->getOp() == EOpFunction)))
@@ -315,9 +315,9 @@ static void processAggregateSequence(TIntermAggregate* node, TIntermTraverser* i
             } else if ( ((*sit)->getAsLoopNode() == 0) &&
                         ((*sit)->getAsSwitchNode() == 0) &&
                         ((*sit)->getAsCaseNode() == 0) &&
-                           (!(((*sit)->getAsSelectionNode() != 0) && 
+                           (!(((*sit)->getAsSelectionNode() != 0) &&
                             !((*sit)->getAsSelectionNode()->isShort())) ) ) {
-                // 
+                //
                 if (oit->sequenceNoOperation) {
                     oit->sequenceNoOperation  = false;
                     oit->ignoreNextIdentation = true;
@@ -358,7 +358,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                 /* Only add brackets if it's not root node */
                 oit->debugProgram += "{\n";
                 oit->depth++;
-                
+
                 /* If in debug mode add initialization to main function */
                 if (oit->cgOptions != DBG_CG_ORIGINAL_SRC &&
                     isChildofMain(node, oit->root)) {
@@ -390,9 +390,9 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                     }
                 }
             }
-            
+
             processAggregateSequence(node, it);
-            
+
             /* Special case for root node */
             if (node != oit->root) {
                 /* And also add debug output at the end */
@@ -427,7 +427,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                             break;
                     }
                 }
-                
+
                 oit->depth--;
                 outputIndentation(oit, oit->depth);
                 oit->debugProgram += "}\n";
@@ -439,7 +439,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                 (node->getDebugState() == DbgStPath)) {
                 it->visitDeclaration = OutputDeclarationDebugged;
             }
-        
+
             if (it->rightToLeft) {
                 // TODO: not the same than in other case???
                 exit(1);
@@ -452,7 +452,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                     }
                 }
             } else {
-                for (sit = sequence.begin(); 
+                for (sit = sequence.begin();
                         sit != sequence.end(); ++sit) {
                     (*sit)->traverse(it);
                     if ( ((*sit)->getAsAggregate() != 0) &&
@@ -501,7 +501,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                     }
                 }
             } else {
-                for (sit = sequence.begin(); 
+                for (sit = sequence.begin();
                         sit != sequence.end(); ++sit) {
                     outputIndentation(oit, oit->depth);
                     (*sit)->traverse(it);
@@ -569,7 +569,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                     (node->getDebugState() == DbgStPath) &&
                     (node->getDbgOverwrite() != DbgOwOriginalCode)) {
                     /* Add debugged function */
-                    oit->debugProgram += cgGetDebugName(node->getName().c_str(), 
+                    oit->debugProgram += cgGetDebugName(node->getName().c_str(),
                                                         oit->root);
                     processAggregateChildren(node, it, "(", "", "");
 
@@ -606,9 +606,9 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                 node->isTarget()) {
 
                 oit->dbgTargetProcessed = true;
-                
+
                 /* This function call acts as target */
-                
+
                 /* Check if we can use a parameter for debugging */
                 TIntermNode *funcDec = getFunctionBySignature(node->getName().c_str(),
                                                               oit->root);
@@ -616,22 +616,22 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                     dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function declaration\n");
                     exit(1);
                 }
-                
+
                 int lastInParameter = getFunctionDebugParameter(
                         funcDec->getAsAggregate());
 
                 if (lastInParameter >= 0) {
                     /* we found a usable parameter */
                     oit->debugProgram += getFunctionName(node->getName());
-                    
+
                     TIntermSequence sequence = node->getSequence();
                     TIntermSequence::iterator sit;
-                    
+
                     oit->debugProgram += "(";
 
                     int i;
-                    
-                    for (sit = sequence.begin(),i=0; sit != sequence.end(); ++sit,++i) 
+
+                    for (sit = sequence.begin(),i=0; sit != sequence.end(); ++sit,++i)
                     {
                         if (i == lastInParameter) {
 
@@ -639,8 +639,8 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                                         node->getAsAggregate(), lastInParameter)) {
                                 /* No special care necessary, just add it before */
                                 oit->debugProgram += "(";
-                                cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, 
-                                             oit->cgOptions, oit->cgbl, oit->vl, 
+                                cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram,
+                                             oit->cgOptions, oit->cgbl, oit->vl,
                                              oit->dbgStack, 0);
                                 oit->debugProgram += ", ";
                                 (*sit)->traverse(it);
@@ -648,7 +648,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                             } else {
                                 /* Copy to temporary, debug, and copy back */
                                 oit->debugProgram += "(";
-                                cgAddDbgCode(CG_TYPE_PARAMETER, oit->debugProgram, 
+                                cgAddDbgCode(CG_TYPE_PARAMETER, oit->debugProgram,
                                              oit->cgOptions, oit->cgbl, oit->vl,
                                              oit->dbgStack, 0);
                                 oit->debugProgram += " = ";
@@ -660,11 +660,11 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                                     oit->debugProgram += ")";
                                 }
                                 oit->debugProgram += ", ";
-                                cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, 
+                                cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram,
                                              oit->cgOptions, oit->cgbl, oit->vl,
                                              oit->dbgStack, 0);
                                 oit->debugProgram += ", ";
-                                cgAddDbgCode(CG_TYPE_PARAMETER, oit->debugProgram, 
+                                cgAddDbgCode(CG_TYPE_PARAMETER, oit->debugProgram,
                                              oit->cgOptions, oit->cgbl, oit->vl,
                                              oit->dbgStack, 0);
                                 oit->debugProgram += ")";
@@ -692,7 +692,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                        node->getDebugState() == DbgStTarget &&
                        node->getDbgOverwrite() != DbgOwOriginalCode) {
                 /* This call leads to the actual prosition of debugging */
-                oit->debugProgram += cgGetDebugName(node->getName().c_str(), 
+                oit->debugProgram += cgGetDebugName(node->getName().c_str(),
                                                     oit->root);
                 processAggregateChildren(node, it, "(", ", ", ")");
             } else if (oit->language == EShLangGeometry &&
@@ -717,17 +717,17 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
 
                             int id;
                             bool allInScope = true;
-                        
+
                             for (id=0; id<oit->cgbl->numChangeables; id++) {
                                 bool inScope = false;
-                            
+
                                 /* builtins are always valid */
                                 ShVariable *var = findShVariableFromId(oit->vl, oit->cgbl->changeables[id]->id);
                                 if (!var) {
                                     dbgPrint(DBGLVL_WARNING, "CodeGen - unkown changeable, stop debugging\n");
                                     return false;
                                 }
-                                
+
                                 if (var->builtin) {
                                     inScope = true;
                                 } else {
@@ -738,13 +738,13 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                                         }
                                     }
                                 }
-                        
+
                                 if (!inScope) {
                                     allInScope = false;
                                     break;
                                 }
                             }
-                            
+
                             if (allInScope) {
                                 cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
                                              oit->cgbl, oit->vl, oit->dbgStack, CG_GEOM_CHANGEABLE_IN_SCOPE);
@@ -755,14 +755,14 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
                             oit->debugProgram += ";\n";
                             outputIndentation(oit, oit->depth);
                         }
-                        
+
                         /* Add original function call */
                         oit->debugProgram += getFunctionName(node->getName());
                         processAggregateChildren(node, it, "(", ", ", ")");
                         break;
                     case DBG_CG_VERTEX_COUNT:
                         cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-                                     oit->cgbl, oit->vl, oit->dbgStack, 0, 
+                                     oit->cgbl, oit->vl, oit->dbgStack, 0,
                                      oit->parseContext->resources->geoOutputType);
                         break;
                     case DBG_CG_COVERAGE:
@@ -982,7 +982,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
             processAggregateChildren(node, it, "refract(", ", ", ")");
             return false;
             break;
-        
+
         case EOpMul:
             processAggregateChildren(node, it, "matrixCompMult(", ", ", ")");
             return false;
@@ -991,7 +991,7 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
             processAggregateChildren(node, it, "outerProduct(", ", ", ")");
             return false;
             break;
-            
+
         case EOpSwizzles:
             processAggregateChildren(node, it, "", "", "");
             return false;
@@ -1014,11 +1014,11 @@ static bool OutputBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraver
     if (node->isTarget() &&
         oit->cgOptions != DBG_CG_ORIGINAL_SRC) {
         oit->dbgTargetProcessed = true;
-        cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions, 
+        cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
                      oit->cgbl, oit->vl, oit->dbgStack, 0);
         oit->debugProgram += ", ";
     }
-    
+
     if (!(node->getLeft()->isAtomic())) {
         oit->debugProgram += "(";
         node->getLeft()->traverse(it);
@@ -1026,10 +1026,10 @@ static bool OutputBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraver
     } else {
         node->getLeft()->traverse(it);
     }
-    
+
     switch (node->getOp()) {
         case EOpIndexDirect:
-            oit->debugProgram +="."; 
+            oit->debugProgram +=".";
             break;
         case EOpIndexIndirect:
             oit->debugProgram += "[";
@@ -1073,7 +1073,7 @@ static bool OutputBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraver
 
             break;
         case EOpVectorSwizzle:
-            oit->debugProgram += "."; 
+            oit->debugProgram += ".";
             break;
         case EOpAssign:                   oit->debugProgram += " = ";  break;
         case EOpAddAssign:                oit->debugProgram += " += "; break;
@@ -1122,7 +1122,7 @@ static bool OutputBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraver
     }
     if (node->getOp() != EOpIndexIndirect &&
         node->getOp() != EOpIndexDirectStruct) {
-    
+
         if (!(node->getRight()->isAtomic())) {
             oit->debugProgram += "(";
             node->getRight()->traverse(it);
@@ -1140,7 +1140,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
     TInfoSink& out = oit->infoSink;
-    
+
     outputExtensions(node, oit);
 
     if (node->isTarget() &&
@@ -1151,7 +1151,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         oit->debugProgram += ", ";
     }
 
-    switch (node->getOp()) {   
+    switch (node->getOp()) {
     case EOpNegative:
         oit->debugProgram += "-(";
         node->getOperand()->traverse(it);
@@ -1202,8 +1202,8 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
         break;
-        
-        
+
+
     case EOpRadians:
         oit->debugProgram += "radians(";
         node->getOperand()->traverse(it);
@@ -1250,7 +1250,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
         break;
-    case EOpLog:            
+    case EOpLog:
         oit->debugProgram += "log(";
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
@@ -1260,7 +1260,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
         break;
-    case EOpLog2:           
+    case EOpLog2:
         oit->debugProgram += "log2(";
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
@@ -1270,7 +1270,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
         break;
-    case EOpInverseSqrt:    
+    case EOpInverseSqrt:
         oit->debugProgram += "inversesqrt(";
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
@@ -1327,7 +1327,7 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         node->getOperand()->traverse(it);
         oit->debugProgram += ")";
         break;
-    
+
     case EOpAny:
         oit->debugProgram += "any(";
         node->getOperand()->traverse(it);
@@ -1344,11 +1344,11 @@ static bool OutputUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverse
         oit->debugProgram += ")";
         break;
 
-    default: 
+    default:
         out.debug.message(EPrefixError, "Bad unary op");
         break;
     }
-    
+
     return false;
 }
 
@@ -1402,7 +1402,7 @@ static void OutputFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
             oit->debugProgram += buf;
         }
     }
-    
+
     if (node->getTypePointer()->isArray()) {
         char buf[300];
         int i;
@@ -1417,12 +1417,12 @@ static void OutputFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
     }
 }
 
-static void OutputConstantUnion(TIntermConstantUnion* node, 
+static void OutputConstantUnion(TIntermConstantUnion* node,
                                 TIntermTraverser* it)
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
     TInfoSink& out = oit->infoSink;
-    
+
     outputExtensions(node, oit);
     int size = node->getType().getObjectSize();
 
@@ -1431,7 +1431,7 @@ static void OutputConstantUnion(TIntermConstantUnion* node,
         oit->debugProgram += node->getType().getCodeString(false, oit->language);
         oit->debugProgram += "(";
     }
-    
+
     for (int i = 0; i < size; i++) {
         switch (node->getUnionArrayPointer()[i].getType()) {
             case EbtBool:
@@ -1444,7 +1444,7 @@ static void OutputConstantUnion(TIntermConstantUnion* node,
             case EbtFloat:
                 {
                     char buf[300];
-                    sprintf(buf, "%f", 
+                    sprintf(buf, "%f",
                             node->getUnionArrayPointer()[i].getFConst());
                     oit->debugProgram += buf;
                 }
@@ -1452,7 +1452,7 @@ static void OutputConstantUnion(TIntermConstantUnion* node,
             case EbtInt:
                 {
                     char buf[300];
-                    sprintf(buf, "%i", 
+                    sprintf(buf, "%i",
                             node->getUnionArrayPointer()[i].getIConst());
                     oit->debugProgram += buf;
                 }
@@ -1460,7 +1460,7 @@ static void OutputConstantUnion(TIntermConstantUnion* node,
             case EbtUInt:
                 {
                     char buf[300];
-                    sprintf(buf, "%iu", 
+                    sprintf(buf, "%iu",
                             node->getUnionArrayPointer()[i].getUIConst());
                     oit->debugProgram += buf;
                 }
@@ -1468,14 +1468,14 @@ static void OutputConstantUnion(TIntermConstantUnion* node,
             case EbtSwizzle:
                 {
                     char buf[300];
-                    sprintf(buf, "%s", 
+                    sprintf(buf, "%s",
                             itoSwizzle(
                                 node->getUnionArrayPointer()[i].getIConst()) );
                     oit->debugProgram += buf;
                 }
                 break;
-            default: 
-                out.info.message(EPrefixInternalError, 
+            default:
+                out.info.message(EPrefixInternalError,
                         "Unknown constant", node->getRange());
             break;
         }
@@ -1520,7 +1520,7 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
                             oit->debugProgram += "(";
                         }
                         cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram,
-                                     oit->cgOptions, oit->cgbl, oit->vl, 
+                                     oit->cgOptions, oit->cgbl, oit->vl,
                                      oit->dbgStack, 0);
                         if (node->isShort()) {
                             oit->debugProgram += "), ";
@@ -1532,9 +1532,9 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
                     case DBG_STATE_SELECTION_IF:
                     case DBG_STATE_SELECTION_ELSE:
                         /* Add temporary register for condition */
-                        
+
                         /* Fix: trigraph initialized condition register
-                         *      even if trigraph is part of another 
+                         *      even if trigraph is part of another
                          *      statement
                          *
                         cgInit(CG_TYPE_CONDITION, NULL, oit->vl, oit->language);
@@ -1556,14 +1556,14 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
     if (!node->isShort()) {
         oit->debugProgram += "if (";
     }
-    
+
     /* Add condition */
     if (copyCondition) {
         if (node->isShort()) {
             oit->debugProgram += "(";
         }
-    
-        cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram, oit->cgOptions, 
+
+        cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram, oit->cgOptions,
                      oit->cgbl, oit->vl, oit->dbgStack, 0);
         oit->debugProgram += " = (";
         node->getCondition()->traverse(it);
@@ -1608,7 +1608,7 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
                 oit->debugProgram += ", ";
             }
         }
-        
+
         if (trueCase) {
             if (node->isShort()) {
                 oit->sequenceUseComma = true;
@@ -1646,7 +1646,7 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
         }
         /* Traverse false block */
         TIntermAggregate *falseCase = node->getFalseBlock()->getAsAggregate();
-        
+
         if (node->isTarget() &&
             oit->cgOptions == DBG_CG_SELECTION_CONDITIONAL &&
             node->getDbgInternalState() == DBG_STATE_SELECTION_CONDITION_PASSED) {
@@ -1662,7 +1662,7 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
                 oit->debugProgram += ", ";
             }
         }
-        
+
         if (falseCase) {
             if (node->isShort()) {
                 oit->sequenceUseComma = true;
@@ -1692,12 +1692,12 @@ static bool OutputSelection(bool, TIntermSelection* node, TIntermTraverser* it)
             oit->debugProgram += ")";
         }
     }
-   
+
     /* Trigraph should be in brackets as if could be child of another statement */
     if (node->isShort()) {
         oit->debugProgram += ")";
     }
- 
+
     if (!node->isShort()) {
         oit->debugProgram += "\n";
     }
@@ -1791,7 +1791,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                         break;
                 }
             }
-			
+
             /* Add loop counter */
             if (node->needDbgLoopIter()) {
                 oit->debugProgram += node->getDbgIterName();
@@ -1800,7 +1800,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             }
 
             oit->debugProgram += "while(";
-            
+
             /* Add condition */
             if (node->isTarget()) {
                 oit->dbgTargetProcessed = true;
@@ -1926,7 +1926,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                 oit->debugProgram += ";\n";
                 outputIndentation(oit, oit->depth);
             }
-            
+
             /* Add optional debug temoprary register to copy condition */
             if (node->isTarget() &&
                 node->getDbgInternalState() == DBG_STATE_LOOP_SELECT_FLOW) {
@@ -1943,7 +1943,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                         break;
                 }
             }
-            
+
             /* Add initialization code */
             oit->debugProgram += "for(";
             if (node->getDbgInternalState() != DBG_STATE_LOOP_WRK_INIT) {
@@ -1966,10 +1966,10 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                     } else {
                         oit->debugProgram += "true";
                     }
-                } else if (node->getDbgInternalState() == 
+                } else if (node->getDbgInternalState() ==
                                                 DBG_STATE_LOOP_SELECT_FLOW) {
                     /* Copy test */
-                    cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram, 
+                    cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram,
                             oit->cgOptions, oit->cgbl, oit->vl, oit->dbgStack, 0);
                     oit->debugProgram += " = (";
                     if (node->getTest()) {
@@ -1982,7 +1982,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                     cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
                             oit->cgbl, oit->vl, oit->dbgStack, 0);
                     oit->debugProgram += ", ";
-                    cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram, 
+                    cgAddDbgCode(CG_TYPE_CONDITION, oit->debugProgram,
                             oit->cgOptions, oit->cgbl, oit->vl, oit->dbgStack, 0);
                 } else {
                     if (node->getTest()) {
@@ -1999,7 +1999,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
                 }
             }
             oit->debugProgram += "; ";
-            
+
             /* Add terminal */
             if (node->isTarget() &&
                 node->getDbgInternalState() == DBG_STATE_LOOP_QYR_TERMINAL) {
@@ -2012,7 +2012,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             if (node->getTerminal()) {
                 node->getTerminal()->traverse(it);
             }
-            
+
             /* Add increment of debug loop iterator */
             if (node->needDbgLoopIter()) {
                 if (node->getTerminal()) {
@@ -2042,7 +2042,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             oit->depth--;
         }
     }
-    
+
     outputIndentation(oit, oit->depth);
     switch (node->getLoopType()) {
         case LOOP_WHILE:
@@ -2058,7 +2058,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             break;
         case LOOP_FOR:
             oit->debugProgram += "}\n";
-            
+
             if (!node->isTarget() &&
                 node->getDbgInternalState() == DBG_STATE_LOOP_WRK_INIT &&
                 oit->cgOptions != DBG_CG_ORIGINAL_SRC) {
@@ -2126,7 +2126,7 @@ static bool OutputLoop(bool, TIntermLoop* node, TIntermTraverser* it)
             }
             oit->debugProgram += ");\n";
             break;
-    } 
+    }
     return false;
 }
 
@@ -2146,17 +2146,17 @@ static bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTravers
                      oit->cgbl, oit->vl, oit->dbgStack, 0);
         oit->debugProgram += "; ";
     }
-    
+
     switch (node->getFlowOp()) {
-        case EOpKill:      
+        case EOpKill:
             if (!(oit->dbgTargetProcessed) || oit->cgOptions == DBG_CG_ORIGINAL_SRC) {
                 oit->debugProgram += "discard";
             }
             break;
-        case EOpBreak:     
+        case EOpBreak:
             oit->debugProgram += "break";
             break;
-        case EOpContinue:  
+        case EOpContinue:
             oit->debugProgram += "continue";
             break;
         case EOpReturn:
@@ -2172,14 +2172,14 @@ static bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTravers
                     /* name */
                     cgGetNewName(&tmpRegister, oit->vl, "dbgBranch");
                     oit->debugProgram += tmpRegister;
-                    
+
                     /* assignment */
                     oit->debugProgram += " = ";
-                    
+
                     /* expression */
                     node->getExpression()->traverse(it);
                     oit->debugProgram += ";\n";
-                    
+
                     /* Debug code */
                     outputIndentation(oit, oit->depth);
                     cgAddDbgCode(CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
@@ -2195,9 +2195,9 @@ static bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTravers
             /* Geometry: If control flow ends program execution append code
              *           for emitting vertex and primitive.
              */
-           
-            if (oit->language == EShLangGeometry && 
-                (oit->cgOptions == DBG_CG_CHANGEABLE || 
+
+            if (oit->language == EShLangGeometry &&
+                (oit->cgOptions == DBG_CG_CHANGEABLE ||
                  oit->cgOptions == DBG_CG_VERTEX_COUNT ||
                  oit->cgOptions == DBG_CG_COVERAGE ||
                  oit->cgOptions == DBG_CG_SELECTION_CONDITIONAL ||
@@ -2217,7 +2217,7 @@ static bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTravers
             }
 
             oit->debugProgram += "return";
-            
+
             if (node->getExpression()) {
                 if (node->isTarget() &&
                     oit->cgOptions != DBG_CG_ORIGINAL_SRC) {
@@ -2229,12 +2229,12 @@ static bool OutputBranch(bool /* previsit*/, TIntermBranch* node, TIntermTravers
                     node->getExpression()->traverse(it);
                 }
             }
-            
+
             break;
-        default:           
+        default:
             break;
     }
-    
+
     return false;
 }
 
@@ -2255,7 +2255,7 @@ static bool OutputDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
     }
 
     oit->debugProgram += v->getName();
-    
+
     /* Add postfix to all non-builtin symbols due to !@$#^$% scope hiding */
     int postfix = v->getUniqueId();
 
@@ -2266,7 +2266,7 @@ static bool OutputDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
              var->qualifier != SH_VARYING_IN &&
              var->qualifier != SH_VARYING_OUT &&
              var->qualifier != SH_UNIFORM &&
-             
+
              var->qualifier != SH_ATTRIBUTE) {
             char buf[300];
             sprintf(buf, "_%i", postfix);
@@ -2341,7 +2341,7 @@ static bool OutputDeclarationDebugged(TIntermDeclaration* node, TIntermTraverser
     oit->debugProgram += v->getType().getCodeString(true, oit->language);
     oit->debugProgram += " ";
     oit->debugProgram += v->getName();
-    
+
     /* Add postfix to all non-builtin symbols due to !@$#^$% scope hiding */
     int postfix = v->getUniqueId();
 
@@ -2359,7 +2359,7 @@ static bool OutputDeclarationDebugged(TIntermDeclaration* node, TIntermTraverser
             oit->debugProgram += buf;
         }
     }
-    
+
     if (v->getType().isArray()) {
         char buf[300];
         int i;
@@ -2405,7 +2405,7 @@ static void outputFuncPrototype(TFunction *f, const char* fname, TIntermTraverse
             oit->debugProgram += "]";
         }
     }
-        
+
     oit->debugProgram += " ";
     oit->debugProgram += fname;
     oit->debugProgram += "(";
@@ -2433,7 +2433,7 @@ static void outputFuncPrototype(TFunction *f, const char* fname, TIntermTraverse
 }
 
 
-static void OutputFuncDeclaration(TIntermFuncDeclaration* node, 
+static void OutputFuncDeclaration(TIntermFuncDeclaration* node,
                                   TIntermTraverser* it)
 {
     TOutputTraverser* oit = static_cast<TOutputTraverser*>(it);
@@ -2441,15 +2441,15 @@ static void OutputFuncDeclaration(TIntermFuncDeclaration* node,
     outputExtensions(node, oit);
 
     TFunction *f = node->getFunction();
-    
+
     /* Check if function is on debug path */
-    TIntermNode *funcDef = getFunctionBySignature(f->getMangledName().c_str(), 
+    TIntermNode *funcDef = getFunctionBySignature(f->getMangledName().c_str(),
                                                   oit->root);
     if (funcDef) {
         if ((oit->cgOptions != DBG_CG_ORIGINAL_SRC) &&
                 (funcDef->getDebugState() == DbgStPath)) {
             /* Add debugged prototype */
-            outputFuncPrototype(f, cgGetDebugName(f->getMangledName().c_str(), 
+            outputFuncPrototype(f, cgGetDebugName(f->getMangledName().c_str(),
                                                   oit->root), it);
             oit->debugProgram += ";\n";
         }
@@ -2498,7 +2498,7 @@ static bool OutputSpecification(TIntermSpecification* node, TIntermTraverser* it
 
     outputIndentation(oit, oit->depth);
     oit->debugProgram += "}";
-    
+
     if (node->getInstances()) {
         oit->debugProgram += " ";
         node->getInstances()->traverse(it);
@@ -2514,7 +2514,7 @@ static void OutputParameter(TIntermParameter* node, TIntermTraverser* it)
     outputExtensions(node, oit);
 
     TType* t = node->getType();
-    
+
     oit->debugProgram += t->getCodeString(true, oit->language);
     oit->debugProgram += " ";
     oit->debugProgram += t->getFieldName();
@@ -2556,7 +2556,7 @@ bool TGenericCompiler::compile(TIntermNode *root)
     TOutputTraverser it(parseContext, infoSink, m_debugProgram, language, NULL, NULL, NULL);
     it.preVisit = true;
     it.postVisit = false;
-    
+
     m_debugProgram = "";
 
     if (parseContext) {
@@ -2820,7 +2820,7 @@ static bool stackBranch(bool, TIntermBranch* node, TIntermTraverser* it)
 static void stackDummy(TIntermDummy* node, TIntermTraverser* it)
 {
     TStackTraverser* oit = static_cast<TStackTraverser*>(it);
-    
+
     if (node->getDebugState() == DbgStTarget) {
         /* add node to stack and finish */
         oit->dbgStack.push_back(node);
@@ -2832,7 +2832,7 @@ static void dumpNodeInfo(TIntermNode *node)
 {
     dbgPrint(DBGLVL_COMPILERINFO, "(%s) ", FormatSourceRange(node->getRange()).c_str());
     if (node->getAsAggregate()) {
-        dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION CALL %s", 
+        dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION CALL %s",
                 getFunctionName(node->getAsAggregate()->getName()));
     } else if (node->getAsBinaryNode()) {
         dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "BINARY");
@@ -2879,7 +2879,7 @@ static void dumpDbgStack(TIntermNodeStack *stack)
             dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "no scope\n");
         }
     }
-    
+
     dbgPrint(DBGLVL_COMPILERINFO, "###############################################\n");
 }
 
@@ -2887,7 +2887,7 @@ static void dumpDbgStack(TIntermNodeStack *stack)
  * DEBUG INTERFACE
  */
 
-bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl, 
+bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
         ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code)
 {
     if (dbgCgOptions == DBG_CG_ORIGINAL_SRC) {
@@ -2898,7 +2898,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
     if (root == 0) {
         return false;
     }
- 
+
     m_debugProgram = "";
 
     /* Version number handling */
@@ -2915,7 +2915,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
     }
 
 	cgInitLoopIter();
-	
+
     /* 1. Pass:
      * - build up debug stack (list of all nodes on the dbgPath)
      * - mark target node where code has to be inserted
@@ -2940,12 +2940,12 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
         dbgPrint(DBGLVL_ERROR, "CodeGen - could not find main function!\n");
         exit(1);
     }
-    
+
     main->traverse(&it1pass);
 
     /* Find target, mark it and prepare neccessary dbgTemporaries */
     TIntermNode *target = NULL;
-    
+
     switch (dbgCgOptions) {
         case DBG_CG_GEOMETRY_MAP:
         case DBG_CG_VERTEX_COUNT:
@@ -2975,7 +2975,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                     /* check if all changeables are in scope */
                     int id;
                     bool allInScope = true;
-                    
+
                     for (id=0; id<cgbl->numChangeables; id++) {
                         bool inScope = false;
 
@@ -2985,7 +2985,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                             dbgPrint(DBGLVL_WARNING, "CodeGen - unkown changeable, stop debugging\n");
                             return false;
                         }
-                        
+
                         if (var->builtin) {
                             inScope = true;
                         } else {
@@ -2997,7 +2997,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                                 }
                             }
                         }
-                        
+
                         if (!inScope) {
                             /* This is not the place to read out the target */
                             if ((*rit)->getAsAggregate() &&
@@ -3006,14 +3006,14 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                                 dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL DbgOwOriginalCode\n");
                                 dumpNodeInfo(*rit);
                                 dbgPrint(DBGLVL_COMPILERINFO, "---------------------------------------\n");
-                                
+
                                 (*rit)->setDbgOverwrite(DbgOwOriginalCode);
-                
+
                                 TIntermNode *funcDec;
                                 funcDec = getFunctionBySignature((*rit)->getAsAggregate()->getName().c_str(),
                                                                  root);
                                 if (!funcDec) {
-                                    dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n", 
+                                    dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n",
                                             (*rit)->getAsAggregate()->getName().c_str());
                                     exit(1);
                                 } else {
@@ -3022,7 +3022,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                             } else {
                                 dumpNodeInfo(*rit);
                             }
-                            
+
                             /* pop stack since we cannot process all changeables here */
                             allInScope = false;
                             break;
@@ -3035,13 +3035,13 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                         if ((*rit)->getAsAggregate() &&
                             (*rit)->getAsAggregate()->getOp() == EOpFunctionCall &&
                             (*rit)->getAsAggregate()->isUserDefined()) {
-                        
+
                             dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL DbgOwOriginalCode\n");
                             dumpNodeInfo(*rit);
                             dbgPrint(DBGLVL_COMPILERINFO, "---------------------------------------\n");
-                            
+
                             (*rit)->setDbgOverwrite(DbgOwOriginalCode);
-                            
+
                             TIntermNode *funcDec;
                             funcDec = getFunctionBySignature((*rit)->getAsAggregate()->getName().c_str(),
                                     root);
@@ -3058,7 +3058,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                         break;
                     }
                 }
-                
+
                 if (!target) {
                     dbgPrint(DBGLVL_WARNING, "CodeGen - target not in stack, no debugging possible\n");
                     dumpDbgStack(&(it1pass.dbgStack));
@@ -3067,19 +3067,19 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
                     /* iterate trough the rest of the stack */
                     for (rit = it1pass.dbgStack.rbegin(); rit != it1pass.dbgStack.rend(); rit++) {
                         if ((*rit)->getAsAggregate() &&
-                            (*rit)->getAsAggregate()->getOp() == EOpFunctionCall && 
+                            (*rit)->getAsAggregate()->getOp() == EOpFunctionCall &&
                             (*rit)->getAsAggregate()->isUserDefined() &&
                             (*rit)->getAsAggregate()->getDbgOverwrite() == DbgOwNone) {
                             dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL DbgOwDebugCode\n");
                             dumpNodeInfo(*rit);
                             dbgPrint(DBGLVL_COMPILERINFO, "---------------------------------------\n");
                             (*rit)->setDbgOverwrite(DbgOwDebugCode);
-                    
+
                             TIntermNode *funcDec;
                             funcDec = getFunctionBySignature((*rit)->getAsAggregate()->getName().c_str(),
                                                              root);
                             if (!funcDec) {
-                                dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n", 
+                                dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n",
                                         (*rit)->getAsAggregate()->getName().c_str());
                                 exit(1);
                             } else {
@@ -3105,7 +3105,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
     }
 
     /* Prepare debug temporary registers */
-    
+
     /* Always allocate a result register */
     dbgPrint(DBGLVL_COMPILERINFO, "initialize CG_TYPE_RESULT for %i\n", language);
     switch (dbgCgOptions) {
@@ -3176,7 +3176,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
             cgInit(CG_TYPE_RESULT, NULL, vl, language);
             break;
     }
-    
+
     /* Check if an optional parameter register is neccessary */
     if (target &&
         target->getAsAggregate() &&
@@ -3186,11 +3186,11 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
         TIntermNode *funcDec = getFunctionBySignature(
                 target->getAsAggregate()->getName().c_str(),
                 root);
-        
+
         int lastInParameter = getFunctionDebugParameter(funcDec->getAsAggregate());
 
         if (lastInParameter >=0) {
-            TType *t = getTypeDebugParameter(target->getAsAggregate(), 
+            TType *t = getTypeDebugParameter(target->getAsAggregate(),
                                              lastInParameter);
             if (t) {
                 if (getHasSideEffectsDebugParameter(target->getAsAggregate(), lastInParameter)) {
@@ -3205,7 +3205,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
 
     /* Check if a selection condition needs to be copied */
     if (target &&
-        ((dbgCgOptions == DBG_CG_COVERAGE) || 
+        ((dbgCgOptions == DBG_CG_COVERAGE) ||
          (dbgCgOptions == DBG_CG_CHANGEABLE) ||
          (dbgCgOptions == DBG_CG_GEOMETRY_CHANGEABLE)) &&
         target->getAsSelectionNode())
@@ -3228,14 +3228,14 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
     cgInitNameMap();
 
     /* 2. Pass:
-     * - do the actual code generation 
+     * - do the actual code generation
      */
-    
-    TOutputTraverser it(parseContext, infoSink, m_debugProgram, language, vl, cgbl, 
+
+    TOutputTraverser it(parseContext, infoSink, m_debugProgram, language, vl, cgbl,
                         &(it1pass.dbgStack));
     it.preVisit = true;
     it.postVisit = false;
-    
+
 
     it.visitAggregate = OutputAggregate;
     it.visitBinary = OutputBinary;
@@ -3258,7 +3258,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
     it.root = root;
 
     root->traverse(&it);
-    
+
     /* Unset target again */
     if (target) {
         target->unsetTarget();
@@ -3281,7 +3281,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
             funcDec = getFunctionBySignature((*stit)->getAsAggregate()->getName().c_str(),
                                              root);
             if (!funcDec) {
-                dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n", 
+                dbgPrint(DBGLVL_ERROR, "CodeGen - could not find function %s\n",
                         (*stit)->getAsAggregate()->getName().c_str());
                 exit(1);
             } else {
