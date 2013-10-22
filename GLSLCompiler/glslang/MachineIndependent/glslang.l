@@ -57,13 +57,14 @@ FS          (f|F)
 US          (u|U)
 
 %option nounput
-%{
+%top{
+/* begin top block */
 #include <stdio.h>
 #include <stdlib.h>
 #include "ParseHelper.h"
-extern "C" {
-#include "glslang_tab.h"
-}
+#include "generated_glsl_parser.hpp"
+extern YYSTYPE yylval;
+
 /* windows only pragma */
 #ifdef _MSC_VER
 #pragma warning(disable : 4102)
@@ -87,6 +88,7 @@ int yytokenpos[2];
     extern int yyparse(void*);
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define parseContext (*((TParseContext*)(parseContextLocal)))		
+
 #endif
  
 #define YY_INPUT(buf,result,max_size) (result = yy_input(buf, max_size))
@@ -97,13 +99,12 @@ int yytokenpos[2];
                           pyylval->lex.range.right.line  = yylinenum; \
                           pyylval->lex.range.right.colum = yytokenpos[YY_TOKEN_RIGHT]; \
                         }
-%}
+/* end top block */
+}
 
 %option noyywrap
 %option never-interactive
-%option outfile="Gen_glslang.cpp"
 %x FIELDS
-
 
 %%
 <*>"//"[^\n]*"\n"     { /* ?? carriage and/or line-feed? */ };
@@ -382,12 +383,10 @@ BEGIN(INITIAL);
 
 %%
 
-
 //Including Pre-processor.
 extern "C" {
   #include "./preprocessor/preprocess.h"
-} 
-
+}
 //
 // The YY_INPUT macro just calls this.  Maybe this could be just put into
 // the macro directly.
@@ -466,8 +465,7 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
     else
         return 0;
 }
-
-void yyerror(char *s) 
+void yyerror(void* parseContextLocal, const char *s) 
 {
     
     TSourceRange range;
@@ -485,7 +483,6 @@ void yyerror(char *s)
         GlobalParseContext->recover(__FILE__, __LINE__);
     }            
 }
-
 void PaReservedWord()
 {
     TSourceRange range;
@@ -548,8 +545,6 @@ int PaParseComment(int &lineno, TParseContext& parseContextLocal)
     }
     return 1;
 }
-
-extern "C" {
 
 void CPPDebugLogMsg(const char *msg)
 {
@@ -620,7 +615,7 @@ void DecLineNumber(void)
     if ((yylinenum & SourceLocLineMask) > 0)
         --yylinenum;
 }
-
+extern "C" {
 void SetCursor(int col)
 {
     yycursor = col;
@@ -660,6 +655,12 @@ void DecCurserCol(YYTOKENPOS t)
 {
     yytokenpos[t]--;
 }
+
+void setVersionNumber(int version) {
+    ((TParseContext *)cpp->pC)->versionNumber = version;
+}
+
+} /* extern "C" */
 
 void HandlePragma(const char **tokens, int numTokens)
 {    
@@ -830,11 +831,8 @@ void  updateExtensionBehavior(const char* extName, const char* behavior)
     }
 }
 
-void setVersionNumber(int version) {
-    ((TParseContext *)cpp->pC)->versionNumber = version;
-}
+
         
-}  // extern "C"
 
 void setInitialState()
 {

@@ -1,8 +1,8 @@
 add_subdirectory(preprocessor)
 
 set(SRC
-	Gen_glslang.cpp 
-	Gen_glslang_tab.cpp 
+	generated_glsl_lexer.cpp
+	generated_glsl_parser.cpp 
 	Initialize.cpp 
 	IntermTraverse.cpp
 	Intermediate.cpp 
@@ -24,12 +24,12 @@ find_package(FLEX REQUIRED)
 # original makefiles use dos2unix around here too, neccessary?
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
-add_custom_command(OUTPUT "Gen_glslang.cpp"
-	COMMAND ${FLEX_EXECUTABLE} -oGen_glslang.cpp glslang.l
+add_custom_command(OUTPUT "generated_glsl_lexer.cpp"
+	COMMAND ${FLEX_EXECUTABLE} -ogenerated_glsl_lexer.cpp glslang.l
 	DEPENDS "glslang.l"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-add_custom_command(OUTPUT "Gen_glslang_tab.cpp"
+add_custom_command(OUTPUT "generated_glsl_parser.cpp"
 	COMMAND "./postProcess.sh"
 	DEPENDS "glslang.y"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

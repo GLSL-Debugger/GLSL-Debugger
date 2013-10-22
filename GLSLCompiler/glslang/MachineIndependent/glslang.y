@@ -37,6 +37,7 @@
  * languages.
  */
 %{
+ /* begin of top */
 
 /* Based on:
 ANSI C Yacc grammar
@@ -69,7 +70,7 @@ Jutta Degener, 1995
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
-    extern void yyerror(char*);    
+    extern void yyerror(void*, const char*);    
 #endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
@@ -151,6 +152,7 @@ Jutta Degener, 1995
         parseContext.recover(__FILE__, __LINE__);                                                            \
     }                                                                           \
 }
+/* end of top */
 %}
 %union {
     struct {
@@ -256,7 +258,11 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 
 %}
 
-%pure_parser /* Just in case is called from multiple threads */
+%define api.pure full
+%lex-param { void* parseContextLocal }
+%parse-param { void* parseContextLocal }
+/*%locations*/
+/*%pure_parser*/ /* Just in case is called from multiple threads */
 %expect 1 /* One shift reduce conflict because of if | else */
 %token <lex> ATTRIBUTE CONST_QUAL BOOL_TYPE FLOAT_TYPE INT_TYPE INVARIANT
 %token <lex> BREAK CONTINUE DO ELSE FOR IF DISCARD RETURN SWITCH CASE DEFAULT
