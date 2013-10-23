@@ -1442,9 +1442,15 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
     }
 
 	ptrace ((__ptrace_request)PTRACE_SETOPTIONS, debuggedProgramPID, 0,
-	        PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK |
-	        PTRACE_O_TRACEEXEC | PTRACE_O_TRACEVFORKDONE /*|
-	        PTRACE_O_TRACECLONE*/);
+	          PTRACE_O_TRACEFORK 
+	        | PTRACE_O_TRACEVFORK
+	        | PTRACE_O_TRACEEXEC
+	        | PTRACE_O_TRACEVFORKDONE
+	        /*| PTRACE_O_TRACECLONE*/
+#ifdef PTRACE_O_EXITKILL
+	        | PTRACE_O_EXITKILL
+#endif
+            );
 
     dbgPrint(DBGLVL_INFO, "wait for child\n");
 	error = checkChildStatus();
