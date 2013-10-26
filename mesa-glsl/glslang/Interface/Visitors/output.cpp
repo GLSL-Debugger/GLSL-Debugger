@@ -166,7 +166,7 @@ void check_initializer(ir_variable *ir, ir_output_traverser_visitor* it)
 			(ir->constant_value && ir->constant_value->debug_target) ||
 			(ir->constant_initializer &&  ir->constant_initializer->debug_target))) {
 	       it->dbgTargetProcessed = true;
-	       cgAddDbgCode(CG_TYPE_RESULT, it->buffer, it->cgOptions, it->cgbl,
+	       cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
 	    		   	   	it->vl, it->dbgStack, 0);
 	       ralloc_asprintf_append (&it->buffer, ";\n");
 	       it->indent();
@@ -374,7 +374,7 @@ static const char *const operator_glsl_strs[] = {
 	"1.0/",
 	"inversesqrt",
 	"sqrt",
-	"normalize",
+	//"normalize",
 	"exp",
 	"log",
 	"exp2",
@@ -452,8 +452,8 @@ static const char *const operator_glsl_strs[] = {
 	"uboloadTODO",
 	"vectorExtract_TODO",
 	"fma",
-	"clamp",
-	"mix",
+//	"clamp",
+//	"mix",
 	"bfi_TODO",
 	"bitfield_extract_TODO",
 	"vector_insert_TODO",
@@ -489,7 +489,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 {
     if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
     	dbgTargetProcessed = true;
-        cgAddDbgCode(CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, 0);
+        cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
         // FIXME: WAT?
         ralloc_asprintf_append (&buffer, ", ");
     }
@@ -807,7 +807,7 @@ void ir_output_traverser_visitor::visit(ir_assignment *ir)
 
     if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
     	dbgTargetProcessed = true;
-        cgAddDbgCode(CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, 0);
+        cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
         // FIXME: WAT?
         ralloc_asprintf_append (&buffer, ", ");
     }
@@ -895,7 +895,7 @@ void ir_output_traverser_visitor::visit(ir_constant *ir)
 
     if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
     	dbgTargetProcessed = true;
-        cgAddDbgCode(CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, 0);
+        cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
         // FIXME: WAT?
         ralloc_asprintf_append (&buffer, ", ");
     }
@@ -972,7 +972,7 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 					if( !getSideEffectsDebugParameter( ir, lastInParameter ) ){
 						/* No special care necessary, just add it before */
 						ralloc_asprintf_append (&it->buffer, "(");
-						cgAddDbgCode( CG_TYPE_RESULT, it->buffer, it->cgOptions,
+						cgAddDbgCode( CG_TYPE_RESULT, &it->buffer, it->cgOptions,
 								it->cgbl, it->vl, it->dbgStack, 0 );
 						// FIXME: WTF? WHAT LANGUAGE ORIGIANAL USED?
 						ralloc_asprintf_append (&it->buffer, ", ");
@@ -981,15 +981,15 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 					}else{
 						/* Copy to temporary, debug, and copy back */
 						ralloc_asprintf_append (&it->buffer, "(");
-						cgAddDbgCode( CG_TYPE_PARAMETER, it->buffer, it->cgOptions,
+						cgAddDbgCode( CG_TYPE_PARAMETER, &it->buffer, it->cgOptions,
 														it->cgbl, it->vl, it->dbgStack, 0 );
 						ralloc_asprintf_append (&it->buffer, " = (");
 						inst->accept( it );
 						ralloc_asprintf_append (&it->buffer, "), ");
-						cgAddDbgCode( CG_TYPE_RESULT, it->buffer, it->cgOptions,
+						cgAddDbgCode( CG_TYPE_RESULT,& it->buffer, it->cgOptions,
 								it->cgbl, it->vl, it->dbgStack, 0 );
 						ralloc_asprintf_append (&it->buffer, ", ");
-						cgAddDbgCode( CG_TYPE_PARAMETER, it->buffer, it->cgOptions,
+						cgAddDbgCode( CG_TYPE_PARAMETER, &it->buffer, it->cgOptions,
 										it->cgbl, it->vl, it->dbgStack, 0 );
 						ralloc_asprintf_append (&it->buffer, ")");
 					}
@@ -1004,7 +1004,7 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 		}else{
 			/* no usable parameter, so debug before function call */
 			ralloc_asprintf_append (&it->buffer, "(");
-			cgAddDbgCode( CG_TYPE_RESULT, it->buffer, it->cgOptions,
+			cgAddDbgCode( CG_TYPE_RESULT, &it->buffer, it->cgOptions,
 					it->cgbl, it->vl, it->dbgStack, 0 );
 			ralloc_asprintf_append (&it->buffer, ", %s (", ir->callee_name());
 			bool first = true;
@@ -1238,7 +1238,7 @@ ir_output_traverser_visitor::visit(ir_if *ir)
                     case ir_dbg_if_init:
                     case ir_dbg_if_condition:
                         /* Add debug code prior to selection */
-                        cgAddDbgCode(CG_TYPE_RESULT, buffer, cgOptions, cgbl,
+                        cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl,
                         				vl, dbgStack, 0);
                         ralloc_asprintf_append (&buffer, ";\n");
                         indent();
@@ -1268,15 +1268,15 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 
    /* Add condition */
 	if( copyCondition ){
-		cgAddDbgCode( CG_TYPE_CONDITION, buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+		cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
 		ralloc_asprintf_append (&buffer, " = (");
 		ir->condition->accept(this);
 		ralloc_asprintf_append (&buffer, "), ");
 
 		/* Add debug code */
-		cgAddDbgCode( CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+		cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
 		ralloc_asprintf_append (&buffer, ", ");
-		cgAddDbgCode( CG_TYPE_CONDITION, buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+		cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
 	}else
 		 ir->condition->accept(this);
 
@@ -1288,7 +1288,7 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 		   ir->debug_state_internal == ir_dbg_if_condition_passed) {
 		/* Add code to colorize condition */
 	   indent();
-       cgAddDbgCode( CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, true);
+       cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true);
        ralloc_asprintf_append (&buffer, ";\n");
    }
 
@@ -1310,7 +1310,7 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 				&& ir->debug_state_internal == ir_dbg_if_condition_passed ){
 			/* Add code to colorize condition */
 			indent();
-			cgAddDbgCode( CG_TYPE_RESULT, buffer, cgOptions, cgbl, vl, dbgStack, true );
+			cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
 			ralloc_asprintf_append( &buffer, ";\n" );
 		}
 

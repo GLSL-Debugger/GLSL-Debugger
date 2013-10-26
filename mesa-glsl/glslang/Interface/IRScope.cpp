@@ -7,18 +7,14 @@
 #include "ir.h"
 #include "IRScope.h"
 #include <map>
-
 #include "glsldb/utils/dbgprint.h"
-
-#define VERBOSE 10
-#define VPRINT(level, ...) { if (level < VERBOSE) \
-                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
-
 
 namespace {
 	typedef std::map< ir_instruction*, scopeList* > ScopeMap;
 	typedef std::map< ir_instruction*, ShChangeableList* > ChangeableListMap;
+	typedef std::map< exec_list*, ShChangeableList* > ChangeableExecListMap;
 	ScopeMap scopes;
+	ChangeableExecListMap changeable_exec_lists;
 	ChangeableListMap changeable_lists;
 	ChangeableListMap changeable_param_lists;
 }
@@ -38,6 +34,19 @@ void set_scope( ir_instruction* ir, scopeList* list )
 	scopes[ir] = list;
 }
 
+ShChangeableList* get_changeable_list( exec_list* list )
+{
+	ChangeableExecListMap::iterator it = changeable_exec_lists.find(list);
+	if( it != changeable_exec_lists.end() )
+		return it->second;
+
+	// Create new
+	ShChangeableList* l = new ShChangeableList();
+	l->changeables = NULL;
+	l->numChangeables = 0;
+	changeable_exec_lists[list] = l;
+	return l;
+}
 
 // TODO: There a leak
 ShChangeableList* get_changeable_list( ir_instruction* ir )

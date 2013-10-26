@@ -72,6 +72,20 @@ enum DBG_LEVELS {
     ((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 0, __VA_ARGS__) : 0))
 #endif
 
+#define VERBOSE 4
+#define VPRINT(level, ...) { if (level < VERBOSE) \
+                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
+
+#ifndef NO_FORMAT_OUTPUT
+#define ESC_BOLD  "[1m"
+#define ESC_RED   "[0;31m"
+#define ESC_BRED  "[1;31m"
+
+#define ESC_RESET "[0m"
+#define ESC_CHAR 27
+#endif
+
+
 DBGLIBLOCAL void setMaxDebugOutputLevel(int level);
 
 DBGLIBLOCAL int getMaxDebugOutputLevel(void);

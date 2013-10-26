@@ -72,9 +72,9 @@ static struct {
 	char *libdlsym;
 #ifndef _WIN32
 	pid_t debuggedProgramPID;
-#else // _WIN32 
+#else // _WIN32
 	DWORD debuggedProgramPID;
-#endif // _WIN32 
+#endif // _WIN32
 } g;
 */
 #ifdef _WIN32
@@ -183,55 +183,55 @@ void printArgument(void *addr, int type)
 	switch (type) {
 	case DBG_TYPE_CHAR:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(char));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(char*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(char*)tmp);
 		break;
 	case DBG_TYPE_UNSIGNED_CHAR:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(unsigned char));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(unsigned char*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(unsigned char*)tmp);
 		break;
 	case DBG_TYPE_SHORT_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(short));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(short*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(short*)tmp);
 		break;
 	case DBG_TYPE_UNSIGNED_SHORT_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(unsigned short));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(unsigned short*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(unsigned short*)tmp);
 		break;
 	case DBG_TYPE_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(int));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(int*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%i", *(int*)tmp);
 		break;
 	case DBG_TYPE_UNSIGNED_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(unsigned int));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%u", *(unsigned int*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%u", *(unsigned int*)tmp);
 		break;
 	case DBG_TYPE_LONG_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(long));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%li", *(long*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%li", *(long*)tmp);
 		break;
 	case DBG_TYPE_UNSIGNED_LONG_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(unsigned long));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%lu", *(unsigned long*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%lu", *(unsigned long*)tmp);
 		break;
 	case DBG_TYPE_LONG_LONG_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(long long));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%lli", *(long long*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%lli", *(long long*)tmp);
 		break;
 	case DBG_TYPE_UNSIGNED_LONG_LONG_INT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(unsigned long long));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%llu", *(unsigned long long*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%llu", *(unsigned long long*)tmp);
 		break;
 	case DBG_TYPE_FLOAT:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(float));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%f", *(float*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%f", *(float*)tmp);
 		break;
 	case DBG_TYPE_DOUBLE:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(double));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%f", *(double*)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%f", *(double*)tmp);
 		break;
 	case DBG_TYPE_POINTER:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(void*));
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "%p", *(void**)tmp); 
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "%p", *(void**)tmp);
 		break;
 	case DBG_TYPE_BOOLEAN:
 		cpyFromProcess(g.debuggedProgramPID, tmp, addr, sizeof(GLboolean));
@@ -250,12 +250,12 @@ void printArgument(void *addr, int type)
 	case DBG_TYPE_STRUCT:
 		dbgPrintNoPrefix(DBGLVL_DEBUG, "STRUCT");
 		break;
-	default:	
+	default:
 		dbgPrintNoPrefix(DBGLVL_DEBUG, "UNKNOWN TYPE [%i]", type);
 	}
 	free(tmp);
-}					  
-	
+}
+
 void printCall(void)
 {
 	int i;
@@ -333,8 +333,8 @@ QStringList parseArguments(int argc, char** argv)
 		switch(opt) {
 			case 'h':
 				std::cout << "Usage: " << argv[0] << " [options] debuggee [debugee_options]" << std::endl;
-				std::cout << "  -h      : this help message" << std::endl; 
-				std::cout << "  -v value: log level from 0 (FATAL) to 5 (LV_TRACE) " << std::endl; 
+				std::cout << "  -h      : this help message" << std::endl;
+				std::cout << "  -v value: log level from 0 (FATAL) to 5 (LV_TRACE) " << std::endl;
 				std::cout << "  -f value: log to file \"value\"" << std::endl;
 				exit(EXIT_SUCCESS);
 			case 'v':

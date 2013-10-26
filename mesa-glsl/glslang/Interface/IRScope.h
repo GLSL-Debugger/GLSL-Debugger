@@ -13,6 +13,8 @@ class ir_instruction;
 
 scopeList* get_scope( ir_instruction* );
 void set_scope( ir_instruction*, scopeList* );
+// TODO: actually changeable_list for exec_list* and parameters_list are doubles each other
+ShChangeableList* get_changeable_list( exec_list* );
 ShChangeableList* get_changeable_list( ir_instruction* );
 ShChangeableList* get_changeable_paramerers_list( ir_instruction* );
 

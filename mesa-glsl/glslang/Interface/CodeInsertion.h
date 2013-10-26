@@ -37,8 +37,8 @@ char* itoSwizzle(int i);
 void cgGetNewName(char **name, ShVariableList *vl, const char *prefix);
 void cgInit(cgTypes type, ShVariable *v, ShVariableList *vl, EShLanguage l);
 void cgAddDeclaration(cgTypes type, std::string &prog, EShLanguage l);
-void cgAddDeclaration(cgTypes type, char* prog, EShLanguage l);
-void cgAddDbgCode(cgTypes type, char* prog, DbgCgOptions cgOptions,
+void cgAddDeclaration(cgTypes type, char** prog, EShLanguage l);
+void cgAddDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
                   ShChangeableList *src, ShVariableList *vl,
                   IRGenStack *stack, int option, int outPrimType = 0x0000);
 void cgAddOutput(cgTypes type, std::string &prog, EShLanguage l, TQualifier o = EvqTemporary);

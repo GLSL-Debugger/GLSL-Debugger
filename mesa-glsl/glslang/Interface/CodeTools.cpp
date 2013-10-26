@@ -6,12 +6,6 @@
 #include "glsldb/utils/dbgprint.h"
 
 
-#define MAIN_FUNC_SIGNATURE "main"
-#define VERBOSE 10
-
-#define VPRINT(level, ...) { if (level < VERBOSE) \
-                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
-
 void makeMangledName( const struct glsl_type* type, std::string& mangledName )
 {
 	if( !type )

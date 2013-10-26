@@ -16,14 +16,14 @@ struct global_print_tracker;
 
 class ir_output_traverser_visitor : public ir_visitor {
 public:
-	ir_output_traverser_visitor(char* buf, struct gl_shader* shader_, EShLanguage mode_,
+	ir_output_traverser_visitor(struct gl_shader* shader_, EShLanguage mode_,
 			DbgCgOptions dbgopts, ShVariableList *list, ShChangeableList *t, IRGenStack *s) :
 			globals(0), cgOptions(dbgopts), vl(list), cgbl(t), dbgStack(s),
 			dbgTargetProcessed(false)
 
 	{
+		buffer = NULL;
 		indentation = 0;
-		buffer = buf;
 		shader = shader_;
 		mode = mode_;
 	}

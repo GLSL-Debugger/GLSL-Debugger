@@ -47,12 +47,6 @@
 #include "glsldb/utils/dbgprint.h"
 
 
-#define MAIN_FUNC_SIGNATURE "main"
-#define VERBOSE 10
-
-#define VPRINT(level, ...) { if (level < VERBOSE) \
-                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
-
 //enum OTOperation {
 //    OTOpTargetUnset,         // Invalidate actual target
 //    OTOpTargetSet,           // Look for new target

@@ -2424,16 +2424,13 @@ bool compileShaderCode(struct gl_shader* shader)
 	exec_list* list = shader->ir;
 //    bool haveValidObjectCode = true;
 
-    std::string m_debugProgram;
     EShLanguage language = EShLangVertex;
     if( shader->Type == GL_FRAGMENT_SHADER )
     	language = EShLangFragment;
     else if( shader->Type == GL_GEOMETRY_SHADER )
 		language = EShLangGeometry;
 
-    char* debug_program = NULL;
-    ir_output_traverser_visitor it(debug_program, shader, language,
-    									DBG_CG_ORIGINAL_SRC, NULL, NULL, NULL);
+    ir_output_traverser_visitor it(shader, language, DBG_CG_ORIGINAL_SRC, NULL, NULL, NULL);
     it.append_version();
 //    TOutputTraverser it(root, m_debugProgram, language, NULL, NULL, NULL);
 //    it.preVisit = true;
@@ -2474,7 +2471,7 @@ bool compileShaderCode(struct gl_shader* shader)
                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
                    "%s\n"
                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-                   m_debugProgram.c_str());
+                   it.buffer);
 
 //    return haveValidObjectCode;
     return true;
@@ -2773,7 +2770,7 @@ void change_DbgOverwrite(ir_call* cir, enum ir_dbg_overwrite status)
     funcDec->debug_overwrite = status;
 }
 
-bool prepareTarget(ir_instruction** out, IRGenStack& dbgStack, DbgCgOptions dbgCgOptions,
+bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgCgOptions,
 					ShChangeableList *cgbl, ShVariableList *vl)
 {
 	ir_instruction* target = NULL;
@@ -2785,7 +2782,8 @@ bool prepareTarget(ir_instruction** out, IRGenStack& dbgStack, DbgCgOptions dbgC
 		case DBG_CG_SELECTION_CONDITIONAL:
 		case DBG_CG_LOOP_CONDITIONAL:
 		case DBG_CG_GEOMETRY_CHANGEABLE:
-			target = dbgStack.back();
+			if( !dbgStack->empty() )
+				target = dbgStack->back();
 			break;
 		case DBG_CG_CHANGEABLE:
 		{
@@ -2795,7 +2793,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack& dbgStack, DbgCgOptions dbgC
 				return false;
 
 			/* iterate backwards thru stack */
-			for( rit = dbgStack.rbegin(); rit != dbgStack.rend(); rit++ ){
+			for( rit = dbgStack->rbegin(); rit != dbgStack->rend(); rit++ ){
 
 				ir_instruction* rir = *rit;
 				scopeList *sl = get_scope( rir );
@@ -2857,11 +2855,11 @@ bool prepareTarget(ir_instruction** out, IRGenStack& dbgStack, DbgCgOptions dbgC
 			if( !target ){
 				dbgPrint( DBGLVL_WARNING,
 						"CodeGen - target not in stack, no debugging possible\n" );
-				dumpDbgStack( &dbgStack );
+				dumpDbgStack( dbgStack );
 				return false;
 			}else{
 				/* iterate trough the rest of the stack */
-				for( rit = dbgStack.rbegin(); rit != dbgStack.rend();
+				for( rit = dbgStack->rbegin(); rit != dbgStack->rend();
 						rit++ ){
 					ir_instruction* rir = *rit;
 
@@ -2871,7 +2869,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack& dbgStack, DbgCgOptions dbgC
 					}
 				}
 				/* DEBUG OUTPUT */
-				dumpDbgStack( &dbgStack );
+				dumpDbgStack( dbgStack );
 			}
 		}
 			break;
@@ -2939,7 +2937,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 
     /* Find target, mark it and prepare neccessary dbgTemporaries */
     ir_instruction* target = NULL;
-	if( !prepareTarget( &target, it1pass.dbgStack, dbgCgOptions, cgbl, vl ) )
+	if( !prepareTarget( &target, &(it1pass.dbgStack), dbgCgOptions, cgbl, vl ) )
 		return false;
 
     if (target) {
@@ -3017,13 +3015,12 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
         }
     }
 
-    char* debug_program = NULL;
-    ir_output_traverser_visitor it(debug_program, shader, language,
+    ir_output_traverser_visitor it(shader, language,
     							   dbgCgOptions, vl, cgbl, &(it1pass.dbgStack));
     it.append_version();
 
     /* Add declaration of all neccessary types */
-    cgAddDeclaration(CG_TYPE_ALL, debug_program, language);
+    cgAddDeclaration(CG_TYPE_ALL, &it.buffer, language);
 
     /* Clear the name map holding debugged names */
     cgInitNameMap();
@@ -3086,18 +3083,15 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
                    "%s\n"
                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-                   debug_program);
+                   it.buffer);
 
-#if 0
 #ifdef _WIN32
-    *code = _strdup(debug_program);
+    *code = _strdup(it.buffer);
 #else
-	*code = strdup(debug_program);
+	*code = strdup(it.buffer);
 #endif
-#endif
-	*code = debug_program;
 
-    return true;
+	return true;
 }
 
 

@@ -115,7 +115,7 @@ class TIntermNode;
 //
 //
 //
-void clearTraverseDebugJump(void);
+//void clearTraverseDebugJump(void);
 
 //class TTraverseDebugJump : public TCompiler {
 //public:

@@ -845,7 +845,7 @@ public:
         rightToLeft(false) {}
 
     void (*visitSymbol)(TIntermSymbol*, TIntermTraverser*);
-    bool (*visitFuncParam)(ir_variable*, TIntermTraverser*);
+    void (*visitFuncParam)(TIntermFuncParam*, TIntermTraverser*);
     void (*visitConstantUnion)(TIntermConstantUnion*, TIntermTraverser*);
     bool (*visitDeclaration)(TIntermDeclaration*, TIntermTraverser*);
     void (*visitFuncDeclaration)(TIntermFuncDeclaration*, TIntermTraverser*);

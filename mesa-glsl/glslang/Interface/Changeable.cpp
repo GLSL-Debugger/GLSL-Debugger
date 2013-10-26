@@ -6,6 +6,7 @@
 
 #include "ShaderLang.h"
 #include "glsldb/utils/notify.h"
+#include "glsldb/utils/dbgprint.h"
 #include <string.h>
 #include <map>
 #include "ir.h"
@@ -352,6 +353,16 @@ void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
     c->indices[c->numIndices-1] = idx;
 }
 
+void addShIndexToChangeableList(ShChangeableList *cl,
+                                int s,
+                                ShChangeableIndex *idx)
+{
+    if (!cl) return;
+
+    if (s < cl->numChangeables) {
+        addShIndexToChangeable(cl->changeables[s], idx);
+    }
+}
 
 void freeShChangeable(ShChangeable **c)
 {
@@ -507,6 +518,8 @@ const char* ShGetQualifierString(const ShVariable *v)
 
     }
 }
+
+
 
 ShVariable* copyShVariable(ShVariable *src)
 {
@@ -706,6 +719,76 @@ ShVariable* irToShVariable( ir_variable* variable )
 	return var;
 }
 
+void ShDumpVariable(ShVariable *v, int depth)
+{
+    int i;
+
+    for (i=0; i<depth; i++)
+        dbgPrint(DBGLVL_COMPILERINFO, "    ");
+
+
+    if (0 <= v->uniqueId) {
+        dbgPrint(DBGLVL_COMPILERINFO, "<%i> ", v->uniqueId);
+    }
+
+    if (v->builtin) {
+        dbgPrint(DBGLVL_COMPILERINFO, "builtin ");
+    }
+
+    dbgPrint(DBGLVL_COMPILERINFO, "%s %s",
+            getShQualifierString(v->qualifier),
+            getShTypeString(v));
+
+    if (v->isMatrix) {
+        dbgPrint(DBGLVL_COMPILERINFO, "%ix%i", v->size, v->size);
+    } else {
+        if (1 < v->size) {
+            dbgPrint(DBGLVL_COMPILERINFO, "%i", v->size);
+        }
+    }
+
+    dbgPrint(DBGLVL_COMPILERINFO, " %s", v->name);
+
+    if (v->isArray) {
+        for (i=0; i<MAX_ARRAYS; i++) {
+            if (v->arraySize[i] != -1) {
+                dbgPrint(DBGLVL_COMPILERINFO, "[%i]", v->arraySize[i]);
+            } else {
+                break;
+            }
+        }
+        dbgPrint(DBGLVL_COMPILERINFO, "\n");
+    } else {
+        dbgPrint(DBGLVL_COMPILERINFO, "\n");
+    }
+
+    if (v->structSize != 0) {
+        depth++;
+        for (i=0; i<v->structSize; i++) {
+            ShDumpVariable(v->structSpec[i], depth);
+        }
+    }
+
+}
+
+ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name)
+{
+    ShVariable **vp = NULL;
+    int i;
+
+    if (!vl) {
+        return NULL;
+    }
+
+    vp = vl->variables;
+
+    for (i=0; i<vl->numVariables; i++) {
+        if (!(strcmp(vp[i]->name, name))) {
+            return vp[i];
+        }
+    }
+    return NULL;
+}
 
 ShVariable* findShVariableFromSource(ir_variable* variable)
 {

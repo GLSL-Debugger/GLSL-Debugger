@@ -28,8 +28,6 @@ public:
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_assignment *ir);
 	virtual bool visitIr(ir_call *ir);
-	virtual bool visitIr(ir_return *ir);
-	virtual bool visitIr(ir_discard *ir);
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
 

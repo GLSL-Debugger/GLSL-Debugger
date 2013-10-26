@@ -10,9 +10,6 @@
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
 
-#define VERBOSE 10
-#define VPRINT(level, ...) { if (level < VERBOSE) \
-                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
 
 #define DEFAULT_DEBUGABLE(ir)  \
 	if( this->operation == OTOpPathClear || \
@@ -192,8 +189,8 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_variable* ir)
 {
-	VPRINT( 2,
-			"processDeclaration L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+	VPRINT( 2, "processDeclaration L:%s DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	DEFAULT_DEBUGABLE( ir )
 	return true;

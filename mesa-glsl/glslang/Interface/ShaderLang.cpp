@@ -27,11 +27,6 @@
 int glsl_es = 0;
 int glsl_version = 150;
 
-static struct {
-	DbgResult result;
-	unsigned int position;
-} g;
-
 
 static void initialize_context(struct gl_context *ctx, const TBuiltInResource* resources)
 {
@@ -231,11 +226,13 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 		const int numStrings, const EShOptimizationLevel optLevel,
 		const TBuiltInResource* resources, int debugOptions, ShVariableList *vl)
 {
-	// TODO: Can we use something like in mesa?.
+	// TODO: Can we use something like in mesa?
 	UNUSED_ARG(optLevel)
 
 	if( handle == NULL )
 		return 0;
+
+	clearTraverseDebugJump();
 
 	vl->numVariables = 0;
 	vl->variables = NULL;
@@ -336,16 +333,11 @@ char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableLi
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 	struct gl_shader* shader = holder->program->Shaders[0];
-	/*
-	 TCompiler* compiler = base->getAsCompiler();
-	 if (compiler == 0)
-	 return NULL;
-	 TParseContext* parseContext = compiler->getParseContext();
+	char* prog = NULL;
 
-	 // Generate code
-	 compiler->compileDbg(parseContext->treeRoot, cgbl, vl, dbgCgOptions, &prog);
-	 */
-	return NULL;
+	// Generate code
+	bool result = compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
+	return prog;
 }
 
 //

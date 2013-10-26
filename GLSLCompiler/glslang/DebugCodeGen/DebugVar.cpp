@@ -51,7 +51,7 @@
 #define reset "[0m"
 static char esc = 27;
 
-#define VERBOSE 0
+#define VERBOSE 4
 #define VPRINT(level, ...) { if (level < VERBOSE) \
                                 dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
 

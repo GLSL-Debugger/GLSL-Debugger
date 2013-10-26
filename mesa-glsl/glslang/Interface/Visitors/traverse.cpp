@@ -10,30 +10,30 @@
 
 void ir_traverse_visitor::visit(ir_variable* ir)
 {
-    bool visit = true;
+	bool visit = true;
 
-    if (this->preVisit)
-    	visit = this->visitIr( ir );
+	if( this->preVisit )
+		visit = this->visitIr( ir );
 
-    if (visit) {
-        ++this->depth;
-        if (ir->constant_value)
-        	ir->constant_value->accept(this);
-        else if( ir->constant_initializer )
-        	ir->constant_initializer->accept(this);
-        --this->depth;
-    }
+	if( visit ){
+		++this->depth;
+		if( ir->constant_value )
+			ir->constant_value->accept( this );
+		else if( ir->constant_initializer )
+			ir->constant_initializer->accept( this );
+		--this->depth;
+	}
 
-    if (visit && (this->postVisit || this->debugVisit))
-    	this->visitIr( ir );
+	if( visit && ( this->postVisit || this->debugVisit ) )
+		this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_function_signature* ir)
 {
 	bool visit = true;
 
-	if (this->preVisit)
-		 visit = this->visitIr( ir );
+	if( this->preVisit )
+		visit = this->visitIr( ir );
 
 	if( visit )
 		this->visit( &ir->parameters );
@@ -42,7 +42,7 @@ void ir_traverse_visitor::visit(ir_function_signature* ir)
 	this->visit( &ir->body );
 	--this->depth;
 
-	if (this->postVisit)
+	if( this->postVisit )
 		visit = this->visitIr( ir );
 }
 
@@ -50,8 +50,8 @@ void ir_traverse_visitor::visit(ir_function* ir)
 {
 	bool visit = true;
 
-	if (this->preVisit)
-	    visit = this->visitIr( ir );
+	if( this->preVisit )
+		visit = this->visitIr( ir );
 
 	bool found_non_builtin_proto = false;
 	foreach_iter(exec_list_iterator, iter, *ir) {
@@ -61,10 +61,10 @@ void ir_traverse_visitor::visit(ir_function* ir)
 	}
 
 	if( visit && found_non_builtin_proto )
-		this->visit(&ir->signatures);
+		this->visit( &ir->signatures );
 
-    if (visit && (this->postVisit || this->debugVisit))
-    	this->visitIr( ir );
+	if( visit && ( this->postVisit || this->debugVisit ) )
+		this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_expression* ir)
@@ -130,7 +130,7 @@ void ir_traverse_visitor::visit(ir_swizzle* ir)
 		visit = this->visitIr( ir );
 
 	if( visit )
-		ir->val->accept(this);
+		ir->val->accept( this );
 
 	if( visit && this->postVisit )
 		visit = this->visitIr( ir );
@@ -138,19 +138,17 @@ void ir_traverse_visitor::visit(ir_swizzle* ir)
 
 void ir_traverse_visitor::visit(ir_dereference_variable* ir)
 {
-	ir_variable *var = ir->variable_referenced();
-	var->accept( this );
+	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_dereference_array* ir)
 {
-	ir->array->accept( this );
-	ir->array_index->accept( this );
+	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_dereference_record* ir)
 {
-	ir->record->accept( this );
+	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_assignment* ir)
@@ -163,12 +161,10 @@ void ir_traverse_visitor::visit(ir_assignment* ir)
 
 	ir->lhs->accept( this );
 
+	if( ir->condition )
+		ir->condition->accept( this );
 
-
-		if( ir->condition )
-			ir->condition->accept( this );
-
-		ir->rhs->accept( this );
+	ir->rhs->accept( this );
 
 	if( visit ){
 		++this->depth;
@@ -203,7 +199,7 @@ void ir_traverse_visitor::visit(ir_assignment* ir)
 void ir_traverse_visitor::visit(ir_constant* ir)
 {
 	// TODO
-	printf("TODO: ir_traverse_visitor: ir_constant");
+	printf( "TODO: ir_traverse_visitor: ir_constant" );
 	this->visitIr( ir );
 }
 
@@ -242,14 +238,14 @@ void ir_traverse_visitor::visit(ir_if* ir)
 
 	if( this->debugVisit ){
 		/* Visit node for optional check of condition */
-		if( ir->debug_state_internal == ir_dbg_if_unset ||
-			ir->debug_state_internal == ir_dbg_if_init ||
-			ir->debug_state_internal == ir_dbg_if_condition_passed )
+		if( ir->debug_state_internal == ir_dbg_if_unset
+				|| ir->debug_state_internal == ir_dbg_if_init
+				|| ir->debug_state_internal == ir_dbg_if_condition_passed )
 			visit = this->visitIr( ir );
 
 		if( visit && ir->debug_state_internal == ir_dbg_if_condition ){
 			++this->depth;
-			ir->condition->accept(this);
+			ir->condition->accept( this );
 			--this->depth;
 		}
 
@@ -271,11 +267,11 @@ void ir_traverse_visitor::visit(ir_if* ir)
 
 	}else{
 		if( ( this->preVisit || this->debugVisit ) )
-				visit = this->visitIr( ir );
+			visit = this->visitIr( ir );
 
 		if( visit ){
 			++this->depth;
-			ir->condition->accept(this);
+			ir->condition->accept( this );
 			this->visit( &ir->then_instructions );
 			this->visit( &ir->else_instructions );
 			--this->depth;
@@ -288,87 +284,91 @@ void ir_traverse_visitor::visit(ir_if* ir)
 
 void ir_traverse_visitor::visit(ir_loop* ir)
 {
-    bool visit = true;
+	bool visit = true;
 
-    if (this->debugVisit) {
-        /* Visit node first */
-        if (ir->debug_state_internal == ir_dbg_loop_unset ||
-        	ir->debug_state_internal == ir_dbg_loop_qyr_init )
-            visit = this->visitIr( ir );
+	if( this->debugVisit ){
+		/* Visit node first */
+		if( ir->debug_state_internal == ir_dbg_loop_unset
+				|| ir->debug_state_internal == ir_dbg_loop_qyr_init )
+			visit = this->visitIr( ir );
 
-        if (ir->debug_state_internal == ir_dbg_loop_wrk_init) {
-            ++this->depth;
-            ir->from->accept(this);
-            --this->depth;
-        }
+		if( ir->debug_state_internal == ir_dbg_loop_wrk_init ){
+			++this->depth;
+			ir->from->accept( this );
+			--this->depth;
+		}
 
-        /* Visit node again for test */
-        if (ir->debug_state_internal == ir_dbg_loop_wrk_init ||
-        	ir->debug_state_internal == ir_dbg_loop_qyr_test )
-        	visit = this->visitIr( ir );
+		/* Visit node again for test */
+		if( ir->debug_state_internal == ir_dbg_loop_wrk_init
+				|| ir->debug_state_internal == ir_dbg_loop_qyr_test )
+			visit = this->visitIr( ir );
 
-        if (visit && ir->debug_state_internal == ir_dbg_loop_wrk_test) {
-            ++this->depth;
-            ir->counter->accept(this);
-            --this->depth;
-        }
+		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_test ){
+			++this->depth;
+			ir->counter->accept( this );
+			--this->depth;
+		}
 
-        /* Visit node again for flow selection */
-        if (ir->debug_state_internal == ir_dbg_loop_wrk_test ||
-        	ir->debug_state_internal == ir_dbg_loop_select_flow)
-        	visit = this->visitIr( ir );
+		/* Visit node again for flow selection */
+		if( ir->debug_state_internal == ir_dbg_loop_wrk_test
+				|| ir->debug_state_internal == ir_dbg_loop_select_flow )
+			visit = this->visitIr( ir );
 
-        if (visit && ir->debug_state_internal == ir_dbg_loop_wrk_body) {
-            ++this->depth;
-            this->visit(&ir->body_instructions);
-            --this->depth;
-        }
+		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_body ){
+			++this->depth;
+			this->visit( &ir->body_instructions );
+			--this->depth;
+		}
 
-        /* Visit node again for terminal */
-        if (ir->debug_state_internal == ir_dbg_loop_wrk_body ||
-        	ir->debug_state_internal == ir_dbg_loop_qyr_terminal)
-        	visit = this->visitIr( ir );
+		/* Visit node again for terminal */
+		if( ir->debug_state_internal == ir_dbg_loop_wrk_body
+				|| ir->debug_state_internal == ir_dbg_loop_qyr_terminal )
+			visit = this->visitIr( ir );
 
-        if (visit && ir->debug_state_internal == ir_dbg_loop_wrk_terminal) {
-            ++this->depth;
-            ir->to->accept(this);
-            --this->depth;
-        }
+		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_terminal ){
+			++this->depth;
+			ir->to->accept( this );
+			--this->depth;
+		}
 
-        /* Visit node again for terminal */
-        if (ir->debug_state_internal == ir_dbg_loop_wrk_terminal)
-        	visit = this->visitIr( ir );
+		/* Visit node again for terminal */
+		if( ir->debug_state_internal == ir_dbg_loop_wrk_terminal )
+			visit = this->visitIr( ir );
 
-    } else {
+	}else{
 		if( ( this->preVisit || this->debugVisit ) )
 			visit = this->visitIr( ir );
 
-        if (visit) {
-            ++this->depth;
-            ir->counter->accept(this);
-            this->visit(&ir->body_instructions);
-            ir->from->accept(this);
-            ir->to->accept(this);
-            --this->depth;
-        }
+		if( visit ){
+			++this->depth;
+			ir->counter->accept( this );
+			this->visit( &ir->body_instructions );
+			ir->from->accept( this );
+			ir->to->accept( this );
+			--this->depth;
+		}
 
-        if (visit && this->postVisit)
-        	this->visitIr( ir );
-    }
+		if( visit && this->postVisit )
+			this->visitIr( ir );
+	}
 }
 
 void ir_traverse_visitor::visit(ir_loop_jump* ir)
 {
-	printf("TODO: ir_traverse_visitor - ir_loop_jump");
+	printf( "TODO: ir_traverse_visitor - ir_loop_jump" );
 	// TODO
 	this->visitIr( ir );
 }
-
 
 void ir_traverse_visitor::visit(exec_list* instructions)
 {
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
-		inst->accept(this);
+		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
+			ir_variable *var = static_cast< ir_variable* >( inst );
+			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
+				continue;
+		}
+		inst->accept( this );
 	}
 }

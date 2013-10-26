@@ -304,12 +304,12 @@ void cgAddDeclaration(cgTypes type, std::string &prog, EShLanguage l)
     }
 }
 
-void cgAddDeclaration(cgTypes type, char* prog, EShLanguage l)
+void cgAddDeclaration(cgTypes type, char** prog, EShLanguage l)
 {
 	// FIXME: weird way to do things
 	std::string out;
 	cgAddDeclaration(type, out, l);
-	ralloc_asprintf_append (&prog, "%s", out.c_str());
+	ralloc_asprintf_append (prog, "%s", out.c_str());
 }
 
 static void addInitializationCode(cgInitialization init, std::string &prog, EShLanguage l)
@@ -445,7 +445,7 @@ char* itoMultiSwizzle(int i)
     return swizzle;
 }
 
-static void addVariableCode(char* prog, ShChangeable *cgb, ShVariableList *vl)
+static void addVariableCode(char** prog, ShChangeable *cgb, ShVariableList *vl)
 {
     ShVariable *var;
 
@@ -461,14 +461,14 @@ static void addVariableCode(char* prog, ShChangeable *cgb, ShVariableList *vl)
         exit(1);
     }
 
-    ralloc_asprintf_append (&prog, "%s", var->name);
+    ralloc_asprintf_append (prog, "%s", var->name);
 
     if (!var->builtin &&
          var->qualifier != SH_VARYING_IN &&
          var->qualifier != SH_VARYING_OUT &&
          var->qualifier != SH_UNIFORM &&
          var->qualifier != SH_ATTRIBUTE)
-    	ralloc_asprintf_append (&prog, "_%i", var->uniqueId);
+    	ralloc_asprintf_append (prog, "_%i", var->uniqueId);
 
     int i;
     for (i=0; i<cgb->numIndices; i++) {
@@ -476,11 +476,11 @@ static void addVariableCode(char* prog, ShChangeable *cgb, ShVariableList *vl)
 
         switch (idx->type) {
             case SH_CGB_ARRAY_INDIRECT:
-            	ralloc_asprintf_append (&prog, "[%i]", idx->index);
+            	ralloc_asprintf_append (prog, "[%i]", idx->index);
                 break;
             case SH_CGB_ARRAY_DIRECT:
             	// FIXME: Leak ahead
-            	ralloc_asprintf_append (&prog, ".%s", itoSwizzle(idx->index));
+            	ralloc_asprintf_append (prog, ".%s", itoSwizzle(idx->index));
                 break;
             case SH_CGB_STRUCT:
 				if( idx->index < var->structSize ){
@@ -490,11 +490,11 @@ static void addVariableCode(char* prog, ShChangeable *cgb, ShVariableList *vl)
 							"CodeInsertion - struct and changeable do not match\n" );
 					exit( 1 );
 				}
-            	ralloc_asprintf_append (&prog, ".%s", var->name);
+            	ralloc_asprintf_append (prog, ".%s", var->name);
                 break;
             case SH_CGB_SWIZZLE:
             	// FIXME: Leak ahead
-            	ralloc_asprintf_append (&prog, ".%s", itoMultiSwizzle(idx->index));
+            	ralloc_asprintf_append (prog, ".%s", itoMultiSwizzle(idx->index));
                 break;
         }
     }
@@ -605,7 +605,7 @@ static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
     return size;
 }
 
-static void addVariableCodeFromList(char* prog, ShChangeableList* cgbl,
+static void addVariableCodeFromList(char** prog, ShChangeableList* cgbl,
 										ShVariableList *vl, int targetSize)
 {
     int id;
@@ -622,7 +622,7 @@ static void addVariableCodeFromList(char* prog, ShChangeableList* cgbl,
 
         /* Only add seperator if not last item */
         if (id < (cgbl->numChangeables - 1))
-        	ralloc_asprintf_append (&prog, ", ");
+        	ralloc_asprintf_append (prog, ", ");
     }
 
     if (size > 4) {
@@ -631,7 +631,7 @@ static void addVariableCodeFromList(char* prog, ShChangeableList* cgbl,
     }
 
     for(id=size; id<targetSize; id++)
-    	ralloc_asprintf_append (&prog, ", 0.0");
+    	ralloc_asprintf_append (prog, ", 0.0");
 }
 
 static bool needDbgLoopIter(ir_loop* ir)
@@ -654,12 +654,12 @@ static bool hasLoop(IRGenStack *stack) {
     return false;
 }
 
-static void addLoopHeader(char* prog, IRGenStack* stack)
+static void addLoopHeader(char** prog, IRGenStack* stack)
 {
     IRGenStack::iterator iter;
 
     if (hasLoop(stack)) {
-    	ralloc_asprintf_append (&prog, "(");
+    	ralloc_asprintf_append (prog, "(");
 
         /* for each loop node inside stack, e.g. dbgPath add condition */
         for(iter = stack->begin(); iter != stack->end(); iter++) {
@@ -669,19 +669,19 @@ static void addLoopHeader(char* prog, IRGenStack* stack)
         		if( *iter_name == NULL )
         			printf("No iter name, crash ahead");
 
-        		ralloc_asprintf_append (&prog, "%s == %i &&",
+        		ralloc_asprintf_append (prog, "%s == %i &&",
         				*iter_name, ir->debug_iter );
         	}
         }
 
-    	ralloc_asprintf_append (&prog, ")");
+    	ralloc_asprintf_append (prog, ")");
     }
 }
 
-static void addLoopFooter(char* prog, IRGenStack* stack)
+static void addLoopFooter(char** prog, IRGenStack* stack)
 {
     if (hasLoop(stack))
-    	ralloc_asprintf_append (&prog, ", true))");
+    	ralloc_asprintf_append (prog, ", true))");
 }
 
 
@@ -689,7 +689,7 @@ static void addLoopFooter(char* prog, IRGenStack* stack)
  *     DBG_CG_SELECTION_CONDITIONAL: branch (true or false)
  *     DBG_CG_GEOMETRY_MAP:          EmitVertex or EndPrimitive
  */
-void cgAddDbgCode(cgTypes type, char* prog, DbgCgOptions cgOptions,
+void cgAddDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
                   ShChangeableList *src, ShVariableList *vl,
                   IRGenStack *stack, int option, int outPrimType)
 {
@@ -707,42 +707,42 @@ void cgAddDbgCode(cgTypes type, char* prog, DbgCgOptions cgOptions,
             const char* type_code = type.c_str();
             switch (cgOptions) {
                 case DBG_CG_COVERAGE:
-                	ralloc_asprintf_append (&prog, "%s = %s(1.0)", g.result->name, type_code);
+                	ralloc_asprintf_append (prog, "%s = %s(1.0)", g.result->name, type_code);
                     break;
                 case DBG_CG_SELECTION_CONDITIONAL:
-                	ralloc_asprintf_append (&prog, "%s = %s(%f)",
+                	ralloc_asprintf_append (prog, "%s = %s(%f)",
                 	        g.result->name, type_code, option ? 1.0 : 0.5);
                     break;
                 case DBG_CG_LOOP_CONDITIONAL:
-                	ralloc_asprintf_append (&prog, "%s = %s(%s)",
+                	ralloc_asprintf_append (prog, "%s = %s(%s)",
                 			g.result->name, type_code, g.condition->name);
                     break;
                 case DBG_CG_CHANGEABLE:
-                	ralloc_asprintf_append (&prog, "%s = %s(", g.result->name, type_code);
+                	ralloc_asprintf_append (prog, "%s = %s(", g.result->name, type_code);
                     addVariableCodeFromList(prog, src, vl, getVariableSizeByArrayIndices(g.result, 0));
-                    ralloc_asprintf_append (&prog, ")");
+                    ralloc_asprintf_append (prog, ")");
                     break;
                 case DBG_CG_GEOMETRY_MAP:
                     /* option: '0' EmitVertex
                      *         '1' EndPrimitive */
-                	ralloc_asprintf_append (&prog, "%s = %s", g.result->name, type_code);
+                	ralloc_asprintf_append (prog, "%s = %s", g.result->name, type_code);
                     if (option)
-                    	ralloc_asprintf_append (&prog, "(dbgResult.x + 1, 0.0, gl_PrimitiveIDIn)");
+                    	ralloc_asprintf_append (prog, "(dbgResult.x + 1, 0.0, gl_PrimitiveIDIn)");
                     else
-                    	ralloc_asprintf_append (&prog, "(dbgResult.x, dbgResult.y + 1, gl_PrimitiveIDIn)");
+                    	ralloc_asprintf_append (prog, "(dbgResult.x, dbgResult.y + 1, gl_PrimitiveIDIn)");
                     break;
                 case DBG_CG_GEOMETRY_CHANGEABLE:
                     switch (option) {
                         case CG_GEOM_CHANGEABLE_AT_TARGET:
-                        	ralloc_asprintf_append (&prog, "%s = %s(0.0)", g.result->name, type_code);
+                        	ralloc_asprintf_append (prog, "%s = %s(0.0)", g.result->name, type_code);
                             break;
                         case CG_GEOM_CHANGEABLE_IN_SCOPE:
-                        	ralloc_asprintf_append (&prog, "%s = %s(", g.result->name, type_code);
+                        	ralloc_asprintf_append (prog, "%s = %s(", g.result->name, type_code);
                             addVariableCodeFromList(prog, src, vl, 0);
-                            ralloc_asprintf_append (&prog, ", abs(%s.y))", g.result->name);
+                            ralloc_asprintf_append (prog, ", abs(%s.y))", g.result->name);
                             break;
                         case CG_GEOM_CHANGEABLE_NO_SCOPE:
-                        	ralloc_asprintf_append (&prog, "%s = %s(0.0, -abs(%s.y))",
+                        	ralloc_asprintf_append (prog, "%s = %s(0.0, -abs(%s.y))",
                         			g.result->name, type_code, g.result->name);
                             break;
                     }
@@ -750,24 +750,24 @@ void cgAddDbgCode(cgTypes type, char* prog, DbgCgOptions cgOptions,
                 case DBG_CG_VERTEX_COUNT:
                     /* option: '0' EmitVertex
                      *         '1' EndPrimitive */
-                	ralloc_asprintf_append (&prog, "%s = %s", g.result->name, type_code);
+                	ralloc_asprintf_append (prog, "%s = %s", g.result->name, type_code);
                     if (option) {
                         switch (outPrimType) {
                             case 0x0000: /* GL_POINTS */
-                            	ralloc_asprintf_append (&prog,
+                            	ralloc_asprintf_append (prog,
                             		"(dbgResult.y > 0 ? dbgResult.x + 1 : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
                                 break;
                             case 0x0003: /* GL_LINE_STRIP */
-                            	ralloc_asprintf_append (&prog,
+                            	ralloc_asprintf_append (prog,
                             		"(dbgResult.y > 1 ? dbgResult.x + dbgResult.y : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
                                 break;
                             case 0x0005: /* GL_TRIANGLE_STRIP */
-                            	ralloc_asprintf_append (&prog,
+                            	ralloc_asprintf_append (prog,
                             		"(dbgResult.y > 2 ? dbgResult.x + dbgResult.y : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
                                 break;
                         }
                     } else
-                    	ralloc_asprintf_append (&prog,
+                    	ralloc_asprintf_append (prog,
                     			"(dbgResult.x, dbgResult.y + 1, gl_PrimitiveIDIn)");
                     break;
                 default:
@@ -782,10 +782,10 @@ void cgAddDbgCode(cgTypes type, char* prog, DbgCgOptions cgOptions,
             break;
     	}
         case CG_TYPE_PARAMETER:
-        	ralloc_asprintf_append (&prog, "%s", g.parameter->name);
+        	ralloc_asprintf_append (prog, "%s", g.parameter->name);
             break;
         case CG_TYPE_CONDITION:
-        	ralloc_asprintf_append (&prog, "%s", g.condition->name);
+        	ralloc_asprintf_append (prog, "%s", g.condition->name);
             break;
         default:
             break;

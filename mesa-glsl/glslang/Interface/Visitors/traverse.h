@@ -16,7 +16,8 @@ class exec_list;
 class ir_traverse_visitor : public ir_visitor {
 public:
 	ir_traverse_visitor() :
-		depth(0), preVisit(true), postVisit(false), debugVisit(false)
+		depth(0), preVisit(true), postVisit(false), debugVisit(false),
+		skipInternal(true)
 	{
 	}
 
@@ -52,6 +53,9 @@ public:
 	virtual bool visitIr(ir_expression *ir) { return true; };
 	virtual bool visitIr(ir_texture *ir) { return true; };
 	virtual bool visitIr(ir_swizzle *ir) { return true; };
+	virtual bool visitIr(ir_dereference_variable *ir) { return true; };
+	virtual bool visitIr(ir_dereference_array *ir) { return true; };
+	virtual bool visitIr(ir_dereference_record *ir) { return true; };
 	virtual bool visitIr(ir_assignment *ir) { return true; };
 	virtual bool visitIr(ir_constant *ir) { return true; };
 	virtual bool visitIr(ir_call *ir) { return true; };
@@ -65,6 +69,7 @@ public:
     bool preVisit;
     bool postVisit;
     bool debugVisit;
+    bool skipInternal;
 };
 
 #endif /* __BASE_TRAVERSER_H */
