@@ -52,12 +52,32 @@ typedef struct YYLTYPE {
 # define YYLTYPE_IS_TRIVIAL 1
 #endif
 
+#define LOCATION_PARAM(name) , name
+#define GET_AST_LOCATION_HERE YYLTYPE _loc = this->get_location();
+#define AST_LOCATION_EXPAND_FRONT(tgt, size) tgt->yy_location.first_column -= size;
 #define COPY_AST_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(YYLTYPE));
 #define COPY_AST_LOCATION_HERE(src) COPY_AST_LOCATION( this->yy_location, src )
-#define COPY_RETURN_AST_LOCATION( type, src, func ) \
+#define COPY_AST_LOCATION_FROM_HERE(tgt) {\
+    GET_AST_LOCATION_HERE                \
+    COPY_AST_LOCATION( tgt, _loc ) }
+#define COPY_RETURN_AST_LOCATION( type, src, func ) {\
    type* c = func;                                   \
-   COPY_AST_LOCATION(c->yy_location, src)           \
-   return c;
+   COPY_AST_LOCATION(c->yy_location, src)            \
+   return c; }
+
+#define COPY_IR_LOCATION_BEGIN(tgt, src) \
+	tgt->yy_location.first_column = src->yy_location.first_column; \
+	tgt->yy_location.first_line = src->yy_location.first_line;
+#define COPY_IR_LOCATION_END(tgt, src) \
+	tgt->yy_location.last_column = src->yy_location.last_column; \
+	tgt->yy_location.last_line = src->yy_location.last_line;
+#define COPY_AST_LOCATION_BEGIN(tgt, src) \
+	tgt->yy_location.first_column = src->location.column; \
+	tgt->yy_location.first_line = src->location.line;
+#define COPY_AST_LOCATION_END(tgt, src) \
+	tgt->yy_location.last_column = src->location.column; \
+	tgt->yy_location.last_line = src->location.line;
+
 
 enum ir_iteration_modes {
    ir_loop_for,
@@ -66,8 +86,15 @@ enum ir_iteration_modes {
 };
 
 #else
+#define COPY_IR_LOCATION_BEGIN(tgt, src)
+#define COPY_IR_LOCATION_END(tgt, src)
+#define COPY_AST_LOCATION_BEGIN(tgt, src)
+#define COPY_AST_LOCATION_END(tgt, src)
+#define GET_AST_LOCATION_HERE
+#define AST_LOCATION_EXPAND_FONT(tgt, size)
 #define COPY_AST_LOCATION(tgt, src)
 #define COPY_AST_LOCATION_HERE(src)
+#define COPY_AST_LOCATION_FROM_HERE(tgt)
 #define COPY_RETURN_AST_LOCATION( type, src, func ) return func;
 #endif
 

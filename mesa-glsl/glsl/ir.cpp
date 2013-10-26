@@ -159,7 +159,8 @@ ir_assignment::ir_assignment(ir_dereference *lhs, ir_rvalue *rhs,
    this->rhs = rhs;
    this->lhs = lhs;
    this->write_mask = write_mask;
-   COPY_AST_LOCATION_HERE( lhs->yy_location );
+   COPY_IR_LOCATION_BEGIN( this, lhs )
+   COPY_IR_LOCATION_END( this, rhs )
 
    if (lhs->type->is_scalar() || lhs->type->is_vector()) {
       int lhs_components = 0;
@@ -178,7 +179,8 @@ ir_assignment::ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs,
    this->ir_type = ir_type_assignment;
    this->condition = condition;
    this->rhs = rhs;
-   COPY_AST_LOCATION_HERE( lhs->yy_location );
+   COPY_IR_LOCATION_BEGIN( this, lhs )
+   COPY_IR_LOCATION_END( this, rhs )
 
    /* If the RHS is a vector type, assume that all components of the vector
     * type are being written to the LHS.  The write mask comes from the RHS
@@ -214,7 +216,8 @@ ir_expression::ir_expression(int op, const struct glsl_type *type,
       assert(this->operands[i] == NULL);
    }
 #endif
-   COPY_AST_LOCATION_HERE( op0->yy_location );
+   COPY_IR_LOCATION_BEGIN( this, op0 )
+   COPY_IR_LOCATION_END( this, (op3 ? op3 : ( op2 ? op2 : op1 )) )
 }
 
 ir_expression::ir_expression(int op, ir_rvalue *op0)
@@ -332,7 +335,8 @@ ir_expression::ir_expression(int op, ir_rvalue *op0, ir_rvalue *op1)
    this->operands[1] = op1;
    this->operands[2] = NULL;
    this->operands[3] = NULL;
-   COPY_AST_LOCATION_HERE( op0->yy_location );
+   COPY_IR_LOCATION_BEGIN( this, op0 )
+   COPY_IR_LOCATION_END( this, op1 )
 
    assert(op > ir_last_unop);
 

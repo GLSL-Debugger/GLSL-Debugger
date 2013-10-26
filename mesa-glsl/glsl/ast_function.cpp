@@ -572,7 +572,7 @@ convert_component(ir_rvalue *src, const glsl_type *desired_type)
  * Dereference a specific component from a scalar, vector, or matrix
  */
 static ir_rvalue *
-dereference_component(ir_rvalue *src, unsigned component)
+dereference_component(ir_rvalue *src, unsigned component LOCATION_PARAM(YYLTYPE& _loc))
 {
    void *ctx = ralloc_parent(src);
    assert(component < src->type->components());
@@ -582,12 +582,12 @@ dereference_component(ir_rvalue *src, unsigned component)
     */
    ir_constant *constant = src->as_constant();
    if (constant)
-      return new(ctx) ir_constant(constant, component);
+      COPY_RETURN_AST_LOCATION(ir_rvalue, _loc, new(ctx) ir_constant(constant, component))
 
    if (src->type->is_scalar()) {
       return src;
    } else if (src->type->is_vector()) {
-      return new(ctx) ir_swizzle(src, component, 0, 0, 0, 1);
+      COPY_RETURN_AST_LOCATION(ir_rvalue, _loc, new(ctx) ir_swizzle(src, component, 0, 0, 0, 1))
    } else {
       assert(src->type->is_matrix());
 
@@ -601,7 +601,7 @@ dereference_component(ir_rvalue *src, unsigned component)
 
       col->type = src->type->column_type();
 
-      return dereference_component(col, r);
+      return dereference_component(col, r LOCATION_PARAM(_loc));
    }
 
    assert(!"Should not get here.");
@@ -890,11 +890,13 @@ ir_rvalue *
 emit_inline_vector_constructor(const glsl_type *type,
 			       exec_list *instructions,
 			       exec_list *parameters,
-			       void *ctx)
+			       void *ctx
+			       LOCATION_PARAM(YYLTYPE& _loc))
 {
    assert(!parameters->is_empty());
 
    ir_variable *var = new(ctx) ir_variable(type, "vec_ctor", ir_var_temporary);
+   COPY_AST_LOCATION(var->yy_location, _loc)
    instructions->push_tail(var);
 
    /* There are two kinds of vector constructors.
@@ -913,6 +915,9 @@ emit_inline_vector_constructor(const glsl_type *type,
 					   lhs_components);
       ir_dereference_variable *lhs = new(ctx) ir_dereference_variable(var);
       const unsigned mask = (1U << lhs_components) - 1;
+
+      /* Temporary variables located at creation place */
+      COPY_AST_LOCATION(rhs->yy_location, _loc)
 
       assert(rhs->type == lhs->type);
 
@@ -977,6 +982,7 @@ emit_inline_vector_constructor(const glsl_type *type,
 							     constant_components,
 							     1);
 	 ir_rvalue *rhs = new(ctx) ir_constant(rhs_type, &data);
+	 COPY_AST_LOCATION(rhs->yy_location, _loc)
 
 	 ir_instruction *inst =
 	    new(ctx) ir_assignment(lhs, rhs, NULL, constant_mask);
@@ -1007,6 +1013,7 @@ emit_inline_vector_constructor(const glsl_type *type,
 	     */
 	    ir_rvalue *rhs =
 	       new(ctx) ir_swizzle(param, 0, 1, 2, 3, rhs_components);
+	    COPY_AST_LOCATION(rhs->yy_location, _loc)
 
 	    ir_instruction *inst =
 	       new(ctx) ir_assignment(lhs, rhs, NULL, write_mask);
@@ -1079,11 +1086,13 @@ ir_rvalue *
 emit_inline_matrix_constructor(const glsl_type *type,
 			       exec_list *instructions,
 			       exec_list *parameters,
-			       void *ctx)
+			       void *ctx
+			       LOCATION_PARAM(YYLTYPE& _loc))
 {
    assert(!parameters->is_empty());
 
    ir_variable *var = new(ctx) ir_variable(type, "mat_ctor", ir_var_temporary);
+   COPY_AST_LOCATION(var->yy_location, _loc)
    instructions->push_tail(var);
 
    /* There are three kinds of matrix constructors.
@@ -1108,6 +1117,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       ir_variable *rhs_var =
 	 new(ctx) ir_variable(glsl_type::vec4_type, "mat_ctor_vec",
 			      ir_var_temporary);
+      COPY_AST_LOCATION(rhs_var->yy_location, _loc)
       instructions->push_tail(rhs_var);
 
       ir_constant_data zero;
@@ -1116,9 +1126,11 @@ emit_inline_matrix_constructor(const glsl_type *type,
       zero.f[2] = 0.0;
       zero.f[3] = 0.0;
 
+      ir_constant *lhs_const = new(ctx) ir_constant(rhs_var->type, &zero);
+      COPY_AST_LOCATION(lhs_const->yy_location, _loc)
       ir_instruction *inst =
 	 new(ctx) ir_assignment(new(ctx) ir_dereference_variable(rhs_var),
-				new(ctx) ir_constant(rhs_var->type, &zero),
+				lhs_const,
 				NULL);
       instructions->push_tail(inst);
 
@@ -1144,11 +1156,13 @@ emit_inline_matrix_constructor(const glsl_type *type,
 					 type->vector_elements);
       for (unsigned i = 0; i < cols_to_init; i++) {
 	 ir_constant *const col_idx = new(ctx) ir_constant(i);
+	 COPY_AST_LOCATION(col_idx->yy_location, _loc)
 	 ir_rvalue *const col_ref = new(ctx) ir_dereference_array(var, col_idx);
 
 	 ir_rvalue *const rhs_ref = new(ctx) ir_dereference_variable(rhs_var);
 	 ir_rvalue *const rhs = new(ctx) ir_swizzle(rhs_ref, rhs_swiz[i],
 						    type->vector_elements);
+	 COPY_AST_LOCATION(rhs->yy_location, _loc)
 
 	 inst = new(ctx) ir_assignment(col_ref, rhs, NULL);
 	 instructions->push_tail(inst);
@@ -1156,11 +1170,13 @@ emit_inline_matrix_constructor(const glsl_type *type,
 
       for (unsigned i = cols_to_init; i < type->matrix_columns; i++) {
 	 ir_constant *const col_idx = new(ctx) ir_constant(i);
+	 COPY_AST_LOCATION(col_idx->yy_location, _loc)
 	 ir_rvalue *const col_ref = new(ctx) ir_dereference_array(var, col_idx);
 
 	 ir_rvalue *const rhs_ref = new(ctx) ir_dereference_variable(rhs_var);
 	 ir_rvalue *const rhs = new(ctx) ir_swizzle(rhs_ref, 1, 1, 1, 1,
 						    type->vector_elements);
+	 COPY_AST_LOCATION(rhs->yy_location, _loc)
 
 	 inst = new(ctx) ir_assignment(col_ref, rhs, NULL);
 	 instructions->push_tail(inst);
@@ -1204,6 +1220,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	    ident.f[col] = 1.0;
 
 	    ir_rvalue *const rhs = new(ctx) ir_constant(col_type, &ident);
+	    COPY_AST_LOCATION(rhs->yy_location, _loc)
 
 	    ir_rvalue *const lhs =
 	       new(ctx) ir_dereference_array(var, new(ctx) ir_constant(col));
@@ -1221,6 +1238,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       ir_variable *const rhs_var =
 	 new(ctx) ir_variable(first_param->type, "mat_ctor_mat",
 			      ir_var_temporary);
+      COPY_AST_LOCATION(rhs_var->yy_location, _loc)
       instructions->push_tail(rhs_var);
 
       ir_dereference *const rhs_var_ref =
@@ -1257,6 +1275,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	 ir_rvalue *rhs;
 	 if (lhs->type->vector_elements != rhs_col->type->vector_elements) {
 	    rhs = new(ctx) ir_swizzle(rhs_col, swiz, last_row);
+	    COPY_AST_LOCATION(rhs->yy_location, _loc)
 	 } else {
 	    rhs = rhs_col;
 	 }
@@ -1282,6 +1301,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	  */
 	 ir_variable *rhs_var =
 	    new(ctx) ir_variable(rhs->type, "mat_ctor_vec", ir_var_temporary);
+	 COPY_AST_LOCATION(rhs_var->yy_location, _loc)
 	 instructions->push_tail(rhs_var);
 
 	 ir_dereference *rhs_var_ref =
@@ -1649,25 +1669,35 @@ ast_function_expression::hir(exec_list *instructions,
 	 }
       }
 
+#ifdef IR_AST_LOCATION
+      YYLTYPE _expr_loc = loc;
+      _expr_loc.last_column = this->location.column; \
+      _expr_loc.last_line = this->location.line;
+#endif
+
       /* If all of the parameters are trivially constant, create a
        * constant representing the complete collection of parameters.
        */
       if (all_parameters_are_constant) {
-	 return new(ctx) ir_constant(constructor_type, &actual_parameters);
+         COPY_RETURN_AST_LOCATION(ir_rvalue, _expr_loc,
+               new(ctx) ir_constant(constructor_type, &actual_parameters) )
       } else if (constructor_type->is_scalar()) {
 	 return dereference_component((ir_rvalue *) actual_parameters.head,
-				      0);
+				      0
+				      LOCATION_PARAM(_expr_loc));
       } else if (constructor_type->is_vector()) {
 	 return emit_inline_vector_constructor(constructor_type,
 					       instructions,
 					       &actual_parameters,
-					       ctx);
+					       ctx
+					       LOCATION_PARAM(_expr_loc));
       } else {
 	 assert(constructor_type->is_matrix());
 	 return emit_inline_matrix_constructor(constructor_type,
 					       instructions,
 					       &actual_parameters,
-					       ctx);
+					       ctx
+					       LOCATION_PARAM(_expr_loc));
       }
    } else {
       const ast_expression *id = subexpressions[0];
