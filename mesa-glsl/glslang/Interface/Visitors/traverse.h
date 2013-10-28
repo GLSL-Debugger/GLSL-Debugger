@@ -47,23 +47,23 @@ public:
 	virtual void visit(exec_list* instructions);
 
 	// Subclasses must implement this
-	virtual bool visitIr(ir_variable *ir) { return true; };
-	virtual bool visitIr(ir_function_signature *ir) { return true; };
-	virtual bool visitIr(ir_function *ir) { return true; };
-	virtual bool visitIr(ir_expression *ir) { return true; };
-	virtual bool visitIr(ir_texture *ir) { return true; };
-	virtual bool visitIr(ir_swizzle *ir) { return true; };
-	virtual bool visitIr(ir_dereference_variable *ir) { return true; };
-	virtual bool visitIr(ir_dereference_array *ir) { return true; };
-	virtual bool visitIr(ir_dereference_record *ir) { return true; };
-	virtual bool visitIr(ir_assignment *ir) { return true; };
-	virtual bool visitIr(ir_constant *ir) { return true; };
-	virtual bool visitIr(ir_call *ir) { return true; };
-	virtual bool visitIr(ir_return *ir) { return true; };
-	virtual bool visitIr(ir_discard *ir) { return true; };
-	virtual bool visitIr(ir_if *ir) { return true; };
-	virtual bool visitIr(ir_loop *ir) { return true; };
-	virtual bool visitIr(ir_loop_jump *ir) { return true; };
+	virtual bool visitIr(ir_variable *ir) { return ir; };
+	virtual bool visitIr(ir_function_signature *ir) { return ir; };
+	virtual bool visitIr(ir_function *ir) { return ir; };
+	virtual bool visitIr(ir_expression *ir) { return ir; };
+	virtual bool visitIr(ir_texture *ir) { return ir; };
+	virtual bool visitIr(ir_swizzle *ir) { return ir; };
+	virtual bool visitIr(ir_dereference_variable *ir) { return ir; };
+	virtual bool visitIr(ir_dereference_array *ir) { return ir; };
+	virtual bool visitIr(ir_dereference_record *ir) { return ir; };
+	virtual bool visitIr(ir_assignment *ir) { return ir; };
+	virtual bool visitIr(ir_constant *ir) { return ir; };
+	virtual bool visitIr(ir_call *ir) { return ir; };
+	virtual bool visitIr(ir_return *ir) { return ir; };
+	virtual bool visitIr(ir_discard *ir) { return ir; };
+	virtual bool visitIr(ir_if *ir) { return ir; };
+	virtual bool visitIr(ir_loop *ir) { return ir; };
+	virtual bool visitIr(ir_loop_jump *ir) { return ir; };
 
     int  depth;
     bool preVisit;

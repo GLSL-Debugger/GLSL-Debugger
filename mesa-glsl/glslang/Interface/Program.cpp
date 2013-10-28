@@ -36,9 +36,10 @@
 #include "Program.h"
 #include "MShader.h"
 #include "glsl/ir.h"
-#include "glsl/glsl_symbol_table.h"
+//#include "glsl/glsl_symbol_table.h"
 #include "glsl/list.h"
 #include "Visitors/debugjump.h"
+#include "Visitors/scopestack.h"
 #include "IRScope.h"
 #include "CodeTools.h"
 
@@ -136,10 +137,10 @@ static void clearGlobalScopeStack(void)
     g.result.scopeStack.ids = NULL;
 }
 
-static void addScopeToScopeStack(scopeList *s)
-{
-	addScopeToScopeStack(g.result.scopeStack, s);
-}
+//static void addScopeToScopeStack(scopeList *s)
+//{
+//	addScopeToScopeStack(g.result.scopeStack, s);
+//}
 
 //static void setGobalScope(scopeList *s)
 //{
@@ -1537,77 +1538,77 @@ void clearTraverseDebugJump(void)
 
 
 
-class TScopeStackTraverser : public TIntermTraverser {
-public:
-    TScopeStackTraverser() : passedTarget(false) { };
-    bool passedTarget;
-};
+//class TScopeStackTraverser : public TIntermTraverser {
+//public:
+//    TScopeStackTraverser() : passedTarget(false) { };
+//    bool passedTarget;
+//};
 
-static bool ScopeStackTraverseAggregate( ir_instruction* raw_node, TIntermTraverser* it)
-{
-    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+//static bool ScopeStackTraverseAggregate( ir_instruction* raw_node, TIntermTraverser* it)
+//{
+//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+//
+//    switch (raw_node->ir_type) {
+//    	case ir_type_function:
+//    	{
+//    		ir_function* node = raw_node->as_function();
+//    		ir_function_signature* sign = (ir_function_signature*)node->signatures.head;
+//    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
+//    				FormatSourceRange(node->yy_location).c_str(),
+//    				node->name, sign->is_builtin, node->debug_state, sit->passedTarget );
+//
+//    		if( node->debug_state != ir_dbg_state_unset )
+//    			sit->passedTarget = false;
+//
+//    		break;
+//    	}
+//    	case ir_type_call:
+//    	{
+//    		ir_call* node = raw_node->as_call();
+//    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
+//    				FormatSourceRange(node->yy_location).c_str(),
+//    				node->callee_name(), node->callee->is_builtin,
+//    				node->debug_state, sit->passedTarget );
+//    		break;
+//    	}
+//    	default:
+//    		break;
+//    }
+//
+//    if( sit->passedTarget || raw_node->debug_state == ir_dbg_state_unset )
+//        return false;
+//
+//    addScopeToScopeStack( get_scope(raw_node) );
+//
+//    if( raw_node->debug_state == ir_dbg_state_target ){
+//        sit->passedTarget = true;
+//        return false;
+//    }
+//
+//    return true;
+//}
 
-    switch (raw_node->ir_type) {
-    	case ir_type_function:
-    	{
-    		ir_function* node = raw_node->as_function();
-    		ir_function_signature* sign = (ir_function_signature*)node->signatures.head;
-    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
-    				FormatSourceRange(node->yy_location).c_str(),
-    				node->name, sign->is_builtin, node->debug_state, sit->passedTarget );
-
-    		if( node->debug_state != ir_dbg_state_unset )
-    			sit->passedTarget = false;
-
-    		break;
-    	}
-    	case ir_type_call:
-    	{
-    		ir_call* node = raw_node->as_call();
-    		VPRINT(2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
-    				FormatSourceRange(node->yy_location).c_str(),
-    				node->callee_name(), node->callee->is_builtin,
-    				node->debug_state, sit->passedTarget );
-    		break;
-    	}
-    	default:
-    		break;
-    }
-
-    if( sit->passedTarget || raw_node->debug_state == ir_dbg_state_unset )
-        return false;
-
-    addScopeToScopeStack( get_scope(raw_node) );
-
-    if( raw_node->debug_state == ir_dbg_state_target ){
-        sit->passedTarget = true;
-        return false;
-    }
-
-    return true;
-}
-
-static bool ScopeStackTraverseExpression( ir_expression* raw_node, TIntermTraverser* it)
-{
-    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-    ir_instruction* node = (ir_instruction*)raw_node;
-
-    VPRINT(-2, "processExpression Op:%i L:%s DbgSt:%i Passed:%i\n",
-    		raw_node->operation, FormatSourceRange(node->yy_location).c_str(),
-    		node->debug_state, sit->passedTarget);
-
-    if (sit->passedTarget)
-        return false;
-
-    addScopeToScopeStack( get_scope(node) );
-
-    if (node->debug_state == ir_dbg_state_target ) {
-        sit->passedTarget = true;
-        return false;
-    }
-
-    return true;
-}
+//static bool ScopeStackTraverseExpression( ir_expression* raw_node, TIntermTraverser* it)
+//{
+//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+//    ir_instruction* node = (ir_instruction*)raw_node;
+//
+//    VPRINT(-2, "processExpression Op:%i L:%s DbgSt:%i Passed:%i\n",
+//    		raw_node->operation, FormatSourceRange(node->yy_location).c_str(),
+//    		node->debug_state, sit->passedTarget);
+//
+//    if (sit->passedTarget)
+//        return false;
+//
+//    addScopeToScopeStack( get_scope(node) );
+//
+//    if (node->debug_state == ir_dbg_state_target ) {
+//        sit->passedTarget = true;
+//        return false;
+//    }
+//
+//    return true;
+//}
 
 //static bool ScopeStackTraverseSelection(bool /* preVisit */, TIntermSelection* node, TIntermTraverser* it)
 //{
@@ -1763,28 +1764,28 @@ static bool ScopeStackTraverseExpression( ir_expression* raw_node, TIntermTraver
 //    return true;
 //}
 
-static bool ScopeStackTraverseDeclaration(ir_variable* node, TIntermTraverser* it)
-{
-    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
-
-    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n",
-            FormatSourceRange(node->yy_location).c_str(),
-            node->debug_state,
-            sit->passedTarget);
-
-
-    if (sit->passedTarget)
-        return false;
-
-    addScopeToScopeStack( get_scope(node) );
-
-    if (node->debug_state == ir_dbg_state_target) {
-        sit->passedTarget = true;
-        return false;
-    }
-
-    return true;
-}
+//static bool ScopeStackTraverseDeclaration(ir_variable* node, TIntermTraverser* it)
+//{
+//    TScopeStackTraverser* sit = static_cast<TScopeStackTraverser*>(it);
+//
+//    VPRINT(-2, "processDeclaration L:%s DbgSt:%i Passed:%i\n",
+//            FormatSourceRange(node->yy_location).c_str(),
+//            node->debug_state,
+//            sit->passedTarget);
+//
+//
+//    if (sit->passedTarget)
+//        return false;
+//
+//    addScopeToScopeStack( get_scope(node) );
+//
+//    if (node->debug_state == ir_dbg_state_target) {
+//        sit->passedTarget = true;
+//        return false;
+//    }
+//
+//    return true;
+//}
 
 //static void ScopeStackTraverseDummy(TIntermDummy* node, TIntermTraverser* it)
 //{
@@ -1935,30 +1936,34 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
         g.it->visit(list);
     }
 
+    VPRINT(1, "********* traverse scope **********\n");
 
-    TScopeStackTraverser itScopeStack;
 
-    itScopeStack.preVisit = true;
-    itScopeStack.postVisit = false;
-    itScopeStack.debugVisit = false;
-    itScopeStack.rightToLeft = false;
+    ir_scopestack_traverse_visitor itScopeStack(g.result);
+//    TScopeStackTraverser itScopeStack();
+//
+//    itScopeStack.preVisit = true;
+//    itScopeStack.postVisit = false;
+//    itScopeStack.debugVisit = false;
+//    itScopeStack.rightToLeft = false;
 
-    itScopeStack.visitAggregate = ScopeStackTraverseAggregate;
-    itScopeStack.visitBinary = ScopeStackTraverseExpression;
-    itScopeStack.visitConstantUnion = 0;
+//    itScopeStack.visitAggregate = ScopeStackTraverseAggregate;
+//    itScopeStack.visitBinary = ScopeStackTraverseExpression;
+//    itScopeStack.visitConstantUnion = 0;
 //    itScopeStack.visitSelection = ScopeStackTraverseSelection;
 //    itScopeStack.visitLoop = ScopeStackTraverseLoop;
-    itScopeStack.visitSymbol = 0;
-    itScopeStack.visitFuncParam = 0;
-    itScopeStack.visitUnary = ScopeStackTraverseExpression;
+//    itScopeStack.visitSymbol = 0;
+//    itScopeStack.visitFuncParam = 0;
+//    itScopeStack.visitUnary = ScopeStackTraverseExpression;
 //    itScopeStack.visitBranch = ScopeStackTraverseBranch;
-    itScopeStack.visitDeclaration = ScopeStackTraverseDeclaration;
-    itScopeStack.visitFuncDeclaration = 0;
-    itScopeStack.visitSpecification = 0;
-    itScopeStack.visitParameter = 0;
+//    itScopeStack.visitDeclaration = ScopeStackTraverseDeclaration;
+//    itScopeStack.visitFuncDeclaration = 0;
+//    itScopeStack.visitSpecification = 0;
+//    itScopeStack.visitParameter = 0;
 //    itScopeStack.visitDummy = ScopeStackTraverseDummy;
 
-    TraverseList( list, &itScopeStack );
+//    TraverseList( list, &itScopeStack );
+    itScopeStack.visit(list);
 
     g.result.status = DBG_RS_STATUS_OK;
     return &g.result;

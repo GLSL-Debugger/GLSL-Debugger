@@ -14,6 +14,9 @@ class ir_debugchange_traverser_visitor : public ir_traverse_visitor {
 public:
 	ir_debugchange_traverser_visitor()
 	{
+		preVisit = false;
+		postVisit = false;
+		debugVisit = true;
 	}
 
 	virtual ~ir_debugchange_traverser_visitor()
@@ -23,7 +26,7 @@ public:
 	// Subclasses must implement this
 	virtual bool visitIr(ir_variable *ir);
 	virtual bool visitIr(ir_function_signature *ir);
-	virtual bool visitIr(ir_function *ir);
+//	virtual bool visitIr(ir_function *ir);
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_texture *ir);
 	virtual bool visitIr(ir_swizzle *ir);

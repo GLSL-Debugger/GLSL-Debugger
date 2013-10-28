@@ -27,7 +27,7 @@ static void setDbgResultRange(DbgRsRange& r, const YYLTYPE& range)
 
 void ir_debugjump_traverser_visitor::setGobalScope(scopeList *s)
 {
-	setDbgScope(this->result.scope, s);
+    setDbgScope(this->result.scope, s);
     /* Add local scope to scope stack */
     addScopeToScopeStack(this->result.scopeStack, s);
 }
@@ -36,21 +36,17 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 // Default handling of a node that can be debugged
 {
     enum ir_dbg_state newState;
-    VPRINT(3, "processDebugable L:%s Op:%i DbgSt:%i\n",
+    VPRINT(3, "process Debugable L:%s Op:%i DbgSt:%i\n",
     		FormatSourceRange(node->yy_location).c_str(), *op, node->debug_state);
 
     switch (*op) {
         case OTOpTargetUnset:
-            switch (node->debug_state) {
-                case ir_dbg_state_target:
-                    node->debug_state = ir_dbg_state_unset;
-                    *op = OTOpTargetSet;
-                    VPRINT(3, "\t ------- unset target --------\n");
-                    result.position = DBG_RS_POSITION_UNSET;
-                    break;
-                default:
-                    break;
-            }
+			if( node->debug_state == ir_dbg_state_target ){
+				node->debug_state = ir_dbg_state_unset;
+				*op = OTOpTargetSet;
+				VPRINT( 3, "\t ------- unset target --------\n" );
+				result.position = DBG_RS_POSITION_UNSET;
+			}
             break;
         case OTOpTargetSet:
             switch (node->debug_state) {
@@ -83,15 +79,15 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     		}
                     		break;
                     	}
-//                    } else if (node->getAsBranchNode()) {
-//                        g.result.position = DBG_RS_POSITION_BRANCH;
-//                        g.result.range = setDbgResultRange(node->getRange());
-//                        setGobalScope(node->getScope());
-//                    } else if (node->getAsDummy()) {
-//                        g.result.position = DBG_RS_POSITION_DUMMY;
-//                        g.result.range = setDbgResultRange(node->getRange());
-//                        setGobalScope(node->getScope());
-//                    }
+                    	case ir_type_return:
+                    	case ir_type_discard:
+                    	case ir_type_loop_jump:
+                    	{
+                    		result.position = DBG_RS_POSITION_BRANCH;
+                    		setDbgResultRange(result.range, node->yy_location);
+                    		setGobalScope( get_scope(node) );
+                    		break;
+                    	}
                     	default:
                     		break;
                     }
@@ -101,13 +97,8 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
             }
             break;
         case OTOpPathClear:
-            switch (node->debug_state) {
-                case ir_dbg_state_path:
-                    node->debug_state = ir_dbg_state_unset;
-                    break;
-                default:
-                    break;
-            }
+            if( node->debug_state == ir_dbg_state_path )
+            	node->debug_state = ir_dbg_state_unset;
             break;
         case OTOpPathBuild:
             switch(node->debug_state) {
@@ -117,18 +108,46 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     newState = ir_dbg_state_unset;
                     switch (node->ir_type){
                     	// Aggregate
-                    	// case ir_type_call:
-                    	case ir_type_function:
+//                    	case ir_type_function:
+//                    	{
+//                    		ir_function* f = node->as_function();
+//                            foreach_iter( exec_list_iterator, iter, f->signatures ){
+//                            	ir_instruction* ir = (ir_instruction *)iter.get();
+//                            	VPRINT(6, "getDebugState: %i\n", ir->debug_state);
+//                            	if( ir->debug_state != ir_dbg_state_unset ){
+//                            		newState = ir_dbg_state_path;
+//                            		break;
+//                            	}
+//                            }
+//                            break;
+//                    	}
+                    	case ir_type_function_signature:
                     	{
-                    		ir_function* f = node->as_function();
-                            foreach_iter( exec_list_iterator, iter, f->signatures ){
-                            	ir_instruction* ir = (ir_instruction *)iter.get();
-                            	VPRINT(6, "getDebugState: %i\n", ir->debug_state);
-                            	// TODO: We just throw away any states, choose only last?
-                            	if( ir->debug_state != ir_dbg_state_unset )
-                            		newState = ir_dbg_state_unset;
-                            }
-                            break;
+                    		ir_function_signature* fs = node->as_function_signature();
+							foreach_iter( exec_list_iterator, iter, fs->parameters ) {
+								ir_instruction* ir = (ir_instruction *)iter.get();
+								VPRINT( 6, "getDebugState: %i\n", ir->debug_state );
+								if( ir->debug_state != ir_dbg_state_unset ){
+									newState = ir_dbg_state_path;
+									break;
+								}
+							}
+							foreach_iter( exec_list_iterator, iter, fs->body ) {
+								ir_instruction* ir = (ir_instruction *)iter.get();
+								VPRINT( 6, "getDebugState: %i\n", ir->debug_state );
+								if( ir->debug_state != ir_dbg_state_unset ){
+									newState = ir_dbg_state_path;
+									break;
+								}
+							}
+							break;
+                    	}
+                    	case ir_type_call:
+                    	{
+                    		ir_call* fs = node->as_call();
+                    		if( fs->callee->debug_state != ir_dbg_state_unset )
+                    			newState = ir_dbg_state_path;
+                    		break;
                     	}
                     	case ir_type_variable:
                     	{
@@ -139,6 +158,14 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     			newState = ir_dbg_state_path;
                     		else if( v->constant_initializer &&
                     				 v->constant_initializer->debug_state != ir_dbg_state_unset )
+                    			newState = ir_dbg_state_path;
+                    		break;
+                    	}
+                    	case ir_type_assignment:
+                    	{
+                    		ir_assignment* as = node->as_assignment();
+                    		if( as->rhs->debug_target != ir_dbg_state_unset ||
+                    				as->lhs->debug_target != ir_dbg_state_unset )
                     			newState = ir_dbg_state_path;
                     		break;
                     	}
@@ -162,12 +189,20 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     		    newState = ir_dbg_state_path;
                     		break;
                     	}
-//                    } else if (node->getAsBranchNode()) {
-//                        TIntermBranch *bn = node->getAsBranchNode();
-//                        if (bn->getExpression() &&
-//                            bn->getExpression()->getDebugState() != DbgStNone) {
-//                            newState = DbgStPath;
-//                        }
+                    	case ir_type_return:
+                    	{
+                    		ir_return* r = node->as_return();
+                    		if( r->value && r->value->debug_state != ir_dbg_state_unset )
+                    			newState = ir_dbg_state_path;
+                    		break;
+                    	}
+                    	case ir_type_discard:
+                    	{
+							ir_discard* d = node->as_discard();
+							if( d->condition && d->condition->debug_state != ir_dbg_state_unset )
+								newState = ir_dbg_state_path;
+							break;
+                    	}
                     	default:
                     		break;
                     }
@@ -189,35 +224,40 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_variable* ir)
 {
-	VPRINT( 2, "processDeclaration L:%s DbgSt:%i\n",
+	VPRINT( 2, "process Declaration L:%s DbgSt:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	DEFAULT_DEBUGABLE( ir )
 	return true;
 }
 
+//bool ir_debugjump_traverser_visitor::visitIr(ir_function_signature* ir)
+//{
+//	VPRINT( 2, "process Signature L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
+//				FormatSourceRange(ir->yy_location).c_str(), ir->function_name(),
+//				ir->is_builtin, this->operation, ir->debug_state );
+//
+//	DEFAULT_DEBUGABLE( ir )
+//
+//	foreach_iter( exec_list_iterator, iter, ir->parameters ) {
+//		ir_variable * const inst = (ir_variable *)iter.get();
+//		inst->accept( this );
+//	}
+//
+//	foreach_iter(exec_list_iterator, iter, ir->body) {
+//		ir_instruction * const inst = (ir_instruction *)iter.get();
+//		inst->accept( this );
+//	}
+//
+//	return false;
+//}
+
 bool ir_debugjump_traverser_visitor::visitIr(ir_function_signature* ir)
 {
-	DEFAULT_DEBUGABLE( ir )
-
-	foreach_iter( exec_list_iterator, iter, ir->parameters ) {
-		ir_variable * const inst = (ir_variable *)iter.get();
-		inst->accept( this );
-	}
-
-	foreach_iter(exec_list_iterator, iter, ir->body) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
-		inst->accept( this );
-	}
-
-	return false;
-}
-
-bool ir_debugjump_traverser_visitor::visitIr(ir_function* ir)
-{
-	ir_function_signature* sign = (ir_function_signature*)ir->signatures.head;
-	VPRINT( 2,
-			"processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->name, sign->is_builtin, this->operation, ir->debug_state );
+//	ir_function_signature* sign = (ir_function_signature*)ir->signatures.head;
+	VPRINT( 2, "process Signature L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->function_name(),
+			ir->is_builtin, this->operation, ir->debug_state );
 
 	if( this->operation == OTOpTargetSet ){
 		/* This marks the end of a function call */
@@ -228,7 +268,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_function* ir)
 
 		VPRINT( 2, "\t ---- pop %p from stack ----\n", ir );
 		this->parseStack.pop();
-		/* Do not dirctly jump into next function after
+		/* Do not directly jump into next function after
 		 * returning from a function */
 		this->dbgBehaviour &= ~DBG_BH_JUMPINTO;
 		this->finishedDbgFunction = true;
@@ -249,8 +289,8 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_function* ir)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_expression* ir)
 {
-	VPRINT( 2,
-			"processExpression L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+	VPRINT( 2, "process Expression L:%s DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	DEFAULT_DEBUGABLE( ir )
 	return true;
@@ -296,10 +336,8 @@ static void checkReturns(exec_list* ir, ir_debugjump_traverser_visitor* it)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 {
-	ir_instruction* inst = (ir_instruction*)ir;
-
-	VPRINT( 2,
-			"processAssignment L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+	VPRINT( 2, "process Assignment L:%s DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	processDebugable( ir, &this->operation );
 
@@ -313,6 +351,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 			checkReturns( ir, this );
 		}else{
 			// visit children
+			++this->depth;
 			if( ir->rhs )
 				ir->rhs->accept( this );
 
@@ -320,6 +359,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 			// it would be possible to skip traversal
 			if( ir->lhs )
 				ir->lhs->accept( this );
+			--this->depth;
 
 			// if no target was found so far
 			// all changeables need to be added to the list
@@ -331,6 +371,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 		return false;
 	}else if( OTOpTargetUnset ){
 		// visit children
+		++this->depth;
 		if( ir->rhs )
 			ir->rhs->accept( this );
 
@@ -338,6 +379,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 		// it would be possible to skip traversal
 		if( ir->lhs )
 			ir->lhs->accept( this );
+		--this->depth;
 
 		// the old target was found inside left/right branch and
 		// a new one is still being searched for
@@ -355,11 +397,9 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_constant* ir)
 {
-//    VPRINT(2, "processConstant L:%s DbgSt:%i\n",
-//		    	FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
-//    DEFAULT_DEBUGABLE(ir)
-	printf( "TODO: debugjump ir_constant" );
-	// TODO:
+    VPRINT(2, "process Constant L:%s DbgSt:%i\n",
+		    	FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+    DEFAULT_DEBUGABLE(ir)
 	return true;
 }
 
@@ -368,8 +408,9 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 	ir_function_signature* fs = ir->callee;
 	ShChangeableList* node_cgbl = get_changeable_list( ir );
 
-	VPRINT( 2,
-			"processAggregate L:%s N:%s Blt:%i Op:%i DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(), ir->callee->is_builtin, this->operation, ir->debug_state );
+	VPRINT( 2, "process Call L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(),
+			ir->callee->is_builtin, this->operation, ir->debug_state );
 
 	VPRINT( 2, "process node %s ...\n", ir->callee_name() );
 	switch( this->operation ){
@@ -421,7 +462,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 			if( ir->debug_state == ir_dbg_state_target ){
 				VPRINT( 3, "\t ERROR! found target with DbgStTarget\n" );
 				exit( 1 );
-			}else if( ir_dbg_state_unset ){
+			}else if( ir->debug_state == ir_dbg_state_unset ){
 				if( !ir->callee->is_builtin ){
 					ir->debug_state = ir_dbg_state_target;
 					VPRINT( 3, "\t -------- set target ---------\n" );
@@ -444,16 +485,15 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_return* ir)
 {
-	ir_rvalue * const value = ir->get_value();
-	value->accept( this );
+	if( ir->value )
+		DEFAULT_DEBUGABLE(ir)
 	return true;
 }
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_discard* ir)
 {
-	if( ir->condition != NULL )
-		ir->condition->accept( this );
-
+	if( ir->condition )
+		DEFAULT_DEBUGABLE(ir)
 	return true;
 }
 
@@ -479,8 +519,8 @@ static inline void addShChangeables(ir_debugjump_traverser_visitor* it,
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 {
-	VPRINT( 2,
-			"processSelection L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+	VPRINT( 2, "process Selection L:%s DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	switch( this->operation ){
 		case OTOpTargetUnset:
@@ -675,8 +715,8 @@ static inline DbgRsTargetPosition loop_position(enum ir_iteration_modes t)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 {
-	VPRINT( 1,
-			"processLoop L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
+	VPRINT( 1, "process Loop L:%s DbgSt:%i\n",
+			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
 
 	switch( this->operation ){
 		case OTOpTargetUnset:
@@ -964,10 +1004,4 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 	}
 
 	return true;
-}
-
-bool ir_debugjump_traverser_visitor::visitIr(ir_loop_jump* ir)
-{
-	// TODO:
-	printf("TODO: loop_jump");
 }

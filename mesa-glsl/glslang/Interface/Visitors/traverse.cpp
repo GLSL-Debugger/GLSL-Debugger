@@ -38,6 +38,7 @@ void ir_traverse_visitor::visit(ir_function_signature* ir)
 	if( visit )
 		this->visit( &ir->parameters );
 
+	// FIXME: must we check for visit here, or traverse the body again?
 	++this->depth;
 	this->visit( &ir->body );
 	--this->depth;
@@ -159,13 +160,6 @@ void ir_traverse_visitor::visit(ir_assignment* ir)
 	if( ( this->preVisit || this->debugVisit ) )
 		visit = this->visitIr( ir );
 
-	ir->lhs->accept( this );
-
-	if( ir->condition )
-		ir->condition->accept( this );
-
-	ir->rhs->accept( this );
-
 	if( visit ){
 		++this->depth;
 		if( ir->lhs )
@@ -198,8 +192,6 @@ void ir_traverse_visitor::visit(ir_assignment* ir)
 
 void ir_traverse_visitor::visit(ir_constant* ir)
 {
-	// TODO
-	printf( "TODO: ir_traverse_visitor: ir_constant" );
 	this->visitIr( ir );
 }
 
@@ -224,12 +216,36 @@ void ir_traverse_visitor::visit(ir_call* ir)
 
 void ir_traverse_visitor::visit(ir_return* ir)
 {
-	this->visitIr( ir );
+    bool visit = true;
+
+    if (this->preVisit)
+        visit = this->visitIr( ir );
+
+    if (visit && ir->value) {
+        ++this->depth;
+        ir->value->accept(this);
+        --this->depth;
+    }
+
+    if (visit && (this->postVisit || this->debugVisit))
+    	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_discard* ir)
 {
-	this->visitIr( ir );
+    bool visit = true;
+
+    if (this->preVisit)
+        visit = this->visitIr( ir );
+
+    if (visit && ir->condition) {
+        ++this->depth;
+        ir->condition->accept(this);
+        --this->depth;
+    }
+
+    if (visit && (this->postVisit || this->debugVisit))
+    	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(ir_if* ir)
@@ -355,8 +371,6 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 void ir_traverse_visitor::visit(ir_loop_jump* ir)
 {
-	printf( "TODO: ir_traverse_visitor - ir_loop_jump" );
-	// TODO
 	this->visitIr( ir );
 }
 

@@ -5,7 +5,6 @@
  */
 
 #include "ShaderLang.h"
-#include "glsldb/utils/notify.h"
 #include "glsldb/utils/dbgprint.h"
 #include <string.h>
 #include <map>
@@ -190,29 +189,29 @@ void dumpShChangeable(ShChangeable *cgb)
     int j;
 
     if (cgb) {
-    	UT_NOTIFY_VA(LV_INFO, "%i", cgb->id);
+    	dbgPrint(DBGLVL_INFO, "%i", cgb->id);
         for (j=0; j<cgb->numIndices; j++) {
             ShChangeableIndex *idx = cgb->indices[j];
             if (idx) {
                 switch (idx->type) {
                     case SH_CGB_ARRAY_DIRECT:
-                    	UT_NOTIFY_VA(LV_INFO, "[%i]", idx->index);
+                    	dbgPrint(DBGLVL_INFO, "[%i]", idx->index);
                         break;
                     case SH_CGB_ARRAY_INDIRECT:
-                    	UT_NOTIFY_VA(LV_INFO, "[(%i)]", idx->index);
+                    	dbgPrint(DBGLVL_INFO, "[(%i)]", idx->index);
                         break;
                     case SH_CGB_STRUCT:
-                    	UT_NOTIFY_VA(LV_INFO, ".%i", idx->index);
+                    	dbgPrint(DBGLVL_INFO, ".%i", idx->index);
                         break;
                     case SH_CGB_SWIZZLE:
-                    	UT_NOTIFY_VA(LV_INFO, ",%i", idx->index);
+                    	dbgPrint(DBGLVL_INFO, ",%i", idx->index);
                         break;
                     default:
                         break;
                 }
             }
         }
-        UT_NOTIFY(LV_INFO, " ");
+        dbgPrint(DBGLVL_INFO, " ");
     }
 }
 
@@ -221,9 +220,9 @@ void dumpShChangeableList(ShChangeableList *cl)
     int i;
 
     if (!cl) return;
-    UT_NOTIFY(LV_INFO, "===> ");
+    dbgPrint(DBGLVL_INFO, "===> ");
     if (cl->numChangeables == 0) {
-    	UT_NOTIFY(LV_INFO, "empty\n");
+    	dbgPrint(DBGLVL_INFO, "empty\n");
         return;
     }
 
@@ -232,7 +231,7 @@ void dumpShChangeableList(ShChangeableList *cl)
         ShChangeable *cgb = cl->changeables[i];
         dumpShChangeable(cgb);
     }
-    UT_NOTIFY(LV_INFO, "\n");
+    dbgPrint(DBGLVL_INFO, "\n");
 }
 
 
@@ -240,7 +239,7 @@ ShChangeable* createShChangeable(int id)
 {
     ShChangeable *cgb;
     if (!(cgb = (ShChangeable*) malloc(sizeof(ShChangeable)))) {
-        UT_NOTIFY(LV_ERROR, "not enough memory for cgb\n");
+    	dbgPrint(DBGLVL_ERROR, "not enough memory for cgb\n");
     }
     cgb->id = id;
     cgb->numIndices = 0;
@@ -253,7 +252,7 @@ ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
 {
     ShChangeableIndex *idx;
     if (!(idx = (ShChangeableIndex*) malloc(sizeof(ShChangeableIndex)))) {
-    	UT_NOTIFY(LV_ERROR, "not enough memory for idx\n");
+    	dbgPrint(DBGLVL_ERROR, "not enough memory for idx\n");
         exit(1);
     }
 
@@ -529,7 +528,7 @@ ShVariable* copyShVariable(ShVariable *src)
     if (!src) return NULL;
 
     if (!(ret = (ShVariable*) malloc(sizeof(ShVariable)))) {
-        UT_NOTIFY(LV_ERROR, "not enough memory to copy ShVariable\n");
+    	dbgPrint(DBGLVL_ERROR, "not enough memory to copy ShVariable\n");
         exit(1);
     }
 
@@ -538,7 +537,7 @@ ShVariable* copyShVariable(ShVariable *src)
 
     if (src->name) {
         if (!(ret->name = (char*) malloc(strlen(src->name)+1))) {
-        	UT_NOTIFY(LV_ERROR, "not enough memory to copy name of ShVariable\n");
+        	dbgPrint(DBGLVL_ERROR, "not enough memory to copy name of ShVariable\n");
             exit(1);
         }
         strcpy(ret->name, src->name);
@@ -559,7 +558,7 @@ ShVariable* copyShVariable(ShVariable *src)
 
     if (src->structName) {
         if (!(ret->structName = (char*) malloc(strlen(src->structName)+1))) {
-        	UT_NOTIFY(LV_ERROR, "not enough memory to copy strctName of ShVariable\n");
+        	dbgPrint(DBGLVL_ERROR, "not enough memory to copy strctName of ShVariable\n");
             exit(1);
         }
         strcpy(ret->structName, src->structName);
@@ -570,7 +569,7 @@ ShVariable* copyShVariable(ShVariable *src)
     ret->structSize = src->structSize;
 
     if (!(ret->structSpec = (ShVariable**) malloc(sizeof(ShVariable*)*ret->structSize))) {
-    	UT_NOTIFY(LV_ERROR, "not enough memory to copy structSpec of ShVariable\n");
+    	dbgPrint(DBGLVL_ERROR, "not enough memory to copy structSpec of ShVariable\n");
         exit(1);
     }
     for (i=0; i<ret->structSize; i++) {
@@ -645,7 +644,7 @@ ShVariable* glsltypeToShVariable(const struct glsl_type* vtype, const char* name
 		SET_TYPE( GLSL_TYPE_STRUCT, SH_STRUCT )
 		SET_TYPE( GLSL_TYPE_ARRAY, SH_ARRAY )
 		default:
-			UT_NOTIFY_VA( LV_ERROR, "Type does not defined %x", vtype->gl_type );
+			dbgPrint( DBGLVL_ERROR, "Type does not defined %x", vtype->gl_type );
 			break;
 	}
 

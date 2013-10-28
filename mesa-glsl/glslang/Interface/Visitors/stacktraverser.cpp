@@ -25,55 +25,52 @@ bool ir_stack_traverser_visitor::visitIr(ir_function_signature* ir)
 	return true;
 }
 
-bool ir_stack_traverser_visitor::visitIr(ir_function* ir)
-{
-	if( ir->debug_state == ir_dbg_state_target ){
-		dbgPrint( DBGLVL_ERROR,
-				"CodeGen - found function declaration as target while building stack\n" );
-		exit( 1 );
-	}
-
-	if( ir->debug_state != ir_dbg_state_path )
-		return false;
-
-	return true;
-}
+//bool ir_stack_traverser_visitor::visitIr(ir_function* ir)
+//{
+//	if( ir->debug_state == ir_dbg_state_target ){
+//		dbgPrint( DBGLVL_ERROR,
+//				"CodeGen - found function declaration as target while building stack\n" );
+//		exit( 1 );
+//	}
+//
+//	if( ir->debug_state != ir_dbg_state_path )
+//		return false;
+//
+//	return true;
+//}
 
 bool ir_stack_traverser_visitor::visitIr(ir_expression* ir)
 {
-    if (ir->debug_state == ir_dbg_state_target) {
-        /* add node to stack and finish */
+	if( ir->debug_state == ir_dbg_state_path ){
+		/* add node to stack and process children */
+		/* unaries don't have an own scope, as the never change it
+		 * thus we don't put it on the stack for simplicity
+		 * even if it would work
+		 * but we continue regularily with its child
+		 */
+		if( ir->operation > ir_last_unop )
+			this->dbgStack.push_back( ir );
+		return true;
+	}
+
+	/* add node to stack and finish */
+    if (ir->debug_state == ir_dbg_state_target)
     	this->dbgStack.push_back(ir);
-        return false;
-    }
-
-    if (ir->debug_state != ir_dbg_state_path)
-    	return false;
-
-	/* add node to stack and process children */
-	/* unaries don't have an own scope, as the never change it
-	 * thus we don't put it on the stack for simplicity
-	 * even if it would work
-	 * but we continue regularily with its child
-	 */
-	if( ir->operation > ir_last_unop )
-		this->dbgStack.push_back( ir );
-
-	return true;
+    return false;
 }
 
 bool ir_stack_traverser_visitor::visitIr(ir_assignment* ir)
 {
-	if( ir->debug_state == ir_dbg_state_target ){
-		dbgPrint( DBGLVL_ERROR,
-				"CodeGen - found function declaration as target while building stack\n" );
-		exit( 1 );
+	if( ir->debug_state == ir_dbg_state_path ){
+		this->dbgStack.push_back( ir );
+		return true;
 	}
 
-	if( ir->debug_state != ir_dbg_state_path )
-		return false;
+	/* add node to stack and finish */
+    if (ir->debug_state == ir_dbg_state_target)
+    	this->dbgStack.push_back(ir);
 
-	return true;
+    return false;
 }
 
 bool ir_stack_traverser_visitor::visitIr(ir_call* ir)

@@ -2684,10 +2684,6 @@ static void dumpNodeInfo(ir_instruction* node)
     		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION CALL %s",
     		                node->as_call()->callee_name());
     		break;
-    	case ir_type_function:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION %s",
-    		    		                node->as_function()->name);
-    		break;
     	case ir_type_function_signature:
     		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION SIGNATURE %s",
     				node->as_function_signature()->function_name());
@@ -2701,12 +2697,21 @@ static void dumpNodeInfo(ir_instruction* node)
     				eir->operation < ir_last_triop ? "TERNARY" : "QUAD"	);
     		break;
     	}
+    	case ir_type_assignment:
+			dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "ASSIGNMENT");
+			break;
     	case ir_type_if:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "if");
+    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "IF");
     		break;
-//    } else if (node->getAsBranchNode()) {
-//        dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "BRANCH");
-//    } else {
+    	case ir_type_loop:
+    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "LOOP");
+    		break;
+    	case ir_type_return:
+    		dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "RETURN");
+    		break;
+    	case ir_type_discard:
+    	    dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "DISCARD");
+    	    break;
     	default:
     		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "unknown");
     		break;
@@ -2915,8 +2920,8 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 	ir_stack_traverser_visitor it1pass(vl);
 
 //    TStackTraverser it1pass(root, vl);
-    it1pass.preVisit = true;
-    it1pass.postVisit = false;
+//    it1pass.preVisit = true;
+//    it1pass.postVisit = false;
 //
 //    it1pass.visitAggregate = stackAggregate;
 //    it1pass.visitBinary = stackExpression;
@@ -2941,7 +2946,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 		return false;
 
     if (target) {
-        dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i = %i:%i\n", target->yy_location.first_line,
+        dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i %i:%i\n", target->yy_location.first_line,
                                                      target->yy_location.first_column,
                                                      target->yy_location.last_line,
                                                      target->yy_location.last_column);
@@ -3001,7 +3006,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
     /* Check if a selection condition needs to be copied */
     if (target && (dbgCgOptions == DBG_CG_COVERAGE ||
     			   dbgCgOptions == DBG_CG_CHANGEABLE ||
-         dbgCgOptions == DBG_CG_GEOMETRY_CHANGEABLE) &&
+    			   dbgCgOptions == DBG_CG_GEOMETRY_CHANGEABLE) &&
          target->ir_type == ir_type_if)
     {
         switch ( target->as_if()->debug_state_internal ) {

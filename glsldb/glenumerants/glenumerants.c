@@ -72,7 +72,7 @@ static void concatenate(char **dst, const char *src)
 	}
 
 	if (*dst) {
-		*dst = realloc(*dst, strlen(*dst) + strlen(src) + 1); 
+		*dst = realloc(*dst, strlen(*dst) + strlen(src) + 1);
 		if (!dst) {
 			fprintf(stderr, "concatenate'ing strings failed\n");
 			exit(1);
@@ -89,7 +89,7 @@ static void concatenate(char **dst, const char *src)
 			exit(1);
 		}
 	}
-} 
+}
 
 const char *lookupEnum(GLenum e)
 {
@@ -101,6 +101,7 @@ const char *lookupEnum(GLenum e)
 		}
 		i++;
 	}
+	printf("UNKNOWN ENUM REQUESTED: %x\n", e);
 	return "UNKNOWN ENUM!";
 }
 

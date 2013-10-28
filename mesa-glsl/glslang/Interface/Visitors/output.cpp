@@ -243,8 +243,9 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
    const char* fname;
    //
    if( this->cgOptions != DBG_CG_ORIGINAL_SRC &&
-   		   ir->debug_state == ir_dbg_state_path &&
-   		   ir->debug_overwrite != ir_dbg_ow_original )
+         strcmp(ir->function_name(), MAIN_FUNC_SIGNATURE) != 0 &&
+         ir->debug_state == ir_dbg_state_path &&
+         ir->debug_overwrite != ir_dbg_ow_original )
    {
 	   std::string mangled = getMangledName(ir);
 	   const char* mname = mangled.c_str();
@@ -333,22 +334,23 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
     * This is done to make sure that only the debugged path is calling
     * a function with inserted debug code */
    if( this->cgOptions != DBG_CG_ORIGINAL_SRC &&
-		   ir->debug_state == ir_dbg_state_path &&
-		   ir->debug_overwrite != ir_dbg_ow_original ){
-       DbgCgOptions option = this->cgOptions;
-       this->cgOptions = DBG_CG_ORIGINAL_SRC;
-       // Add original function. The general route function will be debug one.
-	   foreach_iter(exec_list_iterator, iter, *ir) {
-	         ir_function_signature *const sig = (ir_function_signature *) iter.get();
-	         // Double only path signature
-	         if( sig->debug_state != ir_dbg_state_path )
-	        	 continue;
+         strcmp(ir->name, MAIN_FUNC_SIGNATURE) != 0 &&
+         ir->debug_state == ir_dbg_state_path &&
+         ir->debug_overwrite != ir_dbg_ow_original ){
+      DbgCgOptions option = this->cgOptions;
+      this->cgOptions = DBG_CG_ORIGINAL_SRC;
+      // Add original function. The general route function will be debug one.
+      foreach_iter(exec_list_iterator, iter, *ir) {
+         ir_instruction* sig = (ir_instruction*)iter.get();
+         // Double only path signature
+         if( sig->debug_state != ir_dbg_state_path )
+            continue;
 
-	         indent();
-	         sig->accept(this);
-	         ralloc_asprintf_append (&buffer, "\n");
-	   }
-	   this->cgOptions = option;
+         indent();
+         sig->accept(this);
+         ralloc_asprintf_append (&buffer, "\n");
+      }
+      this->cgOptions = option;
    }
 
    foreach_iter(exec_list_iterator, iter, *ir) {
@@ -808,8 +810,7 @@ void ir_output_traverser_visitor::visit(ir_assignment *ir)
     if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
     	dbgTargetProcessed = true;
         cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
-        // FIXME: WAT?
-        ralloc_asprintf_append (&buffer, ", ");
+        ralloc_asprintf_append (&buffer, "; ");
     }
 
 	// if RHS is ir_triop_vector_insert, then we have to do some special dance. If source expression is:

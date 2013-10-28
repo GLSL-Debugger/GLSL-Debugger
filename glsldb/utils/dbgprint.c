@@ -42,6 +42,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* #define _WIN32_WINNT 0x0500 */
 #include <windows.h>
 #include <tlhelp32.h>
+#else
+#include <unistd.h>
 #endif /* _WIN32 */
 
 #include "dbgprint.h"

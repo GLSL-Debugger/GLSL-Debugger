@@ -703,8 +703,8 @@ void cgAddDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
                 option != CG_GEOM_CHANGEABLE_NO_SCOPE)) {
                 addLoopHeader(prog, stack);
             }
-            std::string type = getTypeCode(g.result);
-            const char* type_code = type.c_str();
+            std::string stype = getTypeCode(g.result);
+            const char* type_code = stype.c_str();
             switch (cgOptions) {
                 case DBG_CG_COVERAGE:
                 	ralloc_asprintf_append (prog, "%s = %s(1.0)", g.result->name, type_code);

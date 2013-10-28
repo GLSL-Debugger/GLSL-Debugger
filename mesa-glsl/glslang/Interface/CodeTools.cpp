@@ -134,7 +134,7 @@ ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader )
 //                for single file shaders this should hold.
 // Todo: Add solution for multiple files compiled in one shader.
 {
-    VPRINT(4, "Search for function [%s]\n", sig);
+    VPRINT(3, "Search for function [%s]\n", sig);
     return shader->symbols->get_function(sig);
 }
 

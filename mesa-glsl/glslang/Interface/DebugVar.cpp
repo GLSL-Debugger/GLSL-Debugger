@@ -1186,7 +1186,7 @@ bool ShaderVarTraverse( struct gl_shader* shader, ShVariableList *vl )
 	if( list->head->next == NULL || list->tail_pred->prev == NULL )
         return 0;
 
-	ir_instruction* root = (ir_instruction*)list->head;
+//	ir_instruction* root = (ir_instruction*)list->head;
 
     //
     // Fill exernal variable list and determine scope

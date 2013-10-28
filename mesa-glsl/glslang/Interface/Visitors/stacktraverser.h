@@ -24,7 +24,7 @@ public:
 	}
 
 	virtual bool visitIr(ir_function_signature *ir);
-	virtual bool visitIr(ir_function *ir);
+//	virtual bool visitIr(ir_function *ir);
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_assignment *ir);
 	virtual bool visitIr(ir_call *ir);

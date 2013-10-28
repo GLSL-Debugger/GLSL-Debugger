@@ -36,8 +36,29 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_variable* ir)
     return false;
 }
 
+static void traverse_func_param( ir_variable* ir )
+{
+	if( !ir || (ir->mode != ir_var_function_in &&
+			ir->mode != ir_var_const_in &&	/* check back with Magnus */
+			ir->mode != ir_var_function_inout ) )
+		return;
+
+	ShChangeableList* node_cgbl = get_changeable_list(ir);
+	ShVariable* var = irToShVariable(ir);
+	if( node_cgbl->numChangeables == 0 ){
+		VPRINT( 2, "(%s) change FuncParam -> created %i %s\n",
+				FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, ir->name );
+		addShChangeable( node_cgbl, createShChangeable( var->uniqueId ) );
+	}else{
+		VPRINT( 2, "(%s) changeFuncParam -> kept %i %s\n",
+				FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, ir->name );
+	}
+}
+
 bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 {
+	VPRINT( 2, "(%s) change function signature array\n", FormatSourceRange(ir->yy_location).c_str() );
+
     // do not parse an function if this was already done before
     // again this is due to the (*^@*$ function prototypes
 	std::set<ir_function_signature*>::iterator iter = parsed_signatures.find(ir);
@@ -52,9 +73,9 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 	// TODO: Not sure, parameters must be processed
 	foreach_iter( exec_list_iterator, iter, ir->parameters ){
 		ir_instruction* inst = (ir_instruction *)iter.get();
-		inst->accept(this);
-		ShChangeableList* inst_list = get_changeable_list( inst );
+		traverse_func_param(inst->as_variable());
 		// copy changeables
+		ShChangeableList* inst_list = get_changeable_list( inst );
 		copyShChangeableList( node_cgbl, inst_list );
 		copyShChangeableList( node_param_cgbl, inst_list );
 	}
@@ -74,8 +95,10 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_function* ir)
+/*bool ir_debugchange_traverser_visitor::visitIr(ir_function* ir)
 {
+	VPRINT( 2, "(%s) function declaration\n", FormatSourceRange(ir->yy_location).c_str() );
+
 	ShChangeableList* node_cgbl = get_changeable_list( ir );
 
 	// now visit children
@@ -89,11 +112,11 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function* ir)
 		copyShChangeableList( node_cgbl, get_changeable_list( inst ) );
 	}
 	return false;
-}
+}*/
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
 {
-    VPRINT(2, "(%s) changeExpression\n", FormatSourceRange(ir->yy_location).c_str());
+    VPRINT(2, "(%s) change Expression\n", FormatSourceRange(ir->yy_location).c_str());
     //dumpShChangeableList(node->getCgbList());
     this->deactivate();
     ShChangeableList* nlist = get_changeable_list(ir);
@@ -112,11 +135,12 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
 bool ir_debugchange_traverser_visitor::visitIr(ir_texture* ir)
 {
 	// TODO: texture
+	return ir;
 }
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_swizzle* ir)
 {
-	VPRINT( 2, "(%s) vectorSwizzle\n", FormatSourceRange(ir->yy_location).c_str() );
+	VPRINT( 2, "(%s) vector swizzle\n", FormatSourceRange(ir->yy_location).c_str() );
 	ShChangeableList* node_cgbl = get_changeable_list(ir);
 
 	// process left branch first
@@ -156,9 +180,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_swizzle* ir)
 		return false;
 	}else if( node_cgbl->numChangeables == 1 ){
 		ShChangeableIndex *cgbIdx;
-
 		int index = 0;
-		int i = 0;
 
 		const unsigned swiz_idx[4] = {
 				ir->mask.x, ir->mask.y, ir->mask.z, ir->mask.w
@@ -194,11 +216,13 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_variable* ir)
                     FormatSourceRange(node->yy_location).c_str(), var->uniqueId, node->name);
         }
     }
+
+    return false;
 }
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_array* ir)
 {
-	VPRINT( 2, "(%s) changeIndex array\n", FormatSourceRange(ir->yy_location).c_str() );
+	VPRINT( 2, "(%s) change Array ref\n", FormatSourceRange(ir->yy_location).c_str() );
 	ShChangeableList* node_cgbls = get_changeable_list(ir);
 
 	// process array branch first
@@ -233,7 +257,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_array* ir)
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_record* ir)
 {
-	VPRINT( 2, "(%s) changeIndex record\n", FormatSourceRange(ir->yy_location).c_str() );
+	VPRINT( 2, "(%s) change Record ref\n", FormatSourceRange(ir->yy_location).c_str() );
 	ShChangeableList* node_cgbls = get_changeable_list(ir);
 
 	// process array branch first
@@ -258,7 +282,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_record* ir)
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_assignment* ir)
 {
-	VPRINT(2, "(%s) changeAssigment\n", FormatSourceRange(ir->yy_location).c_str());
+	VPRINT(2, "(%s) change Assigment\n", FormatSourceRange(ir->yy_location).c_str());
 	ShChangeableList* nlist = get_changeable_list(ir);
 
     // process left branch actively
@@ -292,11 +316,13 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_assignment* ir)
 bool ir_debugchange_traverser_visitor::visitIr(ir_constant* ir)
 {
 	// TODO: constant
-	return true;
+	return ir;
 }
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_call* ir)
 {
+	VPRINT( 2, "(%s) change Call\n", FormatSourceRange(ir->yy_location).c_str() );
+
 	// only user defined functions can have out/inout parameters
 	if( ir->callee->is_builtin )
 		return false;
