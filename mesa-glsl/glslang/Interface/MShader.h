@@ -7,9 +7,9 @@
 #ifndef MESA_INTERFACE_SHADER_H_
 #define MESA_INTERFACE_SHADER_H_
 
-#include "ir.h"
-#include "ShaderLang.h"
 #include <string>
+#include "ShaderLang.h"
+#include "ir.h"
 
 struct exec_list;
 
@@ -25,7 +25,12 @@ bool containsEmitVertex( ir_instruction* );
 bool containsEmitVertex( exec_list* );
 
 bool dbg_state_not_match( exec_list*, enum ir_dbg_state );
-
 char** dbg_iter_name( ir_loop* );
+ir_list_dummy* list_dummy( exec_list* );
+
+void init_shader();
+void clean_shader();
+
+
 
 #endif /* MESA_INTERFACE_SHADER_H_ */

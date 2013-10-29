@@ -25,20 +25,6 @@ bool ir_stack_traverser_visitor::visitIr(ir_function_signature* ir)
 	return true;
 }
 
-//bool ir_stack_traverser_visitor::visitIr(ir_function* ir)
-//{
-//	if( ir->debug_state == ir_dbg_state_target ){
-//		dbgPrint( DBGLVL_ERROR,
-//				"CodeGen - found function declaration as target while building stack\n" );
-//		exit( 1 );
-//	}
-//
-//	if( ir->debug_state != ir_dbg_state_path )
-//		return false;
-//
-//	return true;
-//}
-
 bool ir_stack_traverser_visitor::visitIr(ir_expression* ir)
 {
 	if( ir->debug_state == ir_dbg_state_path ){
@@ -175,4 +161,12 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 	}
 
 	return false;
+}
+
+bool ir_stack_traverser_visitor::visitIr(ir_list_dummy *ir)
+{
+	/* add node to stack and finish */
+    if (ir->debug_state == ir_dbg_state_target)
+    	this->dbgStack.push_back(ir);
+    return false;
 }

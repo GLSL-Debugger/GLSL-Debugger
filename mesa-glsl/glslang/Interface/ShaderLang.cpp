@@ -7,6 +7,7 @@
 #include "ShaderLang.h"
 #include "ShaderHolder.h"
 #include "Program.h"
+#include "MShader.h"
 
 // Mesa includes
 #include "glsl/standalone_scaffolding.h"
@@ -15,7 +16,6 @@
 #include "glsl/program.h"
 #include "glsl/ralloc.h"
 #include "mesa/main/mtypes.h"
-
 
 #include "glsldb/utils/notify.h"
 
@@ -147,6 +147,8 @@ void ShDestruct(ShHandle handle)
 		holder->program = NULL;
 	}
 
+	clean_shader();
+
 	if( holder->ctx )
 		delete holder->ctx, holder->ctx = NULL;
 
@@ -239,6 +241,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 	initialize_context(holder->ctx, resources);
+	init_shader();
 
 	holder->program = rzalloc(NULL, struct gl_shader_program);
 	assert( holder->program != NULL );

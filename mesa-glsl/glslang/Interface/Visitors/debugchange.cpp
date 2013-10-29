@@ -95,25 +95,6 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 	return false;
 }
 
-/*bool ir_debugchange_traverser_visitor::visitIr(ir_function* ir)
-{
-	VPRINT( 2, "(%s) function declaration\n", FormatSourceRange(ir->yy_location).c_str() );
-
-	ShChangeableList* node_cgbl = get_changeable_list( ir );
-
-	// now visit children
-	foreach_iter( exec_list_iterator, iter, *ir ) {
-		ir_instruction* inst = (ir_instruction *)iter.get();
-		VPRINT( 2, "(%s) changeChild \n",
-				FormatSourceRange( inst->yy_location ).c_str() );
-		inst->accept(this);
-
-		// copy changeables
-		copyShChangeableList( node_cgbl, get_changeable_list( inst ) );
-	}
-	return false;
-}*/
-
 bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
 {
     VPRINT(2, "(%s) change Expression\n", FormatSourceRange(ir->yy_location).c_str());

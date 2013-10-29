@@ -6,6 +6,7 @@
 
 #include "debugjump.h"
 #include "ShaderLang.h"
+#include "glsl/list.h"
 #include "glslang/Interface/MShader.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
@@ -88,6 +89,13 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     		setGobalScope( get_scope(node) );
                     		break;
                     	}
+                    	case ir_type_list_dummy:
+                    	{
+                    		result.position = DBG_RS_POSITION_DUMMY;
+                    		setDbgResultRange(result.range, node->yy_location);
+                    		setGobalScope( get_scope(node) );
+                    		break;
+                    	}
                     	default:
                     		break;
                     }
@@ -107,20 +115,6 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     /* Check children for DebugState */
                     newState = ir_dbg_state_unset;
                     switch (node->ir_type){
-                    	// Aggregate
-//                    	case ir_type_function:
-//                    	{
-//                    		ir_function* f = node->as_function();
-//                            foreach_iter( exec_list_iterator, iter, f->signatures ){
-//                            	ir_instruction* ir = (ir_instruction *)iter.get();
-//                            	VPRINT(6, "getDebugState: %i\n", ir->debug_state);
-//                            	if( ir->debug_state != ir_dbg_state_unset ){
-//                            		newState = ir_dbg_state_path;
-//                            		break;
-//                            	}
-//                            }
-//                            break;
-//                    	}
                     	case ir_type_function_signature:
                     	{
                     		ir_function_signature* fs = node->as_function_signature();
@@ -230,27 +224,6 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_variable* ir)
 	DEFAULT_DEBUGABLE( ir )
 	return true;
 }
-
-//bool ir_debugjump_traverser_visitor::visitIr(ir_function_signature* ir)
-//{
-//	VPRINT( 2, "process Signature L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
-//				FormatSourceRange(ir->yy_location).c_str(), ir->function_name(),
-//				ir->is_builtin, this->operation, ir->debug_state );
-//
-//	DEFAULT_DEBUGABLE( ir )
-//
-//	foreach_iter( exec_list_iterator, iter, ir->parameters ) {
-//		ir_variable * const inst = (ir_variable *)iter.get();
-//		inst->accept( this );
-//	}
-//
-//	foreach_iter(exec_list_iterator, iter, ir->body) {
-//		ir_instruction * const inst = (ir_instruction *)iter.get();
-//		inst->accept( this );
-//	}
-//
-//	return false;
-//}
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_function_signature* ir)
 {
@@ -1004,4 +977,15 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 	}
 
 	return true;
+}
+
+
+
+bool ir_debugjump_traverser_visitor::visitIr(ir_list_dummy* ir)
+{
+	VPRINT(2, "process Dummy L:%s DbgSt:%i\n",
+            FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+
+	processDebugable(ir, &this->operation);
+	return false;
 }

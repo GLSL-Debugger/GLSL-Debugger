@@ -24,12 +24,12 @@ public:
 	}
 
 	virtual bool visitIr(ir_function_signature *ir);
-//	virtual bool visitIr(ir_function *ir);
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_assignment *ir);
 	virtual bool visitIr(ir_call *ir);
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
+	virtual bool visitIr(ir_list_dummy *ir);
 
 	ShVariableList *vl;
     IRGenStack dbgStack;

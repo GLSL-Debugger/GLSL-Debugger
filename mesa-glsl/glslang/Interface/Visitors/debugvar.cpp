@@ -134,21 +134,6 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_variable* ir)
 	return false;
 }
 
-//bool ir_debugvar_traverser_visitor::visitIr(ir_function* ir)
-//{
-//	set_scope( ir, getCopyOfScope() );
-//	VPRINT(3, "%c%sbegin function %s at %s %c%s\n", ESC_CHAR, ESC_BOLD,
-//					ir->name, FormatSourceRange(ir->yy_location).c_str(),
-//					ESC_CHAR, ESC_RESET);
-//
-//	traverse_block(&ir->signatures, this);
-//
-//	VPRINT(3, "%c%send function %s at %s %c%s\n", ESC_CHAR, ESC_BOLD,
-//					ir->name, FormatSourceRange(ir->yy_location).c_str(),
-//					ESC_CHAR, ESC_RESET);
-//	return false;
-//}
-
 static void traverse_func_param( ir_variable* ir, ir_debugvar_traverser_visitor* it )
 {
 	if( !ir )
@@ -294,4 +279,10 @@ bool ir_debugvar_traverser_visitor::nameIsAlreadyInList(scopeList* l, const char
     }
 
     return false;
+}
+
+bool ir_debugvar_traverser_visitor::visitIr(ir_list_dummy* ir)
+{
+	set_scope(ir, getCopyOfScope());
+	return false;
 }

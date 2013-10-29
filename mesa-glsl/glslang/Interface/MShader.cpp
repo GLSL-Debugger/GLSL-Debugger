@@ -13,7 +13,10 @@
 
 namespace {
 	typedef std::map< ir_loop*, char* > IterNameMap;
+	typedef std::map< exec_list*, ir_list_dummy* > DebugInfoMap;
 	IterNameMap iter_names;
+	DebugInfoMap debug_infos;
+	void* global_ctx;
 }
 
 
@@ -167,3 +170,42 @@ char** dbg_iter_name( ir_loop* ir )
 	iter_names[ir] = name;
 	return &iter_names[ir];
 }
+
+ir_list_dummy* list_dummy( exec_list* list )
+{
+	if( list->is_empty() )
+		return NULL;
+	DebugInfoMap::iterator it = debug_infos.find(list);
+	if( it != debug_infos.end() )
+		return it->second;
+
+	ir_list_dummy* ir = new(global_ctx) ir_list_dummy;
+	ir->ir_type = ir_type_list_dummy;
+	ir->debug_state = ir_dbg_state_unset;
+	ir->debug_overwrite = ir_dbg_ow_unset;
+	ir->debug_target = false;
+
+	ir_instruction* inst = NULL;
+	foreach_iter(exec_list_iterator, iter, *list)
+		inst = (ir_instruction*)iter.get();
+
+	ir->yy_location.first_column = ir->yy_location.last_column = inst->yy_location.last_column;
+	ir->yy_location.first_line = ir->yy_location.last_line = inst->yy_location.last_line;
+
+	debug_infos[list] = ir;
+	return ir;
+}
+
+void init_shader( )
+{
+	global_ctx = ralloc_context(NULL);
+}
+
+void clean_shader( )
+{
+	iter_names.clear();
+	debug_infos.clear();
+	ralloc_free(global_ctx);
+}
+
+

@@ -24,7 +24,6 @@ public:
 	}
 
 	virtual bool visitIr(ir_variable *ir);
-//	virtual bool visitIr(ir_function *ir);
 	virtual bool visitIr(ir_function_signature *ir);
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_swizzle *ir);
@@ -35,6 +34,7 @@ public:
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
 	virtual bool visitIr(ir_loop_jump *ir);
+	virtual bool visitIr(ir_list_dummy *ir);
 
 	bool passedTarget;
 	DbgResult& result;

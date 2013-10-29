@@ -57,6 +57,9 @@ public:
 	virtual void visit(ir_loop *);
 	virtual void visit(ir_loop_jump *);
 
+	virtual void visit(ir_list_dummy*);
+
+
 	void emit_assignment_part (ir_dereference* lhs, ir_rvalue* rhs, unsigned write_mask, ir_rvalue* dstIndex);
 
 	int indentation;

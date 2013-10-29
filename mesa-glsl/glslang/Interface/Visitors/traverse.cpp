@@ -7,6 +7,8 @@
 #include "traverse.h"
 #include "ir.h"
 #include "glsl/list.h"
+#include "glslang/Interface/MShader.h"
+
 
 void ir_traverse_visitor::visit(ir_variable* ir)
 {
@@ -41,6 +43,13 @@ void ir_traverse_visitor::visit(ir_function_signature* ir)
 	// FIXME: must we check for visit here, or traverse the body again?
 	++this->depth;
 	this->visit( &ir->body );
+
+	// There no such thing as "Dummy node" at the end of blocks in mesa, but
+	// in original debugger it had some logic on it, like afterblock scope
+	// state. Emulate this behavior
+	ir_list_dummy* ird = list_dummy(&ir->body);
+	ird->accept(this);
+
 	--this->depth;
 
 	if( this->postVisit )
@@ -370,6 +379,11 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 }
 
 void ir_traverse_visitor::visit(ir_loop_jump* ir)
+{
+	this->visitIr( ir );
+}
+
+void ir_traverse_visitor::visit(ir_list_dummy* ir)
 {
 	this->visitIr( ir );
 }

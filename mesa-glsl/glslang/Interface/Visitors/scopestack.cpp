@@ -30,29 +30,6 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_variable* ir)
     return true;
 }
 
-//bool ir_scopestack_traverse_visitor::visitIr(ir_function *ir)
-//{
-//	ir_function_signature* fs = ((ir_instruction*)ir->signatures.get_head())->as_function_signature();
-//	VPRINT( 2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
-//			FormatSourceRange(ir->yy_location).c_str(), ir->name,
-//			fs->is_builtin, ir->debug_state, this->passedTarget );
-//
-//	if( ir->debug_state != ir_dbg_state_unset )
-//		this->passedTarget = false;
-//
-//	if( this->passedTarget || ir->debug_state == ir_dbg_state_unset )
-//		return false;
-//
-//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
-//
-//    if( ir->debug_state == ir_dbg_state_target ){
-//        this->passedTarget = true;
-//        return false;
-//    }
-//
-//    return true;
-//}
-
 bool ir_scopestack_traverse_visitor::visitIr(ir_function_signature* ir)
 {
 	VPRINT( 2, "process Signature L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
@@ -297,4 +274,17 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop_jump* ir)
     }
 
     return true;
+}
+
+bool ir_scopestack_traverse_visitor::visitIr(ir_list_dummy* ir)
+{
+	if (this->passedTarget)
+		return false;
+
+	addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+
+	if( ir->debug_state == ir_dbg_state_target )
+		this->passedTarget = true;
+
+    return false;
 }

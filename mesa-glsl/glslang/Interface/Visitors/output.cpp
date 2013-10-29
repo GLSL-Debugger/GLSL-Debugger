@@ -34,8 +34,8 @@
 #include "glslang/Interface/Visitors/output.h"
 #include "glsl/list.h"
 #include "mesa/program/hash_table.h"
-
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/MShader.h"
 
 
 static char* print_type(char* buffer, const glsl_type *t, bool arraySize);
@@ -309,6 +309,11 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
       inst->accept(this);
 	  ralloc_asprintf_append (&buffer, ";\n");
    }
+
+   // Dummy
+   ir_list_dummy* dir = list_dummy(&ir->body);
+   visit(dir);
+
    indentation--;
    indent();
    ralloc_asprintf_append (&buffer, "}\n");
@@ -1433,4 +1438,15 @@ void
 ir_output_traverser_visitor::visit(ir_loop_jump *ir)
 {
    ralloc_asprintf_append (&buffer, "%s", ir->is_break() ? "break" : "continue");
+}
+
+void
+ir_output_traverser_visitor::visit(ir_list_dummy* ir)
+{
+    if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
+        this->dbgTargetProcessed = true;
+        indent();
+        cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+        ralloc_asprintf_append( &buffer, ";\n" );
+    }
 }

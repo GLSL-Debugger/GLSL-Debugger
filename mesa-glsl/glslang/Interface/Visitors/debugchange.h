@@ -26,7 +26,6 @@ public:
 	// Subclasses must implement this
 	virtual bool visitIr(ir_variable *ir);
 	virtual bool visitIr(ir_function_signature *ir);
-//	virtual bool visitIr(ir_function *ir);
 	virtual bool visitIr(ir_expression *ir);
 	virtual bool visitIr(ir_texture *ir);
 	virtual bool visitIr(ir_swizzle *ir);
@@ -43,13 +42,11 @@ public:
 	virtual bool visitIr(ir_loop_jump *ir);
 
     bool isActive(void) { return active; }
-    // active:  all coming symboles are being changed
+    // active:  all coming symbols are being changed
     void activate(void) { active = true; }
-    // passive: coming symboles act as input and are not changed
+    // passive: coming symbols act as input and are not changed
     void deactivate(void) { active = false; }
 
-//    ir_instruction *root;
-//    struct gl_shader* shader;
 private:
     std::set<ir_function_signature*> parsed_signatures;
     bool active;
