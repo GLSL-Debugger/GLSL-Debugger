@@ -142,6 +142,9 @@ enum ir_node_type {
    ir_type_return,
    ir_type_swizzle,
    ir_type_texture,
+#ifdef IR_DEBUG_STATE
+   ir_type_list_dummy,
+#endif
    ir_type_max /**< maximum ir_type enum number, for validation */
 };
 
@@ -256,6 +259,31 @@ protected:
 #endif
    }
 };
+
+
+#ifdef IR_DEBUG_STATE
+class ir_list_dummy : public ir_instruction {
+public:
+   ir_list_dummy()
+   {
+      ir_type = ir_type_list_dummy;
+   }
+
+   virtual void accept(ir_visitor *v)
+   {
+      v->visit( this );
+   }
+
+   virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; };
+   virtual ir_instruction *clone(void *mem_ctx, struct hash_table *ht) const
+   {
+      (void) ht;
+      COPY_RETURN_AST_LOCATION(ir_list_dummy, this->yy_location, new(mem_ctx) ir_list_dummy())
+   };
+
+   virtual ~ir_list_dummy( ) {}
+};
+#endif
 
 
 /**

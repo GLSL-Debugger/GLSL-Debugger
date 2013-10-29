@@ -69,6 +69,9 @@ public:
    virtual void visit(ir_if *);
    virtual void visit(ir_loop *);
    virtual void visit(ir_loop_jump *);
+#ifdef IR_DEBUG_STATE
+   virtual void visit(class ir_list_dummy *) {}
+#endif
    /*@}*/
 
 private:
