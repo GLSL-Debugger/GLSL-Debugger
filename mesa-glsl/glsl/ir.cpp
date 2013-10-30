@@ -217,7 +217,7 @@ ir_expression::ir_expression(int op, const struct glsl_type *type,
    }
 #endif
    COPY_IR_LOCATION_BEGIN( this, op0 )
-   COPY_IR_LOCATION_END( this, (op3 ? op3 : ( op2 ? op2 : op1 )) )
+   COPY_IR_LOCATION_END( this, (op3 ? op3 : (op2 ? op2 : (op1 ? op1 : op0))) )
 }
 
 ir_expression::ir_expression(int op, ir_rvalue *op0)

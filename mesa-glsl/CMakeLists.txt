@@ -5,7 +5,8 @@ include_directories(mapi)
 include_directories(mesa)
 
 file(GLOB SRC_MESA mesa/program/*.c mesa/main/*.c)
-add_library(glsl_mesa ${SRC_MESA})
+add_library(mesa_lib ${SRC_MESA})
+
 
 add_definitions(-DIR_AST_LOCATION -DIR_DEBUG_STATE)
 

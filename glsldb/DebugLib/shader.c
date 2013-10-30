@@ -1111,7 +1111,7 @@ static int getShaderObjects(ShaderProgram *shader)
 static int getCurrentShader(ShaderProgram *shader)
 {
 	int haveOpenGL_2_0_GLSL = checkGLVersionSupported(2, 0);
-	int haveGeometryShader =  checkGLExtensionSupported("EXT_geometry_shader4");
+	int haveGeometryShader =  checkGLExtensionSupported("GL_EXT_geometry_shader4");
 	int error;
 
 	/* get handle of currently active GLSL shader program */
@@ -1576,7 +1576,7 @@ static void freeDbgShader(void)
 int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
                   int target, int forcePointPrimitiveMode)
 {
-	int haveGeometryShader =  checkGLExtensionSupported("EXT_geometry_shader4");
+	int haveGeometryShader =  checkGLExtensionSupported("GL_EXT_geometry_shader4");
 	GLint status;
 	int i, error;
 
