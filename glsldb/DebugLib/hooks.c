@@ -58,7 +58,7 @@ extern Globals G;
 #ifdef _WIN32
 #include "trampolines.inc"
 #endif /* _WIN32 */
-#if defined GLSLDB_LINUX || GLSLDB_OSX
+#if defined(GLSLDB_LINUX) || defined(GLSLDB_OSX)
 #include "../GL/glxext.h"
 #endif
 #include "functionHooks.inc"
