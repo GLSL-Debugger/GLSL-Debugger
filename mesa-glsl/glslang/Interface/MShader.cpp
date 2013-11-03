@@ -171,7 +171,7 @@ char** dbg_iter_name( ir_loop* ir )
 	return &iter_names[ir];
 }
 
-ir_list_dummy* list_dummy( exec_list* list )
+ir_list_dummy* list_dummy( exec_list* list, ir_function_signature* parent )
 {
 	if( list->is_empty() )
 		return NULL;
@@ -185,12 +185,8 @@ ir_list_dummy* list_dummy( exec_list* list )
 	ir->debug_overwrite = ir_dbg_ow_unset;
 	ir->debug_target = false;
 
-	ir_instruction* inst = NULL;
-	foreach_iter(exec_list_iterator, iter, *list)
-		inst = (ir_instruction*)iter.get();
-
-	ir->yy_location.first_column = ir->yy_location.last_column = inst->yy_location.last_column;
-	ir->yy_location.first_line = ir->yy_location.last_line = inst->yy_location.last_line;
+	ir->yy_location.first_column = ir->yy_location.last_column = parent->yy_location.last_column;
+	ir->yy_location.first_line = ir->yy_location.last_line = parent->yy_location.last_line;
 
 	debug_infos[list] = ir;
 	return ir;

@@ -385,7 +385,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 			FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(),
 			ir->callee->is_builtin, this->operation, ir->debug_state );
 
-	VPRINT( 2, "process node %s ...\n", ir->callee_name() );
+	//VPRINT( 2, "process node %s ...\n", ir->callee_name() );
 	switch( this->operation ){
 		case OTOpTargetUnset:
 		{

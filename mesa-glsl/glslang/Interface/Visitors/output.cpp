@@ -311,7 +311,7 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
    }
 
    // Dummy
-   ir_list_dummy* dir = list_dummy(&ir->body);
+   ir_list_dummy* dir = list_dummy(&ir->body, ir);
    visit(dir);
 
    indentation--;

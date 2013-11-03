@@ -102,6 +102,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
     this->deactivate();
     ShChangeableList* nlist = get_changeable_list(ir);
     int opc = ir->get_num_operands();
+    this->depth++;
     for( int i = 0; i < opc; ++i ){
     	ir_instruction* op = ir->operands[i];
     	op->accept(this);
@@ -109,8 +110,10 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
     	copyShChangeableList(nlist, get_changeable_list(op));
     	//dumpShChangeableList(nlist);
     }
+    this->depth--;
 
-    return true;
+    // It makes no sense to traverse operators again
+    return false;
 }
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_texture* ir)
@@ -277,6 +280,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_assignment* ir)
         // copy the changeables of left branch
         copyShChangeableList(nlist, get_changeable_list(ir->lhs));
         //dumpShChangeableList(nlist);
+        VPRINT(2, "=======================================\n");
     }
 
     // process right branch passively
@@ -289,6 +293,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_assignment* ir)
         // copy the changeables of right branch
         copyShChangeableList(nlist, get_changeable_list(ir->rhs));
         //dumpShChangeableList(nlist);
+        VPRINT(2, "=======================================\n");
     }
 
     return false;

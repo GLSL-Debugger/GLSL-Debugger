@@ -122,6 +122,8 @@ ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
 
 ShHandle ShConstructLinker(const EShExecutable executable, int debugOptions)
 {
+	UNUSED_ARG(executable)
+	UNUSED_ARG(debugOptions)
 	/*
 	 if (!InitThread())
 	 return 0;
@@ -339,7 +341,7 @@ char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableLi
 	char* prog = NULL;
 
 	// Generate code
-	bool result = compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
+	compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
 	return prog;
 }
 
@@ -356,6 +358,7 @@ int ShLink(const ShHandle linkHandle, const ShHandle compHandles[], const int nu
 	UNUSED_ARG( uniformMapHandle )
 	UNUSED_ARG( uniformsAccessed )
 	UNUSED_ARG( numUniformsAccessed )
+	UNUSED_ARG( numHandles )
 
 	if( linkHandle == NULL )
 		return 0;

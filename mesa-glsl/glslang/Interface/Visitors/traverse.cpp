@@ -47,7 +47,7 @@ void ir_traverse_visitor::visit(ir_function_signature* ir)
 	// There no such thing as "Dummy node" at the end of blocks in mesa, but
 	// in original debugger it had some logic on it, like afterblock scope
 	// state. Emulate this behavior
-	ir_list_dummy* ird = list_dummy(&ir->body);
+	ir_list_dummy* ird = list_dummy(&ir->body, ir);
 	ird->accept(this);
 
 	--this->depth;
@@ -207,7 +207,7 @@ void ir_traverse_visitor::visit(ir_constant* ir)
 void ir_traverse_visitor::visit(ir_call* ir)
 {
 	bool visit = true;
-	if( ( this->preVisit || this->debugVisit ) )
+	if( this->preVisit )
 		visit = this->visitIr( ir );
 
 	if( visit ){
@@ -393,7 +393,7 @@ void ir_traverse_visitor::visit(exec_list* instructions)
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
 		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
-			ir_variable *var = static_cast< ir_variable* >( inst );
+			ir_variable *var = inst->as_variable();
 			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
 				continue;
 		}

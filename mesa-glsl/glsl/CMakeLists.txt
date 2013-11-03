@@ -10,9 +10,6 @@ find_package(FLEX REQUIRED)
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
 
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/Gen_glslang.cpp
-        OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/glslang_tab.h)
-
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
         SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/glsl_lexer.ll
         COMMAND ${FLEX_EXECUTABLE}
@@ -35,12 +32,14 @@ add_custom_target(generate_builtins
 	COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/builtins/tools/generate_builtins.py ${EXECUTABLE_OUTPUT_PATH}/glsl_compiler > ${CMAKE_CURRENT_BINARY_DIR}/builtin_function.cpp
     DEPENDS glsl_compiler)
 
+
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/builtin_function.cpp GENERATED)
 
+
 file(GLOB SRC_CPP *.cpp)
 file(GLOB SRC_C *.c)
-file(GLOB SRC_CPP_REMOVE main.cpp builtin_stubs.cpp)
+file(GLOB SRC_CPP_REMOVE main.cpp builtin_stubs.cpp glsl_parser.cpp)
 list(REMOVE_ITEM SRC_CPP ${SRC_CPP_REMOVE})
 set(SRC ${SRC_C} ${SRC_CPP} ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp)
 add_library(glsl_src_lib ${SRC})

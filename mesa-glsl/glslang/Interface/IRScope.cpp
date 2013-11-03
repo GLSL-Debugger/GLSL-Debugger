@@ -114,7 +114,7 @@ void setDbgScope(DbgRsScope& scope, scopeList *s)
 
     scopeList::iterator si = s->begin();
 
-    VPRINT(3, "SET GLOBAL SCOPE LIST:");
+    VPRINT(3, "SET GLOBAL SCOPE LIST: ");
 
     while (si != s->end()) {
         scope.numIds++;
