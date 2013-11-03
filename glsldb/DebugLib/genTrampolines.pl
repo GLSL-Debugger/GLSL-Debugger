@@ -3,21 +3,21 @@
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 #   * Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
-# 
+#
 #   * Redistributions in binary form must reproduce the above copyright notice, this
-# 	list of conditions and the following disclaimer in the documentation and/or
-# 	other materials provided with the distribution.
-# 
+#   list of conditions and the following disclaimer in the documentation and/or
+#   other materials provided with the distribution.
+#
 #   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-# 	of its contributors may be used to endorse or promote products derived from
-# 	this software without specific prior written permission.
-# 
+#   of its contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,9 +44,9 @@ sub createUtils {
 print qq|
 static VOID _dbg_Dump(PBYTE pbBytes, LONG nBytes, PBYTE pbTarget)
 {
-	LONG n, m;
+    LONG n, m;
     for (n = 0; n < nBytes; n += 16) {
-		dbgPrintNoPrefix(DBGLVL_DEBUG, "    %p: ", pbBytes + n);
+        dbgPrintNoPrefix(DBGLVL_DEBUG, "    %p: ", pbBytes + n);
         for (m = n; m < n + 16; m++) {
             if (m >= nBytes) {
                 dbgPrintNoPrefix(DBGLVL_DEBUG, "  ");
@@ -67,10 +67,10 @@ static VOID _dbg_Dump(PBYTE pbBytes, LONG nBytes, PBYTE pbTarget)
 
 static VOID _dbg_Decode(PCSTR pszDesc, PBYTE pbCode, PBYTE pbOther, PBYTE pbPointer, LONG nInst)
 {
-	PBYTE pbSrc;
-	PBYTE pbEnd;
-	PVOID pbTarget;
-	LONG n;
+    PBYTE pbSrc;
+    PBYTE pbEnd;
+    PVOID pbTarget;
+    LONG n;
 
     if (pbCode != pbPointer) {
         dbgPrint(DBGLVL_DEBUG, "  %s = %p [%p]\\n", pszDesc, pbCode, pbPointer);
@@ -104,78 +104,78 @@ VOID WINAPI _dbg_Verify(PCHAR pszFunc, PVOID pvPointer)
 
 sub createExtensionTrampolineDefinition
 {
-	my $retval = shift;
-	my $fname = shift;
-	my $argString = shift;
-	my @arguments = buildArgumentList($argString);
-	my $argList = "";
-	for (my $i = 0; $i <= $#arguments; $i++) {
-	    $argList .= "@arguments[$i]";
-		if ($i != $#arguments) {
-			$argList .= ", ";
-		}
-	}
+    my $retval = shift;
+    my $fname = shift;
+    my $argString = shift;
+    my @arguments = buildArgumentList($argString);
+    my $argList = "";
+    for (my $i = 0; $i <= $#arguments; $i++) {
+        $argList .= "@arguments[$i]";
+        if ($i != $#arguments) {
+            $argList .= ", ";
+        }
+    }
 
-	print "$retval (APIENTRYP Orig$fname)($argList) = NULL;\n";
-	print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
-	
-	push @extinitializer, "\tOrig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
+    print "$retval (APIENTRYP Orig$fname)($argList) = NULL;\n";
+    print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
+
+    push @extinitializer, "\tOrig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
 }
 
 sub createTrampolineDefinition
 {
-	my $retval = shift;
-	my $fname = shift;
-	my $argString = shift;
-	my @arguments = buildArgumentList($argString);
-	my $argList = "";
-	for (my $i = 0; $i <= $#arguments; $i++) {
-	    $argList .= "@arguments[$i]";
-		if ($i != $#arguments) {
-			$argList .= ", ";
-		}
-	}
-	print "$retval (APIENTRYP Orig$fname)($argList";
-	#print ") = $fname;\n";
-	print ") = NULL;\n";
-	print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
-	
-	push @initializer, "\tOrig$fname = $fname;\n\tdbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);\n";
-	
-	push @attach, "\tdbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
-	/* _dbg_Verify(\"$fname\", (PBYTE)Orig$fname); */
-	retval = DetourAttach(&((PVOID)Orig$fname), Detoured$fname);
-	if (retval != NO_ERROR) {
-		dbgPrint(DBGLVL_DEBUG, \"DetourAttach($fname) failed: %u\\n\", retval);
-		return 0;
-	}";
-	push @detach, "\tretval = DetourDetach(&((PVOID)Orig$fname), Detoured$fname);
-	if (retval != NO_ERROR) {
-		dbgPrint(DBGLVL_DEBUG, \"DetourDetach($fname) failed: %u\\n\", retval);
-		return 0;
-	}";
+    my $retval = shift;
+    my $fname = shift;
+    my $argString = shift;
+    my @arguments = buildArgumentList($argString);
+    my $argList = "";
+    for (my $i = 0; $i <= $#arguments; $i++) {
+        $argList .= "@arguments[$i]";
+        if ($i != $#arguments) {
+            $argList .= ", ";
+        }
+    }
+    print "$retval (APIENTRYP Orig$fname)($argList";
+    #print ") = $fname;\n";
+    print ") = NULL;\n";
+    print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
+
+    push @initializer, "\tOrig$fname = $fname;\n\tdbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);\n";
+
+    push @attach, "\tdbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
+    /* _dbg_Verify(\"$fname\", (PBYTE)Orig$fname); */
+    retval = DetourAttach(&((PVOID)Orig$fname), Detoured$fname);
+    if (retval != NO_ERROR) {
+        dbgPrint(DBGLVL_DEBUG, \"DetourAttach($fname) failed: %u\\n\", retval);
+        return 0;
+    }";
+    push @detach, "\tretval = DetourDetach(&((PVOID)Orig$fname), Detoured$fname);
+    if (retval != NO_ERROR) {
+        dbgPrint(DBGLVL_DEBUG, \"DetourDetach($fname) failed: %u\\n\", retval);
+        return 0;
+    }";
 }
 
 sub createTrampolineDeclaration
 {
-	my $retval = shift;
-	my $fname = shift;
-	my $argString = shift;
-	my @arguments = buildArgumentList($argString);
-	print "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)(";
-	for (my $i = 0; $i <= $#arguments; $i++) {
-		print "@arguments[$i]";
-		if ($i != $#arguments) {
-			print ", ";
-		}
-	}
-	print ");\n";
+    my $retval = shift;
+    my $fname = shift;
+    my $argString = shift;
+    my @arguments = buildArgumentList($argString);
+    print "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)(";
+    for (my $i = 0; $i <= $#arguments; $i++) {
+        print "@arguments[$i]";
+        if ($i != $#arguments) {
+            print ", ";
+        }
+    }
+    print ");\n";
 }
 
 if ($#ARGV == 0) {
-	$mode = $ARGV[0];
+    $mode = $ARGV[0];
 } else {
-	die "argument must be decl, def or exp"; 
+    die "argument must be decl, def or exp";
 }
 
 if ($mode eq "exp") {
@@ -196,8 +196,8 @@ if ($mode eq "decl") {
     print "#define DEBUGLIBAPI __declspec(dllimport)\n";
     print "#endif /* DEBUGLIB_EXPORTS */\n\n";
 } elsif ($mode eq "exp") {
-	print "LIBRARY \"DebugLib\"\n";
-	print "EXPORTS\n";
+    print "LIBRARY \"DebugLib\"\n";
+    print "EXPORTS\n";
 }
 
 
@@ -207,46 +207,46 @@ my $inprototypes = 0;
 $extname = "GL_VERSION_1_0";
 open(IN, $filename) || die "Couldn’t read $filename: $!";
 while (<IN>) {
-	
-	# create function pointer type for core hook
-	if (/^\s*WINGDIAPI\s+(\S.*\S)\s+APIENTRY\s+(\S+)\s*\((.*)\)/) {
-		if ($mode eq "decl") {
-			createTrampolineDeclaration ($1, $2, $3);
-		} elsif ($mode eq "def") {
-			createTrampolineDefinition ($1, $2, $3);
-		} elsif ($mode eq "exp") {
-			print "\tOrig$2\n";
-		}
-	}
 
-	# create function pointer type for extension hook
-	if ($indefinition == 1) {
-		if (/^#define\s+$extname\s+1/) {
-			$inprototypes = 1;
-		}
-	}
-	
-	if ($inprototypes == 1) {
-		if (/^\s*(?:GLAPI|extern)\s+(\S.*\S)\s*APIENTRY\s+(\S+)\s*\((.*)\)/) {
-			if ($mode eq "decl") {
-				createTrampolineDeclaration ($1, $2, $3);
-			} elsif ($mode eq "def") {
-				createTrampolineDefinition ($1, $2, $3);
-			}  elsif ($mode eq "exp") {
-				print "\tOrig$2\n";
-			}
-		}
-	}
-	
-	if (/^#endif/ && $inprototypes == 1) {
-		$inprototypes = 0;
-		$indefinition = 0;
-	}
+    # create function pointer type for core hook
+    if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
+        if ($mode eq "decl") {
+            createTrampolineDeclaration ($1, $2, $3);
+        } elsif ($mode eq "def") {
+            createTrampolineDefinition ($1, $2, $3);
+        } elsif ($mode eq "exp") {
+            print "\tOrig$2\n";
+        }
+    }
 
-	if (/^#ifndef\s+(GL_\S+)/) {
-		$extname = $1;
-		$indefinition = 1;
-	}
+    #~ # create function pointer type for extension hook
+    #~ if ($indefinition == 1) {
+        #~ if (/^#define\s+$extname\s+1/) {
+            #~ $inprototypes = 1;
+        #~ }
+    #~ }
+#~
+    #~ if ($inprototypes == 1) {
+        if (/^\s*(?:GLAPI|extern)\s+(\S.*\S)\s*(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
+            if ($mode eq "decl") {
+                createTrampolineDeclaration ($1, $2, $3);
+            } elsif ($mode eq "def") {
+                createTrampolineDefinition ($1, $2, $3);
+            }  elsif ($mode eq "exp") {
+                print "\tOrig$2\n";
+            }
+        }
+    #~ }
+#~
+    #~ if (/^#endif/ && $inprototypes == 1) {
+        #~ $inprototypes = 0;
+        #~ $indefinition = 0;
+    #~ }
+#~
+    #~ if (/^#ifndef\s+(GL_\S+)/) {
+        #~ $extname = $1;
+        #~ $indefinition = 1;
+    #~ }
 }
 close(IN);
 
@@ -255,49 +255,49 @@ my $indefinition = 0;
 my $inprototypes = 0;
 open(IN, $filename) || die "Couldn’t read $filename: $!";
 while (<IN>) {
-	if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
-		my $fprototype = $_;
-		chomp $fprototype;
-		while ($fprototype !~ /.*;\s*$/) {
-			$line = <IN>;
-			chomp $line;
-			$line =~ s/\s*/ /;
-			$fprototype = $fprototype.$line;
-		}
-		if ($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
-			if ($mode eq "decl") {
-				createTrampolineDeclaration ($1, $2, $3);
-			} elsif ($mode eq "def") {
-				createTrampolineDefinition ($1, $2, $3);
-			}  elsif ($mode eq "exp") {
-				print "\tOrig$2\n";
-			}
-		}
-	}
+    if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
+        my $fprototype = $_;
+        chomp $fprototype;
+        while ($fprototype !~ /.*;\s*$/) {
+            $line = <IN>;
+            chomp $line;
+            $line =~ s/\s*/ /;
+            $fprototype = $fprototype.$line;
+        }
+        if ($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
+            if ($mode eq "decl") {
+                createTrampolineDeclaration ($1, $2, $3);
+            } elsif ($mode eq "def") {
+                createTrampolineDefinition ($1, $2, $3);
+            }  elsif ($mode eq "exp") {
+                print "\tOrig$2\n";
+            }
+        }
+    }
 
-	if (/^#endif/) {
-		if ($inprototypes == 1) {
-			$inprototypes = 0;
-		} elsif ($indefinition == 1) {	
-			$indefinition = 0;
-			$extname = "WGL_VERSION_1_0";
-		}
-	}
-	
-	if (/^#ifndef\s+(WGL_\S+)/) {
-		$extname = $1;
-		$indefinition = 1;
-	}
+    if (/^#endif/) {
+        if ($inprototypes == 1) {
+            $inprototypes = 0;
+        } elsif ($indefinition == 1) {
+            $indefinition = 0;
+            $extname = "WGL_VERSION_1_0";
+        }
+    }
+
+    if (/^#ifndef\s+(WGL_\S+)/) {
+        $extname = $1;
+        $indefinition = 1;
+    }
 }
 close(IN);
 
 "BOOL SwapBuffers HDC" =~ /(\S+)\s(\S+)\s(\S+)/;
 if ($mode eq "decl") {
-	createTrampolineDeclaration ($1, $2, $3);
+    createTrampolineDeclaration ($1, $2, $3);
 } elsif ($mode eq "def") {
-	createTrampolineDefinition ($1, $2, $3);
+    createTrampolineDefinition ($1, $2, $3);
 }  elsif ($mode eq "exp") {
-	print "\tOrig$2\n";
+    print "\tOrig$2\n";
 }
 
 $filename = "../GL/glext.h";
@@ -305,46 +305,46 @@ my $indefinition = 0;
 my $inprototypes = 0;
 open(IN, $filename) || die "Couldn’t read $filename: $!";
 while (<IN>) {
-	
-	# create function pointer type for core hook
-	if (/^\s*WINGDIAPI\s+(\S.*\S)\s+APIENTRY\s+(\S+)\s*\((.*)\)/) {
-		if ($mode eq "decl") {
-			createTrampolineDeclaration ($1, $2, $3);
-		} elsif ($mode eq "def") {
-			createExtensionTrampolineDefinition ($1, $2, $3);
-		} elsif ($mode eq "exp") {
-			print "\tOrig$2\n";
-		}
-	}
 
-	# create function pointer type for extension hook
-	if ($indefinition == 1) {
-		if (/^#define\s+$extname\s+1/) {
-			$inprototypes = 1;
-		}
-	}
-	
-	if ($inprototypes == 1) {
-		if (/^\s*(?:GLAPI|extern)\s+(\S.*\S)\s*APIENTRY\s+(\S+)\s*\((.*)\)/) {
-			if ($mode eq "decl") {
-				createTrampolineDeclaration ($1, $2, $3);
-			} elsif ($mode eq "def") {
-				createExtensionTrampolineDefinition ($1, $2, $3);
-			}  elsif ($mode eq "exp") {
-				print "\tOrig$2\n";
-			}
-		}
-	}
-	
-	if (/^#endif/ && $inprototypes == 1) {
-		$inprototypes = 0;
-		$indefinition = 0;
-	}
+    # create function pointer type for core hook
+    if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
+        if ($mode eq "decl") {
+            createTrampolineDeclaration ($1, $2, $3);
+        } elsif ($mode eq "def") {
+            createExtensionTrampolineDefinition ($1, $2, $3);
+        } elsif ($mode eq "exp") {
+            print "\tOrig$2\n";
+        }
+    }
 
-	if (/^#ifndef\s+(GL_\S+)/) {
-		$extname = $1;
-		$indefinition = 1;
-	}
+    #~ # create function pointer type for extension hook
+    #~ if ($indefinition == 1) {
+        #~ if (/^#define\s+$extname\s+1/) {
+            #~ $inprototypes = 1;
+        #~ }
+    #~ }
+#~
+    #~ if ($inprototypes == 1) {
+        if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
+            if ($mode eq "decl") {
+                createTrampolineDeclaration ($1, $2, $3);
+            } elsif ($mode eq "def") {
+                createExtensionTrampolineDefinition ($1, $2, $3);
+            }  elsif ($mode eq "exp") {
+                print "\tOrig$2\n";
+            }
+        }
+    #~ }
+#~
+    #~ if (/^#endif/ && $inprototypes == 1) {
+        #~ $inprototypes = 0;
+        #~ $indefinition = 0;
+    #~ }
+#~
+    #~ if (/^#ifndef\s+(GL_\S+)/) {
+        #~ $extname = $1;
+        #~ $indefinition = 1;
+    #~ }
 }
 close(IN);
 
@@ -354,94 +354,94 @@ my $inprototypes = 0;
 $extname = "WGL_VERSION_1_0";
 open(IN, $filename) || die "Couldn’t read $filename: $!";
 while (<IN>) {
-	if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
-		my $fprototype = $_;
-		chomp $fprototype;
-		while ($fprototype !~ /.*;\s*$/) {
-			$line = <IN>;
-			chomp $line;
-			$line =~ s/\s*/ /;
-			$fprototype = $fprototype.$line;
-		}
-		if ($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
-			if ($mode eq "decl") {
-				createTrampolineDeclaration ($1, $2, $3);
-			} elsif ($mode eq "def") {
-				createExtensionTrampolineDefinition ($1, $2, $3);
-			} elsif ($mode eq "exp") {
-				print "\tOrig$2\n";
-			}
-		}
-	}
+    if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
+        my $fprototype = $_;
+        chomp $fprototype;
+        while ($fprototype !~ /.*;\s*$/) {
+            $line = <IN>;
+            chomp $line;
+            $line =~ s/\s*/ /;
+            $fprototype = $fprototype.$line;
+        }
+        if ($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
+            if ($mode eq "decl") {
+                createTrampolineDeclaration ($1, $2, $3);
+            } elsif ($mode eq "def") {
+                createExtensionTrampolineDefinition ($1, $2, $3);
+            } elsif ($mode eq "exp") {
+                print "\tOrig$2\n";
+            }
+        }
+    }
 
-	if (/^#endif/) {
-		if ($inprototypes == 1) {
-			$inprototypes = 0;
-		} elsif ($indefinition == 1) {	
-			$indefinition = 0;
-			$extname = "WGL_VERSION_1_0";
-		}
-	}
-	
-	if (/^#ifndef\s+(WGL_\S+)/) {
-		$extname = $1;
-		$indefinition = 1;
-	}
+    if (/^#endif/) {
+        if ($inprototypes == 1) {
+            $inprototypes = 0;
+        } elsif ($indefinition == 1) {
+            $indefinition = 0;
+            $extname = "WGL_VERSION_1_0";
+        }
+    }
+
+    if (/^#ifndef\s+(WGL_\S+)/) {
+        $extname = $1;
+        $indefinition = 1;
+    }
 }
 close(IN);
-	
+
 if ($mode eq "def") {
-	print "\n";
-	print "void initTrampolines() {\n";
-	print join "\n", @initializer;
-	print "\n}\n";
+    print "\n";
+    print "void initTrampolines() {\n";
+    print join "\n", @initializer;
+    print "\n}\n";
 
-	print "\n";
-	print "void initExtensionTrampolines() {\n";
-	print join "\n", @extinitializer;
-	print "\n}\n";
-	
-	print "\n";
-	createUtils();
-	print "\n";
-	print qq|int attachTrampolines() {
-	LONG retval = 0;
-	initTrampolines();
-	if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
-	}
-    if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
-	}\n|;
-	print join "\n", @attach;
-	print qq|\n\tif ((retval = DetourTransactionCommit()) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
-	}|;
-	print "\n\treturn 1;\n}\n";
+    print "\n";
+    print "void initExtensionTrampolines() {\n";
+    print join "\n", @extinitializer;
+    print "\n}\n";
 
-	print "\n";
-	print qq|int detachTrampolines() {
-	LONG retval = 0;
-	if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
-	}
+    print "\n";
+    createUtils();
+    print "\n";
+    print qq|int attachTrampolines() {
+    LONG retval = 0;
+    initTrampolines();
+    if ((retval = DetourTransactionBegin()) != NO_ERROR) {
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
+    }
     if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
-	}\n|;
-	print join "\n", @detach;
-	print qq|\n\tif ((retval = DetourTransactionCommit()) != NO_ERROR) {
-		dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
-	}|;
-	print "\n\treturn 1;\n}\n";
+        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
+    }\n|;
+    print join "\n", @attach;
+    print qq|\n\tif ((retval = DetourTransactionCommit()) != NO_ERROR) {
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
+    }|;
+    print "\n\treturn 1;\n}\n";
+
+    print "\n";
+    print qq|int detachTrampolines() {
+    LONG retval = 0;
+    if ((retval = DetourTransactionBegin()) != NO_ERROR) {
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
+    }
+    if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
+        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
+    }\n|;
+    print join "\n", @detach;
+    print qq|\n\tif ((retval = DetourTransactionCommit()) != NO_ERROR) {
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
+    }|;
+    print "\n\treturn 1;\n}\n";
 }
 
 if ($mode eq "decl") {
-	print "void initExtensionTrampolines();\n";
-	print "int attachTrampolines();\n";
-	print "int detachTrampolines();\n";
-	print "#endif /* __TRAMPOLINES_H */\n";
+    print "void initExtensionTrampolines();\n";
+    print "int attachTrampolines();\n";
+    print "int detachTrampolines();\n";
+    print "#endif /* __TRAMPOLINES_H */\n";
 }
 if ($mode ne "exp") {
-	print "\n";
+    print "\n";
 }
 
