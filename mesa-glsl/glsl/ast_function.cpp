@@ -281,7 +281,8 @@ static ir_rvalue *
 generate_call(exec_list *instructions, ir_function_signature *sig,
 	      exec_list *actual_parameters,
 	      ir_call **call_ir,
-	      struct _mesa_glsl_parse_state *state)
+	      struct _mesa_glsl_parse_state *state
+	      LOCATION_PARAM(YYLTYPE _base_loc))
 {
    void *ctx = state;
    exec_list post_call_conversions;
@@ -296,12 +297,32 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
    exec_list_iterator actual_iter = actual_parameters->iterator();
    exec_list_iterator formal_iter = sig->parameters.iterator();
 
+#ifdef IR_AST_LOCATION
+   /* Get the union location of all call parameters
+    * We get head as first parameter head and end as last parameter end
+    */
+   YYLTYPE _loc;
+   COPY_AST_LOCATION(_loc, _base_loc)
+   {
+      ir_instruction* first_param = (ir_instruction*)actual_iter.get();
+      if (first_param != NULL){
+         _loc.first_column = first_param->yy_location.first_column; \
+         _loc.first_line = first_param->yy_location.first_line;
+      }
+   }
+#endif
+
    while (actual_iter.has_next()) {
       ir_rvalue *actual = (ir_rvalue *) actual_iter.get();
       ir_variable *formal = (ir_variable *) formal_iter.get();
 
       assert(actual != NULL);
       assert(formal != NULL);
+
+#ifdef IR_AST_LOCATION
+      _loc.last_column = actual->yy_location.last_column;
+      _loc.last_line = actual->yy_location.last_line;
+#endif
 
       if (formal->type->is_numeric() || formal->type->is_boolean()) {
 	 switch (formal->mode) {
@@ -337,6 +358,7 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
    if (state->is_version(120, 300)) {
       ir_constant *value = sig->constant_expression_value(actual_parameters, NULL);
       if (value != NULL) {
+	 COPY_AST_LOCATION(value->yy_location, _loc)
 	 return value;
       }
    }
@@ -350,11 +372,15 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
 				 ralloc_asprintf(ctx, "%s_retval",
 						 sig->function_name()),
 				 ir_var_temporary);
+      COPY_AST_LOCATION(var->yy_location, _loc)
       instructions->push_tail(var);
 
       deref = new(ctx) ir_dereference_variable(var);
    }
    ir_call *call = new(ctx) ir_call(sig, deref, actual_parameters);
+   COPY_AST_LOCATION(call->yy_location, _base_loc)
+   COPY_IR_LOCATION_BEGIN(call, deref)
+   AST_LOCATION_EXPAND_FRONT(call, strlen(sig->function_name()) + 2)
    instructions->push_tail(call);
 
    /* Also emit any necessary out-parameter conversions. */
@@ -1705,6 +1731,10 @@ ast_function_expression::hir(exec_list *instructions,
       YYLTYPE loc = id->get_location();
       exec_list actual_parameters;
 
+#ifdef IR_AST_LOCATION
+      YYLTYPE _expr_loc = this->get_location();
+#endif
+
       process_parameters(instructions, &actual_parameters, &this->expressions,
 			 state);
 
@@ -1716,12 +1746,14 @@ ast_function_expression::hir(exec_list *instructions,
       if (sig == NULL) {
 	 no_matching_function_error(func_name, &loc, &actual_parameters, state);
 	 value = ir_rvalue::error_value(ctx);
+	 COPY_AST_LOCATION(value->yy_location, _expr_loc)
       } else if (!verify_parameter_modes(state, sig, actual_parameters, this->expressions)) {
 	 /* an error has already been emitted */
 	 value = ir_rvalue::error_value(ctx);
+	 COPY_AST_LOCATION(value->yy_location, _expr_loc)
       } else {
 	 value = generate_call(instructions, sig, &actual_parameters,
-			       &call, state);
+			       &call, state LOCATION_PARAM(_expr_loc));
       }
 
       return value;

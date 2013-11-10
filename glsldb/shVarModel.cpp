@@ -1360,6 +1360,7 @@ void ShVarModel::setItemWatched(const QModelIndex & i_qIndex)
             }
         }
 
+        // FIXME: This is fails
         // Black magic: Watch list shows non-watched items if we do not reset
         // the filter here (Qt 4.3.2).
         m_qWatchProxy->setFilterRegExp(QRegExp("(true|1)"));

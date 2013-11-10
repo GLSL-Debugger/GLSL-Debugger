@@ -178,9 +178,10 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 {
    const char *const cent = (ir->centroid) ? "centroid " : "";
    const char *const inv = (ir->invariant) ? "invariant " : "";
-   const char *const mode[3][ir_var_mode_count] =
+   const char *const mode[4][ir_var_mode_count] =
    {
 	{ "", "uniform ", "in ",        "out ",     "in ", "out ", "inout ", "", "", "" },
+	{ "", "uniform ", "attribute ", "varying ", "in ", "out ", "inout ", "", "", "" },
 	{ "", "uniform ", "attribute ", "varying ", "in ", "out ", "inout ", "", "", "" },
 	{ "", "uniform ", "varying ",   "out ",     "in ", "out ", "inout ", "", "", "" },
    };
@@ -1162,23 +1163,23 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 void
 ir_output_traverser_visitor::visit(ir_call *ir)
 {
-	// calls in global scope are postponed to main function
-	if (this->mode != EShLangNone)
-	{
-		assert (!this->globals->main_function_done);
-		this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
-		ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
-		return;
-	}
+   // calls in global scope are postponed to main function
+   if (this->mode != EShLangNone)
+   {
+      assert (!this->globals->main_function_done);
+      this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
+      ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
+      return;
+   }
 
-	if (ir->return_deref)
-	{
-		visit(ir->return_deref);
-		ralloc_asprintf_append (&buffer, " = ");
-	}
+   if (ir->return_deref)
+   {
+      visit(ir->return_deref);
+      ralloc_asprintf_append (&buffer, " = ");
+   }
 
-	if( process_debug_call(ir, this) )
-		return;
+   if( process_debug_call(ir, this) )
+      return;
 
    ralloc_asprintf_append (&buffer, "%s (", ir->callee_name());
    bool first = true;
@@ -1229,73 +1230,71 @@ ir_output_traverser_visitor::visit(ir_discard *ir)
 void
 ir_output_traverser_visitor::visit(ir_if *ir)
 {
-	bool copyCondition;
-    /* Add debug code */
-    if (ir->debug_target) {
-        this->dbgTargetProcessed = true;
-        if( cgOptions == DBG_CG_COVERAGE ||
-        	cgOptions == DBG_CG_CHANGEABLE ||
-        	cgOptions == DBG_CG_GEOMETRY_CHANGEABLE ){
-                switch (ir->debug_state_internal) {
-                    case ir_dbg_if_unset:
-                        printf("CodeGen - selection status is unset\n");
-                        exit(1);
-                        break;
-                    case ir_dbg_if_init:
-                    case ir_dbg_if_condition:
-                        /* Add debug code prior to selection */
-                        cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl,
-                        				vl, dbgStack, 0);
-                        ralloc_asprintf_append (&buffer, ";\n");
-                        indent();
-                        break;
-                    case ir_dbg_if_condition_passed:
-                    case ir_dbg_if_if:
-                    case ir_dbg_if_else:
-                        /* Add temporary register for condition */
-
-                        /* Fix: trigraph initialized condition register
-                         *      even if trigraph is part of another
-                         *      statement
-                         *
-                        cgInit(CG_TYPE_CONDITION, NULL, oit->vl, oit->language);
-                        cgAddDeclaration(CG_TYPE_CONDITION, oit->debugProgram, oit->language);
-                        outputIndentation(oit, oit->depth);
-                        */
-                        copyCondition = true;
-                        break;
-                    default:
-                        break;
-                }
-        }
-    }
+   bool copyCondition = false;
+   /* Add debug code */
+   if (ir->debug_target) {
+      this->dbgTargetProcessed = true;
+      if( cgOptions == DBG_CG_COVERAGE ||
+          cgOptions == DBG_CG_CHANGEABLE ||
+          cgOptions == DBG_CG_GEOMETRY_CHANGEABLE ){
+         switch (ir->debug_state_internal) {
+            case ir_dbg_if_unset:
+               printf("CodeGen - selection status is unset\n");
+               exit(1);
+               break;
+            case ir_dbg_if_init:
+            case ir_dbg_if_condition:
+               /* Add debug code prior to selection */
+               cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
+               ralloc_asprintf_append (&buffer, ";\n");
+               indent();
+               break;
+            case ir_dbg_if_condition_passed:
+            case ir_dbg_if_if:
+            case ir_dbg_if_else:
+               /* Add temporary register for condition */
+               /* Fix: trigraph initialized condition register
+                *      even if trigraph is part of another
+                *      statement
+                *
+               cgInit(CG_TYPE_CONDITION, NULL, oit->vl, oit->language);
+               cgAddDeclaration(CG_TYPE_CONDITION, oit->debugProgram, oit->language);
+               outputIndentation(oit, oit->depth);
+                */
+               copyCondition = true;
+               break;
+            default:
+               break;
+         }
+      }
+   }
 
    ralloc_asprintf_append (&buffer, "if (");
 
    /* Add condition */
-	if( copyCondition ){
-		cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
-		ralloc_asprintf_append (&buffer, " = (");
-		ir->condition->accept(this);
-		ralloc_asprintf_append (&buffer, "), ");
+   if( copyCondition ){
+      cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+      ralloc_asprintf_append (&buffer, " = (");
+      ir->condition->accept(this);
+      ralloc_asprintf_append (&buffer, "), ");
 
-		/* Add debug code */
-		cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
-		ralloc_asprintf_append (&buffer, ", ");
-		cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
-	}else
-		 ir->condition->accept(this);
+      /* Add debug code */
+      cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+      ralloc_asprintf_append (&buffer, ", ");
+      cgAddDbgCode( CG_TYPE_CONDITION, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+   }else
+      ir->condition->accept(this);
 
    ralloc_asprintf_append (&buffer, ") {\n");
    indentation++;
 
    if( !ir->then_instructions.is_empty() && ir->debug_target &&
-		   this->cgOptions == DBG_CG_SELECTION_CONDITIONAL &&
-		   ir->debug_state_internal == ir_dbg_if_condition_passed) {
-		/* Add code to colorize condition */
-	   indent();
-       cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true);
-       ralloc_asprintf_append (&buffer, ";\n");
+         this->cgOptions == DBG_CG_SELECTION_CONDITIONAL &&
+         ir->debug_state_internal == ir_dbg_if_condition_passed) {
+      /* Add code to colorize condition */
+      indent();
+      cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true);
+      ralloc_asprintf_append (&buffer, ";\n");
    }
 
    foreach_iter(exec_list_iterator, iter, ir->then_instructions) {
@@ -1312,27 +1311,26 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 
    if (!ir->else_instructions.is_empty())
    {
-		if( ir->debug_target && this->cgOptions == DBG_CG_SELECTION_CONDITIONAL
-				&& ir->debug_state_internal == ir_dbg_if_condition_passed ){
-			/* Add code to colorize condition */
-			indent();
-			cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
-			ralloc_asprintf_append( &buffer, ";\n" );
-		}
+      if( ir->debug_target && this->cgOptions == DBG_CG_SELECTION_CONDITIONAL
+          && ir->debug_state_internal == ir_dbg_if_condition_passed ){
+         /* Add code to colorize condition */
+         indent();
+         cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
+         ralloc_asprintf_append( &buffer, ";\n" );
+      }
 
-	   ralloc_asprintf_append (&buffer, " else {\n");
-	   indentation++;
+      ralloc_asprintf_append (&buffer, " else {\n");
+      indentation++;
 
-	   foreach_iter(exec_list_iterator, iter, ir->else_instructions) {
-		  ir_instruction *const inst = (ir_instruction *) iter.get();
-
-		  indent();
-		  inst->accept(this);
-		  ralloc_asprintf_append (&buffer, ";\n");
-	   }
-	   indentation--;
-	   indent();
-	   ralloc_asprintf_append (&buffer, "}");
+      foreach_iter(exec_list_iterator, iter, ir->else_instructions) {
+         ir_instruction *const inst = (ir_instruction *) iter.get();
+         indent();
+         inst->accept(this);
+         ralloc_asprintf_append (&buffer, ";\n");
+      }
+      indentation--;
+      indent();
+      ralloc_asprintf_append (&buffer, "}");
    }
 }
 

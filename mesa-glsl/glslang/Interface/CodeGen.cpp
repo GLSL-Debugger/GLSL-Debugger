@@ -428,7 +428,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
     }
 
     ir_output_traverser_visitor it(shader, language,
-    							   dbgCgOptions, vl, cgbl, &(it1pass.dbgStack));
+					dbgCgOptions, vl, cgbl, &(it1pass.dbgStack));
     it.append_version();
 
     /* Add declaration of all neccessary types */

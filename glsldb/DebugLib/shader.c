@@ -1110,7 +1110,7 @@ static int getShaderObjects(ShaderProgram *shader)
 
 static int getCurrentShader(ShaderProgram *shader)
 {
-	int haveOpenGL_2_0_GLSL = checkGLVersionSupported(2, 0);
+//	int haveOpenGL_2_0_GLSL = checkGLVersionSupported(2, 0);
 	int haveGeometryShader =  checkGLExtensionSupported("GL_EXT_geometry_shader4");
 	int error;
 
