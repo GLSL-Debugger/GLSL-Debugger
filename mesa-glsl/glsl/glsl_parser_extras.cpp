@@ -55,7 +55,7 @@ static unsigned known_desktop_glsl_versions[] =
 
 _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
 					       GLenum target, void *mem_ctx)
- : ctx(_ctx)
+   : ctx(_ctx), switch_state()
 {
    switch (target) {
    case GL_VERTEX_SHADER:   this->target = vertex_shader; break;
@@ -66,10 +66,14 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->scanner = NULL;
    this->translation_unit.make_empty();
    this->symbols = new(mem_ctx) glsl_symbol_table;
+
+   this->num_uniform_blocks = 0;
+   this->uniform_block_array_size = 0;
+   this->uniform_blocks = NULL;
+
    this->info_log = ralloc_strdup(mem_ctx, "");
    this->error = false;
    this->loop_nesting_ast = NULL;
-   this->switch_state.switch_nesting_ast = NULL;
 
    this->struct_specifier_depth = 0;
    this->num_builtins_to_link = 0;
@@ -95,7 +99,6 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->Const.MaxTextureCoords = ctx->Const.MaxTextureCoordUnits;
    this->Const.MaxVertexAttribs = ctx->Const.VertexProgram.MaxAttribs;
    this->Const.MaxVertexUniformComponents = ctx->Const.VertexProgram.MaxUniformComponents;
-   this->Const.MaxVaryingFloats = ctx->Const.MaxVarying * 4;
    this->Const.MaxVertexTextureImageUnits = ctx->Const.VertexProgram.MaxTextureImageUnits;
    this->Const.MaxCombinedTextureImageUnits = ctx->Const.MaxCombinedTextureImageUnits;
    this->Const.MaxTextureImageUnits = ctx->Const.FragmentProgram.MaxTextureImageUnits;
@@ -104,6 +107,29 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->Const.MaxProgramTexelOffset = ctx->Const.MaxProgramTexelOffset;
 
    this->Const.MaxDrawBuffers = ctx->Const.MaxDrawBuffers;
+
+   /* 1.50 constants */
+   this->Const.MaxVertexOutputComponents = ctx->Const.VertexProgram.MaxOutputComponents;
+   this->Const.MaxGeometryInputComponents = ctx->Const.GeometryProgram.MaxInputComponents;
+   this->Const.MaxGeometryOutputComponents = ctx->Const.GeometryProgram.MaxOutputComponents;
+   this->Const.MaxFragmentInputComponents = ctx->Const.FragmentProgram.MaxInputComponents;
+   this->Const.MaxGeometryTextureImageUnits = ctx->Const.GeometryProgram.MaxTextureImageUnits;
+   this->Const.MaxGeometryOutputVertices = ctx->Const.MaxGeometryOutputVertices;
+   this->Const.MaxGeometryTotalOutputComponents = ctx->Const.MaxGeometryTotalOutputComponents;
+   this->Const.MaxGeometryUniformComponents = ctx->Const.GeometryProgram.MaxUniformComponents;
+
+   this->Const.MaxVertexAtomicCounters = ctx->Const.VertexProgram.MaxAtomicCounters;
+   this->Const.MaxGeometryAtomicCounters = ctx->Const.GeometryProgram.MaxAtomicCounters;
+   this->Const.MaxFragmentAtomicCounters = ctx->Const.FragmentProgram.MaxAtomicCounters;
+   this->Const.MaxCombinedAtomicCounters = ctx->Const.MaxCombinedAtomicCounters;
+   this->Const.MaxAtomicBufferBindings = ctx->Const.MaxAtomicBufferBindings;
+
+   this->current_function = NULL;
+   this->toplevel_ir = NULL;
+   this->found_return = false;
+   this->all_invariant = false;
+   this->user_structures = NULL;
+   this->num_user_structures = 0;
 
    /* Populate the list of supported GLSL versions */
    /* FINISHME: Once the OpenGL 3.0 'forward compatible' context or
@@ -160,6 +186,11 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->default_uniform_qualifier = new(this) ast_type_qualifier();
    this->default_uniform_qualifier->flags.q.shared = 1;
    this->default_uniform_qualifier->flags.q.column_major = 1;
+
+   this->gs_input_prim_type_specified = false;
+   this->gs_input_prim_type = GL_POINTS;
+   this->gs_input_size = 0;
+   this->out_qualifier = new(this) ast_type_qualifier();
 }
 
 /**
@@ -206,7 +237,7 @@ _mesa_glsl_parse_state::check_version(unsigned required_glsl_version,
       requirement_string = ralloc_asprintf(this, " (%s required)",
                                            glsl_es_version_string);
    }
-   _mesa_glsl_error(locp, this, "%s in %s%s.",
+   _mesa_glsl_error(locp, this, "%s in %s%s",
                     problem, this->get_version_string(),
                     requirement_string);
 
@@ -236,15 +267,15 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
              */
          } else if (strcmp(ident, "compatibility") == 0) {
             _mesa_glsl_error(locp, this,
-                             "The compatibility profile is not supported.\n");
+                             "the compatibility profile is not supported");
          } else {
             _mesa_glsl_error(locp, this,
                              "\"%s\" is not a valid shading language profile; "
-                             "if present, it must be \"core\".\n", ident);
+                             "if present, it must be \"core\"", ident);
          }
       } else {
          _mesa_glsl_error(locp, this,
-                          "Illegal text following version number\n");
+                          "illegal text following version number");
       }
    }
 
@@ -253,7 +284,7 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
       if (es_token_present) {
          _mesa_glsl_error(locp, this,
                           "GLSL 1.00 ES should be selected using "
-                          "`#version 100'\n");
+                          "`#version 100'");
       } else {
          this->es_shader = true;
       }
@@ -272,7 +303,7 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
 
    if (!supported) {
       _mesa_glsl_error(locp, this, "%s is not supported. "
-                       "Supported versions are: %s\n",
+                       "Supported versions are: %s",
                        this->get_version_string(),
                        this->supported_version_string);
 
@@ -294,14 +325,6 @@ _mesa_glsl_parse_state::process_version_directive(YYLTYPE *locp, int version,
 	 this->language_version = 100;
 	 break;
       }
-   }
-
-   if (this->language_version >= 140) {
-      this->ARB_uniform_buffer_object_enable = true;
-   }
-
-   if (this->language_version == 300 && this->es_shader) {
-      this->ARB_explicit_attrib_location_enable = true;
    }
 }
 
@@ -432,15 +455,6 @@ struct _mesa_glsl_extension {
     */
    const char *name;
 
-   /** True if this extension is available to vertex shaders */
-   bool avail_in_VS;
-
-   /** True if this extension is available to geometry shaders */
-   bool avail_in_GS;
-
-   /** True if this extension is available to fragment shaders */
-   bool avail_in_FS;
-
    /** True if this extension is available to desktop GL shaders */
    bool avail_in_GL;
 
@@ -487,9 +501,9 @@ struct _mesa_glsl_extension {
    void set_flags(_mesa_glsl_parse_state *state, ext_behavior behavior) const;
 };
 
-#define EXT(NAME, VS, GS, FS, GL, ES, SUPPORTED_FLAG)                   \
-   { "GL_" #NAME, VS, GS, FS, GL, ES, &gl_extensions::SUPPORTED_FLAG,   \
-         &_mesa_glsl_parse_state::NAME##_enable,                        \
+#define EXT(NAME, GL, ES, SUPPORTED_FLAG)                   \
+   { "GL_" #NAME, GL, ES, &gl_extensions::SUPPORTED_FLAG,   \
+         &_mesa_glsl_parse_state::NAME##_enable,            \
          &_mesa_glsl_parse_state::NAME##_warn }
 
 /**
@@ -497,31 +511,36 @@ struct _mesa_glsl_extension {
  * and the conditions under which they are supported.
  */
 static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
-   /*                                  target availability  API availability */
-   /* name                             VS     GS     FS     GL     ES         supported flag */
-   EXT(ARB_conservative_depth,         false, false, true,  true,  false,     ARB_conservative_depth),
-   EXT(ARB_draw_buffers,               false, false, true,  true,  false,     dummy_true),
-   EXT(ARB_draw_instanced,             true,  false, false, true,  false,     ARB_draw_instanced),
-   EXT(ARB_explicit_attrib_location,   true,  false, true,  true,  false,     ARB_explicit_attrib_location),
-   EXT(ARB_fragment_coord_conventions, true,  false, true,  true,  false,     ARB_fragment_coord_conventions),
-   EXT(ARB_texture_rectangle,          true,  false, true,  true,  false,     dummy_true),
-   EXT(EXT_texture_array,              true,  false, true,  true,  false,     EXT_texture_array),
-   EXT(ARB_shader_texture_lod,         true,  false, true,  true,  false,     ARB_shader_texture_lod),
-   EXT(ARB_shader_stencil_export,      false, false, true,  true,  false,     ARB_shader_stencil_export),
-   EXT(AMD_conservative_depth,         false, false, true,  true,  false,     ARB_conservative_depth),
-   EXT(AMD_shader_stencil_export,      false, false, true,  true,  false,     ARB_shader_stencil_export),
-   EXT(OES_texture_3D,                 true,  false, true,  false, true,      EXT_texture3D),
-   EXT(OES_EGL_image_external,         true,  false, true,  false, true,      OES_EGL_image_external),
-   EXT(ARB_shader_bit_encoding,        true,  true,  true,  true,  false,     ARB_shader_bit_encoding),
-   EXT(ARB_uniform_buffer_object,      true,  false, true,  true,  false,     ARB_uniform_buffer_object),
-   EXT(OES_standard_derivatives,       false, false, true,  false,  true,     OES_standard_derivatives),
-   EXT(ARB_texture_cube_map_array,     true,  false, true,  true,  false,     ARB_texture_cube_map_array),
-   EXT(ARB_shading_language_packing,   true,  false, true,  true,  false,     ARB_shading_language_packing),
-   EXT(ARB_shading_language_420pack,   true,  true,  true,  true,  false,     ARB_shading_language_420pack),
-   EXT(ARB_texture_multisample,        true,  false, true,  true,  false,     ARB_texture_multisample),
-   EXT(ARB_texture_query_lod,          false, false, true,  true,  false,     ARB_texture_query_lod),
-   EXT(ARB_gpu_shader5,                true,  true,  true,  true,  false,     ARB_gpu_shader5),
-   EXT(AMD_vertex_shader_layer,        true,  false, false, true,  false,     AMD_vertex_shader_layer),
+   /*                                  API availability */
+   /* name                             GL     ES         supported flag */
+   EXT(ARB_conservative_depth,         true,  false,     ARB_conservative_depth),
+   EXT(ARB_draw_buffers,               true,  false,     dummy_true),
+   EXT(ARB_draw_instanced,             true,  false,     ARB_draw_instanced),
+   EXT(ARB_explicit_attrib_location,   true,  false,     ARB_explicit_attrib_location),
+   EXT(ARB_fragment_coord_conventions, true,  false,     ARB_fragment_coord_conventions),
+   EXT(ARB_texture_rectangle,          true,  false,     dummy_true),
+   EXT(EXT_texture_array,              true,  false,     EXT_texture_array),
+   EXT(ARB_shader_texture_lod,         true,  false,     ARB_shader_texture_lod),
+   EXT(ARB_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
+   EXT(AMD_conservative_depth,         true,  false,     ARB_conservative_depth),
+   EXT(AMD_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
+   EXT(OES_texture_3D,                 false, true,      EXT_texture3D),
+   EXT(OES_EGL_image_external,         false, true,      OES_EGL_image_external),
+   EXT(ARB_shader_bit_encoding,        true,  false,     ARB_shader_bit_encoding),
+   EXT(ARB_uniform_buffer_object,      true,  false,     ARB_uniform_buffer_object),
+   EXT(OES_standard_derivatives,       false,  true,     OES_standard_derivatives),
+   EXT(ARB_texture_cube_map_array,     true,  false,     ARB_texture_cube_map_array),
+   EXT(ARB_shading_language_packing,   true,  false,     ARB_shading_language_packing),
+   EXT(ARB_shading_language_420pack,   true,  false,     ARB_shading_language_420pack),
+   EXT(ARB_texture_multisample,        true,  false,     ARB_texture_multisample),
+   EXT(ARB_texture_query_levels,       true,  false,     ARB_texture_query_levels),
+   EXT(ARB_texture_query_lod,          true,  false,     ARB_texture_query_lod),
+   EXT(ARB_gpu_shader5,                true,  false,     ARB_gpu_shader5),
+   EXT(AMD_vertex_shader_layer,        true,  false,     AMD_vertex_shader_layer),
+   EXT(EXT_shader_integer_mix,         true,  true,      EXT_shader_integer_mix),
+   EXT(ARB_texture_gather,             true,  false,     ARB_texture_gather),
+   EXT(ARB_shader_atomic_counters,     true,  false,     ARB_shader_atomic_counters),
+   EXT(ARB_sample_shading,             true,  false,     ARB_sample_shading),
 };
 
 #undef EXT
@@ -534,30 +553,6 @@ static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
 bool _mesa_glsl_extension::compatible_with_state(const _mesa_glsl_parse_state *
                                                  state) const
 {
-   /* Check that this extension matches the type of shader we are
-    * compiling to.
-    */
-   switch (state->target) {
-   case vertex_shader:
-      if (!this->avail_in_VS) {
-         return false;
-      }
-      break;
-   case geometry_shader:
-      if (!this->avail_in_GS) {
-         return false;
-      }
-      break;
-   case fragment_shader:
-      if (!this->avail_in_FS) {
-         return false;
-      }
-      break;
-   default:
-      assert (!"Unrecognized shader target");
-      return false;
-   }
-
    /* Check that this extension matches whether we are compiling
     * for desktop GL or GLES.
     */
@@ -623,14 +618,14 @@ _mesa_glsl_process_extension(const char *name, YYLTYPE *name_locp,
       behavior = extension_disable;
    } else {
       _mesa_glsl_error(behavior_locp, state,
-		       "Unknown extension behavior `%s'",
+		       "unknown extension behavior `%s'",
 		       behavior_string);
       return false;
    }
 
    if (strcmp(name, "all") == 0) {
       if ((behavior == extension_enable) || (behavior == extension_require)) {
-	 _mesa_glsl_error(name_locp, state, "Cannot %s all extensions",
+	 _mesa_glsl_error(name_locp, state, "cannot %s all extensions",
 			  (behavior == extension_enable)
 			  ? "enable" : "require");
 	 return false;
@@ -1074,7 +1069,8 @@ ast_expression::print(void) const
 ast_expression::ast_expression(int oper,
 			       ast_expression *ex0,
 			       ast_expression *ex1,
-			       ast_expression *ex2)
+			       ast_expression *ex2) :
+   primary_expression()
 {
    this->oper = ast_operators(oper);
    this->subexpressions[0] = ex0;
@@ -1117,7 +1113,8 @@ ast_function::print(void) const
 
 
 ast_function::ast_function(void)
-   : is_definition(false), signature(NULL)
+   : return_type(NULL), identifier(NULL), is_definition(false),
+     signature(NULL)
 {
    /* empty */
 }
@@ -1442,6 +1439,34 @@ ast_struct_specifier::ast_struct_specifier(const char *identifier,
    is_declaration = true;
 }
 
+static void
+set_shader_inout_layout(struct gl_shader *shader,
+		     struct _mesa_glsl_parse_state *state)
+{
+   if (shader->Type != GL_GEOMETRY_SHADER) {
+      /* Should have been prevented by the parser. */
+      assert(!state->gs_input_prim_type_specified);
+      assert(!state->out_qualifier->flags.i);
+      return;
+   }
+
+   shader->Geom.VerticesOut = 0;
+   if (state->out_qualifier->flags.q.max_vertices)
+      shader->Geom.VerticesOut = state->out_qualifier->max_vertices;
+
+   if (state->gs_input_prim_type_specified) {
+      shader->Geom.InputType = state->gs_input_prim_type;
+   } else {
+      shader->Geom.InputType = PRIM_UNKNOWN;
+   }
+
+   if (state->out_qualifier->flags.q.prim_type) {
+      shader->Geom.OutputType = state->out_qualifier->prim_type;
+   } else {
+      shader->Geom.OutputType = PRIM_UNKNOWN;
+   }
+}
+
 extern "C" {
 
 void
@@ -1517,6 +1542,9 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
    shader->UniformBlocks = state->uniform_blocks;
    ralloc_steal(shader, shader->UniformBlocks);
 
+   if (!state->error)
+      set_shader_inout_layout(shader, state);
+
    /* Retain any live IR, but trash the rest. */
    reparent_ir(shader->ir, shader->ir);
 
@@ -1577,6 +1605,7 @@ do_common_optimization(exec_list *ir, bool linked,
    else
       progress = do_constant_variable_unlinked(ir) || progress;
    progress = do_constant_folding(ir) || progress;
+   progress = do_cse(ir) || progress;
    progress = do_algebraic(ir) || progress;
    progress = do_lower_jumps(ir) || progress;
    progress = do_vec_index_to_swizzle(ir) || progress;
@@ -1622,7 +1651,7 @@ _mesa_destroy_shader_compiler(void)
 void
 _mesa_destroy_shader_compiler_caches(void)
 {
-   _mesa_glsl_release_functions();
+   _mesa_glsl_release_builtin_functions();
 }
 
 }

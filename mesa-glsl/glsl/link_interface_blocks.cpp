@@ -31,8 +31,9 @@
 #include "linker.h"
 #include "main/macros.h"
 
-bool
-validate_intrastage_interface_blocks(const gl_shader **shader_list,
+void
+validate_intrastage_interface_blocks(struct gl_shader_program *prog,
+                                     const gl_shader **shader_list,
                                      unsigned num_shaders)
 {
    glsl_symbol_table interfaces;
@@ -46,7 +47,7 @@ validate_intrastage_interface_blocks(const gl_shader **shader_list,
          if (!var)
             continue;
 
-         const glsl_type *iface_type = var->interface_type;
+         const glsl_type *iface_type = var->get_interface_type();
 
          if (iface_type == NULL)
             continue;
@@ -62,16 +63,17 @@ validate_intrastage_interface_blocks(const gl_shader **shader_list,
             interfaces.add_interface(iface_type->name, iface_type,
                                      (enum ir_variable_mode) var->mode);
          } else if (old_iface_type != iface_type) {
-            return false;
+            linker_error(prog, "definitions of interface block `%s' do not"
+                         " match\n", iface_type->name);
+            return;
          }
       }
    }
-
-   return true;
 }
 
-bool
-validate_interstage_interface_blocks(const gl_shader *producer,
+void
+validate_interstage_interface_blocks(struct gl_shader_program *prog,
+                                     const gl_shader *producer,
                                      const gl_shader *consumer)
 {
    glsl_symbol_table interfaces;
@@ -79,32 +81,34 @@ validate_interstage_interface_blocks(const gl_shader *producer,
    /* Add non-output interfaces from the consumer to the symbol table. */
    foreach_list(node, consumer->ir) {
       ir_variable *var = ((ir_instruction *) node)->as_variable();
-      if (!var || !var->interface_type || var->mode == ir_var_shader_out)
+      if (!var || !var->get_interface_type() || var->mode == ir_var_shader_out)
          continue;
 
-      interfaces.add_interface(var->interface_type->name,
-                               var->interface_type,
+      interfaces.add_interface(var->get_interface_type()->name,
+                               var->get_interface_type(),
                                (enum ir_variable_mode) var->mode);
    }
 
    /* Verify that the producer's interfaces match. */
    foreach_list(node, producer->ir) {
       ir_variable *var = ((ir_instruction *) node)->as_variable();
-      if (!var || !var->interface_type || var->mode == ir_var_shader_in)
+      if (!var || !var->get_interface_type() || var->mode == ir_var_shader_in)
          continue;
 
       enum ir_variable_mode consumer_mode =
          var->mode == ir_var_uniform ? ir_var_uniform : ir_var_shader_in;
       const glsl_type *expected_type =
-         interfaces.get_interface(var->interface_type->name, consumer_mode);
+         interfaces.get_interface(var->get_interface_type()->name,
+                                  consumer_mode);
 
       /* The consumer doesn't use this output block.  Ignore it. */
       if (expected_type == NULL)
          continue;
 
-      if (var->interface_type != expected_type)
-         return false;
+      if (var->get_interface_type() != expected_type) {
+         linker_error(prog, "definitions of interface block `%s' do not "
+                      "match\n", var->get_interface_type()->name);
+         return;
+      }
    }
-
-   return true;
 }

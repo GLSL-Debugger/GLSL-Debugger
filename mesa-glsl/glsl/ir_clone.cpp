@@ -45,6 +45,12 @@ ir_variable::clone(void *mem_ctx, struct hash_table *ht) const
    COPY_AST_LOCATION( var->yy_location, this->yy_location )
 
    var->max_array_access = this->max_array_access;
+   if (this->is_interface_instance()) {
+      var->max_ifc_array_access =
+         rzalloc_array(var, unsigned, this->interface_type->length);
+      memcpy(var->max_ifc_array_access, this->max_ifc_array_access,
+             this->interface_type->length * sizeof(unsigned));
+   }
    var->read_only = this->read_only;
    var->centroid = this->centroid;
    var->invariant = this->invariant;
@@ -52,6 +58,8 @@ ir_variable::clone(void *mem_ctx, struct hash_table *ht) const
    var->location = this->location;
    var->index = this->index;
    var->binding = this->binding;
+   var->atomic.buffer_index = this->atomic.buffer_index;
+   var->atomic.offset = this->atomic.offset;
    var->warn_extension = this->warn_extension;
    var->origin_upper_left = this->origin_upper_left;
    var->pixel_center_integer = this->pixel_center_integer;
@@ -60,6 +68,8 @@ ir_variable::clone(void *mem_ctx, struct hash_table *ht) const
    var->explicit_binding = this->explicit_binding;
    var->has_initializer = this->has_initializer;
    var->depth_layout = this->depth_layout;
+   var->assigned = this->assigned;
+   var->used = this->used;
 
    var->num_state_slots = this->num_state_slots;
    if (this->state_slots) {
@@ -262,6 +272,7 @@ ir_texture::clone(void *mem_ctx, struct hash_table *ht) const
    switch (this->op) {
    case ir_tex:
    case ir_lod:
+   case ir_query_levels:
       break;
    case ir_txb:
       new_tex->lod_info.bias = this->lod_info.bias->clone(mem_ctx, ht);
@@ -277,6 +288,9 @@ ir_texture::clone(void *mem_ctx, struct hash_table *ht) const
    case ir_txd:
       new_tex->lod_info.grad.dPdx = this->lod_info.grad.dPdx->clone(mem_ctx, ht);
       new_tex->lod_info.grad.dPdy = this->lod_info.grad.dPdy->clone(mem_ctx, ht);
+      break;
+   case ir_tg4:
+      new_tex->lod_info.component = this->lod_info.component->clone(mem_ctx, ht);
       break;
    }
 
@@ -350,7 +364,7 @@ ir_function_signature::clone_prototype(void *mem_ctx, struct hash_table *ht) con
    COPY_AST_LOCATION(copy->yy_location, this->yy_location)
 
    copy->is_defined = false;
-   copy->is_builtin = this->is_builtin;
+   copy->builtin_avail = this->builtin_avail;
    copy->origin = this;
 
    /* Clone the parameter list, but NOT the body.
@@ -413,6 +427,7 @@ ir_constant::clone(void *mem_ctx, struct hash_table *ht) const
    }
 
    case GLSL_TYPE_SAMPLER:
+   case GLSL_TYPE_ATOMIC_UINT:
    case GLSL_TYPE_VOID:
    case GLSL_TYPE_ERROR:
    case GLSL_TYPE_INTERFACE:

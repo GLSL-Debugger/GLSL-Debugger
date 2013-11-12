@@ -49,24 +49,7 @@ struct YYLTYPE;
  */
 class ast_node {
 public:
-   /* Callers of this ralloc-based new need not call delete. It's
-    * easier to just ralloc_free 'ctx' (or any of its ancestors). */
-   static void* operator new(size_t size, void *ctx)
-   {
-      void *node;
-
-      node = rzalloc_size(ctx, size);
-      assert(node != NULL);
-
-      return node;
-   }
-
-   /* If the user *does* call delete, that's OK, we will just
-    * ralloc_free in that case. */
-   static void operator delete(void *table)
-   {
-      ralloc_free(table);
-   }
+   DECLARE_RALLOC_CXX_OPERATORS(ast_node);
 
    /**
     * Print an AST node in something approximating the original GLSL code
@@ -363,24 +346,7 @@ enum {
 };
 
 struct ast_type_qualifier {
-   /* Callers of this ralloc-based new need not call delete. It's
-    * easier to just ralloc_free 'ctx' (or any of its ancestors). */
-   static void* operator new(size_t size, void *ctx)
-   {
-      void *node;
-
-      node = rzalloc_size(ctx, size);
-      assert(node != NULL);
-
-      return node;
-   }
-
-   /* If the user *does* call delete, that's OK, we will just
-    * ralloc_free in that case. */
-   static void operator delete(void *table)
-   {
-      ralloc_free(table);
-   }
+   DECLARE_RALLOC_CXX_OPERATORS(ast_type_qualifier);
 
    union {
       struct {
@@ -419,6 +385,12 @@ struct ast_type_qualifier {
           */
          unsigned explicit_binding:1;
 
+         /**
+          * Flag set if GL_ARB_shader_atomic counter "offset" layout
+          * qualifier is used.
+          */
+         unsigned explicit_offset:1;
+
          /** \name Layout qualifiers for GL_AMD_conservative_depth */
          /** \{ */
          unsigned depth_any:1;
@@ -434,6 +406,12 @@ struct ast_type_qualifier {
          unsigned packed:1;
          unsigned column_major:1;
          unsigned row_major:1;
+	 /** \} */
+
+	 /** \name Layout qualifiers for GLSL 1.50 geometry shaders */
+	 /** \{ */
+	 unsigned prim_type:1;
+	 unsigned max_vertices:1;
 	 /** \} */
       }
       /** \brief Set of flags, accessed by name. */
@@ -461,6 +439,12 @@ struct ast_type_qualifier {
     */
    int index;
 
+   /** Maximum output vertices in GLSL 1.50 geometry shaders. */
+   int max_vertices;
+
+   /** Input or output primitive type in GLSL 1.50 geometry shaders */
+   GLenum prim_type;
+
    /**
     * Binding specified via GL_ARB_shading_language_420pack's "binding" keyword.
     *
@@ -468,6 +452,15 @@ struct ast_type_qualifier {
     * This field is only valid if \c explicit_binding is set.
     */
    int binding;
+
+   /**
+    * Offset specified via GL_ARB_shader_atomic_counter's "offset"
+    * keyword.
+    *
+    * \note
+    * This field is only valid if \c explicit_offset is set.
+    */
+   int offset;
 
    /**
     * Return true if and only if an interpolation qualifier is present.
@@ -597,6 +590,10 @@ class ast_fully_specified_type : public ast_node {
 public:
    virtual void print(void) const;
    bool has_qualifiers() const;
+
+   ast_fully_specified_type() : qualifier(), specifier(NULL)
+   {
+   }
 
    const struct glsl_type *glsl_type(const char **name,
 				     struct _mesa_glsl_parse_state *state)
@@ -881,6 +878,10 @@ public:
 
 class ast_function_definition : public ast_node {
 public:
+   ast_function_definition() : prototype(NULL), body(NULL)
+   {
+   }
+
    virtual void print(void) const;
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -893,12 +894,14 @@ public:
 class ast_interface_block : public ast_node {
 public:
    ast_interface_block(ast_type_qualifier layout,
-                     const char *instance_name,
-		     ast_expression *array_size)
+                       const char *instance_name,
+                       bool is_array,
+                       ast_expression *array_size)
    : layout(layout), block_name(NULL), instance_name(instance_name),
-     array_size(array_size)
+     is_array(is_array), array_size(array_size)
    {
-      /* empty */
+      if (!is_array)
+         assert(array_size == NULL);
    }
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -919,16 +922,44 @@ public:
    exec_list declarations;
 
    /**
-    * Declared array size of the block instance
-    *
-    * If the block is not declared as an array, this field will be \c NULL.
+    * True if the block is declared as an array
     *
     * \note
     * A block can only be an array if it also has an instance name.  If this
-    * field is not \c NULL, ::instance_name must also not be \c NULL.
+    * field is true, ::instance_name must also not be \c NULL.
+    */
+   bool is_array;
+
+   /**
+    * Declared array size of the block instance
+    *
+    * If the block is not declared as an array or if the block instance array
+    * is unsized, this field will be \c NULL.
     */
    ast_expression *array_size;
 };
+
+
+/**
+ * AST node representing a declaration of the input layout for geometry
+ * shaders.
+ */
+class ast_gs_input_layout : public ast_node
+{
+public:
+   ast_gs_input_layout(const struct YYLTYPE &locp, GLenum prim_type)
+      : prim_type(prim_type)
+   {
+      set_location(locp);
+   }
+
+   virtual ir_rvalue *hir(exec_list *instructions,
+                          struct _mesa_glsl_parse_state *state);
+
+private:
+   const GLenum prim_type;
+};
+
 /*@}*/
 
 extern void

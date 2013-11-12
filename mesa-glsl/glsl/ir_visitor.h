@@ -63,6 +63,8 @@ public:
    virtual void visit(class ir_if *) = 0;
    virtual void visit(class ir_loop *) = 0;
    virtual void visit(class ir_loop_jump *) = 0;
+   virtual void visit(class ir_emit_vertex *) = 0;
+   virtual void visit(class ir_end_primitive *) = 0;
 #ifdef IR_DEBUG_STATE
    virtual void visit(class ir_list_dummy *) = 0;
 #endif
@@ -84,6 +86,8 @@ public:
    virtual void visit(class ir_assignment *) {}
    virtual void visit(class ir_constant *) {}
    virtual void visit(class ir_call *) {}
+   virtual void visit(class ir_emit_vertex *) {}
+   virtual void visit(class ir_end_primitive *) {}
 #ifdef IR_DEBUG_STATE
    virtual void visit(class ir_list_dummy *) {}
 #endif

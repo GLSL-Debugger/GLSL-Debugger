@@ -4,6 +4,11 @@ find_package(FLEX REQUIRED)
 
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
+include_directories(
+	${PROJECT_SOURCE_DIR}/mesa-glsl/glsl/glcpp
+)
+
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glcpp-lex.c
         SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/glcpp-lex.l
         COMMAND ${FLEX_EXECUTABLE}

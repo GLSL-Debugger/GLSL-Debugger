@@ -38,6 +38,7 @@
 #define INT_DIV_TO_MUL_RCP 0x40
 #define LRP_TO_ARITH       0x80
 #define BITFIELD_INSERT_TO_BFM_BFI 0x100
+#define LDEXP_TO_ARITH     0x200
 
 /**
  * \see class lower_packing_builtins_visitor
@@ -76,6 +77,7 @@ bool do_constant_variable_unlinked(exec_list *instructions);
 bool do_copy_propagation(exec_list *instructions);
 bool do_copy_propagation_elements(exec_list *instructions);
 bool do_constant_propagation(exec_list *instructions);
+bool do_cse(exec_list *instructions);
 void do_dead_builtin_varyings(struct gl_context *ctx,
                               gl_shader *producer, gl_shader *consumer,
                               unsigned num_tfeedback_decls,
@@ -112,7 +114,7 @@ bool lower_packing_builtins(exec_list *instructions, int op_mask);
 void lower_ubo_reference(struct gl_shader *shader, exec_list *instructions);
 void lower_packed_varyings(void *mem_ctx, unsigned location_base,
                            unsigned locations_used, ir_variable_mode mode,
-                           gl_shader *shader);
+                           unsigned gs_input_vertices, gl_shader *shader);
 bool lower_vector_insert(exec_list *instructions, bool lower_nonconstant_index);
 void lower_named_interface_blocks(void *mem_ctx, gl_shader *shader);
 bool optimize_redundant_jumps(exec_list *instructions);

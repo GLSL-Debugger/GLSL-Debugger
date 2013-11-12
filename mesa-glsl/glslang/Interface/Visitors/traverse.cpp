@@ -383,6 +383,16 @@ void ir_traverse_visitor::visit(ir_loop_jump* ir)
 	this->visitIr( ir );
 }
 
+void ir_traverse_visitor::visit(ir_emit_vertex *ir)
+{
+    this->visitIr( ir );
+}
+
+void ir_traverse_visitor::visit(ir_end_primitive *ir)
+{
+    this->visitIr( ir );
+}
+
 void ir_traverse_visitor::visit(ir_list_dummy* ir)
 {
 	this->visitIr( ir );

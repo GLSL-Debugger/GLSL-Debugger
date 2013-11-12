@@ -575,7 +575,8 @@ struct dd_function_table {
                               GLintptr readOffset, GLintptr writeOffset,
                               GLsizeiptr size );
 
-   /* May return NULL if MESA_MAP_NOWAIT_BIT is set in access:
+   /* Returns pointer to the start of the mapped range.
+    * May return NULL if MESA_MAP_NOWAIT_BIT is set in access:
     */
    void * (*MapBufferRange)( struct gl_context *ctx, GLintptr offset,
                              GLsizeiptr length, GLbitfield access,
@@ -643,6 +644,30 @@ struct dd_function_table {
    void (*EndQuery)(struct gl_context *ctx, struct gl_query_object *q);
    void (*CheckQuery)(struct gl_context *ctx, struct gl_query_object *q);
    void (*WaitQuery)(struct gl_context *ctx, struct gl_query_object *q);
+   /*@}*/
+
+   /**
+    * \name Performance monitors
+    */
+   /*@{*/
+   struct gl_perf_monitor_object * (*NewPerfMonitor)(struct gl_context *ctx);
+   void (*DeletePerfMonitor)(struct gl_context *ctx,
+                             struct gl_perf_monitor_object *m);
+   GLboolean (*BeginPerfMonitor)(struct gl_context *ctx,
+                                 struct gl_perf_monitor_object *m);
+
+   /** Stop an active performance monitor, discarding results. */
+   void (*ResetPerfMonitor)(struct gl_context *ctx,
+                            struct gl_perf_monitor_object *m);
+   void (*EndPerfMonitor)(struct gl_context *ctx,
+                          struct gl_perf_monitor_object *m);
+   GLboolean (*IsPerfMonitorResultAvailable)(struct gl_context *ctx,
+                                             struct gl_perf_monitor_object *m);
+   void (*GetPerfMonitorResult)(struct gl_context *ctx,
+                                struct gl_perf_monitor_object *m,
+                                GLsizei dataSize,
+                                GLuint *data,
+                                GLint *bytesWritten);
    /*@}*/
 
 
@@ -818,6 +843,14 @@ struct dd_function_table {
                                    struct gl_transform_feedback_object *obj);
 
    /**
+    * Return the number of vertices written to a stream during the last
+    * Begin/EndTransformFeedback block.
+    */
+   GLsizei (*GetTransformFeedbackVertexCount)(struct gl_context *ctx,
+                                              struct gl_transform_feedback_object *obj,
+                                              GLuint stream);
+
+   /**
     * \name GL_NV_texture_barrier interface
     */
    void (*TextureBarrier)(struct gl_context *ctx);
@@ -843,6 +876,29 @@ struct dd_function_table {
                              struct gl_framebuffer *fb,
                              GLuint index,
                              GLfloat *outValue);
+
+   /**
+    * \name NV_vdpau_interop interface
+    */
+   void (*VDPAUMapSurface)(struct gl_context *ctx, GLenum target,
+                           GLenum access, GLboolean output,
+                           struct gl_texture_object *texObj,
+                           struct gl_texture_image *texImage,
+                           const GLvoid *vdpSurface, GLuint index);
+   void (*VDPAUUnmapSurface)(struct gl_context *ctx, GLenum target,
+                             GLenum access, GLboolean output,
+                             struct gl_texture_object *texObj,
+                             struct gl_texture_image *texImage,
+                             const GLvoid *vdpSurface, GLuint index);
+
+   /**
+    * Query reset status for GL_ARB_robustness
+    *
+    * Per \c glGetGraphicsResetStatusARB, this function should return a
+    * non-zero value once after a reset.  If a reset is non-atomic, the
+    * non-zero status should be returned for the duration of the reset.
+    */
+   GLenum (*GetGraphicsResetStatus)(struct gl_context *ctx);
 };
 
 

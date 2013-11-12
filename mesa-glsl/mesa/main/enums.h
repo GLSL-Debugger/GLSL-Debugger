@@ -1,6 +1,11 @@
 /**
- * \file hash.h
- * Generic hash table. 
+ * \file enums.h
+ * Enumeration name/number lookup functions.
+ * 
+ * \if subset
+ * (No-op)
+ *
+ * \endif
  */
 
 /*
@@ -28,44 +33,15 @@
  */
 
 
-#ifndef HASH_H
-#define HASH_H
+#ifndef _ENUMS_H_
+#define _ENUMS_H_
 
 
-#include "glheader.h"
+extern const char *_mesa_lookup_enum_by_nr( int nr );
 
-
-extern struct _mesa_HashTable *_mesa_NewHashTable(void);
-
-extern void _mesa_DeleteHashTable(struct _mesa_HashTable *table);
-
-extern void *_mesa_HashLookup(struct _mesa_HashTable *table, GLuint key);
-
-extern void _mesa_HashInsert(struct _mesa_HashTable *table, GLuint key, void *data);
-
-extern void _mesa_HashRemove(struct _mesa_HashTable *table, GLuint key);
-
-extern void
-_mesa_HashDeleteAll(struct _mesa_HashTable *table,
-                    void (*callback)(GLuint key, void *data, void *userData),
-                    void *userData);
-
-extern struct _mesa_HashTable *
-_mesa_HashClone(const struct _mesa_HashTable *table);
-
-extern void
-_mesa_HashWalk(const struct _mesa_HashTable *table,
-               void (*callback)(GLuint key, void *data, void *userData),
-               void *userData);
-
-extern void _mesa_HashPrint(const struct _mesa_HashTable *table);
-
-extern GLuint _mesa_HashFindFreeKeyBlock(struct _mesa_HashTable *table, GLuint numKeys);
-
-extern GLuint
-_mesa_HashNumEntries(const struct _mesa_HashTable *table);
-
-extern void _mesa_test_hash_functions(void);
-
+/* Get the name of an enum given that it is a primitive type.  Avoids
+ * GL_FALSE/GL_POINTS ambiguity and others.
+ */
+const char *_mesa_lookup_prim_by_nr( unsigned nr );
 
 #endif

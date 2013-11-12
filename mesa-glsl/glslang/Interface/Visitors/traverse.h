@@ -44,6 +44,8 @@ public:
 	virtual void visit(ir_if *ir);
 	virtual void visit(ir_loop *ir);
 	virtual void visit(ir_loop_jump *ir);
+	virtual void visit(ir_emit_vertex *);
+	virtual void visit(ir_end_primitive *);
 	virtual void visit(ir_list_dummy *ir);
 	virtual void visit(exec_list* instructions);
 
@@ -65,6 +67,8 @@ public:
 	virtual bool visitIr(ir_if *ir) { return ir; };
 	virtual bool visitIr(ir_loop *ir) { return ir; };
 	virtual bool visitIr(ir_loop_jump *ir) { return ir; };
+	virtual bool visitIr(ir_emit_vertex *ir) { return ir; };
+	virtual bool visitIr(ir_end_primitive *ir) { return ir; };
 
 	// Dummy node
 	virtual bool visitIr(ir_list_dummy* ir) { return ir; };

@@ -31,8 +31,7 @@ link_function_calls(gl_shader_program *prog, gl_shader *main,
 		    gl_shader **shader_list, unsigned num_shaders);
 
 extern void
-link_invalidate_variable_locations(gl_shader *sh, enum ir_variable_mode mode,
-				   int generic_base);
+link_invalidate_variable_locations(exec_list *ir);
 
 extern void
 link_assign_uniform_locations(struct gl_shader_program *prog);
@@ -53,20 +52,30 @@ extern bool
 link_uniform_blocks_are_compatible(const gl_uniform_block *a,
 				   const gl_uniform_block *b);
 
-extern int
+extern unsigned
 link_uniform_blocks(void *mem_ctx,
                     struct gl_shader_program *prog,
                     struct gl_shader **shader_list,
                     unsigned num_shaders,
                     struct gl_uniform_block **blocks_ret);
 
-bool
-validate_intrastage_interface_blocks(const gl_shader **shader_list,
+void
+validate_intrastage_interface_blocks(struct gl_shader_program *prog,
+                                     const gl_shader **shader_list,
                                      unsigned num_shaders);
 
-bool
-validate_interstage_interface_blocks(const gl_shader *producer,
+void
+validate_interstage_interface_blocks(struct gl_shader_program *prog,
+                                     const gl_shader *producer,
                                      const gl_shader *consumer);
+
+extern void
+link_assign_atomic_counter_resources(struct gl_context *ctx,
+                                     struct gl_shader_program *prog);
+
+extern void
+link_check_atomic_counter_resources(struct gl_context *ctx,
+                                    struct gl_shader_program *prog);
 
 /**
  * Class for processing all of the leaf fields of a variable that corresponds
@@ -165,8 +174,5 @@ linker_error(gl_shader_program *prog, const char *fmt, ...);
 
 void
 linker_warning(gl_shader_program *prog, const char *fmt, ...);
-
-unsigned
-count_attribute_slots(const glsl_type *t);
 
 #endif /* GLSL_LINKER_H */

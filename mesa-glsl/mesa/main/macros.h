@@ -184,6 +184,28 @@ static inline GLfloat UINT_AS_FLT(GLuint u)
    return tmp.f;
 }
 
+/**
+ * Convert a floating point value to an unsigned fixed point value.
+ *
+ * \param frac_bits   The number of bits used to store the fractional part.
+ */
+static INLINE uint32_t
+U_FIXED(float value, uint32_t frac_bits)
+{
+   value *= (1 << frac_bits);
+   return value < 0.0f ? 0 : (uint32_t) value;
+}
+
+/**
+ * Convert a floating point value to an signed fixed point value.
+ *
+ * \param frac_bits   The number of bits used to store the fractional part.
+ */
+static INLINE int32_t
+S_FIXED(float value, uint32_t frac_bits)
+{
+   return (int32_t) (value * (1 << frac_bits));
+}
 /*@}*/
 
 
@@ -607,7 +629,8 @@ COPY_CLEAN_4V_TYPE_AS_FLOAT(GLfloat dst[4], int sz, const GLfloat src[4],
                      UINT_AS_FLT(0), UINT_AS_FLT(1));
       break;
    default:
-      ASSERT(0);
+      ASSIGN_4V(dst, 0.0f, 0.0f, 0.0f, 1.0f); /* silence warnings */
+      ASSERT(!"Unexpected type in COPY_CLEAN_4V_TYPE_AS_FLOAT macro");
    }
    COPY_SZ_4V(dst, sz, src);
 }
@@ -672,8 +695,20 @@ minify(unsigned value, unsigned levels)
  *
  * \sa ROUND_DOWN_TO()
  */
-#define ALIGN(value, alignment)  (((value) + alignment - 1) & ~(alignment - 1))
+#define ALIGN(value, alignment)  (((value) + (alignment) - 1) & ~((alignment) - 1))
 
+/**
+ * Align a value down to an alignment value
+ *
+ * If \c value is not already aligned to the requested alignment value, it
+ * will be rounded down.
+ *
+ * \param value  Value to be rounded
+ * \param alignment  Alignment value to be used.  This must be a power of two.
+ *
+ * \sa ALIGN()
+ */
+#define ROUND_DOWN_TO(value, alignment) ((value) & ~(alignment - 1))
 
 
 /** Cross product of two 3-element vectors */

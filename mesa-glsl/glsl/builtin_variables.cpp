@@ -30,6 +30,9 @@
 #include "program/prog_statevars.h"
 #include "program/prog_instruction.h"
 
+static struct gl_builtin_uniform_element gl_NumSamples_elements[] = {
+   {NULL, {STATE_NUM_SAMPLES, 0, 0}, SWIZZLE_XXXX}
+};
 
 static struct gl_builtin_uniform_element gl_DepthRange_elements[] = {
    {"near", {STATE_DEPTH_RANGE, 0, 0}, SWIZZLE_XXXX},
@@ -236,6 +239,7 @@ static struct gl_builtin_uniform_element gl_NormalMatrix_elements[] = {
 #define STATEVAR(name) {#name, name ## _elements, Elements(name ## _elements)}
 
 static const struct gl_builtin_uniform_desc _mesa_builtin_uniform_desc[] = {
+   STATEVAR(gl_NumSamples),
    STATEVAR(gl_DepthRange),
    STATEVAR(gl_ClipPlane),
    STATEVAR(gl_Point),
@@ -292,6 +296,54 @@ static const struct gl_builtin_uniform_desc _mesa_builtin_uniform_desc[] = {
 
 
 namespace {
+
+/**
+ * Data structure that accumulates fields for the gl_PerVertex interface
+ * block.
+ */
+class per_vertex_accumulator
+{
+public:
+   per_vertex_accumulator();
+   void add_field(int slot, const glsl_type *type, const char *name);
+   const glsl_type *construct_interface_instance() const;
+
+private:
+   glsl_struct_field fields[10];
+   unsigned num_fields;
+};
+
+
+per_vertex_accumulator::per_vertex_accumulator()
+   : fields(),
+     num_fields(0)
+{
+}
+
+
+void
+per_vertex_accumulator::add_field(int slot, const glsl_type *type,
+                                  const char *name)
+{
+   assert(this->num_fields < ARRAY_SIZE(this->fields));
+   this->fields[this->num_fields].type = type;
+   this->fields[this->num_fields].name = name;
+   this->fields[this->num_fields].row_major = false;
+   this->fields[this->num_fields].location = slot;
+   this->fields[this->num_fields].interpolation = INTERP_QUALIFIER_NONE;
+   this->fields[this->num_fields].centroid = 0;
+   this->num_fields++;
+}
+
+
+const glsl_type *
+per_vertex_accumulator::construct_interface_instance() const
+{
+   return glsl_type::get_interface_instance(this->fields, this->num_fields,
+                                            GLSL_INTERFACE_PACKING_STD140,
+                                            "gl_PerVertex");
+}
+
 
 class builtin_variable_generator
 {
@@ -358,6 +410,9 @@ private:
    const glsl_type * const vec4_t;
    const glsl_type * const mat3_t;
    const glsl_type * const mat4_t;
+
+   per_vertex_accumulator per_vertex_in;
+   per_vertex_accumulator per_vertex_out;
 };
 
 
@@ -497,11 +552,12 @@ builtin_variable_generator::generate_constants()
        */
       if (state->is_version(0, 300)) {
          add_const("gl_MaxVertexOutputVectors",
-                   state->Const.MaxVaryingFloats / 4);
+                   state->ctx->Const.VertexProgram.MaxOutputComponents / 4);
          add_const("gl_MaxFragmentInputVectors",
-                   state->Const.MaxVaryingFloats / 4);
+                   state->ctx->Const.FragmentProgram.MaxInputComponents / 4);
       } else {
-         add_const("gl_MaxVaryingVectors", state->Const.MaxVaryingFloats / 4);
+         add_const("gl_MaxVaryingVectors",
+                   state->ctx->Const.MaxVarying);
       }
    } else {
       add_const("gl_MaxVertexUniformComponents",
@@ -510,7 +566,7 @@ builtin_variable_generator::generate_constants()
       /* Note: gl_MaxVaryingFloats was deprecated in GLSL 1.30+, but not
        * removed
        */
-      add_const("gl_MaxVaryingFloats", state->Const.MaxVaryingFloats);
+      add_const("gl_MaxVaryingFloats", state->ctx->Const.MaxVarying * 4);
 
       add_const("gl_MaxFragmentUniformComponents",
                 state->Const.MaxFragmentUniformComponents);
@@ -531,7 +587,38 @@ builtin_variable_generator::generate_constants()
 
    if (state->is_version(130, 0)) {
       add_const("gl_MaxClipDistances", state->Const.MaxClipPlanes);
-      add_const("gl_MaxVaryingComponents", state->Const.MaxVaryingFloats);
+      add_const("gl_MaxVaryingComponents", state->ctx->Const.MaxVarying * 4);
+   }
+
+   if (state->is_version(150, 0)) {
+      add_const("gl_MaxVertexOutputComponents",
+                state->Const.MaxVertexOutputComponents);
+      add_const("gl_MaxGeometryInputComponents",
+                state->Const.MaxGeometryInputComponents);
+      add_const("gl_MaxGeometryOutputComponents",
+                state->Const.MaxGeometryOutputComponents);
+      add_const("gl_MaxFragmentInputComponents",
+                state->Const.MaxFragmentInputComponents);
+      add_const("gl_MaxGeometryTextureImageUnits",
+                state->Const.MaxGeometryTextureImageUnits);
+      add_const("gl_MaxGeometryOutputVertices",
+                state->Const.MaxGeometryOutputVertices);
+      add_const("gl_MaxGeometryTotalOutputComponents",
+                state->Const.MaxGeometryTotalOutputComponents);
+      add_const("gl_MaxGeometryUniformComponents",
+                state->Const.MaxGeometryUniformComponents);
+
+      /* Note: the GLSL 1.50-4.40 specs require
+       * gl_MaxGeometryVaryingComponents to be present, and to be at least 64.
+       * But they do not define what it means (and there does not appear to be
+       * any corresponding constant in the GL specs).  However,
+       * ARB_geometry_shader4 defines MAX_GEOMETRY_VARYING_COMPONENTS_ARB to
+       * be the maximum number of components available for use as geometry
+       * outputs.  So we assume this is a synonym for
+       * gl_MaxGeometryOutputComponents.
+       */
+      add_const("gl_MaxGeometryVaryingComponents",
+                state->Const.MaxGeometryOutputComponents);
    }
 
    if (compatibility) {
@@ -555,6 +642,21 @@ builtin_variable_generator::generate_constants()
        */
       add_const("gl_MaxTextureCoords", state->Const.MaxTextureCoords);
    }
+
+   if (state->ARB_shader_atomic_counters_enable) {
+      add_const("gl_MaxVertexAtomicCounters",
+                state->Const.MaxVertexAtomicCounters);
+      add_const("gl_MaxGeometryAtomicCounters",
+                state->Const.MaxGeometryAtomicCounters);
+      add_const("gl_MaxFragmentAtomicCounters",
+                state->Const.MaxFragmentAtomicCounters);
+      add_const("gl_MaxCombinedAtomicCounters",
+                state->Const.MaxCombinedAtomicCounters);
+      add_const("gl_MaxAtomicCounterBindings",
+                state->Const.MaxAtomicBufferBindings);
+      add_const("gl_MaxTessControlAtomicCounters", 0);
+      add_const("gl_MaxTessEvaluationAtomicCounters", 0);
+   }
 }
 
 
@@ -564,6 +666,7 @@ builtin_variable_generator::generate_constants()
 void
 builtin_variable_generator::generate_uniforms()
 {
+   add_uniform(int_t, "gl_NumSamples");
    add_uniform(type("gl_DepthRangeParameters"), "gl_DepthRange");
    add_uniform(array(vec4_t, VERT_ATTRIB_MAX), "gl_CurrentAttribVertMESA");
    add_uniform(array(vec4_t, VARYING_SLOT_MAX), "gl_CurrentAttribFragMESA");
@@ -686,8 +789,11 @@ builtin_variable_generator::generate_gs_special_vars()
     * the specific case of gl_PrimitiveIDIn.  So we don't need to treat
     * gl_PrimitiveIDIn as an {ARB,EXT}_geometry_shader4-only variable.
     */
-   add_input(VARYING_SLOT_PRIMITIVE_ID, int_t, "gl_PrimitiveIDIn");
-   add_output(VARYING_SLOT_PRIMITIVE_ID, int_t, "gl_PrimitiveID");
+   ir_variable *var;
+   var = add_input(VARYING_SLOT_PRIMITIVE_ID, int_t, "gl_PrimitiveIDIn");
+   var->interpolation = INTERP_QUALIFIER_FLAT;
+   var = add_output(VARYING_SLOT_PRIMITIVE_ID, int_t, "gl_PrimitiveID");
+   var->interpolation = INTERP_QUALIFIER_FLAT;
 }
 
 
@@ -701,6 +807,12 @@ builtin_variable_generator::generate_fs_special_vars()
    add_input(VARYING_SLOT_FACE, bool_t, "gl_FrontFacing");
    if (state->is_version(120, 100))
       add_input(VARYING_SLOT_PNTC, vec2_t, "gl_PointCoord");
+
+   if (state->is_version(150, 0)) {
+      ir_variable *var =
+         add_input(VARYING_SLOT_PRIMITIVE_ID, int_t, "gl_PrimitiveID");
+      var->interpolation = INTERP_QUALIFIER_FLAT;
+   }
 
    /* gl_FragColor and gl_FragData were deprecated starting in desktop GLSL
     * 1.30, and were relegated to the compatibility profile in GLSL 4.20.
@@ -731,6 +843,19 @@ builtin_variable_generator::generate_fs_special_vars()
       if (state->AMD_shader_stencil_export_warn)
          var->warn_extension = "GL_AMD_shader_stencil_export";
    }
+
+   if (state->ARB_sample_shading_enable) {
+      add_system_value(SYSTEM_VALUE_SAMPLE_ID, int_t, "gl_SampleID");
+      add_system_value(SYSTEM_VALUE_SAMPLE_POS, vec2_t, "gl_SamplePosition");
+      /* From the ARB_sample_shading specification:
+       *    "The number of elements in the array is ceil(<s>/32), where
+       *    <s> is the maximum number of color samples supported by the
+       *    implementation."
+       * Since no drivers expose more than 32x MSAA, we can simply set
+       * the array size to 1 rather than computing it.
+       */
+      add_output(FRAG_RESULT_SAMPLE_MASK, array(int_t, 1), "gl_SampleMask");
+   }
 }
 
 
@@ -747,10 +872,10 @@ builtin_variable_generator::add_varying(int slot, const glsl_type *type,
 {
    switch (state->target) {
    case geometry_shader:
-      add_input(slot, array(type, 0), name_as_gs_input);
+      this->per_vertex_in.add_field(slot, type, name);
       /* FALLTHROUGH */
    case vertex_shader:
-      add_output(slot, type, name);
+      this->per_vertex_out.add_field(slot, type, name);
       break;
    case fragment_shader:
       add_input(slot, type, name);
@@ -792,6 +917,26 @@ builtin_variable_generator::generate_varyings()
          ADD_VARYING(VARYING_SLOT_BFC0, vec4_t, "gl_BackColor");
          ADD_VARYING(VARYING_SLOT_COL1, vec4_t, "gl_FrontSecondaryColor");
          ADD_VARYING(VARYING_SLOT_BFC1, vec4_t, "gl_BackSecondaryColor");
+      }
+   }
+
+   if (state->target == geometry_shader) {
+      const glsl_type *per_vertex_in_type =
+         this->per_vertex_in.construct_interface_instance();
+      add_variable("gl_in", array(per_vertex_in_type, 0),
+                   ir_var_shader_in, -1);
+   }
+   if (state->target == vertex_shader || state->target == geometry_shader) {
+      const glsl_type *per_vertex_out_type =
+         this->per_vertex_out.construct_interface_instance();
+      const glsl_struct_field *fields = per_vertex_out_type->fields.structure;
+      for (unsigned i = 0; i < per_vertex_out_type->length; i++) {
+         ir_variable *var =
+            add_variable(fields[i].name, fields[i].type, ir_var_shader_out,
+                         fields[i].location);
+         var->interpolation = fields[i].interpolation;
+         var->centroid = fields[i].centroid;
+         var->init_interface_type(per_vertex_out_type);
       }
    }
 }

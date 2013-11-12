@@ -252,7 +252,7 @@ void ir_print_visitor::visit(ir_texture *ir)
    ir->sampler->accept(this);
    printf(" ");
 
-   if (ir->op != ir_txs) {
+   if (ir->op != ir_txs && ir->op != ir_query_levels) {
       ir->coordinate->accept(this);
 
       printf(" ");
@@ -266,7 +266,9 @@ void ir_print_visitor::visit(ir_texture *ir)
       printf(" ");
    }
 
-   if (ir->op != ir_txf && ir->op != ir_txf_ms && ir->op != ir_txs) {
+   if (ir->op != ir_txf && ir->op != ir_txf_ms &&
+       ir->op != ir_txs && ir->op != ir_tg4 &&
+       ir->op != ir_query_levels) {
       if (ir->projector)
 	 ir->projector->accept(this);
       else
@@ -285,6 +287,7 @@ void ir_print_visitor::visit(ir_texture *ir)
    {
    case ir_tex:
    case ir_lod:
+   case ir_query_levels:
       break;
    case ir_txb:
       ir->lod_info.bias->accept(this);
@@ -303,6 +306,9 @@ void ir_print_visitor::visit(ir_texture *ir)
       printf(" ");
       ir->lod_info.grad.dPdy->accept(this);
       printf(")");
+      break;
+   case ir_tg4:
+      ir->lod_info.component->accept(this);
       break;
    };
    printf(")");
@@ -406,7 +412,17 @@ void ir_print_visitor::visit(ir_constant *ir)
 	 switch (ir->type->base_type) {
 	 case GLSL_TYPE_UINT:  printf("%u", ir->value.u[i]); break;
 	 case GLSL_TYPE_INT:   printf("%d", ir->value.i[i]); break;
-	 case GLSL_TYPE_FLOAT: printf("%f", ir->value.f[i]); break;
+	 case GLSL_TYPE_FLOAT:
+            if (ir->value.f[i] == 0.0f)
+               /* 0.0 == -0.0, so print with %f to get the proper sign. */
+               printf("%.1f", ir->value.f[i]);
+            else if (abs(ir->value.f[i]) < 0.000001f)
+               printf("%a", ir->value.f[i]);
+            else if (abs(ir->value.f[i]) > 1000000.0f)
+               printf("%e", ir->value.f[i]);
+            else
+               printf("%f", ir->value.f[i]);
+            break;
 	 case GLSL_TYPE_BOOL:  printf("%d", ir->value.b[i]); break;
 	 default: assert(0);
 	 }
@@ -538,4 +554,16 @@ void
 ir_print_visitor::visit(ir_loop_jump *ir)
 {
    printf("%s", ir->is_break() ? "break" : "continue");
+}
+
+void
+ir_print_visitor::visit(ir_emit_vertex *ir)
+{
+   printf("(emit-vertex)");
+}
+
+void
+ir_print_visitor::visit(ir_end_primitive *ir)
+{
+   printf("(end-primitive)");
 }
