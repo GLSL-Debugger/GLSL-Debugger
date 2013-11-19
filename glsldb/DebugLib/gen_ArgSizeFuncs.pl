@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -31,64 +32,41 @@
 #
 ################################################################################
 
-require "argumentListTools.pl";
+
+require argumentListTools;
+require genTools;
+our %regexps;
+
+use Getopt::Std;
+getopts('p');
 
 sub createBody
 {
-    my $retval = shift;
-    my $fname = shift;
-    my $argString = shift;
-    my $isExtFunction = shift;
+    my ($line, $extname, $retval, $fname, $argString) = (@_);
+    my $isExtFunction = $line !~ /WINGDIAPI/;
     my @arguments = buildArgumentList($argString);
     my $pfname = join("","PFN",uc($fname),"PROC");
 
     if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/) {
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            if (@arguments[$i] =~ /[*]$/) {
+        foreach my $argument (@arguments) {
+            if ($argument =~ /[*]$/) {
                 if ($fname !~ /gl\D+([1234])\D{1,2}v[A-Z]*/ &&
-                    $fname !~ /^glGen/ &&
-                    $fname !~ /^glGet/ &&
-                    $fname !~ /^glAre/) {
-                    print "int $fname";
-                    print "_getArg$i";
-                    print "Size($argString);\n";
+                    $fname !~ /^gl(Gen|Get|Are)/) {
+                    print "/* $extname */\n" if not $opt_p;
+                    print "int $fname" . "_getArg$i" . "Size($argString)\n";
+                    # If full definition is required
+                    print "{\n\treturn 1;\n}\n\n" if not $opt_p;
                 }
             }
         }
     }
 }
 
-$extname = "GL_VERSION_1_0";
+my $actions = {
+    $regexps{"wingdi"} => \&createBody,
+    $regexps{"glapi"} => \&createBody
+};
 
-while (<>) {
-
-    # create core hook
-    if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
-        createBody($1, $2, $3, 0);
-    }
-
-    #~ # create extension hook
-    #~ if ($indefinition == 1) {
-        #~ if (/^#define\s+$extname\s+1/) {
-            #~ $inprototypes = 1;
-        #~ }
-    #~ }
-#~
-    #~ if ($inprototypes == 1) {
-        if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
-            createBody($1, $2, $3, 1);
-        #~ }
-    #~ }
-#~
-    #~ if (/^#endif/ && $inprototypes == 1) {
-        #~ $inprototypes = 0;
-        #~ $indefinition = 0;
-    #~ }
-#~
-    #~ if (/^#ifndef\s+(GL_\S+)/) {
-        #~ $extname = $1;
-        #~ $indefinition = 1;
-    #~ }
-
+foreach my $filename (@ARGV){
+    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
 }
-

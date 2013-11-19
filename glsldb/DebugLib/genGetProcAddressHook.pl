@@ -64,7 +64,6 @@ sub createBodyFooter
 {
     if (defined $WIN32) {
         print "\n\treturn NULL;\n}";
-
     } else {
         print " {
             /*fprintf(stderr, \"glXGetProcAddressARB no overload found for %s\\n\", (const char*)n);*/

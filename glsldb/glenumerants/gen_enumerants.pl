@@ -6,7 +6,7 @@
 use Getopt::Std;
 
 our $opt_m = "gl";
-getopt('m:');
+getopt('m');
 
 sub out_struct {
     my $name = shift;
