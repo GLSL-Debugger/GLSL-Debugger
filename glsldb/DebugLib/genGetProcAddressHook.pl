@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -30,6 +31,10 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
+
+
+require genTools;
+our %regexps;
 
 if ($^O =~ /Win32/) {
     $WIN32 = 1;
@@ -65,7 +70,8 @@ sub createBodyFooter
     if (defined $WIN32) {
         print "\n\treturn NULL;\n}";
     } else {
-        print " {
+        print "
+        {
             /*fprintf(stderr, \"glXGetProcAddressARB no overload found for %s\\n\", (const char*)n);*/
             /*return ORIG_GL(glXGetProcAddressARB)(n);*/
             return G.origGlXGetProcAddress(n);
@@ -78,6 +84,8 @@ sub createBodyFooter
 
 sub createFunctionHook
 {
+    my $line = shift;
+    my $extname = shift;
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
@@ -106,147 +114,48 @@ sub createFunctionHook
     } else {
         my $pfname = join("","PFN",uc($fname),"PROC");
 
-        print "if (!strcmp(\"$fname\", (char*)n)) {
-                return (void(*)(void))$fname;\n\t\t}\n\t\t";
+        print "
+        if (!strcmp(\"$fname\", (char*)n)) {
+                return (void(*)(void))$fname;
+        }";
+    }
+}
+
+sub createXFunctionHook {
+    my $fname = $_[3];
+    if ($fname eq "glXGetProcAddressARB") {
+        createFunctionHook($_[0], $_[1], "__GLXextFuncPtr",
+                            "glXGetProcAddressARB", "const GLubyte *");
+    } else {
+        createFunctionHook(@_);
     }
 }
 
 createBodyHeader();
 
-foreach my $filename ("../GL/gl.h", "../GL/glext.h") {
-    my $indefinition = 0;
-    my $inprototypes = 0;
-    $extname = "GL_VERSION_1_0";
-    open(IN, $filename) || die "Couldn’t read $filename: $!";
-    while (<IN>) {
-        if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
-            createFunctionHook($1, $2, $3);
-        }
+my @params = (
+    [["../GL/gl.h", "../GL/glext.h"], "GL_VERSION_1_0", "GL_", {
+            $regexps{"wingdi"} => \&createFunctionHook,
+            $regexps{"glapi"} => \&createFunctionHook
+    }],
+);
 
-        #~ if ($indefinition == 1) {
-            #~ if (/^#define\s+$extname\s+1/) {
-                #~ $inprototypes = 1;
-            #~ }
-        #~ }
-#~
-        #~ if ($inprototypes == 1) {
-            if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
-                createFunctionHook($1, $2, $3);
-            }
-        #~ }
-        #~ if (/^#endif/ && $inprototypes == 1) {
-            #~ $inprototypes = 0;
-            #~ $indefinition = 0;
-        #~ }
-#~
-        #~ if (/^#ifndef\s+(GL_\S+)/) {
-            #~ $extname = $1;
-            #~ $indefinition = 1;
-        #~ }
-    }
-    close(IN);
-}
 if (defined $WIN32) {
-    foreach my $filename ("../GL/WinGDI.h", "../GL/wglext.h") {
-        my $indefinition = 0;
-        my $inprototypes = 0;
-        $extname = "WGL_VERSION_1_0";
-        open(IN, $filename) || die "Couldn’t read $filename: $!";
-        while (<IN>) {
-            if ($indefinition == 1 && /^#define\s+$extname\s+1/) {
-                    $inprototypes = 1;
-            }
+    push @params, [["../GL/WinGDI.h", "../GL/wglext.h"], "WGL_VERSION_1_0",
+        "WGL_", {$regexps{"winapifunc"} => \&createXFunctionHook}];
 
-            if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
-                my $fprototype = $_;
-                chomp $fprototype;
-                while ($fprototype !~ /.*;\s*$/) {
-                    $line = <IN>;
-                    chomp $line;
-                    $line =~ s/\s*/ /;
-                    $fprototype = $fprototype.$line;
-                }
-                if ($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
-                    # No way to parse functions returning a not "typedef'ed"
-                    # function pointer in a simple way :-(
-                    #if ($2 eq "glXGetProcAddressARB") {
-                    #   createFunctionHook("__GLXextFuncPtr", "glXGetProcAddressARB", "const GLubyte *");
-                    #} else {
-                        createFunctionHook($1, $2, $3);
-                    #}
-                }
-            }
-
-            if (/^#endif/) {
-                if ($inprototypes == 1) {
-                    $inprototypes = 0;
-                } elsif ($indefinition == 1) {
-                    $indefinition = 0;
-                    $extname = "GLX_VERSION_1_0";
-                }
-            }
-
-            if (/^#ifndef\s+(WGL_\S+)/) {
-                $extname = $1;
-                $indefinition = 1;
-            }
-        }
-        close(IN);
-    }
-    "BOOL SwapBuffers HDC" =~ /(\S+)\s(\S+)\s(\S+)/;
-    createFunctionHook($1, $2, $3);
+    # Additional function from original file
+    createFunctionHook(0, 0, "BOOL", "SwapBuffers", "HDC");
 } else {
-    foreach my $filename ("../GL/glx.h", "../GL/glxext.h") {
-        my $indefinition = 0;
-        my $inprototypes = 0;
-        $extname = "GLX_VERSION_1_0";
-        open(IN, $filename) || die "Couldn’t read $filename: $!";
-        while (<IN>) {
-            if ($indefinition == 1 && /^#define\s+$extname\s+1/) {
-                    $inprototypes = 1;
-            }
+    push @params, [["../GL/glx.h", "../GL/glxext.h"], "GLX_VERSION_1_0",
+        "GLX_", {$regexps{"glxfunc"} => \&createXFunctionHook}];
+}
 
-            if (/^\s*(?:GLAPI|extern)\s+\S.*\S\s*\(.*/) {
-                # ignore some obscure extensions
-                if ($extname eq "GLX_SGIX_dm_buffer" ||
-                    $extname eq "GLX_SGIX_video_source") {
-                    next;
-                }
-                my $fprototype = $_;
-                chomp $fprototype;
-                while ($fprototype !~ /.*;\s*$/) {
-                    $line = <IN>;
-                    chomp $line;
-                    $line =~ s/\s*/ /;
-                    $fprototype = $fprototype.$line;
-                }
-                $fprototype =~ /^\s*(?:GLAPI|extern)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/;
-                # No way to parse functions returning a not "typedef'ed"
-                # function pointer in a simple way :-(
-                if ($2 eq "glXGetProcAddressARB") {
-                    createFunctionHook("__GLXextFuncPtr", "glXGetProcAddressARB", "const GLubyte *");
-                } else {
-                    createFunctionHook($1, $2, $3);
-                }
-            }
-
-            if (/^#endif/) {
-                if ($inprototypes == 1) {
-                    $inprototypes = 0;
-                } elsif ($indefinition == 1) {
-                    $indefinition = 0;
-                    $extname = "GLX_VERSION_1_0";
-                }
-            }
-
-            if (/^#ifndef\s+(GLX_\S+)/) {
-                $extname = $1;
-                $indefinition = 1;
-            }
-        }
-        close(IN);
+foreach my $entry (@params) {
+    my $filenames = shift @$entry;
+    foreach my $filename (@$filenames) {
+        parse_output($filename, @$entry, 1);
     }
 }
 
 createBodyFooter();
-

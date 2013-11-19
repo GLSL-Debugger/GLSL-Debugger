@@ -26,10 +26,12 @@
 our %regexps = (
     "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
     "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
+    "winapifunc" => qr/^\s*(?:WINGDIAPI\b|extern\b)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
+    "glxfunc" => qr/^\s*(?:GLAPI\b|extern\b)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/,
 );
 
 
-my $func_match = qr/^\s*(?:GLAPI\b).*?(?:GL)?APIENTRY\s+.*?\s*\([^)]*?$/;
+my $func_match = qr/^\s*(?:GLAPI\b|WINGDIAPI\b|extern\b)\s+\S.*\S\s*\([^)]*?$/;
 
 
 # Some extensions switches defined in comments, due to lack of #ifndef
@@ -52,7 +54,6 @@ sub parse_output {
     my $extname = $bextname;
     my @definitions = ($extname);
     my $proto = $extname;
-    my $func_line = "";
     my $api_re = qr/^#ifndef\s+($api\S+)/;
 
     my $ifh;
@@ -67,14 +68,20 @@ sub parse_output {
     while (<$ifh>) {
         chomp;
 
+        # Skip comments
+        next if /^\/\//;
+
         # Multiline function
-        if (/$func_match/ or $func_line ne "") {
-            s/^\s+|\s+$//g;
-            $func_line .= $_ . " ";
-            # Continue to gather string if function not ended on this line
-            next if not /\);\s*$/;
-            $_ = $func_line;
-            $func_line = "";
+        if (/$func_match/) {
+            my $fprototype = $_;
+            chomp $fprototype;
+            while ($fprototype !~ /.*;\s*$/) {
+                $line = <$ifh>;
+                chomp $line;
+                $line =~ s/\s*/ /;
+                $fprototype .= $line;
+            }
+            $_ = $fprototype;
         }
 
         # Prototype name in #define or in comment
