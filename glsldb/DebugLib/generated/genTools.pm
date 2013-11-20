@@ -22,12 +22,17 @@
 #
 ################################################################################
 
+use Time::localtime;
+
 
 our %regexps = (
     "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
     "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
     "winapifunc" => qr/^\s*(?:WINGDIAPI\b|extern\b)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
     "glxfunc" => qr/^\s*(?:GLAPI\b|extern\b)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/,
+    "typegl" => qr/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/,
+    "typewgl" => qr/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/,
+    "typeglx" => qr/^\s*typedef\s+(.*?)\s*(GLX\w+)\s*;/,
 );
 
 
@@ -124,4 +129,65 @@ sub parse_output {
         }
     }
     close $ifh unless $is_stdin;
+}
+
+
+sub header_generated {
+    my $t = localtime;
+    my $year = $t->year + 1900
+    printf "////////////////////////////////////////////////////////
+//
+//   THIS FILE IS GENERATED AUTOMATICALLY %02d.%02d.%04d %02d:%02d:%02d
+//
+// Copyright (c) %04d Perl generator
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+////////////////////////////////////////////////////////
+
+", $year, $t->mon + 1, $t->mday, $t->hour, $t->min, $t->sec, $year;
+}
+
+
+sub parse_gl_files {
+    my $gl_actions = shift;
+    my $add_actions = shift;
+    my $WIN32 = shift;
+    my $win32func = shift;
+
+    my @params = ([["../GL/gl.h", "../GL/glext.h"], "GL_VERSION_1_0",
+                    "GL_", $gl_actions]);
+
+    if ($WIN32) {
+        push @params, [["../GL/WinGDI.h", "../GL/wglext.h"],
+                        "WGL_VERSION_1_0", "WGL_", $add_actions];
+
+        # Additional function from original file
+        $win32func->(0, 0, "BOOL", "SwapBuffers", "HDC") if $win32func;
+    } else {
+        push @params, [["../GL/glx.h", "../GL/glxext.h"],
+                        "GLX_VERSION_1_0", "GLX_", $add_actions];
+    }
+
+    foreach my $entry (@params) {
+        my $filenames = shift @$entry;
+        foreach my $filename (@$filenames) {
+            parse_output($filename, @$entry, 1);
+        }
+    }
 }

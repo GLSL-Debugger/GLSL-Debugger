@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -31,228 +32,136 @@
 #
 ################################################################################
 
-require "argumentListTools.pl";
+require genTypes;
+require genTools;
+our %regexps;
+
 
 if ($^O =~ /Win32/) {
     $WIN32 = 1;
 }
 
-# use only basic C types and size qualifiers, struct, or * (i.e pointer)
-my %typeMap = (
-    # GL
-    "ptrdiff_t" => "long int", # FIXME: 32/64bit issue
-    # GLX
-    "Pixmap" => "unsigned long int", # FIXME: 32/64bit issue
-    "Colormap" => "unsigned long int", # FIXME: 32/64bit issue
-    "Window" => "unsigned long int", # FIXME: 32/64bit issue
-    "int32_t" => "int", # FIXME: 32/64bit issue
-    "int64_t" => "long", # FIXME: 32/64bit issue
-    "Bool" => "int",
-    "Font" => "unsigned long int", # FIXME: 32/64bit issue
-    "XID" => "unsigned long int", # FIXME: 32/64bit issue
-    "Status" => "int",
-    "VLServer" => "void *",
-    "VLPath" => "int",
-    "VLNode" => "int",
-    "DMbuffer" => "void *",
-    "DMparams" => "struct {int a;}",
-    "__GLXextFuncPtr" => "void *"
-);
-
-sub addTypeMapping
-{
-    my $oldtype = shift;
-    my $newtype = shift;
-    $oldtype =~ s/\s+/ /g;
-    $newtype =~ s/\s+/ /g;
-    while (my $prevType = $typeMap{$oldtype}) {
-        $oldtype = $prevType;
-    }
-    #print "addTypeMapping: $newtype -> $oldtype\n";
-    $typeMap{$newtype} = $oldtype;
-}
-
-sub getDummyValue
-{
-    my $tdarg = shift;
-    my $stdarg = stripStorageQualifiers($tdarg);
-    my $arg;
-    if ($typeMap{$stdarg}) {
-        $arg =  $typeMap{$stdarg}
-    } else {
-        $arg = $tdarg;
-    }
-    if ($arg =~ /[*]|[\[]/) {
-        return "($arg)(void *)dirtyHack";
-    } elsif ($arg =~ /struct|union/) {
-        return "*($arg *)(void *)dirtyHack";
-    } elsif ($arg =~ /float/) {
-        return "1.0f";
-    } elsif ($arg =~ /double/) {
-        return "1.0";
-    } elsif ($arg =~ /enum|char|short|int|long|unsigned|signed/) {
-        return "1";
-    } elsif ($arg =~ /void/) {
-        return "";
-    } else {
-        die "getBasicTypeId: Cannot determine argument type of \"$arg\"\n";
-    }
-}
-
-
 sub createBody
 {
+    my $line = shift;
+    my $extname = shift;
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
-    my $isExtension = shift;
+
+    my $isExtension = $line !~ /WINGDIAPI/;
     my @arguments = buildArgumentList($argString);
     my $pfname = join("","PFN",uc($fname),"PROC");
 
-    print "\t{\n";
+    my $funcstring = "($pfname)glXGetProcAddressARB((const GLubyte *)\"$fname\")";
     if (defined $WIN32) {
         if ($isExtension) {
-            print "\t$pfname func = ($pfname)wglGetProcAddress((const GLubyte *)\"$fname\");\n";
+            $funcstring = "($pfname)wglGetProcAddress((const GLubyte *)\"$fname\")";
         } else {
-            print "\t$pfname func = $fname;\n";
+            $funcstring = $fname;
         }
-    } else {
-        print "\t$pfname func = ($pfname)glXGetProcAddressARB((const GLubyte *)\"$fname\");\n";
     }
-    print "\t\tif (func) {\n";
-    print "#ifdef _WIN32\n";
-    print "\t\t\t/* This is an evil hack to catch an access violation in Nvidia's\n";
-    print "\t\t\t * Windows driver. */\n";
-    print "\t\t\t__try {\n";
-    print "\t\t\t\tglBegin(GL_POINTS);\n";
-    print "#else /* _WIN32 */\n";
-    print "\t\t\tif (!sigsetjmp(check_env, 1)) {\n";
-    print "\t\t\t\tglBegin(GL_POINTS);\n";
-    print "\t\t\t\tcurrentFname = \"$fname\";\n";
-    print "\t\t\t\tsignal(SIGSEGV, catch_segfault);\n";
-    print "#endif /* _WIN32 */\n";
-    print "\t\t\t\tfunc(";
-    # add arguments to function head
-    my $i = 0;
-    foreach (@arguments) {
-        print getDummyValue($_);
-        if ($i != $#arguments) {
-            print ", ";
-        }
-        $i++;
-    }
-    print ");\n";
-    print "#ifndef _WIN32\n";
-    print "\t\t\t\tcurrentFname = \"WTF\";\n";
-    print "\t\t\t\tsignal(SIGSEGV, SIG_DFL);\n";
-    print "#endif /* !_WIN32 */\n";
-    print "\t\t\t\tglEnd();\n";
-    print "\t\t\t\tif (glGetError() != GL_INVALID_OPERATION) {\n";
-    print "\t\t\t\t\tprintf(\"$fname,\\n\");\n";
-    print "\t\t\t\t}\n";
-    print "#ifdef _WIN32\n";
-    print "\t\t\t} __except(dirtyFilter(GetExceptionCode(), GetExceptionInformation())) {\n";
-    print "\t\t\t\tprintf(\"# ACCESS VIOLATION WHEN CALLING \\\"$fname\\\"\\n\");\n";
-    print "\t\t\t}\n";
-    print "#else /* _WIN32 */\n";
-    print "\t\t\t}\n";
-    print "#endif /* _WIN32 */\n";
-    print "\t\t}\n";
-    print "\t}\n";
-}
 
-print "#ifdef _WIN32\n";
-print "#include <windows.h>\n";
-print "#include <excpt.h>\n";
-print "#else /* _WIN32 */\n";
-print "#include <signal.h>\n";
-print "#include <sys/types.h>\n";
-print "#include <setjmp.h>\n";
-print "#endif /* _WIN32 */\n";
-print "#include <stdio.h>\n";
-print "#include <stdlib.h>\n";
-print "#include <string.h>\n";
-print "#include \"../GL/gl.h\"\n";
-print "#include \"../GL/glext.h\"\n";
-print "#include <GL/glut.h>\n";
-print "#include \"debuglibInternal.h\"\n";
-
-print "\n\n";
-print "#ifdef _WIN32\n";
-print "int dirtyFilter(unsigned int code, struct _EXCEPTION_POINTERS *ep) {\n";
-print "\tif (code == EXCEPTION_ACCESS_VIOLATION) {\n";
-print "\t\treturn EXCEPTION_EXECUTE_HANDLER;\n";
-print "\t} else {\n";
-print "\t\treturn EXCEPTION_CONTINUE_SEARCH;\n";
-print "\t}\n";
-print "}\n";
-print "#else /* _WIN32 */\n";
-print "const char *currentFname = NULL;\n";
-print "static jmp_buf check_env;\n";
-print "void catch_segfault(int sig_num) {\n";
-print "\tprintf(\"# ACCESS VIOLATION WHEN CALLING \\\"%s\\\"\\n\", currentFname);\n";
-print "\tfflush(stdout);\n";
-print "\tsiglongjmp(check_env, sig_num);\n";
-print "}\n\n";
-#SIGILL,SIGBUS
-print "#endif /* _WIN32 */\n\n";
-
-print "void testFunc(void) {\n";
-print "\tint dirtyHack[4096];\n\n";
-print "\tmemset(dirtyHack, 0, 4096);\n\n";
-
-foreach my $filename ("../GL/gl.h", "../GL/glext.h") {
-    my $indefinition = 0;
-    my $inprototypes = 0;
-    $extname = "GL_VERSION_1_0";
-    open(IN, $filename) || die "Couldn’t read $filename: $!";
-    while (<IN>) {
-
-        # build type map
-        if (/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/) {
-            addTypeMapping($1, $2);
-        }
-
-        # create core hook
-        if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
-            createBody($1, $2, $3, 0);
-        }
-#~
-        #~ # create extension hook
-        #~ if ($indefinition == 1) {
-            #~ if (/^#define\s+$extname\s+1/) {
-                #~ $inprototypes = 1;
-            #~ }
-        #~ }
-#~
-        #~ if ($inprototypes == 1) {
-            if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
-                createBody($1, $2, $3, 1);
+    printf "    {
+        $pfname func = $funcstring;
+        if (func) {
+#ifdef _WIN32
+            /* This is an evil hack to catch an access violation in Nvidia's
+             * Windows driver. */
+            __try {
+                glBegin(GL_POINTS);
+#else /* _WIN32 */
+            if (!sigsetjmp(check_env, 1)) {
+                glBegin(GL_POINTS);
+                    currentFname = \"$fname\";
+                    signal(SIGSEGV, catch_segfault);
+#endif /* _WIN32 */;
+                    func(%s);
+#ifndef _WIN32
+                    currentFname = \"WTF\";
+                    signal(SIGSEGV, SIG_DFL);
+#endif /* !_WIN32 */
+                glEnd();
+                if (glGetError() != GL_INVALID_OPERATION) {
+                    printf(\"${fname},\\n\");
+                }
+#ifdef _WIN32
+            } __except(dirtyFilter(GetExceptionCode(), GetExceptionInformation())) {
+                printf(\"# ACCESS VIOLATION WHEN CALLING '$fname'\\n\");
             }
-        #~ }
-#~
-        #~ if (/^#endif/ && $inprototypes == 1) {
-            #~ $inprototypes = 0;
-            #~ $indefinition = 0;
-        #~ }
-#~
-        #~ if (/^#ifndef\s+(GL_\S+)/) {
-            #~ $extname = $1;
-            #~ $indefinition = 1;
-        #~ }
-    #~ }
-    close(IN);
+#else /* _WIN32 */
+            }
+#endif /* _WIN32 */
+        }
+    }
+", join(", ", map {getDummyValue($_)} @arguments);
 }
-print "\t\texit(0);\n";
-print "}\n";
 
-print "int main(int argc, char *argv[]) {\n";
-print "\tglutInit(&argc, argv);\n";
-print "\tglutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH);\n";
-print "\tglutInitWindowSize(128, 128);\n";
-print "\tglutCreateWindow(argv[0]);\n";
-print "\tglutDisplayFunc(testFunc);\n";
-print "\tglutMainLoop();\n";
-print "\treturn 0;\n";
-print "}\n";
+my $actions = {
+    $regexps{"typegl"} => \&addTypeMapping,
+    $regexps{"wingdi"} => \&createBody,
+    $regexps{"glapi"} => \&createBody
+}
+
+
+
+header_generated();
+print "#ifdef _WIN32
+    #include <windows.h>
+    #include <excpt.h>
+#else /* _WIN32 */
+    #include <signal.h>
+    #include <sys/types.h>
+    #include <setjmp.h>
+#endif /* _WIN32 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include \"../GL/gl.h\"
+#include \"../GL/glext.h\"
+#include <GL/glut.h>
+#include \"debuglibInternal.h\"
+
+
+#ifdef _WIN32
+    int dirtyFilter(unsigned int code, struct _EXCEPTION_POINTERS *ep) {
+        if (code == EXCEPTION_ACCESS_VIOLATION) {
+            return EXCEPTION_EXECUTE_HANDLER;
+        } else {
+            return EXCEPTION_CONTINUE_SEARCH;
+        }
+    }
+#else /* _WIN32 */
+    const char *currentFname = NULL;
+    static jmp_buf check_env;
+    void catch_segfault(int sig_num) {
+        printf(\"# ACCESS VIOLATION WHEN CALLING '%s'\\n\", currentFname);
+        fflush(stdout);
+        siglongjmp(check_env, sig_num);
+    }
+//SIGILL,SIGBUS
+#endif /* _WIN32 */
+
+void testFunc(void) {
+    int dirtyHack[4096];
+    memset(dirtyHack, 0, 4096);
+";
+
+foreach my $filename ("../../GL/gl.h", "../../GL/glext.h") {
+    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
+}
+
+print "
+        exit(0);
+}
+
+int main(int argc, char *argv[]) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH);
+    glutInitWindowSize(128, 128);
+    glutCreateWindow(argv[0]);
+    glutDisplayFunc(testFunc);
+    glutMainLoop();
+    return 0;
+}";
 

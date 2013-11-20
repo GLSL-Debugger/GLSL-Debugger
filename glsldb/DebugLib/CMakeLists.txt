@@ -25,6 +25,7 @@ set(GLSLDEBUG_SRC
 	preExecution.c
 	postExecution.c
 )
+
 execute_process(COMMAND perl 
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
 	INPUT_FILE genGetProcAddressHook.pl 

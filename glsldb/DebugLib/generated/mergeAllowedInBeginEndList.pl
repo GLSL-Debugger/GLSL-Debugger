@@ -32,41 +32,12 @@
 #
 ################################################################################
 
-
-require argumentListTools;
-require genTools;
-our %regexps;
-
-use Getopt::Std;
-getopts('p');
-
-sub createBody
-{
-    my ($line, $extname, $retval, $fname, $argString) = (@_);
-    my $isExtFunction = $line !~ /WINGDIAPI/;
-    my @arguments = buildArgumentList($argString);
-    my $pfname = join("","PFN",uc($fname),"PROC");
-
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/) {
-        foreach my $argument (@arguments) {
-            if ($argument =~ /[*]$/) {
-                if ($fname !~ /gl\D+([1234])\D{1,2}v[A-Z]*/ &&
-                    $fname !~ /^gl(Gen|Get|Are)/) {
-                    print "/* $extname */\n" if not $opt_p;
-                    print "int $fname" . "_getArg$i" . "Size($argString)\n";
-                    # If full definition is required
-                    print "{\n\treturn 1;\n}\n\n" if not $opt_p;
-                }
-            }
-        }
+print "\@allowedInBeginEnd = (\n";
+foreach my $filename (glob("functions/*")) {
+    open(IN, $filename) || die "Couldn’t read $filename: $!";
+    while (<IN>) {
+        print if /^[^#]/ and !$save{$_}++;
     }
+    close(IN);
 }
-
-my $actions = {
-    $regexps{"wingdi"} => \&createBody,
-    $regexps{"glapi"} => \&createBody
-};
-
-foreach my $filename (@ARGV){
-    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
-}
+print ");\n";

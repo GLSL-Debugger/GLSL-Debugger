@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -31,6 +32,7 @@
 #
 ################################################################################
 
+
 my @storageQualifiers = (
     "register",
     "restricted",
@@ -58,6 +60,66 @@ my @cTypes = (
     "double"
 );
 
+# use only basic C types and size qualifiers, struct, or * (i.e pointer)
+our %typeMap = (
+    # GL
+    "ptrdiff_t" => "long int", # FIXME: 32/64bit issue
+    # GLX
+    "Pixmap" => "unsigned long int", # FIXME: 32/64bit issue
+    "Colormap" => "unsigned long int", # FIXME: 32/64bit issue
+    "Window" => "unsigned long int", # FIXME: 32/64bit issue
+    "int32_t" => "int", # FIXME: 32/64bit issue
+    "int64_t" => "long", # FIXME: 32/64bit issue
+    "Bool" => "int",
+    "Font" => "unsigned long int", # FIXME: 32/64bit issue
+    "XID" => "unsigned long int", # FIXME: 32/64bit issue
+    "Status" => "int",
+    "__GLXextFuncPtr" => "void *",
+    "VLServer" => "void *",
+    "VLPath" => "int",
+    "VLNode" => "int",
+    "DMbuffer" => "void *",
+    "DMparams" => "struct",
+    "HDC" => "void *",
+    "HANDLE" => "void *",
+    "UINT" => "unsigned int",
+    "FLOAT" => "float",
+    "INT" => "int",
+    "DWORD" => "unsigned int",
+    "HGLRC" => "void *",
+    "LPCSTR" => "const char *",
+    "BOOL" => "int",
+    "PROC" => "void *",
+    "HPBUFFERARB" => "void *",
+    "HPBUFFEREXT" => "void *",
+    "HGPUNV" => "void *",
+    "INT64" => "__int64",
+    "LPVOID" => "void *",
+    "PGPU_DEVICE" => "void *",
+    "GPU_DEVICE" => "struct",
+    "LPGLYPHMETRICSFLOAT" => "void *",
+    "LPLAYERPLANEDESCRIPTOR" => "void *",
+    "HVIDEOOUTPUTDEVICENV" => "void *",
+    "HPVIDEODEV" => "void *",
+    "GLhandleARB" => "unsigned int",
+);
+
+sub addTypeMapping
+{
+    my $line = shift;
+    my $extname = shift;
+    my $oldtype = shift;
+    my $newtype = shift;
+    $oldtype =~ s/\s+/ /g;
+    $newtype =~ s/\s+/ /g;
+    while (my $prevType = $typeMap{$oldtype}) {
+        $oldtype = $prevType;
+    }
+    #print "addTypeMapping: $newtype -> $oldtype\n";
+    $typeMap{$newtype} = $oldtype;
+}
+
+
 sub stripStorageQualifiers
 {
     my $arg = shift;
@@ -76,34 +138,30 @@ sub stripStorageQualifiers
 sub getBasicTypeId
 {
     my $arg = shift;
-    my $id;
+    my $id = "DBG_TYPE";
     if ($arg =~ /[*]|[\[]/) {
-        $id = "DBG_TYPE_POINTER";
+        $id .= "_POINTER";
     } elsif ($arg =~ /struct|union/) {
-        $id = "DBG_TYPE_STRUCT";
+        $id .= "_STRUCT";
     } elsif ($arg =~ /float/) {
-        $id = "DBG_TYPE_FLOAT";
+        $id .= "_FLOAT";
     } elsif ($arg =~ /double/) {
-        $id = "DBG_TYPE";
         my $N = $arg =~ s/(long)/$1/g;
         for ($i = 0; $i < $N; $i++) {
             $id .= "_LONG";
         }
         $id .= "_DOUBLE";
     } elsif ($arg =~ /char/) {
-        $id = "DBG_TYPE";
         if ($arg =~ /unsigned/) {
             $id .= "_UNSIGNED";
         }
         $id .= "_CHAR";
     } elsif ($arg =~ /short/) {
-            $id = "DBG_TYPE";
         if ($arg =~ /unsigned/) {
             $id .= "_UNSIGNED";
         }
         $id .= "_SHORT_INT";
     } elsif ($arg =~ /int|long|unsigned|signed/) {
-        $id = "DBG_TYPE";
         if ($arg =~ /unsigned/) {
             $id .= "_UNSIGNED";
         }
@@ -113,10 +171,62 @@ sub getBasicTypeId
         }
         $id .= "_INT";
     } else {
-        die "getBasicTypeId: Cannot determine argument type of \"$arg\"\n";
+        die "getBasicTypeId: Cannot determine argument type of $arg\n";
     }
     return $id;
 }
+
+sub getTypeId
+{
+    my $arg = stripStorageQualifiers(shift);
+    #print "STRIPED ARG: ##$arg##\n";
+    if ($arg =~ /[*]|[\[]/) {
+        return "DBG_TYPE_POINTER";
+    } elsif ($arg =~ /GLbitfield/) {
+        return "DBG_TYPE_BITFIELD";
+    } elsif ($arg =~ /GLenum/) {
+        return "DBG_TYPE_ENUM";
+    } elsif ($arg =~ /GLboolean/) {
+        return "DBG_TYPE_BOOLEAN";
+    } elsif ($arg =~ /struct|union/) {
+        return "DBG_TYPE_STRUCT";
+    } elsif ($arg =~ /enum/) {
+        return "DBG_TYPE_INT";
+    } elsif ($typeMap{$arg}) {
+        return getBasicTypeId($typeMap{$arg});
+    } else {
+        return getBasicTypeId($arg);
+    }
+}
+
+
+sub getDummyValue
+{
+    my $tdarg = shift;
+    my $stdarg = stripStorageQualifiers($tdarg);
+    my $arg;
+    if ($typeMap{$stdarg}) {
+        $arg =  $typeMap{$stdarg}
+    } else {
+        $arg = $tdarg;
+    }
+    if ($arg =~ /[*]|[\[]/) {
+        return "($arg)(void *)dirtyHack";
+    } elsif ($arg =~ /struct|union/) {
+        return "*($arg *)(void *)dirtyHack";
+    } elsif ($arg =~ /float/) {
+        return "1.0f";
+    } elsif ($arg =~ /double/) {
+        return "1.0";
+    } elsif ($arg =~ /enum|char|short|int|long|unsigned|signed/) {
+        return "1";
+    } elsif ($arg =~ /void/) {
+        return "";
+    } else {
+        die "getBasicTypeId: Cannot determine argument type of \"$arg\"\n";
+    }
+}
+
 
 sub buildArgumentList
 {
@@ -173,4 +283,3 @@ sub buildArgumentList
     }
     return @argList;
 }
-

@@ -31,148 +31,25 @@
 #
 ################################################################################
 
-require "argumentListTools.pl";
 require "functionsAllowedInBeginEnd.pl";
-require "prePostExecuteList.pl";
 require "justCopyPointersList.pl";
+
+require prePostExecuteList;
+require genTools;
+require genTypes;
+our %regexps;
+our %typeMap;
+
 
 if ($^O =~ /Win32/) {
     $WIN32 = 1;
 }
 
-# use only basic C types and size qualifiers, struct, or * (i.e pointer)
-my %typeMap = (
-    # GL
-    "ptrdiff_t" => "long int", # FIXME: 32/64bit issue
-    # GLX
-    "Pixmap" => "unsigned long int", # FIXME: 32/64bit issue
-    "Colormap" => "unsigned long int", # FIXME: 32/64bit issue
-    "Window" => "unsigned long int", # FIXME: 32/64bit issue
-    "int32_t" => "int", # FIXME: 32/64bit issue
-    "int64_t" => "long", # FIXME: 32/64bit issue
-    "Bool" => "int",
-    "Font" => "unsigned long int", # FIXME: 32/64bit issue
-    "XID" => "unsigned long int", # FIXME: 32/64bit issue
-    "Status" => "int",
-    "__GLXextFuncPtr" => "void *",
-    "VLServer" => "void *",
-    "VLPath" => "int",
-    "VLNode" => "int",
-    "DMbuffer" => "void *",
-    "DMparams" => "struct",
-    "HDC" => "void *",
-    "HANDLE" => "void *",
-    "UINT" => "unsigned int",
-    "FLOAT" => "float",
-    "INT" => "int",
-    "DWORD" => "unsigned int",
-    "HGLRC" => "void *",
-    "LPCSTR" => "const char *",
-    "BOOL" => "int",
-    "PROC" => "void *",
-    "HPBUFFERARB" => "void *",
-    "HPBUFFEREXT" => "void *",
-    "HGPUNV" => "void *",
-    "INT64" => "__int64",
-    "LPVOID" => "void *",
-    "PGPU_DEVICE" => "void *",
-    "GPU_DEVICE" => "struct",
-    "LPGLYPHMETRICSFLOAT" => "void *",
-    "LPLAYERPLANEDESCRIPTOR" => "void *",
-    "HVIDEOOUTPUTDEVICENV" => "void *",
-    "HPVIDEODEV" => "void *",
-    "GLhandleARB" => "unsigned int",
-);
 
-sub addTypeMapping
-{
-    my $oldtype = shift;
-    my $newtype = shift;
-    $oldtype =~ s/\s+/ /g;
-    $newtype =~ s/\s+/ /g;
-    while (my $prevType = $typeMap{$oldtype}) {
-        $oldtype = $prevType;
-    }
-    #print "addTypeMapping: $newtype -> $oldtype\n";
-    $typeMap{$newtype} = $oldtype;
-}
 
-sub getTypeId
-{
-    my $arg = stripStorageQualifiers(shift);
-    #print "STRIPED ARG: ##$arg##\n";
-    if ($arg =~ /[*]|[\[]/) {
-        return "DBG_TYPE_POINTER";
-    } elsif ($arg =~ /GLbitfield/) {
-        return "DBG_TYPE_BITFIELD";
-    } elsif ($arg =~ /GLenum/) {
-        return "DBG_TYPE_ENUM";
-    } elsif ($arg =~ /GLboolean/) {
-        return "DBG_TYPE_BOOLEAN";
-    } elsif ($arg =~ /struct|union/) {
-        return "DBG_TYPE_STRUCT";
-    } elsif ($arg =~ /enum/) {
-        return "DBG_TYPE_INT";
-    } elsif ($typeMap{$arg}) {
-        return getBasicTypeId($typeMap{$arg});
-    } else {
-        return getBasicTypeId($arg);
-    }
-}
 
-sub printArguments
-{
-    my @arguments = @_;
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            print "arg$i";
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-    }
-}
-
-sub printArgumentReferences
-{
-    my @arguments = @_;
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            print "&arg$i";
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-    }
-}
-
-sub printPreExecute
-{
-    my ($indent, $fname, @arguments) = @_;
-    if (scalar grep {$fname eq $_} @preExecutionList) {
-        print "$indent$fname";
-        print "_PREEXECUTE(";
-        printArgumentReferences(@arguments);
-        print ");\n";
-    }
-}
-
-sub printPostExecute
-{
-    my ($indent, $fname, $retval, @arguments) = @_;
-    if (scalar grep {$fname eq $_} @postExecutionList) {
-        print "$indent$fname";
-        print "_POSTEXECUTE(";
-        printArgumentReferences(@arguments);
-        if ($retval !~ /^void$|^$/i) {
-            print ", &result";
-        }
-        print ", &error);\n";
-    }
-}
 
 # TODO: check position of unlock statements!!!
-
 @defined_funcs = ();
 
 sub createBody
@@ -209,78 +86,71 @@ sub createBody
     }
     # add arguments to function head
     my $i = 0;
-    foreach (@arguments) {
-        if ($_ =~ /^void$|^$/i) {
-            print "void";
-        } else {
-            if($_ =~ /(.*)(\[\d+\])/){
-                print "$1 arg$i$2";
-            }else{
-                print "$_ arg$i";
-            }
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-        $i++;
+    if (@arguments[0] ~= /^void$|^$/i){
+        print "void"
+    } else {
+        my $i = 0;
+        print join(", ", map {
+                    (/(.*)(\[\d+\])/ ? "$1 arg$i$2" : "$_ arg$i"), ++$i
+                } @arguments);
     }
+
     print ")\n{\n";
     # temp. variable that holds the return value of the function
     if ($retval !~ /^void$|^$/i) {
         print "\t\t$retval result;\n";
     }
+
     ###########################################################################
     # first store name of called function and its arguments in the shared memory
     # segment, then call dbgFunctionCall that stops the process/thread and waits
     # for the debugger to handle the actual debugging
     print "\t\tint op, error;\n";
     if (defined $WIN32) {
-        print "\t\tDbgRec *rec;\n";
-        print "\t\tdbgPrint(DBGLVL_DEBUG, \"entering $fname\\n\");\n";
-        print "\t\trec = getThreadRecord(GetCurrentProcessId());\n";
+        print "     DbgRec *rec;
+        dbgPrint(DBGLVL_DEBUG, \"entering $fname\\n\");
+        rec = getThreadRecord(GetCurrentProcessId());
+";
         if ($fname eq "glEnd") {
             print "\t\tG.errorCheckAllowed = 1;\n";
-        }
-        if ($fname eq "glBegin") {
+        }elsif ($fname eq "glBegin") {
             print "\t\tG.errorCheckAllowed = 0;\n";
         }
-        print "\t\tif(rec->isRecursing) {\n";
-        print "\t\t\tdbgPrint(DBGLVL_DEBUG, \"stopping recursion\\n\");\n";
-        printPreExecute("\t\t\t", $fname, @arguments);
+        print "        if(rec->isRecursing) {
+        dbgPrint(DBGLVL_DEBUG, \"stopping recursion\\n\");
+";
+        print pre_execute("\t\t\t", $fname, @arguments);
         if ($retval !~ /^void$|^$/i) {
             print "\t\t\tresult = ";
         } else {
             print "\t\t\t";
         }
-        print "ORIG_GL($fname)(";
-        printArguments(@arguments);
-        print ");\n";
-        print "\t\t\t/* no way to check errors in recursive calls! */\n";
-        print "\t\t\terror = GL_NO_ERROR;\n";
-        printPostExecute("\t\t\t", $fname, $retval, @arguments);
+        printf "ORIG_GL($fname)(%s);
+            /* no way to check errors in recursive calls! */
+            error = GL_NO_ERROR;
+", arguments_string(@arguments);
+        print post_execute("\t\t\t", $fname, $retval, @arguments);
         if ($retval !~ /^void$|^$/i) {
             print "\t\t\treturn result;\n";
         } else {
             print "\t\t\treturn;\n";
         }
-        print "\t\t}\n";
-        print "\t\trec->isRecursing = 1;\n";
-        print "\t\tEnterCriticalSection(&G.lock);\n";
+        print "        }
+        rec->isRecursing = 1;
+        EnterCriticalSection(&G.lock);
+";
     } else {
-        print "\t\tpthread_mutex_lock(&G.lock);\n";
+        print "        pthread_mutex_lock(&G.lock);\n";
     }
-    print "\t\tif (keepExecuting(\"$fname\")) {\n";
-    print "\t\t\t$unlockStatement";
-    printPreExecute("\t\t\t", $fname, @arguments);
+    print "        if (keepExecuting(\"$fname\")) {
+            $unlockStatement";
+    print pre_execute("\t\t\t", $fname, @arguments);
     if ($retval !~ /^void$|^$/i) {
         print "\t\t\tresult = ";
     } else {
         print "\t\t\t";
     }
-    print "ORIG_GL($fname)(";
-    printArguments(@arguments);
-    print ");\n";
-
+    printf "ORIG_GL($fname)(%s);\n", arguments_string(@arguments);
     print "\t\t\tif (checkGLErrorInExecution()) {\n";
 
     if ($retval !~ /^void$|^$/i) {
@@ -312,7 +182,7 @@ sub createBody
     } else {
         print "\t\t\t\terror = GL_NO_ERROR;\n";
     }
-    printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+    print post_execute("\t\t\t\t", $fname, $retval, @arguments);
     print "\t\t\t\tif (error != GL_NO_ERROR) {\n";
     print "\t\t\t\t\tsetErrorCode(error);\n";
     print "\t\t\t\t\tstop();\n";
@@ -329,7 +199,7 @@ sub createBody
     print "\t\t\t} else {\n";
     if (scalar grep {$fname eq $_} @postExecutionList) {
         print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-        printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+        print post_execute("\t\t\t\t", $fname, $retval, @arguments);
         print "\t\t\t\tif (error != GL_NO_ERROR) {\n";
         print "\t\t\t\t\tsetErrorCode(error);\n";
         print "\t\t\t\t\tstop();\n";
@@ -458,32 +328,32 @@ sub createBody
         print "\t\t\t\t";
     }
     print "ORIG_GL($fname)(";
-    printArguments(@arguments);
+    print arguments_string(@arguments);
     print ");\n";
     if ($retval !~ /^void$|^$/i) {
         if ($checkError) {
             if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
                 print "\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+                print post_execute("\t\t\t\t", $fname, $retval, @arguments);
                 print "\t\t\t\tstoreResultOrError(error, &result, ";
                 print getTypeId($retval);
                 print ");";
             } else {
                 print "\t\t\t\tif (G.errorCheckAllowed) {\n";
                 print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                printPostExecute("\t\t\t\t\t", $fname, $retval, @arguments);
+                print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
                 print "\t\t\t\t\tstoreResultOrError(error, &result,";
                 print getTypeId($retval);
                 print ");\n\t\t\t\t} else {";
                 print "\n\t\t\t\t\terror = GL_NO_ERROR;\n";
-                printPostExecute("\t\t\t\t\t", $fname, $retval, @arguments);
+                print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
                 print "\t\t\t\t\tstoreResult(&result, ";
                 print getTypeId($retval);
                 print ");\n\t\t\t\t}";
             }
         } else {
             print "\t\t\t\terror = GL_NO_ERROR;\n";
-            printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
             print "\t\t\t\tstoreResult(&result, ";
             print getTypeId($retval);
             print ");\n";
@@ -492,15 +362,15 @@ sub createBody
         if ($fname eq "glBegin") {
             # never check error after glBegin
             print "\n\t\t\t\terror = GL_NO_ERROR;\n";
-            printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
         } elsif (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
             print "\n\t\t\t\terror = ORIG_GL(glGetError)();\n";
-            printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
         } else {
             print "\t\t\t\tif (G.errorCheckAllowed) {\n";
             print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
             print "\t\t\t\t} else {\n\t\t\t\t\terror = GL_NO_ERROR;\n\t\t\t\t}\n";
-            printPostExecute("\t\t\t\t", $fname, $retval, @arguments);
+            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
         }
         print "\t\t\t\tsetErrorCode(error);";
     }
@@ -509,7 +379,7 @@ sub createBody
                 setExecuting();
                 stop();\n";
     print "\t\t\t\t$unlockStatement";
-    printPreExecute("\t\t\t\t", $fname, @arguments);
+    print pre_execute("\t\t\t\t", $fname, @arguments);
     if ($retval !~ /^void$|^$/i) {
         if(defined $WIN32) {
             print "\t\t\t\trec->isRecursing = 0;\n";
@@ -519,7 +389,7 @@ sub createBody
         print "\t\t\t\t";
     }
     print "ORIG_GL($fname)(";
-    printArguments(@arguments);
+    print arguments_string(@arguments);
     print ");";
 
     print "\n\t\t\t\tif (checkGLErrorInExecution()) {\n";
@@ -553,7 +423,7 @@ sub createBody
     } else {
         print "\t\t\t\t\terror = GL_NO_ERROR;\n";
     }
-    printPostExecute("\t\t\t\t\t", $fname, $retval, @arguments);
+    print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
     print "\t\t\t\t\tif (error != GL_NO_ERROR) {\n";
     print "\t\t\t\t\t\tsetErrorCode(error);\n";
     print "\t\t\t\t\t} else {\n";
@@ -570,7 +440,7 @@ sub createBody
 
     if (scalar grep {$fname eq $_} @postExecutionList) {
         print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-        printPostExecute("\t\t\t\t\t", $fname, $retval, @arguments);
+        print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
         print "\t\t\t\t\tif (error != GL_NO_ERROR) {\n";
         print "\t\t\t\t\t\tsetErrorCode(error);\n";
         print "\t\t\t\t\t} else {\n";
@@ -613,157 +483,46 @@ sub createBody
     print "}\n\n";
 }
 
-# parse GL headers
-foreach my $filename ("../GL/gl.h", "../GL/glext.h") {
-    my $indefinition = 0;
-    my $inprototypes = 0;
-    $extname = "GL_VERSION_1_0";
-    open(IN, $filename) || die "Couldn’t read $filename: $!";
-    while (<IN>) {
 
-        # build type map
-        if (/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/) {
-            addTypeMapping($1, $2);
-        }
 
-        # create core hook
-        if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
-            createBody($1, $2, $3, 1);
-        }
-
-        #~ # create extension hook
-        #~ if ($indefinition == 1) {
-            #~ if (/^#define\s+$extname\s+1/) {
-                #~ $inprototypes = 1;
-            #~ }
-        #~ }
-#~
-        #~ if ($inprototypes == 1) {
-            if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
-                createBody($1, $2, $3, 1);
-            }
-        #~ }
-#~
-        #~ if (/^#endif/ && $inprototypes == 1) {
-            #~ $inprototypes = 0;
-            #~ $indefinition = 0;
-        #~ }
-#~
-        #~ if (/^#ifndef\s+(GL_\S+)/) {
-            #~ $extname = $1;
-            #~ $indefinition = 1;
-        #~ }
-    }
-    close(IN);
+sub createBodyError {
+    createBody(@_, 1);
 }
 
-if (defined($WIN32)) {
-    # parse WGL headers
-    foreach my $filename ("../GL/WinGDI.h", "../GL/wglext.h") {
-        my $indefinition = 0;
-        my $inprototypes = 0;
-        $extname = "WGL_VERSION_1_0";
-        open(IN, $filename) || die "Couldn’t read $filename: $!";
-        while (<IN>) {
-            # build type map
-            if (/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/) {
-                addTypeMapping($1, $2);
-            }
+my $actions = {
+    $regexps{"typegl"} => \&addTypeMapping,
+    $regexps{"wingdi"} => \&createBodyError,
+    $regexps{"glapi"} => \&createBodyError,
+}
 
-            if ($indefinition == 1 && /^#define\s+$extname\s+1/) {
-                    $inprototypes = 1;
-            }
-
-            if (/^\s*(?:WINGDIAPI|extern)\s+\S.*\S\s*\(.*/) {
-                my $fprototype = $_;
-                chomp $fprototype;
-                while ($fprototype !~ /.*;\s*$/) {
-                    $line = <IN>;
-                    chomp $line;
-                    $line =~ s/\s*/ /;
-                    $fprototype = $fprototype.$line;
-                }
-                if($fprototype =~ /^\s*(?:WINGDIAPI|extern)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/ > 0) {
-                    if ($2 ne "wglGetProcAddress") {
-                        createBody($1, $2, $3, 0);
-                    }
-                }
-            }
-
-            if (/^#endif/) {
-                if ($inprototypes == 1) {
-                    $inprototypes = 0;
-                } elsif ($indefinition == 1) {
-                    $indefinition = 0;
-                    $extname = "WGL_VERSION_1_0";
-                }
-            }
-
-            if (/^#ifndef\s+(WGL_\S+)/) {
-                $extname = $1;
-                $indefinition = 1;
-            }
-        }
-        close(IN);
+my $add_actions;
+if (defined $WIN32) {
+    $add_actions = {
+        $regexps{"typewgl"} => \&addTypeMapping,
+        $regexps{"winapifunc"} => sub {
+            my $fname = $_[3];
+            createBody(@_, 0) if $fname ne "wglGetProcAddress";
+        },
     }
-    "BOOL SwapBuffers HDC" =~ /(\S+)\s(\S+)\s(\S+)/;
-    createBody($1, $2, $3, 0);
 } else {
-    # parse GLX headers
-    foreach my $filename ("../GL/glx.h", "../GL/glxext.h") {
-        my $indefinition = 0;
-        my $inprototypes = 0;
-        $extname = "GLX_VERSION_1_0";
-        open(IN, $filename) || die "Couldn’t read $filename: $!";
-        while (<IN>) {
-            # build type map
-            if (/^\s*typedef\s+(.*?)\s*(GLX\w+)\s*;/) {
-                addTypeMapping($1, $2);
-            }
+    $add_actions = {
+        $regexps{"typeglx"} => \&addTypeMapping,
+        $regexps{"glxfunc"} => sub {
+            my $extname = $_[1];
+            my $fname = $_[3];
 
-            if ($indefinition == 1 && /^#define\s+$extname\s+1/) {
-                    $inprototypes = 1;
-            }
+            return if $extname eq "GLX_SGIX_dm_buffer" ||
+                      $extname eq "GLX_SGIX_video_source";
 
-            if (/^\s*(?:GLAPI|extern)\s+\S.*\S\s*\(.*/) {
-                # ignore some obscure extensions
-                if ($extname eq "GLX_SGIX_dm_buffer" ||
-                    $extname eq "GLX_SGIX_video_source") {
-                    next;
-                }
-                my $fprototype = $_;
-                chomp $fprototype;
-                while ($fprototype !~ /.*;\s*$/) {
-                    $line = <IN>;
-                    chomp $line;
-                    $line =~ s/\s*/ /;
-                    $fprototype = $fprototype.$line;
-                }
-                $fprototype =~ /^\s*(?:GLAPI|extern)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/;
-                # No way to parse functions returning a not "typedef'ed"
-                # function pointer in a simple way :-(
-                if ($2 eq "glXGetProcAddressARB") {
-                    createBody("__GLXextFuncPtr", "glXGetProcAddressARB", "const GLubyte *", 0);
-                } else {
-                    createBody($1, $2, $3, 0);
-                }
-            }
-
-            if (/^#endif/) {
-                if ($inprototypes == 1) {
-                    $inprototypes = 0;
-                } elsif ($indefinition == 1) {
-                    $indefinition = 0;
-                    $extname = "GLX_VERSION_1_0";
-                }
-            }
-
-            if (/^#ifndef\s+(GLX_\S+)/) {
-                $extname = $1;
-                $indefinition = 1;
-            }
-        }
-        close(IN);
+            # No way to parse functions returning a not "typedef'ed"
+            # function pointer in a simple way :-(
+            my @params = ($fname eq "glXGetProcAddressARB") ? (0, 0,
+                            "__GLXextFuncPtr", "glXGetProcAddressARB",
+                            "const GLubyte *") : @_;
+            createBody(@params, 0);
+        },
     }
 }
 
+header_generated();
+parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&createBody);

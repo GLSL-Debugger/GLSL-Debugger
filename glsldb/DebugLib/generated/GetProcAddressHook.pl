@@ -131,31 +131,22 @@ sub createXFunctionHook {
     }
 }
 
+header_generated();
 createBodyHeader();
 
-my @params = (
-    [["../GL/gl.h", "../GL/glext.h"], "GL_VERSION_1_0", "GL_", {
-            $regexps{"wingdi"} => \&createFunctionHook,
-            $regexps{"glapi"} => \&createFunctionHook
-    }],
-);
+my $gl_actions = {
+        $regexps{"wingdi"} => \&createFunctionHook,
+        $regexps{"glapi"} => \&createFunctionHook
+}
 
+my $add_actions;
 if (defined $WIN32) {
-    push @params, [["../GL/WinGDI.h", "../GL/wglext.h"], "WGL_VERSION_1_0",
-        "WGL_", {$regexps{"winapifunc"} => \&createXFunctionHook}];
-
-    # Additional function from original file
-    createFunctionHook(0, 0, "BOOL", "SwapBuffers", "HDC");
+    $add_actions = {$regexps{"winapifunc"} => \&createXFunctionHook}
 } else {
-    push @params, [["../GL/glx.h", "../GL/glxext.h"], "GLX_VERSION_1_0",
-        "GLX_", {$regexps{"glxfunc"} => \&createXFunctionHook}];
+    $add_actions = {$regexps{"glxfunc"} => \&createXFunctionHook}
 }
 
-foreach my $entry (@params) {
-    my $filenames = shift @$entry;
-    foreach my $filename (@$filenames) {
-        parse_output($filename, @$entry, 1);
-    }
-}
+parse_gl_files($gl_actions, $add_actions, defined $WIN32,
+                \&createFunctionHook);
 
 createBodyFooter();
