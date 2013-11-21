@@ -40,6 +40,9 @@ my @storageQualifiers = (
     "const",
     "CONST"
 );
+
+my %isStorageQualifier = map {$_ => 1} @storageQualifiers;
+
 my @structTypes = (
     "struct",
     "union",
@@ -123,15 +126,10 @@ sub addTypeMapping
 sub stripStorageQualifiers
 {
     my $arg = shift;
-    my $stripedArg = "";
     my @argItems = grep { not /^\s*$/ } split(/(\s|[*\[\]])/, $arg);
-    foreach(@argItems) {
-        my $argItem = $_;
-        if (not scalar grep {$argItem eq $_} @storageQualifiers) {
-            $stripedArg .= "$argItem ";
-        }
-    }
-    chop $stripedArg;
+    my $stripedArg = join(" ", grep {
+            not $isStorageQualifier{$_}} @argItems);
+    $stripedArg=~ s/^\s+|\s+$//g;
     return $stripedArg;
 }
 

@@ -58,24 +58,97 @@ my @postExecutionList = (
     glGetOcclusionQueryuivNV,
 );
 
+# this list contains functions for which a special treatment of pointer
+# arguments is necessary, i.e. we do not want to copy the content the pointer
+# references but the pointer value instead.
+my @justCopyPointersList = (
+    glDrawElements,
+    glDrawElementsARB,
+    glDrawElementsInstancedEXT,
+    glDrawRangeElements,
+    glDrawRangeElementsEXT,
+    glMultiDrawElements,
+    glMultiDrawElementsEXT,
+    glMultiDrawArrays,
+    glMultiDrawArraysEXT
+);
 
-sub argument_references
+
+sub arguments_references
 {
     return if @_[0] =~ /^void$|^$/i;
-    return join(",", map {"&arg$_"} (0..$#_));
+    return join(", ", map {"&arg$_"} (0..$#_));
 }
 
 sub arguments_string
 {
     return if @_[0] =~ /^void$|^$/i;
-    return join(",", map {"arg$_"} (0..$#_));
+    return join(", ", map {"arg$_"} (0..$#_));
+}
+
+
+sub arguments_sizes
+{
+    my ($fname, @arguments) = (@_);
+    my @converted_args = ();
+
+    return "" if not $#arguments or @arguments[0] =~ /^void$|^$/i;
+
+    for (my $i = 0; $i <= $#arguments; $i++) {
+        my $type = stripStorageQualifiers(@arguments[$i]);
+        if (@arguments[$i] =~ /[*]$/) {
+            if (scalar grep {$fname eq $_} @justCopyPointersList) {
+                push @converted_args, "&arg$i, sizeof(void*)";
+            } else {
+                push @converted_args, "arg$i"
+                if ($fname =~ /gl\D+([1234])\D{1,3}v[A-Z]*/ &&
+                    $fname !~ /glProgramNamedParameter\SvNV/) {
+                    push @converted_args, "$1*sizeof($type)";
+                } else {
+                    push @converted_args, sprintf(
+                            "${fname}_getArg${i}Size(%s)",
+                            arguments_string(@arguments));
+                }
+            }
+        } else {
+            push @converted_args, "&arg$i, sizeof($type)"
+        }
+    }
+
+    return join(", " @converted_args);
+}
+
+sub error_postexec
+{
+    my ($fname, $postexec, $win_recursing, $return_name $indent, $need_stop) = (@_);
+    my $stop = $need_stop ? "stop();" : "";
+    my $ret = "";
+    $indent = "    " x $indent;
+    if (scalar grep {$fname eq $_} @postExecutionList) {
+        $ret = "error = GL_NO_ERROR;
+$postexec
+if (error != GL_NO_ERROR) {
+    setErrorCode(error);
+} else {
+    $win_recursing
+    return $return_name;
+}
+";
+    } else {
+        return "$win_recursing
+return $return_name;
+";
+    }
+
+    $ret =~ s/^/$indent/;
+    return $ret;
 }
 
 sub pre_execute
 {
-    my ($indent, $fname, @arguments) = @_;
+    my ($fname, @arguments) = @_;
     if (scalar grep {$fname eq $_} @preExecutionList) {
-        return sprintf "$indent${fname}_PREEXECUTE(%s);\n",
+        return sprintf "${fname}_PREEXECUTE(%s);\n",
                             argument_references(@arguments);
     }
 }
@@ -83,9 +156,9 @@ sub pre_execute
 
 sub post_execute
 {
-    my ($indent, $fname, $retval, @arguments) = @_;
+    my ($fname, $retval, @arguments) = @_;
     if (scalar grep {$fname eq $_} @postExecutionList) {
-        return sprintf "${indent}${fname}_POSTEXECUTE(%s%s, &error);\n",
+        return sprintf "${fname}_POSTEXECUTE(%s%s, &error);\n",
                     argument_references(@arguments),
                     ($retval !~ /^void$|^$/i ? ", &result" : "");
     }

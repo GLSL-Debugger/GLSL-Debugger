@@ -32,7 +32,6 @@
 ################################################################################
 
 require "functionsAllowedInBeginEnd.pl";
-require "justCopyPointersList.pl";
 
 require prePostExecuteList;
 require genTools;
@@ -46,7 +45,124 @@ if ($^O =~ /Win32/) {
 }
 
 
+sub check_error_string
+{
+    my ($check, $void, $fname, $indent) = (@_);
+    my $ret =;
+    $indent = "    " x $indent;
 
+    if ($check and (not $void or $fname ne "glBegin")) {
+        if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
+                $ret = "error = ORIG_GL(glGetError)();\n";
+        } else {
+            $ret = "if (G.errorCheckAllowed) {
+    error = ORIG_GL(glGetError)();
+} else {
+    error = GL_NO_ERROR;
+}\n";
+        }
+    } else {
+        # never check error after glBegin
+        $ret = "error = GL_NO_ERROR;\n";
+    }
+    $ret =~ s/^/$indent/;
+    return $ret;
+}
+
+
+#==============================================
+#   READING BELOW THIS LINE MAY BE HARMFUL
+#               STOP HERE
+#==============================================
+
+
+sub check_error_store
+{
+    my ($check, $void, $fname, $postexec, $return_type, $indent) = (@_);
+    return "" if $void and not $check;
+
+    my $ret = "";
+    my ($storeResult, $storeResultErr);
+    $indent = "    " x $indent;
+
+    if (not $void){
+        my $storeResult = "storeResult(&result, $return_type);";
+        my $storeResultErr = "storeResultOrError(error, &result, $return_type);";
+    }
+
+    if ($check) {
+        if ($fname eq "glBegin") {
+            # never check error after glBegin
+            $ret = "error = GL_NO_ERROR;
+$postexec
+";
+        }elsif (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
+            $ret = "error = ORIG_GL(glGetError)();
+$postexec
+$storeResultErr
+";
+        } else {
+            $ret = "if (G.errorCheckAllowed) {
+    error = ORIG_GL(glGetError)();
+    $postexec
+    $storeResultErr
+} else {
+    error = GL_NO_ERROR;
+    $postexec
+    $storeResult
+}
+";
+        }
+        $ret .= "setErrorCode(error);\n" if $void;
+    } else {
+        $ret = "error = GL_NO_ERROR;
+$postexec
+$storeResult
+";
+    }
+
+    $ret =~ s/^/$indent/;
+    return $ret;
+}
+
+
+sub thread_statement
+{
+    my ($fname, $retval, $retval_assign, $return_name, @arguments) = (@_);
+    my ($lockStatement, $unlockStatement);
+    if (defined $WIN32) {
+        my $preexec = pre_execute($fname, @arguments);
+        my $postexec = post_execute($fname, $retval, @arguments);
+        my $argstring = arguments_string(@arguments);
+
+        my $check_allowed = "";
+        $check_allowed = "G.errorCheckAllowed = 1;" if $fname eq "glEnd";
+        $check_allowed = "G.errorCheckAllowed = 0;" if $fname eq "glBegin";
+
+        $lockStatement = "DbgRec *rec;
+    dbgPrint(DBGLVL_DEBUG, \"entering $fname\\n\");
+    rec = getThreadRecord(GetCurrentProcessId());
+    $check_allowed
+    if(rec->isRecursing) {
+        dbgPrint(DBGLVL_DEBUG, \"stopping recursion\\n\");
+        $preexec
+        $retval_assign ORIG_GL($fname)($argstring);
+        /* no way to check errors in recursive calls! */
+        error = GL_NO_ERROR;
+        $postexec
+        return $return_name;
+    }
+    rec->isRecursing = 1;
+    EnterCriticalSection(&G.lock);
+";
+        $unlockStatement = "LeaveCriticalSection(&G.lock);";
+    } else {
+        $lockStatement = "pthread_mutex_lock(&G.lock);";
+        $unlockStatement = "pthread_mutex_unlock(&G.lock);";
+    }
+
+    return $lockStatement, $unlockStatement;
+}
 
 
 # TODO: check position of unlock statements!!!
@@ -69,12 +185,33 @@ sub createBody
     my @arguments = buildArgumentList($argString);
     my $pfname = join("","PFN",uc($fname),"PROC");
 
-    my $unlockStatement;
-    if (defined $WIN32) {
-        $unlockStatement = "LeaveCriticalSection(&G.lock);\n";
-    } else {
-        $unlockStatement = "pthread_mutex_unlock(&G.lock);\n";
+    my $return_void = $retval =~ /^void$|^$/i;
+    my $return_type = getTypeId($retval);
+    my $return_name =  $return_void ? "" : " result";
+    my $retval_assign = $return_void ? "" : "result =";
+    my $retval_init = $return_void ? "" : "${retval}${return_name};";
+    my $argstring = arguments_string(@arguments);
+    my $argrefstring = arguments_references(@arguments);
+    my $argtypes = join("", map { ", &arg$_, " . getTypeId(
+                            @arguments[$_]) } (0..$#arguments));
+    my $argsizes = arguments_sizes($fname, @arguments);
+
+    my $argcount = 0;
+    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
+        $argcount = $#arguments + 1;
     }
+
+    my $ucfname = uc($fname);
+    my $win_recursing = defined $WIN32 ? "rec->isRecursing = 0;" : "";
+    my $preexec = pre_execute($fname, @arguments);
+    my $postexec = post_execute($fname, $retval, @arguments);
+
+    my ($lockStatement, $unlockStatement) = thread_statement($fname,
+                    $retval, $retval_assign, $return_name, @arguments);
+
+    my $errstr4 = check_error_string($checkError, $return_void, $fname, 4);
+    my $errpostexec4 = error_postexec($fname, $postexec, $win_recursing,
+                        $return_name 4, 1);
 
     ###########################################################################
     # create function head
@@ -85,7 +222,6 @@ sub createBody
         print "$retval $fname (";
     }
     # add arguments to function head
-    my $i = 0;
     if (@arguments[0] ~= /^void$|^$/i){
         print "void"
     } else {
@@ -95,392 +231,98 @@ sub createBody
                 } @arguments);
     }
 
-    print ")\n{\n";
-    # temp. variable that holds the return value of the function
-    if ($retval !~ /^void$|^$/i) {
-        print "\t\t$retval result;\n";
-    }
-
-    ###########################################################################
-    # first store name of called function and its arguments in the shared memory
-    # segment, then call dbgFunctionCall that stops the process/thread and waits
-    # for the debugger to handle the actual debugging
-    print "\t\tint op, error;\n";
-    if (defined $WIN32) {
-        print "     DbgRec *rec;
-        dbgPrint(DBGLVL_DEBUG, \"entering $fname\\n\");
-        rec = getThreadRecord(GetCurrentProcessId());
-";
-        if ($fname eq "glEnd") {
-            print "\t\tG.errorCheckAllowed = 1;\n";
-        }elsif ($fname eq "glBegin") {
-            print "\t\tG.errorCheckAllowed = 0;\n";
-        }
-        print "        if(rec->isRecursing) {
-        dbgPrint(DBGLVL_DEBUG, \"stopping recursion\\n\");
-";
-        print pre_execute("\t\t\t", $fname, @arguments);
-        if ($retval !~ /^void$|^$/i) {
-            print "\t\t\tresult = ";
-        } else {
-            print "\t\t\t";
-        }
-        printf "ORIG_GL($fname)(%s);
-            /* no way to check errors in recursive calls! */
-            error = GL_NO_ERROR;
-", arguments_string(@arguments);
-        print post_execute("\t\t\t", $fname, $retval, @arguments);
-        if ($retval !~ /^void$|^$/i) {
-            print "\t\t\treturn result;\n";
-        } else {
-            print "\t\t\treturn;\n";
-        }
-        print "        }
-        rec->isRecursing = 1;
-        EnterCriticalSection(&G.lock);
-";
-    } else {
-        print "        pthread_mutex_lock(&G.lock);\n";
-    }
-    print "        if (keepExecuting(\"$fname\")) {
-            $unlockStatement";
-    print pre_execute("\t\t\t", $fname, @arguments);
-    if ($retval !~ /^void$|^$/i) {
-        print "\t\t\tresult = ";
-    } else {
-        print "\t\t\t";
-    }
-    printf "ORIG_GL($fname)(%s);\n", arguments_string(@arguments);
-    print "\t\t\tif (checkGLErrorInExecution()) {\n";
-
-    if ($retval !~ /^void$|^$/i) {
-        if ($checkError) {
-            if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-                print "\t\t\t\terror = ORIG_GL(glGetError)();\n";
-
+    print ")
+{
+    // temp. variable that holds the return value of the function
+    $retval_init
+    //##########################################################################
+    // first store name of called function and its arguments in the shared memory
+    // segment, then call dbgFunctionCall that stops the process/thread and waits
+    // for the debugger to handle the actual debugging
+    int op, error;
+    $lockStatement
+    if (keepExecuting(\"$fname\")) {
+        $unlockStatement
+        $preexec
+        $retval_assign ORIG_GL($fname)($argstring);
+        if (checkGLErrorInExecution()) {
+            $errstr4
+            $postexec
+            if (error != GL_NO_ERROR) {
+                setErrorCode(error);
+                stop();
             } else {
-                print "\t\t\t\tif (G.errorCheckAllowed) {\n";
-                print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                print "\t\t\t\t} else {\n";
-                print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-                print "\t\t\t\t}\n";
+                $win_recursing
+                return $return_name;
             }
         } else {
-            print "\t\t\t\terror = GL_NO_ERROR;\n";
-        }
-    } elsif ($checkError) {
-        if ($fname eq "glBegin") {
-            # never check error after glBegin
-            print "\t\t\t\terror = GL_NO_ERROR;\n";
-        } elsif (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-            print "\t\t\t\terror = ORIG_GL(glGetError)();\n";
-        } else {
-            print "\t\t\t\tif (G.errorCheckAllowed) {\n";
-            print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-            print "\t\t\t\t} else {\n\t\t\t\t\terror = GL_NO_ERROR;\n\t\t\t\t}\n";
-        }
-    } else {
-        print "\t\t\t\terror = GL_NO_ERROR;\n";
-    }
-    print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-    print "\t\t\t\tif (error != GL_NO_ERROR) {\n";
-    print "\t\t\t\t\tsetErrorCode(error);\n";
-    print "\t\t\t\t\tstop();\n";
-    print "\t\t\t\t} else {\n";
-    if (defined $WIN32) {
-        print "\t\t\t\t\trec->isRecursing = 0;\n";
-    }
-    if ($retval =~ /^void$|^$/i) {
-        print "\t\t\t\t\treturn;\n";
-    } else {
-        print "\t\t\t\t\treturn result;\n";
-    }
-    print "\t\t\t\t}\n";
-    print "\t\t\t} else {\n";
-    if (scalar grep {$fname eq $_} @postExecutionList) {
-        print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-        print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-        print "\t\t\t\tif (error != GL_NO_ERROR) {\n";
-        print "\t\t\t\t\tsetErrorCode(error);\n";
-        print "\t\t\t\t\tstop();\n";
-        print "\t\t\t\t} else {\n";
-        if(defined $WIN32) {
-            print "\t\t\t\t\trec->isRecursing = 0;\n";
-        }
-        if ($retval =~ /^void$|^$/i) {
-            print "\t\t\t\t\treturn;\n";
-        } else {
-            print "\t\t\t\t\treturn result;\n";
-        }
-        print "\t\t\t\t}\n";
-    } else {
-        if(defined $WIN32) {
-            print "\t\t\t\trec->isRecursing = 0;\n";
-        }
-        if ($retval =~ /^void$|^$/i) {
-            print "\t\t\t\treturn;\n";
-        } else {
-            print "\t\t\t\treturn result;\n";
+            $errpostexec4
         }
     }
-    print "\t\t\t}";
-
-    print "\n\t\t}";
-
-    #print "\t\tfprintf(stderr, \"ThreadID: %li\\n\", (unsigned long)pthread_self());\n";
-    print "
-        storeFunctionCall(\"$fname\", ";
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
-        printf("%i, ", $#arguments + 1);
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            print "&arg$i, ";
-            print getTypeId(@arguments[$i]);
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-    } else {
-        print "0";
+    //fprintf(stderr, \"ThreadID: %li\\n\", (unsigned long)pthread_self());
+    storeFunctionCall(\"$fname\", ${argcount}${argtypes});
+    stop();
+    op = getDbgOperation();
+    while (op != DBG_DONE) {
+        switch (op) {
+            case DBG_CALL_FUNCTION:
+                $retval_assign (($pfname)getDbgFunction())($argstring);",
+    if (not $return_void) {
+        print "
+                storeResult(&result, $return_type);";
     }
-    print ");
-        stop();
-        op = getDbgOperation();
-        while (op != DBG_DONE) {
-            switch (op) {
-            case DBG_CALL_FUNCTION:\n";
-    if ($retval !~ /^void$|^$/i) {
-        print "\t\t\t\tresult = ";
-    } else {
-        print "\t\t\t\t";
-    }
-    print "(($pfname)getDbgFunction())(";
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            print "arg$i";
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-    }
-    print ");";
-    if ($retval !~ /^void$|^$/i) {
-        print "\n\t\t\t\tstoreResult(&result, ";
-        print getTypeId($retval);
-        print ");"
-    }
-    print "
+    printf "
                 break;
-            case DBG_RECORD_CALL:\n#ifdef DBG_STREAM_HINT_";
-    printf("%s", uc($fname));
-    print "\n#  if DBG_STREAM_HINT_";
-    printf("%s", uc($fname));
-    print " != DBG_NO_RECORD
-                recordFunctionCall(&G.recordedStream, \"$fname\", ";
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
-        printf("%i, ", $#arguments + 1);
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            if (@arguments[$i] =~ /[*]$/) {
-                if (scalar grep {$fname eq $_} @justCopyPointersList) {
-                    print "&arg$i, sizeof(void*)";
-                } else {
-                    print "arg$i, ";
-                    if ($fname =~ /gl\D+([1234])\D{1,3}v[A-Z]*/ &&
-                        $fname !~ /glProgramNamedParameter\SvNV/) {
-                        print "$1*sizeof(";
-                        my $type = stripStorageQualifiers(@arguments[$i]);
-                        $type =~ s/\*//;
-                        $type =~ s/\s*$//;
-                        print "$type)";
-                    } else {
-                        print "$fname";
-                        print "_getArg$i";
-                        print "Size(";
-                        for (my $j = 0; $j <= $#arguments; $j++) {
-                            print "arg$j";
-                            if ($j != $#arguments) {
-                                print ", ";
-                            }
-                        }
-                        print ")"
-                    }
-                }
-            } else {
-                print "&arg$i, ";
-                printf("sizeof(%s)", stripStorageQualifiers(@arguments[$i]));
-            }
-            if ($i != $#arguments) {
-                print ", ";
-            }
-        }
-    } else {
-        print "0";
-    }
-    print ");\n#  endif\n#  if DBG_STREAM_HINT_";
-    printf("%s", uc($fname));
-    print " == DBG_RECORD_AND_FINAL
-                break;\n#  else
-                /* FALLTHROUGH!!!! */\n#  endif\n#endif
-            case DBG_CALL_ORIGFUNCTION:\n";
-    printPreExecute("\t\t\t\t", $fname, @arguments);
-    if ($retval !~ /^void$|^$/i) {
-        print "\t\t\t\tresult = ";
-    } else {
-        print "\t\t\t\t";
-    }
-    print "ORIG_GL($fname)(";
-    print arguments_string(@arguments);
-    print ");\n";
-    if ($retval !~ /^void$|^$/i) {
-        if ($checkError) {
-            if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-                print "\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-                print "\t\t\t\tstoreResultOrError(error, &result, ";
-                print getTypeId($retval);
-                print ");";
-            } else {
-                print "\t\t\t\tif (G.errorCheckAllowed) {\n";
-                print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
-                print "\t\t\t\t\tstoreResultOrError(error, &result,";
-                print getTypeId($retval);
-                print ");\n\t\t\t\t} else {";
-                print "\n\t\t\t\t\terror = GL_NO_ERROR;\n";
-                print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
-                print "\t\t\t\t\tstoreResult(&result, ";
-                print getTypeId($retval);
-                print ");\n\t\t\t\t}";
-            }
-        } else {
-            print "\t\t\t\terror = GL_NO_ERROR;\n";
-            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-            print "\t\t\t\tstoreResult(&result, ";
-            print getTypeId($retval);
-            print ");\n";
-        }
-    } elsif ($checkError) {
-        if ($fname eq "glBegin") {
-            # never check error after glBegin
-            print "\n\t\t\t\terror = GL_NO_ERROR;\n";
-            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-        } elsif (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-            print "\n\t\t\t\terror = ORIG_GL(glGetError)();\n";
-            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-        } else {
-            print "\t\t\t\tif (G.errorCheckAllowed) {\n";
-            print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-            print "\t\t\t\t} else {\n\t\t\t\t\terror = GL_NO_ERROR;\n\t\t\t\t}\n";
-            print post_execute("\t\t\t\t", $fname, $retval, @arguments);
-        }
-        print "\t\t\t\tsetErrorCode(error);";
-    }
-    print "\n\t\t\t\tbreak;
+            case DBG_RECORD_CALL:
+#ifdef DBG_STREAM_HINT_$ucfname
+#  if DBG_STREAM_HINT_$ucfname != DBG_NO_RECORD
+                recordFunctionCall(&G.recordedStream, \"$fname\",
+                            ${argcount}${argsizes});
+#  endif
+#  if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+                break;
+#  else
+                /* FALLTHROUGH!!!! */
+#  endif
+#endif
+            case DBG_CALL_ORIGFUNCTION:
+                $preexec
+                $retval_assign ORIG_GL($fname)($argstring);
+                %s
+                break;
             case DBG_EXECUTE:
                 setExecuting();
-                stop();\n";
-    print "\t\t\t\t$unlockStatement";
-    print pre_execute("\t\t\t\t", $fname, @arguments);
-    if ($retval !~ /^void$|^$/i) {
-        if(defined $WIN32) {
-            print "\t\t\t\trec->isRecursing = 0;\n";
-        }
-        print "\t\t\t\tresult = ";
-    } else {
-        print "\t\t\t\t";
-    }
-    print "ORIG_GL($fname)(";
-    print arguments_string(@arguments);
-    print ");";
-
-    print "\n\t\t\t\tif (checkGLErrorInExecution()) {\n";
-
-    if ($retval !~ /^void$|^$/i) {
-        if ($checkError) {
-            if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-                print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-
-            } else {
-                print "\t\t\t\t\tif (G.errorCheckAllowed) {\n";
-                print "\t\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-                print "\t\t\t\t\t} else {\n";
-                print "\t\t\t\t\t\terror = GL_NO_ERROR;\n";
-                print "\t\t\t\t\t}\n";
-            }
-        } else {
-            print "\t\t\t\terror = GL_NO_ERROR;\n";
-        }
-    } elsif($checkError) {
-        if ($fname eq "glBegin") {
-            # never check error after glBegin
-            print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-        } elsif (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-            print "\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-        } else {
-            print "\t\t\t\t\tif (G.errorCheckAllowed) {\n";
-            print "\t\t\t\t\t\terror = ORIG_GL(glGetError)();\n";
-            print "\t\t\t\t\t} else {\n\t\t\t\t\terror = GL_NO_ERROR;\n\t\t\t\t}\n";
-        }
-    } else {
-        print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-    }
-    print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
-    print "\t\t\t\t\tif (error != GL_NO_ERROR) {\n";
-    print "\t\t\t\t\t\tsetErrorCode(error);\n";
-    print "\t\t\t\t\t} else {\n";
-    if(defined $WIN32) {
-        print "\t\t\t\t\t\trec->isRecursing = 0;\n";
-    }
-    if ($retval =~ /^void$|^$/i) {
-        print "\t\t\t\t\t\treturn;\n";
-    } else {
-        print "\t\t\t\t\t\treturn result;\n";
-    }
-    print "\t\t\t\t\t}\n";
-    print "\t\t\t\t} else {\n";
-
-    if (scalar grep {$fname eq $_} @postExecutionList) {
-        print "\t\t\t\t\terror = GL_NO_ERROR;\n";
-        print post_execute("\t\t\t\t\t", $fname, $retval, @arguments);
-        print "\t\t\t\t\tif (error != GL_NO_ERROR) {\n";
-        print "\t\t\t\t\t\tsetErrorCode(error);\n";
-        print "\t\t\t\t\t} else {\n";
-        if(defined $WIN32) {
-            print "\t\t\t\t\t\trec->isRecursing = 0;\n";
-        }
-        if ($retval =~ /^void$|^$/i) {
-            print "\t\t\t\t\t\treturn;\n";
-        } else {
-            print "\t\t\t\t\t\treturn result;\n";
-        }
-        print "\t\t\t\t\t}\n"
-    } else {
-        if(defined $WIN32) {
-            print "\t\t\t\t\trec->isRecursing = 0;\n";
-        }
-        if ($retval =~ /^void$|^$/i) {
-            print "\t\t\t\t\treturn;\n";
-        } else {
-            print "\t\t\t\t\treturn result;\n";
-        }
-    }
-    print "\t\t\t\t}";
-
-    print "
+                stop();
+                $unlockStatement
+                $preexec
+                $win_recursing
+                $retval_assign ORIG_GL($fname)($argstring);
+                if (checkGLErrorInExecution()) {
+                    %s
+                    $postexec
+                    if (error != GL_NO_ERROR) {
+                        setErrorCode(error);
+                    } else {
+                        $win_recursing
+                        return $return_name;
+                    }
+                } else {
+                    %s
+                }
             default:
                 executeDefaultDbgOperation(op);
             }
             stop();
             op = getDbgOperation();
         }
-        setErrorCode(DBG_NO_ERROR);\n";
-    print "\t\t$unlockStatement";
-    if(defined $WIN32) {
-        print "\t\trec->isRecursing = 0;\n";
+        setErrorCode(DBG_NO_ERROR);
+        $unlockStatement
+        $win_recursing
+        return $return_name;
     }
-    if ($retval !~ /^void$|^$/i) {
-        print "\t\treturn result;\n"
-    }
-    print "}\n\n";
+", check_error_store($checkError, $return_void, $fname, $postexec, $return_type, 4),
+    check_error_string($checkError, $return_void, $fname, 5),
+    error_postexec($fname, $postexec, $win_recursing, $return_name 5);
 }
 
 
