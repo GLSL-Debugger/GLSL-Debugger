@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 Intel Corporation
+ * Copyright © 2010 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -21,10 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
-#ifndef TEST_OPTPASS_H
-#define TEST_OPTPASS_H
+#include "ir.h"
 
-int test_optpass(int argc, char **argv);
-
-#endif /* TEST_OPTPASS_H */
+void do_remove_unused_typedecls(exec_list* instructions);

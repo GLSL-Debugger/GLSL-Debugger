@@ -20,7 +20,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
              ${CMAKE_CURRENT_SOURCE_DIR}/glsl_lexer.ll
 )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp ${CMAKE_CURRENT_SOURCE_DIR}/glsl_parser.h
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.h
         SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/glsl_parser.yy
         COMMAND ${BISON_EXECUTABLE}
         ARGS -v -o ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp
@@ -30,14 +30,16 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp ${CMAKE_CU
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
 )
 
-
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp GENERATED)
 
 file(GLOB SRC_CPP *.cpp)
 file(GLOB SRC_C *.c)
-file(GLOB SRC_CPP_REMOVE main.cpp glsl_parser.cpp)
+file(GLOB SRC_CPP_REMOVE main.cpp)
 list(REMOVE_ITEM SRC_CPP ${SRC_CPP_REMOVE})
-set(SRC ${SRC_C} ${SRC_CPP} ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp)
+set(SRC ${SRC_C} ${SRC_CPP}
+		${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
+		${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp)
 add_library(glsl_lib ${SRC})
 target_link_libraries(glsl_lib glsl_glcpp_lib mesa_lib)
 

@@ -310,7 +310,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_call* ir)
 	VPRINT( 2, "(%s) change Call\n", FormatSourceRange(ir->yy_location).c_str() );
 
 	// only user defined functions can have out/inout parameters
-	if( ir->callee->is_builtin )
+	if( ir->callee->is_builtin() )
 		return false;
 
 	// changed variables are all out/inout parameters and

@@ -438,6 +438,23 @@ ir_constant::clone(void *mem_ctx, struct hash_table *ht) const
    return NULL;
 }
 
+ir_typedecl_statement *
+ir_typedecl_statement::clone(void *mem_ctx, struct hash_table *ht) const
+{
+   (void)ht;
+   return new(mem_ctx) ir_typedecl_statement(this->type_decl);
+}
+
+
+#ifdef IR_AST_LOCATION
+ir_list_dummy*
+ir_list_dummy::clone(void *mem_ctx, struct hash_table *ht) const
+{
+   (void) ht;
+   COPY_RETURN_AST_LOCATION(ir_list_dummy, this->yy_location,
+	   new(mem_ctx) ir_list_dummy())
+};
+#endif
 
 class fixup_ir_call_visitor : public ir_hierarchical_visitor {
 public:

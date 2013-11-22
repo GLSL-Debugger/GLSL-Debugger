@@ -38,7 +38,6 @@
 
 #include "compiler.h"
 #include "glheader.h"
-#include "errors.h"
 
 #ifdef __cplusplus
 extern "C" {

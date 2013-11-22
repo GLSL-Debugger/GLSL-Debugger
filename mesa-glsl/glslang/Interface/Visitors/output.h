@@ -36,6 +36,8 @@ public:
 	void run(exec_list* list);
 
 	void indent(void);
+	void newline_indent(void);
+	void newline_deindent(void);
 	void print_var_name (ir_variable* v);
 	void print_precision (ir_instruction* ir, const glsl_type* type);
 
@@ -56,22 +58,24 @@ public:
 	virtual void visit(ir_if *);
 	virtual void visit(ir_loop *);
 	virtual void visit(ir_loop_jump *);
-
+	virtual void visit(ir_typedecl_statement *);
+	virtual void visit(ir_emit_vertex *);
+	virtual void visit(ir_end_primitive *);
 	virtual void visit(ir_list_dummy*);
-
 
 	void emit_assignment_part (ir_dereference* lhs, ir_rvalue* rhs, unsigned write_mask, ir_rvalue* dstIndex);
 
 	int indentation;
+	int expression_depth;
 	char* buffer;
 	struct gl_shader* shader;
 	global_print_tracker* globals;
 	EShLanguage mode;
 	DbgCgOptions cgOptions;
-    ShVariableList *vl;
-    ShChangeableList *cgbl;
-    IRGenStack *dbgStack;
-    bool dbgTargetProcessed;
+	ShVariableList *vl;
+	ShChangeableList *cgbl;
+	IRGenStack *dbgStack;
+	bool dbgTargetProcessed;
 };
 
 

@@ -142,6 +142,7 @@ enum ir_node_type {
    ir_type_return,
    ir_type_swizzle,
    ir_type_texture,
+   ir_type_typedecl,
    ir_type_emit_vertex,
    ir_type_end_primitive,
 #ifdef IR_DEBUG_STATE
@@ -270,6 +271,9 @@ public:
    ir_list_dummy()
    {
       ir_type = ir_type_list_dummy;
+      debug_state = ir_dbg_state_unset;
+      debug_overwrite = ir_dbg_ow_unset;
+      debug_target = false;
    }
 
    virtual void accept(ir_visitor *v)
@@ -277,12 +281,8 @@ public:
       v->visit( this );
    }
 
-   virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; };
-   virtual ir_instruction *clone(void *mem_ctx, struct hash_table *ht) const
-   {
-      (void) ht;
-      COPY_RETURN_AST_LOCATION(ir_list_dummy, this->yy_location, new(mem_ctx) ir_list_dummy())
-   };
+   virtual ir_visitor_status accept(ir_hierarchical_visitor *);
+   virtual ir_list_dummy *clone(void *mem_ctx, struct hash_table *ht) const;
 
    virtual ~ir_list_dummy( ) {}
 };
@@ -1544,6 +1544,8 @@ enum ir_expression_operation {
    ir_last_opcode = ir_quadop_vector
 };
 
+extern const char *const ir_expr_operator_strs[];
+
 class ir_expression : public ir_rvalue {
 public:
    ir_expression(int op, const struct glsl_type *type,
@@ -2342,6 +2344,30 @@ private:
     */
    ir_constant(void);
 };
+
+
+
+class ir_typedecl_statement : public ir_instruction {
+public:
+	ir_typedecl_statement(const glsl_type* type_decl)
+	{
+		this->ir_type = ir_type_typedecl;
+		this->type_decl = type_decl;
+	}
+
+	virtual ir_typedecl_statement *clone(void *mem_ctx, struct hash_table *) const;
+
+	virtual void accept(ir_visitor *v)
+	{
+		v->visit(this);
+	}
+
+	virtual ir_visitor_status accept(ir_hierarchical_visitor *);
+
+	const glsl_type* type_decl;
+};
+
+
 
 /*@}*/
 

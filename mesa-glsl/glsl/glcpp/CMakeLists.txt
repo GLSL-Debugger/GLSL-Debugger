@@ -26,10 +26,13 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glcpp-parse.c ${CMAKE_CURR
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/glcpp-lex.c
 )
 
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glcpp-lex.c GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glcpp-parse.c GENERATED)
 
 file(GLOB SRC_C *.c)
 file(GLOB SRC_REMOVE glcpp.c)
 list(REMOVE_ITEM SRC_C ${SRC_REMOVE})
-set(SRC_C ${SRC_C} ${CMAKE_CURRENT_BINARY_DIR}/glcpp-parse.c)
+set(SRC_C ${SRC_C}
+		  ${CMAKE_CURRENT_BINARY_DIR}/glcpp-lex.c
+		  ${CMAKE_CURRENT_BINARY_DIR}/glcpp-parse.c)
 add_library(glsl_glcpp_lib ${SRC_C})

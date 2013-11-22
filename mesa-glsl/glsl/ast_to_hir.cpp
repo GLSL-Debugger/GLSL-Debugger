@@ -108,7 +108,18 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
     * locations being assigned in the declared order.  Many (arguably buggy)
     * applications depend on this behavior, and it matches what nearly all
     * other drivers do.
+	*
+	* However, do not push the declarations before struct decls or precision
+	* statements.
     */
+	ir_instruction* before_node = (ir_instruction*)instructions->head;
+	ir_instruction* after_node = NULL;
+	while (before_node && before_node->ir_type == ir_type_typedecl)
+	{
+		after_node = before_node;
+	    before_node = (ir_instruction*)before_node->next;
+	}
+
    foreach_list_safe(node, instructions) {
       ir_variable *const var = ((ir_instruction *) node)->as_variable();
 
@@ -116,7 +127,10 @@ _mesa_ast_to_hir(exec_list *instructions, struct _mesa_glsl_parse_state *state)
          continue;
 
       var->remove();
-      instructions->push_head(var);
+      if (after_node)
+         after_node->insert_after(var);
+      else
+         instructions->push_head(var);
    }
 
    /* From section 7.1 (Built-In Language Variables) of the GLSL 4.10 spec:
@@ -1646,7 +1660,7 @@ ast_expression::hir(exec_list *instructions,
        * tree.  This particular use must be at location specified in the grammar
        * as 'variable_identifier'.
        */
-      ir_variable *var = 
+      ir_variable *var =
 	 state->symbols->get_variable(this->primary_expression.identifier);
 
       if (var != NULL) {
@@ -3471,8 +3485,16 @@ ast_declarator_list::hir(exec_list *instructions,
 	  * but otherwise we run into trouble if a function is prototyped, a
 	  * global var is decled, then the function is defined with usage of
 	  * the global var.  See glslparsertest's CorrectModule.frag.
+	  * However, do not insert declarations before default precision statements
+	  * or type declarations.
 	  */
-	 instructions->push_head(var);
+	 ir_instruction* before_node = (ir_instruction*)instructions->head;
+	 while (before_node && before_node->ir_type == ir_type_typedecl)
+	    before_node = (ir_instruction*)before_node->next;
+	 if (before_node)
+	    before_node->insert_before(var);
+	 else
+	    instructions->push_head(var);
       }
 
       instructions->append_list(&initializer_instructions);
@@ -3867,6 +3889,14 @@ ast_function_definition::hir(exec_list *instructions,
    this->body->hir(&signature->body, state);
    signature->is_defined = true;
 
+#ifdef IR_DEBUG_STATE
+   /* Add closing directive. It needed for better functions debug. */
+   ir_list_dummy* body_end = new(state) ir_list_dummy;
+   COPY_AST_LOCATION_BEGIN(body_end, this)
+   COPY_AST_LOCATION_END(body_end, this)
+   signature->body.push_tail(body_end);
+#endif
+
    state->symbols->pop_scope();
 
    assert(state->current_function == signature);
@@ -4024,11 +4054,11 @@ ast_jump_statement::hir(exec_list *instructions,
 	    COPY_AST_LOCATION_FROM_HERE(true_val->yy_location);
 	    ir_assignment *const set_break_var =
 	       new(ctx) ir_assignment(deref_is_break_var, true_val);
-	    
+
 	    instructions->push_tail(set_break_var);
 	 }
 	 else {
-	    ir_loop_jump *const jump = 
+	    ir_loop_jump *const jump =
 	       new(ctx) ir_loop_jump((mode == ast_break)
 				     ? ir_loop_jump::jump_break
 				     : ir_loop_jump::jump_continue);
@@ -4103,8 +4133,8 @@ ast_switch_statement::hir(exec_list *instructions,
 
    /* From page 66 (page 55 of the PDF) of the GLSL 1.50 spec:
     *
-    *    "The type of init-expression in a switch statement must be a 
-    *     scalar integer." 
+    *    "The type of init-expression in a switch statement must be a
+    *     scalar integer."
     */
    if (!test_expression->type->is_scalar() ||
        !test_expression->type->is_integer()) {
@@ -4812,6 +4842,20 @@ ast_struct_specifier::hir(exec_list *instructions,
 	 s[state->num_user_structures] = t;
 	 state->user_structures = s;
 	 state->num_user_structures++;
+	 ir_typedecl_statement* stmt = new(state) ir_typedecl_statement(t);
+
+		/* Push the struct declarations to the top.
+		 * However, do not insert declarations before default precision
+		 * statements or other declarations
+		 */
+		ir_instruction* before_node = (ir_instruction*)instructions->head;
+		while (before_node &&
+			   (before_node->ir_type == ir_type_typedecl))
+			before_node = (ir_instruction*)before_node->next;
+		if (before_node)
+			before_node->insert_before(stmt);
+		else
+			instructions->push_head(stmt);
       }
    }
 

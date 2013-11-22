@@ -230,7 +230,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_function_signature* ir)
 //	ir_function_signature* sign = (ir_function_signature*)ir->signatures.head;
 	VPRINT( 2, "process Signature L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->function_name(),
-			ir->is_builtin, this->operation, ir->debug_state );
+			ir->is_builtin(), this->operation, ir->debug_state );
 
 	if( this->operation == OTOpTargetSet ){
 		/* This marks the end of a function call */
@@ -383,7 +383,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 
 	VPRINT( 2, "process Call L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(),
-			ir->callee->is_builtin, this->operation, ir->debug_state );
+			ir->callee->is_builtin(), this->operation, ir->debug_state );
 
 	//VPRINT( 2, "process node %s ...\n", ir->callee_name() );
 	switch( this->operation ){
@@ -436,7 +436,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 				VPRINT( 3, "\t ERROR! found target with DbgStTarget\n" );
 				exit( 1 );
 			}else if( ir->debug_state == ir_dbg_state_unset ){
-				if( !ir->callee->is_builtin ){
+				if( !ir->callee->is_builtin() ){
 					ir->debug_state = ir_dbg_state_target;
 					VPRINT( 3, "\t -------- set target ---------\n" );
 					result.position = DBG_RS_POSITION_FUNCTION_CALL;

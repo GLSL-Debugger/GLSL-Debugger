@@ -228,7 +228,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 				scopeList *sl = get_scope( rir );
 				scopeList::iterator sit;
 				bool user_call = (rir->ir_type == ir_type_call
-						&& !rir->as_call()->callee->is_builtin);
+						&& !rir->as_call()->callee->is_builtin());
 
 				/* check if all changeables are in scope */bool allInScope = true;
 
@@ -292,7 +292,8 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 						rit++ ){
 					ir_instruction* rir = *rit;
 
-					if( rir->ir_type == ir_type_call && !rir->as_call()->callee->is_builtin
+					if( rir->ir_type == ir_type_call
+							&& !rir->as_call()->callee->is_builtin()
 							&& rir->debug_overwrite == ir_dbg_ow_unset ){
 						change_DbgOverwrite( rir->as_call(), ir_dbg_ow_debug );
 					}
@@ -457,7 +458,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
     	stir->debug_overwrite = ir_dbg_ow_unset;
     	ir_call* cstir = stir->as_call();
 
-        if ( cstir && ! cstir->callee->is_builtin ) {
+        if ( cstir && ! cstir->callee->is_builtin() ) {
         	ir_function_signature* funcDec = cstir->callee;
             funcDec->debug_overwrite = ir_dbg_ow_unset;
         }

@@ -63,6 +63,7 @@ public:
    virtual void visit(class ir_if *) = 0;
    virtual void visit(class ir_loop *) = 0;
    virtual void visit(class ir_loop_jump *) = 0;
+   virtual void visit(class ir_typedecl_statement *) = 0;
    virtual void visit(class ir_emit_vertex *) = 0;
    virtual void visit(class ir_end_primitive *) = 0;
 #ifdef IR_DEBUG_STATE

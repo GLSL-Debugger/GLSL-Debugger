@@ -29,6 +29,7 @@ extern "C" {
 #include "main/core.h" /* for struct gl_context */
 #include "main/context.h"
 #include "main/shaderobj.h"
+#include "main/errors.h"
 }
 
 #include "ralloc.h"
@@ -919,7 +920,7 @@ void
 ast_compound_statement::print(void) const
 {
    printf("{\n");
-   
+
    foreach_list_const(n, &this->statements) {
       ast_node *ast = exec_node_data(ast_node, n, link);
       ast->print();
@@ -1245,7 +1246,7 @@ ast_selection_statement::print(void) const
       printf("else ");
       else_statement->print();
    }
-   
+
 }
 
 

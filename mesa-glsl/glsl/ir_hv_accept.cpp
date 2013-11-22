@@ -423,14 +423,27 @@ ir_if::accept(ir_hierarchical_visitor *v)
 }
 
 ir_visitor_status
-ir_emit_vertex::accept(ir_hierarchical_visitor *v)
+ir_typedecl_statement::accept(ir_hierarchical_visitor *v)
 {
    return v->visit(this);
 }
 
+ir_visitor_status
+ir_emit_vertex::accept(ir_hierarchical_visitor *v)
+{
+   return v->visit(this);
+}
 
 ir_visitor_status
 ir_end_primitive::accept(ir_hierarchical_visitor *v)
 {
    return v->visit(this);
 }
+
+#ifdef IR_DEBUG_STATE
+ir_visitor_status
+ir_list_dummy::accept(ir_hierarchical_visitor *v)
+{
+   return v->visit(this);
+}
+#endif

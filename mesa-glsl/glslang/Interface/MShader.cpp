@@ -16,7 +16,7 @@ namespace {
 	typedef std::map< exec_list*, ir_list_dummy* > DebugInfoMap;
 	IterNameMap iter_names;
 	DebugInfoMap debug_infos;
-	void* global_ctx;
+//	void* global_ctx;
 }
 
 
@@ -43,7 +43,7 @@ std::string getCodeString( ir_variable* var, bool withQualifier, EShLanguage l  
 
 	if( withQualifier ){
 		if( var->interpolation )
-			out += std::string(var->interpolation_string()) + " ";
+			out += std::string(interpolation_string(var->interpolation)) + " ";
 		if( var->centroid )
 			out += "centroid ";
 		if( var->mode > ir_var_auto &&  var->mode < ir_var_temporary )
@@ -171,6 +171,7 @@ char** dbg_iter_name( ir_loop* ir )
 	return &iter_names[ir];
 }
 
+/*
 ir_list_dummy* list_dummy( exec_list* list, ir_function_signature* parent )
 {
 	if( list->is_empty() )
@@ -191,17 +192,18 @@ ir_list_dummy* list_dummy( exec_list* list, ir_function_signature* parent )
 	debug_infos[list] = ir;
 	return ir;
 }
+*/
 
 void init_shader( )
 {
-	global_ctx = ralloc_context(NULL);
+	//global_ctx = ralloc_context(NULL);
 }
 
 void clean_shader( )
 {
 	iter_names.clear();
 	debug_infos.clear();
-	ralloc_free(global_ctx);
+	//ralloc_free(global_ctx);
 }
 
 

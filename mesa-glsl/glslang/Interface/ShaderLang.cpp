@@ -163,8 +163,8 @@ void ShDestruct(ShHandle handle)
 int __fastcall ShFinalize( )
 {
 	_mesa_glsl_release_types();
-	_mesa_glsl_release_functions();
-
+	// Lol, mesa just lost it.
+	//_mesa_glsl_release_functions();
 	return 1;
 }
 

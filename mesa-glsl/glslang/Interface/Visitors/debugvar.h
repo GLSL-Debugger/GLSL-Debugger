@@ -34,14 +34,14 @@ public:
 	virtual bool visitIr(ir_list_dummy* list);
 
 	ShVariableList *getVariableList() { return vl; }
-    void addToScope(int id);
-    void dumpScope(void);
-    scopeList& getScope(void) { return scope; }
-    scopeList* getCopyOfScope(void);
+	void addToScope(int id);
+	void dumpScope(void);
+	scopeList& getScope(void) { return scope; }
+	scopeList* getCopyOfScope(void);
 private:
-    bool nameIsAlreadyInList(scopeList *l, const char *name);
-    ShVariableList *vl;
-    scopeList scope;
+	bool nameIsAlreadyInList(scopeList *l, const char *name);
+	ShVariableList *vl;
+	scopeList scope;
 };
 
 

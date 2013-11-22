@@ -33,9 +33,11 @@
 
 #include "glslang/Interface/Visitors/output.h"
 #include "glsl/list.h"
+#include "glsl/ir_unused_structs.h"
 #include "mesa/program/hash_table.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glslang/Interface/MShader.h"
+#include "glslang/Interface/IRScope.h"
 
 
 static char* print_type(char* buffer, const glsl_type *t, bool arraySize);
@@ -50,6 +52,7 @@ struct ga_entry : public exec_node
 	}
 	ir_instruction* ir;
 };
+
 
 struct global_print_tracker {
 	global_print_tracker () {
@@ -79,6 +82,9 @@ void ir_output_traverser_visitor::append_version()
 
 void ir_output_traverser_visitor::run(exec_list* instructions)
 {
+	// remove unused struct declarations
+	do_remove_unused_typedecls(instructions);
+
 	if( !globals )
 		globals = new global_print_tracker;
 
@@ -92,7 +98,9 @@ void ir_output_traverser_visitor::run(exec_list* instructions)
 	  }
 
 	  ir->accept(this);
-      if (ir->ir_type != ir_type_function)
+      if (ir->ir_type != ir_type_function &&
+    		  ir->ir_type != ir_type_list_dummy &&
+    		  (ir->ir_type != ir_type_assignment || this->mode == EShLangNone))
 		ralloc_asprintf_append (&buffer, ";\n");
    }
 }
@@ -102,6 +110,25 @@ void ir_output_traverser_visitor::indent(void)
 {
    for (int i = 0; i < indentation; i++)
       ralloc_asprintf_append (&buffer, "  ");
+}
+
+void ir_output_traverser_visitor::newline_indent()
+{
+	if (expression_depth % 4 == 0)
+	{
+		++indentation;
+		ralloc_asprintf_append (&buffer, "\n");
+		indent();
+	}
+}
+void ir_output_traverser_visitor::newline_deindent()
+{
+	if (expression_depth % 4 == 0)
+	{
+		--indentation;
+		ralloc_asprintf_append (&buffer, "\n");
+		indent();
+	}
 }
 
 void ir_output_traverser_visitor::print_var_name (ir_variable* v)
@@ -136,17 +163,17 @@ void ir_output_traverser_visitor::print_precision (ir_instruction* ir, const gls
 static char*
 print_type(char* buffer, const glsl_type *t, bool arraySize)
 {
-   if (t->base_type == GLSL_TYPE_ARRAY) {
-      buffer = print_type(buffer, t->fields.array, true);
-      if (arraySize)
-         ralloc_asprintf_append (&buffer, "[%u]", t->length);
-   } else if ((t->base_type == GLSL_TYPE_STRUCT)
-	      && (strncmp("gl_", t->name, 3) != 0)) {
-      ralloc_asprintf_append (&buffer, "%s", t->name);
-   } else {
-      ralloc_asprintf_append (&buffer, "%s", t->name);
-   }
-   return buffer;
+	if (t->base_type == GLSL_TYPE_ARRAY) {
+		buffer = print_type(buffer, t->fields.array, true);
+		if (arraySize)
+			ralloc_asprintf_append (&buffer, "[%u]", t->length);
+	} else if ((t->base_type == GLSL_TYPE_STRUCT)
+			   && (strncmp("gl_", t->name, 3) != 0)) {
+		ralloc_asprintf_append (&buffer, "%s", t->name);
+	} else {
+		ralloc_asprintf_append (&buffer, "%s", t->name);
+	}
+	return buffer;
 }
 
 static char*
@@ -195,33 +222,33 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 		decormode = 0;
 	}
 
-   // give an id to any variable defined in a function that is not an uniform
-   if ((this->mode == EShLangNone && ir->mode != ir_var_uniform))
-   {
-     long id = (long)hash_table_find (globals->var_hash, ir);
-     if (id == 0)
-     {
-       id = ++globals->var_counter;
-       hash_table_insert (globals->var_hash, (void*)id, ir);
-     }
-   }
+	// give an id to any variable defined in a function that is not an uniform
+	if ((this->mode == EShLangNone && ir->mode != ir_var_uniform))
+	{
+		long id = (long)hash_table_find (globals->var_hash, ir);
+		if (id == 0)
+		{
+			id = ++globals->var_counter;
+			hash_table_insert (globals->var_hash, (void*)id, ir);
+		}
+	}
 
    check_initializer(ir, this);
 
-   // keep invariant declaration for builtin variables
-   if (strstr(ir->name, "gl_") == ir->name) {
-      ralloc_asprintf_append (&buffer, "%s", inv);
-      print_var_name (ir);
-      return;
-   }
+	// keep invariant declaration for builtin variables
+	if (strstr(ir->name, "gl_") == ir->name) {
+		ralloc_asprintf_append (&buffer, "%s", inv);
+		print_var_name (ir);
+		return;
+	}
 
-   ralloc_asprintf_append (&buffer, "%s%s%s%s",
-	  cent, inv, interp[ir->interpolation], mode[decormode][ir->mode]);
-   print_precision (ir, ir->type);
-   buffer = print_type(buffer, ir->type, false);
-   ralloc_asprintf_append (&buffer, " ");
-   print_var_name (ir);
-   buffer = print_type_post(buffer, ir->type, false);
+	ralloc_asprintf_append (&buffer, "%s%s%s%s",
+							cent, inv, interp[ir->interpolation], mode[decormode][ir->mode]);
+	print_precision (ir, ir->type);
+	buffer = print_type(buffer, ir->type, false);
+	ralloc_asprintf_append (&buffer, " ");
+	print_var_name (ir);
+	buffer = print_type_post(buffer, ir->type, false);
 
 	if (ir->constant_value &&
 		ir->mode != ir_var_shader_in &&
@@ -242,7 +269,7 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
    buffer = print_type(buffer, ir->return_type, true);
 
    const char* fname;
-   //
+   // Use debug name if we print debuged function's clone
    if( this->cgOptions != DBG_CG_ORIGINAL_SRC &&
          strcmp(ir->function_name(), MAIN_FUNC_SIGNATURE) != 0 &&
          ir->debug_state == ir_dbg_state_path &&
@@ -311,10 +338,6 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 	  ralloc_asprintf_append (&buffer, ";\n");
    }
 
-   // Dummy
-   ir_list_dummy* dir = list_dummy(&ir->body, ir);
-   visit(dir);
-
    indentation--;
    indent();
    ralloc_asprintf_append (&buffer, "}\n");
@@ -327,7 +350,7 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
 
    foreach_iter(exec_list_iterator, iter, *ir) {
       ir_function_signature *const sig = (ir_function_signature *) iter.get();
-      if (!sig->is_builtin)
+      if (!sig->is_builtin())
 	 found_non_builtin_proto = true;
    }
    if (!found_non_builtin_proto)
@@ -372,102 +395,7 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
    indent();
 }
 
-
-static const char *const operator_glsl_strs[] = {
-	"~",
-	"!",
-	"-",
-	"abs",
-	"sign",
-	"1.0/",
-	"inversesqrt",
-	"sqrt",
-	//"normalize",
-	"exp",
-	"log",
-	"exp2",
-	"log2",
-	"int",		// f2i
-	"int",		// f2u
-	"float",	// i2f
-	"bool",		// f2b
-	"float",	// b2f
-	"bool",		// i2b
-	"int",		// b2i
-	"float",	// u2f
-	"int",		// i2u
-	"int",		// u2i
-	"float",	// bit i2f
-	"int",		// bit f2i
-	"float",	// bit u2f
-	"int",		// bit f2u
-	"any",
-	"trunc",
-	"ceil",
-	"floor",
-	"fract",
-	"roundEven",
-	"sin",
-	"cos",
-	"sin", // reduced
-	"cos", // reduced
-	"dFdx",
-	"dFdy",
-	"packSnorm2x16",
-	"packSnorm4x8",
-	"packUnorm2x16",
-	"packUnorm4x8",
-	"packHalf2x16",
-	"unpackSnorm2x16",
-	"unpackSnorm4x8",
-	"unpackUnorm2x16",
-	"unpackUnorm4x8",
-	"unpackHalf2x16",
-	"unpackHalf2x16_splitX_TODO",
-	"unpackHalf2x16_splitY_TODO",
-	"bitfieldReverse",
-	"bitCount",
-	"findMSB",
-	"findLSB",
-	"noise",
-	"+",
-	"-",
-	"*",
-	"/",
-	"mod",
-	"<",
-	">",
-	"<=",
-	">=",
-	"equal",
-	"notEqual",
-	"==",
-	"!=",
-	"<<",
-	">>",
-	"&",
-	"^",
-	"|",
-	"&&",
-	"^^",
-	"||",
-	"dot",
-	"min",
-	"max",
-	"pow",
-	"packHalf2x16_split_TODO",
-	"bfm_TODO",
-	"uboloadTODO",
-	"vectorExtract_TODO",
-	"fma",
-//	"clamp",
-//	"mix",
-	"bfi_TODO",
-	"bitfield_extract_TODO",
-	"vector_insert_TODO",
-	"bitfield_insert_TODO",
-	"vectorTODO",
-};
+extern const char *const ir_expr_operator_strs[];
 
 static const char *const operator_vec_glsl_strs[] = {
 	"lessThan",
@@ -495,6 +423,8 @@ static bool is_binop_func_like(ir_expression_operation op, const glsl_type* type
 
 void ir_output_traverser_visitor::visit(ir_expression *ir)
 {
+	++this->expression_depth;
+	newline_indent();
     if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
     	dbgTargetProcessed = true;
         cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
@@ -509,7 +439,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		} else if (ir->operation == ir_unop_rcp) {
 			ralloc_asprintf_append (&buffer, "(1.0/(");
 		} else {
-			ralloc_asprintf_append (&buffer, "%s(", operator_glsl_strs[ir->operation]);
+			ralloc_asprintf_append (&buffer, "%s(", ir_expr_operator_strs[ir->operation]);
 		}
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
@@ -540,7 +470,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		if (ir->type->is_vector() && (ir->operation >= ir_binop_less && ir->operation <= ir_binop_nequal))
 			ralloc_asprintf_append (&buffer, "%s (", operator_vec_glsl_strs[ir->operation-ir_binop_less]);
 		else
-			ralloc_asprintf_append (&buffer, "%s (", operator_glsl_strs[ir->operation]);
+			ralloc_asprintf_append (&buffer, "%s (", ir_expr_operator_strs[ir->operation]);
 
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
@@ -557,7 +487,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
 
-		ralloc_asprintf_append (&buffer, " %s ", operator_glsl_strs[ir->operation]);
+		ralloc_asprintf_append (&buffer, " %s ", ir_expr_operator_strs[ir->operation]);
 
 		if (ir->operands[1])
 			ir->operands[1]->accept(this);
@@ -566,7 +496,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 	else
 	{
 		// ternary op
-		ralloc_asprintf_append (&buffer, "%s (", operator_glsl_strs[ir->operation]);
+		ralloc_asprintf_append (&buffer, "%s (", ir_expr_operator_strs[ir->operation]);
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
 		ralloc_asprintf_append (&buffer, ", ");
@@ -577,6 +507,9 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 			ir->operands[2]->accept(this);
 		ralloc_asprintf_append (&buffer, ")");
 	}
+
+	newline_deindent();
+	--this->expression_depth;
 }
 
 // [glsl_sampler_dim]
@@ -599,7 +532,7 @@ void ir_output_traverser_visitor::visit(ir_texture *ir)
 	const int uv_dim = uv_type->vector_elements;
 	int sampler_uv_dim = tex_sampler_dim_size[sampler_dim];
 	if (is_shadow)
-		sampler_uv_dim = 3;
+		sampler_uv_dim += 1;
 	const bool is_proj = (uv_dim > sampler_uv_dim);
 
     // texture function name
@@ -670,6 +603,47 @@ void ir_output_traverser_visitor::visit(ir_texture *ir)
 		ir->lod_info.grad.dPdy->accept(this);
 	}
 
+	/*
+
+   if (ir->offset != NULL) {
+      ir->offset->accept(this);
+   }
+
+   if (ir->op != ir_txf) {
+      if (ir->projector)
+	 ir->projector->accept(this);
+      else
+	 ralloc_asprintf_append (&buffer, "1");
+
+      if (ir->shadow_comparitor) {
+	 ralloc_asprintf_append (&buffer, " ");
+	 ir->shadow_comparitor->accept(this);
+      } else {
+	 ralloc_asprintf_append (&buffer, " ()");
+      }
+   }
+
+   ralloc_asprintf_append (&buffer, " ");
+   switch (ir->op)
+   {
+   case ir_tex:
+      break;
+   case ir_txb:
+      ir->lod_info.bias->accept(this);
+      break;
+   case ir_txl:
+   case ir_txf:
+      ir->lod_info.lod->accept(this);
+      break;
+   case ir_txd:
+      ralloc_asprintf_append (&buffer, "(");
+      ir->lod_info.grad.dPdx->accept(this);
+      ralloc_asprintf_append (&buffer, " ");
+      ir->lod_info.grad.dPdy->accept(this);
+      ralloc_asprintf_append (&buffer, ")");
+      break;
+   };
+	 */
    ralloc_asprintf_append (&buffer, ")");
 }
 
@@ -763,7 +737,8 @@ void ir_output_traverser_visitor::emit_assignment_part (ir_dereference* lhs, ir_
 	unsigned j = 0;
 	const glsl_type* lhsType = lhs->type;
 	const glsl_type* rhsType = rhs->type;
-	if (!dstIndex && lhsType->matrix_columns <= 1 && lhsType->vector_elements > 1 && write_mask != (1<<lhsType->vector_elements)-1)
+	if (!dstIndex && lhsType->matrix_columns <= 1 && lhsType->vector_elements > 1
+			&& write_mask != (unsigned)(1<<lhsType->vector_elements)-1)
 	{
 		for (unsigned i = 0; i < 4; i++) {
 			if ((write_mask & (1 << i)) != 0) {
@@ -809,7 +784,7 @@ void ir_output_traverser_visitor::visit(ir_assignment *ir)
 	{
 		assert (!this->globals->main_function_done);
 		this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
-		ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
+		//ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
 		return;
 	}
 
@@ -1041,142 +1016,26 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 		}
 		ralloc_asprintf_append( &it->buffer, ")" );
 	}
-	// TODO: will be available in next mesa
-//	else if( it->mode == EShLangGeometry
-//			&& strcmp( node->getName().c_str(), EMIT_VERTEX_SIG ) == 0
-//			&& !( node->isUserDefined() ) ){
-//		/* Special case for geometry shaders "EmitVertex()" */
-//
-//		switch( oit->cgOptions ){
-//			case DBG_CG_GEOMETRY_MAP:
-//				oit->debugProgram += getFunctionName( node->getName() );
-//				processAggregateChildren( node, it, "(", ", ", ")" );
-//				oit->debugProgram += ";\n";
-//				outputIndentation( oit, oit->depth );
-//				cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//						oit->cgbl, oit->vl, oit->dbgStack, 0 );
-//				break;
-//			case DBG_CG_GEOMETRY_CHANGEABLE:
-//				/* Check if changeable in scope here */
-//				if( oit->cgbl && oit->vl ){
-//					scopeList *sl = node->getScope();
-//					scopeList::iterator sit;
-//
-//					int id;
-//					bool allInScope = true;
-//
-//					for( id = 0; id < oit->cgbl->numChangeables; id++ ){
-//						bool inScope = false;
-//
-//						/* builtins are always valid */
-//						ShVariable *var = findShVariableFromId( oit->vl,
-//								oit->cgbl->changeables[id]->id );
-//						if( !var ){
-//							dbgPrint( DBGLVL_WARNING,
-//									"CodeGen - unkown changeable, stop debugging\n" );
-//							return false;
-//						}
-//
-//						if( var->builtin ){
-//							inScope = true;
-//						}else{
-//							/* parse the actual scope */
-//							for( sit = sl->begin(); sit != sl->end(); sit++ ){
-//								if( ( *sit ) == oit->cgbl->changeables[id]->id ){
-//									inScope = true;
-//								}
-//							}
-//						}
-//
-//						if( !inScope ){
-//							allInScope = false;
-//							break;
-//						}
-//					}
-//
-//					if( allInScope ){
-//						cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//								oit->cgbl, oit->vl, oit->dbgStack,
-//								CG_GEOM_CHANGEABLE_IN_SCOPE );
-//					}else{
-//						cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//								oit->cgbl, oit->vl, oit->dbgStack,
-//								CG_GEOM_CHANGEABLE_NO_SCOPE );
-//					}
-//					oit->debugProgram += ";\n";
-//					outputIndentation( oit, oit->depth );
-//				}
-//
-//				/* Add original function call */
-//				oit->debugProgram += getFunctionName( node->getName() );
-//				processAggregateChildren( node, it, "(", ", ", ")" );
-//				break;
-//			case DBG_CG_VERTEX_COUNT:
-//				cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//						oit->cgbl, oit->vl, oit->dbgStack, 0,
-//						oit->parseContext->resources->geoOutputType );
-//				break;
-//			case DBG_CG_COVERAGE:
-//			case DBG_CG_CHANGEABLE:
-//			case DBG_CG_SELECTION_CONDITIONAL:
-//			case DBG_CG_LOOP_CONDITIONAL:
-//				oit->sequenceNoOperation = true;
-//				break;
-//			default:
-//				oit->debugProgram += getFunctionName( node->getName() );
-//				processAggregateChildren( node, it, "(", ", ", ")" );
-//				break;
-//		}
-//	}else if( oit->language == EShLangGeometry
-//			&& strcmp( node->getName().c_str(), END_PRIMITIVE_SIG ) == 0
-//			&& !( node->isUserDefined() ) ){
-//		/* Special case for geometry shaders "EndPrimitive()" */
-//		switch( oit->cgOptions ){
-//			case DBG_CG_GEOMETRY_MAP:
-//				oit->debugProgram += getFunctionName( node->getName() );
-//				processAggregateChildren( node, it, "(", ", ", ")" );
-//				oit->debugProgram += ";\n";
-//				outputIndentation( oit, oit->depth );
-//				cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//						oit->cgbl, oit->vl, oit->dbgStack, 1 );
-//				break;
-//			case DBG_CG_VERTEX_COUNT:
-//				cgAddDbgCode( CG_TYPE_RESULT, oit->debugProgram, oit->cgOptions,
-//						oit->cgbl, oit->vl, oit->dbgStack, 1,
-//						oit->parseContext->resources->geoOutputType );
-//				break;
-//			case DBG_CG_COVERAGE:
-//			case DBG_CG_CHANGEABLE:
-//			case DBG_CG_SELECTION_CONDITIONAL:
-//			case DBG_CG_LOOP_CONDITIONAL:
-//				oit->sequenceNoOperation = true;
-//				break;
-//			default:
-//				oit->debugProgram += getFunctionName( node->getName() );
-//				processAggregateChildren( node, it, "(", ", ", ")" );
-//				break;
-//		}
-//	}
 	return false;
 }
 
 void
 ir_output_traverser_visitor::visit(ir_call *ir)
 {
-   // calls in global scope are postponed to main function
-   if (this->mode != EShLangNone)
-   {
-      assert (!this->globals->main_function_done);
-      this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
-      ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
-      return;
-   }
+	// calls in global scope are postponed to main function
+	if (this->mode != EShLangNone)
+	{
+		assert (!this->globals->main_function_done);
+		this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
+		ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
+		return;
+	}
 
-   if (ir->return_deref)
-   {
-      visit(ir->return_deref);
-      ralloc_asprintf_append (&buffer, " = ");
-   }
+	if (ir->return_deref)
+	{
+		visit(ir->return_deref);
+		ralloc_asprintf_append (&buffer, " = ");
+	}
 
    if( process_debug_call(ir, this) )
       return;
@@ -1311,26 +1170,27 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 
    if (!ir->else_instructions.is_empty())
    {
-      if( ir->debug_target && this->cgOptions == DBG_CG_SELECTION_CONDITIONAL
-          && ir->debug_state_internal == ir_dbg_if_condition_passed ){
-         /* Add code to colorize condition */
-         indent();
-         cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
-         ralloc_asprintf_append( &buffer, ";\n" );
-      }
+	   if( ir->debug_target && this->cgOptions == DBG_CG_SELECTION_CONDITIONAL
+	       && ir->debug_state_internal == ir_dbg_if_condition_passed ){
+	      /* Add code to colorize condition */
+	      indent();
+	      cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
+	      ralloc_asprintf_append (&buffer, ";\n");
+	   }
 
-      ralloc_asprintf_append (&buffer, " else {\n");
-      indentation++;
+	   ralloc_asprintf_append (&buffer, " else {\n");
+	   indentation++;
 
-      foreach_iter(exec_list_iterator, iter, ir->else_instructions) {
-         ir_instruction *const inst = (ir_instruction *) iter.get();
-         indent();
-         inst->accept(this);
-         ralloc_asprintf_append (&buffer, ";\n");
-      }
-      indentation--;
-      indent();
-      ralloc_asprintf_append (&buffer, "}");
+	   foreach_iter(exec_list_iterator, iter, ir->else_instructions) {
+		  ir_instruction *const inst = (ir_instruction *) iter.get();
+
+		  indent();
+		  inst->accept(this);
+		  ralloc_asprintf_append (&buffer, ";\n");
+	   }
+	   indentation--;
+	   indent();
+	   ralloc_asprintf_append (&buffer, "}");
    }
 }
 
@@ -1447,4 +1307,134 @@ ir_output_traverser_visitor::visit(ir_list_dummy* ir)
         cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
         ralloc_asprintf_append( &buffer, ";\n" );
     }
+}
+
+void
+ir_output_traverser_visitor::visit(ir_typedecl_statement *ir)
+{
+	const glsl_type *const s = ir->type_decl;
+	ralloc_asprintf_append (&buffer, "struct %s {\n", s->name);
+
+	for (unsigned j = 0; j < s->length; j++) {
+		ralloc_asprintf_append (&buffer, "  ");
+		//if (state->es_shader)
+		//	ralloc_asprintf_append (&buffer, "%s", get_precision_string(s->fields.structure[j].precision));
+		buffer = print_type(buffer, s->fields.structure[j].type, false);
+		ralloc_asprintf_append (&buffer, " %s", s->fields.structure[j].name);
+		buffer = print_type_post(buffer, s->fields.structure[j].type, false);
+		ralloc_asprintf_append (&buffer, ";\n");
+	}
+	ralloc_asprintf_append (&buffer, "}");
+}
+
+void
+ir_output_traverser_visitor::visit(ir_emit_vertex *ir)
+{
+	if (this->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target) {
+		/* Special case for geometry shaders "EmitVertex()" */
+
+		switch (this->cgOptions) {
+			case DBG_CG_GEOMETRY_MAP:
+				ralloc_asprintf_append (&buffer, "EmitVertex();\n");
+				indent();
+				cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
+				break;
+			case DBG_CG_GEOMETRY_CHANGEABLE:
+				/* Check if changeable in scope here */
+				if( cgbl && vl ){
+					scopeList *sl = get_scope(ir);
+					scopeList::iterator sit;
+
+					int id;
+					bool allInScope = true;
+
+					for( id = 0; id < cgbl->numChangeables; id++ ){
+						bool inScope = false;
+
+						/* builtins are always valid */
+						ShVariable *var = findShVariableFromId(vl, cgbl->changeables[id]->id );
+						if( !var ){
+							printf("CodeGen - unkown changeable, stop debugging\n");
+							return;
+						}
+
+						if( var->builtin ){
+							inScope = true;
+						}else{
+							/* parse the actual scope */
+							for( sit = sl->begin(); sit != sl->end(); sit++ ){
+								if( ( *sit ) == cgbl->changeables[id]->id ){
+									inScope = true;
+								}
+							}
+						}
+
+						if( !inScope ){
+							allInScope = false;
+							break;
+						}
+					}
+
+					if( allInScope ){
+						cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack,
+									 CG_GEOM_CHANGEABLE_IN_SCOPE);
+					}else{
+						cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack,
+									 CG_GEOM_CHANGEABLE_NO_SCOPE);
+					}
+
+					ralloc_asprintf_append (&buffer, "\n");
+					indent();
+				}
+
+				/* Add original function call */
+				ralloc_asprintf_append (&buffer, "EmitVertex();\n");
+				break;
+			case DBG_CG_VERTEX_COUNT:
+				cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0);
+				//			oit->parseContext->resources->geoOutputType );
+				break;
+			case DBG_CG_COVERAGE:
+			case DBG_CG_CHANGEABLE:
+			case DBG_CG_SELECTION_CONDITIONAL:
+			case DBG_CG_LOOP_CONDITIONAL:
+				//oit->sequenceNoOperation = true;
+				break;
+			default:
+				ralloc_asprintf_append (&buffer, "EmitVertex();\n");
+				break;
+		}
+	} else {
+		ralloc_asprintf_append (&buffer, "emit-vertex-TODO");
+	}
+}
+
+void
+ir_output_traverser_visitor::visit(ir_end_primitive *ir)
+{
+	/* Special case for geometry shaders "EndPrimitive()" */
+	if (this->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target) {
+		switch (this->cgOptions) {
+			case DBG_CG_GEOMETRY_MAP:
+				ralloc_asprintf_append (&buffer, "EndPrimitive();\n");
+				indent();
+				cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 1);
+				break;
+			case DBG_CG_VERTEX_COUNT:
+				cgAddDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 1);
+						//this->parseContext->resources->geoOutputType );
+				break;
+			case DBG_CG_COVERAGE:
+			case DBG_CG_CHANGEABLE:
+			case DBG_CG_SELECTION_CONDITIONAL:
+			case DBG_CG_LOOP_CONDITIONAL:
+				//this->sequenceNoOperation = true;
+				break;
+			default:
+				ralloc_asprintf_append (&buffer, "EndPrimitive();\n");
+				break;
+		}
+	} else {
+		ralloc_asprintf_append (&buffer, "end-primitive-TODO");
+	}
 }

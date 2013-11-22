@@ -957,6 +957,9 @@ move_non_declarations(exec_list *instructions, exec_node *last,
       if (inst->as_function())
 	 continue;
 
+      if (inst->ir_type == ir_type_typedecl)
+         continue;
+
       ir_variable *var = inst->as_variable();
       if ((var != NULL) && (var->mode != ir_var_temporary))
 	 continue;

@@ -557,6 +557,11 @@ ir_print_visitor::visit(ir_loop_jump *ir)
 }
 
 void
+ir_print_visitor::visit(ir_typedecl_statement *ir)
+{
+}
+
+void
 ir_print_visitor::visit(ir_emit_vertex *ir)
 {
    printf("(emit-vertex)");
@@ -567,3 +572,10 @@ ir_print_visitor::visit(ir_end_primitive *ir)
 {
    printf("(end-primitive)");
 }
+
+#ifdef IR_DEBUG_STATE
+void
+ir_print_visitor::visit(ir_list_dummy *ir)
+{
+}
+#endif

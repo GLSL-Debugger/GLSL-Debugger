@@ -460,11 +460,11 @@ struct gl_config
  * \name Bit flags used for updating material values.
  */
 /*@{*/
-#define MAT_ATTRIB_FRONT_AMBIENT           0 
+#define MAT_ATTRIB_FRONT_AMBIENT           0
 #define MAT_ATTRIB_BACK_AMBIENT            1
-#define MAT_ATTRIB_FRONT_DIFFUSE           2 
+#define MAT_ATTRIB_FRONT_DIFFUSE           2
 #define MAT_ATTRIB_BACK_DIFFUSE            3
-#define MAT_ATTRIB_FRONT_SPECULAR          4 
+#define MAT_ATTRIB_FRONT_SPECULAR          4
 #define MAT_ATTRIB_BACK_SPECULAR           5
 #define MAT_ATTRIB_FRONT_EMISSION          6
 #define MAT_ATTRIB_BACK_EMISSION           7
@@ -474,12 +474,12 @@ struct gl_config
 #define MAT_ATTRIB_BACK_INDEXES            11
 #define MAT_ATTRIB_MAX                     12
 
-#define MAT_ATTRIB_AMBIENT(f)  (MAT_ATTRIB_FRONT_AMBIENT+(f))  
-#define MAT_ATTRIB_DIFFUSE(f)  (MAT_ATTRIB_FRONT_DIFFUSE+(f))  
-#define MAT_ATTRIB_SPECULAR(f) (MAT_ATTRIB_FRONT_SPECULAR+(f)) 
-#define MAT_ATTRIB_EMISSION(f) (MAT_ATTRIB_FRONT_EMISSION+(f)) 
+#define MAT_ATTRIB_AMBIENT(f)  (MAT_ATTRIB_FRONT_AMBIENT+(f))
+#define MAT_ATTRIB_DIFFUSE(f)  (MAT_ATTRIB_FRONT_DIFFUSE+(f))
+#define MAT_ATTRIB_SPECULAR(f) (MAT_ATTRIB_FRONT_SPECULAR+(f))
+#define MAT_ATTRIB_EMISSION(f) (MAT_ATTRIB_FRONT_EMISSION+(f))
 #define MAT_ATTRIB_SHININESS(f)(MAT_ATTRIB_FRONT_SHININESS+(f))
-#define MAT_ATTRIB_INDEXES(f)  (MAT_ATTRIB_FRONT_INDEXES+(f))  
+#define MAT_ATTRIB_INDEXES(f)  (MAT_ATTRIB_FRONT_INDEXES+(f))
 
 #define MAT_INDEX_AMBIENT  0
 #define MAT_INDEX_DIFFUSE  1
@@ -558,7 +558,7 @@ struct gl_light
    GLfloat QuadraticAttenuation;
    GLboolean Enabled;		/**< On/off flag */
 
-   /** 
+   /**
     * \name Derived fields
     */
    /*@{*/
@@ -623,7 +623,7 @@ struct gl_colorbuffer_attrib
 
    GLenum DrawBuffer[MAX_DRAW_BUFFERS];	/**< Which buffer to draw into */
 
-   /** 
+   /**
     * \name alpha testing
     */
    /*@{*/
@@ -633,7 +633,7 @@ struct gl_colorbuffer_attrib
    GLclampf AlphaRef;			/**< Alpha reference value */
    /*@}*/
 
-   /** 
+   /**
     * \name Blending
     */
    /*@{*/
@@ -666,7 +666,7 @@ struct gl_colorbuffer_attrib
    GLboolean _BlendEquationPerBuffer;
    /*@}*/
 
-   /** 
+   /**
     * \name Logic op
     */
    /*@{*/
@@ -693,7 +693,7 @@ struct gl_current_attrib
    /**
     * \name Current vertex attributes.
     * \note Values are valid only after FLUSH_VERTICES has been called.
-    * \note Index and Edgeflag current values are stored as floats in the 
+    * \note Index and Edgeflag current values are stored as floats in the
     * SIX and SEVEN attribute slots.
     */
    GLfloat Attrib[VERT_ATTRIB_MAX][4];	/**< Position, color, texcoords, etc */
@@ -733,7 +733,7 @@ struct gl_depthbuffer_attrib
 struct gl_eval_attrib
 {
    /**
-    * \name Enable bits 
+    * \name Enable bits
     */
    /*@{*/
    GLboolean Map1Color4;
@@ -756,7 +756,7 @@ struct gl_eval_attrib
    GLboolean Map2Vertex4;
    GLboolean AutoNormal;
    /*@}*/
-   
+
    /**
     * \name Map Grid endpoints and divisions and calculated du values
     */
@@ -790,9 +790,9 @@ struct gl_fog_attrib
 };
 
 
-/** 
+/**
  * Hint attribute group (GL_HINT_BIT).
- * 
+ *
  * Values are always one of GL_FASTEST, GL_NICEST, or GL_DONT_CARE.
  */
 struct gl_hint_attrib
@@ -834,11 +834,11 @@ struct gl_light_attrib
 
    struct gl_light EnabledList;         /**< List sentinel */
 
-   /** 
-    * Derived state for optimizations: 
+   /**
+    * Derived state for optimizations:
     */
    /*@{*/
-   GLboolean _NeedEyeCoords;		
+   GLboolean _NeedEyeCoords;
    GLboolean _NeedVertices;		/**< Use fast shader? */
    GLfloat _BaseColor[2][3];
    /*@}*/
@@ -1313,8 +1313,8 @@ struct gl_texture_unit
    /** Current sampler object (GL_ARB_sampler_objects) */
    struct gl_sampler_object *Sampler;
 
-   /** 
-    * \name GL_EXT_texture_env_combine 
+   /**
+    * \name GL_EXT_texture_env_combine
     */
    struct gl_tex_env_combine_state Combine;
 
@@ -1672,7 +1672,7 @@ struct gl_2d_map
  */
 struct gl_evaluators
 {
-   /** 
+   /**
     * \name 1-D maps
     */
    /*@{*/
@@ -1687,8 +1687,8 @@ struct gl_evaluators
    struct gl_1d_map Map1Texture4;
    /*@}*/
 
-   /** 
-    * \name 2-D maps 
+   /**
+    * \name 2-D maps
     */
    /*@{*/
    struct gl_2d_map Map2Vertex3;
@@ -2619,7 +2619,7 @@ struct gl_shader_program
     * \c NULL.
     */
    struct gl_shader *_LinkedShaders[MESA_SHADER_TYPES];
-};   
+};
 
 
 #define GLSL_DUMP      0x1  /**< Dump shaders to stdout */
@@ -2773,7 +2773,7 @@ struct gl_shared_state
 
    /**
     * \name Thread safety and statechange notification for texture
-    * objects. 
+    * objects.
     *
     * \todo Improve the granularity of locking.
     */
@@ -3064,7 +3064,7 @@ struct gl_program_constants
 struct gl_constants
 {
    GLuint MaxTextureMbytes;      /**< Max memory per image, in MB */
-   GLuint MaxTextureLevels;      /**< Max mipmap levels. */ 
+   GLuint MaxTextureLevels;      /**< Max mipmap levels. */
    GLuint Max3DTextureLevels;    /**< Max mipmap levels for 3D textures */
    GLuint MaxCubeTextureLevels;  /**< Max mipmap levels for cube textures */
    GLuint MaxArrayTextureLayers; /**< Max layers in array textures */
@@ -3444,7 +3444,7 @@ struct gl_matrix_stack
 
 
 /**
- * \name Bits for image transfer operations 
+ * \name Bits for image transfer operations
  * \sa __struct gl_contextRec::ImageTransferState.
  */
 /*@{*/
@@ -3460,7 +3460,7 @@ struct gl_matrix_stack
 		    IMAGE_MAP_COLOR_BIT)
 
 /**
- * \name Bits to indicate what state has changed.  
+ * \name Bits to indicate what state has changed.
  */
 /*@{*/
 #define _NEW_MODELVIEW         (1 << 0)   /**< gl_context::ModelView */
@@ -3523,60 +3523,6 @@ struct gl_matrix_stack
 #include "dd.h"
 
 
-/**
- * Display list flags.
- * Strictly this is a tnl-private concept, but it doesn't seem
- * worthwhile adding a tnl private structure just to hold this one bit
- * of information:
- */
-#define DLIST_DANGLING_REFS     0x1 
-
-
-/** Opaque declaration of display list payload data type */
-union gl_dlist_node;
-
-
-/**
- * Provide a location where information about a display list can be
- * collected.  Could be extended with driverPrivate structures,
- * etc. in the future.
- */
-struct gl_display_list
-{
-   GLuint Name;
-   GLchar *Label;     /**< GL_KHR_debug */
-   GLbitfield Flags;  /**< DLIST_x flags */
-   /** The dlist commands are in a linked list of nodes */
-   union gl_dlist_node *Head;
-};
-
-
-/**
- * State used during display list compilation and execution.
- */
-struct gl_dlist_state
-{
-   GLuint CallDepth;		/**< Current recursion calling depth */
-
-   struct gl_display_list *CurrentList; /**< List currently being compiled */
-   union gl_dlist_node *CurrentBlock; /**< Pointer to current block of nodes */
-   GLuint CurrentPos;		/**< Index into current block of nodes */
-
-   GLvertexformat ListVtxfmt;
-
-   GLubyte ActiveAttribSize[VERT_ATTRIB_MAX];
-   GLfloat CurrentAttrib[VERT_ATTRIB_MAX][4];
-   
-   GLubyte ActiveMaterialSize[MAT_ATTRIB_MAX];
-   GLfloat CurrentMaterial[MAT_ATTRIB_MAX][4];
-
-   struct {
-      /* State known to have been set by the currently-compiling display
-       * list.  Used to eliminate some redundant state changes.
-       */
-      GLenum ShadeModel;
-   } Current;
-};
 
 /** @{
  *
@@ -3792,9 +3738,6 @@ struct gl_context
    /** Combined modelview and projection matrix */
    GLmatrix _ModelProjectMatrix;
 
-   /** \name Display lists */
-   struct gl_dlist_state ListState;
-
    GLboolean ExecuteFlag;	/**< Execute GL commands? */
    GLboolean CompileFlag;	/**< Compile GL commands into display list? */
 
@@ -3812,7 +3755,7 @@ struct gl_context
    /*@}*/
 
    /** \name Renderer attribute groups
-    * 
+    *
     * We define a struct for each attribute group to make pushing and popping
     * attributes easy.  Also it's a good organization.
     */
@@ -3939,7 +3882,7 @@ struct gl_context
    GLfloat _EyeZDir[3];
    GLfloat _ModelViewInvScale;
    GLboolean _NeedEyeCoords;
-   GLboolean _ForceEyeCoords; 
+   GLboolean _ForceEyeCoords;
 
    GLuint TextureStateTimestamp; /**< detect changes to shared state */
 
@@ -3958,7 +3901,7 @@ struct gl_context
    GLboolean RasterDiscard;  /**< GL_RASTERIZER_DISCARD */
 
    /**
-    * \name Hooks for module contexts.  
+    * \name Hooks for module contexts.
     *
     * These will eventually live in the driver or elsewhere.
     */

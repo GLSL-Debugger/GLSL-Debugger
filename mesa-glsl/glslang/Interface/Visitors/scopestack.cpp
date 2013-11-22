@@ -34,7 +34,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_function_signature* ir)
 {
 	VPRINT( 2, "process Signature L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->function_name(),
-			ir->is_builtin, ir->debug_state, this->passedTarget );
+			ir->is_builtin(), ir->debug_state, this->passedTarget );
 
 	if( ir->debug_state != ir_dbg_state_unset )
 		this->passedTarget = false;
@@ -113,7 +113,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_call* ir)
 {
 	VPRINT( 2, "processAggregate L:%s N:%s Blt:%i DbgSt:%i Passed:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(),
-			ir->callee->is_builtin, ir->debug_state, this->passedTarget );
+			ir->callee->is_builtin(), ir->debug_state, this->passedTarget );
 
 	if( ir->debug_state != ir_dbg_state_unset )
 		this->passedTarget = false;

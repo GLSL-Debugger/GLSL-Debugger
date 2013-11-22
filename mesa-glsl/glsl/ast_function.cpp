@@ -1372,6 +1372,7 @@ emit_inline_record_constructor(const glsl_type *type,
 			       exec_list *parameters,
 			       void *mem_ctx)
 {
+   // TODO: location
    ir_variable *const var =
       new(mem_ctx) ir_variable(type, "record_ctor", ir_var_temporary);
    ir_dereference_variable *const d = new(mem_ctx) ir_dereference_variable(var);
