@@ -27,6 +27,7 @@ GLSLCompiler/glslang/MachineIndependent/glslang.output
 GLSLCompiler/glslang/MachineIndependent/glslang_tab.h
 GLSLCompiler/glslang/MachineIndependent/glslang.tab.c
 GLSLCompiler/glslang/MachineIndependent/glslang.tab.h
+glsldb/DebugLib/generated/
 
 # QT stuff
 moc_*.cxx
