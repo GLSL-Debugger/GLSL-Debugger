@@ -117,8 +117,8 @@ print "#ifdef _WIN32
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include \"../GL/gl.h\"
-#include \"../GL/glext.h\"
+#include \"glsldb/GL/gl.h\"
+#include \"glsldb/GL/glext.h\"
 #include <GL/glut.h>
 #include \"debuglibInternal.h\"
 

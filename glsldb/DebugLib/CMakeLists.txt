@@ -13,6 +13,10 @@ set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
 set(DLSYM_SRC
     libdlsym.c)
 
+set(ENUMERANTS_SRC glenumerants.c)
+set(BEGINENDTEST_SRC ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c)
+
+
 set(GLSLDEBUG_GEN_SRC
     ${GENERATOR_OUTPUT_DIR}/replayFunction.c
     ${GENERATOR_OUTPUT_DIR}/functionList.c
@@ -34,7 +38,6 @@ set(GLSLDEBUG_SRC
     ${GLSLDEBUG_GEN_SRC}
 )
 
-set(ENUMERANTS_SRC glenumerants.c)
 
 # Generate enumerants
 execute_process(COMMAND perl
@@ -57,6 +60,13 @@ execute_process(COMMAND perl
 )
 endif()
 
+
+# Generate generator for list of allowed functions between begin/end
+execute_process(COMMAND perl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE BeginEndFunctionTest.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c
+)
 
 # Generate debug library
 execute_process(COMMAND perl
@@ -97,9 +107,8 @@ include_directories(${PROJECT_SOURCE_DIR}/glsldb
 
 
 add_library(glenumerants STATIC ${ENUMERANTS_SRC})
+add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
 
-# FIXME
-# The makefiles have a target to generate a list of allowed functions between begin/end.
 add_library(functionList SHARED functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})

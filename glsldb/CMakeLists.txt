@@ -1,5 +1,4 @@
 add_subdirectory(DebugLib)
-add_subdirectory(glenumerants)
 add_subdirectory(DebugFunctions)
 add_subdirectory(utils)
 
