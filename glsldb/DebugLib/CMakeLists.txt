@@ -6,28 +6,33 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
     find_package(X11 REQUIRED)
 endif()
 
+
+set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
+set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+
 set(DLSYM_SRC
     libdlsym.c)
+
+set(GLSLDEBUG_GEN_SRC
+    ${GENERATOR_OUTPUT_DIR}/replayFunction.c
+    ${GENERATOR_OUTPUT_DIR}/functionList.c
+)
 
 set(GLSLDEBUG_SRC
     libglsldebug.c
     streamRecorder.c
     streamRecording.c
-    replayFunction.c
     glstate.c
     readback.c
     shader.c
     error.c
     memory.c
     hooks.c
-    functionList.c
     queries.c
     preExecution.c
     postExecution.c
+    ${GLSLDEBUG_GEN_SRC}
 )
-
-set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
-set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
 
 execute_process(COMMAND perl
     WORKING_DIRECTORY ${GENERATOR_DIR}
@@ -41,12 +46,12 @@ execute_process(COMMAND perl
 )
 execute_process(COMMAND perl
     WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE genReplayFunc.pl
+    INPUT_FILE ReplayFunc.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/replayFunction.c
 )
 execute_process(COMMAND perl
     WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE genFunctionList.pl
+    INPUT_FILE FunctionList.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionList.c
 )
 execute_process(COMMAND perl

@@ -195,7 +195,8 @@ sub parse_gl_files {
                             "WGL_VERSION_1_0", "WGL_", $add_actions];
 
             # Additional function from original file
-            $win32func->(0, 0, "BOOL", "SwapBuffers", "HDC") if $win32func;
+            $win32func->(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers",
+                            "HDC") if $win32func;
         } else {
             push @params, [["../../GL/glx.h", "../../GL/glxext.h"],
                             "GLX_VERSION_1_0", "GLX_", $add_actions];

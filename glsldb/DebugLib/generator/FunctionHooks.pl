@@ -32,7 +32,7 @@
 #
 ################################################################################
 
-require functionsAllowedInBeginEnd;
+require '../generated/functionsAllowedInBeginEnd.pm';
 require prePostExecuteList;
 require genTools;
 require genTypes;

@@ -1,0 +1,7 @@
+
+- streamRecording.h and streamRecording.c looks like hand-written but
+  can be generated. There is ArgSizeFuncs.pl in generator/ which is
+  probably template for this action. It must be checked and extended
+  for full autogeneration.
+- generator/genTrampolines.pl - It some windows-specific thing, I think.
+  Actually I don't care about it, but it must be refactored too.
