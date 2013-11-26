@@ -33,6 +33,7 @@ our %regexps = (
     "typegl" => qr/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/,
     "typewgl" => qr/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/,
     "typeglx" => qr/^\s*typedef\s+(.*?)\s*(GLX\w+)\s*;/,
+    "pfn" => qr/^\s*typedef.*\((?:GL)?APIENTRY\S*\s+PFN(\S+)PROC\)/,
 );
 
 
@@ -188,15 +189,17 @@ sub parse_gl_files {
     my @params = ([["../../GL/gl.h", "../../GL/glext.h"], "GL_VERSION_1_0",
                     "GL_", $gl_actions]);
 
-    if ($WIN32) {
-        push @params, [["../../GL/WinGDI.h", "../../GL/wglext.h"],
-                        "WGL_VERSION_1_0", "WGL_", $add_actions];
+    if ($add_actions) {
+        if ($WIN32) {
+            push @params, [["../../GL/WinGDI.h", "../../GL/wglext.h"],
+                            "WGL_VERSION_1_0", "WGL_", $add_actions];
 
-        # Additional function from original file
-        $win32func->(0, 0, "BOOL", "SwapBuffers", "HDC") if $win32func;
-    } else {
-        push @params, [["../../GL/glx.h", "../../GL/glxext.h"],
-                        "GLX_VERSION_1_0", "GLX_", $add_actions];
+            # Additional function from original file
+            $win32func->(0, 0, "BOOL", "SwapBuffers", "HDC") if $win32func;
+        } else {
+            push @params, [["../../GL/glx.h", "../../GL/glxext.h"],
+                            "GLX_VERSION_1_0", "GLX_", $add_actions];
+        }
     }
 
     foreach my $entry (@params) {
