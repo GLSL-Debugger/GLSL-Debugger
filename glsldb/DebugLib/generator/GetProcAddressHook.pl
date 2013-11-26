@@ -36,6 +36,7 @@
 require genTools;
 our %regexps;
 
+
 if ($^O =~ /Win32/) {
     $WIN32 = 1;
 }
@@ -50,35 +51,40 @@ __declspec(dllexport) PROC APIENTRY DetouredwglGetProcAddress(LPCSTR arg0) {
 
     } else {
         print "
-    DBGLIBLOCAL void (*glXGetProcAddressHook(const GLubyte *n))(void)
-    {
-        void (*result)(void) = NULL;
+DBGLIBLOCAL void (*glXGetProcAddressHook(const GLubyte *n))(void)
+{
+    void (*result)(void) = NULL;
 
-        /*fprintf(stderr, \"glXGetProcAddressARB(%s)\\n\", (const char*)n);*/
+    /*fprintf(stderr, \"glXGetProcAddressARB(%s)\\n\", (const char*)n);*/
 
-        if (!(strcmp(\"glXGetProcAddressARB\", (char*)n) &&
-              strcmp(\"glXGetProcAddress\", (char*)n))) {
-            return (void(*)(void))glXGetProcAddressHook;
-        }
-
-        ";
+    if (!(strcmp(\"glXGetProcAddressARB\", (char*)n) &&
+          strcmp(\"glXGetProcAddress\", (char*)n))) {
+        return (void(*)(void))glXGetProcAddressHook;
     }
+
+    ";
+    }
+
 }
 
 sub createBodyFooter
 {
     if (defined $WIN32) {
-        print "\n\treturn NULL;\n}";
+       print "
+    return NULL;
+}
+";
     } else {
         print "
-        {
-            /*fprintf(stderr, \"glXGetProcAddressARB no overload found for %s\\n\", (const char*)n);*/
-            /*return ORIG_GL(glXGetProcAddressARB)(n);*/
-            return G.origGlXGetProcAddress(n);
-        }
-        /*fprintf(stderr, \"glXGetProcAddressARB result: %p\\n\", result);*/
-        return result;
-    }\n";
+    {
+        /*fprintf(stderr, \"glXGetProcAddressARB no overload found for %s\\n\", (const char*)n);*/
+        /*return ORIG_GL(glXGetProcAddressARB)(n);*/
+        return G.origGlXGetProcAddress(n);
+    }
+    /*fprintf(stderr, \"glXGetProcAddressARB result: %p\\n\", result);*/
+    return result;
+}
+";
     }
 }
 
@@ -89,10 +95,6 @@ sub createFunctionHook
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
-
-    if ($fname =~ /MESA$/) {
-        return;
-    }
 
     if (defined $WIN32) {
         print "
@@ -115,10 +117,11 @@ sub createFunctionHook
         my $pfname = join("","PFN",uc($fname),"PROC");
 
         print "
-        if (!strcmp(\"$fname\", (char*)n)) {
-                return (void(*)(void))$fname;
-        }";
+    if (!strcmp(\"$fname\", (char*)n)) {
+            return (void(*)(void))$fname;
+    }";
     }
+
 }
 
 sub createXFunctionHook {
@@ -137,7 +140,7 @@ createBodyHeader();
 my $gl_actions = {
         $regexps{"wingdi"} => \&createFunctionHook,
         $regexps{"glapi"} => \&createFunctionHook
-}
+};
 
 my $add_actions;
 if (defined $WIN32) {
