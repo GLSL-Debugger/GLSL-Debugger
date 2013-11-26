@@ -34,6 +34,31 @@ set(GLSLDEBUG_SRC
     ${GLSLDEBUG_GEN_SRC}
 )
 
+set(ENUMERANTS_SRC glenumerants.c)
+
+# Generate enumerants
+execute_process(COMMAND perl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE Enumerants.pl ../../GL/gl.h ../../GL/glext.h
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glenumerants.h
+)
+
+execute_process(COMMAND perl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE Enumerants.pl -m glx ../../GL/glx.h ../../GL/glxext.h
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
+)
+
+if(WIN32)
+execute_process(COMMAND perl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE Enumerants.pl -m wgl ../../GL/WinGDI.h ../../GL/wglext.h
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
+)
+endif()
+
+
+# Generate debug library
 execute_process(COMMAND perl
     WORKING_DIRECTORY ${GENERATOR_DIR}
     INPUT_FILE GetProcAddressHook.pl
@@ -69,6 +94,9 @@ include_directories(${PROJECT_SOURCE_DIR}/glsldb
     ${PROJECT_SOURCE_DIR}/glsldb/utils
     ${X11_INCLUDE_DIR}
 )
+
+
+add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 
 # FIXME
 # The makefiles have a target to generate a list of allowed functions between begin/end.

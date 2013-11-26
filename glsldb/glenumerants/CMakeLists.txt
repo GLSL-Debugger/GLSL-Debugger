@@ -5,10 +5,7 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
     find_package(X11 REQUIRED)
 endif()
 
-set(SRC
-    glenumerants.c
-    glxenumerants.c
-)
+set(SRC glenumerants.c)
 
 execute_process(COMMAND perl gen_enumerants.pl ../GL/gl.h ../GL/glext.h
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
