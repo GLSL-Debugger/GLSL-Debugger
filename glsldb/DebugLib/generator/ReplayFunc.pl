@@ -32,44 +32,80 @@
 #
 ################################################################################
 
-
-require genTypes;
+require prePostExecuteList;
 require genTools;
+require genTypes;
 our %regexps;
 
-use Getopt::Std;
-getopts('p');
 
-sub createBody
+sub createBodyHeader
 {
-    my ($line, $extname, $retval, $fname, $argString) = (@_);
-    my $isExtFunction = $line !~ /WINGDIAPI/;
-    my @arguments = buildArgumentList($argString);
-    my $pfname = join("","PFN",uc($fname),"PROC");
+    print '#include <stdio.h>
+#include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+#include "glsldb/GL/gl.h"
+#include "glsldb/GL/glext.h"
+#ifndef _WIN32
+#include "glsldb/GL/glx.h"
+#include "glsldb/GL/glxext.h"
+#else /* _WIN32 */
+#include "glsldb/GL/wglext.h"
+#include "trampolines.h"
+#endif /* _WIN32 */
+#include "debuglibInternal.h"
+#include "streamRecording.h"
+#include "replayFunction.h"
 
-    return if @arguments[0] =~ /^void$|^$/;
-
-    foreach my $argument (@arguments) {
-        if ($argument =~ /[*]$/) {
-            if ($fname !~ /gl\D+([1234])\D{1,2}v[A-Z]*/ &&
-                $fname !~ /^gl(Gen|Get|Are)/) {
-                print "/* $extname */\n" if not $opt_p;
-                print "int $fname" . "_getArg$i" . "Size($argString)\n";
-                # If full definition is required
-                print "{\n\treturn 1;\n}\n\n" if not $opt_p;
-            }
-        }
-    }
+void replayFunctionCall(StoredCall *f, int final)
+{
+';
 }
 
-my $actions = {
-    $regexps{"wingdi"} => \&createBody,
-    $regexps{"glapi"} => \&createBody
-};
+sub createBodyFooter
+{
+    print '    {
+        fprintf(stderr, "Cannot replay %s: unknown function\n", f->fname);
+    }
+}
+';
+}
+
+sub createFunctionHook
+{
+    my $line = shift;
+    my $extname = shift;
+    my $retval = shift;
+    my $fname = shift;
+    my $argString = shift;
+    my $ucfname = uc($fname);
+    my @arguments = buildArgumentList($argString);
+    my $argOutput = arguments_types_array($fname, "f->arguments", @arguments);
+
+    printf "#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_REPLAY || DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+    if (!strcmp(\"$fname\", (char*)f->fname)) {
+#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+        if (final) {
+#endif
+            ORIG_GL($fname)($argOutput);
+#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+        }
+#endif
+        return;
+    }
+#endif
+";
+}
 
 
 header_generated();
+createBodyHeader();
 
-foreach my $filename (@ARGV){
-    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
-}
+my $gl_actions = {
+    $regexps{"wingdi"} => \&createFunctionHook,
+    $regexps{"glapi"} => \&createFunctionHook
+};
+parse_gl_files($gl_actions);
+
+createBodyFooter();

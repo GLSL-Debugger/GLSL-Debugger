@@ -91,7 +91,7 @@ sub arguments_sizes
     my ($fname, @arguments) = (@_);
     my @converted_args = ();
 
-    return "" if not $#arguments or @arguments[0] =~ /^void$|^$/i;
+    return "" if @arguments[0] =~ /^void$|^$/i;
 
     for (my $i = 0; $i <= $#arguments; $i++) {
         my $type = stripStorageQualifiers(@arguments[$i]);
@@ -115,6 +115,25 @@ sub arguments_sizes
     }
 
     return join(", ", @converted_args);
+}
+
+sub arguments_types_array
+{
+    local ($fname, $array_name, @arguments) = (@_);
+
+    return "" if @arguments[0] =~ /^void$|^$/i;
+
+    sub _get_arg {
+        my $argument = @arguments[$_];
+        if (scalar grep {$fname eq $_} @justCopyPointersList) {
+            return "*($argument *)${array_name}[$_]";
+        } elsif ($argument =~ /[*]$/) {
+            return "($argument)${array_name}[$_]";
+        }
+        return "*($argument *)${array_name}[$_]";
+    };
+
+    return join(", ", map _get_arg, (0..$#arguments));
 }
 
 sub error_postexec

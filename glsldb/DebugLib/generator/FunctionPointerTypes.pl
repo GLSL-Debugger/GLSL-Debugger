@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -126,7 +127,7 @@ if (defined $WIN32) {
     $add_actions = {$regexps{"glxfunc"} => \&create_func_glx}
 };
 
-
+header_generated();
 # Add PFN definitions first
 parse_gl_files( { $regexps{"pfn"} => \&add_definition } );
 # Then add absent definitions

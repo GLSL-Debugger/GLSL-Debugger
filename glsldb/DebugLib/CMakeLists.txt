@@ -26,35 +26,38 @@ set(GLSLDEBUG_SRC
     postExecution.c
 )
 
+set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
+set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    INPUT_FILE genGetProcAddressHook.pl
-    OUTPUT_FILE getProcAddressHook.inc
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE GetProcAddressHook.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc
 )
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    INPUT_FILE genFunctionPointerTypes.pl
-    OUTPUT_FILE functionPointerTypes.inc
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE FunctionPointerTypes.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc
 )
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
     INPUT_FILE genReplayFunc.pl
-    OUTPUT_FILE replayFunction.c
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/replayFunction.c
 )
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
     INPUT_FILE genFunctionList.pl
-    OUTPUT_FILE functionList.c
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionList.c
 )
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
     INPUT_FILE mergeAllowedInBeginEndList.pl
-    OUTPUT_FILE functionsAllowedInBeginEnd.pm
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm
 )
 execute_process(COMMAND perl
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    INPUT_FILE genFunctionHooks.pl
-    OUTPUT_FILE functionHooks.inc
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE FunctionHooks.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/glsldb

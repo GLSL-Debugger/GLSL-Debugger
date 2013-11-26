@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -189,7 +190,7 @@ sub createBody
 
     my $argcount = 0;
     my $argtypes = "";
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/i) {
+    if ($#arguments > 0 || @arguments[0] !~ /^void$|^$/i) {
         $argcount = $#arguments + 1;
         $argtypes = join("", map { ", &arg$_, " . getTypeId(
                             @arguments[$_]) } (0..$#arguments));
