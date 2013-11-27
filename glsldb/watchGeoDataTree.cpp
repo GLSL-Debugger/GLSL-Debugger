@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dbgprint.h"
 
 extern "C" {
-#include "glenumerants/glenumerants.h"
+#include "DebugLib/glenumerants.h"
 }
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

@@ -5,3 +5,4 @@
   for full autogeneration.
 - generator/genTrampolines.pl - It some windows-specific thing, I think.
   Actually I don't care about it, but it must be refactored too.
+- Optimisation. Debug lib takes too long to generate

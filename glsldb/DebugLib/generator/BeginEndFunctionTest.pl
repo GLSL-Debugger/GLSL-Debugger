@@ -35,6 +35,7 @@
 require genTypes;
 require genTools;
 our %regexps;
+our %files;
 
 
 if ($^O =~ /Win32/) {
@@ -75,7 +76,7 @@ sub createBody
                 glBegin(GL_POINTS);
                     currentFname = \"$fname\";
                     signal(SIGSEGV, catch_segfault);
-#endif /* _WIN32 */;
+#endif /* _WIN32 */
                     func(%s);
 #ifndef _WIN32
                     currentFname = \"WTF\";
@@ -101,8 +102,7 @@ my $actions = {
     $regexps{"typegl"} => \&addTypeMapping,
     $regexps{"wingdi"} => \&createBody,
     $regexps{"glapi"} => \&createBody
-}
-
+};
 
 
 header_generated();
@@ -117,8 +117,8 @@ print "#ifdef _WIN32
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include \"glsldb/GL/gl.h\"
-#include \"glsldb/GL/glext.h\"
+#include \"GL/gl.h\"
+#include \"GL/glext.h\"
 #include <GL/glut.h>
 #include \"debuglibInternal.h\"
 
@@ -147,7 +147,7 @@ void testFunc(void) {
     memset(dirtyHack, 0, 4096);
 ";
 
-foreach my $filename ("../../GL/gl.h", "../../GL/glext.h") {
+foreach my $filename (@{$files{"gl"}}) {
     parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
 }
 

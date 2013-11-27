@@ -34,7 +34,18 @@ our %regexps = (
     "typewgl" => qr/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/,
     "typeglx" => qr/^\s*typedef\s+(.*?)\s*(GLX\w+)\s*;/,
     "pfn" => qr/^\s*typedef.*\((?:GL)?APIENTRY\S*\s+PFN(\S+)PROC\)/,
+    "glvar" => qr/^\s*#define\s+(GL_\w+)\s+0x[0-9A-Fa-f]*/,
+    "glxvar" => qr/^\s*#define\s+(GLX_\w+)\s+0x[0-9A-Fa-f]*/,
+    "wglvar" => qr/^\s*#define\s+((WGL|ERROR)_\w+)\s+0x[0-9A-Fa-f]*/,
 );
+
+
+our %files = (
+    "gl" => ["../../GL/gl.h", "../../GL/glext.h"],
+    "glx" => ["../../GL/glx.h", "../../GL/glxext.h"],
+    "wgl" => ["../../GL/WinGDI.h", "../../GL/wglext.h"]
+);
+
 
 
 my $func_match = qr/^\s*(?:GLAPI\b|WINGDIAPI\b|extern\b)\s+\S.*\S\s*\([^)]*?$/;
@@ -63,6 +74,11 @@ my %extname_matches = (
 my @skip_defines = (
     "GL_GLEXT_PROTOTYPES"
 );
+
+my @ignore_blocks = (
+    "GL_OES_compressed_paletted_texture"
+);
+
 
 
 # I wanted to make it clear
@@ -96,7 +112,7 @@ sub parse_output {
             my $fprototype = $_;
             chomp $fprototype;
             while ($fprototype !~ /.*;\s*$/) {
-                $line = <$ifh>;
+                my $line = <$ifh>;
                 chomp $line;
                 $line =~ s/\s*/ /;
                 $fprototype .= $line;
@@ -105,13 +121,12 @@ sub parse_output {
         }
 
         # Prototype name in #define or in comment
-        my $line = $_;
-        my ($reg_match) = grep { $line =~ /^\Q$_\E$/ } keys %extname_matches;
+        my $reg_match = $extname_matches{$_};
         my $extreg = qr/^#define\s+$extname\s+1/;
         if ($reg_match || ($indef == $ifdir && /$extreg/)) {
             if ($reg_match){
                 push @definitions, $extname;
-                $extname = $extname_matches{$reg_match};
+                $extname = $reg_match;
             }
             $proto = $extname;
         }
@@ -137,10 +152,12 @@ sub parse_output {
         if (/^#if/) {
             $ifdir++;
             if (/$api_re/) {
-                push @definitions, $extname;
-                $extname = $1;
-                $indef = $ifdir;
-            } elsif (/$api_defined/ && grep { /^$1$/ } @skip_defines) {
+                if (not grep { /^$1$/ } @ignore_blocks){
+                    push @definitions, $extname;
+                    $extname = $1;
+                    $indef = $ifdir;
+                }
+            } elsif (/$api_defined/ and grep { /^$1$/ } @skip_defines) {
                 $indef = $ifdir;
             }
         }
@@ -186,20 +203,19 @@ sub parse_gl_files {
     my $add_actions = shift;
     my $WIN32 = shift;
     my $win32func = shift;
-    my @params = ([["../../GL/gl.h", "../../GL/glext.h"], "GL_VERSION_1_0",
-                    "GL_", $gl_actions]);
+    my @params = ([$files{"gl"}, "GL_VERSION_1_0", "GL_", $gl_actions]);
 
-    if ($add_actions) {
+    if (ref($add_actions) eq "HASH") {
         if ($WIN32) {
-            push @params, [["../../GL/WinGDI.h", "../../GL/wglext.h"],
-                            "WGL_VERSION_1_0", "WGL_", $add_actions];
+            push @params, [$files{"wgl"}, "WGL_VERSION_1_0",
+                            "WGL_", $add_actions];
 
             # Additional function from original file
             $win32func->(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers",
                             "HDC") if $win32func;
         } else {
-            push @params, [["../../GL/glx.h", "../../GL/glxext.h"],
-                            "GLX_VERSION_1_0", "GLX_", $add_actions];
+            push @params, [$files{"glx"}, "GLX_VERSION_1_0",
+                            "GLX_", $add_actions];
         }
     }
 
@@ -210,3 +226,4 @@ sub parse_gl_files {
         }
     }
 }
+

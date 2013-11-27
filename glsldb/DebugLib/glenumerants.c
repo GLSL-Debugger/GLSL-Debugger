@@ -45,21 +45,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  include "../GL/glx.h"
 #  include "../GL/glxext.h"
 
-/*#include "glenumerants.h"*/
-
 //#  ifdef GLX_VERSION_1_4
 //#    define GLX_SAMPLE_BUFFERS                 100000
 //#    define GLX_SAMPLES                        100001
 //#  endif
 #include "glenumerants.h"
-#include "enumerants.h"
-#include "glxenumerants.h"
+#include "generated/glenumerants.h"
+#include "generated/glxenumerants.h"
 #endif
 
 #ifdef GLSLDB_WIN32
 #  include <windows.h>
 #  include <GL/wglext.h>
-#  include "wglenumerants.h"
+#  include "generated/wglenumerants.h"
 #endif
 
 static void concatenate(char **dst, const char *src)

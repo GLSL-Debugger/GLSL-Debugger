@@ -4,56 +4,62 @@
 # Mode can be gl, glx or wgl. gl is default.
 
 use Getopt::Std;
+require genTools;
+our %files;
+our %regexps;
 
 our $opt_m = "gl";
 getopt('m');
 
 sub out_struct {
     my $name = shift;
-    my $elements = join("\n", map { "\t{$_, $_}," } @_);
+    my $elements = join("\n", map { "\t{$_, \"$_\"}," } @_);
     print "
 static struct {
-    GLenum value;
-    const char *string;
+\tGLenum value;
+\tconst char *string;
 } ${name}[] = {
 $elements
-    {0, NULL}
-};\n";
+\t{0, NULL}
+};
+";
 }
 
-sub out_gl {
-    my @enums = grep(!/GL_FALSE|GL_TRUE|GL_TIMEOUT_IGNORED/, @_);
-    my @bits = grep(/_BIT$|_BIT_\w$|_ATTRIB_BITS/, @_);
-    &out_struct("glEnumerantsMap", @enums);
-    # create OpenGL Bitfield map
-    &out_struct("glBitfieldMap", @bits);
-}
-
-sub out_glx {
-    &out_struct("glxEnumerantsMap", @_);
-}
-
-sub out_wgl {
-    &out_struct("wglEnumerantsMap", @_);
-}
-
-my %modes = (
-    "gl" => [qr/^\s*#define\s+(GL_\w+)\s+0x[0-9A-Fa-f]*/, \&out_gl],
-    "glx" => [qr/^\s*#define\s+(GLX_\w+)\s+0x[0-9A-Fa-f]*/, \&out_glx],
-    "wgl" => [qr/^\s*#define\s+((WGL|ERROR)_\w+)\s+0x[0-9A-Fa-f]*/, \&out_wgl]
-);
-
-if (not defined $modes{$opt_m}) {
-    die "Mode must be 'gl', 'glx' or 'wgl'";
-}
-
-$regex = $modes{$opt_m}[0];
-my @matches;
-while (<>) {
-    if (m/$regex/){
-        push @matches, $1;
+sub out {
+    if ($opt_m eq "glx") {
+        out_struct("glxEnumerantsMap", @_);
+    } elsif ($opt_m eq "wgl") {
+        out_struct("wglEnumerantsMap", @_);
+    } else {
+        my @enums = grep(!/GL_FALSE|GL_TRUE|GL_TIMEOUT_IGNORED/, @_);
+        my @bits = grep(/_BIT$|_BIT_\w$|_ATTRIB_BITS/, @_);
+        out_struct("glEnumerantsMap", @enums);
+        # create OpenGL Bitfield map
+        out_struct("glBitfieldMap", @bits);
     }
 }
 
-my $func = $modes{$opt_m}[1];
-$func->(@matches);
+my @matches;
+sub push_matches
+{
+    my ($line, $match) = (@_);
+    push @matches, $match;
+}
+
+my %modes = (
+    "gl" => {$regexps{"glvar"} => \&push_matches},
+    "glx" => {$regexps{"glxvar"} => \&push_matches},
+    "wgl" => {$regexps{"wglvar"} => \&push_matches},
+);
+
+if (not defined $modes{$opt_m}) {
+    die "Mode must be one of " . join(", ", keys %modes) . "\n";
+}
+
+my $actions = $modes{$opt_m};
+foreach my $filename (@{$files{$opt_m}}) {
+    parse_output($filename, $actions);
+}
+
+header_generated();
+out(@matches);

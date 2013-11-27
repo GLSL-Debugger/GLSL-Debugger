@@ -41,13 +41,23 @@ if ($^O =~ /Win32/) {
     $WIN32 = 1;
 }
 
-@defined_types = ();
+my %defined_types = ();
+my %defined_upper = ();
+
+
+# This extensions was enabled in one file (gl.h, for example) but
+# another file contains #ifndef for it, which ignored by preprocessor
+# but not this parser
+my @skipped_extnames = (
+    "GL_ARB_imaging"
+);
+
 
 sub print_type
 {
     my $retval = shift;
     my $pfname = shift;
-    printf  "\n\ttypedef $retval (APIENTRYP $pfname)(%s);",
+    printf  "\ntypedef $retval (APIENTRYP $pfname)(%s);",
         join(", ", map { $_ } @_);
 }
 
@@ -56,11 +66,13 @@ sub createFPType
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
+    my $ufname = uc($fname);
+    return if $defined_upper{$ufname};
 
     $retval =~ s/^\s+|\s+$//g;
     my @arguments = buildArgumentList($argString);
-    my $pfname = sprintf "PFN%sPROC", uc($fname);
-    print_type($retval, $pfname, @arguments);
+    print_type($retval, "PFN${ufname}PROC", @arguments);
+    $defined_upper{$ufname} = 1;
 }
 
 sub createFPlowercaseType
@@ -68,13 +80,12 @@ sub createFPlowercaseType
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
-    return if grep { /^$fname$/i } @defined_types;
+    return if $defined_types{$fname};
 
     $retval =~ s/^\s+|\s+$//g;
     my @arguments = buildArgumentList($argString);
-    my $pfname = "PFN${fname}PROC";
-    print_type($retval, $pfname, @arguments);
-    push(@defined_types, $fname);
+    print_type($retval, "PFN${fname}PROC", @arguments);
+    $defined_types{$fname} = 1;
 }
 
 
@@ -83,17 +94,16 @@ sub add_definition
     my $line = shift;
     my $extname = shift;
     my $fname = shift;
-    push(@defined_upper, uc($fname));
+    if (not grep { /^$extname$/ } @skipped_extnames) {
+        $defined_upper{uc($fname)} = 1;
+    }
 }
 
 sub create_func
 {
     my $line = shift;
     my $extname = shift;
-    my $fn = uc($_[1]);
-    if(!grep(/^$fn$/i, @defined_upper)){
-        createFPType(@_);
-    }
+    createFPType(@_);
     createFPlowercaseType(@_);
 }
 
@@ -102,7 +112,7 @@ sub create_func_glx
     my $line = shift;
     my $extname = shift;
     if ($extname eq "GLX_VERSION_1_1" || $extname eq "GLX_VERSION_1_0") {
-        createFPType(@_) if !grep { /^$fn$/i } @defined_upper;
+        createFPType(@_);
     }
 
     # No way to parse functions returning a not "typedef'ed"
@@ -111,7 +121,7 @@ sub create_func_glx
         createFPlowercaseType("__GLXextFuncPtr", "glXGetProcAddressARB",
                               "const GLubyte *");
     } else {
-        createFPlowercaseType($_);
+        createFPlowercaseType(@_);
     }
 }
 
@@ -129,7 +139,7 @@ if (defined $WIN32) {
 
 header_generated();
 # Add PFN definitions first
-parse_gl_files( { $regexps{"pfn"} => \&add_definition } );
+parse_gl_files( {$regexps{"pfn"} => \&add_definition} );
 # Then add absent definitions
 parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&create_func);
 

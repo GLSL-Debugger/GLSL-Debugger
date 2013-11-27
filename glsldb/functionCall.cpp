@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -49,7 +49,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FunctionsMap.h"
 
 extern "C" {
-#include "glenumerants/glenumerants.h"
+#include "DebugLib/glenumerants.h"
 }
 
 //extern "C" GLFunctionList glFunctions[];
@@ -119,17 +119,17 @@ const FunctionCall::Argument* FunctionCall::getArgument(int i_iIdx) const
 
 void FunctionCall::addArgument(int i_iType, void *i_pData, void *i_pAddress)
 {
-	void *tmpAlloc;
+    void *tmpAlloc;
 
     m_iNumArgs++;
     tmpAlloc = realloc(m_pArguments,
                        m_iNumArgs*sizeof(Argument));
-	if (!tmpAlloc)
-	{
-		dbgPrint(DBGLVL_ERROR, "Failed to allocate memory for function argument: %s\n",
-				strerror(errno));
-	}
-	m_pArguments = (Argument*)tmpAlloc;
+    if (!tmpAlloc)
+    {
+        dbgPrint(DBGLVL_ERROR, "Failed to allocate memory for function argument: %s\n",
+                strerror(errno));
+    }
+    m_pArguments = (Argument*)tmpAlloc;
     m_pArguments[m_iNumArgs-1].iType = i_iType;
     m_pArguments[m_iNumArgs-1].pData = i_pData;
     m_pArguments[m_iNumArgs-1].pAddress = i_pAddress;
@@ -147,7 +147,7 @@ void FunctionCall::editArgument(int i_iIdx, void *i_pData)
 void* FunctionCall::copyArgument(int type, void *addr)
 {
     void *r;
-    
+
     switch (type) {
         case DBG_TYPE_CHAR:
             r = malloc(sizeof(char));
@@ -213,9 +213,9 @@ void* FunctionCall::copyArgument(int type, void *addr)
             r = malloc(sizeof(GLbitfield));
             memcpy(r, addr, sizeof(GLbitfield));
             break;
-		case DBG_TYPE_STRUCT:
-			r = NULL; /* FIXME */
-			break;
+        case DBG_TYPE_STRUCT:
+            r = NULL; /* FIXME */
+            break;
         default:
             r = NULL;
     }
@@ -227,14 +227,14 @@ void* FunctionCall::copyArgument(int type, void *addr)
 bool FunctionCall::operator==(const FunctionCall &right)
 {
     int i;
-    
+
     if (strcmp(m_pName, right.getName()) != 0) {
         return false;
     }
     if (m_iNumArgs != right.getNumArguments()) {
         return false;
     }
-    
+
     for (i=0; i<m_iNumArgs; i++) {
         const FunctionCall::Argument *rArg = right.getArgument(i);
         if (m_pArguments[i].iType != rArg->iType) {
@@ -321,9 +321,9 @@ bool FunctionCall::operator==(const FunctionCall &right)
                     return false;
                 }
                 break;
-			case DBG_TYPE_STRUCT:
-				return false; /* FIXME */
-				break;
+            case DBG_TYPE_STRUCT:
+                return false; /* FIXME */
+                break;
             default:
                 return false;
         }
@@ -339,46 +339,46 @@ bool FunctionCall::operator!=(const FunctionCall &right)
 char* FunctionCall::getArgumentString(Argument arg) const
 {
     char *argString, *s;
-    
+
     switch(arg.iType) {
         case DBG_TYPE_CHAR:
-            asprintf(&argString, "%i", *(char*)arg.pData); 
+            asprintf(&argString, "%i", *(char*)arg.pData);
             break;
         case DBG_TYPE_UNSIGNED_CHAR:
-            asprintf(&argString, "%i", *(unsigned char*)arg.pData); 
+            asprintf(&argString, "%i", *(unsigned char*)arg.pData);
             break;
         case DBG_TYPE_SHORT_INT:
-            asprintf(&argString, "%i", *(short*)arg.pData); 
+            asprintf(&argString, "%i", *(short*)arg.pData);
             break;
         case DBG_TYPE_UNSIGNED_SHORT_INT:
-            asprintf(&argString, "%i", *(unsigned short*)arg.pData); 
+            asprintf(&argString, "%i", *(unsigned short*)arg.pData);
             break;
         case DBG_TYPE_INT:
-            asprintf(&argString, "%i", *(int*)arg.pData); 
+            asprintf(&argString, "%i", *(int*)arg.pData);
             break;
         case DBG_TYPE_UNSIGNED_INT:
-            asprintf(&argString, "%u", *(unsigned int*)arg.pData); 
+            asprintf(&argString, "%u", *(unsigned int*)arg.pData);
             break;
         case DBG_TYPE_LONG_INT:
-            asprintf(&argString, "%li", *(long*)arg.pData); 
+            asprintf(&argString, "%li", *(long*)arg.pData);
             break;
         case DBG_TYPE_UNSIGNED_LONG_INT:
-            asprintf(&argString, "%lu", *(unsigned long*)arg.pData); 
+            asprintf(&argString, "%lu", *(unsigned long*)arg.pData);
             break;
         case DBG_TYPE_LONG_LONG_INT:
-            asprintf(&argString, "%lli", *(long long*)arg.pData); 
+            asprintf(&argString, "%lli", *(long long*)arg.pData);
             break;
         case DBG_TYPE_UNSIGNED_LONG_LONG_INT:
-            asprintf(&argString, "%llu", *(unsigned long long*)arg.pData); 
+            asprintf(&argString, "%llu", *(unsigned long long*)arg.pData);
             break;
         case DBG_TYPE_FLOAT:
-            asprintf(&argString, "%f", *(float*)arg.pData); 
+            asprintf(&argString, "%f", *(float*)arg.pData);
             break;
         case DBG_TYPE_DOUBLE:
-            asprintf(&argString, "%f", *(double*)arg.pData); 
+            asprintf(&argString, "%f", *(double*)arg.pData);
             break;
         case DBG_TYPE_POINTER:
-            asprintf(&argString, "%p", *(void**)arg.pData); 
+            asprintf(&argString, "%p", *(void**)arg.pData);
             break;
         case DBG_TYPE_BOOLEAN:
             asprintf(&argString, "%s", *(GLboolean*)arg.pData ? "TRUE" : "FALSE");
@@ -391,10 +391,10 @@ char* FunctionCall::getArgumentString(Argument arg) const
         case DBG_TYPE_ENUM:
             asprintf(&argString, "%s", lookupEnum(*(GLenum*)arg.pData));
             break;
-		case DBG_TYPE_STRUCT:
-			asprintf(&argString, "STRUCT");
-			break;
-        default:	
+        case DBG_TYPE_STRUCT:
+            asprintf(&argString, "STRUCT");
+            break;
+        default:
             asprintf(&argString, "UNKNOWN_TYPE[%i]", arg.iType);
     }
     return argString;
@@ -404,13 +404,13 @@ char* FunctionCall::getCallString(void) const
 {
     int i;
     char *callString = (char*) malloc(4096);
-    
+
     strcpy(callString, m_pName);
     strcat(callString, "(");
     for (i=0; i<m_iNumArgs; i++) {
-		char *argstr = getArgumentString(m_pArguments[i]);
+        char *argstr = getArgumentString(m_pArguments[i]);
         strcat(callString, argstr);
-		free(argstr);
+        free(argstr);
         if (i < m_iNumArgs-1) {
             strcat(callString, ", ");
         }
@@ -424,7 +424,7 @@ bool FunctionCall::isDebuggable() const
 {
     /* So far we restrict it to draw calls */
     if (isDebuggableDrawCall()) return true;
-    
+
     return false;
 }
 
@@ -432,7 +432,7 @@ bool FunctionCall::isDebuggable(int *primitiveMode) const
 {
     /* So far we restrict it to draw calls */
     if (isDebuggableDrawCall(primitiveMode)) return true;
-    
+
     return false;
 }
 

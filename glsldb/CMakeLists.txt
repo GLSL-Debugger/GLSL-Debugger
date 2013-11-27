@@ -8,8 +8,8 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
-	find_package(X11 REQUIRED)
-	find_package(Threads REQUIRED)
+    find_package(X11 REQUIRED)
+    find_package(Threads REQUIRED)
 endif()
 
 include(${QT_USE_FILE})
@@ -24,36 +24,37 @@ qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
 qt4_add_resources(RES_OUTFILES ${RES_FILES})
 
-set(SRC	
-	${SRC_C}
-	${SRC_CPP}
-	${MOC_OUTFILES}
-	${UI_OUTFILES}
-	${RES_OUTFILES}
+set(SRC
+    ${SRC_C}
+    ${SRC_CPP}
+    ${MOC_OUTFILES}
+    ${UI_OUTFILES}
+    ${RES_OUTFILES}
 )
 
-include_directories(${OPENGL_INCLUDE_DIR} 
-	${X11_INCLUDE_DIR}
-	${QT_INCLUDE_DIR}
-	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
-	${CMAKE_CURRENT_SOURCE_DIR}/utils
-	${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
-	${GLEW_INCLUDE_DIR}
+include_directories(${OPENGL_INCLUDE_DIR}
+    ${X11_INCLUDE_DIR}
+    ${QT_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
+    ${GLEW_INCLUDE_DIR}
 )
 
 if(GLSLDB_LINUX)
-	#add_definitions(-DUNIX)
+    #add_definitions(-DUNIX)
 endif()
 
 add_executable(glsldb ${SRC})
-target_link_libraries(glsldb 
-	${QT_LIBRARIES} 
-	${CMAKE_THREAD_LIBS_INIT} 
-	glslang 
-	glenumerants
-	functionList
-	utils
-	${OPENGL_LIBRARIES}
-	${X11_LIBRARIES}
-	${GLEW_LIBRARIES}
+target_link_libraries(glsldb
+    ${QT_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    glslang
+    glenumerants
+    functionList
+    utils
+    ${OPENGL_LIBRARIES}
+    ${X11_LIBRARIES}
+    ${GLEW_LIBRARIES}
 )
