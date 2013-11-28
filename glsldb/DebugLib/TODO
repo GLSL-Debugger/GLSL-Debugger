@@ -3,6 +3,15 @@
   can be generated. There is ArgSizeFuncs.pl in generator/ which is
   probably template for this action. It must be checked and extended
   for full autogeneration.
-- generator/genTrampolines.pl - It some windows-specific thing, I think.
-  Actually I don't care about it, but it must be refactored too.
+
+- generator/Trampolines.pl - It some windows-specific thing, I think.
+  Actually I don't care about it, but do some clean-ups and did not
+  check it. Does it work?
+
+- This trampolines thing needs to be integrated in cmake build. The
+  information on how to do this is avaliable in VS projects in this folder.
+
+- Also, all VS builds is broken now. It must be checked for broken
+  paths and fixed.
+
 - Optimisation. Debug lib takes too long to generate

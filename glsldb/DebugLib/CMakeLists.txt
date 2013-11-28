@@ -54,7 +54,7 @@ execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m glx
 if(WIN32)
 execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m wgl
     WORKING_DIRECTORY ${GENERATOR_DIR}
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/wglenumerants.h
 )
 endif()
 
@@ -99,6 +99,10 @@ execute_process(COMMAND ${PERL_EXECUTABLE}
     INPUT_FILE FunctionHooks.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
 )
+
+# TODO: windows command for trampolines. Not sure, how much files must
+# be generated from it. It require to check VS project for this info.
+
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/glsldb
