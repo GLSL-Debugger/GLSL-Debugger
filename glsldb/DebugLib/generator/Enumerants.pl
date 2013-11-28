@@ -7,13 +7,32 @@ use Getopt::Std;
 require genTools;
 our %files;
 our %regexps;
+our %extnames_defines;
+our @problem_defines;
 
 our $opt_m = "gl";
 getopt('m');
 
 sub out_struct {
     my $name = shift;
-    my $elements = join("\n", map { "\t{$_, \"$_\"}," } @_);
+    my $elements = "";
+    sub generate_element {
+        my $name = $_;
+        my $out = "";
+        my $need_escape = scalar grep { /^$name$/ } @problem_defines;
+        $out .= "#ifdef $name\n" if $need_escape;
+        $out .= "\t{$name, \"$name\"},";
+        $out .= "\n#endif /* $name */" if $need_escape;
+        return $out;
+    }
+
+    foreach my $subarray (@_){
+        my ($extname, $enums) = (@$subarray);
+        next if not @$enums;
+        $elements .= "\n#ifdef $extname\n" if $extname;
+        $elements .= join("\n", map generate_element, @$enums);
+        $elements .= "\n#endif /* $extname */\n" if $extname;
+    }
     print "
 static struct {
 \tGLenum value;
@@ -31,8 +50,15 @@ sub out {
     } elsif ($opt_m eq "wgl") {
         out_struct("wglEnumerantsMap", @_);
     } else {
-        my @enums = grep(!/GL_FALSE|GL_TRUE|GL_TIMEOUT_IGNORED/, @_);
-        my @bits = grep(/_BIT$|_BIT_\w$|_ATTRIB_BITS/, @_);
+        my @enums;
+        my @bits;
+        foreach my $subarray (@_){
+            my ($extname, $elements) = (@$subarray);
+            my @e = grep(!/GL_FALSE|GL_TRUE|GL_TIMEOUT_IGNORED/, @$elements);
+            my @b = grep(/_BIT$|_BIT_\w+$|_ATTRIB_BITS/, @$elements);
+            push @enums, [$extname, \@e];
+            push @bits, [$extname, \@b];
+        }
         out_struct("glEnumerantsMap", @enums);
         # create OpenGL Bitfield map
         out_struct("glBitfieldMap", @bits);
@@ -40,25 +66,31 @@ sub out {
 }
 
 my @matches;
+my $last_ext = "";
 sub push_matches
 {
-    my ($line, $match) = (@_);
-    push @matches, $match;
+    my ($line, $extname, $match) = (@_);
+    $extname = $extnames_defines{$extname} if defined $extnames_defines{$extname};
+    if ($last_ext ne $extname){
+        push @matches, [$extname, []];
+        $last_ext = $extname;
+    }
+    $arr = ${$matches[-1]}[-1];
+    push @$arr, $match;
 }
 
 my %modes = (
-    "gl" => {$regexps{"glvar"} => \&push_matches},
-    "glx" => {$regexps{"glxvar"} => \&push_matches},
-    "wgl" => {$regexps{"wglvar"} => \&push_matches},
+    "gl" => ["GL_VERSION_1_0", "GL_", {$regexps{"glvar"} => \&push_matches}],
+    "glx" => ["GLX_VERSION_1_0", "GLX_", {$regexps{"glxvar"} => \&push_matches}],
+    "wgl" => ["WGL_VERSION_1_0", "WGL_", {$regexps{"wglvar"} => \&push_matches}],
 );
 
 if (not defined $modes{$opt_m}) {
     die "Mode must be one of " . join(", ", keys %modes) . "\n";
 }
 
-my $actions = $modes{$opt_m};
 foreach my $filename (@{$files{$opt_m}}) {
-    parse_output($filename, $actions);
+    parse_output($filename, @{$modes{$opt_m}}, 1);
 }
 
 header_generated();

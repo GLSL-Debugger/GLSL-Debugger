@@ -148,7 +148,7 @@ void testFunc(void) {
 ";
 
 foreach my $filename (@{$files{"gl"}}) {
-    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
+    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions);
 }
 
 print "

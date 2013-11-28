@@ -2,6 +2,7 @@ find_package(Perl REQUIRED)
 find_package(DL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
@@ -108,7 +109,9 @@ include_directories(
 
 
 add_library(glenumerants STATIC ${ENUMERANTS_SRC})
+
 add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
+target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 add_library(functionList SHARED ${GENERATOR_OUTPUT_DIR}/functionList.c)
 

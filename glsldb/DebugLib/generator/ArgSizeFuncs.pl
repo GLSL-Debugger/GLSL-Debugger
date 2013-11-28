@@ -71,5 +71,5 @@ my $actions = {
 header_generated();
 
 foreach my $filename (@ARGV){
-    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions, 1);
+    parse_output($filename, "GL_VERSION_1_0", "GL_", $actions);
 }

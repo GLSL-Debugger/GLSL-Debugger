@@ -35,6 +35,7 @@
 require genTypes;
 require genTools;
 our %regexps;
+our %files;
 
 
 if ($^O =~ /Win32/) {
@@ -49,7 +50,10 @@ my %defined_upper = ();
 # another file contains #ifndef for it, which ignored by preprocessor
 # but not this parser
 my @skipped_extnames = (
-    "GL_ARB_imaging"
+    "GL_VERSION_1_1",
+    "GL_VERSION_1_2",
+    "GL_VERSION_1_3",
+    "GL_ARB_imaging",
 );
 
 
@@ -90,6 +94,14 @@ sub createFPlowercaseType
 
 
 sub add_definition
+{
+    my $line = shift;
+    my $extname = shift;
+    my $fname = shift;
+    $defined_upper{uc($fname)} = 1;
+}
+
+sub add_definition_check
 {
     my $line = shift;
     my $extname = shift;
@@ -139,7 +151,15 @@ if (defined $WIN32) {
 
 header_generated();
 # Add PFN definitions first
-parse_gl_files( {$regexps{"pfn"} => \&add_definition} );
+my $defines = {$regexps{"pfn"} => \&add_definition};
+my $defines_check = {$regexps{"pfn"} => \&add_definition_check};
+my @params = ([$files{"gl"}[0], "GL_VERSION_1_0", "GL_", $defines],
+              [$files{"gl"}[1], "GL_VERSION_1_0", "GL_", $defines_check]);
+foreach my $entry (@params) {
+    parse_output(@$entry, 1);
+}
+
+
 # Then add absent definitions
 parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&create_func);
 

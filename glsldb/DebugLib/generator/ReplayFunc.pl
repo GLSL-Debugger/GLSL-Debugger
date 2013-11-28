@@ -45,13 +45,13 @@ sub createBodyHeader
 #ifdef _WIN32
 #include <windows.h>
 #endif /* _WIN32 */
-#include "glsldb/GL/gl.h"
-#include "glsldb/GL/glext.h"
+#include "GL/gl.h"
+#include "GL/glext.h"
 #ifndef _WIN32
-#include "glsldb/GL/glx.h"
-#include "glsldb/GL/glxext.h"
+#include "GL/glx.h"
+#include "GL/glxext.h"
 #else /* _WIN32 */
-#include "glsldb/GL/wglext.h"
+#include "GL/wglext.h"
 #include "trampolines.h"
 #endif /* _WIN32 */
 #include "debuglibInternal.h"

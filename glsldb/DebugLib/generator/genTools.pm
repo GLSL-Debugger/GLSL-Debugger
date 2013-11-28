@@ -23,6 +23,10 @@
 ################################################################################
 
 use Time::localtime;
+require genSettings;
+our %extname_matches;
+our %files;
+our @skip_defines;
 
 
 our %regexps = (
@@ -39,58 +43,19 @@ our %regexps = (
     "wglvar" => qr/^\s*#define\s+((WGL|ERROR)_\w+)\s+0x[0-9A-Fa-f]*/,
 );
 
-
-our %files = (
-    "gl" => ["../../GL/gl.h", "../../GL/glext.h"],
-    "glx" => ["../../GL/glx.h", "../../GL/glxext.h"],
-    "wgl" => ["../../GL/WinGDI.h", "../../GL/wglext.h"]
-);
-
-
-
 my $func_match = qr/^\s*(?:GLAPI\b|WINGDIAPI\b|extern\b)\s+\S.*\S\s*\([^)]*?$/;
-
-
-# Some extensions switches defined in comments, due to lack of #ifndef
-# for old gl versions. It must be checked when gl.h updates.
-my %extname_matches = (
-    # gl.h
-    " * Vertex Arrays  (1.1)" => "GL_VERSION_1_1",
-    " * Lighting" => "GL_VERSION_1_0",
-    "/* 1.1 functions */" => "GL_VERSION_1_1",
-    " * OpenGL 1.2" => "GL_VERSION_1_2",
-    " * GL_ARB_imaging" => "GL_ARB_imaging",
-    " * OpenGL 1.3" => "GL_VERSION_1_3",
-    # glx.h
-    " * GLX 1.1 and later:" => "GLX_VERSION_1_1",
-    "/* GLX 1.1 and later */" => "GLX_VERSION_1_1",
-    "/* GLX 1.2 and later */" => "GLX_VERSION_1_2",
-    " * GLX 1.3 and later:" => "GLX_VERSION_1_3",
-    "/* GLX 1.3 and later */" => "GLX_VERSION_1_3",
-    " * GLX 1.4 and later:" => "GLX_VERSION_1_4",
-    "** Events." => "GLX_VERSION_1_0",
-);
-
-my @skip_defines = (
-    "GL_GLEXT_PROTOTYPES"
-);
-
-my @ignore_blocks = (
-    "GL_OES_compressed_paletted_texture"
-);
-
-
 
 # I wanted to make it clear
 # Well, shit...
 sub parse_output {
-    my ($filename, $bextname, $api, $actions, $internal_only) = (@_);
+    my ($filename, $bextname, $api, $actions) = (@_);
     my ($ifdir, $indef) = (0, 1);
     my $extname = $bextname;
     my @definitions = ($extname);
     my $proto = $extname;
     my $api_re = qr/^#ifndef\s+($api\S+)/;
     my $api_defined = qr/^#ifdef\s+(\S+)/;
+    my $skip = 0;
 
     my $ifh;
     my $is_stdin = 0;
@@ -132,7 +97,7 @@ sub parse_output {
         }
 
         # Run each supplied regexp here
-        if (not $internal_only or $indef == $ifdir) {
+        if ($indef == $ifdir) {
             while (my ($regexp, $func) = each(%$actions) ) {
                 if (my @matches = /$regexp/){
                     $func->($_, $proto, @matches);
@@ -141,6 +106,11 @@ sub parse_output {
         }
 
         if (/^#endif/ and $ifdir) {
+            if ($skip > 0){
+                $skip--;
+                next;
+            }
+
             if ($ifdir == $indef){
                 $indef--;
                 $extname = pop @definitions;
@@ -150,14 +120,15 @@ sub parse_output {
         }
 
         if (/^#if/) {
+            if (/$api_defined/ and grep { /^$1$/ } @skip_defines){
+                $skip++;
+                next;
+            }
+
             $ifdir++;
             if (/$api_re/) {
-                if (not grep { /^$1$/ } @ignore_blocks){
-                    push @definitions, $extname;
-                    $extname = $1;
-                    $indef = $ifdir;
-                }
-            } elsif (/$api_defined/ and grep { /^$1$/ } @skip_defines) {
+                push @definitions, $extname;
+                $extname = $1;
                 $indef = $ifdir;
             }
         }
@@ -222,7 +193,7 @@ sub parse_gl_files {
     foreach my $entry (@params) {
         my $filenames = shift @$entry;
         foreach my $filename (@$filenames) {
-            parse_output($filename, @$entry, 1);
+            parse_output($filename, @$entry);
         }
     }
 }

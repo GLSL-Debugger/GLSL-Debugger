@@ -209,6 +209,8 @@ sub getDummyValue
         $arg = $tdarg;
     }
     if ($arg =~ /[*]|[\[]/) {
+        # No sized array in cast, only pointer
+        $arg =~ s/\[\d+\]/\*/;
         return "($arg)(void *)dirtyHack";
     } elsif ($arg =~ /struct|union/) {
         return "*($arg *)(void *)dirtyHack";
