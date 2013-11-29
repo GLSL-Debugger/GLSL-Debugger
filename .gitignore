@@ -21,6 +21,7 @@ Makefile
 # output & generated stuff
 bin
 lib
+glsldb/DebugLib/generated/
 GLSLCompiler/glslang/MachineIndependent/Gen_glslang.cpp
 GLSLCompiler/glslang/MachineIndependent/Gen_glslang_tab.cpp
 GLSLCompiler/glslang/MachineIndependent/glslang.output
@@ -35,22 +36,6 @@ qrc_*.cxx
 glsldb/glslDevil.qrc.depends
 
 *.bak
-
-glsldb/glenumerants/glxenumerants.h
-
-glsldb/glenumerants/enumerants.h
-
-glsldb/DebugLib/functionList.c
-
-glsldb/DebugLib/replayFunction.c
-
-glsldb/DebugLib/getProcAddressHook.inc
-
-glsldb/DebugLib/functionsAllowedInBeginEnd.pl
-
-glsldb/DebugLib/functionPointerTypes.inc
-
-glsldb/DebugLib/functionHooks.inc
 
 glsldb/.DS_Store
 
