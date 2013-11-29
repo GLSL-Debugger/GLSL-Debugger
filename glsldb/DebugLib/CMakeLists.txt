@@ -1,69 +1,123 @@
+find_package(Perl REQUIRED)
 find_package(DL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
-	find_package(X11 REQUIRED)
+    find_package(X11 REQUIRED)
 endif()
 
-set(DLSYM_SRC
-	libdlsym.c)
+
+set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
+set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+
+set(DLSYM_SRC libdlsym.c)
+set(ENUMERANTS_SRC glenumerants.c)
+set(BEGINENDTEST_SRC ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c)
+
+set(GLSLDEBUG_GEN_SRC
+    ${GENERATOR_OUTPUT_DIR}/replayFunction.c
+    ${GENERATOR_OUTPUT_DIR}/functionList.c
+)
 
 set(GLSLDEBUG_SRC
-	libglsldebug.c
-	streamRecorder.c
-	streamRecording.c
-	replayFunction.c
-	glstate.c
-	readback.c
-	shader.c
-	error.c
-	memory.c
-	hooks.c
-	functionList.c
-	queries.c
-	preExecution.c
-	postExecution.c
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genGetProcAddressHook.pl 
-	OUTPUT_FILE getProcAddressHook.inc
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionPointerTypes.pl 
-	OUTPUT_FILE functionPointerTypes.inc
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genReplayFunc.pl 
-	OUTPUT_FILE replayFunction.c
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionList.pl 
-	OUTPUT_FILE functionList.c
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE mergeAllowedInBeginEndList.pl 
-	OUTPUT_FILE functionsAllowedInBeginEnd.pl
-)
-execute_process(COMMAND perl 
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-	INPUT_FILE genFunctionHooks.pl 
-	OUTPUT_FILE functionHooks.inc
+    libglsldebug.c
+    streamRecorder.c
+    streamRecording.c
+    glstate.c
+    readback.c
+    shader.c
+    error.c
+    memory.c
+    hooks.c
+    queries.c
+    preExecution.c
+    postExecution.c
+    ${GLSLDEBUG_GEN_SRC}
 )
 
-include_directories(${PROJECT_SOURCE_DIR}/glsldb
-	${PROJECT_SOURCE_DIR}/glsldb/utils
-	${X11_INCLUDE_DIR}
+
+# Generate enumerants
+message(STATUS "Generate enumerants")
+execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glenumerants.h
 )
 
-# FIXME
-# The makefiles have a target to generate a list of allowed functions between begin/end. 
-add_library(functionList SHARED functionList.c)
+execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m glx
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
+)
+
+if(WIN32)
+execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m wgl
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/wglenumerants.h
+)
+endif()
+
+
+# Generate generator for list of allowed functions between begin/end
+message(STATUS "Generate allowed function list generator.")
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE BeginEndFunctionTest.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c
+)
+
+# Generate debug library
+message(STATUS "Generate debug library")
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE GetProcAddressHook.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc
+)
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE FunctionPointerTypes.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc
+)
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE ReplayFunc.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/replayFunction.c
+)
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE FunctionList.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionList.c
+)
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE mergeAllowedInBeginEndList.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm
+)
+execute_process(COMMAND ${PERL_EXECUTABLE}
+    WORKING_DIRECTORY ${GENERATOR_DIR}
+    INPUT_FILE FunctionHooks.pl
+    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
+)
+
+# TODO: windows command for trampolines. Not sure, how much files must
+# be generated from it. It require to check VS project for this info.
+
+
+include_directories(
+    ${PROJECT_SOURCE_DIR}/glsldb
+    ${PROJECT_SOURCE_DIR}/glsldb/DebugLib
+    ${PROJECT_SOURCE_DIR}/glsldb/utils
+    ${X11_INCLUDE_DIR}
+)
+
+
+add_library(glenumerants STATIC ${ENUMERANTS_SRC})
+
+add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
+target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+
+add_library(functionList SHARED ${GENERATOR_OUTPUT_DIR}/functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
 target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})

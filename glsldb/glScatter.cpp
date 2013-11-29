@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -33,7 +33,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define GLX_GLXEXT_PROTOTYPES
 #define GLH_EXT_SINGLE_FILE
-//#include "glh/glh_extensions.h"
 #include <GL/glew.h>
 
 /* get rid of some symbols defined in X.h included from glx.h that conflict e.g. with QT */
@@ -76,7 +75,7 @@ GLScatter::GLScatter(QWidget *parent)
     m_iNumPoints = 0;
     m_pVertices  = NULL;
     m_pColors    = NULL;
-	m_psize = 0.01;
+    m_psize = 0.01;
 }
 
 GLScatter::~GLScatter()
@@ -103,28 +102,28 @@ void GLScatter::setClearColor(QColor i_qColor)
 void GLScatter::setData(float *positions, float *colors, int numPoints)
 {
     m_iNumPoints = numPoints;
-	m_pVertices = positions;
-	m_pColors = colors;
+    m_pVertices = positions;
+    m_pColors = colors;
 }
 
 static void printShaderInfoLog(GLuint shader)
 {
-	int length;
-	GLchar *log;
+    int length;
+    GLchar *log;
 
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-	if (length > 1) {
-		if (!(log = (GLchar*)malloc(length*sizeof(GLchar)))) {
-			fprintf(stderr, "Allocation of mem for GLSL info log failed\n");
-			exit(1);
-		}
-		glGetShaderInfoLog(shader, length, NULL, log);
-		fprintf(stderr, "SHADER INFOLOG:\n%s\n", log);
-		free(log);
-	}
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+    if (length > 1) {
+        if (!(log = (GLchar*)malloc(length*sizeof(GLchar)))) {
+            fprintf(stderr, "Allocation of mem for GLSL info log failed\n");
+            exit(1);
+        }
+        glGetShaderInfoLog(shader, length, NULL, log);
+        fprintf(stderr, "SHADER INFOLOG:\n%s\n", log);
+        free(log);
+    }
 }
 
-static int initGLSLShader(const char *src, GLuint *shader, GLenum type) 
+static int initGLSLShader(const char *src, GLuint *shader, GLenum type)
 {
     GLint pstatus;
 
@@ -151,19 +150,19 @@ static int initGLSLShader(const char *src, GLuint *shader, GLenum type)
 
 static void printProgramInfoLog(GLuint shader)
 {
-	int length;
-	GLchar *log;
+    int length;
+    GLchar *log;
 
-	glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &length);
-	if (length > 1) {
-		if (!(log = (GLchar*)malloc(length*sizeof(GLchar)))) {
-			fprintf(stderr, "Allocation of mem for GLSL info log failed\n");
-			exit(1);
-		}
-		glGetProgramInfoLog(shader, length, NULL, log);
-		fprintf(stderr, "PROGRAM INFOLOG:\n%s\n", log);
-		free(log);
-	}
+    glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &length);
+    if (length > 1) {
+        if (!(log = (GLchar*)malloc(length*sizeof(GLchar)))) {
+            fprintf(stderr, "Allocation of mem for GLSL info log failed\n");
+            exit(1);
+        }
+        glGetProgramInfoLog(shader, length, NULL, log);
+        fprintf(stderr, "PROGRAM INFOLOG:\n%s\n", log);
+        free(log);
+    }
 }
 
 void GLScatter::initializeGL()
@@ -178,10 +177,6 @@ void GLScatter::initializeGL()
       fprintf(stderr, "E: GL_VERSION 2.0 required\n");
       exit(1);
     }
-    // if (!glh_init_extensions("GL_VERSION_2_0 ")) {
-    //     fprintf(stderr, "E: GL_VERSION 2.0 required\n");
-    //     exit(1);
-    // }
 
     qglClearColor(m_qClearColor);
     glEnable(GL_DEPTH_TEST);
@@ -191,18 +186,18 @@ void GLScatter::initializeGL()
     GLuint fragShader;
     QFile vertProg(":/shaders/shaders/pointbased_spheres.vp");
     QFile fragProg(":/shaders/shaders/pointbased_spheres.fp");
-	if (!vertProg.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		fprintf(stderr, "E: Failed to open vertex shader ressource\n");
-		exit(1);
-	}
-	if (!fragProg.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		fprintf(stderr, "E: Failed to open fragment shader ressource\n");
-		exit(1);
-	}
-	QByteArray vertProgSrc = vertProg.readAll();
-	QByteArray fragProgSrc = fragProg.readAll();
-	vertProg.close();
-	fragProg.close();
+    if (!vertProg.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        fprintf(stderr, "E: Failed to open vertex shader ressource\n");
+        exit(1);
+    }
+    if (!fragProg.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        fprintf(stderr, "E: Failed to open fragment shader ressource\n");
+        exit(1);
+    }
+    QByteArray vertProgSrc = vertProg.readAll();
+    QByteArray fragProgSrc = fragProg.readAll();
+    vertProg.close();
+    fragProg.close();
 
     initGLSLShader(vertProgSrc.data(), &vertShader, GL_VERTEX_SHADER);
     initGLSLShader(fragProgSrc.data(), &fragShader, GL_FRAGMENT_SHADER);
@@ -263,10 +258,10 @@ void GLScatter::paintGL()
       glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
       glVertex3f(1.0f, 1.0f, 1.0f);
       glVertex3f(0.0f, 1.0f, 1.0f);
-      
+
       glVertex3f(1.0f, 1.0f, 1.0f);
       glVertex3f(1.0f, 0.0f, 1.0f);
-      
+
       glVertex3f(1.0f, 1.0f, 1.0f);
       glVertex3f(1.0f, 1.0f, 0.0f);
 
@@ -284,21 +279,21 @@ void GLScatter::paintGL()
 
       glVertex3f(0.0f, 0.0f, 1.0f);
       glVertex3f(0.0f, 1.0f, 1.0f);
-      
+
       glVertex3f(0.0f, 0.0f, 1.0f);
       glVertex3f(1.0f, 0.0f, 1.0f);
     glEnd();
 
     glUseProgram(m_Shader);
-    glUniform4f(glGetUniformLocation(m_Shader, "vpParams"), 
+    glUniform4f(glGetUniformLocation(m_Shader, "vpParams"),
                 2.0/width(), 2.0/height(), 0.5*width(), 0.5*height());
-   	glUniform1f(glGetUniformLocation(m_Shader, "psize"), m_psize);
-	
+    glUniform1f(glGetUniformLocation(m_Shader, "psize"), m_psize);
+
 #ifdef DEBUG
-	fprintf(stderr, "m_iNumPoints = %i m_pVertices=%p m_pColors=%p m_psize=%f\n",
-			m_iNumPoints, m_pVertices, m_pColors, m_psize);
+    fprintf(stderr, "m_iNumPoints = %i m_pVertices=%p m_pColors=%p m_psize=%f\n",
+            m_iNumPoints, m_pVertices, m_pColors, m_psize);
 #endif
-	
+
     if (m_iNumPoints && m_pVertices && m_pColors) {
         glEnable(GL_VERTEX_ARRAY);
         glEnable(GL_COLOR_ARRAY);
@@ -313,7 +308,7 @@ void GLScatter::paintGL()
 
 void GLScatter::resizeGL(int width, int height)
 {
-	float aspect = width/(float)height;
+    float aspect = width/(float)height;
 
     glViewport(0, 0, width, height);
 
@@ -340,10 +335,10 @@ void GLScatter::mouseMoveEvent(QMouseEvent *event)
     view.x = 0.0;
     view.y = 0.0;
     view.z = -1.0;
-    
+
     rotAxis = Vector3_cross(mouseVector, view);
     Vector3_normalize(&rotAxis);
-    
+
     if (event->buttons() & Qt::LeftButton) {
         Quaternion rot = Quaternion_fromAngleAxis(SQR(mouseVector.x) + SQR(mouseVector.y), rotAxis);
         m_Rotation = Quaternion_mult(rot, m_Rotation);
@@ -355,6 +350,6 @@ void GLScatter::mouseMoveEvent(QMouseEvent *event)
     }
     m_qLastMousePos = event->pos();
 
-	updateGL();
+    updateGL();
 }
 

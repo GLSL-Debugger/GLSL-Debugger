@@ -1,23 +1,24 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 #   * Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
-# 
+#
 #   * Redistributions in binary form must reproduce the above copyright notice, this
-# 	list of conditions and the following disclaimer in the documentation and/or
-# 	other materials provided with the distribution.
-# 
+#   list of conditions and the following disclaimer in the documentation and/or
+#   other materials provided with the distribution.
+#
 #   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-# 	of its contributors may be used to endorse or promote products derived from
-# 	this software without specific prior written permission.
-# 
+#   of its contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,28 +32,12 @@
 #
 ################################################################################
 
-# this list contains functions for which a special pre-execution function exits
-# which has to be called just before executing the original functions in a
-# function hook. These functions have to be provided in preExecution.c and have
-# to be called *_PREEXECUTE. They take pointer arguments to all parameters of
-# the original function
-@preExecutionList = (
-	glBeginQuery,
-	glBeginQueryARB,
-	glBeginOcclusionQueryNV,
-);
-
-# this list contains functions for which a special post-execution function exits
-# which has to be called just after executing the original functions in a
-# function hook. These functions have to be provided in postExecution.c and have
-# to be called *_POSTEXECUTE. They take pointer arguments to all parameters of
-# the original function, the result variable, and the error code of the original
-# call
-@postExecutionList = (
-	glGetQueryObjectiv,
-	glGetQueryObjectuiv,
-	glGetQueryObjectivARB,
-	glGetQueryObjectuivARB,
-	glGetOcclusionQueryivNV,
-	glGetOcclusionQueryuivNV,
-);
+print "our \@allowedInBeginEnd = (\n";
+foreach my $filename (glob("functions/*")) {
+    open(IN, $filename) || die "Couldn’t read $filename: $!";
+    while (<IN>) {
+        print if /^[^#]/ and !$save{$_}++;
+    }
+    close(IN);
+}
+print ");\n";

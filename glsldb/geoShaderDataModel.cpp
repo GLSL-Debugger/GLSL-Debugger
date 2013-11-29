@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
   #include "GL/gl.h"
   #include "GL/glext.h"
-  #include "glenumerants/glenumerants.h"
+  #include "DebugLib/glenumerants.h"
   #include "dbgprint.h"
 }
 
