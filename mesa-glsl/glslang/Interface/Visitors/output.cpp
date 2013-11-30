@@ -395,7 +395,104 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
    indent();
 }
 
-extern const char *const ir_expr_operator_strs[];
+static const char *const operator_glsl_strs[] = {
+   "~",
+   "!",
+   "-",
+   "abs",
+   "sign",
+   "1.0/",
+   "inversesqrt",
+   "sqrt",
+   "exp",
+   "log",
+   "exp2",
+   "log2",
+   "int",	// f2i
+   "int",	// f2u
+   "float",	// i2f
+   "bool",	// f2b
+   "float",	// b2f
+   "bool",	// i2b
+   "int",	// b2i
+   "float",	// u2f
+   "int",	// i2u
+   "int",	// u2i
+   "float",	// bit i2f
+   "int",	// bit f2i
+   "float",	// bit u2f
+   "int",	// bit f2u
+   "any",
+   "trunc",
+   "ceil",
+   "floor",
+   "fract",
+   "round_even",
+   "sin",
+   "cos",
+   "sin", // reduced
+   "cos", // reduced
+   "dFdx",
+   "dFdy",
+   "packSnorm2x16",
+   "packSnorm4x8",
+   "packUnorm2x16",
+   "packUnorm4x8",
+   "packHalf2x16",
+   "unpackSnorm2x16",
+   "unpackSnorm4x8",
+   "unpackUnorm2x16",
+   "unpackUnorm4x8",
+   "unpackHalf2x16",
+   "unpackHalf2x16_split_x_TODO",
+   "unpackHalf2x16_split_y_TODO",
+   "bitfield_reverse",
+   "bitCount",
+   "findMSB",
+   "findLSB",
+   "noise",
+   "+",
+   "-",
+   "*",
+   "imul_high_TODO",
+   "/",
+   "carry_TODO",
+   "borrow_TODO",
+   "mod",
+   "<",
+   ">",
+   "<=",
+   ">=",
+   "equal",
+   "notEqual",
+   "==",
+   "!=",
+   "<<",
+   ">>",
+   "&",
+   "^",
+   "|",
+   "&&",
+   "^^",
+   "||",
+   "dot",
+   "min",
+   "max",
+   "pow",
+   "packHalf2x16_split_TODO",
+   "bfm_TODO",
+   "ubo_load_TODO",
+   "ldexp_TODO",
+   "vector_extract_TODO",
+   "fma",
+   "lrp",
+   "csel_TODO",
+   "bfi_TODO",
+   "bitfield_extract_TODO",
+   "vector_insert_TODO",
+   "bitfield_insert_TODO",
+   "vector_TODO",
+};
 
 static const char *const operator_vec_glsl_strs[] = {
 	"lessThan",
@@ -439,7 +536,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		} else if (ir->operation == ir_unop_rcp) {
 			ralloc_asprintf_append (&buffer, "(1.0/(");
 		} else {
-			ralloc_asprintf_append (&buffer, "%s(", ir_expr_operator_strs[ir->operation]);
+			ralloc_asprintf_append (&buffer, "%s(", operator_glsl_strs[ir->operation]);
 		}
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
@@ -470,7 +567,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		if (ir->type->is_vector() && (ir->operation >= ir_binop_less && ir->operation <= ir_binop_nequal))
 			ralloc_asprintf_append (&buffer, "%s (", operator_vec_glsl_strs[ir->operation-ir_binop_less]);
 		else
-			ralloc_asprintf_append (&buffer, "%s (", ir_expr_operator_strs[ir->operation]);
+			ralloc_asprintf_append (&buffer, "%s (", operator_glsl_strs[ir->operation]);
 
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
@@ -487,7 +584,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
 
-		ralloc_asprintf_append (&buffer, " %s ", ir_expr_operator_strs[ir->operation]);
+		ralloc_asprintf_append (&buffer, " %s ", operator_glsl_strs[ir->operation]);
 
 		if (ir->operands[1])
 			ir->operands[1]->accept(this);
@@ -496,7 +593,7 @@ void ir_output_traverser_visitor::visit(ir_expression *ir)
 	else
 	{
 		// ternary op
-		ralloc_asprintf_append (&buffer, "%s (", ir_expr_operator_strs[ir->operation]);
+		ralloc_asprintf_append (&buffer, "%s (", operator_glsl_strs[ir->operation]);
 		if (ir->operands[0])
 			ir->operands[0]->accept(this);
 		ralloc_asprintf_append (&buffer, ", ");
@@ -910,6 +1007,15 @@ void ir_output_traverser_visitor::visit(ir_constant *ir)
 	    ralloc_asprintf_append (&buffer, ", ");
 	 ir->get_array_element(i)->accept(this);
       }
+   } else if (ir->type->is_record()) {
+      bool first = true;
+      foreach_iter(exec_list_iterator, iter, ir->components){
+	  if (!first)
+	    ralloc_asprintf_append (&buffer, ", ");
+	  first = false;
+	  ir_constant* inst = (ir_constant*)iter.get();
+	  inst->accept(this);
+      }
    } else {
       bool first = true;
       for (unsigned i = 0; i < ir->type->components(); i++) {
@@ -1085,6 +1191,28 @@ ir_output_traverser_visitor::visit(ir_discard *ir)
    }
 }
 
+static void print_selection_instructions(exec_list* list, ir_if* ir, ir_output_traverser_visitor* it)
+{
+    it->indentation++;
+    if (ir->debug_target && it->cgOptions == DBG_CG_SELECTION_CONDITIONAL
+	    && ir->debug_state_internal == ir_dbg_if_condition_passed)	{
+	/* Add code to colorize condition */
+	it->indent();
+	//DBG_CG_COVERAGE
+	cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions,
+		    it->cgbl, it->vl, it->dbgStack, true);
+	ralloc_asprintf_append(&it->buffer, ";\n");
+    }
+
+    foreach_iter(exec_list_iterator, iter, *list){
+	ir_instruction * const inst = (ir_instruction *) iter.get();
+	it->indent();
+	inst->accept(it);
+	ralloc_asprintf_append(&it->buffer, ";\n");
+    }
+    it->indentation--;
+    it->indent();
+}
 
 void
 ir_output_traverser_visitor::visit(ir_if *ir)
@@ -1109,7 +1237,7 @@ ir_output_traverser_visitor::visit(ir_if *ir)
                indent();
                break;
             case ir_dbg_if_condition_passed:
-            case ir_dbg_if_if:
+            case ir_dbg_if_then:
             case ir_dbg_if_else:
                /* Add temporary register for condition */
                /* Fix: trigraph initialized condition register
@@ -1145,51 +1273,13 @@ ir_output_traverser_visitor::visit(ir_if *ir)
       ir->condition->accept(this);
 
    ralloc_asprintf_append (&buffer, ") {\n");
-   indentation++;
-
-   if( !ir->then_instructions.is_empty() && ir->debug_target &&
-         this->cgOptions == DBG_CG_SELECTION_CONDITIONAL &&
-         ir->debug_state_internal == ir_dbg_if_condition_passed) {
-      /* Add code to colorize condition */
-      indent();
-      cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true);
-      ralloc_asprintf_append (&buffer, ";\n");
-   }
-
-   foreach_iter(exec_list_iterator, iter, ir->then_instructions) {
-      ir_instruction *const inst = (ir_instruction *) iter.get();
-
-      indent();
-      inst->accept(this);
-      ralloc_asprintf_append (&buffer, ";\n");
-   }
-
-   indentation--;
-   indent();
+   print_selection_instructions(&ir->then_instructions, ir, this);
    ralloc_asprintf_append (&buffer, "}");
 
    if (!ir->else_instructions.is_empty())
    {
-	   if( ir->debug_target && this->cgOptions == DBG_CG_SELECTION_CONDITIONAL
-	       && ir->debug_state_internal == ir_dbg_if_condition_passed ){
-	      /* Add code to colorize condition */
-	      indent();
-	      cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, true );
-	      ralloc_asprintf_append (&buffer, ";\n");
-	   }
-
 	   ralloc_asprintf_append (&buffer, " else {\n");
-	   indentation++;
-
-	   foreach_iter(exec_list_iterator, iter, ir->else_instructions) {
-		  ir_instruction *const inst = (ir_instruction *) iter.get();
-
-		  indent();
-		  inst->accept(this);
-		  ralloc_asprintf_append (&buffer, ";\n");
-	   }
-	   indentation--;
-	   indent();
+       	   print_selection_instructions(&ir->else_instructions, ir, this);
 	   ralloc_asprintf_append (&buffer, "}");
    }
 }

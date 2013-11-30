@@ -273,14 +273,14 @@ void ir_traverse_visitor::visit(ir_if* ir)
 			visit = this->visitIr( ir );
 
 		if( visit ){
-			if( ir->debug_state_internal == ir_dbg_if_if )
+			if( ir->debug_state_internal == ir_dbg_if_then )
 				this->visit( &ir->then_instructions );
 			if( ir->debug_state_internal == ir_dbg_if_else )
 				this->visit( &ir->else_instructions );
 		}
 
 		/* Visit node again for preparation of pass */
-		if( ir->debug_state_internal == ir_dbg_if_if
+		if( ir->debug_state_internal == ir_dbg_if_then
 				|| ir->debug_state_internal == ir_dbg_if_else )
 			visit = this->visitIr( ir );
 

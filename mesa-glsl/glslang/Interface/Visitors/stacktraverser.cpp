@@ -92,7 +92,7 @@ bool ir_stack_traverser_visitor::visitIr(ir_if* ir)
 				this->dbgStack.push_back( ir );
 				ir->condition->accept(this);
 				break;
-			case ir_dbg_if_if:
+			case ir_dbg_if_then:
 				this->dbgStack.push_back( ir );
 				this->visit(&ir->then_instructions);
 				break;

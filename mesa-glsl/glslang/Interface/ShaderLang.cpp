@@ -55,7 +55,7 @@ static void initialize_context(struct gl_context *ctx, const TBuiltInResource* r
 
 	ctx->Const.MaxDrawBuffers = resources->maxDrawBuffers;
 	ctx->Const.MaxGeometryOutputVertices = resources->geoVerticesOut;
-	// I saw it in mailing-list in the latest mesa git, I think. Or not.
+	// I saw it in mailing list in the latest mesa git, I think. Or not.
 	// But anyway I cannot find anything in current headers and we using only stable mesa now.
 	//	int geoVerticesIn;
 	//	int geoInputType;

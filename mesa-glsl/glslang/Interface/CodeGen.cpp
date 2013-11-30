@@ -419,7 +419,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
     {
         switch ( target->as_if()->debug_state_internal ) {
             case ir_dbg_if_condition_passed:
-            case ir_dbg_if_if:
+            case ir_dbg_if_then:
             case ir_dbg_if_else:
                 cgInit(CG_TYPE_CONDITION, NULL, vl, language);
                 break;
@@ -432,6 +432,15 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 					dbgCgOptions, vl, cgbl, &(it1pass.dbgStack));
     it.append_version();
 
+    /* I have some problems with locale-dependent %f interpretation in printf
+     * Not sure, whose fault it is, qt or some line of code in debugger initialization.
+     * I added this crutch to resolve it, but it must be eventually rewritten.
+     * Well... fuck you, something.
+     * P.S. You cannot have Gujarati comments in generated shaders now.
+     */
+    char* old_locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "POSIX");
+
     /* Add declaration of all neccessary types */
     cgAddDeclaration(CG_TYPE_ALL, &it.buffer, language);
 
@@ -442,6 +451,9 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
      * - do the actual code generation
      */
     it.run(list);
+
+    /* restore locale */
+    setlocale(LC_NUMERIC, old_locale);
 
     /* Unset target again */
     if (target)

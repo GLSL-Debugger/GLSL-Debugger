@@ -562,7 +562,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 								if( ir->else_instructions.is_empty() ){
 									// It looks like it was this weird way before. Not sure
 									// this branch will ever execute
-									ir->debug_state_internal = ir_dbg_if_if;
+									ir->debug_state_internal = ir_dbg_if_then;
 								}else{
 									ir->debug_state_internal = ir_dbg_if_else;
 									// check other branch for discards
@@ -572,7 +572,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 									}
 								}
 							}else{
-								ir->debug_state_internal = ir_dbg_if_if;
+								ir->debug_state_internal = ir_dbg_if_then;
 								// check other branch for discards
 								if( containsDiscard( &ir->else_instructions ) ){
 									this->discardPassed = true;
@@ -616,16 +616,15 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 						setDbgResultRange( result.range, ir->yy_location );
 						setGobalScope( get_scope( ir ) );
 						return false;
-					case ir_dbg_if_if:
+					case ir_dbg_if_then:
 					case ir_dbg_if_else:
 					{
 						VPRINT( 4, "\t -------- set condition pass ---------\n" );
 						// Debugging of condition finished! Take care of the
 						// non-debugged branch - if there is one - and copy
 						// it's changeables!
-						exec_list* path =
-								ir->debug_state_internal == ir_dbg_if_if ?
-										&ir->then_instructions : &ir->else_instructions;
+						exec_list* path = ir->debug_state_internal == ir_dbg_if_then ?
+									&ir->then_instructions : &ir->else_instructions;
 						addShChangeablesFromList( this, path );
 						ir->debug_state_internal = ir_dbg_if_unset;
 						return false;

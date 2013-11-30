@@ -482,8 +482,7 @@ ir_expression::get_num_operands(ir_expression_operation op)
    return 0;
 }
 
-// Mesa, don't hide it, please
-const char *const ir_expr_operator_strs[] = {
+static const char *const operator_strs[] = {
    "~",
    "!",
    "neg",
@@ -584,9 +583,9 @@ const char *const ir_expr_operator_strs[] = {
 
 const char *ir_expression::operator_string(ir_expression_operation op)
 {
-   assert((unsigned int) op < Elements(ir_expr_operator_strs));
-   assert(Elements(ir_expr_operator_strs) == (ir_quadop_vector + 1));
-   return ir_expr_operator_strs[op];
+   assert((unsigned int) op < Elements(operator_strs));
+   assert(Elements(operator_strs) == (ir_quadop_vector + 1));
+   return operator_strs[op];
 }
 
 const char *ir_expression::operator_string()
@@ -613,9 +612,9 @@ depth_layout_string(ir_depth_layout layout)
 ir_expression_operation
 ir_expression::get_operator(const char *str)
 {
-   const int operator_count = sizeof(ir_expr_operator_strs) / sizeof(ir_expr_operator_strs[0]);
+   const int operator_count = sizeof(operator_strs) / sizeof(operator_strs[0]);
    for (int op = 0; op < operator_count; op++) {
-      if (strcmp(str, ir_expr_operator_strs[op]) == 0)
+      if (strcmp(str, operator_strs[op]) == 0)
 	 return (ir_expression_operation) op;
    }
    return (ir_expression_operation) -1;

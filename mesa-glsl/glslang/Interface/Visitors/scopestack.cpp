@@ -183,7 +183,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_if* ir)
             if (ir->condition)
             	ir->condition->accept(this);
             break;
-        case ir_dbg_if_if:
+        case ir_dbg_if_then:
             if (ir->condition)
             	ir->condition->accept(this);
             this->visit(&ir->then_instructions);

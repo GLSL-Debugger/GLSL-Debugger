@@ -164,7 +164,7 @@ enum ir_dbg_state_internal_if {
     ir_dbg_if_init,              // already visited once
     ir_dbg_if_condition,         // condition in process
     ir_dbg_if_condition_passed,  // condition processed
-    ir_dbg_if_if,                // descided to debug true branch
+    ir_dbg_if_then,              // descided to debug true branch
     ir_dbg_if_else,              // descided to debug false branch
     ir_dbg_if_passed             // debugging is past selection
 };
@@ -1543,8 +1543,6 @@ enum ir_expression_operation {
     */
    ir_last_opcode = ir_quadop_vector
 };
-
-extern const char *const ir_expr_operator_strs[];
 
 class ir_expression : public ir_rvalue {
 public:
