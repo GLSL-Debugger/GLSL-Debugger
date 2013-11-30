@@ -1,5 +1,4 @@
 add_subdirectory(DebugLib)
-add_subdirectory(glenumerants)
 add_subdirectory(DebugFunctions)
 add_subdirectory(utils)
 
@@ -9,8 +8,8 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
-	find_package(X11 REQUIRED)
-	find_package(Threads REQUIRED)
+    find_package(X11 REQUIRED)
+    find_package(Threads REQUIRED)
 endif()
 
 include(${QT_USE_FILE})
@@ -26,11 +25,11 @@ qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
 qt4_add_resources(RES_OUTFILES ${RES_FILES})
 
 set(SRC
-	${SRC_C}
-	${SRC_CPP}
-	${MOC_OUTFILES}
-	${UI_OUTFILES}
-	${RES_OUTFILES}
+    ${SRC_C}
+    ${SRC_CPP}
+    ${MOC_OUTFILES}
+    ${UI_OUTFILES}
+    ${RES_OUTFILES}
 )
 
 include_directories(${OPENGL_INCLUDE_DIR}
@@ -57,7 +56,7 @@ endif()
 
 
 if(GLSLDB_LINUX)
-	#add_definitions(-DUNIX)
+    #add_definitions(-DUNIX)
 endif()
 
 add_executable(glsldb ${SRC})

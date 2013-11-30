@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 #include <string>
-
 #include "debuglib.h"
 
 typedef std::unordered_map<std::string, GLFunctionList*> GLFunctionsMap;

@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -47,38 +47,38 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../utils/hash.h"
 #include "GL/glx.h"
 
-#include "functionPointerTypes.inc"
+#include "generated/functionPointerTypes.inc"
 
 #define TRANSFORM_FEEDBACK_BUFFER_SIZE (1<<24)
 
 typedef struct {
-	void (*(*origGlXGetProcAddress)(const GLubyte *))(void);
-	StreamRecorder recordedStream;
-	int errorCheckAllowed;
+    void (*(*origGlXGetProcAddress)(const GLubyte *))(void);
+    StreamRecorder recordedStream;
+    int errorCheckAllowed;
 #ifndef _WIN32
-	pthread_mutex_t lock;
+    pthread_mutex_t lock;
 #else /* _WIN32 */
-	CRITICAL_SECTION lock;
+    CRITICAL_SECTION lock;
 #endif /* _WIN32 */
-	Hash queries;
+    Hash queries;
 } Globals;
 
 DBGLIBLOCAL int checkGLVersionSupported(int majorVersion, int minorVersion);
 DBGLIBLOCAL int checkGLExtensionSupported(const char *extension);
 
-typedef enum {TFBVersion_None, TFBVersion_NV, TFBVersion_EXT} TFBVersion;  
+typedef enum {TFBVersion_None, TFBVersion_NV, TFBVersion_EXT} TFBVersion;
 DBGLIBLOCAL TFBVersion getTFBVersion();
 
 DBGLIBLOCAL void (*getOrigFunc(const char *fname))(void);
 
 #ifdef _WIN32
 /* #define ORIG_GL(fname) (Orig##fname) */
-/* 
+/*
  * mueller: If attaching to a process, the Orig* of extension functions will
  * not be intialised because the debugged process probably already has retrieved
- * the extension pointers it needs and stored in local variables. We can use 
- * getOrigFunc to lazily initialse our Orig* function pointer using the 
- * getProcAddressHook function if the Orig* function is NULL. However, I think 
+ * the extension pointers it needs and stored in local variables. We can use
+ * getOrigFunc to lazily initialse our Orig* function pointer using the
+ * getProcAddressHook function if the Orig* function is NULL. However, I think
  * this is a bit hugly ...
  */
 /* TODO: If the application saved its own pointer to extension function, will
@@ -111,9 +111,9 @@ DBGLIBLOCAL int setGLErrorCode(void);
 DBGLIBLOCAL void (*glXGetProcAddressHook(const GLubyte *n))(void);
 
 DBGLIBLOCAL void (*getDbgFunction(void))(void);
-	
+
 DBGLIBLOCAL void storeFunctionCall(const char *fname, int numArgs, ...);
-	
+
 DBGLIBLOCAL void storeResultOrError(unsigned int error, void *result, int type);
 
 DBGLIBLOCAL void storeResult(void *result, int type);

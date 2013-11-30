@@ -1,5 +1,6 @@
 ################################################################################
 #
+# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -31,64 +32,80 @@
 #
 ################################################################################
 
-require "argumentListTools.pl";
+require prePostExecuteList;
+require genTools;
+require genTypes;
+our %regexps;
 
-sub createBody
+
+sub createBodyHeader
 {
+    print '#include <stdio.h>
+#include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+#include "GL/gl.h"
+#include "GL/glext.h"
+#ifndef _WIN32
+#include "GL/glx.h"
+#include "GL/glxext.h"
+#else /* _WIN32 */
+#include "GL/wglext.h"
+#include "trampolines.h"
+#endif /* _WIN32 */
+#include "debuglibInternal.h"
+#include "streamRecording.h"
+#include "replayFunction.h"
+
+void replayFunctionCall(StoredCall *f, int final)
+{
+';
+}
+
+sub createBodyFooter
+{
+    print '    {
+        fprintf(stderr, "Cannot replay %s: unknown function\n", f->fname);
+    }
+}
+';
+}
+
+sub createFunctionHook
+{
+    my $line = shift;
+    my $extname = shift;
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
-    my $isExtFunction = shift;
+    my $ucfname = uc($fname);
     my @arguments = buildArgumentList($argString);
-    my $pfname = join("","PFN",uc($fname),"PROC");
+    my $argOutput = arguments_types_array($fname, "f->arguments", @arguments);
 
-    if ($#arguments > 1 || @arguments[0] !~ /^void$|^$/) {
-        for (my $i = 0; $i <= $#arguments; $i++) {
-            if (@arguments[$i] =~ /[*]$/) {
-                if ($fname !~ /gl\D+([1234])\D{1,2}v[A-Z]*/ &&
-                    $fname !~ /^glGen/ &&
-                    $fname !~ /^glGet/ &&
-                    $fname !~ /^glAre/) {
-                    print "int $fname";
-                    print "_getArg$i";
-                    print "Size($argString);\n";
-                }
-            }
+    printf "#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_REPLAY || DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+    if (!strcmp(\"$fname\", (char*)f->fname)) {
+#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
+        if (final) {
+#endif
+            ORIG_GL($fname)($argOutput);
+#if DBG_STREAM_HINT_$ucfname == DBG_RECORD_AND_FINAL
         }
+#endif
+        return;
     }
+#endif
+";
 }
 
-$extname = "GL_VERSION_1_0";
 
-while (<>) {
+header_generated();
+createBodyHeader();
 
-    # create core hook
-    if (/^\s*WINGDIAPI\s+(\S.*\S)\s+(?:GL)?APIENTRY\s+(\S+)\s*\((.*)\)/) {
-        createBody($1, $2, $3, 0);
-    }
+my $gl_actions = {
+    $regexps{"wingdi"} => \&createFunctionHook,
+    $regexps{"glapi"} => \&createFunctionHook
+};
+parse_gl_files($gl_actions);
 
-    #~ # create extension hook
-    #~ if ($indefinition == 1) {
-        #~ if (/^#define\s+$extname\s+1/) {
-            #~ $inprototypes = 1;
-        #~ }
-    #~ }
-#~
-    #~ if ($inprototypes == 1) {
-        if (/^\s*(?:GLAPI\b)(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/) {
-            createBody($1, $2, $3, 1);
-        #~ }
-    #~ }
-#~
-    #~ if (/^#endif/ && $inprototypes == 1) {
-        #~ $inprototypes = 0;
-        #~ $indefinition = 0;
-    #~ }
-#~
-    #~ if (/^#ifndef\s+(GL_\S+)/) {
-        #~ $extname = $1;
-        #~ $indefinition = 1;
-    #~ }
-
-}
-
+createBodyFooter();

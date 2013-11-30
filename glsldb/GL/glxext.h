@@ -7,7 +7,7 @@ extern "C" {
 
 /*
 ** Copyright (c) 2007-2012 The Khronos Group Inc.
-** 
+**
 ** Permission is hereby granted, free of charge, to any person obtaining a
 ** copy of this software and/or associated documentation files (the
 ** "Materials"), to deal in the Materials without restriction, including
@@ -15,10 +15,10 @@ extern "C" {
 ** distribute, sublicense, and/or sell copies of the Materials, and to
 ** permit persons to whom the Materials are furnished to do so, subject to
 ** the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included
 ** in all copies or substantial portions of the Materials.
-** 
+**
 ** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -464,16 +464,16 @@ typedef struct __GLXFBConfigRec *GLXFBConfigSGIX;
 typedef XID GLXPbufferSGIX;
 typedef struct {
     int type;
-    unsigned long serial;	  /* # of last request processed by server */
-    Bool send_event;		  /* true if this came for SendEvent request */
-    Display *display;		  /* display the event was read from */
-    GLXDrawable drawable;	  /* i.d. of Drawable */
-    int event_type;		  /* GLX_DAMAGED_SGIX or GLX_SAVED_SGIX */
-    int draw_type;		  /* GLX_WINDOW_SGIX or GLX_PBUFFER_SGIX */
-    unsigned int mask;	  /* mask indicating which buffers are affected*/
+    unsigned long serial;     /* # of last request processed by server */
+    Bool send_event;          /* true if this came for SendEvent request */
+    Display *display;         /* display the event was read from */
+    GLXDrawable drawable;     /* i.d. of Drawable */
+    int event_type;       /* GLX_DAMAGED_SGIX or GLX_SAVED_SGIX */
+    int draw_type;        /* GLX_WINDOW_SGIX or GLX_PBUFFER_SGIX */
+    unsigned int mask;    /* mask indicating which buffers are affected*/
     int x, y;
     int width, height;
-    int count;		  /* if nonzero, at least this many more */
+    int count;        /* if nonzero, at least this many more */
 } GLXBufferClobberEventSGIX;
 #endif
 
