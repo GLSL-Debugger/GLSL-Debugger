@@ -22,12 +22,10 @@ Makefile
 bin
 lib
 glsldb/DebugLib/generated/
-GLSLCompiler/glslang/MachineIndependent/Gen_glslang.cpp
-GLSLCompiler/glslang/MachineIndependent/Gen_glslang_tab.cpp
-GLSLCompiler/glslang/MachineIndependent/glslang.output
-GLSLCompiler/glslang/MachineIndependent/glslang_tab.h
-GLSLCompiler/glslang/MachineIndependent/glslang.tab.c
-GLSLCompiler/glslang/MachineIndependent/glslang.tab.h
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_lexer.cpp
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.cpp
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.output
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.hpp
 
 # QT stuff
 moc_*.cxx

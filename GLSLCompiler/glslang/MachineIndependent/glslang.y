@@ -37,6 +37,7 @@
  * languages.
  */
 %{
+ /* begin of top */
 
 /* Based on:
 ANSI C Yacc grammar
@@ -69,7 +70,7 @@ Jutta Degener, 1995
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
-    extern void yyerror(char*);
+    extern void yyerror(void*, const char*);
 #endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
@@ -151,6 +152,7 @@ Jutta Degener, 1995
         parseContext.recover(__FILE__, __LINE__);                                                            \
     }                                                                           \
 }
+/* end of top */
 %}
 %union {
     struct {
@@ -191,8 +193,8 @@ Jutta Degener, 1995
 #endif
 
 void addStructInstance(TIntermSpecification* specificationNode,
-                    TIntermNode* intermNode,
-                    TParseContext &pC)
+                       TIntermNode* intermNode,
+                       TParseContext &pC)
 {
     if (!specificationNode || !intermNode) return;
 
@@ -218,7 +220,7 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
     TTypeList::iterator iter = paramList->begin();
     for(; iter != paramList->end(); iter++) {
         if(iter->type->isSpecified() == true &&
-        iter->type->getBasicType() == EbtStruct) {
+           iter->type->getBasicType() == EbtStruct) {
 
             /* add specification */
             TIntermNode *structNode =
@@ -226,15 +228,15 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 
             /* recursive process this struct */
             processStruct(iter->type->getStruct(),
-                        structNode->getAsSpecificationNode()->getParameterPointer(),
-                        pC);
+                          structNode->getAsSpecificationNode()->getParameterPointer(),
+                          pC);
 
             /* Add instance */
             TIntermNode *intermNode =
                 pC.intermediate.addParameter(iter->range, iter->type, pC.extensionChanged);
 
             addStructInstance(structNode->getAsSpecificationNode(),
-                            intermNode, pC);
+                              intermNode, pC);
 
             /* Make aggregate and add to parameters */
             TIntermAggregate *structAggregate =
@@ -256,7 +258,11 @@ void processStruct(TTypeList *paramList, TIntermAggregate** p, TParseContext &pC
 
 %}
 
-%pure_parser /* Just in case is called from multiple threads */
+%define api.pure full
+%lex-param { void* parseContextLocal }
+%parse-param { void* parseContextLocal }
+/*%locations*/
+/*%pure_parser*/ /* Just in case is called from multiple threads */
 %expect 1 /* One shift reduce conflict because of if | else */
 %token <lex> ATTRIBUTE CONST_QUAL BOOL_TYPE FLOAT_TYPE INT_TYPE INVARIANT
 %token <lex> BREAK CONTINUE DO ELSE FOR IF DISCARD RETURN SWITCH CASE DEFAULT
@@ -364,10 +370,10 @@ variable_identifier
             $$ = parseContext.intermediate.addConstantUnion(constArray, t, $1.range, parseContext.extensionChanged);
         } else {
             $$ = parseContext.intermediate.addSymbol(variable->getUniqueId(),
-                                                    variable->getName(),
-                                                    variable->getType(),
-                                                    $1.range,
-                                                    parseContext.extensionChanged);
+                                                     variable->getName(),
+                                                     variable->getType(),
+                                                     $1.range,
+                                                     parseContext.extensionChanged);
         }
         if ($$) $$->setRange($1.range);
     }
@@ -504,11 +510,11 @@ postfix_expression
             } else {
                 if ($1->isMatrix()) {
                     $$ ->setType(TType($1->getBasicType(), EvqTemporary, EvmNone, 1,
-                                    $1->getMatrixSize(0), $1->getMatrixSize(1), $1->isMatrix()));
+                                       $1->getMatrixSize(0), $1->getMatrixSize(1), $1->isMatrix()));
                 } else {
                     $$ ->setType(TType($1->getBasicType(), EvqTemporary, EvmNone, $1->getNominalSize(),
-                                    1,1, $1->isMatrix()));
-            }
+                                       1,1, $1->isMatrix()));
+               }
             }
             if ($1->getType().getQualifier() == EvqConst) {
                 $$->getTypePointer()->changeQualifier(EvqConst);
@@ -1043,11 +1049,11 @@ unary_operator
     | DASH  { $$.range = $1.range; $$.op = EOpNegative; }
     | BANG  { $$.range = $1.range; $$.op = EOpLogicalNot; }
     | TILDE {
-            if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
-                parseContext.recover(__FILE__, __LINE__);
-            }
-            $$.range = $1.range;
-            $$.op = EOpBitwiseNot;
+              if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                  parseContext.recover(__FILE__, __LINE__);
+              }
+              $$.range = $1.range;
+              $$.op = EOpBitwiseNot;
             }
     ;
 // Grammar Note:  No '*' or '&' unary ops.  Pointers are not supported.
@@ -1308,15 +1314,15 @@ logical_or_expression
 conditional_expression
     : logical_or_expression { $$ = $1; }
     | logical_or_expression QUESTION expression COLON assignment_expression {
-    if (parseContext.boolErrorCheck($2.range, $1))
+       if (parseContext.boolErrorCheck($2.range, $1))
             parseContext.recover(__FILE__, __LINE__);
 
         $$ = parseContext.intermediate.addSelection($1, $3, $5, $2.range, parseContext.extensionChanged);
 
         /* GLSL 1.20 does not require the expressions to have the same type,
-        * as long as there is a conversion to one of the expressions to make
-        * their types match. The resulting matching is the type of the
-        * entire expression */
+         * as long as there is a conversion to one of the expressions to make
+         * their types match. The resulting matching is the type of the
+         * entire expression */
         /*
         if ($3->getType() != $5->getType())
             $$ = 0;
@@ -1351,48 +1357,48 @@ assignment_operator
     | MUL_ASSIGN   { FRAG_VERT_GEOM_ONLY("*=", $1.range);     $$.range = $1.range; $$.op = EOpMulAssign; }
     | DIV_ASSIGN   { FRAG_VERT_GEOM_ONLY("/=", $1.range);     $$.range = $1.range; $$.op = EOpDivAssign; }
     | MOD_ASSIGN   {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range; $$.op = EOpModAssign;
-                }
+                     }
+                     $$.range = $1.range; $$.op = EOpModAssign;
+                   }
     | ADD_ASSIGN   { $$.range = $1.range; $$.op = EOpAddAssign; }
     | SUB_ASSIGN   { $$.range = $1.range; $$.op = EOpSubAssign; }
     | LEFT_ASSIGN  {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range;
-                    $$.op = EOpLeftShiftAssign;
-                }
+                     }
+                     $$.range = $1.range;
+                     $$.op = EOpLeftShiftAssign;
+                   }
     | RIGHT_ASSIGN {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range;
-                    $$.op = EOpRightShiftAssign;
-                }
+                     }
+                     $$.range = $1.range;
+                     $$.op = EOpRightShiftAssign;
+                   }
     | AND_ASSIGN   {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range;
-                    $$.op = EOpAndAssign;
-                }
+                     }
+                     $$.range = $1.range;
+                     $$.op = EOpAndAssign;
+                   }
     | XOR_ASSIGN   {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range;
-                    $$.op = EOpExclusiveOrAssign;
-                }
+                     }
+                     $$.range = $1.range;
+                     $$.op = EOpExclusiveOrAssign;
+                   }
     | OR_ASSIGN    {
-                    if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
+                     if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                         parseContext.recover(__FILE__, __LINE__);
-                    }
-                    $$.range = $1.range;
-                    $$.op = EOpInclusiveOrAssign;
-                }
+                     }
+                     $$.range = $1.range;
+                     $$.op = EOpInclusiveOrAssign;
+                   }
     ;
 
 expression
@@ -1694,19 +1700,19 @@ init_declarator_list
             TSymbol *sym = parseContext.symbolTable.find(*$3.string);
             TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration($3.range, (TVariable*)sym, NULL,
-                                                        parseContext.extensionChanged);
+                                                         parseContext.extensionChanged);
 
             /* Special care taken for structs */
             if ( $1.type.type == EbtStruct
-                && $1.type.userDef != 0
-                && $1.type.userDef->isSpecified() ) {
+                 && $1.type.userDef != 0
+                 && $1.type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
                 TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                intermNode->getAsDeclarationNode(),
-                                parseContext);
+                                  intermNode->getAsDeclarationNode(),
+                                  parseContext);
             } else {
                 /* Add declaration normally to the tree */
                 $$.intermAggregate =
@@ -1728,7 +1734,7 @@ init_declarator_list
 
                 TIntermNode *intermNode =
                     parseContext.intermediate.addDeclaration($3.range, newVar, NULL,
-                                                            parseContext.extensionChanged);
+                                                             parseContext.extensionChanged);
                 /* Add declaration normally to the tree */
                 $$.intermAggregate =
                     parseContext.intermediate.growAggregate($1.intermNode, intermNode,
@@ -1801,15 +1807,15 @@ init_declarator_list
 
         /* Special care taken for structs */
         if ( $1.type.type == EbtStruct
-            && $1.type.userDef != 0
-            && $1.type.userDef->isSpecified() ) {
+             && $1.type.userDef != 0
+             && $1.type.userDef->isSpecified() ) {
             /* Add declaration to instances of stuct */
             TIntermSpecification* specificationNode =
                 ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
             addStructInstance(specificationNode,
-                            intermNode->getAsDeclarationNode(),
-                            parseContext);
+                              intermNode->getAsDeclarationNode(),
+                              parseContext);
         } else {
             /* Add declaration normally to the tree */
             $$.intermAggregate =
@@ -1858,8 +1864,8 @@ init_declarator_list
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                decNode,
-                                parseContext);
+                                  decNode,
+                                  parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 $$.intermAggregate = 0;
@@ -1932,8 +1938,8 @@ init_declarator_list
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                decNode,
-                                parseContext);
+                                  decNode,
+                                  parseContext);
             } else {
                 parseContext.recover(__FILE__, __LINE__);
                 $$.intermAggregate = 0;
@@ -1980,23 +1986,23 @@ init_declarator_list
             decNode =
                 parseContext.intermediate.addDeclaration($3.range, (TVariable*) sym, intermNode, parseContext.extensionChanged);
             /* Special care taken for structs */
-        if ( $1.type.type == EbtStruct
-                && $1.type.userDef != 0
-                && $1.type.userDef->isSpecified() ) {
+           if ( $1.type.type == EbtStruct
+                 && $1.type.userDef != 0
+                 && $1.type.userDef->isSpecified() ) {
                 /* Add declaration to instances of stuct */
                 TIntermSpecification* specificationNode =
                     ($1.intermAggregate->getSequence())[0]->getAsSpecificationNode();
 
                 addStructInstance(specificationNode,
-                                decNode->getAsDeclarationNode(),
-                                parseContext);
+                                  decNode->getAsDeclarationNode(),
+                                  parseContext);
             } else {
                 /* Add declaration normally to the tree */
                 $$.intermAggregate =
                     parseContext.intermediate.growAggregate($1.intermNode, decNode, parseContext.extensionChanged);
                 $$.intermAggregate->setRange(addRange($1.range, $5->getRange()));
             }
-        } else {
+         } else {
             parseContext.recover(__FILE__, __LINE__);
             $$.intermAggregate = 0;
         }
@@ -2010,14 +2016,14 @@ single_declaration
         $$.intermAggregate = 0;
 
         if ( $1.type == EbtStruct &&
-            $1.userDef != 0 &&
-            $1.userDef->isSpecified() == true ) {
+             $1.userDef != 0 &&
+             $1.userDef->isSpecified() == true ) {
             TIntermNode *intermNode =
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
             processStruct($1.userDef->getStruct(),
-                        intermNode->getAsSpecificationNode()->getParameterPointer(),
-                        parseContext);
+                          intermNode->getAsSpecificationNode()->getParameterPointer(),
+                          parseContext);
 
             $$.intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
@@ -2053,8 +2059,8 @@ single_declaration
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
             processStruct($1.userDef->getStruct(),
-                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                        parseContext);
+                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                          parseContext);
 
             TIntermAggregate *specificationAggregate =
                 parseContext.intermediate.makeAggregate(specificationNode,
@@ -2068,8 +2074,8 @@ single_declaration
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                            declarationNode->getAsDeclarationNode(),
-                            parseContext);
+                              declarationNode->getAsDeclarationNode(),
+                              parseContext);
 
             $$.intermAggregate = specificationAggregate;
 
@@ -2150,8 +2156,8 @@ single_declaration
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
             processStruct($1.userDef->getStruct(),
-                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                        parseContext);
+                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                          parseContext);
 
             TIntermAggregate *specificationAggregate =
                 parseContext.intermediate.makeAggregate(specificationNode,
@@ -2165,8 +2171,8 @@ single_declaration
                 parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym, NULL, parseContext.extensionChanged);
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                            declarationNode->getAsDeclarationNode(),
-                            parseContext);
+                              declarationNode->getAsDeclarationNode(),
+                              parseContext);
 
             $$.intermAggregate = specificationAggregate;
 
@@ -2208,8 +2214,8 @@ single_declaration
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
             processStruct($1.userDef->getStruct(),
-                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                        parseContext);
+                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                          parseContext);
 
             TIntermAggregate *specificationAggregate =
                 parseContext.intermediate.makeAggregate(specificationNode,
@@ -2229,8 +2235,8 @@ single_declaration
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                            declarationNode->getAsDeclarationNode(),
-                            parseContext);
+                              declarationNode->getAsDeclarationNode(),
+                              parseContext);
 
             $$.intermAggregate = specificationAggregate;
 
@@ -2252,7 +2258,7 @@ single_declaration
                 }
 
                 $$.intermAggregate = parseContext.intermediate.makeAggregate(decNode,
-                                                                parseContext.extensionChanged);
+                                                                   parseContext.extensionChanged);
                 $$.intermAggregate->setRange(addRange($1.range, $6->getRange()));
             } else {
                 parseContext.recover(__FILE__, __LINE__);
@@ -2290,8 +2296,8 @@ single_declaration
                 parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
             processStruct($1.userDef->getStruct(),
-                        specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                        parseContext);
+                          specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                          parseContext);
 
             TIntermAggregate *specificationAggregate =
                 parseContext.intermediate.makeAggregate(specificationNode,
@@ -2311,8 +2317,8 @@ single_declaration
             }
 
             addStructInstance(specificationNode->getAsSpecificationNode(),
-                            declarationNode->getAsDeclarationNode(),
-                            parseContext);
+                              declarationNode->getAsDeclarationNode(),
+                              parseContext);
 
             $$.intermAggregate = specificationAggregate;
 
@@ -2361,8 +2367,8 @@ single_declaration
                     parseContext.intermediate.addSpecification($1.range, $1.userDef, parseContext.extensionChanged);
 
                 processStruct($1.userDef->getStruct(),
-                            specificationNode->getAsSpecificationNode()->getParameterPointer(),
-                            parseContext);
+                              specificationNode->getAsSpecificationNode()->getParameterPointer(),
+                              parseContext);
 
                 TIntermAggregate *specificationAggregate =
                     parseContext.intermediate.makeAggregate(specificationNode, parseContext.extensionChanged);
@@ -2373,11 +2379,11 @@ single_declaration
                 TSymbol *sym = parseContext.symbolTable.find(*$2.string);
                 TIntermNode *declarationNode =
                     parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym,
-                                                            intermNode, parseContext.extensionChanged);
+                                                             intermNode, parseContext.extensionChanged);
 
                 addStructInstance(specificationNode->getAsSpecificationNode(),
-                                declarationNode->getAsDeclarationNode(),
-                                parseContext);
+                                  declarationNode->getAsDeclarationNode(),
+                                  parseContext);
 
                 $$.intermAggregate = specificationAggregate;
 
@@ -2386,7 +2392,7 @@ single_declaration
                 TSymbol *sym = parseContext.symbolTable.find(*$2.string);
                 TIntermNode *decNode =
                     parseContext.intermediate.addDeclaration($2.range, (TVariable*) sym,
-                                                            intermNode, parseContext.extensionChanged);
+                                                             intermNode, parseContext.extensionChanged);
                 decNode->getAsDeclarationNode()->setFirst(true);
                 $$.intermAggregate =
                     parseContext.intermediate.makeAggregate(decNode, parseContext.extensionChanged);
@@ -2398,12 +2404,12 @@ single_declaration
 
             if (intermNode) {
                 decNode = parseContext.intermediate.addDeclaration($2.range,
-                                                                (TVariable*) sym,
-                                                                intermNode);
+                                                                   (TVariable*) sym,
+                                                                   intermNode);
             } else {
                 decNode = parseContext.intermediate.addDeclaration($2.range,
-                                                                (TVariable*) sym,
-                                                                NULL);
+                                                                   (TVariable*) sym,
+                                                                   NULL);
             }
             decNode->getAsDeclarationNode()->setFirst(true);
 
@@ -2430,7 +2436,7 @@ single_declaration
 
             TIntermNode *intermNode =
                 parseContext.intermediate.addDeclaration($2.range, newVar, NULL,
-                                                        parseContext.extensionChanged);
+                                                         parseContext.extensionChanged);
             ((TIntermDeclaration*)intermNode)->setFirst(true);
             $$.intermAggregate =
                 parseContext.intermediate.makeAggregate(intermNode, parseContext.extensionChanged);
@@ -3302,9 +3308,9 @@ struct_declaration
                 (*$$)[i].type->setTypeName($1.userDef->getTypeName());
 
             if ( i == 0 &&
-                $1.type == EbtStruct &&
-                $1.userDef != 0 &&
-                $1.userDef->isSpecified() == true ) {
+                 $1.type == EbtStruct &&
+                 $1.userDef != 0 &&
+                 $1.userDef->isSpecified() == true ) {
 
                     (*$$)[i].type->setSpecified(true);
             }
@@ -3692,15 +3698,15 @@ function_definition
                 paramNodes = parseContext.intermediate.growAggregate(
                         paramNodes,
                         parseContext.intermediate.addFuncParam(variable->getUniqueId(),
-                                                            variable->getName(),
-                                                            variable->getType(), $1.range,
-                                                            parseContext.extensionChanged),
+                                                               variable->getName(),
+                                                               variable->getType(), $1.range,
+                                                               parseContext.extensionChanged),
                         parseContext.extensionChanged);
             } else {
                 paramNodes = parseContext.intermediate.growAggregate(
                         paramNodes,
                         parseContext.intermediate.addFuncParam(0, "", *param.type, $1.range,
-                                                            parseContext.extensionChanged),
+                                                               parseContext.extensionChanged),
                         parseContext.extensionChanged);
             }
         }
