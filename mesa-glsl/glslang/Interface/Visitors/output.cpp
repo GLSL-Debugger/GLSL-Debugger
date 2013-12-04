@@ -67,12 +67,24 @@ struct global_print_tracker {
 		ralloc_free(mem_ctx);
 	}
 
+	inline int push_var( ir_variable* v ) {
+		/* We using our local variable tracker while printing variables in
+		 * debug code, so we replace original ids with our. It is slower.
+		 */
+		//int id = ++var_counter;
+		ShVariable* var = findShVariableFromSource(v);
+		int id = var->uniqueId;
+		hash_table_insert (var_hash, (void*)id, v);
+		return id;
+	}
+
 	unsigned	var_counter;
 	hash_table*	var_hash;
 	exec_list	global_assignements;
 	void* mem_ctx;
 	bool	main_function_done;
 };
+
 
 void ir_output_traverser_visitor::append_version()
 {
@@ -135,10 +147,7 @@ void ir_output_traverser_visitor::print_var_name (ir_variable* v)
 {
     long id = (long)hash_table_find (globals->var_hash, v);
 	if (!id && v->mode == ir_var_temporary)
-	{
-        id = ++globals->var_counter;
-        hash_table_insert (globals->var_hash, (void*)id, v);
-	}
+		id = globals->push_var(v);
     if (id)
     {
         if (v->mode == ir_var_temporary)
@@ -227,10 +236,7 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 	{
 		long id = (long)hash_table_find (globals->var_hash, ir);
 		if (id == 0)
-		{
-			id = ++globals->var_counter;
-			hash_table_insert (globals->var_hash, (void*)id, ir);
-		}
+			id = globals->push_var(ir);
 	}
 
    check_initializer(ir, this);
@@ -1191,27 +1197,28 @@ ir_output_traverser_visitor::visit(ir_discard *ir)
    }
 }
 
-static void print_selection_instructions(exec_list* list, ir_if* ir, ir_output_traverser_visitor* it)
+static void print_selection_instructions(exec_list* list, ir_if* ir,
+					ir_output_traverser_visitor* it, int debug_option)
 {
-    it->indentation++;
-    if (ir->debug_target && it->cgOptions == DBG_CG_SELECTION_CONDITIONAL
-	    && ir->debug_state_internal == ir_dbg_if_condition_passed)	{
-	/* Add code to colorize condition */
-	it->indent();
-	//DBG_CG_COVERAGE
-	cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions,
-		    it->cgbl, it->vl, it->dbgStack, true);
-	ralloc_asprintf_append(&it->buffer, ";\n");
-    }
+   it->indentation++;
+   if (ir->debug_target && it->cgOptions == DBG_CG_SELECTION_CONDITIONAL
+      && ir->debug_state_internal == ir_dbg_if_condition_passed)	{
+      /* Add code to colorize condition */
+      it->indent();
+      //DBG_CG_COVERAGE
+      cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions,
+                   it->cgbl, it->vl, it->dbgStack, debug_option);
+      ralloc_asprintf_append(&it->buffer, ";\n");
+   }
 
-    foreach_iter(exec_list_iterator, iter, *list){
-	ir_instruction * const inst = (ir_instruction *) iter.get();
-	it->indent();
-	inst->accept(it);
-	ralloc_asprintf_append(&it->buffer, ";\n");
-    }
-    it->indentation--;
-    it->indent();
+   foreach_iter(exec_list_iterator, iter, *list){
+      ir_instruction * const inst = (ir_instruction *) iter.get();
+      it->indent();
+      inst->accept(it);
+      ralloc_asprintf_append(&it->buffer, ";\n");
+   }
+   it->indentation--;
+   it->indent();
 }
 
 void
@@ -1273,13 +1280,13 @@ ir_output_traverser_visitor::visit(ir_if *ir)
       ir->condition->accept(this);
 
    ralloc_asprintf_append (&buffer, ") {\n");
-   print_selection_instructions(&ir->then_instructions, ir, this);
+   print_selection_instructions(&ir->then_instructions, ir, this, true);
    ralloc_asprintf_append (&buffer, "}");
 
    if (!ir->else_instructions.is_empty())
    {
 	   ralloc_asprintf_append (&buffer, " else {\n");
-       	   print_selection_instructions(&ir->else_instructions, ir, this);
+       	   print_selection_instructions(&ir->else_instructions, ir, this, false);
 	   ralloc_asprintf_append (&buffer, "}");
    }
 }

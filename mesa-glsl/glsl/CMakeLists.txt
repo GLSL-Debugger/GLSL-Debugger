@@ -1,6 +1,7 @@
 
 add_subdirectory(glcpp)
 include_directories(
+	${CMAKE_CURRENT_BINARY_DIR}
 	${PROJECT_SOURCE_DIR}/mesa-glsl
 	${PROJECT_SOURCE_DIR}/mesa-glsl/mapi
 	${PROJECT_SOURCE_DIR}/mesa-glsl/mesa
@@ -13,24 +14,17 @@ find_package(FLEX REQUIRED)
 
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
-        SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/glsl_lexer.ll
-        COMMAND ${FLEX_EXECUTABLE}
-        ARGS --nounistd -o${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
-             ${CMAKE_CURRENT_SOURCE_DIR}/glsl_lexer.ll
+execute_process(COMMAND ${FLEX_EXECUTABLE} --nounistd -o${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp glsl_lexer.ll
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.h
-        SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/glsl_parser.yy
-        COMMAND ${BISON_EXECUTABLE}
-        ARGS -v -o ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp
-             -p "_mesa_glsl_"
-             --defines=${CMAKE_CURRENT_SOURCE_DIR}/glsl_parser.h
-             ${CMAKE_CURRENT_SOURCE_DIR}/glsl_parser.yy
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp
+execute_process(COMMAND ${BISON_EXECUTABLE} -v -o ${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp
+             -p "_mesa_glsl_" --defines=${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.h glsl_parser.yy
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_lexer.cpp GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.h GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/glsl_parser.cpp GENERATED)
 
 file(GLOB SRC_CPP *.cpp)

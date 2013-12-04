@@ -1985,8 +1985,8 @@ void MainWindow::ShaderStep(int action, bool updateWatchData, bool updateCoverma
                         case RL_DBG_FRAGMENT_SHADER:
                             {
                                 PixelBoxFloat *imageBox = NULL;
-                                if (getDebugImage(DBG_CG_SELECTION_CONDITIONAL,
-											NULL, GL_FLOAT, m_pCoverage, (PixelBox**)&imageBox)) {
+                                if (getDebugImage(DBG_CG_SELECTION_CONDITIONAL, NULL, GL_FLOAT,
+                                				  m_pCoverage, (PixelBox**)&imageBox)) {
                                 } else {
                                     QMessageBox::warning(this, "Warning",
                                         "An error occurred while retrieving "

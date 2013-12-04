@@ -1351,11 +1351,12 @@ void ShVarModel::setItemWatched(const QModelIndex & i_qIndex)
                 // Note: According to Thomas, each variable must be read
                 // separately when adding, so batching the process will not give
                 // much speedup compared to this recursion.
+                int column = i_qIndex.column();
                 for (int i = 0; i < item->childCount(); i++) {
                     // TODO: There is possible a more elegant solution to get
                     // indices of the children, but I am no Qt expert and this
                     // seems to work somehow.
-                    this->setItemWatched(i_qIndex.child(i, i_qIndex.column()));
+                    this->setItemWatched(i_qIndex.child(i, column));
                 }
             }
         }

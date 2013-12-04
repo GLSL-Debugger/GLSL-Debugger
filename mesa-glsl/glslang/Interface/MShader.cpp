@@ -13,10 +13,7 @@
 
 namespace {
 	typedef std::map< ir_loop*, char* > IterNameMap;
-	typedef std::map< exec_list*, ir_list_dummy* > DebugInfoMap;
 	IterNameMap iter_names;
-	DebugInfoMap debug_infos;
-//	void* global_ctx;
 }
 
 
@@ -134,9 +131,36 @@ bool containsDiscard( exec_list* list )
 	return false;
 }
 
-bool containsEmitVertex( ir_instruction* )
+bool containsEmitVertex( ir_instruction* ir )
 {
-	// TODO: will be in newest mesa
+	switch( ir->ir_type ){
+		case ir_type_emit_vertex:
+			return true;
+			break;
+		case ir_type_assignment:
+		{
+			ir_assignment* f = ir->as_assignment();
+			return containsEmitVertex(f->lhs) || containsEmitVertex(f->rhs);
+			break;
+		}
+		case ir_type_expression:
+		{
+			ir_expression* e = ir->as_expression();
+			int operands = e->get_num_operands();
+			for( int i = 0; i < operands; ++i )
+				if( e->operands[i] && containsEmitVertex(e->operands[i]) )
+					return true;
+			break;
+		}
+		case ir_type_call:
+		{
+			ir_call* c = ir->as_call();
+			return containsEmitVertex( &(c->callee->body) );
+			break;
+		}
+		default:
+			break;
+	}
 	return false;
 }
 
@@ -171,39 +195,14 @@ char** dbg_iter_name( ir_loop* ir )
 	return &iter_names[ir];
 }
 
-/*
-ir_list_dummy* list_dummy( exec_list* list, ir_function_signature* parent )
-{
-	if( list->is_empty() )
-		return NULL;
-	DebugInfoMap::iterator it = debug_infos.find(list);
-	if( it != debug_infos.end() )
-		return it->second;
-
-	ir_list_dummy* ir = new(global_ctx) ir_list_dummy;
-	ir->ir_type = ir_type_list_dummy;
-	ir->debug_state = ir_dbg_state_unset;
-	ir->debug_overwrite = ir_dbg_ow_unset;
-	ir->debug_target = false;
-
-	ir->yy_location.first_column = ir->yy_location.last_column = parent->yy_location.last_column;
-	ir->yy_location.first_line = ir->yy_location.last_line = parent->yy_location.last_line;
-
-	debug_infos[list] = ir;
-	return ir;
-}
-*/
 
 void init_shader( )
 {
-	//global_ctx = ralloc_context(NULL);
 }
 
 void clean_shader( )
 {
 	iter_names.clear();
-	debug_infos.clear();
-	//ralloc_free(global_ctx);
 }
 
 

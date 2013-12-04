@@ -251,47 +251,32 @@ static std::string getTypeCode(ShVariable *v, bool reduceToScalar = false)
     }
 }
 
-void cgAddDeclaration(cgTypes type, std::string &prog, EShLanguage l)
+
+void cgAddDeclaration(cgTypes type, char** prog, EShLanguage l)
 {
     switch (type) {
         case CG_TYPE_RESULT:
-            if (g.result) {
-                prog += getQualifierCode(g.result, l);
-                prog += getTypeCode(g.result);
-                prog += " ";
-                prog += g.result->name;
-                prog += ";\n";
-            }
+            if (g.result)
+            	ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(g.result, l),
+            							getTypeCode(g.result).c_str(), g.result->name);
             break;
         case CG_TYPE_CONDITION:
-            if (g.condition) {
-                prog += getQualifierCode(g.condition, l);
-                prog += getTypeCode(g.condition);
-                prog += " ";
-                prog += g.condition->name;
-                prog += ";\n";
-            }
+            if (g.condition)
+            	ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(g.condition, l),
+            							getTypeCode(g.condition).c_str(), g.condition->name);
             break;
         case CG_TYPE_PARAMETER:
             if (g.parameter) {
-                prog += getQualifierCode(g.parameter, l);
-                prog += getTypeCode(g.parameter);
-                prog += " ";
-                prog += g.parameter->name;
-                if (g.parameter->isArray) {
-                    char buf[100];
-                    sprintf(buf, "[%i]", g.parameter->arraySize[0]);
-                    prog += buf;
-                }
-                prog += ";\n";
+            	ralloc_asprintf_append(prog, "%s%s %s", getQualifierCode(g.parameter, l),
+            	            			getTypeCode(g.parameter).c_str(), g.parameter->name);
+                if (g.parameter->isArray)
+                	ralloc_asprintf_append(prog, "[%i]", g.parameter->arraySize[0]);
+                ralloc_asprintf_append(prog, ";\n");
             }
             break;
         case CG_TYPE_LOOP_ITERS:
-            for (strList::iterator it = g.loopIters.begin(); it != g.loopIters.end(); it++) {
-                prog += "int ";
-                prog += *it;
-                prog += ";\n";
-            }
+            for (strList::iterator it = g.loopIters.begin(); it != g.loopIters.end(); it++)
+            	ralloc_asprintf_append(prog, "int %s;\n", *it);
             break;
         case CG_TYPE_ALL:
             cgAddDeclaration(CG_TYPE_RESULT, prog, l);
@@ -302,14 +287,6 @@ void cgAddDeclaration(cgTypes type, std::string &prog, EShLanguage l)
         default:
         	break;
     }
-}
-
-void cgAddDeclaration(cgTypes type, char** prog, EShLanguage l)
-{
-	// FIXME: weird way to do things
-	std::string out;
-	cgAddDeclaration(type, out, l);
-	ralloc_asprintf_append (prog, "%s", out.c_str());
 }
 
 static void addInitializationCode(cgInitialization init, std::string &prog, EShLanguage l)
