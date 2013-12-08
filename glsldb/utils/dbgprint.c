@@ -42,185 +42,183 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* #define _WIN32_WINNT 0x0500 */
 #include <windows.h>
 #include <tlhelp32.h>
+#else
+#include <unistd.h>
 #endif /* _WIN32 */
 
 #include "dbgprint.h"
 
 static struct {
-    int maxDebugOutputLevel;
-    char* logDir;
-    FILE *logfile;
-} g = {0, NULL, NULL};
+	int maxDebugOutputLevel;
+	char* logDir;
+	FILE *logfile;
+} g = {
+	0,
+	NULL,
+	NULL };
 
 #define LOG_SUFFIX "-glsldevil.log"
 
-void setMaxDebugOutputLevel(int level) {
-    g.maxDebugOutputLevel = level;
+void setMaxDebugOutputLevel(int level)
+{
+	g.maxDebugOutputLevel = level;
 }
 
-int getMaxDebugOutputLevel(void) {
-    return g.maxDebugOutputLevel;
+int getMaxDebugOutputLevel(void)
+{
+	return g.maxDebugOutputLevel;
 }
 
 void setLogDir(const char* dir)
 {
-    if (dir) {
+	if (dir) {
 #ifdef _WIN32
-        g.logDir = _strdup(dir);
+		g.logDir = _strdup(dir);
 #else
-        g.logDir = strdup(dir);
+		g.logDir = strdup(dir);
 #endif
-    } else {
-        g.logDir = NULL;
-    }
+	} else {
+		g.logDir = NULL;
+	}
 }
 
 const char *getLogDir()
 {
-    return g.logDir;
+	return g.logDir;
 }
 
 void startLogging(const char* baseName)
 {
-    if (g.logDir) {
-        char* logfileName;
-        time_t epochTime = time(NULL);
-        struct tm *currentTime = localtime(&epochTime);
+	if (g.logDir) {
+		char* logfileName;
+		time_t epochTime = time(NULL);
+		struct tm *currentTime = localtime(&epochTime);
 
-        if (baseName) {
-            if (!(logfileName = malloc(strlen(g.logDir) + strlen(baseName) + 16 + strlen(LOG_SUFFIX)))) {
-                perror("Error opening logfile");
-                exit(1);
-            }
+		if (baseName) {
+			if (!(logfileName = malloc(
+					strlen(g.logDir) + strlen(baseName) + 16
+							+ strlen(LOG_SUFFIX)))) {
+				perror("Error opening logfile");
+				exit(1);
+			}
 
-            sprintf(logfileName, "%s/%02i%02i%02i-%02i%02i%02i-%s%s",
-                    g.logDir,
-                    currentTime->tm_year%100,
-                    currentTime->tm_mon + 1,
-                    currentTime->tm_mday,
-                    currentTime->tm_hour,
-                    currentTime->tm_min,
-                    currentTime->tm_sec,
-                    baseName,
-                    LOG_SUFFIX);
-        } else {
+			sprintf(logfileName, "%s/%02i%02i%02i-%02i%02i%02i-%s%s", g.logDir,
+					currentTime->tm_year % 100, currentTime->tm_mon + 1,
+					currentTime->tm_mday, currentTime->tm_hour,
+					currentTime->tm_min, currentTime->tm_sec, baseName,
+					LOG_SUFFIX);
+		} else {
 #ifdef _WIN32
-            DWORD pid = GetCurrentProcessId();
+			DWORD pid = GetCurrentProcessId();
 #else
-            pid_t pid = getpid();
+			pid_t pid = getpid();
 #endif
-            /* 64 bit pid should suffice (20 digits) */
-            if (!(logfileName = malloc(strlen(g.logDir) + 1 + 20 + 16 +strlen(LOG_SUFFIX)))) {
-                perror("Error opening logfile");
-                exit(1);
-            }
+			/* 64 bit pid should suffice (20 digits) */
+			if (!(logfileName = malloc(
+					strlen(g.logDir) + 1 + 20 + 16 + strlen(LOG_SUFFIX)))) {
+				perror("Error opening logfile");
+				exit(1);
+			}
 
-            sprintf(logfileName, "%s/%02i%02i%02i-%02i%02i%02i-%li%s",
-                    g.logDir,
-                    currentTime->tm_year%100,
-                    currentTime->tm_mon + 1,
-                    currentTime->tm_mday,
-                    currentTime->tm_hour,
-                    currentTime->tm_min,
-                    currentTime->tm_sec,
-                    (long)pid,
-                    LOG_SUFFIX);
-        }
+			sprintf(logfileName, "%s/%02i%02i%02i-%02i%02i%02i-%li%s", g.logDir,
+					currentTime->tm_year % 100, currentTime->tm_mon + 1,
+					currentTime->tm_mday, currentTime->tm_hour,
+					currentTime->tm_min, currentTime->tm_sec, (long) pid,
+					LOG_SUFFIX);
+		}
 
-        g.logfile = fopen(logfileName, "w");
-        if (!g.logfile)	{
-            perror("Error opening logfile");
-            exit(1);
-        }
-        free(logfileName);
-    } else {
-        g.logfile = NULL;
-    }
+		g.logfile = fopen(logfileName, "w");
+		if (!g.logfile) {
+			perror("Error opening logfile");
+			exit(1);
+		}
+		free(logfileName);
+	} else {
+		g.logfile = NULL;
+	}
 }
 
 void quitLogging(void)
 {
-    if (g.logfile) {
-        fclose(g.logfile);
-        g.logfile = NULL;
-    }
+	if (g.logfile) {
+		fclose(g.logfile);
+		g.logfile = NULL;
+	}
 }
 
 int _dbgPrint_(int level, int printPrefix, const char *fmt, ...)
 {
-    va_list list;
+	va_list list;
 #ifdef _WIN32
-    int cnt = 0;        /* Size of formatted message. */
-    char *tmp = NULL;   /* Buffer for formatted message. */
+	int cnt = 0; /* Size of formatted message. */
+	char *tmp = NULL; /* Buffer for formatted message. */
 #endif /* _WIN32 */
-    const char* prefix = NULL;
-    time_t epochTime = time(NULL);
+	const char* prefix = NULL;
+	time_t epochTime = time(NULL);
 
-    if (level > g.maxDebugOutputLevel) {
-        return 0;
-    }
+	if (level > g.maxDebugOutputLevel) {
+		return 0;
+	}
 
-    if (printPrefix) {
-        switch (level) {
-        case DBGLVL_ERROR:
-            prefix = "ERROR: ";
-            break;
-        case DBGLVL_WARNING:
-            prefix = "WARNING: ";
-            break;
-        case DBGLVL_INFO:
-            prefix = "INFO: ";
-            break;
-        case DBGLVL_INTERNAL_WARNING:
-            prefix = "INTERNAL: ";
-            break;
-        case DBGLVL_COMPILERINFO:
-            prefix = "COMPILER: ";
-            break;
-        case DBGLVL_DEBUG:
-            prefix = "DEBUG: ";
-            break;
-        default:
-            prefix = "UNCLASSIFIED: ";
-            break;
-        }
-    }
+	if (printPrefix) {
+		switch (level) {
+		case DBGLVL_ERROR:
+			prefix = "ERROR: ";
+			break;
+		case DBGLVL_WARNING:
+			prefix = "WARNING: ";
+			break;
+		case DBGLVL_INFO:
+			prefix = "INFO: ";
+			break;
+		case DBGLVL_INTERNAL_WARNING:
+			prefix = "INTERNAL: ";
+			break;
+		case DBGLVL_COMPILERINFO:
+			prefix = "COMPILER: ";
+			break;
+		case DBGLVL_DEBUG:
+			prefix = "DEBUG: ";
+			break;
+		default:
+			prefix = "UNCLASSIFIED: ";
+			break;
+		}
+	}
 
 #if _WIN32 && (defined(DEBUG) || defined(_DEBUG))
-    /* Debug builds should write to attached debugger console: */
-    if (printPrefix) {
-        OutputDebugStringA(prefix);
-    }
-    va_start(list, fmt);
-    cnt = _vscprintf(fmt, list) + 1;
-    va_end(list);
-    tmp = (char *) malloc(cnt * sizeof(char));
-    if (tmp != NULL) {
-        va_start(list, fmt);
-        _vsnprintf_s(tmp, cnt, cnt, fmt, list);
-        va_end(list);
-        OutputDebugStringA(tmp);
-        free(tmp);
-    }
+	/* Debug builds should write to attached debugger console: */
+	if (printPrefix) {
+		OutputDebugStringA(prefix);
+	}
+	va_start(list, fmt);
+	cnt = _vscprintf(fmt, list) + 1;
+	va_end(list);
+	tmp = (char *) malloc(cnt * sizeof(char));
+	if (tmp != NULL) {
+		va_start(list, fmt);
+		_vsnprintf_s(tmp, cnt, cnt, fmt, list);
+		va_end(list);
+		OutputDebugStringA(tmp);
+		free(tmp);
+	}
 #else
 
-    /* Write to log file */
-    if (g.logfile != NULL) {
-        if (printPrefix) {
-            fprintf(g.logfile, "%li - %s", (long)epochTime, prefix);
-        }
-        va_start(list, fmt);
-        vfprintf(g.logfile, fmt, list);
-        va_end(list);
-        fflush(g.logfile);
-    }
-    else
-    {
-        va_start(list, fmt);
-        vfprintf(stderr, fmt, list);
-        va_end(list);
-    }
+	/* Write to log file */
+	if (g.logfile != NULL) {
+		if (printPrefix) {
+			fprintf(g.logfile, "%li - %s", (long) epochTime, prefix);
+		}
+		va_start(list, fmt);
+		vfprintf(g.logfile, fmt, list);
+		va_end(list);
+		fflush(g.logfile);
+	} else {
+		va_start(list, fmt);
+		vfprintf(stderr, fmt, list);
+		va_end(list);
+	}
 #endif
 
-    return 0;
+	return 0;
 }

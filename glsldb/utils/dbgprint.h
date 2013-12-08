@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../DebugLib/debuglibExport.h"
 
 #ifndef UNUSED_ARG
-    #define UNUSED_ARG(x) (void) x;
+#define UNUSED_ARG(x) (void) x;
 #endif
 
 /**
@@ -52,12 +52,12 @@ extern "C" {
 #endif /* _CPP */
 
 enum DBG_LEVELS {
-    DBGLVL_ERROR = 0,
-    DBGLVL_WARNING,
-    DBGLVL_INFO,
-    DBGLVL_INTERNAL_WARNING,
-    DBGLVL_COMPILERINFO,
-    DBGLVL_DEBUG
+	DBGLVL_ERROR = 0,
+	DBGLVL_WARNING,
+	DBGLVL_INFO,
+	DBGLVL_INTERNAL_WARNING,
+	DBGLVL_COMPILERINFO,
+	DBGLVL_DEBUG
 };
 
 #if defined DEBUG
