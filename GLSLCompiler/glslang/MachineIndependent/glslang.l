@@ -36,16 +36,16 @@
 /* Based on
 ANSI C grammar, Lex specification
 
-In 1985, Jeff Lee published this Lex specification together with a Yacc
-grammar for the April 30, 1985 ANSI C draft.  Tom Stockfisch reposted
-both to net.sources in 1987; that original, as mentioned in the answer
-to question 17.25 of the comp.lang.c FAQ, can be ftp'ed from ftp.uu.net,
-file usenet/net.sources/ansi.c.grammar.Z.
+In 1985, Jeff Lee published this Lex specification together with a Yacc 
+grammar for the April 30, 1985 ANSI C draft.  Tom Stockfisch reposted 
+both to net.sources in 1987; that original, as mentioned in the answer 
+to question 17.25 of the comp.lang.c FAQ, can be ftp'ed from ftp.uu.net, 
+file usenet/net.sources/ansi.c.grammar.Z. 
 
-I intend to keep this version as close to the current C Standard grammar
-as possible; please let me know if you discover discrepancies.
+I intend to keep this version as close to the current C Standard grammar 
+as possible; please let me know if you discover discrepancies. 
 
-Jutta Degener, 1995
+Jutta Degener, 1995 
 */
 
 D           [0-9]
@@ -57,13 +57,14 @@ FS          (f|F)
 US          (u|U)
 
 %option nounput
-%{
+%top{
+/* begin top block */
 #include <stdio.h>
 #include <stdlib.h>
 #include "ParseHelper.h"
-extern "C" {
-#include "glslang_tab.h"
-}
+#include "generated_glsl_parser.hpp"
+extern YYSTYPE yylval;
+
 /* windows only pragma */
 #ifdef _MSC_VER
 #pragma warning(disable : 4102)
@@ -82,13 +83,14 @@ int yytokenpos[2];
 
 #ifdef _WIN32
     extern int yyparse(TParseContext&);
-    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
+    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)    
 #else
     extern int yyparse(void*);
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
-    #define parseContext (*((TParseContext*)(parseContextLocal)))
-#endif
+    #define parseContext (*((TParseContext*)(parseContextLocal)))		
 
+#endif
+ 
 #define YY_INPUT(buf,result,max_size) (result = yy_input(buf, max_size))
 
 #define PREP_PPYLVAL(A) {\
@@ -97,13 +99,12 @@ int yytokenpos[2];
                           pyylval->lex.range.right.line  = yylinenum; \
                           pyylval->lex.range.right.colum = yytokenpos[YY_TOKEN_RIGHT]; \
                         }
-%}
+/* end top block */
+}
 
 %option noyywrap
 %option never-interactive
-%option outfile="Gen_glslang.cpp"
 %x FIELDS
-
 
 %%
 <*>"//"[^\n]*"\n"     { /* ?? carriage and/or line-feed? */ };
@@ -204,9 +205,9 @@ int yytokenpos[2];
 
 
 
-"sampler2DRect"        { PREP_PPYLVAL("sampler2DRect"); parseContext.lexAfterType = true;
+"sampler2DRect"        { PREP_PPYLVAL("sampler2DRect"); parseContext.lexAfterType = true; 
                          return SAMPLER2DRECTARB; /* ARB_texture_rectangle */ }
-"sampler2DRectShadow"  { PREP_PPYLVAL("sampler2DRectShadow"); parseContext.lexAfterType = true;
+"sampler2DRectShadow"  { PREP_PPYLVAL("sampler2DRectShadow"); parseContext.lexAfterType = true; 
                          return SAMPLER2DRECTSHADOWARB; /* ARB_texture_rectangle */ }
 
 "struct"       {  PREP_PPYLVAL("struct"); return(STRUCT); }
@@ -270,27 +271,27 @@ int yytokenpos[2];
 
 {L}({L}|{D})*       {
    PREP_PPYLVAL("PaIdentOrType");
-   pyylval->lex.string = NewPoolTString(yytext);
-   return PaIdentOrType(*pyylval->lex.string, parseContext, pyylval->lex.symbol);
+   pyylval->lex.string = NewPoolTString(yytext); 
+   return PaIdentOrType(*pyylval->lex.string, parseContext, pyylval->lex.symbol); 
 }
 
  /* GLSL: 1.20 const ints */
-0[xX]{H}+{US}?    { PREP_PPYLVAL("INTCONSTANT");
+0[xX]{H}+{US}?    { PREP_PPYLVAL("INTCONSTANT"); 
                     if (yytext[strlen(yytext)-1] == 'u' || yytext[strlen(yytext)-1] == 'U') {
-                        pyylval->lex.ui = strtoul(yytext, 0, 16);
-                        return(UINTCONSTANT);
+						pyylval->lex.ui = strtoul(yytext, 0, 16);
+                        return(UINTCONSTANT); 
                     } else {
-                        pyylval->lex.i = strtol(yytext, 0, 16);
-                        return(INTCONSTANT);
+						pyylval->lex.i = strtol(yytext, 0, 16);
+                        return(INTCONSTANT); 
                     }
                   }
-0{O}+{US}?        { PREP_PPYLVAL("INTCONSTANT");
+0{O}+{US}?        { PREP_PPYLVAL("INTCONSTANT"); 
                     if (yytext[strlen(yytext)-1] == 'u' || yytext[strlen(yytext)-1] == 'U') {
-                        pyylval->lex.ui = strtoul(yytext, 0, 8);
-                        return(UINTCONSTANT);
+						pyylval->lex.ui = strtoul(yytext, 0, 8);
+                        return(UINTCONSTANT); 
                     } else {
-                        pyylval->lex.i = strtol(yytext, 0, 8);
-                        return(INTCONSTANT);
+						pyylval->lex.i = strtol(yytext, 0, 8);
+                        return(INTCONSTANT); 
                     }
                   }
 0{D}+{US}?        { TSourceRange range;
@@ -298,28 +299,28 @@ int yytokenpos[2];
                     range.left.colum = yytokenpos[YY_TOKEN_LEFT];
                     range.right.line = yylinenum;
                     range.right.colum = yytokenpos[YY_TOKEN_RIGHT];
-                    parseContext.error(range, "Invalid Octal number.", yytext, "", "");
-                    parseContext.recover(__FILE__, __LINE__); return 0;
+                    parseContext.error(range, "Invalid Octal number.", yytext, "", ""); 
+                    parseContext.recover(__FILE__, __LINE__); return 0; 
                   }
-{D}+{US}?         { PREP_PPYLVAL("INTCONSTANT");
+{D}+{US}?         { PREP_PPYLVAL("INTCONSTANT"); 
                     if (yytext[strlen(yytext)-1] == 'u' || yytext[strlen(yytext)-1] == 'U') {
-                        pyylval->lex.ui = strtoul(yytext, 0, 0);
-                        return(UINTCONSTANT);
+						pyylval->lex.ui = strtoul(yytext, 0, 0); 
+                        return(UINTCONSTANT); 
                     } else {
-                        pyylval->lex.i = strtol(yytext, 0, 0);
-                        return(INTCONSTANT);
+						pyylval->lex.i = strtol(yytext, 0, 0); 
+                        return(INTCONSTANT); 
                     }
                   }
 
  /* GLSL 1.20: Accept 'f' as part of a floating-point constants */
-{D}+{E}{FS}?           { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext));
+{D}+{E}{FS}?           { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext)); 
                          return(FLOATCONSTANT); }
-{D}+"."{D}*({E})?{FS}? { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext));
+{D}+"."{D}*({E})?{FS}? { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext)); 
                          return(FLOATCONSTANT); }
-"."{D}+({E})?{FS}?     { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext));
+"."{D}+({E})?{FS}?     { PREP_PPYLVAL("FLOATCONSTANT"); pyylval->lex.f = static_cast<float>(atof(yytext)); 
                          return(FLOATCONSTANT); }
 
-"/*"            {  int ret = PaParseComment(pyylval->lex.range.left.line, parseContext); if (!ret) return ret; }
+"/*"            {  int ret = PaParseComment(pyylval->lex.range.left.line, parseContext); if (!ret) return ret; }   
 
 "+="            {  PREP_PPYLVAL("+="); return(ADD_ASSIGN); }
 "-="            {  PREP_PPYLVAL("-="); return(SUB_ASSIGN); }
@@ -368,10 +369,10 @@ int yytokenpos[2];
 "&"         {  PREP_PPYLVAL("&"); return(AMPERSAND); }
 "?"         {  PREP_PPYLVAL("?"); return(QUESTION); }
 
-<FIELDS>{L}({L}|{D})* {
-BEGIN(INITIAL);
-    PREP_PPYLVAL("FIELD_SELECTION");
-    pyylval->lex.string = NewPoolTString(yytext);
+<FIELDS>{L}({L}|{D})* { 
+BEGIN(INITIAL);      
+    PREP_PPYLVAL("FIELD_SELECTION");     
+    pyylval->lex.string = NewPoolTString(yytext); 
     return FIELD_SELECTION; }
 <FIELDS>[ \t\v\f\r] {}
 
@@ -382,12 +383,10 @@ BEGIN(INITIAL);
 
 %%
 
-
 //Including Pre-processor.
 extern "C" {
   #include "./preprocessor/preprocess.h"
 }
-
 //
 // The YY_INPUT macro just calls this.  Maybe this could be just put into
 // the macro directly.
@@ -395,16 +394,16 @@ extern "C" {
 
 int yy_input(char* buf, int max_size)
 {
-     //char *char_token = NULL;
+     char *char_token =NULL;
      int len;
 
     if ((len = yylex_CPP(buf, max_size)) == 0)
         return 0;
-    if (len >= max_size)
+    if (len >= max_size) 
         YY_FATAL_ERROR( "input buffer overflow, can't enlarge buffer because scanner uses REJECT" );
 
     buf[len] = ' ';
-    return len+1;
+	return len+1;
 }
 
 
@@ -417,15 +416,15 @@ int yy_input(char* buf, int max_size)
 int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseContextLocal)
 {
     int argv0len;
-
-    ScanFromString(argv[0]);
-
+    
+    ScanFromString(argv[0]); 
+    
     //Storing the Current Compiler Parse context into the cpp structure.
-    cpp->pC = (void*)&parseContextLocal;
-
-    if (!argv || argc == 0)
+	cpp->pC = (void*)&parseContextLocal;
+	
+	if (!argv || argc == 0)
         return 1;
-
+    
     for (int i = 0; i < argc; ++i) {
         if (!argv[i]) {
             parseContextLocal.error(TSourceRangeInit, "Null shader source string", "", "");
@@ -433,7 +432,7 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
             return 1;
         }
     }
-
+    
     if (!strLen) {
         argv0len = (int) strlen(argv[0]);
         strLen   = &argv0len;
@@ -449,11 +448,11 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
     yycursor    = 1;
     yytokenpos[YY_TOKEN_LEFT] = 1;
     yytokenpos[YY_TOKEN_RIGHT] = 1;
-
-    if (*cpp->PaStrLen >= 0) {
+   
+    if (*cpp->PaStrLen >= 0) {    
         int ret;
         #ifdef _WIN32
-            ret = yyparse(parseContextLocal);
+            ret = yyparse(parseContextLocal);            
         #else
             ret = yyparse((void*)(&parseContextLocal));
         #endif
@@ -466,10 +465,9 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
     else
         return 0;
 }
-
-void yyerror(char *s)
+void yyerror(void* parseContextLocal, const char *s) 
 {
-
+    
     TSourceRange range;
     range.left.line = yylinenum;
     range.left.colum = yytokenpos[YY_TOKEN_LEFT];
@@ -483,9 +481,8 @@ void yyerror(char *s)
     } else {
         GlobalParseContext->error(range, "syntax error", yytext, s, "");
         GlobalParseContext->recover(__FILE__, __LINE__);
-    }
+    }            
 }
-
 void PaReservedWord()
 {
     TSourceRange range;
@@ -499,7 +496,7 @@ void PaReservedWord()
 
 int PaIdentOrType(TString& id, TParseContext& parseContextLocal, TSymbol*& symbol)
 {
-
+    
     symbol = parseContextLocal.symbolTable.find(id);
     if (parseContextLocal.lexAfterType == false && symbol && symbol->isVariable()) {
         TVariable* variable = static_cast<TVariable*>(symbol);
@@ -508,7 +505,7 @@ int PaIdentOrType(TString& id, TParseContext& parseContextLocal, TSymbol*& symbo
             return TYPE_NAME;
         }
     }
-
+    
     return IDENTIFIER;
 }
 
@@ -516,7 +513,7 @@ int PaParseComment(int &lineno, TParseContext& parseContextLocal)
 {
     int transitionFlag = 0;
     int nextChar;
-
+    
     while (transitionFlag != 2) {
         nextChar = yyinput();
         if (nextChar == '\n')
@@ -540,7 +537,7 @@ int PaParseComment(int &lineno, TParseContext& parseContextLocal)
                 range.right.colum = yytokenpos[YY_TOKEN_RIGHT];
                 parseContextLocal.error(range, "End of shader found before end of comment.", "", "", "");
                 GlobalParseContext->recover(__FILE__, __LINE__);
-                return YY_NULL;
+                return YY_NULL; 
             }
         default :  /* Any other character will be a part of the comment */
             transitionFlag = 0;
@@ -548,8 +545,6 @@ int PaParseComment(int &lineno, TParseContext& parseContextLocal)
     }
     return 1;
 }
-
-extern "C" {
 
 void CPPDebugLogMsg(const char *msg)
 {
@@ -563,7 +558,7 @@ void CPPWarningToInfoLog(const char *msg)
     range.left.colum = yytokenpos[YY_TOKEN_LEFT];
     range.right.line = yylinenum;
     range.right.colum = yytokenpos[YY_TOKEN_RIGHT];
-    ((TParseContext *)cpp->pC)->infoSink.info.message(EPrefixWarning, msg, range);
+    ((TParseContext *)cpp->pC)->infoSink.info.message(EPrefixWarning, msg, range); 
 }
 
 void CPPShInfoLogMsg(const char *msg)
@@ -620,7 +615,7 @@ void DecLineNumber(void)
     if ((yylinenum & SourceLocLineMask) > 0)
         --yylinenum;
 }
-
+extern "C" {
 void SetCursor(int col)
 {
     yycursor = col;
@@ -661,19 +656,25 @@ void DecCurserCol(YYTOKENPOS t)
     yytokenpos[t]--;
 }
 
+void setVersionNumber(int version) {
+    ((TParseContext *)cpp->pC)->versionNumber = version;
+}
+
+} /* extern "C" */
+
 void HandlePragma(const char **tokens, int numTokens)
-{
+{    
     if (!strcmp(tokens[0], "optimize")) {
         if (numTokens != 4) {
             CPPShInfoLogMsg("optimize pragma syntax is incorrect");
             return;
         }
-
+        
         if (strcmp(tokens[1], "(")) {
             CPPShInfoLogMsg("\"(\" expected after 'optimize' keyword");
             return;
         }
-
+            
         if (!strcmp(tokens[2], "on"))
             ((TParseContext *)cpp->pC)->contextPragma.optimize = true;
         else if (!strcmp(tokens[2], "off"))
@@ -682,7 +683,7 @@ void HandlePragma(const char **tokens, int numTokens)
             CPPShInfoLogMsg("\"on\" or \"off\" expected after '(' for 'optimize' pragma");
             return;
         }
-
+        
         if (strcmp(tokens[3], ")")) {
             CPPShInfoLogMsg("\")\" expected to end 'optimize' pragma");
             return;
@@ -692,12 +693,12 @@ void HandlePragma(const char **tokens, int numTokens)
             CPPShInfoLogMsg("debug pragma syntax is incorrect");
             return;
         }
-
+        
         if (strcmp(tokens[1], "(")) {
             CPPShInfoLogMsg("\"(\" expected after 'debug' keyword");
             return;
         }
-
+            
         if (!strcmp(tokens[2], "on"))
             ((TParseContext *)cpp->pC)->contextPragma.debug = true;
         else if (!strcmp(tokens[2], "off"))
@@ -706,7 +707,7 @@ void HandlePragma(const char **tokens, int numTokens)
             CPPShInfoLogMsg("\"on\" or \"off\" expected after '(' for 'debug' pragma");
             return;
         }
-
+        
         if (strcmp(tokens[3], ")")) {
             CPPShInfoLogMsg("\")\" expected to end 'debug' pragma");
             return;
@@ -721,8 +722,8 @@ void HandlePragma(const char **tokens, int numTokens)
         // An Example of one such implementation for a pragma that has a syntax like
         // #pragma pragmaname(pragmavalue)
         // This implementation stores the current pragmavalue against the pragma name in pragmaTable.
-        //
-        if (numTokens == 4 && !strcmp(tokens[1], "(") && !strcmp(tokens[3], ")")) {
+        //        
+        if (numTokens == 4 && !strcmp(tokens[1], "(") && !strcmp(tokens[3], ")")) {              
             TPragmaTable& pragmaTable = ((TParseContext *)cpp->pC)->contextPragma.pragmaTable;
             TPragmaTable::iterator iter;
             iter = pragmaTable.find(TString(tokens[0]));
@@ -730,7 +731,7 @@ void HandlePragma(const char **tokens, int numTokens)
                 iter->second = tokens[2];
             } else {
                 pragmaTable[tokens[0] ] = tokens[2];
-            }
+            }        
         } else if (numTokens >= 2) {
             TPragmaTable& pragmaTable = ((TParseContext *)cpp->pC)->contextPragma.pragmaTable;
             TPragmaTable::iterator iter;
@@ -777,7 +778,7 @@ TBehavior GetBehavior(const char* behavior)
     else {
         CPPShInfoLogMsg((TString("behavior '") + behavior + "' is not supported").c_str());
         return EBhDisable;
-    }
+    }        
 }
 
 void  updateExtensionBehavior(const char* extName, const char* behavior)
@@ -785,15 +786,15 @@ void  updateExtensionBehavior(const char* extName, const char* behavior)
     TBehavior behaviorVal = GetBehavior(behavior);
     TMap<TString, TBehavior>:: iterator iter;
     TString msg;
-
+    
     // special cased for all extension
     if (!strcmp(extName, "all")) {
         if (behaviorVal == EBhRequire || behaviorVal == EBhEnable) {
-            CPPShInfoLogMsg("extension 'all' cannot have 'require' or 'enable' behavior");
+            CPPShInfoLogMsg("extension 'all' cannot have 'require' or 'enable' behavior");  
             return;
         } else {
-            for (iter = ((TParseContext *)cpp->pC)->extensionBehavior.begin();
-                 iter != ((TParseContext *)cpp->pC)->extensionBehavior.end();
+            for (iter = ((TParseContext *)cpp->pC)->extensionBehavior.begin(); 
+                 iter != ((TParseContext *)cpp->pC)->extensionBehavior.end(); 
                  ++iter) {
                 iter->second = behaviorVal;
             }
@@ -805,7 +806,7 @@ void  updateExtensionBehavior(const char* extName, const char* behavior)
         if (iter == ((TParseContext *)cpp->pC)->extensionBehavior.end()) {
             switch (behaviorVal) {
             case EBhRequire:
-                CPPShInfoLogMsg((TString("extension '") + extName + "' is not supported").c_str());
+                CPPShInfoLogMsg((TString("extension '") + extName + "' is not supported").c_str());  
                 break;
             case EBhEnable:
             case EBhWarn:
@@ -830,11 +831,8 @@ void  updateExtensionBehavior(const char* extName, const char* behavior)
     }
 }
 
-void setVersionNumber(int version) {
-    ((TParseContext *)cpp->pC)->versionNumber = version;
-}
 
-}  // extern "C"
+        
 
 void setInitialState()
 {
