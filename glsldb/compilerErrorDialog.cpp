@@ -33,42 +33,43 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "compilerErrorDialog.qt.h"
 
-
-Dialog_CompilerError::Dialog_CompilerError(QWidget *parent) : QDialog(parent) {
+Dialog_CompilerError::Dialog_CompilerError(QWidget *parent) :
+		QDialog(parent)
+{
 	this->setupUi(this);
 
-    /*
-     * Initialise the most expensive dialog of all times. VIS is wasting
-     * taxpayer's money(tm) ...
-     */
-    this->details = new Widget_CompilerError(this);
-    
-    QGridLayout *layout = dynamic_cast<QGridLayout *>(this->layout());
-    layout->setSizeConstraint(QLayout::SetFixedSize);
-    layout->addWidget(this->details, 2, 0);
-    connect(btnDetails, SIGNAL(clicked()), this, SLOT(toggleDetails()));
+	/*
+	 * Initialise the most expensive dialog of all times. VIS is wasting
+	 * taxpayer's money(tm) ...
+	 */
+	this->details = new Widget_CompilerError(this);
 
-    this->details->hide();
+	QGridLayout *layout = dynamic_cast<QGridLayout *>(this->layout());
+	layout->setSizeConstraint(QLayout::SetFixedSize);
+	layout->addWidget(this->details, 2, 0);
+	connect(btnDetails, SIGNAL(clicked()), this, SLOT(toggleDetails()));
+
+	this->details->hide();
 }
 
-
-Dialog_CompilerError::~Dialog_CompilerError(void) {
-    delete this->details;
+Dialog_CompilerError::~Dialog_CompilerError(void)
+{
+	delete this->details;
 }
 
-
-void Dialog_CompilerError::setDetailedOutput(const char *text) {
-    this->details->textBoxCompilerOutput->setText(text);
+void Dialog_CompilerError::setDetailedOutput(const char *text)
+{
+	this->details->textBoxCompilerOutput->setText(text);
 }
 
-
-void Dialog_CompilerError::toggleDetails(void) {
-    if (this->details->isHidden()) {
-        this->details->show();
-        this->btnDetails->setText("Hide Details");
-    } else {
-        this->details->hide();
-        this->btnDetails->setText("Show Details");
-    }
+void Dialog_CompilerError::toggleDetails(void)
+{
+	if (this->details->isHidden()) {
+		this->details->show();
+		this->btnDetails->setText("Hide Details");
+	} else {
+		this->details->hide();
+		this->btnDetails->setText("Show Details");
+	}
 }
 

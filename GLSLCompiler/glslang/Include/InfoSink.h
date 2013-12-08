@@ -43,19 +43,19 @@
 // See below.
 //
 enum TPrefixType {
-    EPrefixNone,
-    EPrefixWarning,
-    EPrefixError,
-    EPrefixInternalError,
-    EPrefixUnimplemented,
-    EPrefixNote
+	EPrefixNone,
+	EPrefixWarning,
+	EPrefixError,
+	EPrefixInternalError,
+	EPrefixUnimplemented,
+	EPrefixNote
 };
 
 enum TOutputStream {
-    ENull = 0,
-    EDebugger = 0x01,
-    EStdOut = 0x02,
-    EString = 0x04,
+	ENull = 0,
+	EDebugger = 0x01,
+	EStdOut = 0x02,
+	EString = 0x04,
 };
 //
 // Encapsulate info logs for all objects that have them.
@@ -65,73 +65,142 @@ enum TOutputStream {
 //
 class TInfoSinkBase {
 public:
-    TInfoSinkBase() : outputStream(4) {}
-    void erase() { sink.erase(); }
-    TInfoSinkBase& operator<<(const TPersistString& t) { append(t); return *this; }
-    TInfoSinkBase& operator<<(char c)                  { append(1, c); return *this; }
-    TInfoSinkBase& operator<<(const char* s)           { append(s); return *this; }
-    TInfoSinkBase& operator<<(int n)                   { append(String(n)); return *this; }
-    TInfoSinkBase& operator<<(const unsigned int n)    { append(String(n)); return *this; }
-    TInfoSinkBase& operator<<(float n)                 { char buf[40]; 
-                                                     sprintf(buf, (fabs(n) > 1e-8 && fabs(n) < 1e8) || n == 0.0f ?
-                                                             "%f" : "%g", n);
-                                                     append(buf); 
-                                                     return *this; }
-    TInfoSinkBase& operator+(const TPersistString& t)  { append(t); return *this; }
-    TInfoSinkBase& operator+(const TString& t)         { append(t); return *this; }
-    TInfoSinkBase& operator<<(const TString& t)        { append(t); return *this; }
-    TInfoSinkBase& operator+(const char* s)            { append(s); return *this; }
-    const char* c_str() const { return sink.c_str(); }
-    void prefix(TPrefixType message) {
-        switch(message) {
-        case EPrefixNone:                                      break;
-        case EPrefixWarning:       append("WARNING: ");        break;
-        case EPrefixError:         append("ERROR: ");          break;
-        case EPrefixInternalError: append("INTERNAL ERROR: "); break;
-        case EPrefixUnimplemented: append("UNIMPLEMENTED: ");  break;
-        case EPrefixNote:          append("NOTE: ");           break;
-        default:                   append("UNKOWN ERROR: ");   break;
-        }
-    }
-    void location(TSourceRange range) {
-        append(FormatSourceRange(range).c_str());
-        append(": ");
-    }
-    void message(TPrefixType message, const char* s) {
-        prefix(message);
-        append(s);
-        append("\n");
-    }
-    void message(TPrefixType message, const char* s, TSourceRange range) {
-        prefix(message);
-        location(range);
-        append(s);
-        append("\n");
-    }
-    
-    void setOutputStream(int output = 4)
-    {
-        outputStream = output;
-    }
+	TInfoSinkBase() :
+			outputStream(4)
+	{
+	}
+	void erase()
+	{
+		sink.erase();
+	}
+	TInfoSinkBase& operator<<(const TPersistString& t)
+	{
+		append(t);
+		return *this;
+	}
+	TInfoSinkBase& operator<<(char c)
+	{
+		append(1, c);
+		return *this;
+	}
+	TInfoSinkBase& operator<<(const char* s)
+	{
+		append(s);
+		return *this;
+	}
+	TInfoSinkBase& operator<<(int n)
+	{
+		append(String(n));
+		return *this;
+	}
+	TInfoSinkBase& operator<<(const unsigned int n)
+	{
+		append(String(n));
+		return *this;
+	}
+	TInfoSinkBase& operator<<(float n)
+	{
+		char buf[40];
+		sprintf(buf,
+				(fabs(n) > 1e-8 && fabs(n) < 1e8) || n == 0.0f ? "%f" : "%g",
+				n);
+		append(buf);
+		return *this;
+	}
+	TInfoSinkBase& operator+(const TPersistString& t)
+	{
+		append(t);
+		return *this;
+	}
+	TInfoSinkBase& operator+(const TString& t)
+	{
+		append(t);
+		return *this;
+	}
+	TInfoSinkBase& operator<<(const TString& t)
+	{
+		append(t);
+		return *this;
+	}
+	TInfoSinkBase& operator+(const char* s)
+	{
+		append(s);
+		return *this;
+	}
+	const char* c_str() const
+	{
+		return sink.c_str();
+	}
+	void prefix(TPrefixType message)
+	{
+		switch (message) {
+		case EPrefixNone:
+			break;
+		case EPrefixWarning:
+			append("WARNING: ");
+			break;
+		case EPrefixError:
+			append("ERROR: ");
+			break;
+		case EPrefixInternalError:
+			append("INTERNAL ERROR: ");
+			break;
+		case EPrefixUnimplemented:
+			append("UNIMPLEMENTED: ");
+			break;
+		case EPrefixNote:
+			append("NOTE: ");
+			break;
+		default:
+			append("UNKOWN ERROR: ");
+			break;
+		}
+	}
+	void location(TSourceRange range)
+	{
+		append(FormatSourceRange(range).c_str());
+		append(": ");
+	}
+	void message(TPrefixType message, const char* s)
+	{
+		prefix(message);
+		append(s);
+		append("\n");
+	}
+	void message(TPrefixType message, const char* s, TSourceRange range)
+	{
+		prefix(message);
+		location(range);
+		append(s);
+		append("\n");
+	}
+
+	void setOutputStream(int output = 4)
+	{
+		outputStream = output;
+	}
 
 protected:
-    void append(const char *s); 
+	void append(const char *s);
 
-    void append(int count, char c);
-    void append(const TPersistString& t);
-    void append(const TString& t);
+	void append(int count, char c);
+	void append(const TPersistString& t);
+	void append(const TString& t);
 
-    void checkMem(size_t growth) { if (sink.capacity() < sink.size() + growth + 2)  
-                                       sink.reserve(sink.capacity() +  sink.capacity() / 2); }
-    void appendToStream(const char* s);
-    TPersistString sink;
-    int outputStream;
+	void checkMem(size_t growth)
+	{
+		if (sink.capacity() < sink.size() + growth + 2)
+			sink.reserve(sink.capacity() + sink.capacity() / 2);
+	}
+	void appendToStream(const char* s);
+	TPersistString sink;
+	int outputStream;
 };
 
 class TInfoSink {
 public:
-    TInfoSinkBase info;
-    TInfoSinkBase debug;
+	TInfoSinkBase info;
+	TInfoSinkBase debug;
 };
 
 #endif // _INFOSINK_INCLUDED_

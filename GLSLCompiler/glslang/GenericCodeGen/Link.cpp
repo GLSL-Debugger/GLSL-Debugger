@@ -42,50 +42,65 @@
 //
 // Actual link object, derived from the shader handle base classes.
 //
-class TGenericLinker : public TLinker {
+class TGenericLinker: public TLinker {
 public:
-    TGenericLinker(EShExecutable e, int dOptions) : TLinker(e, infoSink), debugOptions(dOptions) { }
-    bool link(TCompilerList&, TUniformMap*) { return true; }
-	void getAttributeBindings(ShBindingTable const **t) const { }
-    TInfoSink infoSink;
-    int debugOptions;
+	TGenericLinker(EShExecutable e, int dOptions) :
+			TLinker(e, infoSink), debugOptions(dOptions)
+	{
+	}
+	bool link(TCompilerList&, TUniformMap*)
+	{
+		return true;
+	}
+	void getAttributeBindings(ShBindingTable const **t) const
+	{
+		UNUSED_ARG(t)
+	}
+	TInfoSink infoSink;
+	int debugOptions;
 };
 
 //
 // The internal view of a uniform/float object exchanged with the driver.
 //
-class TUniformLinkedMap : public TUniformMap {
+class TUniformLinkedMap: public TUniformMap {
 public:
-    TUniformLinkedMap() { }
-    virtual int getLocation(const char* name) { return 0; }
+	TUniformLinkedMap()
+	{
+	}
+	virtual int getLocation(const char* name)
+	{
+		UNUSED_ARG(name)
+		return 0;
+	}
 };
 
 TShHandleBase* ConstructLinker(EShExecutable executable, int debugOptions)
 {
-    return new TGenericLinker(executable, debugOptions);
+	return new TGenericLinker(executable, debugOptions);
 }
 
 void DeleteLinker(TShHandleBase* linker)
 {
-    delete linker;
+	delete linker;
 }
 
 TUniformMap* ConstructUniformMap()
 {
-    return new TUniformLinkedMap();
+	return new TUniformLinkedMap();
 }
 
 void DeleteUniformMap(TUniformMap* map)
 {
-    delete map;
+	delete map;
 }
 
 TShHandleBase* ConstructBindings()
 {
-    return 0;
+	return 0;
 }
 
 void DeleteBindingList(TShHandleBase* bindingList)
 {
-    delete bindingList;
+	delete bindingList;
 }

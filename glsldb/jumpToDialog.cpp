@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,67 +40,70 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" GLFunctionList glFunctions[];
 
-class GlFuncValidator : public QValidator
-{
+class GlFuncValidator: public QValidator {
 public:
-    GlFuncValidator(QWidget *parant);
-    QValidator::State validate(QString &, int &) const;
+	GlFuncValidator(QWidget *parant);
+	QValidator::State validate(QString &, int &) const;
 };
 
-GlFuncValidator::GlFuncValidator(QWidget *parent) : QValidator(parent)
+GlFuncValidator::GlFuncValidator(QWidget *parent) :
+		QValidator(parent)
 {
 }
 
 QValidator::State GlFuncValidator::validate(QString &input, int &pos) const
 {
-    QValidator::State state = QValidator::Invalid;
-    int i = 0;
+	UNUSED_ARG(pos)
+	QValidator::State state = QValidator::Invalid;
+	int i = 0;
 
-    while (glFunctions[i].fname != NULL) {
-        if (input.compare(QString(glFunctions[i].fname)) == 0) {
-            /* exact match */
-            return  QValidator::Acceptable;
-        }
-        if (QString(glFunctions[i].fname).startsWith(input)) {
-            state = QValidator::Intermediate;
-        }
-        i++;
-    }
+	while (glFunctions[i].fname != NULL) {
+		if (input.compare(QString(glFunctions[i].fname)) == 0) {
+			/* exact match */
+			return QValidator::Acceptable;
+		}
+		if (QString(glFunctions[i].fname).startsWith(input)) {
+			state = QValidator::Intermediate;
+		}
+		i++;
+	}
 
-    return state;
+	return state;
 }
 
 JumpToDialog::JumpToDialog(void)
 {
-    int i = 0;
-    
-    setupUi(this);
-    
-    GlFuncValidator *v = new GlFuncValidator(cbFunctions);
-    cbFunctions->setValidator(v);
-    while (glFunctions[i].fname != NULL) {
-        cbFunctions->addItem(glFunctions[i].fname);
-        i++;
-    }
-    connect(cbFunctions, SIGNAL(editTextChanged(QString)), this, SLOT(checkValidity()));
+	int i = 0;
+
+	setupUi(this);
+
+	GlFuncValidator *v = new GlFuncValidator(cbFunctions);
+	cbFunctions->setValidator(v);
+	while (glFunctions[i].fname != NULL) {
+		cbFunctions->addItem(glFunctions[i].fname);
+		i++;
+	}
+	connect(cbFunctions, SIGNAL(editTextChanged(QString)), this,
+			SLOT(checkValidity()));
 }
 
 JumpToDialog::JumpToDialog(QString i_qInitName)
 {
-    int i = 0;
-    
-    setupUi(this);
-    
-    GlFuncValidator *v = new GlFuncValidator(cbFunctions);
-    cbFunctions->setValidator(v);
-    while (glFunctions[i].fname != NULL) {
-        cbFunctions->addItem(glFunctions[i].fname);
-        if (i_qInitName.compare(glFunctions[i].fname) == 0) {
-            cbFunctions->setCurrentIndex(i);
-        }
-        i++;
-    }
-    connect(cbFunctions, SIGNAL(editTextChanged(QString)), this, SLOT(checkValidity()));
+	int i = 0;
+
+	setupUi(this);
+
+	GlFuncValidator *v = new GlFuncValidator(cbFunctions);
+	cbFunctions->setValidator(v);
+	while (glFunctions[i].fname != NULL) {
+		cbFunctions->addItem(glFunctions[i].fname);
+		if (i_qInitName.compare(glFunctions[i].fname) == 0) {
+			cbFunctions->setCurrentIndex(i);
+		}
+		i++;
+	}
+	connect(cbFunctions, SIGNAL(editTextChanged(QString)), this,
+			SLOT(checkValidity()));
 }
 
 JumpToDialog::~JumpToDialog()
@@ -109,41 +112,41 @@ JumpToDialog::~JumpToDialog()
 
 void JumpToDialog::checkValidity(void)
 {
-    QValidator::State state = QValidator::Acceptable;
-    
-    int i;
+	QValidator::State state = QValidator::Acceptable;
 
-    const QValidator *vldr = cbFunctions->validator();
-    QString s = cbFunctions->currentText();
-    int pos = 0;
-    if (vldr->validate(s, pos) != QValidator::Acceptable) {
-        state = QValidator::Invalid;
-    }
+	int i;
 
-    /* Find OK button */
-    QAbstractButton *okButton = NULL;
-    QList<QAbstractButton*> buttonList;
-    buttonList = buttonBox->buttons();
-    for(i=0; i<buttonList.size(); i++) {
-        if (buttonBox->buttonRole(buttonList[i]) == 
-                QDialogButtonBox::AcceptRole) {
-            okButton = buttonList[i];
-        }
-    }
+	const QValidator *vldr = cbFunctions->validator();
+	QString s = cbFunctions->currentText();
+	int pos = 0;
+	if (vldr->validate(s, pos) != QValidator::Acceptable) {
+		state = QValidator::Invalid;
+	}
 
-    if (!okButton) {
-        return;
-    }
+	/* Find OK button */
+	QAbstractButton *okButton = NULL;
+	QList<QAbstractButton*> buttonList;
+	buttonList = buttonBox->buttons();
+	for (i = 0; i < buttonList.size(); i++) {
+		if (buttonBox->buttonRole(buttonList[i])
+				== QDialogButtonBox::AcceptRole) {
+			okButton = buttonList[i];
+		}
+	}
 
-    if (state == QValidator::Acceptable) {
-        okButton->setEnabled(true);
-    } else {
-        okButton->setEnabled(false);
-    }
+	if (!okButton) {
+		return;
+	}
+
+	if (state == QValidator::Acceptable) {
+		okButton->setEnabled(true);
+	} else {
+		okButton->setEnabled(false);
+	}
 }
 
 QString JumpToDialog::getTargetFuncName()
 {
-    return cbFunctions->currentText();
+	return cbFunctions->currentText();
 }
 

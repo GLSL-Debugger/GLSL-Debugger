@@ -46,65 +46,62 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "shVarModel.qt.h"
 
-class LoopDialog : public QDialog, public Ui::dLoop {
-    Q_OBJECT
+class LoopDialog: public QDialog, public Ui::dLoop {
+Q_OBJECT
 
 public:
-    LoopDialog(LoopData *data, QWidget *parent = 0);
+	LoopDialog(LoopData *data, QWidget *parent = 0);
 
-    LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems,
-               int inPrimitiveType, int outPrimitiveType,
-               VertexBox *primitiveMap,
-               VertexBox *vertexCountMap,
-               QWidget *parent = 0);
+	LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems,
+			int inPrimitiveType, int outPrimitiveType, VertexBox *primitiveMap,
+			VertexBox *vertexCountMap, QWidget *parent = 0);
 
-    LoopDialog(LoopData *data,
-               QList<ShVarItem*> &watchItems,
-               QWidget *parent = 0);
+	LoopDialog(LoopData *data, QList<ShVarItem*> &watchItems, QWidget *parent =
+			0);
 
-    typedef enum {
-        SA_NEXT = 0,
-        SA_BREAK,
-        SA_JUMP
-    } selectedAction;
+	typedef enum {
+		SA_NEXT = 0,
+		SA_BREAK,
+		SA_JUMP
+	} selectedAction;
 
-    int exec();
+	int exec();
 
 signals:
-    void doShaderStep(int, bool, bool);
+	void doShaderStep(int, bool, bool);
 
 private slots:
-    /* auto-connect */
-    void on_pbBreak_clicked();
-    void on_pbStatistics_clicked();
-    void on_pbJump_clicked();
-    void on_pbNext_clicked();
-    void on_pbStopProgress_clicked();
-    void on_pbStopJump_clicked();
+	/* auto-connect */
+	void on_pbBreak_clicked();
+	void on_pbStatistics_clicked();
+	void on_pbJump_clicked();
+	void on_pbNext_clicked();
+	void on_pbStopProgress_clicked();
+	void on_pbStopJump_clicked();
 
-    void on_cbActive_stateChanged(int);
-    void on_cbOut_stateChanged(int);
-    void on_cbDone_stateChanged(int);
+	void on_cbActive_stateChanged(int);
+	void on_cbOut_stateChanged(int);
+	void on_cbDone_stateChanged(int);
 
-    /* self connect */
-    void reorganizeLoopTable(const QModelIndex&, int, int);
-    
+	/* self connect */
+	void reorganizeLoopTable(const QModelIndex&, int, int);
+
 private:
-    void setupGui(void);
+	void setupGui(void);
 
-    void updateIterationStatistics();
-    
-    QScrollArea *m_qScrollArea;
-    QLabel      *m_qLabel;
+	void updateIterationStatistics();
 
-    QTableView  *m_qTableView;
-    QTreeView   *m_qTreeView;
-    
-    CurveView   *m_qCurves;
+	QScrollArea *m_qScrollArea;
+	QLabel *m_qLabel;
 
-    LoopData    *m_pData;
-    int          m_nActive;
-    bool         m_bProcessStopped;
+	QTableView *m_qTableView;
+	QTreeView *m_qTreeView;
+
+	CurveView *m_qCurves;
+
+	LoopData *m_pData;
+	int m_nActive;
+	bool m_bProcessStopped;
 };
 
 #endif

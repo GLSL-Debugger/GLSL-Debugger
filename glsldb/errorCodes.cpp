@@ -35,144 +35,144 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool isErrorCritical(pcErrorCode error)
 {
-    switch (error) {
-        case PCE_NONE:
+	switch (error) {
+	case PCE_NONE:
 		/* gl errors */
-        case PCE_GL_INVALID_ENUM:
-        case PCE_GL_INVALID_VALUE:
-        case PCE_GL_INVALID_OPERATION:
-        case PCE_GL_STACK_OVERFLOW:
-        case PCE_GL_STACK_UNDERFLOW:
-        case PCE_GL_OUT_OF_MEMORY:
-        case PCE_GL_TABLE_TOO_LARGE:
-		case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+	case PCE_GL_INVALID_ENUM:
+	case PCE_GL_INVALID_VALUE:
+	case PCE_GL_INVALID_OPERATION:
+	case PCE_GL_STACK_OVERFLOW:
+	case PCE_GL_STACK_UNDERFLOW:
+	case PCE_GL_OUT_OF_MEMORY:
+	case PCE_GL_TABLE_TOO_LARGE:
+	case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
 		/* other non-critical errors */
-		case PCE_DBG_READBACK_NOT_ALLOWED:
-            return false;
-        default:
-            return true;
-    }
+	case PCE_DBG_READBACK_NOT_ALLOWED:
+		return false;
+	default:
+		return true;
+	}
 }
 
 bool isOpenGLError(pcErrorCode error)
 {
 	switch (error) {
-		/* gl errors */
-        case PCE_GL_INVALID_ENUM:
-        case PCE_GL_INVALID_VALUE:
-        case PCE_GL_INVALID_OPERATION:
-        case PCE_GL_STACK_OVERFLOW:
-        case PCE_GL_STACK_UNDERFLOW:
-        case PCE_GL_OUT_OF_MEMORY:
-        case PCE_GL_TABLE_TOO_LARGE:
-		case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-			return true;
-		default:
-			return false;
+	/* gl errors */
+	case PCE_GL_INVALID_ENUM:
+	case PCE_GL_INVALID_VALUE:
+	case PCE_GL_INVALID_OPERATION:
+	case PCE_GL_STACK_OVERFLOW:
+	case PCE_GL_STACK_UNDERFLOW:
+	case PCE_GL_OUT_OF_MEMORY:
+	case PCE_GL_TABLE_TOO_LARGE:
+	case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		return true;
+	default:
+		return false;
 	}
 }
 
 const char* getErrorDescription(pcErrorCode error)
 {
-    switch (error) {
-		/* general debugger errors */
-		case PCE_NONE:
-			return "";
-        case PCE_FORK:
-            return "Error forking child process";
-        case PCE_EXEC:
-            return "Error executing child process";
-        case PCE_EXIT:
-            return "Child process exited";
-		case PCE_UNKNOWN_ERROR:
-            return "Internal debugger error";
-		case PCE_MEMORY_ALLOCATION_FAILED:
-			return "Memory allocation failed";
+	switch (error) {
+	/* general debugger errors */
+	case PCE_NONE:
+		return "";
+	case PCE_FORK:
+		return "Error forking child process";
+	case PCE_EXEC:
+		return "Error executing child process";
+	case PCE_EXIT:
+		return "Child process exited";
+	case PCE_UNKNOWN_ERROR:
+		return "Internal debugger error";
+	case PCE_MEMORY_ALLOCATION_FAILED:
+		return "Memory allocation failed";
 		/* debuglib errors */
-		case PCE_DBG_NO_ACTIVE_SHADER:
-		case PCE_DBG_NO_SUCH_DBG_FUNC:
-		case PCE_DBG_MEMORY_ALLOCATION_FAILED:
-		case PCE_DBG_DBG_SHADER_COMPILE_FAILED:
-		case PCE_DBG_DBG_SHADER_LINK_FAILED:
-		case PCE_DBG_NO_STORED_SHADER:
-		case PCE_DBG_READBACK_INVALID_COMPONENTS:
-		case PCE_DBG_READBACK_INVALID_FORMAT:
-		case PCE_DBG_OPERATION_NOT_ALLOWED:
-		case PCE_DBG_INVALID_OPERATION:
-		case PCE_DBG_INVALID_VALUE:
-            return "Internal debugger error";
-		case PCE_DBG_READBACK_NOT_ALLOWED:
-			return "Readback not allowed here";
+	case PCE_DBG_NO_ACTIVE_SHADER:
+	case PCE_DBG_NO_SUCH_DBG_FUNC:
+	case PCE_DBG_MEMORY_ALLOCATION_FAILED:
+	case PCE_DBG_DBG_SHADER_COMPILE_FAILED:
+	case PCE_DBG_DBG_SHADER_LINK_FAILED:
+	case PCE_DBG_NO_STORED_SHADER:
+	case PCE_DBG_READBACK_INVALID_COMPONENTS:
+	case PCE_DBG_READBACK_INVALID_FORMAT:
+	case PCE_DBG_OPERATION_NOT_ALLOWED:
+	case PCE_DBG_INVALID_OPERATION:
+	case PCE_DBG_INVALID_VALUE:
+		return "Internal debugger error";
+	case PCE_DBG_READBACK_NOT_ALLOWED:
+		return "Readback not allowed here";
 		/* gl errors */
-        case PCE_GL_INVALID_ENUM:
-            return "OpenGL error GL_INVALID_ENUM detected";
-        case PCE_GL_INVALID_VALUE:
-            return "OpenGL error GL_INVALID_VALUE detected";
-        case PCE_GL_INVALID_OPERATION:
-            return "OpenGL error GL_INVALID_OPERATION detected";
-        case PCE_GL_STACK_OVERFLOW:
-            return "OpenGL error GL_STACK_OVERFLOW detected";
-        case PCE_GL_STACK_UNDERFLOW:
-            return "OpenGL error GL_STACK_UNDERFLOW detected";
-        case PCE_GL_OUT_OF_MEMORY:
-            return "OpenGL error GL_OUT_OF_MEMORY detected";
-        case PCE_GL_TABLE_TOO_LARGE:
-            return "OpenGL error GL_TABLE_TOO_LARGE detected";
-		case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-			return "PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-        default:
-            return "UNKNOWN ERROR!";
-    }
+	case PCE_GL_INVALID_ENUM:
+		return "OpenGL error GL_INVALID_ENUM detected";
+	case PCE_GL_INVALID_VALUE:
+		return "OpenGL error GL_INVALID_VALUE detected";
+	case PCE_GL_INVALID_OPERATION:
+		return "OpenGL error GL_INVALID_OPERATION detected";
+	case PCE_GL_STACK_OVERFLOW:
+		return "OpenGL error GL_STACK_OVERFLOW detected";
+	case PCE_GL_STACK_UNDERFLOW:
+		return "OpenGL error GL_STACK_UNDERFLOW detected";
+	case PCE_GL_OUT_OF_MEMORY:
+		return "OpenGL error GL_OUT_OF_MEMORY detected";
+	case PCE_GL_TABLE_TOO_LARGE:
+		return "OpenGL error GL_TABLE_TOO_LARGE detected";
+	case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		return "PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
+	default:
+		return "UNKNOWN ERROR!";
+	}
 }
 
 const char* getErrorInfo(pcErrorCode error)
 {
-    switch (error) {
-		case PCE_NONE:
-			return "";
-        case PCE_FORK:
-            return "FORK_FAILED";
-        case PCE_EXEC:
-            return "EXEC_FAILED";
-        case PCE_EXIT:
-            return "CHILD_EXIT";
-        case PCE_UNKNOWN_ERROR:
-            return "PROGRAM_ERROR";
+	switch (error) {
+	case PCE_NONE:
+		return "";
+	case PCE_FORK:
+		return "FORK_FAILED";
+	case PCE_EXEC:
+		return "EXEC_FAILED";
+	case PCE_EXIT:
+		return "CHILD_EXIT";
+	case PCE_UNKNOWN_ERROR:
+		return "PROGRAM_ERROR";
 		/* debuglib errors */
-		case PCE_MEMORY_ALLOCATION_FAILED:
-		case PCE_DBG_NO_ACTIVE_SHADER:
-		case PCE_DBG_NO_SUCH_DBG_FUNC:
-		case PCE_DBG_MEMORY_ALLOCATION_FAILED:
-		case PCE_DBG_DBG_SHADER_COMPILE_FAILED:
-		case PCE_DBG_DBG_SHADER_LINK_FAILED:
-		case PCE_DBG_NO_STORED_SHADER:
-		case PCE_DBG_READBACK_INVALID_COMPONENTS:
-		case PCE_DBG_READBACK_INVALID_FORMAT:
-		case PCE_DBG_OPERATION_NOT_ALLOWED:
-		case PCE_DBG_INVALID_OPERATION:
-		case PCE_DBG_INVALID_VALUE:
-            return "INTERNAL_ERROR";
-		case PCE_DBG_READBACK_NOT_ALLOWED:
-			return "INVALID_OPERATION";
+	case PCE_MEMORY_ALLOCATION_FAILED:
+	case PCE_DBG_NO_ACTIVE_SHADER:
+	case PCE_DBG_NO_SUCH_DBG_FUNC:
+	case PCE_DBG_MEMORY_ALLOCATION_FAILED:
+	case PCE_DBG_DBG_SHADER_COMPILE_FAILED:
+	case PCE_DBG_DBG_SHADER_LINK_FAILED:
+	case PCE_DBG_NO_STORED_SHADER:
+	case PCE_DBG_READBACK_INVALID_COMPONENTS:
+	case PCE_DBG_READBACK_INVALID_FORMAT:
+	case PCE_DBG_OPERATION_NOT_ALLOWED:
+	case PCE_DBG_INVALID_OPERATION:
+	case PCE_DBG_INVALID_VALUE:
+		return "INTERNAL_ERROR";
+	case PCE_DBG_READBACK_NOT_ALLOWED:
+		return "INVALID_OPERATION";
 		/* gl errors */
-        case PCE_GL_INVALID_ENUM:
-            return "GL_INVALID_ENUM";
-        case PCE_GL_INVALID_VALUE:
-            return "GL_INVALID_VALUE";
-        case PCE_GL_INVALID_OPERATION:
-            return "GL_INVALID_OPERATION";
-        case PCE_GL_STACK_OVERFLOW:
-            return "GL_STACK_OVERFLOW";
-        case PCE_GL_STACK_UNDERFLOW:
-            return "GL_STACK_UNDERFLOW";
-        case PCE_GL_OUT_OF_MEMORY:
-            return "GL_OUT_OF_MEMORY";
-        case PCE_GL_TABLE_TOO_LARGE:
-            return "GL_TABLE_TOO_LARGE";
-		case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-			return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-        default:
-            return "UNKNOW";
-    }
+	case PCE_GL_INVALID_ENUM:
+		return "GL_INVALID_ENUM";
+	case PCE_GL_INVALID_VALUE:
+		return "GL_INVALID_VALUE";
+	case PCE_GL_INVALID_OPERATION:
+		return "GL_INVALID_OPERATION";
+	case PCE_GL_STACK_OVERFLOW:
+		return "GL_STACK_OVERFLOW";
+	case PCE_GL_STACK_UNDERFLOW:
+		return "GL_STACK_UNDERFLOW";
+	case PCE_GL_OUT_OF_MEMORY:
+		return "GL_OUT_OF_MEMORY";
+	case PCE_GL_TABLE_TOO_LARGE:
+		return "GL_TABLE_TOO_LARGE";
+	case PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
+	default:
+		return "UNKNOW";
+	}
 }
 

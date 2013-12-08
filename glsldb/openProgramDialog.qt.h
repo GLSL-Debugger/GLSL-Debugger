@@ -38,21 +38,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QDirModel>
 #include "ui_openProgramDialog.h"
 
-class Dialog_OpenProgram : public QDialog, public Ui::Dialog_OpenProgram {
-    Q_OBJECT
+class Dialog_OpenProgram: public QDialog, public Ui::Dialog_OpenProgram {
+Q_OBJECT
 
 public:
-    Dialog_OpenProgram(void);
-    virtual ~Dialog_OpenProgram(void);
+	Dialog_OpenProgram(void);
+	virtual ~Dialog_OpenProgram(void);
 
 private slots:
-    void on_pbSelect_clicked();
-    void ob_pbWorkDirSelect_clicked();
+	void on_pbSelect_clicked();
+	void ob_pbWorkDirSelect_clicked();
 
 private:
 
-    QCompleter *completer;
-    QDirModel *dirModel;
+	QCompleter *completer;
+	QDirModel *dirModel;
 };
 
 #endif

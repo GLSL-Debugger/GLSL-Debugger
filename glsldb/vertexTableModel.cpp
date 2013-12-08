@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,8 +34,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "colors.qt.h"
 #include "vertexTableModel.qt.h"
 
-VertexTableModel::VertexTableModel(QObject *parent)
-	: QAbstractTableModel(parent)
+VertexTableModel::VertexTableModel(QObject *parent) :
+		QAbstractTableModel(parent)
 {
 	m_condition = NULL;
 	m_pInitialCoverage = NULL;
@@ -49,7 +49,7 @@ VertexTableModel::~VertexTableModel()
 
 bool VertexTableModel::addVertexBox(VertexBox *vb, QString &name)
 {
-	for (int i = 0;  i < m_pData.count(); i++) {
+	for (int i = 0; i < m_pData.count(); i++) {
 		if (m_pData[i] == vb) {
 			return false;
 		}
@@ -65,10 +65,10 @@ bool VertexTableModel::addVertexBox(VertexBox *vb, QString &name)
 void VertexTableModel::setCondition(VertexBox *condition, bool *initialCoverage)
 {
 	m_condition = condition;
-    m_pInitialCoverage = initialCoverage;
+	m_pInitialCoverage = initialCoverage;
 }
 
-int VertexTableModel::rowCount(const QModelIndex &parent) const
+int VertexTableModel::rowCount(const QModelIndex &) const
 {
 	if (m_condition) {
 		return m_condition->getNumVertices();
@@ -79,7 +79,7 @@ int VertexTableModel::rowCount(const QModelIndex &parent) const
 	}
 }
 
-int VertexTableModel::columnCount(const QModelIndex &parent) const
+int VertexTableModel::columnCount(const QModelIndex &) const
 {
 	if (m_condition) {
 		return m_pData.size() + 1;
@@ -91,93 +91,96 @@ int VertexTableModel::columnCount(const QModelIndex &parent) const
 QVariant VertexTableModel::data(const QModelIndex &index, int role) const
 {
 	if (m_condition) {
-		if (!index.isValid() ||
-			index.column() >= m_pData.size()+1 || 
-			index.row() >= m_condition->getNumVertices()) {
+		if (!index.isValid() || index.column() >= m_pData.size() + 1
+				|| index.row() >= m_condition->getNumVertices()) {
 			return QVariant();
 		}
 
 		switch (role) {
-			case Qt::DisplayRole:
-                if (m_pInitialCoverage && index.column() == 0) {
-                    if (m_pInitialCoverage[index.row()]) {
-                        if (m_condition->getCoveragePointer()[index.row()] == true) {
-                            if (m_condition->getDataPointer()[index.row()] > 0.75f) {
-                                return QString("active");
-                            } else {
-                                return QString("done");
-                            }
-                        } else {
-                            return QString("out");
-                        }
-                    } else {
-                        return QVariant("%");
-                    }
-                } else if (m_condition->getCoveragePointer()[index.row()]) {
-					if (index.column() == 0) {
-						if (m_condition->getDataPointer()[index.row()] > 0.75f) {
-							return QString("true");
-						} else if (m_condition->getDataPointer()[index.row()] > 0.25f) {
-							return QString("false");
+		case Qt::DisplayRole:
+			if (m_pInitialCoverage && index.column() == 0) {
+				if (m_pInitialCoverage[index.row()]) {
+					if (m_condition->getCoveragePointer()[index.row()]
+							== true) {
+						if (m_condition->getDataPointer()[index.row()]
+								> 0.75f) {
+							return QString("active");
 						} else {
-							return QVariant("false");
+							return QString("done");
 						}
 					} else {
-						if (!m_pData[index.column()-1]->getDataMapPointer()[index.row()]) {
-							return QString("-");
-						} else {
-							return m_pData[index.column()-1]->getDataPointer()[index.row()];
-						}
+						return QString("out");
 					}
 				} else {
-					return QString("%");
+					return QVariant("%");
 				}
-			case Qt::TextColorRole:
-                if (m_pInitialCoverage) {
-                    if (m_pInitialCoverage[index.row()]) {
-                        if (m_condition->getCoveragePointer()[index.row()] == true) {
-                            if (m_condition->getDataPointer()[index.row()] > 0.75f) {
-                                return DBG_GREEN;
-                            } else {
-                                return DBG_RED;
-                            }
-                        } else {
-                            return DBG_ORANGE;
-                        }
-                    } else {
-                        return QVariant();
-                    }
-                } else {
-                    if (m_condition->getDataPointer()[index.row()] > 0.75f) {
-                        return DBG_GREEN;
-                    } else if (m_condition->getDataPointer()[index.row()] > 0.25f) {
-                        return DBG_RED;
-                    } else {
-                        return QVariant();
-                    }
-                }
-			default:
-				return QVariant();
+			} else if (m_condition->getCoveragePointer()[index.row()]) {
+				if (index.column() == 0) {
+					if (m_condition->getDataPointer()[index.row()] > 0.75f) {
+						return QString("true");
+					} else if (m_condition->getDataPointer()[index.row()]
+							> 0.25f) {
+						return QString("false");
+					} else {
+						return QVariant("false");
+					}
+				} else {
+					if (!m_pData[index.column() - 1]->getDataMapPointer()[index.row()]) {
+						return QString("-");
+					} else {
+						return m_pData[index.column() - 1]->getDataPointer()[index.row()];
+					}
+				}
+			} else {
+				return QString("%");
+			}
+		case Qt::TextColorRole:
+			if (m_pInitialCoverage) {
+				if (m_pInitialCoverage[index.row()]) {
+					if (m_condition->getCoveragePointer()[index.row()]
+							== true) {
+						if (m_condition->getDataPointer()[index.row()]
+								> 0.75f) {
+							return DBG_GREEN;
+						} else {
+							return DBG_RED;
+						}
+					} else {
+						return DBG_ORANGE;
+					}
+				} else {
+					return QVariant();
+				}
+			} else {
+				if (m_condition->getDataPointer()[index.row()] > 0.75f) {
+					return DBG_GREEN;
+				} else if (m_condition->getDataPointer()[index.row()] > 0.25f) {
+					return DBG_RED;
+				} else {
+					return QVariant();
+				}
+			}
+		default:
+			return QVariant();
 		}
 	} else {
-		if (!index.isValid() || 
-			index.column() >= m_pData.size() || 
-			m_pData.empty() ||
-			index.row() >= m_pData[0]->getNumVertices()) {
+		if (!index.isValid() || index.column() >= m_pData.size()
+				|| m_pData.empty()
+				|| index.row() >= m_pData[0]->getNumVertices()) {
 			return QVariant();
 		}
 
 		switch (role) {
-			case Qt::DisplayRole:
-				if (!m_pData[index.column()]->getCoveragePointer()[index.row()]) {
-					return QString("%");
-				} else if (!m_pData[index.column()]->getDataMapPointer()[index.row()]) {
-					return QString("-");
-				} else {
-					return m_pData[index.column()]->getDataPointer()[index.row()];
-				}
-			default:
-				return QVariant();
+		case Qt::DisplayRole:
+			if (!m_pData[index.column()]->getCoveragePointer()[index.row()]) {
+				return QString("%");
+			} else if (!m_pData[index.column()]->getDataMapPointer()[index.row()]) {
+				return QString("-");
+			} else {
+				return m_pData[index.column()]->getDataPointer()[index.row()];
+			}
+		default:
+			return QVariant();
 		}
 	}
 }
@@ -185,9 +188,8 @@ QVariant VertexTableModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags VertexTableModel::flags(const QModelIndex &index) const
 {
 	if (m_condition) {
-		if (!index.isValid() ||
-			index.column() >= m_pData.size()+1 ||
-			index.row() >= m_condition->getNumVertices()) {
+		if (!index.isValid() || index.column() >= m_pData.size() + 1
+				|| index.row() >= m_condition->getNumVertices()) {
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 		}
 		if (m_condition->getCoveragePointer()[index.row()] == false) {
@@ -196,14 +198,14 @@ Qt::ItemFlags VertexTableModel::flags(const QModelIndex &index) const
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 		}
 	} else {
-		if (!index.isValid() ||
-			index.column() >= m_pData.size() ||
-			m_pData.empty() ||
-			index.row() >= m_pData[0]->getNumVertices()) {
+		if (!index.isValid() || index.column() >= m_pData.size()
+				|| m_pData.empty()
+				|| index.row() >= m_pData[0]->getNumVertices()) {
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 		}
 
-		if (!m_pData.empty() && m_pData[0]->getCoveragePointer()[index.row()] == false) {
+		if (!m_pData.empty()
+				&& m_pData[0]->getCoveragePointer()[index.row()] == false) {
 			return 0;
 		} else {
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -211,7 +213,8 @@ Qt::ItemFlags VertexTableModel::flags(const QModelIndex &index) const
 	}
 }
 
-QVariant VertexTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant VertexTableModel::headerData(int section, Qt::Orientation orientation,
+		int role) const
 {
 	if (m_condition) {
 		if (role != Qt::DisplayRole) {
@@ -220,7 +223,7 @@ QVariant VertexTableModel::headerData(int section, Qt::Orientation orientation, 
 			if (section == 0) {
 				return QString("Condition");
 			} else {
-				return m_Names[section-1];
+				return m_Names[section - 1];
 			}
 		} else {
 			return section;
@@ -253,19 +256,19 @@ void VertexTableModel::detachData(void)
 
 void VertexTableModel::updateData(void)
 {
-    QModelIndex indexBegin = index(0, 0);
-    QModelIndex indexEnd   = index(columnCount()-1, rowCount()-1);
+	QModelIndex indexBegin = index(0, 0);
+	QModelIndex indexEnd = index(columnCount() - 1, rowCount() - 1);
 	if (indexBegin.isValid() && indexEnd.isValid()) {
-        emit dataChanged(indexBegin, indexEnd);
+		emit dataChanged(indexBegin, indexEnd);
 		emit layoutChanged();
 	} else {
 		reset();
 	}
 }
 
-
-VertexTableSortFilterProxyModel::VertexTableSortFilterProxyModel(QObject *parent)
-	: QSortFilterProxyModel(parent)
+VertexTableSortFilterProxyModel::VertexTableSortFilterProxyModel(
+		QObject *parent) :
+		QSortFilterProxyModel(parent)
 {
 	m_hideInactive = false;
 }
@@ -273,16 +276,17 @@ VertexTableSortFilterProxyModel::VertexTableSortFilterProxyModel(QObject *parent
 void VertexTableSortFilterProxyModel::setHideInactive(bool b)
 {
 	m_hideInactive = b;
-/*
-	QModelIndex indexBegin = sourceModel()->index(0, 0);
-	QModelIndex indexEnd   = sourceModel()->index(sourceModel()->columnCount()-1,
-	                                              sourceModel()->rowCount()-1);
-	emit dataChanged(indexBegin, indexEnd);
-*/
+	/*
+	 QModelIndex indexBegin = sourceModel()->index(0, 0);
+	 QModelIndex indexEnd   = sourceModel()->index(sourceModel()->columnCount()-1,
+	 sourceModel()->rowCount()-1);
+	 emit dataChanged(indexBegin, indexEnd);
+	 */
 	reset();
 }
 
-bool VertexTableSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+bool VertexTableSortFilterProxyModel::filterAcceptsRow(int sourceRow,
+		const QModelIndex &sourceParent) const
 {
 	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 	if (m_hideInactive) {
@@ -295,7 +299,7 @@ bool VertexTableSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QMod
 const QString& VertexTableModel::getDataColumnName(int column) const
 {
 	static const QString es("");
-	if (column >= 0 && column < m_Names.size()) { 
+	if (column >= 0 && column < m_Names.size()) {
 		return m_Names[column];
 	} else {
 		return es;
@@ -304,7 +308,7 @@ const QString& VertexTableModel::getDataColumnName(int column) const
 
 VertexBox* VertexTableModel::getDataColumn(int column)
 {
-	if (column >= 0 && column < m_pData.size()) { 
+	if (column >= 0 && column < m_pData.size()) {
 		return m_pData[column];
 	} else {
 		return NULL;

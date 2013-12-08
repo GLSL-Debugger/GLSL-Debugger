@@ -44,7 +44,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <semaphore.h>
 #endif /* _WIN32 */
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -108,7 +107,6 @@ typedef pthread_mutex_t ThdLock;
 #define deleteThdLock(lock) pthread_mutex_destroy(lock)
 #endif /* _WIN32 */
 
-
 /** An event object for interprocess synchronisation. */
 #ifdef _WIN32
 typedef HANDLE IpcEvent;
@@ -117,7 +115,7 @@ typedef sem_t *IpcEvent;
 #endif /* _WIN32 */
 
 /*
- * Use this constant for waiting infinitely for an event to enter signaled 
+ * Use this constant for waiting infinitely for an event to enter signaled
  * state.
  */
 #ifdef _WIN32
@@ -135,13 +133,13 @@ typedef sem_t *IpcEvent;
  * @param isCreateOnly   If TRUE, the operation failed if an event object with
  *                       the same name already exists. Otherwise, this object is
  *                       opened.
- * @param name           The name of the event. This name must not include 
+ * @param name           The name of the event. This name must not include
  *                       Windows kernel namespaces or a POSIX leading '/'.
  *
  * @return 0 in case of success, a system error code otherwise.
  */
 int createIpcEvent(IpcEvent *evt, const int reserved, const int isInitiallySet,
-    const int isCreateOnly, const char *name);
+		const int isCreateOnly, const char *name);
 
 /**
  * Signal the event.
@@ -172,9 +170,8 @@ int waitIpcEvent(IpcEvent evt, int timeout);
  */
 int deleteIpcEvent(IpcEvent evt);
 
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-	
+
 #endif /* _SYNC_H */

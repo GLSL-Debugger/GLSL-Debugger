@@ -40,46 +40,54 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QRubberBand>
 #include <QtGui/QWorkspace>
 
-class ImageView : public QLabel {
-	Q_OBJECT
-		
+class ImageView: public QLabel {
+Q_OBJECT
+
 public:
-	enum MouseMode {MM_NONE, MM_ZOOM, MM_PICK, MM_MINMAX};
+	enum MouseMode {
+		MM_NONE,
+		MM_ZOOM,
+		MM_PICK,
+		MM_MINMAX
+	};
 
 	ImageView(QWidget *parent = 0);
 	void setImage(QImage &image);
 	void setMouseMode(int mouseMode);
 	void setWorkspace(QWorkspace *ws);
 
-    QImage getImage(void) { return m_image; }
-		
+	QImage getImage(void)
+	{
+		return m_image;
+	}
+
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseReleaseEvent(QMouseEvent *event);
-    virtual void paintEvent(QPaintEvent *evt);
+	virtual void paintEvent(QPaintEvent *evt);
 
 	void setCustomCursor(const char *name);
-	
+
 	void zoomIn();
 	void zoomOut();
 	void zoomRegion(const QRect &region);
-    void setZoomLevel(const float zoomLevel);
-    void canvasToImage(int& inOutX, int& inOutY);
-			
+	void setZoomLevel(const float zoomLevel);
+	void canvasToImage(int& inOutX, int& inOutY);
+
 signals:
 	void mousePosChanged(int x, int y);
 	void picked(int x, int y);
 	void viewCenterChanged(int x, int y);
-    void minMaxAreaChanged(const QRect& minMaxArea);
-    void setMappingBounds();
+	void minMaxAreaChanged(const QRect& minMaxArea);
+	void setMappingBounds();
 
 protected:
-    QRubberBand *m_minMaxLens;
+	QRubberBand *m_minMaxLens;
 	QRubberBand *m_rubberBand;
-    QPoint m_minMaxLensOrigin;
+	QPoint m_minMaxLensOrigin;
 	QPoint m_rubberBandOrigin;
 	int m_mouseMode;
 	float m_zoomLevel;

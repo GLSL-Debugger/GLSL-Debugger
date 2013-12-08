@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 
 #include "debuglibInternal.h"
-#include "dbgprint.h"
+#include "utils/notify.h"
 
 #ifdef _WIN32
 #include "trampolines.h"
@@ -54,14 +54,14 @@ void setErrorCode(int error)
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
 
-	dbgPrint(DBGLVL_INFO, "STORE ERROR: %i\n", error);
+	UT_NOTIFY_VA(LV_INFO, "STORE ERROR: %i", error);
 	rec->result = DBG_ERROR_CODE;
-	rec->items[0] = (ALIGNED_DATA)error;
+	rec->items[0] = (ALIGNED_DATA) error;
 }
 
 /* work-around for external debug functions */
-/* TODO: do we need debug functions at all? */
-DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(int error)
+/* TODO: do we need debug functions at all? */DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(
+		int error)
 {
 	setErrorCode(error);
 }
@@ -69,24 +69,24 @@ DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(int error)
 static const char *decodeError(GLenum error)
 {
 	switch (error) {
-		case GL_INVALID_ENUM:
-			return "GL_INVALID_ENUM";
-		case GL_INVALID_VALUE:
-			return "GL_INVALID_VALUE";
-		case GL_INVALID_OPERATION:
-			return "GL_INVALID_OPERATION";
-		case GL_STACK_OVERFLOW:
-			return "GL_STACK_OVERFLOW";
-		case GL_STACK_UNDERFLOW:
-			return "GL_STACK_UNDERFLOW";
-		case GL_OUT_OF_MEMORY:
-			return "GL_OUT_OF_MEMORY";
-		case GL_TABLE_TOO_LARGE:
-			return "GL_TABLE_TOO_LARGE";
-		case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-			return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-		default:
-			return "UNKNOWN_ERROR";
+	case GL_INVALID_ENUM:
+		return "GL_INVALID_ENUM";
+	case GL_INVALID_VALUE:
+		return "GL_INVALID_VALUE";
+	case GL_INVALID_OPERATION:
+		return "GL_INVALID_OPERATION";
+	case GL_STACK_OVERFLOW:
+		return "GL_STACK_OVERFLOW";
+	case GL_STACK_UNDERFLOW:
+		return "GL_STACK_UNDERFLOW";
+	case GL_OUT_OF_MEMORY:
+		return "GL_OUT_OF_MEMORY";
+	case GL_TABLE_TOO_LARGE:
+		return "GL_TABLE_TOO_LARGE";
+	case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
+	default:
+		return "UNKNOWN_ERROR";
 	}
 }
 
@@ -94,7 +94,7 @@ int glError(void)
 {
 	GLenum error = ORIG_GL(glGetError)();
 	if (error != GL_NO_ERROR) {
-		dbgPrint(DBGLVL_INFO, "GL ERROR: %s (%i)\n", decodeError(error), error);
+		UT_NOTIFY_VA(LV_INFO, "GL ERROR: %s (%i)", decodeError(error), error);
 		return error;
 	}
 	return GL_NO_ERROR;

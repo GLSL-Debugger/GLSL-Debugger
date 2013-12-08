@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -37,37 +37,57 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
 
-class VertexBox : public QObject
-{
-    Q_OBJECT
+class VertexBox: public QObject {
+Q_OBJECT
 
 public:
-    VertexBox(QObject *i_qParent = 0);
-    VertexBox(float *i_pData , int numElementsPerVertex, int numVertices,
-              int numPrimitives, bool *i_pCoverage, QObject *i_qParent = 0);
-    ~VertexBox();
+	VertexBox(QObject *i_qParent = 0);
+	VertexBox(float *i_pData, int numElementsPerVertex, int numVertices,
+			int numPrimitives, bool *i_pCoverage, QObject *i_qParent = 0);
+	~VertexBox();
 
-    void copyFrom(VertexBox* src);
+	void copyFrom(VertexBox* src);
 
-    void setData(float *i_pData , int numElementsPerVertex, int numVertices,
-	             int numPrimitives, bool *i_pCoverage = 0);
-    
-    void addVertexBox(VertexBox *f);
-    
-    void setNewCoverage(bool* i_pCoverage) { m_pCoverage = i_pCoverage; }
-    
+	void setData(float *i_pData, int numElementsPerVertex, int numVertices,
+			int numPrimitives, bool *i_pCoverage = 0);
+
+	void addVertexBox(VertexBox *f);
+
+	void setNewCoverage(bool* i_pCoverage)
+	{
+		m_pCoverage = i_pCoverage;
+	}
+
 	bool* getCoverageFromData(bool *oldCoverage, bool *coverageChanged);
-    bool* getCoveragePointer(void) { return m_pCoverage; }
-    bool* getDataMapPointer(void) { return m_pDataMap; }
-    float* getDataPointer(void) { return m_pData; }
+	bool* getCoveragePointer(void)
+	{
+		return m_pCoverage;
+	}
+	bool* getDataMapPointer(void)
+	{
+		return m_pDataMap;
+	}
+	float* getDataPointer(void)
+	{
+		return m_pData;
+	}
 	bool getDataValue(int numVertex, float *v);
 	bool getDataValue(int numVertex, QVariant *v);
-	int getNumElementsPerVertex(void) {return m_numElementsPerVertex; }
-	int getNumVertices(void) { return m_numVertices; }
-	int getNumPrimitives(void) { return m_numPrimitives; }
-	
+	int getNumElementsPerVertex(void)
+	{
+		return m_numElementsPerVertex;
+	}
+	int getNumVertices(void)
+	{
+		return m_numVertices;
+	}
+	int getNumPrimitives(void)
+	{
+		return m_numPrimitives;
+	}
+
 	void invalidateData();
-	
+
 	/* get min/max data values per element list, element == -1 means all
 	 * elements of all vertices
 	 */
@@ -75,24 +95,24 @@ public:
 	float getMax(int element = -1);
 	float getAbsMin(int element = -1);
 	float getAbsMax(int element = -1);
-	
+
 signals:
-    void dataChanged();
-    void dataDeleted();
+	void dataChanged();
+	void dataDeleted();
 
 private:
-    void calcMinMax();
+	void calcMinMax();
 
-    float *m_pData;
+	float *m_pData;
 	bool *m_pDataMap;
 	bool *m_pCoverage;
 	int m_numElementsPerVertex;
 	int m_numVertices;
 	int m_numPrimitives;
-    float *m_nMinData;
-    float *m_nMaxData;
-    float *m_nAbsMinData;
-    float *m_nAbsMaxData;
+	float *m_nMinData;
+	float *m_nMaxData;
+	float *m_nAbsMinData;
+	float *m_nAbsMaxData;
 };
 
 #endif

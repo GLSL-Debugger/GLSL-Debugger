@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -39,42 +39,42 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int getIntFromMapping(Mapping m)
 {
-    int r = 0;
+	int r = 0;
 
-    r = m.index << 2;
-    r += m.type;
+	r = m.index << 2;
+	r += m.type;
 
-    return r;
+	return r;
 }
 
 Mapping getMappingFromInt(int i)
 {
-    Mapping m;
+	Mapping m;
 
-    m.type  = (MapType)(i & 0x3);
-    m.index = i >> 2;
+	m.type = (MapType) (i & 0x3);
+	m.index = i >> 2;
 
-    return m;
+	return m;
 }
 
 int getIntFromRangeMapping(RangeMapping m)
 {
-    int r = 0;
+	int r = 0;
 
-    r = m.index << 3;
-    r += m.range;
+	r = m.index << 3;
+	r += m.range;
 
-    return r;
+	return r;
 }
 
 RangeMapping getRangeMappingFromInt(int i)
 {
-    RangeMapping m;
+	RangeMapping m;
 
-    m.range  = (RangeMap)(i & 0x7);
-    m.index = i >> 3;
+	m.range = (RangeMap) (i & 0x7);
+	m.index = i >> 3;
 
-    return m;
+	return m;
 }
 
 static float mapValueF(float v, float min, float max)
@@ -87,58 +87,60 @@ static int mapValueI(float v, float min, float max)
 	return CLAMP((int)((v - min)/(max - min)*255), 0, 255);
 }
 
-float getMappedValueF(float v, Mapping *mapping,
-                      RangeMapping *rangeMapping, float minmax[2])
+float getMappedValueF(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2])
 {
+	UNUSED_ARG(mapping)
 	float value = 0.0f;
 	switch (rangeMapping->range) {
-		case RANGE_MAP_DEFAULT:
+	case RANGE_MAP_DEFAULT:
+		value = mapValueF(v, minmax[0], minmax[1]);
+		break;
+	case RANGE_MAP_POSITIVE:
+		if (v < 0.0f) {
+			value = 0.0f;
+		} else {
 			value = mapValueF(v, minmax[0], minmax[1]);
-			break;
-		case RANGE_MAP_POSITIVE:
-			if (v < 0.0f) {
-				value = 0.0f;
-			} else {
-				value = mapValueF(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_NEGATIVE:
-			if (v > 0.0f) {
-				value = 0.0f;
-			} else {
-				value = mapValueF(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_ABSOLUTE:
-			value = mapValueF(fabs(v), minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_NEGATIVE:
+		if (v > 0.0f) {
+			value = 0.0f;
+		} else {
+			value = mapValueF(v, minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_ABSOLUTE:
+		value = mapValueF(fabs(v), minmax[0], minmax[1]);
 	}
 	return value;
 }
 
-int getMappedValueI(float v, Mapping *mapping,
-                    RangeMapping *rangeMapping, float minmax[2])
+int getMappedValueI(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2])
 {
+	UNUSED_ARG(mapping)
 	int value = 0;
 	switch (rangeMapping->range) {
-		case RANGE_MAP_DEFAULT:
+	case RANGE_MAP_DEFAULT:
+		value = mapValueI(v, minmax[0], minmax[1]);
+		break;
+	case RANGE_MAP_POSITIVE:
+		if (v < 0.0f) {
+			value = 0;
+		} else {
 			value = mapValueI(v, minmax[0], minmax[1]);
-			break;
-		case RANGE_MAP_POSITIVE:
-			if (v < 0.0f) {
-				value = 0;
-			} else {
-				value = mapValueI(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_NEGATIVE:
-			if (v > 0.0f) {
-				value = 0;
-			} else {
-				value = mapValueI(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_ABSOLUTE:
-			value = mapValueI(fabs(v), minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_NEGATIVE:
+		if (v > 0.0f) {
+			value = 0;
+		} else {
+			value = mapValueI(v, minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_ABSOLUTE:
+		value = mapValueI(fabs(v), minmax[0], minmax[1]);
 	}
 	return value;
 }

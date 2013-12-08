@@ -42,30 +42,28 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "attachToProcess.qt.h"
 
-
 /**
  * A dialog showing all currently active processes. The user can choose one
  * of the processes to attach the debugger to.
  */
-class Dialog_AttachToProcess 
-        : public QDialog, public Ui::Dialog_AttachToProcess {
-	Q_OBJECT
+class Dialog_AttachToProcess: public QDialog, public Ui::Dialog_AttachToProcess {
+Q_OBJECT
 
 public:
 
 	Dialog_AttachToProcess(QWidget *parent = 0);
-	
-    ~Dialog_AttachToProcess(void);
 
-    ProcessSnapshotModel::Item *getSelectedItem(void) const;
+	~Dialog_AttachToProcess(void);
+
+	ProcessSnapshotModel::Item *getSelectedItem(void) const;
 
 private slots:
 
-    void updateProcessList(void);
+	void updateProcessList(void);
 
 private:
 
-    ProcessSnapshotModel psm;
+	ProcessSnapshotModel psm;
 
 };
 

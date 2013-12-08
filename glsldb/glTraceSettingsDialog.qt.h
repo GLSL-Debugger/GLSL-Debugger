@@ -42,42 +42,39 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ui_glTraceSettingsDialog.h"
 #include "glTraceFilterModel.qt.h"
 
-class GlTraceSettingsViewFilter : public QSortFilterProxyModel
-{
-    Q_OBJECT
+class GlTraceSettingsViewFilter: public QSortFilterProxyModel {
+Q_OBJECT
 
-    public:
-        GlTraceSettingsViewFilter(QObject *parent = 0);
+public:
+	GlTraceSettingsViewFilter(QObject *parent = 0);
 
-    public slots:
-        void setFilterWildcard(const QString &pattern);
+public slots:
+	void setFilterWildcard(const QString &pattern);
 
-    protected:
-        virtual bool filterAcceptsRow(int sourceRow, 
-                const QModelIndex &sourceParent) const;
+protected:
+	virtual bool filterAcceptsRow(int sourceRow,
+			const QModelIndex &sourceParent) const;
 
-    private:
-        QString filterPattern;
+private:
+	QString filterPattern;
 };
 
+class GlTraceSettingsDialog: public QDialog, public Ui::dGlTraceSettings {
+Q_OBJECT
 
-class GlTraceSettingsDialog : public QDialog, public Ui::dGlTraceSettings
-{
-    Q_OBJECT
+public:
+	GlTraceSettingsDialog(GlTraceFilterModel *model, QWidget *parent = 0);
 
-    public:
-        GlTraceSettingsDialog(GlTraceFilterModel *model, QWidget *parent=0);
+private slots:
+	void resetToDefaults();
+	void acceptSettings();
+	void rejectSettings();
 
-    private slots:
-        void resetToDefaults();
-        void acceptSettings();
-        void rejectSettings();
+private:
+	void getExtensions();
 
-	private:
-		void getExtensions();
-
-        GlTraceSettingsViewFilter *m_pViewFilter;
-        GlTraceFilterModel *m_pGlTraceModel;
+	GlTraceSettingsViewFilter *m_pViewFilter;
+	GlTraceFilterModel *m_pGlTraceModel;
 
 };
 
