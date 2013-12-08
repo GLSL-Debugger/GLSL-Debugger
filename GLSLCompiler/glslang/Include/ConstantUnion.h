@@ -35,299 +35,402 @@
 #ifndef _CONSTANT_UNION_INCLUDED_
 #define _CONSTANT_UNION_INCLUDED_
 
-
 class constUnion {
 public:
 
-    POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)        
-    void setIConst(int i) {iConst = i; type = EbtInt; }
-    void setUIConst(int i) {iConst = i; type = EbtUInt; }
-    void setFConst(float f) {fConst = f; type = EbtFloat; }
-    void setBConst(bool b) {bConst = b; type = EbtBool; }
-    void setSConst(int i) {iConst = i; type = EbtSwizzle; }
+	POOL_ALLOCATOR_NEW_DELETE (GlobalPoolAllocator)
+	void setIConst(int i)
+	{
+		iConst = i;
+		type = EbtInt;
+	}
+	void setUIConst(int i)
+	{
+		iConst = i;
+		type = EbtUInt;
+	}
+	void setFConst(float f)
+	{
+		fConst = f;
+		type = EbtFloat;
+	}
+	void setBConst(bool b)
+	{
+		bConst = b;
+		type = EbtBool;
+	}
+	void setSConst(int i)
+	{
+		iConst = i;
+		type = EbtSwizzle;
+	}
 
-    int getIConst() { return iConst; }
-    int getUIConst() { return iConst; }
-    float getFConst() { return fConst; }
-    bool getBConst() { return bConst; }
-    int getIConst() const { return iConst; }
-    int getUIConst() const { return iConst; }
-    float getFConst() const { return fConst; }
-    bool getBConst() const { return bConst; }
+	int getIConst()
+	{
+		return iConst;
+	}
+	int getUIConst()
+	{
+		return iConst;
+	}
+	float getFConst()
+	{
+		return fConst;
+	}
+	bool getBConst()
+	{
+		return bConst;
+	}
+	int getIConst() const
+	{
+		return iConst;
+	}
+	int getUIConst() const
+	{
+		return iConst;
+	}
+	float getFConst() const
+	{
+		return fConst;
+	}
+	bool getBConst() const
+	{
+		return bConst;
+	}
 
-    bool operator==(const int i) const
-    {
-        if (i == iConst)
-            return true;
+	bool operator==(const int i) const
+	{
+		if (i == iConst)
+			return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    bool operator==(const float f) const
-    {
-        if (f == fConst)
-            return true;
+	bool operator==(const float f) const
+	{
+		if (f == fConst)
+			return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    bool operator==(const bool b) const
-    {
-        if (b == bConst)
-            return true;
+	bool operator==(const bool b) const
+	{
+		if (b == bConst)
+			return true;
 
-        return false;
-    }
+		return false;
+	}
 
-    bool operator==(const constUnion& constant) const
-    {
-        if (constant.type != type)
-            return false;
+	bool operator==(const constUnion& constant) const
+	{
+		if (constant.type != type)
+			return false;
 
-        switch (type) {
-            case EbtInt:
-            case EbtUInt:
-                if (constant.iConst == iConst)
-                    return true;
-                
-                break;
-            case EbtFloat:
-                if (constant.fConst == fConst)
-                    return true;
-                
-                break;
-            case EbtBool:
-                if (constant.bConst == bConst)
-                    return true;
-                
-                break;
-            default:
-                return false;
-        }
+		switch (type) {
+		case EbtInt:
+		case EbtUInt:
+			if (constant.iConst == iConst)
+				return true;
 
-        return false;
-    }
+			break;
+		case EbtFloat:
+			if (constant.fConst == fConst)
+				return true;
 
-    bool operator!=(const int i) const
-    {
-        return !operator==(i);
-    }
+			break;
+		case EbtBool:
+			if (constant.bConst == bConst)
+				return true;
 
-    bool operator!=(const float f) const
-    {
-        return !operator==(f);
-    }
+			break;
+		default:
+			return false;
+		}
 
-    bool operator!=(const bool b) const
-    {
-        return !operator==(b);
-    }
+		return false;
+	}
 
-    bool operator!=(const constUnion& constant) const
-    {
-        return !operator==(constant);
-    }
+	bool operator!=(const int i) const
+	{
+		return !operator==(i);
+	}
 
-    bool operator>(const constUnion& constant) const
-    { 
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt:
-        case EbtUInt:
-            if (iConst > constant.iConst)
-                return true;
+	bool operator!=(const float f) const
+	{
+		return !operator==(f);
+	}
 
-            return false;
-        case EbtFloat:
-            if (fConst > constant.fConst)
-                return true;
+	bool operator!=(const bool b) const
+	{
+		return !operator==(b);
+	}
 
-            return false;
-        default:
-            assert(false && "Default missing");
-            return false;
-        }
+	bool operator!=(const constUnion& constant) const
+	{
+		return !operator==(constant);
+	}
 
-        return false;
-    }
+	bool operator>(const constUnion& constant) const
+	{
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+		case EbtUInt:
+			if (iConst > constant.iConst)
+				return true;
 
-    bool operator<(const constUnion& constant) const
-    { 
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt:
-        case EbtUInt:
-            if (iConst < constant.iConst)
-                return true;
+			return false;
+		case EbtFloat:
+			if (fConst > constant.fConst)
+				return true;
 
-            return false;
-        case EbtFloat:
-            if (fConst < constant.fConst)
-                return true;
+			return false;
+		default:
+			assert(false && "Default missing");
+			return false;
+		}
 
-            return false;
-        default:
-            assert(false && "Default missing");
-            return false;
-        }
+		return false;
+	}
 
-        return false;
-    }
+	bool operator<(const constUnion& constant) const
+	{
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+		case EbtUInt:
+			if (iConst < constant.iConst)
+				return true;
 
-    constUnion operator+(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst + constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst + constant.iConst); break;
-        case EbtFloat: returnValue.setFConst(fConst + constant.fConst); break;
-        default: assert(false && "Default missing");
-        }
+			return false;
+		case EbtFloat:
+			if (fConst < constant.fConst)
+				return true;
 
-        return returnValue;
-    }
+			return false;
+		default:
+			assert(false && "Default missing");
+			return false;
+		}
 
-    constUnion operator-(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst - constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst - constant.iConst); break;
-        case EbtFloat: returnValue.setFConst(fConst - constant.fConst); break;
-        default: assert(false && "Default missing");
-        }
+		return false;
+	}
 
-        return returnValue;
-    }
+	constUnion operator+(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst + constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst + constant.iConst);
+			break;
+		case EbtFloat:
+			returnValue.setFConst(fConst + constant.fConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator*(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst * constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst * constant.iConst); break;
-        case EbtFloat: returnValue.setFConst(fConst * constant.fConst); break; 
-        default: assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator-(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst - constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst - constant.iConst);
+			break;
+		case EbtFloat:
+			returnValue.setFConst(fConst - constant.fConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator%(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst % constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst % constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator*(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst * constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst * constant.iConst);
+			break;
+		case EbtFloat:
+			returnValue.setFConst(fConst * constant.fConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator>>(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst >> constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst >> constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator%(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst % constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst % constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator<<(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt: returnValue.setIConst(iConst << constant.iConst); break;
-        case EbtUInt: returnValue.setUIConst(iConst << constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator>>(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst >> constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst >> constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator&(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt:  returnValue.setIConst(iConst & constant.iConst); break;
-        case EbtUInt:  returnValue.setUIConst(iConst & constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator<<(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst << constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst << constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator|(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt:  returnValue.setIConst(iConst | constant.iConst); break;
-        case EbtUInt:  returnValue.setUIConst(iConst | constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator&(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst & constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst & constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator^(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtInt:  returnValue.setIConst(iConst ^ constant.iConst); break;
-        case EbtUInt:  returnValue.setUIConst(iConst ^ constant.iConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator|(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst | constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst | constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator&&(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtBool: returnValue.setBConst(bConst && constant.bConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator^(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtInt:
+			returnValue.setIConst(iConst ^ constant.iConst);
+			break;
+		case EbtUInt:
+			returnValue.setUIConst(iConst ^ constant.iConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    constUnion operator||(const constUnion& constant) const
-    { 
-        constUnion returnValue;
-        assert(type == constant.type);
-        switch (type) {
-        case EbtBool: returnValue.setBConst(bConst || constant.bConst); break;
-        default:     assert(false && "Default missing");
-        }
+		return returnValue;
+	}
 
-        return returnValue;
-    }
+	constUnion operator&&(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtBool:
+			returnValue.setBConst(bConst && constant.bConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
 
-    TBasicType getType() { return type; }
+		return returnValue;
+	}
+
+	constUnion operator||(const constUnion& constant) const
+	{
+		constUnion returnValue;
+		assert(type == constant.type);
+		switch (type) {
+		case EbtBool:
+			returnValue.setBConst(bConst || constant.bConst);
+			break;
+		default:
+			assert(false && "Default missing");
+		}
+
+		return returnValue;
+	}
+
+	TBasicType getType()
+	{
+		return type;
+	}
 private:
 
-    union  {
-        int iConst;  // used for ivec, scalar ints
-        bool bConst; // used for bvec, scalar bools
-        float fConst;   // used for vec, mat, scalar floats
-    } ;
+	union {
+		int iConst;  // used for ivec, scalar ints
+		bool bConst;  // used for bvec, scalar bools
+		float fConst;   // used for vec, mat, scalar floats
+	};
 
-    TBasicType type;
+	TBasicType type;
 };
 
 #endif // _CONSTANT_UNION_INCLUDED_
