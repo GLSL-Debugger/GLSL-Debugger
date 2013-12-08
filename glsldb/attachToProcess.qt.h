@@ -44,136 +44,135 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #endif /* _WIN32 */
 
-
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QString>
-
 
 /**
  * This list model represents a snapshot of all running processes at the point
  * in time it was created. The process list can be updated using Update().
  */
-class ProcessSnapshotModel : public QAbstractListModel {
-    Q_OBJECT;
+class ProcessSnapshotModel: public QAbstractListModel {
+Q_OBJECT
+	;
 
 public:
 
 #ifdef _WIN32
-    typedef DWORD PID;
+	typedef DWORD PID;
 #else /* _WIN32 */
-    typedef pid_t PID;
+	typedef pid_t PID;
 #endif /* _WIN32 */
 
-    /** 
-     * The ProcessSnapshotModel::Items represent a single process currently
-     * running on the system.
-     */
-    class Item {
+	/**
+	 * The ProcessSnapshotModel::Items represent a single process currently
+	 * running on the system.
+	 */
+	class Item {
 
-    public:
+	public:
 
-        ~Item(void);
+		~Item(void);
 
-        inline const QString& GetExe(void) const {
-            return this->exe;
-        }
+		inline const QString& GetExe(void) const
+		{
+			return this->exe;
+		}
 
-        inline const QString& GetOwner(void) const {
-            return this->owner;
-        }
+		inline const QString& GetOwner(void) const
+		{
+			return this->owner;
+		}
 
-        inline PID GetPid(void) const {
-            return this->pid;
-        }
+		inline PID GetPid(void) const
+		{
+			return this->pid;
+		}
 
-        inline bool IsAttachtable(void) const {
-            return this->isAttachable;
-        }
+		inline bool IsAttachtable(void) const
+		{
+			return this->isAttachable;
+		}
 
-
-    private:
+	private:
 
 #ifdef _WIN32
-        QString toQString(const wchar_t *str);
+		QString toQString(const wchar_t *str);
 #endif /* _WIN32 */
 
-        Item(const char *exe, const char *owner, PID pid, 
-            bool isAttachtable = true, Item *parent = NULL);
+		Item(const char *exe, const char *owner, PID pid, bool isAttachtable =
+				true, Item *parent = NULL);
 
 #ifdef _WIN32
-        Item(PROCESSENTRY32& pe, Item *parent = NULL);
+		Item(PROCESSENTRY32& pe, Item *parent = NULL);
 #endif /* _WIN32 */
 
-        /** Next process in linked list. */
-        Item *child;
+		/** Next process in linked list. */
+		Item *child;
 
-        /** Previous process in linked list. */
-        Item *parent;
+		/** Previous process in linked list. */
+		Item *parent;
 
-        /** Name of executable image. */
-        QString exe;
+		/** Name of executable image. */
+		QString exe;
 
-        /** Name of process owner. */
-        QString owner;
+		/** Name of process owner. */
+		QString owner;
 
-        /** Determines whether the user can attach to the process. */
-        bool isAttachable;
-        
-        /** Process ID. */
-        PID pid;
+		/** Determines whether the user can attach to the process. */
+		bool isAttachable;
 
-        friend class ProcessSnapshotModel;
-    }; /* end class Item */
+		/** Process ID. */
+		PID pid;
 
+		friend class ProcessSnapshotModel;
+	}; /* end class Item */
 
-    /** Create a new model with a new process snapshot. */
-    ProcessSnapshotModel(QObject *parent = NULL);
+	/** Create a new model with a new process snapshot. */
+	ProcessSnapshotModel(QObject *parent = NULL);
 
-    /** Dtor. */
-    virtual ~ProcessSnapshotModel(void);
+	/** Dtor. */
+	virtual ~ProcessSnapshotModel(void);
 
-    /** Update the process model with a new snapshot. */
-    bool Update(void);
+	/** Update the process model with a new snapshot. */
+	bool Update(void);
 
+	/*
+	 * Implementation of Qt pure virtual methods:
+	 */
 
-    /* 
-     * Implementation of Qt pure virtual methods:
-     */
+	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
+	virtual QVariant data(const QModelIndex& index,
+			int role = Qt::DisplayRole) const;
 
-    virtual QVariant data(const QModelIndex& index, 
-        int role = Qt::DisplayRole) const;
+	virtual Qt::ItemFlags flags(const QModelIndex& index) const;
 
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+	virtual QVariant headerData(int section, Qt::Orientation orientation,
+			int role = Qt::DisplayRole) const;
 
-    virtual QVariant headerData(int section, Qt::Orientation orientation, 
-        int role = Qt::DisplayRole) const; 
+	virtual QModelIndex index(int row, int column, const QModelIndex& parent =
+			QModelIndex()) const;
 
-    virtual QModelIndex index(int row, int column, 
-        const QModelIndex& parent = QModelIndex()) const;
+	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    
 private:
 
-    /** Superclass typedef. */
-    typedef QAbstractListModel Super;
+	/** Superclass typedef. */
+	typedef QAbstractListModel Super;
 
-    /** Root of the process list. */
-    Item *root;
+	/** Root of the process list. */
+	Item *root;
 
-}; /* end class ProcessSnapshotModel */
-
+};
+/* end class ProcessSnapshotModel */
 
 #ifdef _WIN32
 
 typedef struct ATTACHMENT_INFORMATION_t {
-    HANDLE hProcess;    // Process handle of the process we attached to.
-    HMODULE hLibrary;   // Handle to injected debug library.
-    HMODULE hDetours;   // Handle to injected detours marker.
-} ATTACHMENT_INFORMATION;
-
+	HANDLE hProcess;    // Process handle of the process we attached to.
+	HMODULE hLibrary;// Handle to injected debug library.
+	HMODULE hDetours;// Handle to injected detours marker.
+}ATTACHMENT_INFORMATION;
 
 /**
  * Attach to the remote process with process ID 'pid' and inject the debug
@@ -193,10 +192,9 @@ typedef struct ATTACHMENT_INFORMATION_t {
  * access rights required for doing the work of this function, which might
  * not be enough for the things the caller wants to do.
  */
-bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid, 
-    DWORD desiredAccess, const char *libPath, const char *smName, 
-    const char *dbgFuncPath);
-
+bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
+		DWORD desiredAccess, const char *libPath, const char *smName,
+		const char *dbgFuncPath);
 
 /**
  * Detach from the process designated by 'attachInfo'. If 'attachInfo' does not
@@ -205,6 +203,5 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 bool DetachFromProcess(ATTACHMENT_INFORMATION& inOutAi);
 #else /* _WIN32 */
 #endif /* _WIN32 */
-
 
 #endif /* ATTACHTOPROCESS_QT_H_INCLUDED */
