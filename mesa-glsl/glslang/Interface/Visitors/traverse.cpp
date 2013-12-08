@@ -313,7 +313,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( ir->debug_state_internal == ir_dbg_loop_wrk_init ){
 			++this->depth;
-			ir->from->accept( this );
+			if( ir->from )
+				ir->from->accept( this );
 			--this->depth;
 		}
 
@@ -324,7 +325,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_test ){
 			++this->depth;
-			ir->counter->accept( this );
+			if( ir->counter )
+				ir->counter->accept( this );
 			--this->depth;
 		}
 
@@ -346,7 +348,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_terminal ){
 			++this->depth;
-			ir->to->accept( this );
+			if( ir->to )
+				ir->to->accept( this );
 			--this->depth;
 		}
 
@@ -360,10 +363,13 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit ){
 			++this->depth;
-			ir->counter->accept( this );
+			if( ir->counter )
+				ir->counter->accept( this );
 			this->visit( &ir->body_instructions );
-			ir->from->accept( this );
-			ir->to->accept( this );
+			if( ir->from )
+				ir->from->accept( this );
+			if( ir->to )
+				ir->to->accept( this );
 			--this->depth;
 		}
 
