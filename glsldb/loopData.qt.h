@@ -43,56 +43,89 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_LOOP_ITERATIONS 255
 
-class LoopData : public QObject {
-    Q_OBJECT
+class LoopData: public QObject {
+Q_OBJECT
 
 public:
-    LoopData(PixelBoxFloat  *condition, QObject *parent = 0);
-    LoopData(VertexBox *condition, QObject *parent = 0);
-    ~LoopData();
+	LoopData(PixelBoxFloat *condition, QObject *parent = 0);
+	LoopData(VertexBox *condition, QObject *parent = 0);
+	~LoopData();
 
-    void addLoopIteration(PixelBoxFloat  *condition, int iteration);
-    void addLoopIteration(VertexBox *condition, int iteration);
+	void addLoopIteration(PixelBoxFloat *condition, int iteration);
+	void addLoopIteration(VertexBox *condition, int iteration);
 
-    QStandardItemModel* getModel(void) { return &m_qModel; }
+	QStandardItemModel* getModel(void)
+	{
+		return &m_qModel;
+	}
 
-    bool*  getInitialCoverage(void) { return m_pInitialCoverage; }
-    bool*  getActualCoverage(void);
-    float* getActualCondition(void);
+	bool* getInitialCoverage(void)
+	{
+		return m_pInitialCoverage;
+	}
+	bool* getActualCoverage(void);
+	float* getActualCondition(void);
 
-    PixelBoxFloat*  getActualPixelBox(void)  { return m_pActualFData; }
-    VertexBox* getActualVertexBox(void) { return m_pActualVData; }
-    
-    int getTotal(void)  { return m_nTotal; }
-    int getActive(void) { return m_nActive; }
-    int getDone(void)   { return m_nDone; }
-    int getOut(void)    { return m_nOut; }
+	PixelBoxFloat* getActualPixelBox(void)
+	{
+		return m_pActualFData;
+	}
+	VertexBox* getActualVertexBox(void)
+	{
+		return m_pActualVData;
+	}
 
-    int getWidth(void);
-    int getHeight(void);
-    int getIteration(void) { return m_nIteration; }
-    
-    QImage getImage(void);
+	int getTotal(void)
+	{
+		return m_nTotal;
+	}
+	int getActive(void)
+	{
+		return m_nActive;
+	}
+	int getDone(void)
+	{
+		return m_nDone;
+	}
+	int getOut(void)
+	{
+		return m_nOut;
+	}
 
-    bool isFragmentLoop(void) { return (m_pActualFData != NULL); }
-    bool isVertexLoop(void)   { return (m_pActualVData != NULL); }
-    
+	int getWidth(void);
+	int getHeight(void);
+	int getIteration(void)
+	{
+		return m_nIteration;
+	}
+
+	QImage getImage(void);
+
+	bool isFragmentLoop(void)
+	{
+		return (m_pActualFData != NULL);
+	}
+	bool isVertexLoop(void)
+	{
+		return (m_pActualVData != NULL);
+	}
+
 private slots:
 
 private:
-    void updateStatistic(void);
+	void updateStatistic(void);
 
-    int      m_nIteration;
-    bool     *m_pInitialCoverage;
-    PixelBoxFloat  *m_pActualFData;
-    VertexBox *m_pActualVData;
+	int m_nIteration;
+	bool *m_pInitialCoverage;
+	PixelBoxFloat *m_pActualFData;
+	VertexBox *m_pActualVData;
 
-    int      m_nTotal;
-    int      m_nActive;
-    int      m_nDone;
-    int      m_nOut;
-    
-    QStandardItemModel m_qModel;
+	int m_nTotal;
+	int m_nActive;
+	int m_nDone;
+	int m_nOut;
+
+	QStandardItemModel m_qModel;
 };
 
 #endif

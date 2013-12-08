@@ -33,10 +33,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "compilerErrorDetails.qt.h"
 
-Widget_CompilerError::Widget_CompilerError(QWidget *parent) : QWidget(parent) {
+Widget_CompilerError::Widget_CompilerError(QWidget *parent) :
+		QWidget(parent)
+{
 	this->setupUi(this);
 }
 
-Widget_CompilerError::~Widget_CompilerError(void) {
+Widget_CompilerError::~Widget_CompilerError(void)
+{
 
 }

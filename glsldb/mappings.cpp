@@ -51,7 +51,7 @@ Mapping getMappingFromInt(int i)
 {
 	Mapping m;
 
-	m.type  = (MapType)(i & 0x3);
+	m.type = (MapType) (i & 0x3);
 	m.index = i >> 2;
 
 	return m;
@@ -71,7 +71,7 @@ RangeMapping getRangeMappingFromInt(int i)
 {
 	RangeMapping m;
 
-	m.range  = (RangeMap)(i & 0x7);
+	m.range = (RangeMap) (i & 0x7);
 	m.index = i >> 3;
 
 	return m;
@@ -87,60 +87,60 @@ static int mapValueI(float v, float min, float max)
 	return CLAMP((int)((v - min)/(max - min)*255), 0, 255);
 }
 
-float getMappedValueF(float v, Mapping *mapping,
-					RangeMapping *rangeMapping, float minmax[2])
+float getMappedValueF(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2])
 {
 	UNUSED_ARG(mapping)
 	float value = 0.0f;
 	switch (rangeMapping->range) {
-		case RANGE_MAP_DEFAULT:
+	case RANGE_MAP_DEFAULT:
+		value = mapValueF(v, minmax[0], minmax[1]);
+		break;
+	case RANGE_MAP_POSITIVE:
+		if (v < 0.0f) {
+			value = 0.0f;
+		} else {
 			value = mapValueF(v, minmax[0], minmax[1]);
-			break;
-		case RANGE_MAP_POSITIVE:
-			if (v < 0.0f) {
-				value = 0.0f;
-			} else {
-				value = mapValueF(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_NEGATIVE:
-			if (v > 0.0f) {
-				value = 0.0f;
-			} else {
-				value = mapValueF(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_ABSOLUTE:
-			value = mapValueF(fabs(v), minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_NEGATIVE:
+		if (v > 0.0f) {
+			value = 0.0f;
+		} else {
+			value = mapValueF(v, minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_ABSOLUTE:
+		value = mapValueF(fabs(v), minmax[0], minmax[1]);
 	}
 	return value;
 }
 
-int getMappedValueI(float v, Mapping *mapping,
-					RangeMapping *rangeMapping, float minmax[2])
+int getMappedValueI(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2])
 {
 	UNUSED_ARG(mapping)
 	int value = 0;
 	switch (rangeMapping->range) {
-		case RANGE_MAP_DEFAULT:
+	case RANGE_MAP_DEFAULT:
+		value = mapValueI(v, minmax[0], minmax[1]);
+		break;
+	case RANGE_MAP_POSITIVE:
+		if (v < 0.0f) {
+			value = 0;
+		} else {
 			value = mapValueI(v, minmax[0], minmax[1]);
-			break;
-		case RANGE_MAP_POSITIVE:
-			if (v < 0.0f) {
-				value = 0;
-			} else {
-				value = mapValueI(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_NEGATIVE:
-			if (v > 0.0f) {
-				value = 0;
-			} else {
-				value = mapValueI(v, minmax[0], minmax[1]);
-			}
-			break;
-		case RANGE_MAP_ABSOLUTE:
-			value = mapValueI(fabs(v), minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_NEGATIVE:
+		if (v > 0.0f) {
+			value = 0;
+		} else {
+			value = mapValueI(v, minmax[0], minmax[1]);
+		}
+		break;
+	case RANGE_MAP_ABSOLUTE:
+		value = mapValueI(fabs(v), minmax[0], minmax[1]);
 	}
 	return value;
 }

@@ -43,19 +43,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ui_jumpToDialog.h"
 
-class JumpToDialog : public QDialog, public Ui::dJumpTo {
-    Q_OBJECT
+class JumpToDialog: public QDialog, public Ui::dJumpTo {
+Q_OBJECT
 
 public:
-    JumpToDialog(void);
-    JumpToDialog(QString);
-    ~JumpToDialog();
+	JumpToDialog(void);
+	JumpToDialog(QString);
+	~JumpToDialog();
 
-    QString getTargetFuncName(void);
+	QString getTargetFuncName(void);
 
 private slots:
-    void checkValidity(void);
-    
+	void checkValidity(void);
+
 private:
 };
 

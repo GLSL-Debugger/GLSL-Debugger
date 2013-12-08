@@ -33,45 +33,44 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "attachToProcessDialog.qt.h"
 
-
 /*
  * Dialog_AttachToProcess::Dialog_AttachToProcess
  */
-Dialog_AttachToProcess::Dialog_AttachToProcess(QWidget *parent) 
-        : QDialog(parent) {
+Dialog_AttachToProcess::Dialog_AttachToProcess(QWidget *parent) :
+		QDialog(parent)
+{
 	this->setupUi(this);
-    this->processList->setModel(&this->psm);
+	this->processList->setModel(&this->psm);
 }
-
 
 /*
  * Dialog_AttachToProcess::~Dialog_AttachToProcess
  */
-Dialog_AttachToProcess::~Dialog_AttachToProcess(void) {
+Dialog_AttachToProcess::~Dialog_AttachToProcess(void)
+{
 }
-
 
 /*
  * Dialog_AttachToProcess::getSelectedItem
  */
-ProcessSnapshotModel::Item *Dialog_AttachToProcess::getSelectedItem(
-        void) const {
-    QModelIndexList sel = this->processList->selectionModel()->selectedRows();
-    ProcessSnapshotModel::Item *retval = NULL;
+ProcessSnapshotModel::Item *Dialog_AttachToProcess::getSelectedItem(void) const
+{
+	QModelIndexList sel = this->processList->selectionModel()->selectedRows();
+	ProcessSnapshotModel::Item *retval = NULL;
 
-    if (!sel.isEmpty()) {
-        retval = static_cast<ProcessSnapshotModel::Item *>(
-            sel[0].internalPointer());
-    }
+	if (!sel.isEmpty()) {
+		retval =
+				static_cast<ProcessSnapshotModel::Item *>(sel[0].internalPointer());
+	}
 
-    return retval;
+	return retval;
 }
-
 
 /*
  * Dialog_AttachToProcess::updateProcessList
  */
-void Dialog_AttachToProcess::updateProcessList(void) {
-    this->psm.Update();
+void Dialog_AttachToProcess::updateProcessList(void)
+{
+	this->psm.Update();
 }
 

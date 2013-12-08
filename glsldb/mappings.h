@@ -35,42 +35,42 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAPPINGS_H
 
 #ifndef UNUSED_ARG
-    #define UNUSED_ARG(x) (void) x;
+#define UNUSED_ARG(x) (void) x;
 #endif
 
 enum MapType {
-    MAP_TYPE_BLACK = 0,
-    MAP_TYPE_WHITE = 1,
-    MAP_TYPE_VAR   = 2,
-    MAP_TYPE_OFF   = 3
+	MAP_TYPE_BLACK = 0,
+	MAP_TYPE_WHITE = 1,
+	MAP_TYPE_VAR = 2,
+	MAP_TYPE_OFF = 3
 };
 
 struct Mapping {
-    int index;
-    MapType type;
+	int index;
+	MapType type;
 };
 
-int     getIntFromMapping(Mapping m);
+int getIntFromMapping(Mapping m);
 Mapping getMappingFromInt(int i);
 
 enum RangeMap {
-    RANGE_MAP_DEFAULT  = 0,
-    RANGE_MAP_POSITIVE = 1,
-    RANGE_MAP_NEGATIVE = 2,
-    RANGE_MAP_ABSOLUTE = 3
+	RANGE_MAP_DEFAULT = 0,
+	RANGE_MAP_POSITIVE = 1,
+	RANGE_MAP_NEGATIVE = 2,
+	RANGE_MAP_ABSOLUTE = 3
 };
 
 struct RangeMapping {
-    int index;
-    RangeMap range;
+	int index;
+	RangeMap range;
 };
 
-int          getIntFromRangeMapping(RangeMapping m);
+int getIntFromRangeMapping(RangeMapping m);
 RangeMapping getRangeMappingFromInt(int i);
-float        getMappedValueF(float v, Mapping *mapping,
-                            RangeMapping *rangeMapping, float minmax[2]);
-int          getMappedValueI(float v, Mapping *mapping,
-                            RangeMapping *rangeMapping, float minmax[2]);
+float getMappedValueF(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2]);
+int getMappedValueI(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2]);
 
 #endif
 

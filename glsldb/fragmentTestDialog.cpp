@@ -37,31 +37,31 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int mapPFTToIndex(int pftOption)
 {
 	switch (pftOption) {
-		case DBG_PFT_FORCE_DISABLED:
-			return 1;
-		case DBG_PFT_FORCE_ENABLED:
-			return 2;
-		case DBG_PFT_KEEP:
-		default:
-			return 0;
+	case DBG_PFT_FORCE_DISABLED:
+		return 1;
+	case DBG_PFT_FORCE_ENABLED:
+		return 2;
+	case DBG_PFT_KEEP:
+	default:
+		return 0;
 	}
 }
 
 static int mapIndexToPFT(int index)
 {
 	switch (index) {
-		case 1:
-			return DBG_PFT_FORCE_DISABLED;
-		case 2:
-			return DBG_PFT_FORCE_ENABLED;
-		case 0:
-		default:
-			return DBG_PFT_KEEP;
+	case 1:
+		return DBG_PFT_FORCE_DISABLED;
+	case 2:
+		return DBG_PFT_FORCE_ENABLED;
+	case 0:
+	default:
+		return DBG_PFT_KEEP;
 	}
 }
 
-FragmentTestDialog::FragmentTestDialog(QWidget *parent)
-	: QDialog(parent)
+FragmentTestDialog::FragmentTestDialog(QWidget *parent) :
+		QDialog(parent)
 {
 	setupUi(this);
 	connect(pbDefaults, SIGNAL(clicked()), this, SLOT(setDefaults()));
@@ -90,7 +90,7 @@ void FragmentTestDialog::setDefaults()
 
 	resetSettings();
 }
-	
+
 void FragmentTestDialog::resetSettings()
 {
 	cbAlphaTest->setCurrentIndex(mapPFTToIndex(m_alphaTest));

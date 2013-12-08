@@ -7,16 +7,14 @@
 
 typedef std::unordered_map<std::string, GLFunctionList*> GLFunctionsMap;
 
-class FunctionsMap
-{
+class FunctionsMap {
 public:
-    static FunctionsMap& instance();
-    void initialize();
-    GLFunctionList* operator[](const std::string& name);
+	static FunctionsMap& instance();
+	void initialize();
+	GLFunctionList* operator[](const std::string& name);
 private:
-    static FunctionsMap* _instance;
-    GLFunctionsMap _map;
-
+	static FunctionsMap* _instance;
+	GLFunctionsMap _map;
 
 };
 

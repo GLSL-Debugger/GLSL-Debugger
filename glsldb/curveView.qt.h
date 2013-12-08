@@ -43,53 +43,54 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "loopData.qt.h"
 
-class CurveView : public QAbstractItemView
-{
-    Q_OBJECT
+class CurveView: public QAbstractItemView {
+Q_OBJECT
 
 public:
-    CurveView(QWidget *parent = 0);
+	CurveView(QWidget *parent = 0);
 
-    QRect visualRect(const QModelIndex &index) const;
-    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible);
-    QModelIndex indexAt(const QPoint &point) const;
+	QRect visualRect(const QModelIndex &index) const;
+	void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible);
+	QModelIndex indexAt(const QPoint &point) const;
 
-    void setBase(int base);
-    void addMapping(int col, QColor color);
-    void delMapping(int col);
+	void setBase(int base);
+	void addMapping(int col, QColor color);
+	void delMapping(int col);
 protected slots:
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-    void rowsInserted(const QModelIndex &parent, int start, int end);
+	void dataChanged(const QModelIndex &topLeft,
+			const QModelIndex &bottomRight);
+	void rowsInserted(const QModelIndex &parent, int start, int end);
 
 protected:
-    QModelIndex moveCursor(QAbstractItemView::CursorAction cursorAction,
-                           Qt::KeyboardModifiers modifiers);
+	QModelIndex moveCursor(QAbstractItemView::CursorAction cursorAction,
+			Qt::KeyboardModifiers modifiers);
 
-    int horizontalOffset() const;
-    int verticalOffset() const;
+	int horizontalOffset() const;
+	int verticalOffset() const;
 
-    bool isIndexHidden(const QModelIndex &index) const;
+	bool isIndexHidden(const QModelIndex &index) const;
 
-    void setSelection(const QRect&, QItemSelectionModel::SelectionFlags command);
-    QRegion visualRegionForSelection(const QItemSelection &selection) const;
+	void setSelection(const QRect&,
+			QItemSelectionModel::SelectionFlags command);
+	QRegion visualRegionForSelection(const QItemSelection &selection) const;
 
-    void paintEvent(QPaintEvent *event);
-    void resizeEvent(QResizeEvent *event);
-    void scrollContentsBy(int dx, int dy);
+	void paintEvent(QPaintEvent *event);
+	void resizeEvent(QResizeEvent *event);
+	void scrollContentsBy(int dx, int dy);
 
 private:
-    void updateGeometries();
+	void updateGeometries();
 
-    int               m_nMargin;
-    int               m_nTickSize[2];
-    int               m_nTickSpace[2];
-    int               m_nLabelSize[2];
-    int               m_nTotalSize[2];
-    int               m_nAxisArrow[2];
-    int               m_nDrawAreaMinimum[2];
-    int               m_nDrawArea[2];
-    int               m_nBase;
-    QMap<int, QColor> m_qMapping;
+	int m_nMargin;
+	int m_nTickSize[2];
+	int m_nTickSpace[2];
+	int m_nLabelSize[2];
+	int m_nTotalSize[2];
+	int m_nAxisArrow[2];
+	int m_nDrawAreaMinimum[2];
+	int m_nDrawArea[2];
+	int m_nBase;
+	QMap<int, QColor> m_qMapping;
 };
 
 #endif

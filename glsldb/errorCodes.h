@@ -35,12 +35,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _ERROR_CODES_H_
 
 typedef enum {
-    PCE_NONE = 0,
+	PCE_NONE = 0,
 
 	/* general debugger errors */
-    PCE_FORK,
-    PCE_EXEC,
-    PCE_EXIT,
+	PCE_FORK,
+	PCE_EXEC,
+	PCE_EXIT,
 	PCE_UNKNOWN_ERROR,
 	PCE_MEMORY_ALLOCATION_FAILED,
 
@@ -57,20 +57,20 @@ typedef enum {
 	PCE_DBG_OPERATION_NOT_ALLOWED,
 	PCE_DBG_INVALID_OPERATION,
 	PCE_DBG_INVALID_VALUE,
-	
+
 	/* gl errors */
-    PCE_GL_INVALID_ENUM,
-    PCE_GL_INVALID_VALUE,
-    PCE_GL_INVALID_OPERATION,
-    PCE_GL_STACK_OVERFLOW,
-    PCE_GL_STACK_UNDERFLOW,
-    PCE_GL_OUT_OF_MEMORY,
-    PCE_GL_TABLE_TOO_LARGE,
+	PCE_GL_INVALID_ENUM,
+	PCE_GL_INVALID_VALUE,
+	PCE_GL_INVALID_OPERATION,
+	PCE_GL_STACK_OVERFLOW,
+	PCE_GL_STACK_UNDERFLOW,
+	PCE_GL_OUT_OF_MEMORY,
+	PCE_GL_TABLE_TOO_LARGE,
 	PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT
 } pcErrorCode;
 
-bool  isErrorCritical(pcErrorCode error);
-bool  isOpenGLError(pcErrorCode error);
+bool isErrorCritical(pcErrorCode error);
+bool isOpenGLError(pcErrorCode error);
 const char* getErrorDescription(pcErrorCode error);
 const char* getErrorInfo(pcErrorCode error);
 
