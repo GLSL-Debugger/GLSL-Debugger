@@ -1,84 +1,83 @@
 /*
-Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
-All rights reserved.
+ Copyright (C) 2002-2005  3Dlabs Inc. Ltd.
+ All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
+	Redistributions of source code must retain the above copyright
+	notice, this list of conditions and the following disclaimer.
 
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
+	Redistributions in binary form must reproduce the above
+	copyright notice, this list of conditions and the following
+	disclaimer in the documentation and/or other materials provided
+	with the distribution.
 
-    Neither the name of 3Dlabs Inc. Ltd. nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
+	Neither the name of 3Dlabs Inc. Ltd. nor the names of its
+	contributors may be used to endorse or promote products derived
+	from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-*/
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /****************************************************************************\
 Copyright (c) 2002, NVIDIA Corporation.
 
-NVIDIA Corporation("NVIDIA") supplies this software to you in
-consideration of your agreement to the following terms, and your use,
-installation, modification or redistribution of this NVIDIA software
-constitutes acceptance of these terms.  If you do not agree with these
-terms, please do not use, install, modify or redistribute this NVIDIA
-software.
+ NVIDIA Corporation("NVIDIA") supplies this software to you in
+ consideration of your agreement to the following terms, and your use,
+ installation, modification or redistribution of this NVIDIA software
+ constitutes acceptance of these terms.  If you do not agree with these
+ terms, please do not use, install, modify or redistribute this NVIDIA
+ software.
 
-In consideration of your agreement to abide by the following terms, and
-subject to these terms, NVIDIA grants you a personal, non-exclusive
-license, under NVIDIA's copyrights in this original NVIDIA software (the
-"NVIDIA Software"), to use, reproduce, modify and redistribute the
-NVIDIA Software, with or without modifications, in source and/or binary
-forms; provided that if you redistribute the NVIDIA Software, you must
-retain the copyright notice of NVIDIA, this notice and the following
-text and disclaimers in all such redistributions of the NVIDIA Software.
-Neither the name, trademarks, service marks nor logos of NVIDIA
-Corporation may be used to endorse or promote products derived from the
-NVIDIA Software without specific prior written permission from NVIDIA.
-Except as expressly stated in this notice, no other rights or licenses
-express or implied, are granted by NVIDIA herein, including but not
-limited to any patent rights that may be infringed by your derivative
-works or by other works in which the NVIDIA Software may be
-incorporated. No hardware is licensed hereunder.
+ In consideration of your agreement to abide by the following terms, and
+ subject to these terms, NVIDIA grants you a personal, non-exclusive
+ license, under NVIDIA's copyrights in this original NVIDIA software (the
+ "NVIDIA Software"), to use, reproduce, modify and redistribute the
+ NVIDIA Software, with or without modifications, in source and/or binary
+ forms; provided that if you redistribute the NVIDIA Software, you must
+ retain the copyright notice of NVIDIA, this notice and the following
+ text and disclaimers in all such redistributions of the NVIDIA Software.
+ Neither the name, trademarks, service marks nor logos of NVIDIA
+ Corporation may be used to endorse or promote products derived from the
+ NVIDIA Software without specific prior written permission from NVIDIA.
+ Except as expressly stated in this notice, no other rights or licenses
+ express or implied, are granted by NVIDIA herein, including but not
+ limited to any patent rights that may be infringed by your derivative
+ works or by other works in which the NVIDIA Software may be
+ incorporated. No hardware is licensed hereunder.
 
-THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-INCLUDING WITHOUT LIMITATION, WARRANTIES OR CONDITIONS OF TITLE,
-NON-INFRINGEMENT, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
-ITS USE AND OPERATION EITHER ALONE OR IN COMBINATION WITH OTHER
-PRODUCTS.
+ THE NVIDIA SOFTWARE IS BEING PROVIDED ON AN "AS IS" BASIS, WITHOUT
+ WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+ INCLUDING WITHOUT LIMITATION, WARRANTIES OR CONDITIONS OF TITLE,
+ NON-INFRINGEMENT, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
+ ITS USE AND OPERATION EITHER ALONE OR IN COMBINATION WITH OTHER
+ PRODUCTS.
 
-IN NO EVENT SHALL NVIDIA BE LIABLE FOR ANY SPECIAL, INDIRECT,
-INCIDENTAL, EXEMPLARY, CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, LOST PROFITS; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) OR ARISING IN ANY WAY
-OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE
-NVIDIA SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT,
-TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
-NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-\****************************************************************************/
+ IN NO EVENT SHALL NVIDIA BE LIABLE FOR ANY SPECIAL, INDIRECT,
+ INCIDENTAL, EXEMPLARY, CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ TO, LOST PROFITS; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) OR ARISING IN ANY WAY
+ OUT OF THE USE, REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF THE
+ NVIDIA SOFTWARE, HOWEVER CAUSED AND WHETHER UNDER THEORY OF CONTRACT,
+ TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN IF
+ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ \****************************************************************************/
 /*
  * tokens.c
  */
-
 
 #include <assert.h>
 #include <stdlib.h>
@@ -89,8 +88,8 @@ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "slglobals.h"
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////// Preprocessor and Token Recorder and Playback: /////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////*/
+ //////////////////////// Preprocessor and Token Recorder and Playback: /////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////////////*/
 
 /*
  * idstr()
@@ -101,24 +100,25 @@ NVIDIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static char *idstr(const char *fstr, MemoryPool *pool)
 {
-    size_t len;
-    char *str, *t;
-    const char *f;
+	size_t len;
+	char *str, *t;
+	const char *f;
 
-    len = strlen(fstr);
-    if (!pool)
-        str = (char *) malloc(len + 1);
-    else
-        str = (char *) mem_Alloc(pool, len + 1);
+	len = strlen(fstr);
+	if (!pool)
+		str = (char *) malloc(len + 1);
+	else
+		str = (char *) mem_Alloc(pool, len + 1);
 
-    for (f=fstr, t=str; *f; f++) {
-        if (isalnum(*f)) *t++ = *f;
-        else if (*f == '.' || *f == '/') *t++ = '_';
-    }
-    *t = 0;
-    return str;
+	for (f = fstr, t = str; *f; f++) {
+		if (isalnum(*f))
+			*t++ = *f;
+		else if (*f == '.' || *f == '/')
+			*t++ = '_';
+	}
+	*t = 0;
+	return str;
 } /* idstr */
-
 
 /*
  * lNewBlock()
@@ -127,24 +127,24 @@ static char *idstr(const char *fstr, MemoryPool *pool)
 
 static TokenBlock *lNewBlock(TokenStream *fTok, MemoryPool *pool)
 {
-    TokenBlock *lBlock;
+	TokenBlock *lBlock;
 
-    if (!pool)
-        lBlock = (TokenBlock *) malloc(sizeof(TokenBlock) + 256);
-    else
-        lBlock = (TokenBlock *) mem_Alloc(pool, sizeof(TokenBlock) + 256);
-    lBlock->count = 0;
-    lBlock->current = 0;
-    lBlock->data = (unsigned char *) lBlock + sizeof(TokenBlock);
-    lBlock->max = 256;
-    lBlock->next = NULL;
-    if (fTok->head) {
-        fTok->current->next = lBlock;
-    } else {
-        fTok->head = lBlock;
-    }
-    fTok->current = lBlock;
-    return lBlock;
+	if (!pool)
+		lBlock = (TokenBlock *) malloc(sizeof(TokenBlock) + 256);
+	else
+		lBlock = (TokenBlock *) mem_Alloc(pool, sizeof(TokenBlock) + 256);
+	lBlock->count = 0;
+	lBlock->current = 0;
+	lBlock->data = (unsigned char *) lBlock + sizeof(TokenBlock);
+	lBlock->max = 256;
+	lBlock->next = NULL;
+	if (fTok->head) {
+		fTok->current->next = lBlock;
+	} else {
+		fTok->head = lBlock;
+	}
+	fTok->current = lBlock;
+	return lBlock;
 } /* lNewBlock */
 
 /*
@@ -154,14 +154,12 @@ static TokenBlock *lNewBlock(TokenStream *fTok, MemoryPool *pool)
 
 static void lAddByte(TokenStream *fTok, unsigned char fVal)
 {
-    TokenBlock *lBlock;
-    lBlock = fTok->current;
-    if (lBlock->count >= lBlock->max)
-        lBlock = lNewBlock(fTok, 0);
-    lBlock->data[lBlock->count++] = fVal;
+	TokenBlock *lBlock;
+	lBlock = fTok->current;
+	if (lBlock->count >= lBlock->max)
+		lBlock = lNewBlock(fTok, 0);
+	lBlock->data[lBlock->count++] = fVal;
 } /* lAddByte */
-
-
 
 /*
  * lReadByte() - Get the next byte from a stream.
@@ -170,21 +168,21 @@ static void lAddByte(TokenStream *fTok, unsigned char fVal)
 
 static int lReadByte(TokenStream *pTok)
 {
-    TokenBlock *lBlock;
-    int lval = -1;
+	TokenBlock *lBlock;
+	int lval = -1;
 
-    lBlock = pTok->current;
-    if (lBlock) {
-        if (lBlock->current >= lBlock->count) {
-            lBlock = lBlock->next;
-            if (lBlock)
-                lBlock->current = 0;
-            pTok->current = lBlock;
-        }
-        if (lBlock)
-            lval = lBlock->data[lBlock->current++];
-    }
-    return lval;
+	lBlock = pTok->current;
+	if (lBlock) {
+		if (lBlock->current >= lBlock->count) {
+			lBlock = lBlock->next;
+			if (lBlock)
+				lBlock->current = 0;
+			pTok->current = lBlock;
+		}
+		if (lBlock)
+			lval = lBlock->data[lBlock->current++];
+	}
+	return lval;
 } /* lReadByte */
 
 /*////////////////////////////////////// Global Functions:////////////////////////////////////*/
@@ -196,18 +194,18 @@ static int lReadByte(TokenStream *pTok)
 
 TokenStream *NewTokenStream(const char *name, MemoryPool *pool)
 {
-    TokenStream *pTok;
+	TokenStream *pTok;
 
-    if (!pool)
-        pTok = (TokenStream *) malloc(sizeof(TokenStream));
-    else
-        pTok = (TokenStream*)mem_Alloc(pool, sizeof(TokenStream));
-    pTok->next = NULL;
-    pTok->name = idstr(name, pool);
-    pTok->head = NULL;
-    pTok->current = NULL;
-    lNewBlock(pTok, pool);
-    return pTok;
+	if (!pool)
+		pTok = (TokenStream *) malloc(sizeof(TokenStream));
+	else
+		pTok = (TokenStream*) mem_Alloc(pool, sizeof(TokenStream));
+	pTok->next = NULL;
+	pTok->name = idstr(name, pool);
+	pTok->head = NULL;
+	pTok->current = NULL;
+	lNewBlock(pTok, pool);
+	return pTok;
 } /* NewTokenStream */
 
 /*
@@ -217,19 +215,19 @@ TokenStream *NewTokenStream(const char *name, MemoryPool *pool)
 
 void DeleteTokenStream(TokenStream *pTok)
 {
-    TokenBlock *pBlock, *nBlock;
+	TokenBlock *pBlock, *nBlock;
 
-    if (pTok) {
-        pBlock = pTok->head;
-        while (pBlock) {
-            nBlock = pBlock->next;
-            free(pBlock);
-            pBlock = nBlock;
-        }
-        if (pTok->name)
-            free(pTok->name);
-        free(pTok);
-    }
+	if (pTok) {
+		pBlock = pTok->head;
+		while (pBlock) {
+			nBlock = pBlock->next;
+			free(pBlock);
+			pBlock = nBlock;
+		}
+		if (pTok->name)
+			free(pTok->name);
+		free(pTok);
+	}
 } /* DeleteTokenStream */
 
 /*
@@ -239,36 +237,36 @@ void DeleteTokenStream(TokenStream *pTok)
 
 void RecordToken(TokenStream *pTok, int token, yystypepp * yylvalpp)
 {
-    const char *s;
-    unsigned char *str=NULL;
+	const char *s;
+	unsigned char *str = NULL;
 
-    if (token > 256)
-        lAddByte(pTok, (unsigned char)((token & 0x7f) + 0x80));
-    else
-        lAddByte(pTok, (unsigned char)(token & 0x7f));
-    switch (token) {
-    case CPP_IDENTIFIER:
-    case CPP_TYPEIDENTIFIER:
-    case CPP_STRCONSTANT:
-        s = GetAtomString(atable, yylvalpp->sc_ident);
-        while (*s)
-            lAddByte(pTok, (unsigned char) *s++);
-        lAddByte(pTok, 0);
-        break;
-    case CPP_FLOATCONSTANT:
-    case CPP_INTCONSTANT:
-         str = (unsigned char*)yylvalpp->symbol_name;
-         while (*str){
-            lAddByte(pTok,(unsigned char) *str);
-            *str++;
-         }
-         lAddByte(pTok, 0);
-         break;
-    case '(':
-        lAddByte(pTok, (unsigned char)(yylvalpp->sc_int ? 1 : 0));
-    default:
-        break;
-    }
+	if (token > 256)
+		lAddByte(pTok, (unsigned char) ((token & 0x7f) + 0x80));
+	else
+		lAddByte(pTok, (unsigned char) (token & 0x7f));
+	switch (token) {
+	case CPP_IDENTIFIER:
+	case CPP_TYPEIDENTIFIER:
+	case CPP_STRCONSTANT:
+		s = GetAtomString(atable, yylvalpp->sc_ident);
+		while (*s)
+			lAddByte(pTok, (unsigned char) *s++);
+		lAddByte(pTok, 0);
+		break;
+	case CPP_FLOATCONSTANT:
+	case CPP_INTCONSTANT:
+		str = (unsigned char*) yylvalpp->symbol_name;
+		while (*str) {
+			lAddByte(pTok, (unsigned char) *str);
+			*str++;
+		}
+		lAddByte(pTok, 0);
+		break;
+	case '(':
+		lAddByte(pTok, (unsigned char) (yylvalpp->sc_int ? 1 : 0));
+	default:
+		break;
+	}
 } /* RecordToken */
 
 /*
@@ -278,10 +276,10 @@ void RecordToken(TokenStream *pTok, int token, yystypepp * yylvalpp)
 
 void RewindTokenStream(TokenStream *pTok)
 {
-    if (pTok->head) {
-        pTok->current = pTok->head;
-        pTok->current->current = 0;
-    }
+	if (pTok->head) {
+		pTok->current = pTok->head;
+		pTok->current->current = 0;
+	}
 } /* RewindTokenStream */
 
 /*
@@ -291,188 +289,189 @@ void RewindTokenStream(TokenStream *pTok)
 
 int ReadToken(TokenStream *pTok, yystypepp * yylvalpp)
 {
-    char symbol_name[MAX_SYMBOL_NAME_LEN + 1];
-    char string_val[MAX_STRING_LEN + 1];
-    int ltoken, len;
-    char ch;
+	char symbol_name[MAX_SYMBOL_NAME_LEN + 1];
+	char string_val[MAX_STRING_LEN + 1];
+	int ltoken, len;
+	char ch;
 
-    ltoken = lReadByte(pTok);
-    if (ltoken >= 0) {
-        if (ltoken > 127)
-            ltoken += 128;
-        switch (ltoken) {
-        case CPP_IDENTIFIER:
-        case CPP_TYPEIDENTIFIER:
-            len = 0;
-            ch = lReadByte(pTok);
-            while ((ch >= 'a' && ch <= 'z') ||
-                     (ch >= 'A' && ch <= 'Z') ||
-                     (ch >= '0' && ch <= '9') ||
-                     ch == '_')
-            {
-                if (len < MAX_SYMBOL_NAME_LEN) {
-                    symbol_name[len] = ch;
-                    len++;
-                    ch = lReadByte(pTok);
-                }
-            }
-            symbol_name[len] = '\0';
-            assert(ch == '\0');
-            yylvalpp->sc_ident = LookUpAddString(atable, symbol_name);
-            return CPP_IDENTIFIER;
-            break;
-        case CPP_STRCONSTANT:
-            len = 0;
-            while ((ch = lReadByte(pTok)) != 0)
-                if (len < MAX_STRING_LEN)
-                    string_val[len++] = ch;
-            string_val[len] = 0;
-            yylvalpp->sc_ident = LookUpAddString(atable, string_val);
-            break;
-        case CPP_FLOATCONSTANT:
-            len = 0;
-            ch = lReadByte(pTok);
-            while ((ch >= '0' && ch <= '9')||(ch=='e'||ch=='E'||ch=='.')||(ch=='+'||ch=='-'))
-            {
-                if (len < MAX_SYMBOL_NAME_LEN) {
-                    symbol_name[len] = ch;
-                    len++;
-                    ch = lReadByte(pTok);
-                }
-            }
-            symbol_name[len] = '\0';
-            assert(ch == '\0');
-            strcpy(yylvalpp->symbol_name,symbol_name);
-            yylvalpp->sc_fval=(float)atof(yylvalpp->symbol_name);
-            break;
-        case CPP_INTCONSTANT:
-            len = 0;
-            ch = lReadByte(pTok);
-            while ((ch >= '0' && ch <= '9'))
-            {
-                if (len < MAX_SYMBOL_NAME_LEN) {
-                    symbol_name[len] = ch;
-                    len++;
-                    ch = lReadByte(pTok);
-                }
-            }
-            symbol_name[len] = '\0';
-            assert(ch == '\0');
-            strcpy(yylvalpp->symbol_name,symbol_name);
-            yylvalpp->sc_int=atoi(yylvalpp->symbol_name);
-            break;
-        case '(':
-            yylvalpp->sc_int = lReadByte(pTok);
-            break;
-        }
-        return ltoken;
-    }
-    return EOF_SY;
+	ltoken = lReadByte(pTok);
+	if (ltoken >= 0) {
+		if (ltoken > 127)
+			ltoken += 128;
+		switch (ltoken) {
+		case CPP_IDENTIFIER:
+		case CPP_TYPEIDENTIFIER:
+			len = 0;
+			ch = lReadByte(pTok);
+			while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+					|| (ch >= '0' && ch <= '9') || ch == '_') {
+				if (len < MAX_SYMBOL_NAME_LEN) {
+					symbol_name[len] = ch;
+					len++;
+					ch = lReadByte(pTok);
+				}
+			}
+			symbol_name[len] = '\0';
+			assert(ch == '\0');
+			yylvalpp->sc_ident = LookUpAddString(atable, symbol_name);
+			return CPP_IDENTIFIER;
+			break;
+		case CPP_STRCONSTANT:
+			len = 0;
+			while ((ch = lReadByte(pTok)) != 0)
+				if (len < MAX_STRING_LEN)
+					string_val[len++] = ch;
+			string_val[len] = 0;
+			yylvalpp->sc_ident = LookUpAddString(atable, string_val);
+			break;
+		case CPP_FLOATCONSTANT:
+			len = 0;
+			ch = lReadByte(pTok);
+			while ((ch >= '0' && ch <= '9')
+					|| (ch == 'e' || ch == 'E' || ch == '.')
+					|| (ch == '+' || ch == '-')) {
+				if (len < MAX_SYMBOL_NAME_LEN) {
+					symbol_name[len] = ch;
+					len++;
+					ch = lReadByte(pTok);
+				}
+			}
+			symbol_name[len] = '\0';
+			assert(ch == '\0');
+			strcpy(yylvalpp->symbol_name, symbol_name);
+			yylvalpp->sc_fval = (float) atof(yylvalpp->symbol_name);
+			break;
+		case CPP_INTCONSTANT:
+			len = 0;
+			ch = lReadByte(pTok);
+			while ((ch >= '0' && ch <= '9')) {
+				if (len < MAX_SYMBOL_NAME_LEN) {
+					symbol_name[len] = ch;
+					len++;
+					ch = lReadByte(pTok);
+				}
+			}
+			symbol_name[len] = '\0';
+			assert(ch == '\0');
+			strcpy(yylvalpp->symbol_name, symbol_name);
+			yylvalpp->sc_int = atoi(yylvalpp->symbol_name);
+			break;
+		case '(':
+			yylvalpp->sc_int = lReadByte(pTok);
+			break;
+		}
+		return ltoken;
+	}
+	return EOF_SY;
 } /* ReadToken */
 
 typedef struct TokenInputSrc {
-    InputSrc            base;
-    TokenStream         *tokens;
-    int                 (*final)(CPPStruct *);
+	InputSrc base;
+	TokenStream *tokens;
+	int (*final)(CPPStruct *);
 } TokenInputSrc;
 
 static int scan_token(TokenInputSrc *in, yystypepp * yylvalpp)
 {
-    int token = ReadToken(in->tokens, yylvalpp);
-    int (*final)(CPPStruct *);
-    cpp->tokenLoc->file = cpp->currentInput->name;
-    cpp->tokenLoc->line = cpp->currentInput->line;
-    if (token == '\n') {
-        in->base.line++;
-        return token;
-    }
-    if (token > 0) return token;
-    cpp->currentInput = in->base.prev;
-    final = in->final;
-    free(in);
-    if (final && !final(cpp)) return -1;
-    return cpp->currentInput->scan(cpp->currentInput, yylvalpp);
+	int token = ReadToken(in->tokens, yylvalpp);
+	int (*final)(CPPStruct *);
+	cpp->tokenLoc->file = cpp->currentInput->name;
+	cpp->tokenLoc->line = cpp->currentInput->line;
+	if (token == '\n') {
+		in->base.line++;
+		return token;
+	}
+	if (token > 0)
+		return token;
+	cpp->currentInput = in->base.prev;
+	final = in->final;
+	free(in);
+	if (final && !final(cpp))
+		return -1;
+	return cpp->currentInput->scan(cpp->currentInput, yylvalpp);
 }
 
 int ReadFromTokenStream(TokenStream *ts, int name, int (*final)(CPPStruct *))
 {
-    TokenInputSrc *in = (TokenInputSrc *)malloc(sizeof(TokenInputSrc));
-    memset(in, 0, sizeof(TokenInputSrc));
-    in->base.name = name;
-    in->base.prev = cpp->currentInput;
-    in->base.scan = (int (*)(InputSrc *, yystypepp *))scan_token;
-    in->base.line = 1;
-    in->tokens = ts;
-    in->final = final;
-    RewindTokenStream(ts);
-    cpp->currentInput = &in->base;
-    return 1;
+	TokenInputSrc *in = (TokenInputSrc *) malloc(sizeof(TokenInputSrc));
+	memset(in, 0, sizeof(TokenInputSrc));
+	in->base.name = name;
+	in->base.prev = cpp->currentInput;
+	in->base.scan = (int (*)(InputSrc *, yystypepp *)) scan_token;
+	in->base.line = 1;
+	in->tokens = ts;
+	in->final = final;
+	RewindTokenStream(ts);
+	cpp->currentInput = &in->base;
+	return 1;
 }
 
 typedef struct UngotToken {
-    InputSrc    base;
-    int         token;
-    yystypepp     lval;
+	InputSrc base;
+	int token;
+	yystypepp lval;
 } UngotToken;
 
 static int reget_token(UngotToken *t, yystypepp * yylvalpp)
 {
-    int token = t->token;
-    *yylvalpp = t->lval;
-    cpp->currentInput = t->base.prev;
-    free(t);
-    return token;
+	int token = t->token;
+	*yylvalpp = t->lval;
+	cpp->currentInput = t->base.prev;
+	free(t);
+	return token;
 }
 
-void UngetToken(int token, yystypepp * yylvalpp) {
-    UngotToken *t = (UngotToken *)malloc(sizeof(UngotToken));
-    memset(t, 0, sizeof(UngotToken));
-    t->token = token;
-    t->lval = *yylvalpp;
+void UngetToken(int token, yystypepp * yylvalpp)
+{
+	UngotToken *t = (UngotToken *) malloc(sizeof(UngotToken));
+	memset(t, 0, sizeof(UngotToken));
+	t->token = token;
+	t->lval = *yylvalpp;
 #ifdef _WIN32
-    t->base.scan = (int (__cdecl*)(InputSrc *, yystypepp *))reget_token;
+	t->base.scan = (int (__cdecl*)(InputSrc *, yystypepp *))reget_token;
 #else /* _WIN32 */
-    t->base.scan = (void *)reget_token;
+	t->base.scan = (void *) reget_token;
 #endif /* _WIN32 */
-    t->base.prev = cpp->currentInput;
-    t->base.name = cpp->currentInput->name;
-    t->base.line = cpp->currentInput->line;
-    cpp->currentInput = &t->base;
+	t->base.prev = cpp->currentInput;
+	t->base.name = cpp->currentInput->name;
+	t->base.line = cpp->currentInput->line;
+	cpp->currentInput = &t->base;
 }
 
+void DumpTokenStream(FILE *fp, TokenStream *s, yystypepp * yylvalpp)
+{
+	int token;
+	char str[100];
 
-void DumpTokenStream(FILE *fp, TokenStream *s, yystypepp * yylvalpp) {
-    int token;
-    char str[100];
-
-    if (fp == 0) fp = stdout;
-    RewindTokenStream(s);
-    while ((token = ReadToken(s, yylvalpp)) > 0) {
-        switch (token) {
-        case CPP_IDENTIFIER:
-        case CPP_TYPEIDENTIFIER:
-            sprintf(str, "%s ", GetAtomString(atable, yylvalpp->sc_ident));
-            break;
-        case CPP_STRCONSTANT:
-            sprintf(str, "\"%s\"", GetAtomString(atable, yylvalpp->sc_ident));
-            break;
-        case CPP_FLOATCONSTANT:
-            /* printf("%g9.6 ", yylvalpp->sc_fval); */
-            break;
-        case CPP_INTCONSTANT:
-            /* printf("%d ", yylvalpp->sc_int); */
-            break;
-        default:
-            if (token >= 127)
-                sprintf(str, "%s ", GetAtomString(atable, token));
-            else
-                sprintf(str, "%c", token);
-            break;
-        }
-        CPPDebugLogMsg(str);
-    }
+	if (fp == 0)
+		fp = stdout;
+	RewindTokenStream(s);
+	while ((token = ReadToken(s, yylvalpp)) > 0) {
+		switch (token) {
+		case CPP_IDENTIFIER:
+		case CPP_TYPEIDENTIFIER:
+			sprintf(str, "%s ", GetAtomString(atable, yylvalpp->sc_ident));
+			break;
+		case CPP_STRCONSTANT:
+			sprintf(str, "\"%s\"", GetAtomString(atable, yylvalpp->sc_ident));
+			break;
+		case CPP_FLOATCONSTANT:
+			/* printf("%g9.6 ", yylvalpp->sc_fval); */
+			break;
+		case CPP_INTCONSTANT:
+			/* printf("%d ", yylvalpp->sc_int); */
+			break;
+		default:
+			if (token >= 127)
+				sprintf(str, "%s ", GetAtomString(atable, token));
+			else
+				sprintf(str, "%c", token);
+			break;
+		}
+		CPPDebugLogMsg(str);
+	}
 }
 
 /*//////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////// End of tokens.c ////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////*/
+ /////////////////////////////////////// End of tokens.c ////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////////////////////////*/
