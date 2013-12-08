@@ -46,80 +46,81 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_ATTACHMENTS 16
 
-class WatchVector : public WatchView, public Ui::wWatchVector {
-    Q_OBJECT
+class WatchVector: public WatchView, public Ui::wWatchVector {
+Q_OBJECT
 
 public:
-    WatchVector(QWidget *parent = 0);
-    void updateView(bool force);
-    void attachFpData(PixelBox *f, QString name);
-    void setWorkspace(QWorkspace *ws);
+	WatchVector(QWidget *parent = 0);
+	void updateView(bool force);
+	void attachFpData(PixelBox *f, QString name);
+	void setWorkspace(QWorkspace *ws);
 
 public slots:
-    void on_cbRed_activated(int);
-    void on_cbGreen_activated(int);
-    void on_cbBlue_activated(int);
-    void on_cbMapRed_activated(int);
-    void on_cbMapGreen_activated(int);
-    void on_cbMapBlue_activated(int);
+	void on_cbRed_activated(int);
+	void on_cbGreen_activated(int);
+	void on_cbBlue_activated(int);
+	void on_cbMapRed_activated(int);
+	void on_cbMapGreen_activated(int);
+	void on_cbMapBlue_activated(int);
 
-    void on_tbMinRed_clicked();
-    void on_tbMaxRed_clicked();
-    void on_tbMinGreen_clicked();
-    void on_tbMaxGreen_clicked();
-    void on_tbMinBlue_clicked();
-    void on_tbMaxBlue_clicked();
+	void on_tbMinRed_clicked();
+	void on_tbMaxRed_clicked();
+	void on_tbMinGreen_clicked();
+	void on_tbMaxGreen_clicked();
+	void on_tbMinBlue_clicked();
+	void on_tbMaxBlue_clicked();
 
-    void on_dsMinRed_valueChanged(double d);
-    void on_dsMaxRed_valueChanged(double d);
-    void on_dsMinGreen_valueChanged(double d);
-    void on_dsMaxGreen_valueChanged(double d);
-    void on_dsMinBlue_valueChanged(double d);
-    void on_dsMaxBlue_valueChanged(double d);
+	void on_dsMinRed_valueChanged(double d);
+	void on_dsMaxRed_valueChanged(double d);
+	void on_dsMinGreen_valueChanged(double d);
+	void on_dsMaxGreen_valueChanged(double d);
+	void on_dsMinBlue_valueChanged(double d);
+	void on_dsMaxBlue_valueChanged(double d);
 
-    void on_tbSwitchRed_clicked();
-    void on_tbSwitchGreen_clicked();
-    void on_tbSwitchBlue_clicked();
+	void on_tbSwitchRed_clicked();
+	void on_tbSwitchGreen_clicked();
+	void on_tbSwitchBlue_clicked();
 
-    void on_tbSaveImage_clicked();
+	void on_tbSaveImage_clicked();
 
-    void updateData();
-    void detachData();
-    void closeView();
+	void updateData();
+	void detachData();
+	void closeView();
 
-    void setZoomMode();
-    void setPickMode();
-    void setMinMaxMode();
-    void updateAllMinMax();
+	void setZoomMode();
+	void setPickMode();
+	void setMinMaxMode();
+	void updateAllMinMax();
 
 signals:
-    void mouseOverValuesChanged(int x, int y, const bool *active, const QVariant *values);
-    void selectionChanged(int x, int y);
+	void mouseOverValuesChanged(int x, int y, const bool *active,
+			const QVariant *values);
+	void selectionChanged(int x, int y);
 
 private slots:
-    void setMousePos(int x, int y);
-    void newSelection(int x, int y);
-    void newViewCenter(int x, int y);
-    void onMinMaxAreaChanged(void);
+	void setMousePos(int x, int y);
+	void newSelection(int x, int y);
+	void newViewCenter(int x, int y);
+	void onMinMaxAreaChanged(void);
 
 private:
-    int  getNumFreeMappings(void);
-    void updateGUI();
-    void addMappingOptions(int idx);
-    void delMappingOptions(int idx);
-    int  getFirstFreeMapping(void);
-    int  getIndexFromPixelBox(PixelBox *f);
-    void getActiveChannels(PixelBox *channels[3]);
-    QImage* drawNewImage(bool useAlpha);
+	int getNumFreeMappings(void);
+	void updateGUI();
+	void addMappingOptions(int idx);
+	void delMappingOptions(int idx);
+	int getFirstFreeMapping(void);
+	int getIndexFromPixelBox(PixelBox *f);
+	void getActiveChannels(PixelBox *channels[3]);
+	QImage* drawNewImage(bool useAlpha);
 
-    PixelBox    *m_pData[MAX_ATTACHMENTS];
-    QString      m_qName[MAX_ATTACHMENTS];
+	PixelBox *m_pData[MAX_ATTACHMENTS];
+	QString m_qName[MAX_ATTACHMENTS];
 
-    QScrollArea *m_qScrollArea;
-    ImageView   *m_pImageView;
-    int          m_viewCenter[2];
-    bool         m_bNeedsUpdate;
-    int          m_nActiveMappings;
+	QScrollArea *m_qScrollArea;
+	ImageView *m_pImageView;
+	int m_viewCenter[2];
+	bool m_bNeedsUpdate;
+	int m_nActiveMappings;
 };
 
 #endif
