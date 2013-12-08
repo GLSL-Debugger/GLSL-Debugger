@@ -53,18 +53,19 @@ void allocMem(void)
 	DWORD pid = GetCurrentProcessId();
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
-	
+
 	for (i = 0; i < rec->numItems; i++) {
-		rec->items[i] = (ALIGNED_DATA)malloc(rec->items[i]*sizeof(char));
+		rec->items[i] = (ALIGNED_DATA) malloc(rec->items[i] * sizeof(char));
 		if (!rec->items[i]) {
-			dbgPrint(DBGLVL_WARNING, "allocMem: Allocation of scratch mem failed\n");
+			dbgPrint(DBGLVL_WARNING,
+					"allocMem: Allocation of scratch mem failed\n");
 			for (i--; i >= 0; i--) {
-				free((void*)rec->items[i]);
+				free((void*) rec->items[i]);
 			}
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 			return;
 		}
-	}	
+	}
 	rec->result = DBG_ALLOCATED;
 }
 
@@ -78,9 +79,9 @@ void freeMem(void)
 	DWORD pid = GetCurrentProcessId();
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
-	
+
 	for (i = 0; i < rec->numItems; i++) {
-		free((void*)rec->items[i]);
+		free((void*) rec->items[i]);
 	}
 	setErrorCode(DBG_NO_ERROR);
 }

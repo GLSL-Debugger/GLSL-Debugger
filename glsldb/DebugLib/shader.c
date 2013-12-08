@@ -378,7 +378,7 @@ static int shaderBaseTypeSize(GLenum t)
 static void allocateUniformStorage(ActiveUniform *v)
 {
 	int size = shaderTypeSize(v->type);
-	
+
 	/* error check in getUniform */
 	v->value = malloc(size*v->size);
 }
@@ -959,7 +959,7 @@ static int getActiveAttributes(ShaderProgram *shader)
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
 
-	dbgPrint(DBGLVL_INFO, "ACTIVE ATTRIBS: %i\n", shader->numAttributes);	
+	dbgPrint(DBGLVL_INFO, "ACTIVE ATTRIBS: %i\n", shader->numAttributes);
 	if (!(shader->attributes = (ActiveAttribute*)malloc(shader->numAttributes*
 	                                              sizeof(ActiveAttribute)))) {
 		dbgPrint(DBGLVL_ERROR, "Allocation failed: attributes\n");
@@ -1078,7 +1078,7 @@ static int getShaderObjects(ShaderProgram *shader)
     for (i = 0; i < shader->numObjects; i++) {
 
 		shader->objects[i].handle = objects[i];
-		
+
 	 	ORIG_GL(glGetShaderiv)(shader->objects[i].handle, GL_SHADER_SOURCE_LENGTH,
 		        &shader->objects[i].srcLength);
 		ORIG_GL(glGetShaderiv)(shader->objects[i].handle, GL_SHADER_TYPE,
@@ -1088,14 +1088,14 @@ static int getShaderObjects(ShaderProgram *shader)
 			free(objects);
 			return error;
 		}
-		
+
 		if (!(shader->objects[i].src =
 					(char*)malloc((shader->objects[i].srcLength + 1)*sizeof(char)))) {
 			dbgPrint(DBGLVL_ERROR, "not enough memory for src string\n");
 			free(objects);
 			return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 		}
-		
+
 	 	ORIG_GL(glGetShaderSource)(shader->objects[i].handle,
 		                           shader->objects[i].srcLength,
 		                           NULL, shader->objects[i].src);
@@ -1285,24 +1285,24 @@ static int serializeUniforms(
 }
 
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_GET_SHADER_CODE
-	SHM out:
-		fname    : *
-		result   : DBG_SHADER_CODE or DBG_ERROR_CODE on error
-		numItems : number of returned shader codes (0 or 3)
-		items[0] : pointer to vertex shader src
-		items[1] : length of vertex shader src
-		items[2] : pointer to geometry shader src
-		items[3] : length of geometry shader src
-		items[4] : pointer to fragment shader src
-		items[5] : length of fragment shader src
-		items[6] : pointer to shader resources (TBuiltInResource*)
-		items[7] : number of active uniforms
-		items[8] : size of serialized uniforms array
-		items[9] : pointer to serialzied active uniforms
-*/
+ *	SHM IN:
+ *		fname    : *
+ *		operation: DBG_GET_SHADER_CODE
+ *	SHM out:
+ *		fname    : *
+ *		result   : DBG_SHADER_CODE or DBG_ERROR_CODE on error
+ *		numItems : number of returned shader codes (0 or 3)
+ *		items[0] : pointer to vertex shader src
+ *		items[1] : length of vertex shader src
+ *		items[2] : pointer to geometry shader src
+ *		items[3] : length of geometry shader src
+ *		items[4] : pointer to fragment shader src
+ *		items[5] : length of fragment shader src
+ *		items[6] : pointer to shader resources (TBuiltInResource*)
+ *		items[7] : number of active uniforms
+ *		items[8] : size of serialized uniforms array
+ *		items[9] : pointer to serialzied active uniforms
+ */
 void getShaderCode(void)
 {
     char** source[3] = {NULL, NULL, NULL};
@@ -1314,7 +1314,7 @@ void getShaderCode(void)
     int numSourceStrings[3] = {0, 0, 0};
     int lenSourceStrings[3] = {0, 0, 0};
 	int error;
-	
+
 	ShaderProgram shader;
     DbgRec* rec;
     int i, j;
@@ -1361,8 +1361,8 @@ void getShaderCode(void)
 			return;
         }
         source[typeId] = tmpAlloc;
-		source[typeId][numSourceStrings[typeId] - 1] = shader.objects[i].src; 
-		dbgPrint(DBGLVL_INFO, "source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1, 
+		source[typeId][numSourceStrings[typeId] - 1] = shader.objects[i].src;
+		dbgPrint(DBGLVL_INFO, "source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1,
             shader.objects[i].src);
 	}
 
@@ -1439,13 +1439,13 @@ void getShaderCode(void)
 
 /* TODO: error checking */
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_GET_SHADER_CODE
-	SHM out:
-		fname    : *
-		result   : DBG_ERROR_CODE
-*/
+ *	SHM IN:
+ *		fname    : *
+ *		operation: DBG_GET_SHADER_CODE
+ *	SHM out:
+ *		fname    : *
+ *		result   : DBG_ERROR_CODE
+ */
 void storeActiveShader(void)
 {
 	setErrorCode(getCurrentShader(&g.storedShader));
@@ -1453,13 +1453,13 @@ void storeActiveShader(void)
 
 /* TODO: error checking */
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_GET_SHADER_CODE
-	SHM out:
-		fname    : *
-		result   : DBG_ERROR_CODE
-*/
+ *	SHM IN:
+ *		fname    : *
+ *		operation: DBG_GET_SHADER_CODE
+ *	SHM out:
+ *		fname    : *
+ *		result   : DBG_ERROR_CODE
+ */
 void restoreActiveShader(void)
 {
 	int error;
@@ -1574,7 +1574,7 @@ static void freeDbgShader(void)
 }
 
 int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
-                  int target, int forcePointPrimitiveMode) 
+                  int target, int forcePointPrimitiveMode)
 {
 	int haveGeometryShader =  checkGLExtensionSupported("EXT_geometry_shader4");
 	GLint status;
@@ -1655,7 +1655,7 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 		}
 	}
 
-	
+
 	/* if geometry shader is supported, set program parameters */
 	if (haveGeometryShader && gshader) {
 		DMARK
@@ -1798,17 +1798,17 @@ int loadDbgShader(const char* vshader, const char *gshader, const char *fshader,
 }
 
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_SET_DBG_SHADER
-		items[0] : pointer to vertex shader src
-		items[1] : pointer to geometry shader src
-		items[2] : pointer to fragment shader src
-		items[3] : debug target
-	SHM out:
-		fname    : *
-		result   : DBG_ERROR_CODE on error; else DBG_NO_ERROR
-*/
+ *	SHM IN:
+ *		fname    : *
+ *		operation: DBG_SET_DBG_SHADER
+ *		items[0] : pointer to vertex shader src
+ *		items[1] : pointer to geometry shader src
+ *		items[2] : pointer to fragment shader src
+ *		items[3] : debug target
+ *	SHM out:
+ *		fname    : *
+ *		result   : DBG_ERROR_CODE on error; else DBG_NO_ERROR
+ */
 void setDbgShader(void)
 {
 #ifdef _WIN32
@@ -1822,7 +1822,7 @@ void setDbgShader(void)
 	const char *gshader = (const char *)rec->items[1];
 	const char *fshader = (const char *)rec->items[2];
 	int target = (int)rec->items[3];
-	
+
 	setErrorCode(loadDbgShader(vshader, gshader, fshader, target, 0));
 }
 

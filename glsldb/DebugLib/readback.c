@@ -53,15 +53,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 
 typedef struct {
-	GLint name;   /* 0 if not bound */
-	GLint start;  /* 0 if not specified, -1 if not bound */
-	GLint size;   /* 0 if not specified, -1 if not bound */
+	GLint name; /* 0 if not bound */
+	GLint start; /* 0 if not specified, -1 if not bound */
+	GLint size; /* 0 if not specified, -1 if not bound */
 } TFBBufferBinding;
 
 typedef struct {
-	GLint attribute;  /* 0 if no data */
+	GLint attribute; /* 0 if no data */
 	GLint components; /* 0 if no data */
-	GLint index;      /* 0 if no data or not indexed*/
+	GLint index; /* 0 if no data or not indexed*/
 } TFBRecord;
 
 typedef struct {
@@ -81,7 +81,7 @@ static struct {
 	GLuint dbgDepthBuffer;
 	/*GLuint dbgStencilBuffer;*/
 
-	/* fraembuffer saved state */
+	/* framebuffer saved state */
 	GLint activeFBO;
 	GLint activeDrawbuffer;
 	GLint activeReadbuffer;
@@ -139,14 +139,13 @@ typedef struct {
 	GLboolean convolution_1d;
 	GLboolean convolution_2d;
 	GLboolean separable_2d;
-    GLfloat depth_bias;
-    GLfloat depth_scale;
+	GLfloat depth_bias;
+	GLfloat depth_scale;
 } pixelTransferState;
 
 static void savePixelTransferState(pixelTransferState *savedState)
 {
-	DMARK
-	/* pixel packing */
+DMARK	/* pixel packing */
 	ORIG_GL(glGetBooleanv)(GL_PACK_SWAP_BYTES, &savedState->pack_swap_bytes);
 	ORIG_GL(glPixelStorei)(GL_PACK_SWAP_BYTES, GL_FALSE);
 	ORIG_GL(glGetBooleanv)(GL_PACK_LSB_FIRST, &savedState->pack_lsb_first);
@@ -202,7 +201,7 @@ static void savePixelTransferState(pixelTransferState *savedState)
 
 	/* convolution */
 	if (checkGLExtensionSupported("GL_ARB_imaging") ||
-	    checkGLExtensionSupported("GL_EXT_convolution")) {
+			checkGLExtensionSupported("GL_EXT_convolution")) {
 		ORIG_GL(glGetBooleanv)(GL_CONVOLUTION_1D, &savedState->convolution_1d);
 		ORIG_GL(glDisable)(GL_CONVOLUTION_1D);
 		ORIG_GL(glGetBooleanv)(GL_CONVOLUTION_2D, &savedState->convolution_2d);
@@ -235,8 +234,7 @@ static void savePixelTransferState(pixelTransferState *savedState)
 
 static void restorePixelTransferState(pixelTransferState *savedState)
 {
-	DMARK
-	/* pixel packing */
+DMARK	/* pixel packing */
 	ORIG_GL(glPixelStorei)(GL_PACK_SWAP_BYTES, savedState->pack_swap_bytes);
 	ORIG_GL(glPixelStorei)(GL_PACK_LSB_FIRST, savedState->pack_lsb_first);
 	ORIG_GL(glPixelStorei)(GL_PACK_ALIGNMENT, savedState->pack_alignment);
@@ -292,7 +290,7 @@ static void restorePixelTransferState(pixelTransferState *savedState)
 		}
 		if (savedState->convolution_2d) {
 			ORIG_GL(glEnable)(savedState->convolution_2d);
-		}else {
+		} else {
 			ORIG_GL(glDisable)(GL_CONVOLUTION_2D);
 		}
 		if (savedState->separable_2d) {
@@ -320,10 +318,8 @@ static void restorePixelTransferState(pixelTransferState *savedState)
 	ORIG_GL(glPixelTransferf)(GL_DEPTH_SCALE, savedState->depth_scale);
 }
 
-
 static int setDbgRenderState(int target, int alphaTestOption,
-                             int depthTestOption, int stencilTestOption,
-                             int blendingOption)
+		int depthTestOption, int stencilTestOption, int blendingOption)
 {
 	DMARK
 	if (target == DBG_TARGET_FRAGMENT_SHADER) {
@@ -334,58 +330,56 @@ static int setDbgRenderState(int target, int alphaTestOption,
 		ORIG_GL(glGetBooleanv)(GL_STENCIL_TEST, &g.activeStencilTest);
 		ORIG_GL(glGetBooleanv)(GL_DEPTH_TEST, &g.activeDepthTest);
 		ORIG_GL(glGetBooleanv)(GL_BLEND, &g.activeBlending);
-		/* set state */
-		ORIG_GL(glDrawBuffer)(GL_COLOR_ATTACHMENT0_EXT);
+		/* set state */ORIG_GL(glDrawBuffer)(GL_COLOR_ATTACHMENT0_EXT);
 		ORIG_GL(glReadBuffer)(GL_COLOR_ATTACHMENT0_EXT);
 		ORIG_GL(glColorMask)(GL_TRUE, GL_FALSE, GL_FALSE, g.activeColorMask[3]);
-		dbgPrint(DBGLVL_INFO, "setDbgRenderState: stencilTestOption: %i "
-				              "alphaTestOption: %i depthTestOption: %i "
-							  "blendingOption: %i\n",
-		         stencilTestOption, alphaTestOption, depthTestOption,
-		         blendingOption);
+		dbgPrint(DBGLVL_INFO,
+				"setDbgRenderState: stencilTestOption: %i "
+				"alphaTestOption: %i depthTestOption: %i "
+				"blendingOption: %i\n", stencilTestOption, alphaTestOption, depthTestOption, blendingOption);
 		switch (stencilTestOption) {
-			case DBG_PFT_FORCE_DISABLED:
-				ORIG_GL(glDisable)(GL_STENCIL_TEST);
-				break;
-			case DBG_PFT_FORCE_ENABLED:
-				ORIG_GL(glEnable)(GL_STENCIL_TEST);
-				break;
-			case DBG_PFT_KEEP:
-			default:
-				break;
+		case DBG_PFT_FORCE_DISABLED:
+			ORIG_GL(glDisable)(GL_STENCIL_TEST);
+			break;
+		case DBG_PFT_FORCE_ENABLED:
+			ORIG_GL(glEnable)(GL_STENCIL_TEST);
+			break;
+		case DBG_PFT_KEEP:
+		default:
+			break;
 		}
 		switch (alphaTestOption) {
-			case DBG_PFT_FORCE_DISABLED:
-				ORIG_GL(glDisable)(GL_ALPHA_TEST);
-				break;
-			case DBG_PFT_FORCE_ENABLED:
-				ORIG_GL(glEnable)(GL_ALPHA_TEST);
-				break;
-			case DBG_PFT_KEEP:
-			default:
-				break;
+		case DBG_PFT_FORCE_DISABLED:
+			ORIG_GL(glDisable)(GL_ALPHA_TEST);
+			break;
+		case DBG_PFT_FORCE_ENABLED:
+			ORIG_GL(glEnable)(GL_ALPHA_TEST);
+			break;
+		case DBG_PFT_KEEP:
+		default:
+			break;
 		}
 		switch (depthTestOption) {
-			case DBG_PFT_FORCE_DISABLED:
-				ORIG_GL(glDisable)(GL_DEPTH_TEST);
-				break;
-			case DBG_PFT_FORCE_ENABLED:
-				ORIG_GL(glEnable)(GL_DEPTH_TEST);
-				break;
-			case DBG_PFT_KEEP:
-			default:
-				break;
+		case DBG_PFT_FORCE_DISABLED:
+			ORIG_GL(glDisable)(GL_DEPTH_TEST);
+			break;
+		case DBG_PFT_FORCE_ENABLED:
+			ORIG_GL(glEnable)(GL_DEPTH_TEST);
+			break;
+		case DBG_PFT_KEEP:
+		default:
+			break;
 		}
 		switch (blendingOption) {
-			case DBG_PFT_FORCE_DISABLED:
-				ORIG_GL(glDisable)(GL_BLEND);
-				break;
-			case DBG_PFT_FORCE_ENABLED:
-				ORIG_GL(glEnable)(GL_BLEND);
-				break;
-			case DBG_PFT_KEEP:
-			default:
-				break;
+		case DBG_PFT_FORCE_DISABLED:
+			ORIG_GL(glDisable)(GL_BLEND);
+			break;
+		case DBG_PFT_FORCE_ENABLED:
+			ORIG_GL(glEnable)(GL_BLEND);
+			break;
+		case DBG_PFT_KEEP:
+		default:
+			break;
 		}
 	} else {
 	}
@@ -399,14 +393,14 @@ static void saveTransformFeedbackState(TFBState *tfbState)
 
 #if 0
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_BUFFER_MODE_NV,
-	                       &tfbState->mode);
+			&tfbState->mode);
 	dbgPrint(DBGLVL_INFO,"\tmode: %i\n", tfbState->mode);
 
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_ATTRIBS_NV, &tfbState->attribs);
 	dbgPrint(DBGLVL_INFO,"\tattribs: %i\n", tfbState->attribs);
 
 	ORIG_GL(glGetIntegerv)(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_NV,
-	                       &tfbState->buffer_binding);
+			&tfbState->buffer_binding);
 	dbgPrint(DBGLVL_INFO,"\tbuffer_binding: %i\n", tfbState->buffer_binding);
 
 	ORIG_GL(glGetIntegerIndexedvEXT)(GL_TRANSFORM_FEEDBACK_RECORD_NV,XXXXXX);
@@ -436,7 +430,7 @@ static int restoreDbgRenderState(int target)
 		ORIG_GL(glDrawBuffer)(g.activeDrawbuffer);
 		ORIG_GL(glReadBuffer)(g.activeReadbuffer);
 		ORIG_GL(glColorMask)(g.activeColorMask[0], g.activeColorMask[1],
-		                     g.activeColorMask[2], g.activeColorMask[3]);
+				g.activeColorMask[2], g.activeColorMask[3]);
 		ORIG_GL(glDepthMask)(g.activeDepthMask);
 		if (g.activeStencilTest) {
 			ORIG_GL(glEnable)(GL_STENCIL_TEST);
@@ -477,21 +471,22 @@ static void setDbgOutputTargetVertexData(void)
 		return;
 	}
 
-	DMARK
-	/* setup queries for number of generated/written primitives */
+DMARK	/* setup queries for number of generated/written primitives */
 	ORIG_GL(glGenQueries)(2, g.tfbQueries);
 	if (setGLErrorCode()) {
 		return;
 	}
 
-	/* setup vbos for transform feedback data */
-	ORIG_GL(glGenBuffers)(1, &g.tfbBuffer);
+	/* setup vbos for transform feedback data */ORIG_GL(glGenBuffers)(1,
+			&g.tfbBuffer);
 	if (setGLErrorCode()) {
 		ORIG_GL(glDeleteQueries)(2, g.tfbQueries);
 		return;
 	}
-    ORIG_GL(glBindBuffer)(GL_ARRAY_BUFFER, g.tfbBuffer);
-	ORIG_GL(glBufferData)(GL_ARRAY_BUFFER, TRANSFORM_FEEDBACK_BUFFER_SIZE*sizeof(GLfloat), NULL, GL_DYNAMIC_READ);
+	ORIG_GL(glBindBuffer)(GL_ARRAY_BUFFER, g.tfbBuffer);
+	ORIG_GL(glBufferData)(GL_ARRAY_BUFFER,
+			TRANSFORM_FEEDBACK_BUFFER_SIZE * sizeof(GLfloat), NULL,
+			GL_DYNAMIC_READ);
 	if (setGLErrorCode()) {
 		ORIG_GL(glDeleteBuffers)(1, &g.tfbBuffer);
 		ORIG_GL(glDeleteQueries)(2, g.tfbQueries);
@@ -500,16 +495,18 @@ static void setDbgOutputTargetVertexData(void)
 
 	/* set base for transform feedback */
 	switch (getTFBVersion()) {
-		case TFBVersion_NV:
-			ORIG_GL(glBindBufferBaseNV)(GL_TRANSFORM_FEEDBACK_BUFFER_NV, 0, g.tfbBuffer);
-			break;
-		case TFBVersion_EXT:
-			ORIG_GL(glBindBufferBaseEXT)(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0, g.tfbBuffer);
-			break;
-		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
-			setErrorCode(DBG_ERROR_INVALID_OPERATION);
-			return;
+	case TFBVersion_NV:
+		ORIG_GL(glBindBufferBaseNV)(GL_TRANSFORM_FEEDBACK_BUFFER_NV, 0,
+				g.tfbBuffer);
+		break;
+	case TFBVersion_EXT:
+		ORIG_GL(glBindBufferBaseEXT)(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0,
+				g.tfbBuffer);
+		break;
+	default:
+		dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+		setErrorCode(DBG_ERROR_INVALID_OPERATION);
+		return;
 	}
 	if (setGLErrorCode()) {
 		ORIG_GL(glDeleteBuffers)(1, &g.tfbBuffer);
@@ -525,58 +522,60 @@ static void setDbgOutputTargetVertexData(void)
 		return;
 	}
 	setErrorCode(DBG_NO_ERROR);
-	
+
 }
 
 int beginTransformFeedback(int primitiveType)
 {
 	int error;
 
-	DMARK
-	dbgPrint(DBGLVL_INFO, "glBeginTransformFeedback expecting %s\n",
-	        lookupEnum(primitiveType));
+DMARK
+		dbgPrint(DBGLVL_INFO,
+			"glBeginTransformFeedback expecting %s\n", lookupEnum(primitiveType));
 
 	switch (getTFBVersion()) {
-		case TFBVersion_NV:
-			ORIG_GL(glBeginTransformFeedbackNV)(primitiveType);
-			error = glError();
-			if (error) {
-				return error;
-			}
+	case TFBVersion_NV:
+		ORIG_GL(glBeginTransformFeedbackNV)(primitiveType);
+		error = glError();
+		if (error) {
+			return error;
+		}
 
-			/* disable rasterization */
-			ORIG_GL(glEnable)(GL_RASTERIZER_DISCARD_NV);
+		/* disable rasterization */
+		ORIG_GL(glEnable)(GL_RASTERIZER_DISCARD_NV);
 
-			/* start queries */
-			ORIG_GL(glBeginQuery)(GL_PRIMITIVES_GENERATED_NV, g.tfbQueries[0]);
-			ORIG_GL(glBeginQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV, g.tfbQueries[1]);
-			error = glError();
-			break;
-		case TFBVersion_EXT:
-			ORIG_GL(glBeginTransformFeedbackEXT)(primitiveType);
-			error = glError();
-			if (error) {
-				return error;
-			}
+		/* start queries */
+		ORIG_GL(glBeginQuery)(GL_PRIMITIVES_GENERATED_NV, g.tfbQueries[0]);
+		ORIG_GL(glBeginQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV,
+				g.tfbQueries[1]);
+		error = glError();
+		break;
+	case TFBVersion_EXT:
+		ORIG_GL(glBeginTransformFeedbackEXT)(primitiveType);
+		error = glError();
+		if (error) {
+			return error;
+		}
 
-			/* disable rasterization */
-			ORIG_GL(glEnable)(GL_RASTERIZER_DISCARD_EXT);
+		/* disable rasterization */
+		ORIG_GL(glEnable)(GL_RASTERIZER_DISCARD_EXT);
 
-			/* start queries */
-			ORIG_GL(glBeginQuery)(GL_PRIMITIVES_GENERATED_EXT, g.tfbQueries[0]);
-			ORIG_GL(glBeginQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT, g.tfbQueries[1]);
-			error = glError();
-			break;
-		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
-			error = GL_INVALID_OPERATION;
+		/* start queries */
+		ORIG_GL(glBeginQuery)(GL_PRIMITIVES_GENERATED_EXT, g.tfbQueries[0]);
+		ORIG_GL(glBeginQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT,
+				g.tfbQueries[1]);
+		error = glError();
+		break;
+	default:
+		dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+		error = GL_INVALID_OPERATION;
 	}
 
 	return error;
 }
 
-int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data,
-                         int *numPrimitives, int *numVertices)
+int endTransformFeedback(int primitiveType, int numFloatsPerVertex,
+		float **data, int *numPrimitives, int *numVertices)
 {
 	GLuint primitivesGenerated, primitivesWritten;
 	void *mappedBuffer = NULL;
@@ -585,76 +584,75 @@ int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data
 	DMARK
 
 	switch (getTFBVersion()) {
-		case TFBVersion_NV:
-			ORIG_GL(glEndQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV);
-			ORIG_GL(glEndQuery)(GL_PRIMITIVES_GENERATED_NV);
-			error = glError();
-			if (error) {
-				return error;
-			}
+	case TFBVersion_NV:
+		ORIG_GL(glEndQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_NV);
+		ORIG_GL(glEndQuery)(GL_PRIMITIVES_GENERATED_NV);
+		error = glError();
+		if (error) {
+			return error;
+		}
 
-			ORIG_GL(glDisable)(GL_RASTERIZER_DISCARD_NV);
-			ORIG_GL(glEndTransformFeedbackNV)();
-			error = glError();
-			if (error) {
-				return error;
-			}
-			break;
-		case TFBVersion_EXT:
-			ORIG_GL(glEndQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT);
-			ORIG_GL(glEndQuery)(GL_PRIMITIVES_GENERATED_EXT);
-			error = glError();
-			if (error) {
-				return error;
-			}
+		ORIG_GL(glDisable)(GL_RASTERIZER_DISCARD_NV);
+		ORIG_GL(glEndTransformFeedbackNV)();
+		error = glError();
+		if (error) {
+			return error;
+		}
+		break;
+	case TFBVersion_EXT:
+		ORIG_GL(glEndQuery)(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN_EXT);
+		ORIG_GL(glEndQuery)(GL_PRIMITIVES_GENERATED_EXT);
+		error = glError();
+		if (error) {
+			return error;
+		}
 
-			ORIG_GL(glDisable)(GL_RASTERIZER_DISCARD_EXT);
-			ORIG_GL(glEndTransformFeedbackEXT)();
-			error = glError();
-			if (error) {
-				return error;
-			}
-			break;
-		default:
-			dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
-			return GL_INVALID_OPERATION;
+		ORIG_GL(glDisable)(GL_RASTERIZER_DISCARD_EXT);
+		ORIG_GL(glEndTransformFeedbackEXT)();
+		error = glError();
+		if (error) {
+			return error;
+		}
+		break;
+	default:
+		dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
+		return GL_INVALID_OPERATION;
 	}
 
-	/* read back number of primitives written */
-	ORIG_GL(glGetQueryObjectuiv)(g.tfbQueries[0], GL_QUERY_RESULT,
-	                             &primitivesGenerated);
+	/* read back number of primitives written */ORIG_GL(glGetQueryObjectuiv)(
+			g.tfbQueries[0], GL_QUERY_RESULT, &primitivesGenerated);
 	error = glError();
 	if (error) {
 		return error;
 	}
 	ORIG_GL(glGetQueryObjectuiv)(g.tfbQueries[1], GL_QUERY_RESULT,
-	                             &primitivesWritten);
+			&primitivesWritten);
 	error = glError();
 	if (error) {
 		return error;
 	}
-	dbgPrint(DBGLVL_INFO, "PRIMITIVES GENERATED/WRITTEN = %d/%d\n",
-	        primitivesGenerated, primitivesWritten);
+	dbgPrint(DBGLVL_INFO,
+			"PRIMITIVES GENERATED/WRITTEN = %d/%d\n", primitivesGenerated, primitivesWritten);
 
 	if (primitivesWritten != primitivesGenerated) {
 		dbgPrint(DBGLVL_WARNING, "PRIMITIVES GENERATED > PRIMITIVES WRITTEN -> "
-		                "FEEDBACKBUFFER TOO SMALL!\n");
+		"FEEDBACKBUFFER TOO SMALL!\n");
 	}
 
 	*numPrimitives = primitivesWritten;
 	switch (primitiveType) {
-		case GL_POINTS:
-			*numVertices = primitivesWritten;
-			break;
-		case GL_LINES:
-			*numVertices = 2*primitivesWritten;
-			break;
-		case GL_TRIANGLES:
-			*numVertices = 3*primitivesWritten;
-			break;
+	case GL_POINTS:
+		*numVertices = primitivesWritten;
+		break;
+	case GL_LINES:
+		*numVertices = 2 * primitivesWritten;
+		break;
+	case GL_TRIANGLES:
+		*numVertices = 3 * primitivesWritten;
+		break;
 	}
 
-	if (!(*data = malloc(*numVertices*numFloatsPerVertex*sizeof(GLfloat)))) {
+	if (!(*data = malloc(*numVertices * numFloatsPerVertex * sizeof(GLfloat)))) {
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
 	mappedBuffer = ORIG_GL(glMapBuffer)(GL_ARRAY_BUFFER, GL_READ_ONLY);
@@ -665,7 +663,8 @@ int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data
 		return error;
 	}
 
-	memcpy(*data, mappedBuffer, *numVertices*numFloatsPerVertex*sizeof(GLfloat));
+	memcpy(*data, mappedBuffer,
+			*numVertices * numFloatsPerVertex * sizeof(GLfloat));
 
 	ORIG_GL(glUnmapBuffer)(GL_ARRAY_BUFFER);
 	error = glError();
@@ -680,18 +679,15 @@ int endTransformFeedback(int primitiveType, int numFloatsPerVertex, float **data
 
 #ifdef DEBUG
 static void writeDbgImage(const char *filename, int width, int height,
-                          int numComponents, float *data)
+		int numComponents, float *data)
 {
 	PFMFile f = {data, width, height, numComponents, 1.0};
 	pfmWrite(filename, &f);
 }
 #endif
 
-
 static void setDbgOutputTargetFragmentData(int alphaTestOption,
-                                           int depthTestOption,
-                                           int stencilTestOption,
-                                           int blendingOption)
+		int depthTestOption, int stencilTestOption, int blendingOption)
 {
 	pixelTransferState savedState;
 	GLint viewport[4];
@@ -712,7 +708,7 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	/* store currently active draw buffer and bit depths */
 	ORIG_GL(glGetIntegerv)(GL_DRAW_BUFFER, &g.activeDrawbuffer);
 	/* TODO: MRT draw buffers */
-	ORIG_GL(glGetIntegerv)(GL_RED_BITS, &g.activeRedBits);
+	ORIG_GL(glGetIntegerv)(GL_RED_BITS,	&g.activeRedBits);
 	ORIG_GL(glGetIntegerv)(GL_GREEN_BITS, &g.activeGreenBits);
 	ORIG_GL(glGetIntegerv)(GL_BLUE_BITS, &g.activeBlueBits);
 	ORIG_GL(glGetIntegerv)(GL_ALPHA_BITS, &g.activeAlphaBits);
@@ -731,14 +727,12 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 		return;
 	}
 
-	dbgPrint(DBGLVL_INFO, "ACTIVE BUFFER: %s r=%i g=%i b=%i a=%i i=%i d=%i s=%i\n",
-			lookupEnum(g.activeDrawbuffer), g.activeRedBits, g.activeGreenBits,
-			g.activeBlueBits, g.activeAlphaBits, g.activeIndexBits,
-			g.activeDepthBits, g.activeStencilBits);
+	dbgPrint(DBGLVL_INFO,
+			"ACTIVE BUFFER: %s r=%i g=%i b=%i a=%i i=%i d=%i s=%i\n", lookupEnum(g.activeDrawbuffer), g.activeRedBits, g.activeGreenBits, g.activeBlueBits, g.activeAlphaBits, g.activeIndexBits, g.activeDepthBits, g.activeStencilBits);
 
 	/* store color buffer content */
-	if (!(g.colorBuffer =
-	          (GLfloat*)malloc(4*viewport[2]*viewport[3]*sizeof(GLfloat)))) {
+	if (!(g.colorBuffer = (GLfloat*) malloc(
+			4 * viewport[2] * viewport[3] * sizeof(GLfloat)))) {
 		dbgPrint(DBGLVL_WARNING, "ALLOCATION OF COLOR BUFFER BACKUP FAILED\n");
 		setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 		return;
@@ -746,23 +740,24 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	ORIG_GL(glGetIntegerv)(GL_READ_BUFFER, &g.activeReadbuffer);
 	ORIG_GL(glReadBuffer)(g.activeDrawbuffer);
 	ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2], viewport[3],
-	                      GL_RGBA, GL_FLOAT, g.colorBuffer);
+			GL_RGBA, GL_FLOAT, g.colorBuffer);
 	if (setGLErrorCode()) {
 		return;
 	}
 
 	/* store depth buffer content */
 	if (g.activeDepthBits) {
-		if (!(g.depthBuffer =
-				  (GLfloat*)malloc(viewport[2]*viewport[3]*sizeof(GLfloat)))) {
-			dbgPrint(DBGLVL_WARNING, "ALLOCATION OF DEPTH BUFFER BACKUP FAILED\n");
+		if (!(g.depthBuffer = (GLfloat*) malloc(
+				viewport[2] * viewport[3] * sizeof(GLfloat)))) {
+			dbgPrint(DBGLVL_WARNING,
+					"ALLOCATION OF DEPTH BUFFER BACKUP FAILED\n");
 			free(g.colorBuffer);
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 			return;
 		}
-		ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2], viewport[3],
-					          GL_DEPTH_COMPONENT, GL_FLOAT, g.depthBuffer);
-#if 0 
+		ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2],
+				viewport[3], GL_DEPTH_COMPONENT, GL_FLOAT, g.depthBuffer);
+#if 0
 		fprintf(stderr, "XXXXXXXXXXXXXX %f %f %f\n",
 				g.depthBuffer[512*256-1], g.depthBuffer[512*256], g.depthBuffer[512*256+1]);
 		writeDbgImage("DBG-ORIG-DEPTHBUFFER.pfm", viewport[2], viewport[3], 1, g.depthBuffer);
@@ -774,16 +769,17 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 
 	/* store stencil buffer content */
 	if (g.activeStencilBits) {
-		if (!(g.stencilBuffer =
-				  (GLint*)malloc(viewport[2]*viewport[3]*sizeof(GLint)))) {
-			dbgPrint(DBGLVL_WARNING, "ALLOCATION OF STENCIL BUFFER BACKUP FAILED\n");
+		if (!(g.stencilBuffer = (GLint*) malloc(
+				viewport[2] * viewport[3] * sizeof(GLint)))) {
+			dbgPrint(DBGLVL_WARNING,
+					"ALLOCATION OF STENCIL BUFFER BACKUP FAILED\n");
 			free(g.colorBuffer);
 			free(g.depthBuffer);
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 			return;
 		}
-		ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2], viewport[3],
-		                      GL_STENCIL_INDEX, GL_INT, g.stencilBuffer);
+		ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2],
+				viewport[3], GL_STENCIL_INDEX, GL_INT, g.stencilBuffer);
 		if (setGLErrorCode()) {
 			return;
 		}
@@ -799,65 +795,59 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 		return;
 	}
 
-	/* create a new fbo with a RGBA float attachment */
-	ORIG_GL(glGenFramebuffersEXT)(1, &g.dbgFBO);
+	/* create a new fbo with a RGBA float attachment */ORIG_GL(glGenFramebuffersEXT)(
+			1, &g.dbgFBO);
 	ORIG_GL(glBindFramebufferEXT)(GL_FRAMEBUFFER_EXT, g.dbgFBO);
 	if (setGLErrorCode()) {
 		return;
 	}
 
-	/* color attachment */
-	ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgBufferFloat);
+	/* color attachment */ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgBufferFloat);
 	ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT, g.dbgBufferFloat);
 	ORIG_GL(glRenderbufferStorageEXT)(GL_RENDERBUFFER_EXT, GL_RGBA32F_ARB,
-	                                  viewport[2], viewport[3]);
+			viewport[2], viewport[3]);
 	ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
-	                                      GL_COLOR_ATTACHMENT0_EXT,
-	                                      GL_RENDERBUFFER_EXT,
-	                                      g.dbgBufferFloat);
+			GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, g.dbgBufferFloat);
 	if (setGLErrorCode()) {
 		return;
 	}
 
-	/* stencil buffer attachment */ 
+	/* stencil buffer attachment */
 	if (g.activeStencilBits > 0) {
-#if 0 
+#if 0
 		not working, yet :-(
 
-		GLenum internalFormat;
-		switch (g.activeStencilBits) {
-			case 1: internalFormat = GL_STENCIL_INDEX1_EXT; break;
-			case 4: internalFormat = GL_STENCIL_INDEX4_EXT; break;
-			case 8: internalFormat = GL_STENCIL_INDEX8_EXT; break;
-			case 16: internalFormat = GL_STENCIL_INDEX16_EXT; break;
-			default:
-				 dbgPrint(DBGLVL_WARNING, "UNSUPPORTED STENCIL BUFFER BIT DEPTH: %i\n",
-				         g.activeStencilBits);
-				 setErrorCode(DBG_ERROR_INVALID_VALUE);
-				 return;
-		}
-		
-		ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgStencilBuffer);
-		ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT, g.dbgStencilBuffer);
-		ORIG_GL(glRenderbufferStorageEXT)(GL_RENDERBUFFER_EXT,
-		                                  internalFormat,
-		                                  viewport[2], viewport[3]);
-		ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
-											  GL_STENCIL_ATTACHMENT_EXT,
-											  GL_RENDERBUFFER_EXT,
-											  g.dbgStencilBuffer);
+				GLenum internalFormat;
+				switch (g.activeStencilBits) {
+					case 1: internalFormat = GL_STENCIL_INDEX1_EXT; break;
+					case 4: internalFormat = GL_STENCIL_INDEX4_EXT; break;
+					case 8: internalFormat = GL_STENCIL_INDEX8_EXT; break;
+					case 16: internalFormat = GL_STENCIL_INDEX16_EXT; break;
+					default:
+					dbgPrint(DBGLVL_WARNING, "UNSUPPORTED STENCIL BUFFER BIT DEPTH: %i\n",
+							g.activeStencilBits);
+					setErrorCode(DBG_ERROR_INVALID_VALUE);
+					return;
+				}
+
+				ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgStencilBuffer);
+				ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT, g.dbgStencilBuffer);
+				ORIG_GL(glRenderbufferStorageEXT)(GL_RENDERBUFFER_EXT,
+						internalFormat,
+						viewport[2], viewport[3]);
+				ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT,
+						GL_RENDERBUFFER_EXT,
+						g.dbgStencilBuffer);
 #endif
 		ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgDepthBuffer);
 		ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT, g.dbgDepthBuffer);
 		ORIG_GL(glRenderbufferStorageEXT)(GL_RENDERBUFFER_EXT,
 				GL_DEPTH_STENCIL_NV, viewport[2], viewport[3]);
 		ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
-				GL_DEPTH_ATTACHMENT_EXT,
-				GL_RENDERBUFFER_EXT,
-				g.dbgDepthBuffer);
+				GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, g.dbgDepthBuffer);
 		ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
-				GL_STENCIL_ATTACHMENT_EXT,
-				GL_RENDERBUFFER_EXT,
+				GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT,
 				g.dbgDepthBuffer);
 		if (setGLErrorCode()) {
 			return;
@@ -866,13 +856,12 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 		/* depth buffer attachment */
 		if (g.activeDepthBits > 0) {
 			ORIG_GL(glGenRenderbuffersEXT)(1, &g.dbgDepthBuffer);
-			ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT, g.dbgDepthBuffer);
+			ORIG_GL(glBindRenderbufferEXT)(GL_RENDERBUFFER_EXT,
+					g.dbgDepthBuffer);
 			ORIG_GL(glRenderbufferStorageEXT)(GL_RENDERBUFFER_EXT,
-					GL_DEPTH_COMPONENT24,
-					viewport[2], viewport[3]);
+					GL_DEPTH_COMPONENT24, viewport[2], viewport[3]);
 			ORIG_GL(glFramebufferRenderbufferEXT)(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT,
-					GL_RENDERBUFFER_EXT,
+					GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT,
 					g.dbgDepthBuffer);
 			if (setGLErrorCode()) {
 				return;
@@ -881,32 +870,32 @@ static void setDbgOutputTargetFragmentData(int alphaTestOption,
 	}
 
 	/* check framebuffer completeness */
-	error = ORIG_GL(glCheckFramebufferStatusEXT)(GL_FRAMEBUFFER_EXT);    
-	switch(error) {
-		case GL_FRAMEBUFFER_COMPLETE_EXT:
-			break;
-		case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-		default: 
-			setErrorCode(error);
-			return;
+	error = ORIG_GL(glCheckFramebufferStatusEXT)(GL_FRAMEBUFFER_EXT);
+	switch (error) {
+	case GL_FRAMEBUFFER_COMPLETE_EXT:
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+	default:
+		setErrorCode(error);
+		return;
 	}
 
 	/* disable everything that could interfere when writting the debug result to
 	 * the debug buffer and setup draw and read buffer.
 	 */
 	error = setDbgRenderState(DBG_TARGET_FRAGMENT_SHADER, alphaTestOption,
-	                          depthTestOption, stencilTestOption, blendingOption);
+			depthTestOption, stencilTestOption, blendingOption);
 	if (error) {
 		setErrorCode(error);
 		return;
 	}
-	
+
 	error = saveGLState();
 	if (error) {
 		setErrorCode(error);
 		return;
 	}
-	
+
 	setErrorCode(DBG_NO_ERROR);
 }
 
@@ -922,20 +911,18 @@ void setDbgOutputTarget(void)
 
 	DMARK
 	switch (rec->items[0]) {
-		case DBG_TARGET_VERTEX_SHADER:
-		case DBG_TARGET_GEOMETRY_SHADER:
-			setDbgOutputTargetVertexData();
-			break;
-		case DBG_TARGET_FRAGMENT_SHADER:
-			setDbgOutputTargetFragmentData((int)rec->items[1],
-			                               (int)rec->items[2],
-			                               (int)rec->items[3],
-			                               (int)rec->items[4]);
-			break;
-		default:
-			setErrorCode(DBG_ERROR_INVALID_DBG_TARGET);
-			return;
-	} 
+	case DBG_TARGET_VERTEX_SHADER:
+	case DBG_TARGET_GEOMETRY_SHADER:
+		setDbgOutputTargetVertexData();
+		break;
+	case DBG_TARGET_FRAGMENT_SHADER:
+		setDbgOutputTargetFragmentData((int) rec->items[1], (int) rec->items[2],
+				(int) rec->items[3], (int) rec->items[4]);
+		break;
+	default:
+		setErrorCode(DBG_ERROR_INVALID_DBG_TARGET);
+		return;
+	}
 }
 
 static void restoreOutputTargetFragmentData(void)
@@ -949,7 +936,7 @@ static void restoreOutputTargetFragmentData(void)
 
 	ORIG_GL(glBindFramebufferEXT)(GL_FRAMEBUFFER_EXT, g.activeFBO);
 	ORIG_GL(glDeleteRenderbuffersEXT)(1, &g.dbgBufferFloat);
-	if(setGLErrorCode()) {
+	if (setGLErrorCode()) {
 		return;
 	}
 	if (g.activeDepthBits > 0 || g.activeStencilBits > 0) {
@@ -963,27 +950,25 @@ static void restoreOutputTargetFragmentData(void)
 		/*ORIG_GL(glDeleteRenderbuffersEXT)(1, &g.dbgStencilBuffer);*/
 	}
 	ORIG_GL(glDeleteFramebuffersEXT)(1, &g.dbgFBO);
-	if(!setGLErrorCode()) {
+	if (!setGLErrorCode()) {
 		setErrorCode(DBG_NO_ERROR);
 	}
-	
+
 	error = restoreDbgRenderState(DBG_TARGET_FRAGMENT_SHADER);
 	if (error) {
 		setErrorCode(error);
 		return;
 	}
-	
+
 }
 
 static void restoreOutputTargetVertexData(void)
 {
 	int error;
 
-	DMARK
-
-	ORIG_GL(glDeleteBuffers)(1, &g.tfbBuffer);
+DMARK	ORIG_GL(glDeleteBuffers)(1, &g.tfbBuffer);
 	ORIG_GL(glDeleteQueries)(2, g.tfbQueries);
-	if(!setGLErrorCode()) {
+	if (!setGLErrorCode()) {
 		setErrorCode(DBG_NO_ERROR);
 	}
 
@@ -1013,23 +998,23 @@ void restoreOutputTarget(void)
 		return;
 	}
 
-	switch (rec->items[0]) { 
-		case DBG_TARGET_VERTEX_SHADER:
-		case DBG_TARGET_GEOMETRY_SHADER:
-			restoreOutputTargetVertexData();
-			break;
-		case DBG_TARGET_FRAGMENT_SHADER:
-			restoreOutputTargetFragmentData();
-			break;
-		default:
-			setErrorCode(DBG_ERROR_INVALID_DBG_TARGET);
-			return;
-	} 
+	switch (rec->items[0]) {
+	case DBG_TARGET_VERTEX_SHADER:
+	case DBG_TARGET_GEOMETRY_SHADER:
+		restoreOutputTargetVertexData();
+		break;
+	case DBG_TARGET_FRAGMENT_SHADER:
+		restoreOutputTargetFragmentData();
+		break;
+	default:
+		setErrorCode(DBG_ERROR_INVALID_DBG_TARGET);
+		return;
+	}
 
 }
 
-int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *height,
-                         void **buffer)
+int readBackRenderBuffer(int numComponents, int dataFormat, int *width,
+		int *height, void **buffer)
 {
 	pixelTransferState savedState;
 	GLint viewport[4];
@@ -1039,40 +1024,44 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 	int j, error;
 	int formatSize;
 
-	DMARK
-	ORIG_GL(glGetIntegerv)(GL_VIEWPORT, viewport);
+DMARK	ORIG_GL(glGetIntegerv)(GL_VIEWPORT, viewport);
 
 	switch (numComponents) {
-		case 1:	format = GL_RED; break;
-		case 3: format = GL_RGB; break;
-		case 4: format = GL_RGBA; break;
-		default:
-			dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
-							"Error: requested %i components\n",
-					numComponents);
-			return DBG_ERROR_READBACK_INVALID_COMPONENTS;
+	case 1:
+		format = GL_RED;
+		break;
+	case 3:
+		format = GL_RGB;
+		break;
+	case 4:
+		format = GL_RGBA;
+		break;
+	default:
+		dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
+		"Error: requested %i components\n", numComponents);
+		return DBG_ERROR_READBACK_INVALID_COMPONENTS;
 	}
 	switch (dataFormat) {
-		case GL_FLOAT:
-			formatSize = sizeof(GLfloat);
-			break;
-		case GL_INT:
-			formatSize = sizeof(GLint);
-			break;
-		case GL_UNSIGNED_INT:
-			formatSize = sizeof(GLuint);
-			break;
-		default:
-			dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
-							"Error: requested format %i invalid\n",
-					format);
-			return DBG_ERROR_READBACK_INVALID_FORMAT;
+	case GL_FLOAT:
+		formatSize = sizeof(GLfloat);
+		break;
+	case GL_INT:
+		formatSize = sizeof(GLint);
+		break;
+	case GL_UNSIGNED_INT:
+		formatSize = sizeof(GLuint);
+		break;
+	default:
+		dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer "
+		"Error: requested format %i invalid\n", format);
+		return DBG_ERROR_READBACK_INVALID_FORMAT;
 	}
 
-	if (!(*buffer = malloc(numComponents*viewport[2]*viewport[3]*formatSize)) ||
-		!(line = malloc(numComponents*viewport[2]*formatSize))) {
-		dbgPrint(DBGLVL_WARNING, "readBackRenderBuffer: Allocation of %i bytes failed\n",
-		        numComponents*viewport[2]*viewport[3]*formatSize);
+	if (!(*buffer = malloc(
+			numComponents * viewport[2] * viewport[3] * formatSize)) || !(line =
+			malloc(numComponents * viewport[2] * formatSize))) {
+		dbgPrint(DBGLVL_WARNING,
+				"readBackRenderBuffer: Allocation of %i bytes failed\n", numComponents*viewport[2]*viewport[3]*formatSize);
 		return DBG_ERROR_MEMORY_ALLOCATION_FAILED;
 	}
 
@@ -1087,8 +1076,8 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 		free(*buffer);
 		return error;
 	}
-	ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2],
-			viewport[3], format, dataFormat, *buffer);
+	ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2], viewport[3],
+			format, dataFormat, *buffer);
 	error = glError();
 	if (error) {
 		free(*buffer);
@@ -1105,10 +1094,10 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 	*height = viewport[3];
 
 	/* flip buffer content */
-	lineWidth = numComponents*viewport[2]*sizeof(float);
-	bf = (char*)*buffer;
-	bb = (char*)*buffer + (viewport[3] - 1)*lineWidth;
-	for (j = 0; j < viewport[3]/2; j++) {
+	lineWidth = numComponents * viewport[2] * sizeof(float);
+	bf = (char*) *buffer;
+	bb = (char*) *buffer + (viewport[3] - 1) * lineWidth;
+	for (j = 0; j < viewport[3] / 2; j++) {
 		memcpy(line, bf, lineWidth);
 		memcpy(bf, bb, lineWidth);
 		memcpy(bb, line, lineWidth);
@@ -1121,17 +1110,17 @@ int readBackRenderBuffer(int numComponents, int dataFormat, int *width, int *hei
 }
 
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_READ_RENDER_BUFFER
-		items[0] : number of components to read (1:R, 3:RGB, 4:RGBA)
-	SHM out:
-		fname    : *
-		result: DBG_READBACK_RESULT_FRAGMENT_DATA or DBG_ERROR_CODE on error
-		items[0] : buffer address
-		items[1] : image width
-		items[2] : image height
-*/
+ SHM IN:
+ fname    : *
+ operation: DBG_READ_RENDER_BUFFER
+ items[0] : number of components to read (1:R, 3:RGB, 4:RGBA)
+ SHM out:
+ fname    : *
+ result: DBG_READBACK_RESULT_FRAGMENT_DATA or DBG_ERROR_CODE on error
+ items[0] : buffer address
+ items[1] : image width
+ items[2] : image height
+ */
 void readRenderBuffer(void)
 {
 #ifndef _WIN32
@@ -1141,19 +1130,20 @@ void readRenderBuffer(void)
 	DWORD pid = GetCurrentProcessId();
 #endif /* _WIN32 */
 	DbgRec *rec = getThreadRecord(pid);
-	int numComponents = (int)rec->items[0];
+	int numComponents = (int) rec->items[0];
 	int width, height, error;
 	void *buffer;
 
 	DMARK
-	error = readBackRenderBuffer(numComponents, GL_FLOAT, &width, &height, &buffer);
+	error = readBackRenderBuffer(numComponents, GL_FLOAT, &width, &height,
+			&buffer);
 	if (error != DBG_NO_ERROR) {
 		setErrorCode(error);
 	} else {
 		rec->result = DBG_READBACK_RESULT_FRAGMENT_DATA;
-		rec->items[0] = (ALIGNED_DATA)buffer;
-		rec->items[1] = (ALIGNED_DATA)width;
-		rec->items[2] = (ALIGNED_DATA)height;
+		rec->items[0] = (ALIGNED_DATA) buffer;
+		rec->items[1] = (ALIGNED_DATA) width;
+		rec->items[2] = (ALIGNED_DATA) height;
 	}
 }
 
@@ -1164,35 +1154,35 @@ typedef struct {
 	GLboolean stencil_write_mask;
 
 	GLboolean alpha_test;
-    GLint     alpha_test_func;
-    GLfloat   alpha_test_ref;
-    
+	GLint alpha_test_func;
+	GLfloat alpha_test_ref;
+
 	GLboolean depth_test;
-    GLint     depth_func;
-    
+	GLint depth_func;
+
 	GLboolean scissor_test;
-    GLint     scissor_box[4];
-    
+	GLint scissor_box[4];
+
 	GLboolean stencil_test;
-	GLint     stencil_fail;
-	GLint     stencil_func;
-	GLint     stencil_pass_depth_fail;
-	GLint     stencil_pass_depth_pass;
-	GLint     stencil_ref;
-    GLint     stencil_value_mask;
+	GLint stencil_fail;
+	GLint stencil_func;
+	GLint stencil_pass_depth_fail;
+	GLint stencil_pass_depth_pass;
+	GLint stencil_ref;
+	GLint stencil_value_mask;
 
 	GLboolean blend;
-    GLint     blend_dst;
-    GLint     blend_equation;
-    GLint     blend_src;
+	GLint blend_dst;
+	GLint blend_equation;
+	GLint blend_src;
 
-    GLboolean fog;
+	GLboolean fog;
 
-    GLboolean texture_1D;
-    GLboolean texture_2D;
-    GLboolean texture_3D;
+	GLboolean texture_1D;
+	GLboolean texture_2D;
+	GLboolean texture_3D;
 
-    GLint     shader_handle;
+	GLint shader_handle;
 } pixelCopyState;
 
 static void saveCopyState(pixelCopyState *savedState)
@@ -1201,202 +1191,199 @@ static void saveCopyState(pixelCopyState *savedState)
 	ORIG_GL(glGetBooleanv)(GL_COLOR_WRITEMASK, savedState->color_write_mask);
 	ORIG_GL(glGetBooleanv)(GL_DEPTH_WRITEMASK, &savedState->depth_write_mask);
 	ORIG_GL(glGetBooleanv)(GL_INDEX_WRITEMASK, &savedState->index_write_mask);
-	ORIG_GL(glGetBooleanv)(GL_STENCIL_WRITEMASK, &savedState->stencil_write_mask);
+	ORIG_GL(glGetBooleanv)(GL_STENCIL_WRITEMASK,
+			&savedState->stencil_write_mask);
 
-	/* Tests */
-	ORIG_GL(glGetBooleanv)(GL_ALPHA_TEST, &savedState->alpha_test);
-    ORIG_GL(glGetIntegerv)(GL_ALPHA_TEST_FUNC, &savedState->alpha_test_func);
-    ORIG_GL(glGetFloatv)(GL_ALPHA_TEST_REF, &savedState->alpha_test_ref);
-    
+	/* Tests */ORIG_GL(glGetBooleanv)(GL_ALPHA_TEST, &savedState->alpha_test);
+	ORIG_GL(glGetIntegerv)(GL_ALPHA_TEST_FUNC, &savedState->alpha_test_func);
+	ORIG_GL(glGetFloatv)(GL_ALPHA_TEST_REF, &savedState->alpha_test_ref);
+
 	ORIG_GL(glGetBooleanv)(GL_DEPTH_TEST, &savedState->depth_test);
-    ORIG_GL(glGetIntegerv)(GL_DEPTH_FUNC, &savedState->depth_func);
-    
+	ORIG_GL(glGetIntegerv)(GL_DEPTH_FUNC, &savedState->depth_func);
+
 	ORIG_GL(glGetBooleanv)(GL_SCISSOR_TEST, &savedState->scissor_test);
 	ORIG_GL(glGetIntegerv)(GL_SCISSOR_BOX, savedState->scissor_box);
-    
-    ORIG_GL(glGetBooleanv)(GL_STENCIL_TEST, &savedState->stencil_test);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_FAIL, &savedState->stencil_fail);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_FUNC, &savedState->stencil_func);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_PASS_DEPTH_FAIL, &savedState->stencil_pass_depth_fail);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_PASS_DEPTH_PASS, &savedState->stencil_pass_depth_pass);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_REF, &savedState->stencil_ref);
-    ORIG_GL(glGetIntegerv)(GL_STENCIL_VALUE_MASK, &savedState->stencil_value_mask);
-    
-	/* Blending */
-	ORIG_GL(glGetBooleanv)(GL_BLEND, &savedState->blend);
-    ORIG_GL(glGetIntegerv)(GL_BLEND_DST, &savedState->blend_dst);
-    ORIG_GL(glGetIntegerv)(GL_BLEND_EQUATION, &savedState->blend_equation);
-    ORIG_GL(glGetIntegerv)(GL_BLEND_SRC, &savedState->blend_src);
 
-    /* Fog */
-    ORIG_GL(glGetBooleanv)(GL_FOG, &savedState->fog);
+	ORIG_GL(glGetBooleanv)(GL_STENCIL_TEST, &savedState->stencil_test);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_FAIL, &savedState->stencil_fail);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_FUNC, &savedState->stencil_func);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_PASS_DEPTH_FAIL,
+			&savedState->stencil_pass_depth_fail);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_PASS_DEPTH_PASS,
+			&savedState->stencil_pass_depth_pass);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_REF, &savedState->stencil_ref);
+	ORIG_GL(glGetIntegerv)(GL_STENCIL_VALUE_MASK,
+			&savedState->stencil_value_mask);
 
-    /* Texture */
-    ORIG_GL(glGetBooleanv)(GL_TEXTURE_1D, &savedState->texture_1D);
-    ORIG_GL(glGetBooleanv)(GL_TEXTURE_2D, &savedState->texture_2D);
-    ORIG_GL(glGetBooleanv)(GL_TEXTURE_3D, &savedState->texture_3D);
+	/* Blending */ORIG_GL(glGetBooleanv)(GL_BLEND, &savedState->blend);
+	ORIG_GL(glGetIntegerv)(GL_BLEND_DST, &savedState->blend_dst);
+	ORIG_GL(glGetIntegerv)(GL_BLEND_EQUATION, &savedState->blend_equation);
+	ORIG_GL(glGetIntegerv)(GL_BLEND_SRC, &savedState->blend_src);
 
-    /* Fragment Program */
-    ORIG_GL(glGetIntegerv)(GL_CURRENT_PROGRAM, &savedState->shader_handle);
+	/* Fog */ORIG_GL(glGetBooleanv)(GL_FOG, &savedState->fog);
+
+	/* Texture */ORIG_GL(glGetBooleanv)(GL_TEXTURE_1D, &savedState->texture_1D);
+	ORIG_GL(glGetBooleanv)(GL_TEXTURE_2D, &savedState->texture_2D);
+	ORIG_GL(glGetBooleanv)(GL_TEXTURE_3D, &savedState->texture_3D);
+
+	/* Fragment Program */
+	ORIG_GL(glGetIntegerv)(GL_CURRENT_PROGRAM, &savedState->shader_handle);
 }
 
 static void restoreCopyState(pixelCopyState *savedState)
 {
 	/* Masks */
-	ORIG_GL(glColorMask)(savedState->color_write_mask[0], savedState->color_write_mask[1],
-                         savedState->color_write_mask[2], savedState->color_write_mask[3]);
+	ORIG_GL(glColorMask)(savedState->color_write_mask[0],
+			savedState->color_write_mask[1], savedState->color_write_mask[2],
+			savedState->color_write_mask[3]);
 	ORIG_GL(glDepthMask)(savedState->depth_write_mask);
 	ORIG_GL(glIndexMask)(savedState->index_write_mask);
 	ORIG_GL(glStencilMask)(savedState->stencil_write_mask);
 
 	/* Tests */
-    if (savedState->alpha_test == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_ALPHA_TEST);
-    } else {
-        ORIG_GL(glDisable)(GL_ALPHA_TEST);
-    }
-    ORIG_GL(glAlphaFunc)(savedState->alpha_test_func, savedState->alpha_test_ref);
-    
-    if (savedState->depth_test == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_DEPTH_TEST);
-    } else {
-        ORIG_GL(glDisable)(GL_DEPTH_TEST);
-    }
-    ORIG_GL(glDepthFunc)(savedState->depth_func);
-    
-    if (savedState->scissor_test == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_SCISSOR_TEST);
-    } else {
-        ORIG_GL(glDisable)(GL_SCISSOR_TEST);
-    }
+	if (savedState->alpha_test == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_ALPHA_TEST);
+	} else {
+		ORIG_GL(glDisable)(GL_ALPHA_TEST);
+	}
+	ORIG_GL(glAlphaFunc)(savedState->alpha_test_func,
+			savedState->alpha_test_ref);
+
+	if (savedState->depth_test == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_DEPTH_TEST);
+	} else {
+		ORIG_GL(glDisable)(GL_DEPTH_TEST);
+	}
+	ORIG_GL(glDepthFunc)(savedState->depth_func);
+
+	if (savedState->scissor_test == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_SCISSOR_TEST);
+	} else {
+		ORIG_GL(glDisable)(GL_SCISSOR_TEST);
+	}
 	ORIG_GL(glScissor)(savedState->scissor_box[0], savedState->scissor_box[1],
-                       savedState->scissor_box[2], savedState->scissor_box[3]);
-    
-    if (savedState->stencil_test == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_STENCIL_TEST);
-    } else {
-        ORIG_GL(glDisable)(GL_STENCIL_TEST);
-    }
-    
-    ORIG_GL(glStencilFunc)(savedState->stencil_func,
-                           savedState->stencil_ref,
-                           savedState->stencil_value_mask);
-    
-    ORIG_GL(glStencilOp)(savedState->stencil_fail,
-                         savedState->stencil_pass_depth_fail,
-                         savedState->stencil_pass_depth_pass);
+			savedState->scissor_box[2], savedState->scissor_box[3]);
+
+	if (savedState->stencil_test == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_STENCIL_TEST);
+	} else {
+		ORIG_GL(glDisable)(GL_STENCIL_TEST);
+	}
+
+	ORIG_GL(glStencilFunc)(savedState->stencil_func, savedState->stencil_ref,
+			savedState->stencil_value_mask);
+
+	ORIG_GL(glStencilOp)(savedState->stencil_fail,
+			savedState->stencil_pass_depth_fail,
+			savedState->stencil_pass_depth_pass);
 
 	/* Blending */
-    if (savedState->blend == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_BLEND);
-    } else {
-        ORIG_GL(glDisable)(GL_BLEND);
-    }
-    ORIG_GL(glBlendFunc)(savedState->blend_src, savedState->blend_dst);
-    ORIG_GL(glBlendEquation)(savedState->blend_equation);
+	if (savedState->blend == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_BLEND);
+	} else {
+		ORIG_GL(glDisable)(GL_BLEND);
+	}
+	ORIG_GL(glBlendFunc)(savedState->blend_src, savedState->blend_dst);
+	ORIG_GL(glBlendEquation)(savedState->blend_equation);
 
-    /* Fog */
-    if (savedState->fog == GL_TRUE) {
-        ORIG_GL(glEnable)(GL_FOG);
-    } else {
-        ORIG_GL(glDisable)(GL_FOG);
-    }
+	/* Fog */
+	if (savedState->fog == GL_TRUE) {
+		ORIG_GL(glEnable)(GL_FOG);
+	} else {
+		ORIG_GL(glDisable)(GL_FOG);
+	}
 
-    /* Texture */
-    if (savedState->texture_1D) {
-        ORIG_GL(glEnable)(GL_TEXTURE_1D);
-    } else {
-        ORIG_GL(glDisable)(GL_TEXTURE_1D);
-    }
-    if (savedState->texture_2D) {
-        ORIG_GL(glEnable)(GL_TEXTURE_2D);
-    } else {
-        ORIG_GL(glDisable)(GL_TEXTURE_2D);
-    }
-    if (savedState->texture_3D) {
-        ORIG_GL(glEnable)(GL_TEXTURE_3D);
-    } else {
-        ORIG_GL(glDisable)(GL_TEXTURE_3D);
-    }
+	/* Texture */
+	if (savedState->texture_1D) {
+		ORIG_GL(glEnable)(GL_TEXTURE_1D);
+	} else {
+		ORIG_GL(glDisable)(GL_TEXTURE_1D);
+	}
+	if (savedState->texture_2D) {
+		ORIG_GL(glEnable)(GL_TEXTURE_2D);
+	} else {
+		ORIG_GL(glDisable)(GL_TEXTURE_2D);
+	}
+	if (savedState->texture_3D) {
+		ORIG_GL(glEnable)(GL_TEXTURE_3D);
+	} else {
+		ORIG_GL(glDisable)(GL_TEXTURE_3D);
+	}
 
-    /* Fragment Program */
-    ORIG_GL(glUseProgram)(savedState->shader_handle);
+	/* Fragment Program */
+	ORIG_GL(glUseProgram)(savedState->shader_handle);
 }
 
 typedef enum {
-    CS_COLOR,
-    CS_DEPTH,
-    CS_INDEX,
-    CS_STENCIL
+	CS_COLOR,
+	CS_DEPTH,
+	CS_INDEX,
+	CS_STENCIL
 } copyStateTarget;
 
 static void setCopyState(copyStateTarget csTarget)
 {
 	/* Masks */
-    if (csTarget == CS_COLOR) {
-        ORIG_GL(glColorMask)(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    } else {
-        ORIG_GL(glColorMask)(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    }
-    if (csTarget == CS_DEPTH) {
-        ORIG_GL(glDepthMask)(GL_TRUE);
-    } else {
-        ORIG_GL(glDepthMask)(GL_FALSE);
-    }
-    if (csTarget == CS_INDEX) {
-        ORIG_GL(glIndexMask)(GL_TRUE);
-    } else {
-        ORIG_GL(glIndexMask)(GL_FALSE);
-    }
-    if (csTarget == CS_STENCIL) {
-        ORIG_GL(glStencilMask)(GL_TRUE);
-    } else {
-        ORIG_GL(glStencilMask)(GL_FALSE);
-    }
+	if (csTarget == CS_COLOR) {
+		ORIG_GL(glColorMask)(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	} else {
+		ORIG_GL(glColorMask)(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	}
+	if (csTarget == CS_DEPTH) {
+		ORIG_GL(glDepthMask)(GL_TRUE);
+	} else {
+		ORIG_GL(glDepthMask)(GL_FALSE);
+	}
+	if (csTarget == CS_INDEX) {
+		ORIG_GL(glIndexMask)(GL_TRUE);
+	} else {
+		ORIG_GL(glIndexMask)(GL_FALSE);
+	}
+	if (csTarget == CS_STENCIL) {
+		ORIG_GL(glStencilMask)(GL_TRUE);
+	} else {
+		ORIG_GL(glStencilMask)(GL_FALSE);
+	}
 
-	/* Tests */
-    ORIG_GL(glDisable)(GL_ALPHA_TEST);
-    if (csTarget == CS_DEPTH) {
-        ORIG_GL(glEnable)(GL_DEPTH_TEST);
-        ORIG_GL(glDepthFunc)(GL_ALWAYS);
-    } else {
-        ORIG_GL(glDisable)(GL_DEPTH_TEST);
-    }
-    ORIG_GL(glDisable)(GL_SCISSOR_TEST);
-    ORIG_GL(glDisable)(GL_STENCIL_TEST);
-    
-	/* Blending */
-    ORIG_GL(glDisable)(GL_BLEND);
+	/* Tests */ORIG_GL(glDisable)(GL_ALPHA_TEST);
+	if (csTarget == CS_DEPTH) {
+		ORIG_GL(glEnable)(GL_DEPTH_TEST);
+		ORIG_GL(glDepthFunc)(GL_ALWAYS);
+	} else {
+		ORIG_GL(glDisable)(GL_DEPTH_TEST);
+	}
+	ORIG_GL(glDisable)(GL_SCISSOR_TEST);
+	ORIG_GL(glDisable)(GL_STENCIL_TEST);
 
-    /* Fog */
-    ORIG_GL(glDisable)(GL_FOG);
+	/* Blending */ORIG_GL(glDisable)(GL_BLEND);
 
-    /* Texture */
-    ORIG_GL(glDisable)(GL_TEXTURE_1D);
-    ORIG_GL(glDisable)(GL_TEXTURE_2D);
-    ORIG_GL(glDisable)(GL_TEXTURE_3D);
+	/* Fog */ORIG_GL(glDisable)(GL_FOG);
 
-    /* Fragment Program */
-    ORIG_GL(glUseProgram)(0);
+	/* Texture */ORIG_GL(glDisable)(GL_TEXTURE_1D);
+	ORIG_GL(glDisable)(GL_TEXTURE_2D);
+	ORIG_GL(glDisable)(GL_TEXTURE_3D);
+
+	/* Fragment Program */
+	ORIG_GL(glUseProgram)(0);
 }
 
 /*
-	SHM IN:
-		fname    : *
-		operation: DBG_CLEAR_RENDER_BUFFER
-		items[0] : bitwise OR of several values indicating which buffer is to be
-		           cleared or copied, allowed values are DBG_CLEAR_RGB,
-		           DBG_CLEAR_ALPHA, DBG_CLEAR_DEPTH, and DBG_CLEAR_STENCIL
-		items[1] : clear value red (float!)
-		items[2] : clear value green (float!)
-		items[3] : clear value blue (float!)
-		items[4] : clear value alpha (float!)
-		items[5] : clear value depth (float!)
-		items[6] : clear value stencil
-	SHM out:
-		fname    : *
-		result: DBG_ERROR_CODE on error
-*/
+ SHM IN:
+ fname    : *
+ operation: DBG_CLEAR_RENDER_BUFFER
+ items[0] : bitwise OR of several values indicating which buffer is to be
+ cleared or copied, allowed values are DBG_CLEAR_RGB,
+ DBG_CLEAR_ALPHA, DBG_CLEAR_DEPTH, and DBG_CLEAR_STENCIL
+ items[1] : clear value red (float!)
+ items[2] : clear value green (float!)
+ items[3] : clear value blue (float!)
+ items[4] : clear value alpha (float!)
+ items[5] : clear value depth (float!)
+ items[6] : clear value stencil
+ SHM out:
+ fname    : *
+ result: DBG_ERROR_CODE on error
+ */
 void clearRenderBuffer(void)
 {
 #ifndef _WIN32
@@ -1415,14 +1402,11 @@ void clearRenderBuffer(void)
 	GLfloat rasterPos[4];
 	GLfloat projectionMatrix[16];
 	GLfloat modelViewMatrix[16];
-	GLint   matrixMode;
+	GLint matrixMode;
 
 	pixelCopyState copyState;
 
-
 	DMARK
-
-
 
 	/* save state */
 	saveCopyState(&copyState);
@@ -1440,38 +1424,33 @@ void clearRenderBuffer(void)
 	ORIG_GL(glRasterPos2i)(viewport[0], viewport[1]);
 	ORIG_GL(glWindowPos2i)(viewport[0], viewport[1]);
 
-	dbgPrint(DBGLVL_INFO, "clearRenderBuffer: clearRGB: %li (%f %f %f) "
-	                      "clearAlpha: %li (%f) "
-	                      "clearDepth: %li (%f) clearStencil: %li (%i)\n",
-	         rec->items[0] & DBG_CLEAR_RGB, *(float*)&rec->items[1],
-	         *(float*)&rec->items[2], *(float*)&rec->items[3],
-	         rec->items[0] & DBG_CLEAR_ALPHA, *(float*)&rec->items[4],
-	         rec->items[0] & DBG_CLEAR_DEPTH, *(float*)&rec->items[5],
-	         rec->items[0] & DBG_CLEAR_STENCIL, (GLint)rec->items[6]);
+	dbgPrint(DBGLVL_INFO,
+			"clearRenderBuffer: clearRGB: %li (%f %f %f) "
+			"clearAlpha: %li (%f) "
+			"clearDepth: %li (%f) clearStencil: %li (%i)\n", rec->items[0] & DBG_CLEAR_RGB, *(float*)&rec->items[1], *(float*)&rec->items[2], *(float*)&rec->items[3], rec->items[0] & DBG_CLEAR_ALPHA, *(float*)&rec->items[4], rec->items[0] & DBG_CLEAR_DEPTH, *(float*)&rec->items[5], rec->items[0] & DBG_CLEAR_STENCIL, (GLint)rec->items[6]);
 
 	/* check gl error */
 	if (setGLErrorCode()) {
-        DMARK
+		DMARK
 		return;
 	}
-
 
 	/* depth buffer */
 	if (g.activeDepthBits > 0) {
 		if (rec->items[0] & DBG_CLEAR_DEPTH) {
 			clearBits |= GL_DEPTH_BUFFER_BIT;
 			ORIG_GL(glGetFloatv)(GL_DEPTH_CLEAR_VALUE, &clearDepth);
-			ORIG_GL(glClearDepth)(*(float*)&rec->items[5]);
+			ORIG_GL(glClearDepth)(*(float*) &rec->items[5]);
 		} else {
 			/* copy depth buffer content */
-            setCopyState(CS_DEPTH);
-			ORIG_GL(glDrawPixels)(viewport[2], viewport[3], GL_DEPTH_COMPONENT, GL_FLOAT,
-			                      g.depthBuffer);
+			setCopyState(CS_DEPTH);
+			ORIG_GL(glDrawPixels)(viewport[2], viewport[3], GL_DEPTH_COMPONENT,
+					GL_FLOAT, g.depthBuffer);
 #ifdef DEBUG
 			{
 				float *data = (float*)malloc(viewport[2]*viewport[3]*sizeof(GLfloat));
 				ORIG_GL(glReadPixels)(viewport[0], viewport[1], viewport[2], viewport[3],
-					          GL_DEPTH_COMPONENT, GL_FLOAT, data);
+						GL_DEPTH_COMPONENT, GL_FLOAT, data);
 				fprintf(stderr, "XXXXXXXXXXXXXX %f %f %f\n",
 						g.depthBuffer[512*256-1], g.depthBuffer[512*256], g.depthBuffer[512*256+1]);
 				writeDbgImage("DBG-STORED-DEPTHBUFFER.pfm", viewport[2], viewport[3], 1, g.depthBuffer);
@@ -1488,15 +1467,15 @@ void clearRenderBuffer(void)
 		if (rec->items[0] & DBG_CLEAR_STENCIL) {
 			clearBits |= GL_STENCIL_BUFFER_BIT;
 			ORIG_GL(glGetIntegerv)(GL_STENCIL_CLEAR_VALUE, &clearStencil);
-			ORIG_GL(glClearStencil)((GLint)rec->items[6]);
+			ORIG_GL(glClearStencil)((GLint) rec->items[6]);
 		} else {
 			/* copy stencil buffer content */
-            setCopyState(CS_STENCIL);
-			ORIG_GL(glDrawPixels)(viewport[2], viewport[3], GL_STENCIL_INDEX, GL_INT,
-								  g.stencilBuffer);
+			setCopyState(CS_STENCIL);
+			ORIG_GL(glDrawPixels)(viewport[2], viewport[3], GL_STENCIL_INDEX,
+					GL_INT, g.stencilBuffer);
 		}
-	}	
-	
+	}
+
 	/* color buffer */
 	if (rec->items[0] & DBG_CLEAR_RGB) {
 		clearBits |= GL_COLOR_BUFFER_BIT;
@@ -1506,47 +1485,47 @@ void clearRenderBuffer(void)
 	}
 	if ((rec->items[0] & DBG_CLEAR_RGB) || (rec->items[0] & DBG_CLEAR_ALPHA)) {
 		ORIG_GL(glGetFloatv)(GL_COLOR_CLEAR_VALUE, clearColor);
-		ORIG_GL(glClearColor)(*(float*)&rec->items[1], *(float*)&rec->items[2],
-		                      *(float*)&rec->items[3], *(float*)&rec->items[4]);
+		ORIG_GL(glClearColor)(*(float*) &rec->items[1],
+				*(float*) &rec->items[2], *(float*) &rec->items[3],
+				*(float*) &rec->items[4]);
 		ORIG_GL(glColorMask)(rec->items[0] & DBG_CLEAR_RGB,
-		                     rec->items[0] & DBG_CLEAR_RGB,
-		                     rec->items[0] & DBG_CLEAR_RGB,
-		                     g.activeAlphaBits &&
-		                     (rec->items[0] & DBG_CLEAR_ALPHA));
+				rec->items[0] & DBG_CLEAR_RGB, rec->items[0] & DBG_CLEAR_RGB,
+				g.activeAlphaBits && (rec->items[0] & DBG_CLEAR_ALPHA));
 	}
-    if (rec->items[0] & DBG_CLEAR_DEPTH) {
-        ORIG_GL(glDepthMask)(GL_TRUE);
-    } else {
-        ORIG_GL(glDepthMask)(GL_FALSE);
-    }
-    if (rec->items[0] & DBG_CLEAR_STENCIL) {
-        ORIG_GL(glStencilMask)(GL_TRUE);
-    } else {
-        ORIG_GL(glStencilMask)(GL_FALSE);
-    }
-    dbgPrint(DBGLVL_INFO, "glClear: %s\n",dissectBitfield(clearBits));
+	if (rec->items[0] & DBG_CLEAR_DEPTH) {
+		ORIG_GL(glDepthMask)(GL_TRUE);
+	} else {
+		ORIG_GL(glDepthMask)(GL_FALSE);
+	}
+	if (rec->items[0] & DBG_CLEAR_STENCIL) {
+		ORIG_GL(glStencilMask)(GL_TRUE);
+	} else {
+		ORIG_GL(glStencilMask)(GL_FALSE);
+	}
+	dbgPrint(DBGLVL_INFO, "glClear: %s\n", dissectBitfield(clearBits));
 	ORIG_GL(glClear)(clearBits);
 
 	/* copy color buffer content */
-	if (!(rec->items[0] & DBG_CLEAR_RGB) || !(rec->items[0] & DBG_CLEAR_ALPHA)) {
-        setCopyState(CS_COLOR);
+	if (!(rec->items[0] & DBG_CLEAR_RGB)
+			|| !(rec->items[0] & DBG_CLEAR_ALPHA)) {
+		setCopyState(CS_COLOR);
 		ORIG_GL(glColorMask)(!(rec->items[0] & DBG_CLEAR_RGB),
-		                     !(rec->items[0] & DBG_CLEAR_RGB),
-		                     !(rec->items[0] & DBG_CLEAR_RGB),
-		                     !(rec->items[0] & DBG_CLEAR_ALPHA));
+				!(rec->items[0] & DBG_CLEAR_RGB),
+				!(rec->items[0] & DBG_CLEAR_RGB),
+				!(rec->items[0] & DBG_CLEAR_ALPHA));
 		ORIG_GL(glDrawPixels)(viewport[2], viewport[3], GL_RGBA, GL_FLOAT,
-		                      g.colorBuffer);
+				g.colorBuffer);
 	}
 
 	/* restore clear values and masks */
-	if ((rec->items[0] & DBG_CLEAR_RGB) || (rec->items[0] & DBG_CLEAR_ALPHA)) {	
+	if ((rec->items[0] & DBG_CLEAR_RGB) || (rec->items[0] & DBG_CLEAR_ALPHA)) {
 		ORIG_GL(glClearColor)(clearColor[0], clearColor[1], clearColor[2],
-		                      clearColor[3]);
+				clearColor[3]);
 		ORIG_GL(glColorMask)(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 	if (g.activeDepthBits > 0 && (rec->items[0] & DBG_CLEAR_DEPTH)) {
 		ORIG_GL(glClearDepth)(clearDepth);
-	} 
+	}
 	if (g.activeStencilBits > 0 && (rec->items[0] & DBG_CLEAR_STENCIL)) {
 		ORIG_GL(glClearStencil)(clearStencil);
 	}
@@ -1559,7 +1538,7 @@ void clearRenderBuffer(void)
 	ORIG_GL(glMatrixMode)(GL_MODELVIEW);
 	ORIG_GL(glLoadMatrixf)(modelViewMatrix);
 	ORIG_GL(glMatrixMode)(matrixMode);
-		
+
 	/* check gl error */
 	if (setGLErrorCode()) {
 		return;
