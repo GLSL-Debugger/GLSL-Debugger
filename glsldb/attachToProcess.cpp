@@ -1,7 +1,7 @@
 /******************************************************************************
 
 Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
-(VIS), Universit�t Stuttgart.
+(VIS), Universität Stuttgart.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -432,7 +432,7 @@ static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
     }
 
     /* Get exit code, which is the module handle of our remote debug library. */
-    // TODO: Das k�nnte unter 64 bit kriminell sein ...
+    // TODO: Das könnte unter 64 bit kriminell sein ...
     if (!::GetExitCodeThread(hThread, &exitCode)) {
         dbgPrint(DBGLVL_ERROR, "GetExitCodeThread failed: %u.\n", ::GetLastError());
         goto cleanup;

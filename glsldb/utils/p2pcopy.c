@@ -46,7 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _GNU_SOURCE
 #include <stdio.h>
 
-#include "notify.h"
+#include "dbgprint.h"
 #include "p2pcopy.h"
 
 /* works at least for Linux on x86 architecture and for windows*/
@@ -61,16 +61,16 @@ void cpyFromProcess(DWORD pid, void *dst, void *src, size_t size) {
 	SIZE_T numBytesRead;
 	HANDLE procHandle = OpenProcess(PROCESS_VM_READ, FALSE, pid);
 	if (procHandle == NULL) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: could not open process %u", procHandle);
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: could not open process %u\n", procHandle);
 		exit(1);
 	}
 	if (ReadProcessMemory(procHandle, src, dst, size, &numBytesRead) == 0) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: copying failed: %u", GetLastError());
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: copying failed: %u\n", GetLastError());
 		CloseHandle(procHandle);
 		exit(1);
 	}
 	if (numBytesRead != size) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: could copy only %u out of %u bytes.", numBytesRead, size);
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: could copy only %u out of %u bytes.\n", numBytesRead, size);
 		CloseHandle(procHandle);
 		exit(1);
 	}
@@ -91,7 +91,7 @@ void cpyFromProcess(pid_t pid, void *dst, void *src, size_t size)
 	  
 	buffer = (ALIGNED_DATA*)malloc(count*sizeof(ALIGNED_DATA));
 	if (!buffer) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: Could not allocate buffer");
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: Could not allocate buffer\n");
 		exit(1);
 	}
 
@@ -112,16 +112,16 @@ void cpyToProcess(DWORD pid, void *dst, void *src, size_t size) {
 	SIZE_T numBytesWritten;
 	HANDLE procHandle = OpenProcess(PROCESS_VM_WRITE | PROCESS_VM_OPERATION, FALSE, pid);
 	if (procHandle == NULL) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: could not open process %u", procHandle);
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: could not open process %u\n", procHandle);
 		exit(1);
 	}
 	if (WriteProcessMemory(procHandle, dst, src, size, &numBytesWritten) == 0) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: copying failed: %u", GetLastError());
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: copying failed: %u\n", GetLastError());
 		CloseHandle(procHandle);
 		exit(1);
 	}
 	if (numBytesWritten != size) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: could copy only %u out of %u bytes.", numBytesWritten, size);
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: could copy only %u out of %u bytes.\n", numBytesWritten, size);
 		CloseHandle(procHandle);
 		exit(1);
 	}
@@ -142,7 +142,7 @@ void cpyToProcess(pid_t pid, void *dst, void *src, size_t size)
 		
 	buffer = (ALIGNED_DATA*)malloc(count*sizeof(ALIGNED_DATA));
 	if (!buffer) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: Could not allocate buffer");
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: Could not allocate buffer\n");
 		exit(1);
 	}
 	

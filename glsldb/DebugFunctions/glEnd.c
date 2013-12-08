@@ -45,7 +45,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //typedef GLint GLfixed;
 #include "../DebugLib/debuglib.h"
 #include "../DebugLib/debuglibInternal.h"
-#include "utils/notify.h"
+#include "../utils/dbgprint.h"
 
 #ifdef _WIN32
 #include "../DebugLib/trampolines.h"
@@ -69,8 +69,8 @@ void APIENTRY glEnd(void)
 	   in the head and we end up in a totally wrong memory segment. This might have to do
 	   something with improper relocation of all the library goo, but we do not know. yet. */
 	HANDLE lib = LoadLibraryA("debuglib.dll");
-	UT_NOTIFY_VA(LV_DEBUG, "using special glEnd: 0x%x", OrigglEnd);
-	UT_NOTIFY_VA(LV_DEBUG, "origglend = 0x%x", *((GetProcAddress(lib, "OrigglEnd"))));
+	dbgPrint(DBGLVL_DEBUG, "using special glEnd: 0x%x\n", OrigglEnd);
+	dbgPrint(DBGLVL_DEBUG, "origglend = 0x%x\n", *((GetProcAddress(lib, "OrigglEnd"))));
 	(*((GetProcAddress(lib, "OrigglEnd"))))();
 	(*((GetProcAddress(lib, "OrigglGetError"))))();
 	FreeLibrary(lib);

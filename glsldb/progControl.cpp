@@ -52,7 +52,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* !_WIN32 */
 #include <errno.h>
 #include "utils/dbgprint.h"
-#include "utils/notify.h"
 
 #ifdef GLSLDB_OSX
 #  include <signal.h>
@@ -117,7 +116,7 @@ ProgramControl::ProgramControl(const char *pname)
 
 ProgramControl::~ProgramControl()
 {
-    UT_NOTIFY(LV_DEBUG, "freeShmem()\n");
+    dbgPrint(DBGLVL_DEBUG, "~ProgramControl freeShmem()\n");
     freeShmem();
 #ifdef _WIN32
 	this->closeEvents();
@@ -133,11 +132,11 @@ bool ProgramControl::childAlive(void)
 	int status = 15;
 	pid_t pid = -1;
 	
-	UT_NOTIFY(LV_DEBUG, "getting debuggee status...");
+	dbgPrint(DBGLVL_INFO, "getting debuggee status...\n");
 	pid = waitpid(_debuggeePID, &status, WUNTRACED |WNOHANG);
 		
 	if (pid == -1) {
-		UT_NOTIFY(LV_WARN, "no such debuggee!");
+		dbgPrint(DBGLVL_WARNING, "no such debuggee!\n");
 		return false;
 	}
 	return true;
@@ -166,7 +165,8 @@ bool ProgramControl::childAlive(void)
 			return false;
 		}
 	} else {
-		UT_NOTIFY(LV_WARN, "Retrieving process exit code failed: " << ::GetLastError());
+		dbgPrint(DBGLVL_WARNING, "Retrieving process exit code failed: %u\n",
+				::GetLastError());
 		return false;
 	}
 	return true;
@@ -182,13 +182,13 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 	ALIGNED_DATA newPid;
 	
 	while (pid == -1 && errorStatus == EINTR) {
-		UT_NOTIFY(LV_TRACE, "checking debuggee status...");
+		dbgPrint(DBGLVL_DEBUG, "checking debuggee status...\n");
 		pid = waitpid(_debuggeePID, &status, WUNTRACED);
 		
 		/* from gdb: Try again with __WCLONE to check cloned processes. */
 		if (pid == -1 && errno == ECHILD) {
 #ifndef GLSLDB_OSX
-			UT_NOTIFY(LV_TRACE, "checking clones: " << (int)pid);
+			dbgPrint(DBGLVL_INFO, "checking clones: %i", (int)pid);
 			pid = waitpid (_debuggeePID, &status, __WCLONE);
 #else
 			/* Ack, ugly ugly hack --
@@ -204,19 +204,19 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			while ( system(command) == 0 )
 				sleep(1);
 #endif
-			UT_NOTIFY(LV_INFO, pid);
+			dbgPrint(DBGLVL_INFO, " %i\n", pid);
 			errorStatus = errno;
 		}
 		
 		if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP &&
 			pid != _debuggeePID) {
-			UT_NOTIFY(LV_WARN, "New pid: " << (int)pid);
+			dbgPrint(DBGLVL_WARNING, "New pid: %i\n", (int)pid);
 			errorStatus = EINTR;
 		}
 	}
 
 	if (pid == -1) {
-		UT_NOTIFY(LV_WARN, "no such debuggee!");
+		dbgPrint(DBGLVL_WARNING, "no such debuggee!\n");
 		return PCE_EXIT;
 	}
 
@@ -227,29 +227,30 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			ptrace((__ptrace_request)PTRACE_GETEVENTMSG, pid, 0, &newPid);
 			dbgPrint(DBGLVL_INFO, "extended wait status: PTRACE_EVENT_CLONE new pid: %i FIXME!!!!!!!!!!!\n", newPid);
 #else
-			UT_NOTIFY(LV_WARN, "extended wait status: PTRACE_EVENT_CLONE ... FIXME!!!!!!!!!!!");
+			dbgPrint(DBGLVL_WARNING, "extended wait status: PTRACE_EVENT_CLONE ... FIXME!!!!!!!!!!!\n");
 #endif
 			break;
 		case PTRACE_EVENT_FORK:
 		case PTRACE_EVENT_VFORK:
 #ifndef GLSLDB_OSX
 			ptrace((__ptrace_request)PTRACE_GETEVENTMSG, pid, 0, &newPid);
-			UT_NOTIFY(LV_INFO, "extended wait status: PTRACE_EVENT_FORK or "
-			                "PTRACE_EVENT_VFORKi with pid " << (int)newPid);
+			dbgPrint(DBGLVL_INFO, "extended wait status: PTRACE_EVENT_FORK or "
+			                "PTRACE_EVENT_VFORKi with pid %i\n", (int)newPid);
 #endif
 			break;
 		case PTRACE_EVENT_EXEC:
-			UT_NOTIFY(LV_INFO, "extended wait status: PTRACE_EVENT_EXEC");
+			dbgPrint(DBGLVL_INFO, "extended wait status: PTRACE_EVENT_EXEC\n");
 			break;
 		default:
 			break;
 	}
 	
     if (WIFEXITED(status)) {
-        UT_NOTIFY(LV_INFO, "debuggee terminated normally with status " << WEXITSTATUS(status));
+        dbgPrint(DBGLVL_INFO, "debuggee terminated normally with status %i\n",
+                WEXITSTATUS(status));
 		return PCE_EXIT;
     } else if (WIFSIGNALED(status)) {
-        UT_NOTIFY(LV_INFO, "debuggee terminated by signal " << WTERMSIG(status));
+        dbgPrint(DBGLVL_INFO, "debuggee terminated by signal %i\n", WTERMSIG(status));
 		switch (WTERMSIG(status)) {
 			case SIGHUP:
 			case SIGINT:
@@ -275,17 +276,17 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			case SIGVTALRM:
 				return PCE_EXIT;
 			default:
-				UT_NOTIFY(LV_WARN, "Unhandled signal " << WTERMSIG(status));
+				dbgPrint(DBGLVL_WARNING, "Unhandled signal %i\n", WTERMSIG(status));
 				return PCE_EXIT;
 		}
 		return PCE_NONE;
 	} else if (WIFSTOPPED(status)) {
 		switch (WSTOPSIG(status)) {
 			case SIGSTOP:
-				UT_NOTIFY(LV_DEBUG, "debuggee process was stopped by SIGSTOP " << WSTOPSIG(status));
+				dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGSTOP %i\n", WSTOPSIG(status));
 				return PCE_NONE;
 			case SIGTRAP:
-				UT_NOTIFY(LV_DEBUG, "debuggee process was stopped by SIGTRAP " << WSTOPSIG(status));
+				dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGTRAP %i\n", WSTOPSIG(status));
 				return PCE_NONE;
 			case SIGHUP:
 			case SIGINT:
@@ -310,17 +311,16 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 			case SIGXCPU:
 			case SIGVTALRM:
 			default:
-				//UT_NOTIFY(LV_INFO, "debuggee process was stopped by signal " << WSTOPSIG(status));
-				UT_NOTIFY(LV_INFO, "debuggee process was stopped by signal " << strsignal(status));
+				dbgPrint(DBGLVL_INFO, "debuggee process was stopped by signal %i\n", strsignal(status));
 				return PCE_EXIT;
 		}
 #ifdef WIFCONTINUED
 	} else if (WIFCONTINUED(status)) {
-		UT_NOTIFY(LV_INFO, "debuggee process was resumed by delivery of SIGCONT");
+		dbgPrint(DBGLVL_INFO, "debuggee process was resumed by delivery of SIGCONT\n");
 		return PCE_NONE;
 #endif
 	} else {
-        UT_NOTIFY(LV_WARN, "debuggee terminated with unknown reason");
+        dbgPrint(DBGLVL_WARNING, "debuggee terminated with unknown reason\n");
     	return PCE_EXIT;
     }
 #else /* !_WIN32 */
@@ -352,7 +352,7 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 				retval = PCE_EXIT;
 			}
 		} else {
-			UT_NOTIFY(LV_WARN, "Retrieving process exit code failed: " << ::GetLastError());
+			dbgPrint(DBGLVL_WARNING, "Retrieving process exit code failed: %u\n", ::GetLastError());
 			retval = PCE_UNKNOWN_ERROR;
 			break;
 		}
@@ -381,65 +381,58 @@ void ProgramControl::setDebugEnvVars(void)
 {
 #ifndef _WIN32
     if (setenv("LD_PRELOAD", _path_dbglib.c_str(), 1)) 
-    	UT_NOTIFY(LV_ERROR, "setenv failed LD_PRELOAD failed: " << strerror(errno));
-    //else 
-    	UT_NOTIFY(LV_INFO, "env dbglib: " << _path_dbglib);
-    
+    	dbgPrint(DBGLVL_ERROR, "setenv LD_PRELOAD failed: %s\n", strerror(errno));
+    dbgPrint(DBGLVL_INFO, "env dbglib: \"%s\"\n", _path_dbglib.c_str());
+
     {
 	    std::string s = std::to_string(shmid);
 	    if (setenv("GLSL_DEBUGGER_SHMID", s.c_str(), 1))
-	    	UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: " << strerror(errno));
-	//    else 
-	    	UT_NOTIFY(LV_INFO, "env shmid: " << s);
-	}
-    
-    if (setenv("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs.c_str(), 1)) 
-        UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: " << strerror(errno));
-    //else 
-    	UT_NOTIFY(LV_INFO, "env dbgfctns: " << _path_dbgfuncs);
-    
-    if (setenv("GLSL_DEBUGGER_LIBDLSYM", _path_libdlsym.c_str(), 1)) 
-        UT_NOTIFY(LV_ERROR, "setenv LIBDLSYM failed: " << strerror(errno));
-    //else 
-    	UT_NOTIFY(LV_DEBUG, "libdlsym: " << _path_libdlsym);
-	
-	{
-		std::string s = std::to_string(getMaxDebugOutputLevel());
-	    if (setenv("GLSL_DEBUGGER_LOGLEVEL", s.c_str(), 1)) 
-	        UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: " << strerror(errno));
-	//    else
-		    UT_NOTIFY(LV_INFO, "env dbglvl: " << s);
+	    	dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: %s\n", strerror(errno));
+	    dbgPrint(DBGLVL_INFO, "env shmid: \"%s\"\n", s.c_str());
 	}
 
-    if (_path_log.size() && setenv("GLSL_DEBUGGER_LOGDIR", _path_log.c_str(), 1)) 
-        UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: " << strerror(errno));
-    UT_NOTIFY(LV_INFO, "env dbglogdir: " << _path_log);
+    if (setenv("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs.c_str(), 1))
+        dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: %s\n", strerror(errno));
+    dbgPrint(DBGLVL_INFO, "env dbgfctns: \"%s\"\n", _path_dbgfuncs.c_str());
+
+    if (setenv("GLSL_DEBUGGER_LIBDLSYM", _path_libdlsym.c_str(), 1))
+        dbgPrint(DBGLVL_ERROR, "setenv LIBDLSYM failed: %s\n", strerror(errno));
+    dbgPrint(DBGLVL_DEBUG, "libdlsym: \"%s\"\n", _path_libdlsym.c_str());
+
+	{
+		std::string s = std::to_string(getMaxDebugOutputLevel());
+	    if (setenv("GLSL_DEBUGGER_LOGLEVEL", s.c_str(), 1))
+	        dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: %s\n", strerror(errno));
+	    dbgPrint(DBGLVL_INFO, "env dbglvl: \"%s\"\n", s.c_str());
+	}
+
+    if (_path_log.size() && setenv("GLSL_DEBUGGER_LOGDIR", _path_log.c_str(), 1))
+        dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: %s\n", strerror(errno));
+    dbgPrint(DBGLVL_INFO, "env dbglogdir: \"%s\"\n", _path_log.c_str());
 
 #else /* !_WIN32 */
     {
     	std::string s = std::to_string(GetCurrentProcessId()) + std::string("SHM");
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", s.c_str()))
-			UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: " << ::GetLastError());
-		UT_NOTIFY(LV_DEBUG, "env shmid: " << s);
-	}
-    
-    if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", 
-			_path_dbgfuncs)) {
-		UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: " << ::GetLastError());
+			dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: %u\n", ::GetLastError());
+		dbgPrint(DBGLVL_DEBUG, "env shmid: \"%s\"\n", s.c_str());
     }
-	UT_NOTIFY(LV_INFO, "env dbgfctns: " << _path_dbgfuncs);
-	
+
+    if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs)) {
+		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: %u\n", ::GetLastError());
+    }
+	dbgPrint(DBGLVL_INFO, "env dbgfctns: \"%s\"\n", _path_dbgfuncs.c_str());
+
 	{
 	    std::string s = std::to_string(getMaxDebugOutputLevel());
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGLEVEL", s.c_str()))
-			UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: " <<	::GetLastError());
-	//	else
-		    UT_NOTIFY(LV_INFO, "env dbglvl: " << s);
+			dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: %u\n", ::GetLastError());
+		dbgPrint(DBGLVL_INFO, "env dbglvl: \"%s\"\n", s.c_str());
 	}
-	
+
 	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGDIR", _path_log))
-		UT_NOTIFY(LV_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: " << ::GetLastError());
-	UT_NOTIFY(LV_INFO, "env dbglogdir: " << _path_log);
+		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: %u\n", ::GetLastError());
+	dbgPrint(DBGLVL_INFO, "env dbglogdir: \"%s\"\n", _path_log.c_str());
 #endif /* !_WIN32 */
 }
 
@@ -489,28 +482,25 @@ void ProgramControl::buildEnvVars(const char *pname)
 	long pathmax = pathconf("/", _PC_PATH_MAX);
 	if (pathmax <= 0)
 	{
-		UT_NOTIFY(LV_ERROR, "Cannot get max. path length!");
+		dbgPrint(DBGLVL_ERROR, "Cannot get max. path length!");
 		if (errno != 0)
-			UT_NOTIFY(LV_ERROR, strerror(errno));
+			dbgPrint(DBGLVL_ERROR, "%s", strerror(errno));
 		else
-			UT_NOTIFY(LV_ERROR, "No value set!");
+			dbgPrint(DBGLVL_ERROR, "No value set!");
 		exit(1);
 	}
 
 	{
 		std::string s;
 		ssize_t progPathLen;
-		s += "/proc/";
-		s += std::to_string(getpid());
-		s += "/exe";
+		s += "/proc/" + std::to_string(getpid()) + "/exe";
 		char *tmp = new char[pathmax];
 		progPathLen = readlink(s.c_str(), tmp, pathmax);
 		if(progPathLen != -1) {
 			tmp[progPathLen] = '\0';
 			progpath.append(tmp);
-		} 
-		else {
-			UT_NOTIFY(LV_ERROR, "Unable to retrieve absolute path.");
+		} else {
+			dbgPrint(DBGLVL_ERROR, "Unable to retrieve absolute path.");
 			exit(1);
 		}
 		delete[] tmp;
@@ -518,7 +508,7 @@ void ProgramControl::buildEnvVars(const char *pname)
 #endif
 
 #endif /* _WIN32 */
-    UT_NOTIFY(LV_INFO, "Absolute path to debugger executable is: " << progpath);
+    dbgPrint(DBGLVL_INFO, "Absolute path to debugger executable is: %s\n", progpath.c_str());
 
     /* Remove executable name from path. */
     size_t pos = progpath.find_last_of(PATH_SEP);
@@ -529,17 +519,17 @@ void ProgramControl::buildEnvVars(const char *pname)
     /* preload library */
     _path_dbglib.append(progpath);
    	_path_dbglib.append(DEBUGLIB);
-    UT_NOTIFY(LV_INFO, "Path to debug library is: " << _path_dbglib);
+    dbgPrint(DBGLVL_INFO, "Path to debug library is: %s\n", _path_dbglib.c_str());
     
     /* path to debug SOs */
     _path_dbgfuncs.append(progpath);
     _path_dbgfuncs.append(DBG_FUNCTIONS_PATH);
-    UT_NOTIFY(LV_INFO, "Path to debug functions is: " << _path_dbgfuncs);
+    dbgPrint(DBGLVL_INFO, "Path to debug functions is: %s\n", _path_dbgfuncs.c_str());
     
     /* dlsym helper library */
     _path_libdlsym.append(progpath);
     _path_libdlsym.append(LIBDLSYM);
-    UT_NOTIFY(LV_INFO, "Path to libdlsym is: " << _path_libdlsym);
+    dbgPrint(DBGLVL_INFO, "Path to libdlsym is: %s\n", _path_libdlsym.c_str());
 
     /* log dir */
 	if (getLogDir()) {
@@ -548,7 +538,7 @@ void ProgramControl::buildEnvVars(const char *pname)
 #else
 		_path_log = realpath(getLogDir(), NULL);
 #endif
-		UT_NOTIFY(LV_INFO, "LogDir is: " << _path_log);
+		dbgPrint(DBGLVL_INFO, "LogDir is: %s\n", _path_log.c_str());
 	}
 
 #undef PATH_SEP
@@ -571,7 +561,7 @@ DbgRec* ProgramControl::getThreadRecord(DWORD pid)
         }
     }
     if (i == SHM_MAX_THREADS) {
-        UT_NOTIFY(LV_ERROR, "max. number of debuggable threads exceeded!");
+        dbgPrint(DBGLVL_ERROR, "Error: max. number of debuggable threads exceeded!\n");
         exit(1);
     }
     return &_fcalls[i];
@@ -615,7 +605,7 @@ unsigned int ProgramControl::getArgumentSize(int type)
 		case DBG_TYPE_STRUCT:
 			return 0; /* FIXME */
         default:
-            UT_NOTIFY(LV_WARN, "invalid argument type");
+            dbgPrint(DBGLVL_WARNING, "invalid argument type\n");
             return 0;
     }
 }
@@ -743,7 +733,7 @@ void ProgramControl::printCall()
     int i;
     DbgRec *rec = getThreadRecord(_debuggeePID);
     if (!rec) {
-        UT_NOTIFY(LV_ERROR, "no rec\n");
+        dbgPrint(DBGLVL_ERROR, "no rec\n");
         exit(1);
     }
     
@@ -771,7 +761,7 @@ void ProgramControl::printResult()
         printArgument((void*)rec->items[0], rec->items[1]);
         dbgPrintNoPrefix(DBGLVL_INFO, "\n");
     } else {
-		UT_NOTIFY(LV_WARN, "Hmm: Result expected but got code " << (unsigned int)rec->result);
+		dbgPrint(DBGLVL_WARNING, "Hmm: Result expected but got code %i\n", (unsigned int)rec->result);
 	}
 }
 
@@ -826,7 +816,7 @@ pcErrorCode ProgramControl::checkError()
 			case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
 				return PCE_GL_INVALID_FRAMEBUFFER_OPERATION_EXT;
 			default:
-				UT_NOTIFY(LV_WARN, "checkError got error code " << (unsigned int)rec->items[0]);
+				dbgPrint(DBGLVL_WARNING, "checkError got error code %i\n", (unsigned int)rec->items[0]);
 				return PCE_UNKNOWN_ERROR;
 		}
 	}
@@ -836,7 +826,7 @@ pcErrorCode ProgramControl::checkError()
 pcErrorCode ProgramControl::dbgCommandStopExecution(void)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_STOP_EXECUTION");
+    dbgPrint(DBGLVL_INFO, "send: DBG_STOP_EXECUTION\n");
     rec->operation = DBG_STOP_EXECUTION;
 	return PCE_NONE;
 }
@@ -844,7 +834,7 @@ pcErrorCode ProgramControl::dbgCommandStopExecution(void)
 pcErrorCode ProgramControl::dbgCommandExecute(bool stopOnGLError)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_EXECUTE (DBG_EXECUTE_RUN)");
+    dbgPrint(DBGLVL_INFO, "send: DBG_EXECUTE (DBG_EXECUTE_RUN)\n");
     rec->operation = DBG_EXECUTE;
 	rec->items[0] = DBG_EXECUTE_RUN;
 	rec->items[1] = stopOnGLError ? 1 : 0; 
@@ -863,7 +853,7 @@ pcErrorCode ProgramControl::dbgCommandExecute(bool stopOnGLError)
 pcErrorCode ProgramControl::dbgCommandExecuteToDrawCall(bool stopOnGLError)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_DRAW_CALL)");
+    dbgPrint(DBGLVL_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_DRAW_CALL)\n");
     rec->operation = DBG_EXECUTE;
 	rec->items[0] = DBG_JUMP_TO_DRAW_CALL;
 	rec->items[1] = stopOnGLError ? 1 : 0; 
@@ -882,7 +872,7 @@ pcErrorCode ProgramControl::dbgCommandExecuteToDrawCall(bool stopOnGLError)
 pcErrorCode ProgramControl::dbgCommandExecuteToShaderSwitch(bool stopOnGLError)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_SHADER_SWITCH)");
+    dbgPrint(DBGLVL_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_SHADER_SWITCH)\n");
     rec->operation = DBG_EXECUTE;
 	rec->items[0] = DBG_JUMP_TO_SHADER_SWITCH;
 	rec->items[1] = stopOnGLError ? 1 : 0; 
@@ -902,7 +892,7 @@ pcErrorCode ProgramControl::dbgCommandExecuteToUserDefined(const char *fname,
                                                            bool stopOnGLError)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_USER_DEFINED)");
+    dbgPrint(DBGLVL_INFO, "send: DBG_EXECUTE (DBG_JUMP_TO_USER_DEFINED)\n");
     rec->operation = DBG_EXECUTE;
 	rec->items[0] = DBG_JUMP_TO_USER_DEFINED;
 	rec->items[1] = stopOnGLError ? 1 : 0; 
@@ -924,7 +914,7 @@ pcErrorCode ProgramControl::dbgCommandDone()
 	pcErrorCode error;
 
     DbgRec *rec = getThreadRecord(_debuggeePID);
-    UT_NOTIFY(LV_INFO, "send: DBG_DONE");
+    dbgPrint(DBGLVL_INFO, "send: DBG_DONE\n");
     rec->operation = DBG_DONE;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -938,7 +928,7 @@ pcErrorCode ProgramControl::dbgCommandCallOrig()
     DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_CALL_ORIGFUNCTION");
+    dbgPrint(DBGLVL_INFO, "send: DBG_CALL_ORIGFUNCTION\n");
     rec->operation = DBG_CALL_ORIGFUNCTION;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -958,7 +948,7 @@ pcErrorCode ProgramControl::dbgCommandSetDbgTarget(int target, int alphaTestOpti
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_SET_DBG_TARGET");
+    dbgPrint(DBGLVL_INFO, "send: DBG_SET_DBG_TARGET\n");
     rec->operation = DBG_SET_DBG_TARGET;
 	rec->items[0] = target;
 	rec->items[1] = alphaTestOption;
@@ -977,7 +967,7 @@ pcErrorCode ProgramControl::dbgCommandRestoreRenderTarget(int target)
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_RESTORE_RENDER_TARGET");
+    dbgPrint(DBGLVL_INFO, "send: DBG_RESTORE_RENDER_TARGET\n");
     rec->operation = DBG_RESTORE_RENDER_TARGET;
 	rec->items[0] = target;
 	error = executeDbgCommand();
@@ -992,7 +982,7 @@ pcErrorCode ProgramControl::dbgCommandSaveAndInterruptQueries(void)
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_SAVE_AND_INTERRUPT_QUERIES");
+    dbgPrint(DBGLVL_INFO, "send: DBG_SAVE_AND_INTERRUPT_QUERIES\n");
     rec->operation = DBG_SAVE_AND_INTERRUPT_QUERIES;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1006,7 +996,7 @@ pcErrorCode ProgramControl::dbgCommandRestartQueries(void)
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_RESTART_QUERIES");
+    dbgPrint(DBGLVL_INFO, "send: DBG_RESTART_QUERIES\n");
     rec->operation = DBG_RESTART_QUERIES;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1020,13 +1010,13 @@ pcErrorCode ProgramControl::dbgCommandStartRecording()
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_START_RECORDING");
+    dbgPrint(DBGLVL_INFO, "send: DBG_START_RECORDING\n");
     rec->operation = DBG_START_RECORDING;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
 		return error;
 	}
-    UT_NOTIFY(LV_INFO, "function call recording done!");
+    dbgPrint(DBGLVL_INFO, "function call recording done!\n");
 	return checkError();
 }
 
@@ -1035,7 +1025,7 @@ pcErrorCode ProgramControl::dbgCommandReplay(int target)
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_REPLAY");
+    dbgPrint(DBGLVL_INFO, "send: DBG_REPLAY\n");
     rec->operation = DBG_REPLAY;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1049,7 +1039,7 @@ pcErrorCode ProgramControl::dbgCommandEndReplay()
     DbgRec *rec = getThreadRecord(_debuggeePID);
     pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_END_REPLAY");
+    dbgPrint(DBGLVL_INFO, "send: DBG_END_REPLAY\n");
     rec->operation = DBG_END_REPLAY;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1063,7 +1053,7 @@ pcErrorCode ProgramControl::dbgCommandRecord()
     DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_RECORD_CALL");
+    dbgPrint(DBGLVL_INFO, "send: DBG_RECORD_CALL\n");
     rec->operation = DBG_RECORD_CALL;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1083,23 +1073,23 @@ pcErrorCode ProgramControl::dbgCommandCallOrig(const FunctionCall *fCall)
     int i;
     
     if (!rec) {
-        UT_NOTIFY(LV_ERROR, "no rec");
+        dbgPrint(DBGLVL_ERROR, "no rec\n");
         exit(1);
     }
 
     if (strcmp(rec->fname, fCall->getName()) != 0) {
-        UT_NOTIFY(LV_ERROR, "function name does not match record");
+        dbgPrint(DBGLVL_ERROR, "function name does not match record\n");
         exit(1);
     }
 
     rec->numItems = fCall->getNumArguments();
 
-    UT_NOTIFY(LV_INFO, "send: DBG_CALL_ORIGFUNCTION_WITH_CHANGED_ARGUMENTS");
+    dbgPrint(DBGLVL_INFO, "send: DBG_CALL_ORIGFUNCTION_WITH_CHANGED_ARGUMENTS\n");
     rec->operation = DBG_CALL_ORIGFUNCTION;
 
     for (i = 0; i < fCall->getNumArguments(); i++) {
         rec->items[2*i+1] = fCall->getArgument(i)->iType;
-        UT_NOTIFY(LV_INFO, "argument " << *(float*)fCall->getArgument(i)->pData);
+        dbgPrint(DBGLVL_INFO, "argument %f\n", *(float*)fCall->getArgument(i)->pData);
         copyArgumentToProcess(fCall->getArgument(i)->pAddress,
                 fCall->getArgument(i)->pData,  fCall->getArgument(i)->iType);
     }
@@ -1120,18 +1110,18 @@ pcErrorCode ProgramControl::overwriteFuncArguments(const FunctionCall *fCall)
     int i;
 
     if (!rec) {
-        UT_NOTIFY(LV_ERROR, "no rec");
+        dbgPrint(DBGLVL_ERROR, "no rec\n");
         exit(1);
     }
     
     if (strcmp(rec->fname, fCall->getName()) != 0) {
-        UT_NOTIFY(LV_ERROR, "function name does not match record");
+        dbgPrint(DBGLVL_ERROR, "function name does not match record\n");
         exit(1);
     }
 
-    UT_NOTIFY(LV_INFO, "change: NEW_ARGUMENTS_FOR_ORIGINAL_FUNCTION");
+    dbgPrint(DBGLVL_INFO, "change: NEW_ARGUMENTS_FOR_ORIGINAL_FUNCTION\n");
     for (i = 0; i < fCall->getNumArguments(); i++) {
-        UT_NOTIFY(LV_INFO, "argument " << *(float*)fCall->getArgument(i)->pData);
+        dbgPrint(DBGLVL_INFO, "argument %f\n", *(float*)fCall->getArgument(i)->pData);
         copyArgumentToProcess(fCall->getArgument(i)->pAddress,
                 fCall->getArgument(i)->pData,  fCall->getArgument(i)->iType);
     }
@@ -1147,13 +1137,13 @@ pcErrorCode ProgramControl::dbgCommandCallDBGFunction(const char* dbgFunctionNam
         strcpy(rec->fname, dbgFunctionName);
     }
     
-    UT_NOTIFY(LV_INFO, "send: DBG_CALL_FUNCTION");
+    dbgPrint(DBGLVL_INFO, "send: DBG_CALL_FUNCTION\n");
     rec->operation = DBG_CALL_FUNCTION;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
 		return error;
 	}
-    UT_NOTIFY(LV_INFO, "dbg function " << dbgFunctionName << " called for " << rec->fname);
+    dbgPrint(DBGLVL_INFO, "dbg function %s called for \"%s\"!\n", dbgFunctionName, rec->fname);
     return checkError();
 }
 
@@ -1164,12 +1154,13 @@ pcErrorCode ProgramControl::dbgCommandFreeMem(unsigned int numBlocks, void **add
 	pcErrorCode error;
 
 	if (numBlocks > SHM_MAX_ITEMS) {
-		UT_NOTIFY(LV_ERROR, "Cannot free " << numBlocks << " memory blocks in one call! Max. is "
-			<< (int)SHM_MAX_ITEMS);
+		dbgPrint(DBGLVL_ERROR, "ProgramControl::dbgCommandFreeMem: Cannot free "
+		                "%i memory blocks in one call! Max. is %i!\n",
+		        numBlocks, (int)SHM_MAX_ITEMS);
 		exit(1);
 	}
 	
-    UT_NOTIFY(LV_INFO, "send: DBG_FREE_MEM");
+    dbgPrint(DBGLVL_INFO, "send: DBG_FREE_MEM\n");
     rec->operation = DBG_FREE_MEM;
 	rec->numItems = numBlocks;
 	for (i = 0; i < numBlocks; i++) {
@@ -1183,10 +1174,10 @@ pcErrorCode ProgramControl::dbgCommandFreeMem(unsigned int numBlocks, void **add
 	/* TODO: debug message */
 	if (error == PCE_NONE) {
 		for (i = 0; i < numBlocks; i++) {
-    		UT_NOTIFY(LV_INFO, "memory free'd at " << addresses[i]);
+    		dbgPrint(DBGLVL_INFO, "ProgramControl::dbgCommandFreeMem: memory free'd at %p\n", addresses[i]);
 		}
 	} else {
-		UT_NOTIFY(LV_WARN, "error free'ing memory");
+		dbgPrint(DBGLVL_WARNING, "ProgramControl::dbgCommandFreeMem: error free'ing memory\n");
 	}
     return error;
 }
@@ -1200,12 +1191,13 @@ pcErrorCode ProgramControl::dbgCommandAllocMem(unsigned int numBlocks,
 	pcErrorCode error;
 	
 	if (numBlocks > SHM_MAX_ITEMS) {
-		UT_NOTIFY(LV_ERROR, "Cannot allocate " << numBlocks << " memory blocks in one call! Max. is "
-			<< (int)SHM_MAX_ITEMS);
+		dbgPrint(DBGLVL_ERROR, "ProgramControl::dbgCommandAllocMem: Cannot allocate "
+		                "%i memory blocks in one call! Max. is %i!\n",
+		        numBlocks, (int)SHM_MAX_ITEMS);
 		exit(1);
 	}
 
-    UT_NOTIFY(LV_INFO, "send: DBG_ALLOC_MEM");
+    dbgPrint(DBGLVL_INFO, "send: DBG_ALLOC_MEM\n");
     rec->operation = DBG_ALLOC_MEM;
 	rec->numItems = numBlocks;
 	for (i = 0; i < numBlocks; i++) {
@@ -1218,7 +1210,8 @@ pcErrorCode ProgramControl::dbgCommandAllocMem(unsigned int numBlocks,
 	if (rec->result == DBG_ALLOCATED) {
 		for (i = 0; i < numBlocks; i++) {
 			addresses[i] = (void*)rec->items[i];
-			UT_NOTIFY(LV_INFO, sizes[i] << " bytes of memory allocated at " << addresses[i]);
+			dbgPrint(DBGLVL_INFO, "%i bytes of memory allocated at %p\n",
+					sizes[i], addresses[i]);
 		}
 		return PCE_NONE;
 	} else {
@@ -1234,7 +1227,7 @@ pcErrorCode ProgramControl::dbgCommandClearRenderBuffer(int mode,
 	DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_CLEAR_RENDER_BUFFER");
+    dbgPrint(DBGLVL_INFO, "send: DBG_CLEAR_RENDER_BUFFER\n");
     rec->operation = DBG_CLEAR_RENDER_BUFFER;
 	rec->items[0] = (ALIGNED_DATA)mode;
 	*(float*)(void*)&rec->items[1] = r;
@@ -1257,7 +1250,7 @@ pcErrorCode ProgramControl::dbgCommandReadRenderBuffer(int numComponents,
 	DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 
-    UT_NOTIFY(LV_INFO, "send: DBG_READ_RENDER_BUFFER");
+    dbgPrint(DBGLVL_INFO, "send: DBG_READ_RENDER_BUFFER\n");
     rec->operation = DBG_READ_RENDER_BUFFER;
 	rec->items[0] = (ALIGNED_DATA)numComponents;
 	error = executeDbgCommand();
@@ -1287,7 +1280,7 @@ pcErrorCode ProgramControl::dbgCommandShaderStepFragment(void *shaders[3],
 	DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 	
-    UT_NOTIFY(LV_INFO, "send: DBG_SHADER_STEP");
+    dbgPrint(DBGLVL_INFO, "send: DBG_SHADER_STEP\n");
     rec->operation = DBG_SHADER_STEP;
 	rec->items[0] = (ALIGNED_DATA)shaders[0];
 	rec->items[1] = (ALIGNED_DATA)shaders[1];
@@ -1348,7 +1341,7 @@ pcErrorCode ProgramControl::dbgCommandShaderStepVertex(void *shaders[3],
 	DbgRec *rec = getThreadRecord(_debuggeePID);
 	pcErrorCode error;
 	
-    UT_NOTIFY(LV_INFO, "send: DBG_SHADER_STEP");
+    dbgPrint(DBGLVL_INFO, "send: DBG_SHADER_STEP\n");
     rec->operation = DBG_SHADER_STEP;
 	rec->items[0] = (ALIGNED_DATA)shaders[0];
 	rec->items[1] = (ALIGNED_DATA)shaders[1];
@@ -1387,7 +1380,7 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
     _debuggeePID = vfork();
 
     if(_debuggeePID > 0)
-    	UT_NOTIFY(LV_INFO, "debuggee process pid: " << _debuggeePID);
+    	dbgPrint(DBGLVL_INFO, "debuggee process pid: %i\n", _debuggeePID);
 
     if (_debuggeePID < 0) {
 		_debuggeePID = 0;
@@ -1401,7 +1394,7 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
             // TODO: Error checking here?
         }
 
-        UT_NOTIFY(LV_INFO, "debuggee executes " << debuggedProgramArgs[0]);
+        dbgPrint(DBGLVL_INFO, "debuggee executes %s\n", debuggedProgramArgs[0]);
         ptrace(PTRACE_TRACEME, 0, 0, 0);
 		/*
 		ptrace ((__ptrace_request)PTRACE_SETOPTIONS, getpid(), 0,
@@ -1413,24 +1406,30 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
         execv(debuggedProgramArgs[0], debuggedProgramArgs);
 
 		/* an error occured, execv should never return */
-		UT_NOTIFY(LV_ERROR, "debuggee fork/execution failed: " << strerror(errno));
-		UT_NOTIFY(LV_ERROR, "debuggee pid: " << getpid());
+		dbgPrint(DBGLVL_ERROR, "debuggee fork/execution failed: %s\n", strerror(errno));
+		dbgPrint(DBGLVL_INFO, "debuggee pid: %i\n", getpid());
         _exit(73);
     }
 
 	ptrace ((__ptrace_request)PTRACE_SETOPTIONS, _debuggeePID, 0,
-	        PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK |
-	        PTRACE_O_TRACEEXEC | PTRACE_O_TRACEVFORKDONE /*|
-	        PTRACE_O_TRACECLONE*/);
+	          PTRACE_O_TRACEFORK 
+	        | PTRACE_O_TRACEVFORK
+	        | PTRACE_O_TRACEEXEC
+	        | PTRACE_O_TRACEVFORKDONE
+	        /*| PTRACE_O_TRACECLONE*/
+#ifdef PTRACE_O_EXITKILL
+	        | PTRACE_O_EXITKILL
+#endif
+            );
 
-    UT_NOTIFY(LV_INFO, "waiting for debuggee to respond...");
+    dbgPrint(DBGLVL_INFO, "waiting for debuggee to respond...\n");
 	error = checkChildStatus();
 	if (error != PCE_NONE) {
 		kill(_debuggeePID, SIGKILL);
 		_debuggeePID = 0;
 		return error;
 	}
-    UT_NOTIFY(LV_INFO, "sending continue");
+    dbgPrint(DBGLVL_INFO, "sending continue\n");
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
 		kill(_debuggeePID, SIGKILL);
@@ -1503,7 +1502,7 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
 	delete[] cmdLine;
 	//return error;
 
-    UT_NOTIFY(LV_INFO, "wait for debuggee");
+    dbgPrint(DBGLVL_INFO, "wait for debuggee\n");
 	error = checkChildStatus();
 	if (error != PCE_NONE) {
 		killProgram(0);
@@ -1511,7 +1510,7 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
 		return error;
 	}
 
-    UT_NOTIFY(LV_INFO, "send continue");
+    dbgPrint(DBGLVL_INFO, "send continue\n");
 	error = executeDbgCommand();
 	//error = dbgCommandCallOrig();
 	if (error != PCE_NONE) {
@@ -1573,7 +1572,7 @@ FunctionCall* ProgramControl::getCurrentCall(void)
     DbgRec *rec = getThreadRecord(_debuggeePID);
     
     if (!rec) {
-        UT_NOTIFY(LV_ERROR, "no rec");
+        dbgPrint(DBGLVL_ERROR, "no rec\n");
         exit(1);
     }
     
@@ -1604,7 +1603,7 @@ pcErrorCode ProgramControl::getShaderCode(char *shaders[3],
 	sched_yield();
 #endif /* _WIN32 */
 
-    UT_NOTIFY(LV_INFO, "send: DBG_GET_SHADER_CODE");
+    dbgPrint(DBGLVL_INFO, "send: DBG_GET_SHADER_CODE\n");
     rec->operation = DBG_GET_SHADER_CODE;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1638,7 +1637,7 @@ pcErrorCode ProgramControl::getShaderCode(char *shaders[3],
                 continue;
             }
             if (!(shaders[i] = new char[rec->items[2*i+1]+1])) {
-                UT_NOTIFY(LV_ERROR, "not enough memory");
+                dbgPrint(DBGLVL_ERROR, "not enough memory\n");
 				for (--i; i >= 0; i--) {
 					delete [] shaders[i];
 					shaders[i] = NULL;
@@ -1658,7 +1657,7 @@ pcErrorCode ProgramControl::getShaderCode(char *shaders[3],
 		if (rec->items[7] > 0) {
 			*numUniforms = rec->items[7];
             if (!(*serializedUniforms = new char[rec->items[8]])) {
-                UT_NOTIFY(LV_ERROR, "not enough memory");
+                dbgPrint(DBGLVL_ERROR, "not enough memory\n");
 				for (i = 0; i < 3; ++i) {
 					delete [] shaders[i];
 					shaders[i] = NULL;
@@ -1679,11 +1678,11 @@ pcErrorCode ProgramControl::getShaderCode(char *shaders[3],
 		}
 
         /* free memory on client side */
-		UT_NOTIFY_VA(LV_INFO, "free memory on client side [%p, %p, %p, %p, %p]",
+		dbgPrint(DBGLVL_INFO, "getShaderCode: free memory on client side [%p, %p, %p, %p, %p]\n",
 				addr[0], addr[1], addr[2], addr[3], addr[4]);
 		error = dbgCommandFreeMem(5, addr);
 		if (error != PCE_NONE) {
-			UT_NOTIFY(LV_WARN, "free memory on client side error: " << error);
+			dbgPrint(DBGLVL_WARNING, "getShaderCode: free memory on client side error: %i\n", error);
 			for (i=0; i<3; i++) {
 				delete [] shaders[i];
 				shaders[i] = NULL;
@@ -1691,15 +1690,15 @@ pcErrorCode ProgramControl::getShaderCode(char *shaders[3],
 			return error;
 		}
 	}
-	UT_NOTIFY(LV_INFO, ">>>>>>>>> Orig. Vertex Shader <<<<<<<<<<<"
-						<< shaders[0] 
-						<< ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"); 
-	UT_NOTIFY(LV_INFO, ">>>>>>>> Orig. Geometry Shader <<<<<<<<<<"
-						<< shaders[1]
-						<< ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"); 
-	UT_NOTIFY(LV_INFO, ">>>>>>>> Orig. Fragment Shader <<<<<<<<<<"
-						<< shaders[2] 
-						<< ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"); 
+	dbgPrint(DBGLVL_INFO, ">>>>>>>>> Orig. Vertex Shader <<<<<<<<<<<\n%s\n"
+	                      ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<\n",
+	         shaders[0]); 
+	dbgPrint(DBGLVL_INFO, ">>>>>>>> Orig. Geometry Shader <<<<<<<<<<\n%s\n"
+	                      ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<\n",
+	         shaders[1]); 
+	dbgPrint(DBGLVL_INFO, ">>>>>>>> Orig. Fragment Shader <<<<<<<<<<\n%s\n"
+	                      ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<\n",
+	         shaders[2]); 
 	return PCE_NONE;
 }
 
@@ -1714,7 +1713,7 @@ pcErrorCode ProgramControl::saveActiveShader(void)
 	sched_yield();
 #endif /* _WIN32 */
 	
-    UT_NOTIFY(LV_INFO, "send: DBG_STORE_ACTIVE_SHADER");
+    dbgPrint(DBGLVL_INFO, "send: DBG_STORE_ACTIVE_SHADER\n");
     rec->operation = DBG_STORE_ACTIVE_SHADER;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1734,7 +1733,7 @@ pcErrorCode ProgramControl::restoreActiveShader(void)
 	sched_yield();
 #endif /* _WIN32 */
 	
-    UT_NOTIFY(LV_INFO, "send: DBG_RESTORE_ACTIVE_SHADER");
+    dbgPrint(DBGLVL_INFO, "send: DBG_RESTORE_ACTIVE_SHADER\n");
     rec->operation = DBG_RESTORE_ACTIVE_SHADER;
 	error = executeDbgCommand();
 	if (error != PCE_NONE) {
@@ -1756,14 +1755,14 @@ pcErrorCode ProgramControl::setDbgShaderCode(char *shaders[3], int target)
 	sched_yield();
 #endif /* _WIN32 */
 
-	UT_NOTIFY_VA(LV_INFO, "setting SH code: %p, %p, %p, %i",
+	dbgPrint(DBGLVL_INFO, "setting SH code: %p, %p, %p, %i\n",
 			shaders[0], shaders[1], shaders[2], target);
 
 	/* allocate client side memory and copy shader src */
 	for (i = 0; i < 3; i++) {
 		if (shaders[i]) {
 			unsigned int size = strlen(shaders[i]) + 1;
-			UT_NOTIFY_VA(LV_ERROR, "allocating memory for shader[%i]: %ibyte", i, size);
+			dbgPrint(DBGLVL_ERROR, "allocating memory for shader[%i]: %ibyte\n", i, size);
 			error = dbgCommandAllocMem(1, &size, &addr[i]);
 			if (error != PCE_NONE) {
 				dbgCommandFreeMem(i, addr);
@@ -1774,7 +1773,7 @@ pcErrorCode ProgramControl::setDbgShaderCode(char *shaders[3], int target)
 			addr[i] = NULL;
 		}
 	}
-	UT_NOTIFY(LV_INFO, "send: DBG_SET_DBG_SHADER");
+	dbgPrint(DBGLVL_INFO, "send: DBG_SET_DBG_SHADER\n");
 	for (i = 0; i < 3; i++) {
 		rec->items[i] = (ALIGNED_DATA)addr[i];
 	}
@@ -1792,11 +1791,11 @@ pcErrorCode ProgramControl::setDbgShaderCode(char *shaders[3], int target)
 	}
 	
 	/* free memory on client side */
-	UT_NOTIFY_VA(LV_INFO, "setShaderCode: free memory on client side [%p, %p, %p]",
+	dbgPrint(DBGLVL_INFO, "setShaderCode: free memory on client side [%p, %p, %p]\n",
 			addr[0], addr[1], addr[2]);
 	error = dbgCommandFreeMem(3, addr);
 	if (error != PCE_NONE) {
-		UT_NOTIFY(LV_ERROR, "getShaderCode: free memory on client side error: " << error);
+		dbgPrint(DBGLVL_ERROR, "getShaderCode: free memory on client side error: %i\n", error);
 		return error;
 	}
 	return PCE_NONE;
@@ -1999,7 +1998,7 @@ pcErrorCode ProgramControl::shaderStepFragment(char *shaders[3],
 	/* free memory on client side */
 	error = dbgCommandFreeMem(3, addr);
 	if (error) {
-		UT_NOTIFY(LV_ERROR, "free memory on client side error: " << error);
+		dbgPrint(DBGLVL_ERROR, "getShaderCode: free memory on client side error: %i\n", error);
 	}
 	return error;
 }
@@ -2061,7 +2060,7 @@ pcErrorCode ProgramControl::shaderStepVertex(char *shaders[3], int target,
 			basePrimitiveMode = GL_TRIANGLES;
 			break;
 		default:
-			UT_NOTIFY(LV_WARN, "Unknown primitive mode");
+			dbgPrint(DBGLVL_WARNING, "Unknown primitive mode\n");
 			return PCE_DBG_INVALID_VALUE;
 	}
 	
@@ -2076,7 +2075,7 @@ pcErrorCode ProgramControl::shaderStepVertex(char *shaders[3], int target,
 	/* free memory on client side */
 	error = dbgCommandFreeMem(3, addr);
 	if (error) {
-		UT_NOTIFY(LV_WARN, "free memory on client side error: " << error);
+		dbgPrint(DBGLVL_WARNING, "getShaderCode: free memory on client side error: %i\n", error);
 	}
 	return error;
 }
@@ -2153,7 +2152,7 @@ pcErrorCode ProgramControl::stop(void)
 pcErrorCode ProgramControl::checkExecuteState(int *state)
 {
     DbgRec *rec = getThreadRecord(_debuggeePID);
-	UT_NOTIFY(LV_INFO, "execute state: " << (int)rec->result);
+	dbgPrint(DBGLVL_INFO, "execute state: %i\n", (int)rec->result);
 	switch (rec->result) {
 		case DBG_EXECUTE_IN_PROGRESS:
 			*state = 0;
@@ -2183,11 +2182,8 @@ pcErrorCode ProgramControl::executeContinueOnError(void)
 
 pcErrorCode ProgramControl::killProgram(int hard)
 {
-	UT_NOTIFY(LV_INFO, "killing debuggee");
-	if(hard)
-		UT_NOTIFY(LV_INFO, "method: forced");
-	else
-		UT_NOTIFY(LV_INFO, "method: request termination");
+	dbgPrint(DBGLVL_INFO, "killing debuggee: %s", (hard ? 
+				"forced" : "termination requested"));
 #ifdef _WIN32
     if (_ai.hProcess != NULL) {
         return this->detachFromProgram();
@@ -2254,13 +2250,13 @@ void ProgramControl::initShmem(void)
 	/* this creates a non-inheritable shared memory mapping! */
 	_hShMem = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, SHM_SIZE, shmemName);
 	if (_hShMem == NULL || _hShMem == INVALID_HANDLE_VALUE) {
-		UT_NOTIFY(LV_ERROR, "Creation of shared mem segment " << shmemName << " failed: " << GetLastError());
+		dbgPrint(DBGLVL_ERROR, "Creation of shared mem segment %s failed: %u\n", shmemName, GetLastError());
 		exit(1);
 	}
 	/* FILE_MAP_WRITE implies read */
 	_fcalls = (DbgRec*)MapViewOfFile(_hShMem, FILE_MAP_WRITE, 0, 0, SHM_SIZE);
 	if (_fcalls == NULL) {
-		UT_NOTIFY(LV_ERROR, "View mapping of shared mem segment " << shmemName " failed: " << GetLastError());
+		dbgPrint(DBGLVL_ERROR, "View mapping of shared mem segment %s failed: %u\n", shmemName, GetLastError());
 		exit(1);
 	}
 #undef SHMEM_NAME_LEN
@@ -2268,14 +2264,14 @@ void ProgramControl::initShmem(void)
     shmid = shmget(IPC_PRIVATE, SHM_SIZE, SHM_R | SHM_W);
 
     if (shmid == -1) {
-        UT_NOTIFY(LV_ERROR, "Creation of shared mem segment failed " << strerror(errno));
+        dbgPrint(DBGLVL_ERROR, "Creation of shared mem segment failed %s\n", strerror(errno));
         exit(1);
     }
 
     _fcalls = (DbgRec*) shmat(shmid, NULL, 0);
 
     if ((void*)_fcalls == (void*)-1) {
-        UT_NOTIFY(LV_ERROR, "Attaching to shared mem segment failed: " << strerror(errno));
+        dbgPrint(DBGLVL_ERROR, "Attaching to shared mem segment failed: %s\n", strerror(errno));
         exit(1);
     }
 #endif /* _WIN32 */
@@ -2291,14 +2287,14 @@ void ProgramControl::freeShmem(void)
 #ifdef _WIN32
 	if (_fcalls != NULL) {
 		if (!UnmapViewOfFile(_fcalls)) {
-			UT_NOTIFY(LV_ERROR, "View unmapping of shared mem segment failed: " << GetLastError());
+			dbgPrint(DBGLVL_ERROR, "View unmapping of shared mem segment failed: %u\n", GetLastError());
 			exit(1);		
 		}
 		fcalls = NULL;
 	}
 	if (_hShMem != INVALID_HANDLE_VALUE && _hShMem != NULL) {
 		if (CloseHandle(_hShMem) == 0) {
-			UT_NOTIFY(LV_ERROR, "Closing handle of shared mem segment failed: " << GetLastError());
+			dbgPrint(DBGLVL_ERROR, "Closing handle of shared mem segment failed: %u\n", GetLastError());
 			exit(1);		
 		}
 		_hShMem = INVALID_HANDLE_VALUE;
@@ -2307,7 +2303,7 @@ void ProgramControl::freeShmem(void)
     shmctl(shmid, IPC_RMID, 0);
 
     if (shmdt(_fcalls) == -1) {
-        UT_NOTIFY(LV_ERROR, "Deleting shared mem segment failed: " << strerror(errno));
+        dbgPrint(DBGLVL_ERROR, "Deleting shared mem segment failed: %s\n", strerror(errno));
     }
 #endif /* _WIN32 */
 }
@@ -2323,20 +2319,20 @@ void ProgramControl::createEvents(const DWORD processId) {
 	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
 	_hEvtDebuggee = ::CreateEventW(NULL, FALSE, FALSE, eventName);
 	if (_hEvtDebuggee == NULL) {
-		UT_NOTIFY(LV_ERROR, "creating " << eventName << " failed");
+		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
 		::exit(1);
 	}
 
 	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
 	_hEvtDebugger = ::CreateEventW(NULL, FALSE, FALSE, eventName);
 	if (_hEvtDebugger == NULL) {
-		UT_NOTIFY(LV_ERROR, "creating " << eventName << " failed", eventName);
+		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
 		::exit(1);
 	}
 }
 
 void ProgramControl::closeEvents(void) {
-    UT_NOTIFY(LV_INFO, "Closing events...");
+    dbgPrint(DBGLVL_INFO, "Closing events ...\n");
 
     if (_hEvtDebugger != NULL) {
 		::CloseHandle(_hEvtDebugger);
@@ -2348,7 +2344,7 @@ void ProgramControl::closeEvents(void) {
 		_hEvtDebuggee = NULL;
 	}
 
-    UT_NOTIFY(LV_INFO, "Events closed");
+    dbgPrint(DBGLVL_INFO, "Events closed.\n");
 }
 
 #endif /* _WIN32 */
