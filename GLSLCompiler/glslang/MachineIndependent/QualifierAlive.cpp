@@ -35,26 +35,31 @@
 #include "../Include/intermediate.h"
 
 void AliveSymbol(TIntermSymbol* node, TIntermTraverser* it);
-bool AliveSelection(bool preVisit, TIntermSelection* node, TIntermTraverser* it);
+bool AliveSelection(bool preVisit, TIntermSelection* node,
+		TIntermTraverser* it);
 bool AliveSwitch(bool preVisit, TIntermSwitch* node, TIntermTraverser* it);
 
-class TAliveTraverser : public TIntermTraverser {
+class TAliveTraverser: public TIntermTraverser {
 public:
-    TAliveTraverser(TQualifier q) : TIntermTraverser(), found(false), qualifier(q)
-    {
-        visitSymbol    = AliveSymbol;
-        visitSelection = AliveSelection;
-        visitSwitch = AliveSwitch;
-        rightToLeft    = true;
-    }
-    bool wasFound() { return found; }
+	TAliveTraverser(TQualifier q) :
+			TIntermTraverser(), found(false), qualifier(q)
+	{
+		visitSymbol = AliveSymbol;
+		visitSelection = AliveSelection;
+		visitSwitch = AliveSwitch;
+		rightToLeft = true;
+	}
+	bool wasFound()
+	{
+		return found;
+	}
 protected:
-    bool found;
-    TQualifier qualifier;
+	bool found;
+	TQualifier qualifier;
 
-    friend void AliveSymbol(TIntermSymbol*, TIntermTraverser*);
-    friend bool AliveSelection(bool, TIntermSelection*, TIntermTraverser*);
-    friend bool AliveSwitch(bool, TIntermSwitch*, TIntermTraverser*);
+	friend void AliveSymbol(TIntermSymbol*, TIntermTraverser*);
+	friend bool AliveSelection(bool, TIntermSelection*, TIntermTraverser*);
+	friend bool AliveSwitch(bool, TIntermSwitch*, TIntermTraverser*);
 };
 
 //
@@ -67,45 +72,45 @@ protected:
 //
 bool QualifierWritten(TIntermNode* node, TQualifier qualifier)
 {
-    TAliveTraverser it(qualifier);
+	TAliveTraverser it(qualifier);
 
-    if (node)
-        node->traverse(&it);
+	if (node)
+		node->traverse(&it);
 
-    return it.wasFound();
+	return it.wasFound();
 }
 
 void AliveSymbol(TIntermSymbol* node, TIntermTraverser* it)
 {
-    TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
+	TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
 
-    //
-    // If it's what we're looking for, record it.
-    //
-    if (node->getQualifier() == lit->qualifier)
-        lit->found = true;
+	//
+	// If it's what we're looking for, record it.
+	//
+	if (node->getQualifier() == lit->qualifier)
+		lit->found = true;
 }
 
 bool AliveSelection(bool preVisit, TIntermSelection* node, TIntermTraverser* it)
 {
-    UNUSED_ARG(preVisit)
-    UNUSED_ARG(node)
-    TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
+	UNUSED_ARG(preVisit)
+	UNUSED_ARG(node)
+	TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
 
-    if (lit->wasFound())
-        return false;
+	if (lit->wasFound())
+		return false;
 
-    return true;
+	return true;
 }
 
 bool AliveSwitch(bool preVisit, TIntermSwitch* node, TIntermTraverser* it)
 {
-    UNUSED_ARG(preVisit)
-    UNUSED_ARG(node)
-    TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
+	UNUSED_ARG(preVisit)
+	UNUSED_ARG(node)
+	TAliveTraverser* lit = static_cast<TAliveTraverser*>(it);
 
-    if (lit->wasFound())
-        return false;
+	if (lit->wasFound())
+		return false;
 
-    return true;
+	return true;
 }
