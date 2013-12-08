@@ -49,209 +49,223 @@ GlTraceListItem::~GlTraceListItem()
 
 void GlTraceListItem::setIconType(IconType type)
 {
-    m_eIconType = type;
+	m_eIconType = type;
 
-    switch(type) {
-        case IT_EMPTY:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/empty_32.png"));
-            break;
-        case IT_ACTUAL:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/go-actual_32.png"));
-            break;
-        case IT_OK:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/dialog-ok_32.png"));
-            break;
-        case IT_ERROR:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/dialog-error_32.png"));
-            break;
-        case IT_WARNING:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/dialog-warning_32.png"));
-            break;
-        case IT_IMPORTANT:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/emblem-important_32.png"));
-            break;
-        case IT_RECORD:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/media-record_32.png"));
-            break;
-        default:
-            m_qItem = QIcon(QString::fromUtf8(":/icons/icons/empty_32.png"));
-    }
+	switch (type) {
+	case IT_EMPTY:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/empty_32.png"));
+		break;
+	case IT_ACTUAL:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/go-actual_32.png"));
+		break;
+	case IT_OK:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/dialog-ok_32.png"));
+		break;
+	case IT_ERROR:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/dialog-error_32.png"));
+		break;
+	case IT_WARNING:
+		m_qItem = QIcon(
+				QString::fromUtf8(":/icons/icons/dialog-warning_32.png"));
+		break;
+	case IT_IMPORTANT:
+		m_qItem = QIcon(
+				QString::fromUtf8(":/icons/icons/emblem-important_32.png"));
+		break;
+	case IT_RECORD:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/media-record_32.png"));
+		break;
+	default:
+		m_qItem = QIcon(QString::fromUtf8(":/icons/icons/empty_32.png"));
+	}
 }
 
-GlTraceListFilterModel::GlTraceListFilterModel(GlTraceFilterModel *traceFilter, QObject *parent)
-    : QSortFilterProxyModel(parent)
+GlTraceListFilterModel::GlTraceListFilterModel(GlTraceFilterModel *traceFilter,
+		QObject *parent) :
+		QSortFilterProxyModel(parent)
 {
 	m_GlTraceFilterModel = traceFilter;
 	currentShown = false;
 }
 
-bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow, const
-                                                 QModelIndex &sourceParent) const
+bool GlTraceListFilterModel::filterAcceptsRow(int sourceRow,
+		const QModelIndex &sourceParent) const
 {
-    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    QString text = sourceModel()->data(index, Qt::DisplayRole).toString();
+	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+	QString text = sourceModel()->data(index, Qt::DisplayRole).toString();
 
-    /*
-    return (!(text.startsWith(QString("glXGetProcAddressARB("))));
-    */
-    //return true;
+	/*
+	 return (!(text.startsWith(QString("glXGetProcAddressARB("))));
+	 */
+	//return true;
 	return m_GlTraceFilterModel->isFunctionVisible(text.left(text.indexOf("(")))
-		|| dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(index);
+			|| dynamic_cast<GlTraceListModel*>(sourceModel())->isCurrentCall(
+					index);
 }
 
-void GlTraceListFilterModel::showCurrentItemAnyway(bool show) {
+void GlTraceListFilterModel::showCurrentItemAnyway(bool show)
+{
 	currentShown = show;
 }
 
-GlTraceListModel::GlTraceListModel(int maxListEntries, GlTraceFilterModel *traceFilter, QObject *parent)
-    : QAbstractListModel(parent)
+GlTraceListModel::GlTraceListModel(int maxListEntries,
+		GlTraceFilterModel *traceFilter, QObject *parent) :
+		QAbstractListModel(parent)
 {
-    m_iMax = maxListEntries;
-    m_pData = new GlTraceListItem[maxListEntries];
-    m_iFirst = 0;
-    m_iNum   = 0;
+	m_iMax = maxListEntries;
+	m_pData = new GlTraceListItem[maxListEntries];
+	m_iFirst = 0;
+	m_iNum = 0;
 	m_pTraceFilterModel = traceFilter;
 }
 
 GlTraceListModel::~GlTraceListModel()
 {
-    delete[] m_pData;
+	delete[] m_pData;
 }
 
 void GlTraceListModel::clear(void)
 {
-    layoutAboutToBeChanged();
-    m_iFirst = 0;
-    m_iNum   = 0;
-    layoutChanged();
+	layoutAboutToBeChanged();
+	m_iFirst = 0;
+	m_iNum = 0;
+	layoutChanged();
 }
 
-int  GlTraceListModel::getNextIndex(void)
+int GlTraceListModel::getNextIndex(void)
 {
-    int idx;
+	int idx;
 
-    m_iNum++;
-    if (m_iNum > m_iMax) {
-        m_iNum = m_iMax;
+	m_iNum++;
+	if (m_iNum > m_iMax) {
+		m_iNum = m_iMax;
 
-        m_iFirst++;
-        if (m_iFirst >= m_iMax) {
-            m_iFirst = 0;
-        }
+		m_iFirst++;
+		if (m_iFirst >= m_iMax) {
+			m_iFirst = 0;
+		}
 
-        idx = m_iFirst - 1;
-        if (idx < 0) {
-            idx = m_iMax - 1;
-        }
+		idx = m_iFirst - 1;
+		if (idx < 0) {
+			idx = m_iMax - 1;
+		}
 
-    } else {
-        idx = m_iNum - 1;
-    }
+	} else {
+		idx = m_iNum - 1;
+	}
 
-    return idx;
+	return idx;
 }
 
-void GlTraceListModel::addGlTraceItem(const  GlTraceListItem::IconType type, const QString & text)
+void GlTraceListModel::addGlTraceItem(const GlTraceListItem::IconType type,
+		const QString & text)
 {
-    layoutAboutToBeChanged();
-    int idx = getNextIndex();
-    m_pData[idx].setIconType(type);
-    m_pData[idx].setText(text);
-    layoutChanged();
+	layoutAboutToBeChanged();
+	int idx = getNextIndex();
+	m_pData[idx].setIconType(type);
+	m_pData[idx].setText(text);
+	layoutChanged();
 }
 
-void GlTraceListModel::addGlTraceWarningItem(const QString & text)
+void GlTraceListModel::addGlTraceWarningItem(const QString &)
 {
-    layoutAboutToBeChanged();
-    int idx = getNextIndex();
-    m_pData[idx].setIconType(GlTraceListItem::IT_WARNING);
-    layoutChanged();
+	layoutAboutToBeChanged();
+	int idx = getNextIndex();
+	m_pData[idx].setIconType(GlTraceListItem::IT_WARNING);
+	layoutChanged();
 }
 
-void GlTraceListModel::addGlTraceErrorItem(const QString & text)
+void GlTraceListModel::addGlTraceErrorItem(const QString &)
 {
-    layoutAboutToBeChanged();
-    int idx = getNextIndex();
-    m_pData[idx].setIconType(GlTraceListItem::IT_ERROR);
-    layoutChanged();
+	layoutAboutToBeChanged();
+	int idx = getNextIndex();
+	m_pData[idx].setIconType(GlTraceListItem::IT_ERROR);
+	layoutChanged();
 }
 
-void GlTraceListModel::setCurrentGlTraceIconType(const GlTraceListItem::IconType type, int offset)
+void GlTraceListModel::setCurrentGlTraceIconType(
+		const GlTraceListItem::IconType type, int offset)
 {
-    int idx;
+	int idx;
 
-    idx = m_iFirst + m_iNum + offset;
-    if (idx >= m_iMax) {
-        idx -= m_iMax;
-    }
+	idx = m_iFirst + m_iNum + offset;
+	if (idx >= m_iMax) {
+		idx -= m_iMax;
+	}
 
-    if ( 0 <= idx && idx < m_iMax) {
-        layoutAboutToBeChanged();
-        m_pData[idx].setIconType(type);
-        layoutChanged();
-    }
+	if (0 <= idx && idx < m_iMax) {
+		layoutAboutToBeChanged();
+		m_pData[idx].setIconType(type);
+		layoutChanged();
+	}
 }
 
 void GlTraceListModel::setCurrentGlTraceText(const QString &text, int offset)
 {
-    int idx;
+	int idx;
 
-    idx = m_iFirst + m_iNum + offset;
-    if (idx >= m_iMax) {
-        idx -= m_iMax;
-    }
+	idx = m_iFirst + m_iNum + offset;
+	if (idx >= m_iMax) {
+		idx -= m_iMax;
+	}
 
-    if ( 0 <= idx && idx < m_iMax) {
-        layoutAboutToBeChanged();
-        m_pData[idx].setText(text);
-        layoutChanged();
-    }
+	if (0 <= idx && idx < m_iMax) {
+		layoutAboutToBeChanged();
+		m_pData[idx].setText(text);
+		layoutChanged();
+	}
 }
 
 int GlTraceListModel::rowCount(const QModelIndex &parent) const
 {
-    UNUSED_ARG(parent)
-    return m_iNum;
+	UNUSED_ARG(parent)
+	return m_iNum;
 }
 
 QVariant GlTraceListModel::data(const QModelIndex &index, int role) const
 {
-    int idx;
+	int idx;
 
-    if (!index.isValid()) {
-        return QVariant();
-    }
+	if (!index.isValid()) {
+		return QVariant();
+	}
 
-    idx = m_iFirst + index.row();
-    if (idx >= m_iMax) {
-        idx -= m_iMax;
-    }
-    switch (role) {
-		case Qt::ForegroundRole:
-			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-				return QVariant();
-			} else {
-				return QBrush(QColor(128,128,128));
-			}
-		case Qt::FontRole:
-			if (m_pTraceFilterModel->isFunctionVisible(m_pData[idx].getText().left(m_pData[idx].getText().indexOf("(")))) {
-				return QVariant();
-			} else {
-				QFont f;
-				f.setItalic(true);
-				return f;
-			}
-        case Qt::DisplayRole:
-            return m_pData[idx].getText();
-        case Qt::DecorationRole:
-            return m_pData[idx].getIcon();
-        default:
-            return QVariant();
-    }
+	idx = m_iFirst + index.row();
+	if (idx >= m_iMax) {
+		idx -= m_iMax;
+	}
+	switch (role) {
+	case Qt::ForegroundRole:
+		if (m_pTraceFilterModel->isFunctionVisible(
+				m_pData[idx].getText().left(
+						m_pData[idx].getText().indexOf("(")))) {
+			return QVariant();
+		} else {
+			return QBrush(QColor(128, 128, 128));
+		}
+	case Qt::FontRole:
+		if (m_pTraceFilterModel->isFunctionVisible(
+				m_pData[idx].getText().left(
+						m_pData[idx].getText().indexOf("(")))) {
+			return QVariant();
+		} else {
+			QFont f;
+			f.setItalic(true);
+			return f;
+		}
+	case Qt::DisplayRole:
+		return m_pData[idx].getText();
+	case Qt::DecorationRole:
+		return m_pData[idx].getIcon();
+	default:
+		return QVariant();
+	}
 }
 
-bool GlTraceListModel::isCurrentCall(const QModelIndex &index) {
-	if ((m_iFirst + index.row()) % m_iMax == (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
+bool GlTraceListModel::isCurrentCall(const QModelIndex &index)
+{
+	if ((m_iFirst + index.row()) % m_iMax
+			== (m_iFirst + m_iNum - 1 + m_iMax) % m_iMax) {
 		return true;
 	} else {
 		return false;
@@ -260,45 +274,46 @@ bool GlTraceListModel::isCurrentCall(const QModelIndex &index) {
 
 void GlTraceListItem::outputTXT(QTextStream &out) const
 {
-    switch(m_eIconType) {
-        case IT_EMPTY:
-            out << QString("  ");
-            break;
-        case IT_ACTUAL:
-            out << QString("> ");
-            break;
-        case IT_OK:
-            out << QString("| ");
-            break;
-        case IT_ERROR:
-            out << QString("E!");
-            break;
-        case IT_WARNING:
-            out << QString("W!");
-            break;
-        case IT_IMPORTANT:
-            out << QString("I ");
-            break;
-        case IT_RECORD:
-            out << QString("* ");
-            break;
-        default:
-            out << QString("? ");
-    }
-    out << " " << getText() << endl;
+	switch (m_eIconType) {
+	case IT_EMPTY:
+		out << QString("  ");
+		break;
+	case IT_ACTUAL:
+		out << QString("> ");
+		break;
+	case IT_OK:
+		out << QString("| ");
+		break;
+	case IT_ERROR:
+		out << QString("E!");
+		break;
+	case IT_WARNING:
+		out << QString("W!");
+		break;
+	case IT_IMPORTANT:
+		out << QString("I ");
+		break;
+	case IT_RECORD:
+		out << QString("* ");
+		break;
+	default:
+		out << QString("? ");
+	}
+	out << " " << getText() << endl;
 }
 
-void GlTraceListModel::traverse(QTextStream &out, void (GlTraceListItem::*pt2Member)(QTextStream&) const)
+void GlTraceListModel::traverse(QTextStream &out,
+		void (GlTraceListItem::*pt2Member)(QTextStream&) const)
 {
-    int i, idx;
+	int i, idx;
 
-    for (i = 0, idx=m_iFirst; i < m_iNum; i++, idx++) {
-        if (idx >= m_iMax) {
-            idx -= m_iMax;
-        }
-        if ( 0 <= idx && idx < m_iMax) {
-            (m_pData[idx].*pt2Member)(out);
-        }
-    }
+	for (i = 0, idx = m_iFirst; i < m_iNum; i++, idx++) {
+		if (idx >= m_iMax) {
+			idx -= m_iMax;
+		}
+		if (0 <= idx && idx < m_iMax) {
+			(m_pData[idx].*pt2Member)(out);
+		}
+	}
 }
 

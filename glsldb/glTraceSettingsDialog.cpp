@@ -43,76 +43,73 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-GlTraceSettingsViewFilter::GlTraceSettingsViewFilter(QObject *parent)
-    : QSortFilterProxyModel(parent)
+GlTraceSettingsViewFilter::GlTraceSettingsViewFilter(QObject *parent) :
+		QSortFilterProxyModel(parent)
 {
-    filterPattern = QString();
+	filterPattern = QString();
 }
 
-void GlTraceSettingsViewFilter::setFilterWildcard(const QString &pattern) 
+void GlTraceSettingsViewFilter::setFilterWildcard(const QString &pattern)
 {
-    filterPattern = pattern;
-    invalidateFilter();
+	filterPattern = pattern;
+	invalidateFilter();
 }
 
-bool GlTraceSettingsViewFilter::filterAcceptsRow(int sourceRow, 
-                const QModelIndex &sourceParent) const
+bool GlTraceSettingsViewFilter::filterAcceptsRow(int sourceRow,
+		const QModelIndex &sourceParent) const
 {
-    if (sourceModel()) {
-        QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-        return ((GlTraceFilterModel*)sourceModel())->
-            itemContainsPatternRecursive(index, filterPattern);
-    } else {
-        return true;
-    }
+	if (sourceModel()) {
+		QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+		return ((GlTraceFilterModel*) sourceModel())->itemContainsPatternRecursive(
+				index, filterPattern);
+	} else {
+		return true;
+	}
 }
 
-
-GlTraceSettingsDialog::GlTraceSettingsDialog(GlTraceFilterModel *model, QWidget *parent)
-    : QDialog(parent)
+GlTraceSettingsDialog::GlTraceSettingsDialog(GlTraceFilterModel *model,
+		QWidget *parent) :
+		QDialog(parent)
 {
-    setupUi(this);
+	setupUi(this);
 
-	treeView->setEditTriggers(QAbstractItemView::CurrentChanged | 
-                              QAbstractItemView::SelectedClicked);
+	treeView->setEditTriggers(
+			QAbstractItemView::CurrentChanged
+					| QAbstractItemView::SelectedClicked);
 	treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	treeView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    m_pGlTraceModel = model;
+	m_pGlTraceModel = model;
 
-    m_pViewFilter = new GlTraceSettingsViewFilter(m_pGlTraceModel);
-    m_pViewFilter->setSourceModel(m_pGlTraceModel);
+	m_pViewFilter = new GlTraceSettingsViewFilter(m_pGlTraceModel);
+	m_pViewFilter->setSourceModel(m_pGlTraceModel);
 
 	treeView->setModel(m_pViewFilter);
 
+	connect(leSearch, SIGNAL(textChanged(const QString &)), m_pViewFilter,
+			SLOT(setFilterWildcard(const QString &)));
 
+	connect(buttonBox->button(QDialogButtonBox::RestoreDefaults),
+			SIGNAL(pressed()), this, SLOT(resetToDefaults()));
 
-    connect(leSearch, SIGNAL(textChanged(const QString &)),
-            m_pViewFilter, SLOT(setFilterWildcard(const QString &)));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptSettings()));
+	connect(buttonBox, SIGNAL(rejected()), this, SLOT(rejectSettings()));
 
-    connect(buttonBox->button(QDialogButtonBox::RestoreDefaults), 
-            SIGNAL(pressed()),
-            this, SLOT(resetToDefaults()));
-
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptSettings()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(rejectSettings()));
-
-    connect(buttonBox->button(QDialogButtonBox::Reset), 
-            SIGNAL(pressed()),
-            this, SLOT(rejectSettings()));
+	connect(buttonBox->button(QDialogButtonBox::Reset), SIGNAL(pressed()), this,
+			SLOT(rejectSettings()));
 }
 
 void GlTraceSettingsDialog::resetToDefaults()
 {
-    m_pGlTraceModel->resetToDefaults();
+	m_pGlTraceModel->resetToDefaults();
 }
 
 void GlTraceSettingsDialog::acceptSettings()
 {
-    m_pGlTraceModel->save();
+	m_pGlTraceModel->save();
 }
 
 void GlTraceSettingsDialog::rejectSettings()
 {
-    m_pGlTraceModel->load();
+	m_pGlTraceModel->load();
 }
