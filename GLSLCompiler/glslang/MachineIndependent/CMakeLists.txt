@@ -24,16 +24,9 @@ find_package(FLEX REQUIRED)
 # original makefiles use dos2unix around here too, neccessary?
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
 
-add_custom_command(OUTPUT "generated_glsl_lexer.cpp"
-	COMMAND ${FLEX_EXECUTABLE} -ogenerated_glsl_lexer.cpp glslang.l
-	DEPENDS "glslang.l"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-add_custom_command(OUTPUT "generated_glsl_parser.cpp"
-	COMMAND "./postProcess.sh"
-	DEPENDS "glslang.y"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+bison_target(GLSLParser glslang.y ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_parser.cpp)
+flex_target(GLSLScanner glslang.l ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_lexer.cpp)
+add_flex_bison_dependency(GLSLScanner GLSLParser)
 #execute_process(COMMAND postProcess)
 
 # FIXME
@@ -49,5 +42,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../
 	${PROJECT_SOURCE_DIR}/glsldb
 )
 
-add_library(glslang STATIC ${SRC})
+add_library(glslang STATIC ${SRC} ${BISON_GLSLParser_OUTPUTS})
 target_link_libraries(glslang InitializeDll CodeGen DebugVar DebugJump Preprocessor Ossource)
