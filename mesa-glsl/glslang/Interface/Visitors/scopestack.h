@@ -34,7 +34,7 @@ public:
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
 	virtual bool visitIr(ir_loop_jump *ir);
-	virtual bool visitIr(ir_list_dummy *ir);
+	virtual bool visitIr(ir_dummy *ir);
 
 	bool passedTarget;
 	DbgResult& result;

@@ -220,6 +220,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop* ir)
         return false;
     }
 
+    ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
 
     switch (ir->debug_state_internal) {
         case ir_dbg_loop_unset:
@@ -228,31 +229,31 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop* ir)
             break;
         case ir_dbg_loop_wrk_init:
         case ir_dbg_loop_qyr_test:
-        	if( ir->from )
-        		ir->from->accept(this);
+        	if( ir->debug_init )
+        		ir->debug_init->accept(this);
             break;
         case ir_dbg_loop_wrk_test:
         case ir_dbg_loop_select_flow:
         case ir_dbg_loop_qyr_terminal:
-        	if( ir->from )
-        		ir->from->accept(this);
-        	if( ir->counter )
-        		ir->counter->accept(this);
+        	if( ir->debug_init )
+        		ir->debug_init->accept(this);
+        	if( check->condition )
+        		check->condition->accept(this);
             break;
         case ir_dbg_loop_wrk_body:
-        	if( ir->from )
-        		ir->from->accept(this);
-        	if( ir->counter )
-        		ir->counter->accept(this);
+        	if( ir->debug_init )
+        		ir->debug_init->accept(this);
+        	if( check->condition )
+        		check->condition->accept(this);
         	this->visit(&ir->body_instructions);
             break;
         case ir_dbg_loop_wrk_terminal:
-        	if( ir->from )
-        		ir->from->accept(this);
-        	if( ir->counter )
-        		ir->counter->accept(this);
-        	if( ir->to )
-        		ir->to->accept(this);
+        	if( ir->debug_init )
+        		ir->debug_init->accept(this);
+        	if( check->condition )
+        		check->condition->accept(this);
+        	if( ir->debug_terminal )
+        		ir->debug_terminal->accept(this);
             break;
         default:
         	return true;
@@ -276,7 +277,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop_jump* ir)
     return true;
 }
 
-bool ir_scopestack_traverse_visitor::visitIr(ir_list_dummy* ir)
+bool ir_scopestack_traverse_visitor::visitIr(ir_dummy* ir)
 {
 	if (this->passedTarget)
 		return false;

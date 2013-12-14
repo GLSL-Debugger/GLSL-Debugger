@@ -111,11 +111,13 @@ bool ir_stack_traverser_visitor::visitIr(ir_if* ir)
 
 bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 {
+	// FIXME: Here is a leak. We creates new names in ir, but nobody clear it
+	// on ir destruction.
+
 	/* Clear old name for dbgLoopIter */
-	char** iter_name = dbg_iter_name(ir);
-	if( *iter_name != NULL ){
-		free(*iter_name);
-		*iter_name = NULL;
+	if( ir->debug_iter_name != NULL ){
+		free(ir->debug_iter_name);
+		ir->debug_iter_name = NULL;
 	}
 
 	if( ir->debug_state == ir_dbg_state_target ){
@@ -125,7 +127,7 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 				  ir->debug_state_internal == ir_dbg_loop_select_flow ||
 				  ir->debug_state_internal == ir_dbg_loop_qyr_terminal ){
 			this->dbgStack.push_back( ir );
-			cgSetLoopIterName( iter_name, this->vl );
+			cgSetLoopIterName( &ir->debug_iter_name, this->vl );
 		}else{
 			dbgPrint( DBGLVL_ERROR, "CodeGen - loop target has invalid internal state\n" );
 			exit( 1 );
@@ -134,24 +136,28 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 		switch( ir->debug_state_internal ){
 			case ir_dbg_loop_wrk_init:
 				this->dbgStack.push_back( ir );
-				cgSetLoopIterName( iter_name, this->vl );
-				if( ir->from )
-					ir->from->accept(this);
+				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
+				if( ir->debug_init )
+					ir->debug_init->accept(this);
 				return false;
-			case ir_dbg_loop_wrk_test:
+			case ir_dbg_loop_wrk_test: {
 				this->dbgStack.push_back( ir );
-				cgSetLoopIterName( iter_name, this->vl );
-				ir->increment->accept(this);
+				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
+				ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
+				if( check->condition )
+					check->condition->accept(this);
 				return false;
+			}
 			case ir_dbg_loop_wrk_body:
 				this->dbgStack.push_back( ir );
-				cgSetLoopIterName( iter_name, this->vl );
+				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
 				this->visit(&ir->body_instructions);
 				return false;
 			case ir_dbg_loop_wrk_terminal:
 				this->dbgStack.push_back( ir );
-				cgSetLoopIterName( iter_name, this->vl );
-				ir->to->accept(this);
+				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
+				if( ir->debug_terminal )
+					ir->debug_terminal->accept(this);
 				return false;
 			default:
 				dbgPrint( DBGLVL_ERROR,
@@ -163,7 +169,7 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 	return false;
 }
 
-bool ir_stack_traverser_visitor::visitIr(ir_list_dummy *ir)
+bool ir_stack_traverser_visitor::visitIr(ir_dummy *ir)
 {
 	/* add node to stack and finish */
     if (ir->debug_state == ir_dbg_state_target)

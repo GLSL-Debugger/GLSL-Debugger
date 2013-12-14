@@ -224,7 +224,7 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_if* ir)
 bool ir_debugvar_traverser_visitor::visitIr(ir_loop* ir)
 {
 	// declarations made in the initialization are not in scope of the loop
-	set_scope( ir,  getCopyOfScope() );
+	set_scope(ir,  getCopyOfScope());
 
 	// remember end of actual scope, initialization only changes scope of body
 	scopeList::iterator end;
@@ -233,16 +233,17 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_loop* ir)
 		end = --( scope.end() );
 
 	// visit optional initialization
-	if( ir->from )
-		ir->from->accept(this);
+	if( ir->debug_init )
+		ir->debug_init->accept(this);
 
 	// visit test, this cannot change scope anyway, so order is unimportant
-	if( ir->counter )
-		ir->counter->accept(this);
+	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
+	if( check->condition )
+		check->condition->accept(this);
 
 	// visit optional terminal, this cannot change the scope either
-	if( ir->to )
-		ir->to->accept(this);
+	if( ir->debug_terminal )
+		ir->debug_terminal->accept(this);
 
 	// visit body
 	this->visit(&ir->body_instructions);
@@ -281,7 +282,7 @@ bool ir_debugvar_traverser_visitor::nameIsAlreadyInList(scopeList* l, const char
     return false;
 }
 
-bool ir_debugvar_traverser_visitor::visitIr(ir_list_dummy* ir)
+bool ir_debugvar_traverser_visitor::visitIr(ir_dummy* ir)
 {
 	set_scope(ir, getCopyOfScope());
 	return false;

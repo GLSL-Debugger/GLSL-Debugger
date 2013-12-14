@@ -53,7 +53,7 @@ public:
 	virtual bool visitIr(ir_discard *ir);
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
-	virtual bool visitIr(ir_list_dummy* list);
+	virtual bool visitIr(ir_dummy* list);
 
 	OTOperation operation;
     // Keeps track of function call order

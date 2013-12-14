@@ -61,7 +61,9 @@ public:
 	virtual void visit(ir_typedecl_statement *);
 	virtual void visit(ir_emit_vertex *);
 	virtual void visit(ir_end_primitive *);
-	virtual void visit(ir_list_dummy*);
+	virtual void visit(ir_dummy*);
+
+	void visit_block(exec_list* instructions, const char* sep, bool do_indent = true);
 
 	void emit_assignment_part (ir_dereference* lhs, ir_rvalue* rhs, unsigned write_mask, ir_rvalue* dstIndex);
 

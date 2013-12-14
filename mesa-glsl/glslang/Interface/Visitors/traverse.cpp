@@ -301,9 +301,11 @@ void ir_traverse_visitor::visit(ir_if* ir)
 	}
 }
 
+
 void ir_traverse_visitor::visit(ir_loop* ir)
 {
 	bool visit = true;
+	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
 
 	if( this->debugVisit ){
 		/* Visit node first */
@@ -313,8 +315,7 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( ir->debug_state_internal == ir_dbg_loop_wrk_init ){
 			++this->depth;
-			if( ir->from )
-				ir->from->accept( this );
+			this->visit_block(ir->debug_init);
 			--this->depth;
 		}
 
@@ -325,8 +326,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_test ){
 			++this->depth;
-			if( ir->counter )
-				ir->counter->accept( this );
+			if (check->condition)
+				check->condition->accept(this);
 			--this->depth;
 		}
 
@@ -348,8 +349,7 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_terminal ){
 			++this->depth;
-			if( ir->to )
-				ir->to->accept( this );
+			this->visit_block(ir->debug_terminal);
 			--this->depth;
 		}
 
@@ -363,13 +363,11 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit ){
 			++this->depth;
-			if( ir->counter )
-				ir->counter->accept( this );
+			if (check->condition)
+				check->condition->accept(this);
 			this->visit( &ir->body_instructions );
-			if( ir->from )
-				ir->from->accept( this );
-			if( ir->to )
-				ir->to->accept( this );
+			this->visit_block(ir->debug_init);
+			this->visit_block(ir->debug_terminal);
 			--this->depth;
 		}
 
@@ -398,20 +396,53 @@ void ir_traverse_visitor::visit(ir_end_primitive *ir)
 	this->visitIr( ir );
 }
 
-void ir_traverse_visitor::visit(ir_list_dummy* ir)
+void ir_traverse_visitor::visit(ir_dummy* ir)
 {
 	this->visitIr( ir );
 }
 
 void ir_traverse_visitor::visit(exec_list* instructions)
 {
+	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
 		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
 			ir_variable *var = inst->as_variable();
 			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
 				continue;
+		} else if (inst->ir_type == ir_type_dummy) {
+			ir_dummy * const dm = (ir_dummy* const)inst;
+			if ( skip_pair < 0 ) {
+				skip_pair = ir_dummy::pair_type(dm->dummy_type);
+			} else if ( skip_pair == dm->dummy_type ) {
+				skip_pair = -1;
+				continue;
+			}
 		}
+		if (skip_pair >= 0)
+			continue;
 		inst->accept( this );
+	}
+}
+
+
+void ir_traverse_visitor::visit_block(ir_dummy* first)
+{
+	if (!first || !first->next)
+		return;
+
+	int end_token = ir_dummy::pair_type(first->dummy_type);
+
+	// Skip non-blocks
+	if (end_token < 0)
+		return;
+
+	foreach_node_safe(node, first->next){
+		ir_instruction * const inst = (ir_instruction *)node;
+		ir_dummy * const dm = inst->as_dummy();
+		// End traverse
+		if ( dm && end_token == dm->dummy_type )
+			return;
+		inst->accept(this);
 	}
 }

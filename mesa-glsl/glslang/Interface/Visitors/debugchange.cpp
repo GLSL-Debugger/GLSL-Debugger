@@ -434,21 +434,22 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_loop* ir)
 	this->deactivate();
 
 	// visit optional initialization
-	if( ir->from ){
-		ir->from->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( ir->from ) );
+	if( ir->debug_init ){
+		ir->debug_init->accept( this );
+		copyShChangeableList( node_cgbl, get_changeable_list( ir->debug_init ) );
 	}
 
 	// visit test, this should not change the changeables, but to be sure
-	if( ir->counter ){
-		ir->counter->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( ir->counter ) );
+	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
+	if( check ){
+		check->condition->accept( this );
+		copyShChangeableList( node_cgbl, get_changeable_list( check->condition ) );
 	}
 
 	// visit optional terminal, this cannot change the changeables either
-	if( ir->to ){
-		ir->to->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( ir->to ) );
+	if( ir->debug_terminal ){
+		ir->debug_terminal->accept( this );
+		copyShChangeableList( node_cgbl, get_changeable_list( ir->debug_terminal ) );
 	}
 
 	// visit body
@@ -460,4 +461,28 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_loop* ir)
 bool ir_debugchange_traverser_visitor::visitIr(ir_loop_jump* ir)
 {
     return false;
+}
+
+bool ir_debugchange_traverser_visitor::visitIr(ir_dummy *ir)
+{
+	if (!ir || !ir->next)
+		return false;
+
+	int end_token = ir_dummy::pair_type(ir->dummy_type);
+	if (end_token >= 0) {
+		ShChangeableList* node_cgbl = get_changeable_list( ir );
+		foreach_node_safe(node, ir->next){
+			ir_instruction * const inst = (ir_instruction *)node;
+			if (inst->ir_type == ir_type_dummy) {
+				ir_dummy * const dm = (ir_dummy* const)inst;
+				// End traverse
+				if ( end_token == dm->dummy_type )
+					return false;
+			}
+			inst->accept(this);
+			copyShChangeableList( node_cgbl, get_changeable_list( inst ) );
+		}
+	}
+
+	return false;
 }

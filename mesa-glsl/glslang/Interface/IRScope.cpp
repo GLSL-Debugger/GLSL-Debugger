@@ -31,6 +31,8 @@ scopeList* get_scope( ir_instruction* ir )
 
 void set_scope( ir_instruction* ir, scopeList* list )
 {
+	if (!ir)
+		return;
 	scopes[ir] = list;
 }
 

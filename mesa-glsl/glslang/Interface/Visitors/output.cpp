@@ -100,23 +100,42 @@ void ir_output_traverser_visitor::run(exec_list* instructions)
 	if( !globals )
 		globals = new global_print_tracker;
 
-   foreach_iter(exec_list_iterator, iter, *instructions) {
-      ir_instruction *ir = (ir_instruction *)iter.get();
-	  if (ir->ir_type == ir_type_variable) {
-		ir_variable *var = static_cast<ir_variable*>(ir);
-		if ((strstr(var->name, "gl_") == var->name)
-			  && !var->invariant)
-			continue;
-	  }
-
-	  ir->accept(this);
-      if (ir->ir_type != ir_type_function &&
-    		  ir->ir_type != ir_type_list_dummy &&
-    		  (ir->ir_type != ir_type_assignment || this->mode == EShLangNone))
-		ralloc_asprintf_append (&buffer, ";\n");
-   }
+	visit_block(instructions, ";\n", false);
 }
 
+void ir_output_traverser_visitor::visit_block(exec_list* instructions,
+					 const char* sep, bool do_indent)
+{
+	int skip_pair = -1;
+	if (do_indent)
+		indentation++;
+	foreach_iter(exec_list_iterator, iter, *instructions) {
+		ir_instruction * const inst = (ir_instruction *)iter.get();
+		if (inst->ir_type == ir_type_variable) {
+			ir_variable *var = static_cast<ir_variable*>(inst);
+			if ((strstr(var->name, "gl_") == var->name) && !var->invariant)
+				continue;
+		} else if (inst->ir_type == ir_type_dummy) {
+			ir_dummy * const dm = (ir_dummy* const)inst;
+			if ( skip_pair < 0 ) {
+				skip_pair = ir_dummy::pair_type(dm->dummy_type);
+			} else if ( skip_pair == dm->dummy_type ) {
+				skip_pair = -1;
+				continue;
+			}
+		}
+		if (skip_pair >= 0)
+			continue;
+		if (do_indent)
+			indent();
+		inst->accept( this );
+		if (sep && inst->ir_type != ir_type_function && inst->ir_type != ir_type_dummy &&
+		    		  (inst->ir_type != ir_type_assignment || this->mode == EShLangNone))
+			ralloc_asprintf_append (&buffer, sep);
+	}
+	if (do_indent)
+		indentation--;
+}
 
 void ir_output_traverser_visitor::indent(void)
 {
@@ -321,11 +340,11 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 
    indent();
    ralloc_asprintf_append (&buffer, "{\n");
-   indentation++;
 
 	// insert postponed global assigments
 	if (strcmp(ir->function()->name, "main") == 0)
 	{
+		indentation++;
 		assert (!globals->main_function_done);
 		globals->main_function_done = true;
 		foreach_iter(exec_list_iterator, it, globals->global_assignements)
@@ -334,17 +353,11 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 			as->accept(this);
 			ralloc_asprintf_append(&buffer, ";\n");
 		}
+		indentation--;
 	}
 
-   foreach_iter(exec_list_iterator, iter, ir->body) {
-      ir_instruction *const inst = (ir_instruction *) iter.get();
+   visit_block(&ir->body, ";\n");
 
-      indent();
-      inst->accept(this);
-	  ralloc_asprintf_append (&buffer, ";\n");
-   }
-
-   indentation--;
    indent();
    ralloc_asprintf_append (&buffer, "}\n");
 }
@@ -1063,18 +1076,16 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 					ralloc_asprintf_append( &it->buffer, ", " );
 
 				if( i == lastInParameter ){
+					ralloc_asprintf_append (&it->buffer, "(");
 					if( !getSideEffectsDebugParameter( ir, lastInParameter ) ){
 						/* No special care necessary, just add it before */
-						ralloc_asprintf_append (&it->buffer, "(");
 						cgAddDbgCode( CG_TYPE_RESULT, &it->buffer, it->cgOptions,
 								it->cgbl, it->vl, it->dbgStack, 0 );
 						// FIXME: WTF? WHAT LANGUAGE ORIGIANAL USED?
 						ralloc_asprintf_append (&it->buffer, ", ");
 						inst->accept( it );
-						ralloc_asprintf_append (&it->buffer, ")");
 					}else{
 						/* Copy to temporary, debug, and copy back */
-						ralloc_asprintf_append (&it->buffer, "(");
 						cgAddDbgCode( CG_TYPE_PARAMETER, &it->buffer, it->cgOptions,
 														it->cgbl, it->vl, it->dbgStack, 0 );
 						ralloc_asprintf_append (&it->buffer, " = (");
@@ -1085,8 +1096,8 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 						ralloc_asprintf_append (&it->buffer, ", ");
 						cgAddDbgCode( CG_TYPE_PARAMETER, &it->buffer, it->cgOptions,
 										it->cgbl, it->vl, it->dbgStack, 0 );
-						ralloc_asprintf_append (&it->buffer, ")");
 					}
+					ralloc_asprintf_append (&it->buffer, ")");
 				}else
 					inst->accept( it );
 
@@ -1200,24 +1211,19 @@ ir_output_traverser_visitor::visit(ir_discard *ir)
 static void print_selection_instructions(exec_list* list, ir_if* ir,
 					ir_output_traverser_visitor* it, int debug_option)
 {
-   it->indentation++;
    if (ir->debug_target && it->cgOptions == DBG_CG_SELECTION_CONDITIONAL
       && ir->debug_state_internal == ir_dbg_if_condition_passed)	{
+      it->indentation++;
       /* Add code to colorize condition */
       it->indent();
       //DBG_CG_COVERAGE
       cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions,
                    it->cgbl, it->vl, it->dbgStack, debug_option);
       ralloc_asprintf_append(&it->buffer, ";\n");
+      it->indentation--;
    }
 
-   foreach_iter(exec_list_iterator, iter, *list){
-      ir_instruction * const inst = (ir_instruction *) iter.get();
-      it->indent();
-      inst->accept(it);
-      ralloc_asprintf_append(&it->buffer, ";\n");
-   }
-   it->indentation--;
+   it->visit_block(list, ";\n");
    it->indent();
 }
 
@@ -1292,100 +1298,147 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 }
 
 
+
 void
 ir_output_traverser_visitor::visit(ir_loop *ir)
 {
-	// TODO: loop
-	printf("TODO: loop debug output");
+	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
 
-	bool noData = (ir->counter == NULL && ir->from == NULL && ir->to == NULL && ir->increment == NULL);
-	if (noData) {
-		ralloc_asprintf_append (&buffer, "while (true) {\n");
-		indentation++;
-		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-			ir_instruction *const inst = (ir_instruction *) iter.get();
-			indent();
-			inst->accept(this);
-			ralloc_asprintf_append (&buffer, ";\n");
-		}
-		indentation--;
-		indent();
-		ralloc_asprintf_append (&buffer, "}");
-		return;
-	}
-
-	bool canonicalFor = (ir->counter && ir->from && ir->to && ir->increment);
-	if (canonicalFor)
-	{
+	if (ir->mode == ir_loop_for) {
 		ralloc_asprintf_append (&buffer, "for (");
-		ir->counter->accept (this);
-		ralloc_asprintf_append (&buffer, " = ");
-		ir->from->accept (this);
+		if( ir->debug_init )
+			ir->debug_init->accept(this);
 		ralloc_asprintf_append (&buffer, "; ");
-		print_var_name (ir->counter);
-
-		// IR cmp operator is when to terminate loop; whereas GLSL for loop syntax
-		// is while to continue the loop. Invert the meaning of operator when outputting.
-		const char* termOp = NULL;
-		switch (ir->cmp) {
-		case ir_binop_less: termOp = ">="; break;
-		case ir_binop_greater: termOp = "<="; break;
-		case ir_binop_lequal: termOp = ">"; break;
-		case ir_binop_gequal: termOp = "<"; break;
-		case ir_binop_equal: termOp = "!="; break;
-		case ir_binop_nequal: termOp = "=="; break;
-		default: assert(false);
-		}
-		ralloc_asprintf_append (&buffer, " %s ", termOp);
-		ir->to->accept (this);
+		if( check->condition )
+			check->condition->accept(this);
 		ralloc_asprintf_append (&buffer, "; ");
-		// IR already has instructions that modify the loop counter in the body
-		//print_var_name (ir->counter);
-		//ralloc_asprintf_append (&buffer, " = ");
-		//print_var_name (ir->counter);
-		//ralloc_asprintf_append (&buffer, "+(");
-		//ir->increment->accept (this);
-		//ralloc_asprintf_append (&buffer, ")");
+		if( ir->debug_terminal )
+			ir->debug_terminal->accept(this);
 		ralloc_asprintf_append (&buffer, ") {\n");
-		indentation++;
-		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-			ir_instruction *const inst = (ir_instruction *) iter.get();
-			indent();
-			inst->accept(this);
-			ralloc_asprintf_append (&buffer, ";\n");
-		}
-		indentation--;
-		indent();
+		visit_block(&ir->body_instructions, ";\n");
 		ralloc_asprintf_append (&buffer, "}");
 		return;
 	}
 
+	// While loops
 
-   ralloc_asprintf_append (&buffer, "( TODO loop (");
-   if (ir->counter != NULL)
-      ir->counter->accept(this);
-   ralloc_asprintf_append (&buffer, ") (");
-   if (ir->from != NULL)
-      ir->from->accept(this);
-   ralloc_asprintf_append (&buffer, ") (");
-   if (ir->to != NULL)
-      ir->to->accept(this);
-   ralloc_asprintf_append (&buffer, ") (");
-   if (ir->increment != NULL)
-      ir->increment->accept(this);
-   ralloc_asprintf_append (&buffer, ") (\n");
-   indentation++;
 
-   foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-      ir_instruction *const inst = (ir_instruction *) iter.get();
+	if (ir->mode == ir_loop_while) {
+		ralloc_asprintf_append (&buffer, "while (");
+		if( check->condition )
+			check->condition->accept(this);
+		ralloc_asprintf_append (&buffer, ") {\n");
+	} else {
+		ralloc_asprintf_append (&buffer, "do {\n");
+	}
 
-      indent();
-      inst->accept(this);
-      ralloc_asprintf_append (&buffer, ";\n");
-   }
-   indentation--;
-   indent();
-   ralloc_asprintf_append (&buffer, "))\n");
+	if( ir->debug_init )
+		ir->debug_init->accept(this);
+	visit_block(&ir->body_instructions, ";\n");
+	if( ir->debug_terminal )
+		ir->debug_terminal->accept(this);
+
+	if (ir->mode == ir_loop_while) {
+		ralloc_asprintf_append (&buffer, "}");
+	} else {
+		ralloc_asprintf_append (&buffer, "while (");
+		if( check->condition )
+			check->condition->accept(this);
+		ralloc_asprintf_append (&buffer, ")");
+	}
+
+
+//	// TODO: loop
+//	printf("TODO: loop debug output");
+//
+//	bool noData = (ir->counter == NULL && ir->from == NULL && ir->to == NULL && ir->increment == NULL);
+//	if (noData) {
+//		ralloc_asprintf_append (&buffer, "while (true) {\n");
+//		indentation++;
+//		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
+//			ir_instruction *const inst = (ir_instruction *) iter.get();
+//			indent();
+//			inst->accept(this);
+//			ralloc_asprintf_append (&buffer, ";\n");
+//		}
+//		indentation--;
+//		indent();
+//		ralloc_asprintf_append (&buffer, "}");
+//		return;
+//	}
+//
+//	bool canonicalFor = (ir->counter && ir->from && ir->to && ir->increment);
+//	if (canonicalFor)
+//	{
+//		ralloc_asprintf_append (&buffer, "for (");
+//		ir->counter->accept (this);
+//		ralloc_asprintf_append (&buffer, " = ");
+//		ir->from->accept (this);
+//		ralloc_asprintf_append (&buffer, "; ");
+//		print_var_name (ir->counter);
+//
+//		// IR cmp operator is when to terminate loop; whereas GLSL for loop syntax
+//		// is while to continue the loop. Invert the meaning of operator when outputting.
+//		const char* termOp = NULL;
+//		switch (ir->cmp) {
+//		case ir_binop_less: termOp = ">="; break;
+//		case ir_binop_greater: termOp = "<="; break;
+//		case ir_binop_lequal: termOp = ">"; break;
+//		case ir_binop_gequal: termOp = "<"; break;
+//		case ir_binop_equal: termOp = "!="; break;
+//		case ir_binop_nequal: termOp = "=="; break;
+//		default: assert(false);
+//		}
+//		ralloc_asprintf_append (&buffer, " %s ", termOp);
+//		ir->to->accept (this);
+//		ralloc_asprintf_append (&buffer, "; ");
+//		// IR already has instructions that modify the loop counter in the body
+//		//print_var_name (ir->counter);
+//		//ralloc_asprintf_append (&buffer, " = ");
+//		//print_var_name (ir->counter);
+//		//ralloc_asprintf_append (&buffer, "+(");
+//		//ir->increment->accept (this);
+//		//ralloc_asprintf_append (&buffer, ")");
+//		ralloc_asprintf_append (&buffer, ") {\n");
+//		indentation++;
+//		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
+//			ir_instruction *const inst = (ir_instruction *) iter.get();
+//			indent();
+//			inst->accept(this);
+//			ralloc_asprintf_append (&buffer, ";\n");
+//		}
+//		indentation--;
+//		indent();
+//		ralloc_asprintf_append (&buffer, "}");
+//		return;
+//	}
+//
+//
+//   ralloc_asprintf_append (&buffer, "( TODO loop (");
+//   if (ir->counter != NULL)
+//      ir->counter->accept(this);
+//   ralloc_asprintf_append (&buffer, ") (");
+//   if (ir->from != NULL)
+//      ir->from->accept(this);
+//   ralloc_asprintf_append (&buffer, ") (");
+//   if (ir->to != NULL)
+//      ir->to->accept(this);
+//   ralloc_asprintf_append (&buffer, ") (");
+//   if (ir->increment != NULL)
+//      ir->increment->accept(this);
+//   ralloc_asprintf_append (&buffer, ") (\n");
+//   indentation++;
+//
+//   foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
+//      ir_instruction *const inst = (ir_instruction *) iter.get();
+//
+//      indent();
+//      inst->accept(this);
+//      ralloc_asprintf_append (&buffer, ";\n");
+//   }
+//   indentation--;
+//   indent();
+//   ralloc_asprintf_append (&buffer, "))\n");
 }
 
 
@@ -1396,14 +1449,32 @@ ir_output_traverser_visitor::visit(ir_loop_jump *ir)
 }
 
 void
-ir_output_traverser_visitor::visit(ir_list_dummy* ir)
+ir_output_traverser_visitor::visit(ir_dummy* ir)
 {
-    if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
-        this->dbgTargetProcessed = true;
-        indent();
-        cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
-        ralloc_asprintf_append( &buffer, ";\n" );
-    }
+	int end_token = ir_dummy::pair_type(ir->dummy_type);
+
+	// Skip non-blocks
+	if (end_token >= 0) {
+        if (!ir->next)
+            return;
+        foreach_node_safe(node, ir->next){
+            ir_instruction * const inst = (ir_instruction *)node;
+            if (inst->ir_type == ir_type_dummy) {
+                ir_dummy * const dm = (ir_dummy* const)inst;
+                // End traverse
+                if ( end_token == dm->dummy_type )
+                    return;
+            }
+            inst->accept(this);
+        }
+	} else {
+	    if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
+	        this->dbgTargetProcessed = true;
+	        indent();
+	        cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+	        ralloc_asprintf_append( &buffer, ";\n" );
+	    }
+	}
 }
 
 void
