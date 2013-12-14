@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,8 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "colors.qt.h"
 
 GeoShaderTreeItem::GeoShaderTreeItem(QString name, int dataIdx,
-                                     QList<VertexBox*> *data,
-                                     GeoShaderTreeItem *parent)
+		QList<VertexBox*> *data, GeoShaderTreeItem *parent)
 {
 	m_parentItem = parent;
 	m_name = name;
@@ -82,7 +81,8 @@ GeoShaderTreeItem *GeoShaderTreeItem::parent()
 int GeoShaderTreeItem::row() const
 {
 	if (m_parentItem) {
-		return m_parentItem->m_children.indexOf(const_cast<GeoShaderTreeItem*>(this));
+		return m_parentItem->m_children.indexOf(
+				const_cast<GeoShaderTreeItem*>(this));
 	}
 
 	return 0;
@@ -93,17 +93,17 @@ int GeoShaderTreeItem::getDataIndex() const
 	return m_dataIdx;
 }
 
-QVariant GeoShaderTreeItem::data(int column) const
+QVariant GeoShaderTreeItem::data(int) const
 {
 	return QVariant();
 }
 
-QVariant GeoShaderTreeItem::displayColor(int column) const
+QVariant GeoShaderTreeItem::displayColor(int) const
 {
 	return QVariant();
 }
 
-Qt::ItemFlags GeoShaderTreeItem::flags(int column) const
+Qt::ItemFlags GeoShaderTreeItem::flags(int) const
 {
 	return 0;
 }
@@ -114,14 +114,12 @@ int GeoShaderTreeItem::isVertexItem() const
 }
 
 GeoShaderTreeInPrimItem::GeoShaderTreeInPrimItem(QString name, int dataIdx,
-                                                 QList<VertexBox*> *data,
-                                                 VertexBox *condition,
-                                                 bool *initialCondition,
-                                                 GeoShaderTreeItem *parent)
-	: GeoShaderTreeItem(name, dataIdx, data, parent)
+		QList<VertexBox*> *data, VertexBox *condition, bool *initialCondition,
+		GeoShaderTreeItem *parent) :
+		GeoShaderTreeItem(name, dataIdx, data, parent)
 {
 	m_condition = condition;
-    m_initialCondition = initialCondition;
+	m_initialCondition = initialCondition;
 }
 
 int GeoShaderTreeInPrimItem::columnCount() const
@@ -141,58 +139,63 @@ int GeoShaderTreeInPrimItem::columnCount() const
 
 QVariant GeoShaderTreeInPrimItem::data(int column) const
 {
-    if (m_condition) {
-        if (column == 0) {
-            return m_name;
-        } else {
-            if (m_initialCondition && column == 1) {
-                if (m_initialCondition[m_dataIdx]) {
-                    if (m_condition->getCoveragePointer() &&
-                        m_condition->getCoveragePointer()[m_dataIdx] == true) {
-                        if (m_condition->getDataPointer() &&
-                            m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
-                            return QString("active");
-                        } else {
-                            return QString("done");
-                        }
-                    } else {
-                        return QString("out");
-                    }
-                } else {
-                    return QVariant("%");
-                }
-            } else if (flags(0) == 0) {
-                return QVariant("%");
-            } else if (column == 1) {
-                if (m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
-                    return QString("true");
-                } else if (m_condition->getDataPointer()[m_dataIdx] > 0.25f) {
-                    return QString("false");
-                } else {
-                    return QVariant("false");
-                }
-            } else if (m_data && column-2 >= 0 && column-2 < m_data->size()) {
-                if (((*m_data)[column-2]->getDataMapPointer() &&
-                            !(*m_data)[column-2]->getDataMapPointer()[m_dataIdx])) {
-                    return QVariant("-");
-                } else {
-                    return QVariant((*m_data)[column-2]->getDataPointer()[m_dataIdx]);
-                }
-            } else {
-                return QVariant();
-            }
-        }
+	if (m_condition) {
+		if (column == 0) {
+			return m_name;
+		} else {
+			if (m_initialCondition && column == 1) {
+				if (m_initialCondition[m_dataIdx]) {
+					if (m_condition->getCoveragePointer()
+							&& m_condition->getCoveragePointer()[m_dataIdx]
+									== true) {
+						if (m_condition->getDataPointer()
+								&& m_condition->getDataPointer()[m_dataIdx]
+										> 0.75f) {
+							return QString("active");
+						} else {
+							return QString("done");
+						}
+					} else {
+						return QString("out");
+					}
+				} else {
+					return QVariant("%");
+				}
+			} else if (flags(0) == 0) {
+				return QVariant("%");
+			} else if (column == 1) {
+				if (m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
+					return QString("true");
+				} else if (m_condition->getDataPointer()[m_dataIdx] > 0.25f) {
+					return QString("false");
+				} else {
+					return QVariant("false");
+				}
+			} else if (m_data && column - 2 >= 0
+					&& column - 2 < m_data->size()) {
+				if (((*m_data)[column - 2]->getDataMapPointer()
+						&& !(*m_data)[column - 2]->getDataMapPointer()[m_dataIdx])) {
+					return QVariant("-");
+				} else {
+					return QVariant(
+							(*m_data)[column - 2]->getDataPointer()[m_dataIdx]);
+				}
+			} else {
+				return QVariant();
+			}
+		}
 	} else {
 		if (column == 0) {
 			return m_name;
-		} else if (m_data && column-1 >= 0 && column-1 < m_data->size()) {
+		} else if (m_data && column - 1 >= 0 && column - 1 < m_data->size()) {
 			if (flags(0) == 0) {
 				return QVariant("%");
-			} else if (((*m_data)[column-1]->getDataMapPointer() &&
-					   !(*m_data)[column-1]->getDataMapPointer()[m_dataIdx])) {
+			} else if (((*m_data)[column - 1]->getDataMapPointer()
+					&& !(*m_data)[column - 1]->getDataMapPointer()[m_dataIdx])) {
 				return QVariant("-");
 			} else {
-				return QVariant((*m_data)[column-1]->getDataPointer()[m_dataIdx]);
+				return QVariant(
+						(*m_data)[column - 1]->getDataPointer()[m_dataIdx]);
 			}
 		} else {
 			return QVariant();
@@ -200,85 +203,86 @@ QVariant GeoShaderTreeInPrimItem::data(int column) const
 	}
 }
 
-QVariant GeoShaderTreeInPrimItem::displayColor(int column) const
+QVariant GeoShaderTreeInPrimItem::displayColor(int) const
 {
 	if (m_condition) {
-        if (m_initialCondition) {
-            if (m_initialCondition[m_dataIdx]) {
-                if (m_condition->getCoveragePointer() &&
-                    m_condition->getCoveragePointer()[m_dataIdx] == true)
-                {
-                    if (m_condition->getDataPointer() &&
-                        m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
-                        return DBG_GREEN;
-                    } else {
-                        return DBG_RED;
-                    }
-                } else {
-                    return DBG_ORANGE;
-                }
-            } else {
-                return QVariant();
-            }
-        } else {
-            if (m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
-                return DBG_GREEN;
-            } else if (m_condition->getDataPointer()[m_dataIdx] > 0.25f) {
-                return DBG_RED;
-            } else {
-                return QVariant();
-            }
-        }
+		if (m_initialCondition) {
+			if (m_initialCondition[m_dataIdx]) {
+				if (m_condition->getCoveragePointer()
+						&& m_condition->getCoveragePointer()[m_dataIdx]
+								== true) {
+					if (m_condition->getDataPointer()
+							&& m_condition->getDataPointer()[m_dataIdx]
+									> 0.75f) {
+						return DBG_GREEN;
+					} else {
+						return DBG_RED;
+					}
+				} else {
+					return DBG_ORANGE;
+				}
+			} else {
+				return QVariant();
+			}
+		} else {
+			if (m_condition->getDataPointer()[m_dataIdx] > 0.75f) {
+				return DBG_GREEN;
+			} else if (m_condition->getDataPointer()[m_dataIdx] > 0.25f) {
+				return DBG_RED;
+			} else {
+				return QVariant();
+			}
+		}
 	} else {
 		return QVariant();
 	}
 }
 
-
 Qt::ItemFlags GeoShaderTreeInPrimItem::flags(int column) const
 {
 	if (column == 0) {
-        if (m_condition) {
-            if (m_condition->getCoveragePointer() &&
-                m_condition->getCoveragePointer()[m_dataIdx] == false) {
-                return 0;
-            } else if (!m_data) {
-                /* non-basic input primitive */
-                for (int i = 0; i < m_children.size(); i++) {
-                    Qt::ItemFlags cflags = m_children[i]->flags(column);
-                    if (cflags != 0) {
-                        return cflags;
-                    }
-                }
-                return 0;
-            } else {
-                return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-            }
-        } else {
-            if (m_data && !m_data->empty() && (*m_data)[0] &&
-                ((*m_data)[0]->getCoveragePointer() &&
-                 !(*m_data)[0]->getCoveragePointer()[m_dataIdx])) {
-                return 0;
-            } else if (!m_data) {
-                /* non-basic input primitive */
-                for (int i = 0; i < m_children.size(); i++) {
-                    Qt::ItemFlags cflags = m_children[i]->flags(column);
-                    if (cflags != 0) {
-                        return cflags;
-                    }
-                }
-                return 0;
-            } else {
-                return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-            }
-        }
+		if (m_condition) {
+			if (m_condition->getCoveragePointer()
+					&& m_condition->getCoveragePointer()[m_dataIdx] == false) {
+				return 0;
+			} else if (!m_data) {
+				/* non-basic input primitive */
+				for (int i = 0; i < m_children.size(); i++) {
+					Qt::ItemFlags cflags = m_children[i]->flags(column);
+					if (cflags != 0) {
+						return cflags;
+					}
+				}
+				return 0;
+			} else {
+				return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+			}
+		} else {
+			if (m_data && !m_data->empty() && (*m_data)[0]
+					&& ((*m_data)[0]->getCoveragePointer()
+							&& !(*m_data)[0]->getCoveragePointer()[m_dataIdx])) {
+				return 0;
+			} else if (!m_data) {
+				/* non-basic input primitive */
+				for (int i = 0; i < m_children.size(); i++) {
+					Qt::ItemFlags cflags = m_children[i]->flags(column);
+					if (cflags != 0) {
+						return cflags;
+					}
+				}
+				return 0;
+			} else {
+				return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+			}
+		}
 	} else {
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 }
 
-GeoShaderTreeOutPrimItem::GeoShaderTreeOutPrimItem(QString name, GeoShaderTreeItem *parent)
-	: GeoShaderTreeItem(name, -1, NULL, parent)
+GeoShaderTreeOutPrimItem::GeoShaderTreeOutPrimItem(QString name,
+		GeoShaderTreeItem *parent) :
+		GeoShaderTreeItem(name, -1, NULL, parent)
 {
 }
 
@@ -294,7 +298,7 @@ QVariant GeoShaderTreeOutPrimItem::data(int column) const
 Qt::ItemFlags GeoShaderTreeOutPrimItem::flags(int column) const
 {
 	if (column == 0) {
-		if (!m_data && m_parentItem) { 
+		if (!m_data && m_parentItem) {
 			return m_parentItem->flags(0);
 		}
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -304,9 +308,8 @@ Qt::ItemFlags GeoShaderTreeOutPrimItem::flags(int column) const
 }
 
 GeoShaderTreeVertexItem::GeoShaderTreeVertexItem(QString name, int dataIdx,
-                                                 QList<VertexBox*> *data,
-                                                 GeoShaderTreeItem *parent)
-	: GeoShaderTreeItem(name, dataIdx, data, parent)
+		QList<VertexBox*> *data, GeoShaderTreeItem *parent) :
+		GeoShaderTreeItem(name, dataIdx, data, parent)
 {
 }
 
@@ -314,20 +317,21 @@ QVariant GeoShaderTreeVertexItem::data(int column) const
 {
 	if (column == 0) {
 		return m_name;
-	} else if (m_data && column-1 >= 0 && column-1 < m_data->size()) {
-		float *dp = (*m_data)[column-1]->getDataPointer();
-		bool *dmp = (*m_data)[column-1]->getDataMapPointer();
+	} else if (m_data && column - 1 >= 0 && column - 1 < m_data->size()) {
+		float *dp = (*m_data)[column - 1]->getDataPointer();
+		bool *dmp = (*m_data)[column - 1]->getDataMapPointer();
 		if (!dmp[m_dataIdx]) {
 			return QVariant("-");
-		} else if (dp[2*m_dataIdx+1] == 0.0f || dp[2*m_dataIdx+1] == -0.0f) {
+		} else if (dp[2 * m_dataIdx + 1] == 0.0f
+				|| dp[2 * m_dataIdx + 1] == -0.0f) {
 			return QVariant(QString("?"));
-		} else if (dp[2*m_dataIdx+1] < 0.0) {
+		} else if (dp[2 * m_dataIdx + 1] < 0.0) {
 			return QVariant("-");
-		} else if (dp[2*m_dataIdx+1] > 0.0) {
+		} else if (dp[2 * m_dataIdx + 1] > 0.0) {
 			if (flags(0) == 0) {
 				return QVariant("%");
 			} else {
-				return QVariant(dp[2*m_dataIdx]);
+				return QVariant(dp[2 * m_dataIdx]);
 			}
 		} else {
 			return QVariant();

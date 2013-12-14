@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,11 +34,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MAPPINGS_H
 #define MAPPINGS_H
 
+#ifndef UNUSED_ARG
+#define UNUSED_ARG(x) (void) x;
+#endif
+
 enum MapType {
 	MAP_TYPE_BLACK = 0,
 	MAP_TYPE_WHITE = 1,
-	MAP_TYPE_VAR   = 2,
-	MAP_TYPE_OFF   = 3
+	MAP_TYPE_VAR = 2,
+	MAP_TYPE_OFF = 3
 };
 
 struct Mapping {
@@ -46,13 +50,13 @@ struct Mapping {
 	MapType type;
 };
 
-int     getIntFromMapping(Mapping m);
+int getIntFromMapping(Mapping m);
 Mapping getMappingFromInt(int i);
 
 enum RangeMap {
-	RANGE_MAP_DEFAULT  = 0,
-	RANGE_MAP_POSITIVE = 1, 
-	RANGE_MAP_NEGATIVE = 2, 
+	RANGE_MAP_DEFAULT = 0,
+	RANGE_MAP_POSITIVE = 1,
+	RANGE_MAP_NEGATIVE = 2,
 	RANGE_MAP_ABSOLUTE = 3
 };
 
@@ -61,12 +65,12 @@ struct RangeMapping {
 	RangeMap range;
 };
 
-int          getIntFromRangeMapping(RangeMapping m);
+int getIntFromRangeMapping(RangeMapping m);
 RangeMapping getRangeMappingFromInt(int i);
-float        getMappedValueF(float v, Mapping *mapping,
-                             RangeMapping *rangeMapping, float minmax[2]);
-int          getMappedValueI(float v, Mapping *mapping,
-                             RangeMapping *rangeMapping, float minmax[2]);
+float getMappedValueF(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2]);
+int getMappedValueI(float v, Mapping *mapping, RangeMapping *rangeMapping,
+		float minmax[2]);
 
 #endif
 

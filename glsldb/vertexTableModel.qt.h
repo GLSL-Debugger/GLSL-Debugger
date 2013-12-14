@@ -38,69 +38,68 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QSortFilterProxyModel>
 #include "vertexBox.qt.h"
 
-class VertexTableSortFilterProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
+class VertexTableSortFilterProxyModel: public QSortFilterProxyModel {
+Q_OBJECT
 
- public:
+public:
 
 	VertexTableSortFilterProxyModel(QObject *parent = 0);
 
- public slots:
+public slots:
 
 	void setHideInactive(bool b);
 
- protected:
+protected:
 
-	virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+	virtual bool filterAcceptsRow(int sourceRow,
+			const QModelIndex &sourceParent) const;
 
- private:
+private:
 
 	bool m_hideInactive;
 };
 
-class VertexTableModel : public QAbstractTableModel
-{
-	Q_OBJECT
+class VertexTableModel: public QAbstractTableModel {
+Q_OBJECT
 
- public:
+public:
 
 	VertexTableModel(QObject *parent = 0);
 	~VertexTableModel();
 
 	bool addVertexBox(VertexBox *vb, QString &name);
 
-	void setCondition(VertexBox *condition, bool *initialCoverage=NULL);
+	void setCondition(VertexBox *condition, bool *initialCoverage = NULL);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-	QVariant headerData(int section, Qt::Orientation orientation,
-	                    int role = Qt::DisplayRole) const;
+	QVariant headerData(int section, Qt::Orientation orientation, int role =
+			Qt::DisplayRole) const;
 	const QString &getDataColumnName(int column) const;
 	VertexBox* getDataColumn(int column);
 
- public slots:
+public slots:
 	void updateData();
 
- signals:
+signals:
 	void empty();
 	void dataDeleted(int idx);
-	
- private slots:
-	 
- 	void detachData();
-	
- private:
+
+private slots:
+
+	void detachData();
+
+private:
 
 	VertexTableSortFilterProxyModel *m_filterProxy;
-	
+
 	QList<VertexBox*> m_pData;
-	QList<QString>    m_Names;
-	VertexBox        *m_condition;
-	bool             *m_pInitialCoverage;
+	QList<QString> m_Names;
+	VertexBox *m_condition;
+	bool *m_pInitialCoverage;
 };
 
 #endif

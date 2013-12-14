@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,116 +40,118 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <time.h>
 
-	#ifdef __MACH__
-		#include <mach/clock.h>
-		#include <mach/mach.h>
-	#endif
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
 
 #endif /* _!WIN32 */
 
 #include "sync.h"
 
-
 /*
  * ::createIpcEvent
  */
 int createIpcEvent(IpcEvent *evt, const int reserved, const int isInitiallySet,
-        const int isCreateOnly, const char *name) {
-    int retval = 0;
+		const int isCreateOnly, const char *name)
+{
+	int retval = 0;
 
 #ifdef _WIN32
-    if ((*evt = CreateEventA(NULL, reserved, isInitiallySet, name)) == NULL) {
-        retval = GetLastError();
+	if ((*evt = CreateEventA(NULL, reserved, isInitiallySet, name)) == NULL) {
+		retval = GetLastError();
 
-        /* If event already exists and open is allowed, try to open it. */
-        if ((retval == ERROR_ALREADY_EXISTS) && !isCreateOnly) {
-            if ((*evt = OpenEventA(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, name))
-                    != NULL) {
-                retval = 0;
-            } else {
-                retval = GetLastError();
-            }
-        }
-    }
+		/* If event already exists and open is allowed, try to open it. */
+		if ((retval == ERROR_ALREADY_EXISTS) && !isCreateOnly) {
+			if ((*evt = OpenEventA(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, name))
+					!= NULL) {
+				retval = 0;
+			} else {
+				retval = GetLastError();
+			}
+		}
+	}
 
 #else /* _WIN32 */
-    char *n = (char *) malloc(strlen(name) + 2);
+	char *n = (char *) malloc(strlen(name) + 2);
 
-    if (n != NULL) {
-        strcpy(n, "/");
-        strcat(n, name);
+	if (n != NULL) {
+		strcpy(n, "/");
+		strcat(n, name);
 
-        if ((*evt = sem_open(n, (isCreateOnly ? O_CREAT : 0), 0666, 
-                (isInitiallySet ? 1 : 0))) == SEM_FAILED) {
-            retval = errno;
-        }
+		if ((*evt = sem_open(n, (isCreateOnly ? O_CREAT : 0), 0666,
+				(isInitiallySet ? 1 : 0))) == SEM_FAILED) {
+			retval = errno;
+		}
 
-        free(n);
-    } else {
-        retval = ENOMEM;
-    }
+		free(n);
+	} else {
+		retval = ENOMEM;
+	}
 #endif /* _WIN32 */
 
-    return retval;
+	return retval;
 }
-
 
 /*
  * ::setIpcEvent
  */
-int setIpcEvent(IpcEvent evt) {
+int setIpcEvent(IpcEvent evt)
+{
 #ifdef _WIN32
-    return (SetEvent(evt) ? 0 : GetLastError());
+	return (SetEvent(evt) ? 0 : GetLastError());
 
 #else /* _WIN32 */
 
-    /* Ensure maximum number of 1 in semaphore. */
-    if ((sem_trywait(evt) == -1) && (errno != EAGAIN)) {
-        return errno;
-    }
+	/* Ensure maximum number of 1 in semaphore. */
+	if ((sem_trywait(evt) == -1) && (errno != EAGAIN)) {
+		return errno;
+	}
 
-    if (sem_post(evt) == -1) {
-        return errno;
-    }
+	if (sem_post(evt) == -1) {
+		return errno;
+	}
+
+	return 0;
 
 #endif /* _WIN32 */
 }
 
-
 /*
  * ::waitIpcEvent
  */
-int waitIpcEvent(IpcEvent evt, int timeout) {
+int waitIpcEvent(IpcEvent evt, int timeout)
+{
 #ifdef _WIN32
-    switch (WaitForSingleObject(evt, timeout)) {
+	switch (WaitForSingleObject(evt, timeout)) {
 
-        case WAIT_OBJECT_0:
-            /* falls through. */
-        case WAIT_ABANDONED:
-            return 0;
-            /* Unreachable. */
+		case WAIT_OBJECT_0:
+		/* falls through. */
+		case WAIT_ABANDONED:
+		return 0;
+		/* Unreachable. */
 
-        case WAIT_TIMEOUT:
-            return ERROR_TIMEOUT;
-            /* Unreachable. */
+		case WAIT_TIMEOUT:
+		return ERROR_TIMEOUT;
+		/* Unreachable. */
 
-        default:
-            return GetLastError();
-            /* Unreachable. */
-    }
+		default:
+		return GetLastError();
+		/* Unreachable. */
+	}
 
 #else /* _WIN32 */
-    struct timespec tsEnd;
-    int retval = 0;
+	struct timespec tsEnd;
+	int retval = 0;
 
-    if (timeout == TIMEOUT_INFINITE) {
-        if (sem_wait(evt) == -1) {
-            retval = errno;
-        }
+	if (timeout == TIMEOUT_INFINITE) {
+		if (sem_wait(evt) == -1) {
+			retval = errno;
+		}
 
-    } else {
-    
-#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+	} else {
+
+#ifdef __MACH__ /* OS X does not have clock_gettime, use clock_get_time */
 		clock_serv_t cclock;
 		mach_timespec_t mts;
 		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
@@ -158,33 +160,33 @@ int waitIpcEvent(IpcEvent evt, int timeout) {
 		tsEnd.tv_sec = mts.tv_sec;
 		tsEnd.tv_nsec = mts.tv_nsec;
 #else /* __MACH__ */
-        clock_gettime(CLOCK_REALTIME, &tsEnd);
+		clock_gettime(CLOCK_REALTIME, &tsEnd);
 #endif
-        tsEnd.tv_sec += timeout / 1000;
-        tsEnd.tv_nsec += (timeout % 1000) * 1000;
+		tsEnd.tv_sec += timeout / 1000;
+		tsEnd.tv_nsec += (timeout % 1000) * 1000;
 
-        if (sem_timedwait(evt, &tsEnd) == -1) {
-            retval = errno;
-        }
-    }
+		if (sem_timedwait(evt, &tsEnd) == -1) {
+			retval = errno;
+		}
+	}
 
-    return retval;
+	return retval;
 #endif /* _WIN32 */
 }
-
 
 /*
  * ::deleteIpcEvent
  */
-int deleteIpcEvent(IpcEvent evt) {
+int deleteIpcEvent(IpcEvent evt)
+{
 #ifdef _WIN32
-    return (CloseHandle(evt) ? 0 : GetLastError());
+	return (CloseHandle(evt) ? 0 : GetLastError());
 #else /* _WIN32 */
-    /* TODO: Should unlink semaphore. Needs name. */
-    /*
-     * mueller: I assume that sem_close releases the memory, but I could not 
-     * find any documentation about that.
-     */
-    return ((sem_close(evt) == -1) ? errno : 0);
+	/* TODO: Should unlink semaphore. Needs name. */
+	/*
+	 * mueller: I assume that sem_close releases the memory, but I could not
+	 * find any documentation about that.
+	 */
+	return ((sem_close(evt) == -1) ? errno : 0);
 #endif /* _WIN32 */
 }

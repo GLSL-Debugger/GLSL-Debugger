@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,38 +40,33 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif /* _WIN32 */
 
-#include "glenumerants.h"
-#include "enumerants.h"
-
 #if (defined(GLSLDB_LINUX) || defined(GLSLDB_OSX))
-#  include "GL/glx.h"
-#  include "GL/glxext.h"
+#  include "../GL/glx.h"
+#  include "../GL/glxext.h"
 
-/*#include "glenumerants.h"*/
-
-#  ifdef GLX_VERSION_1_4
-#    define GLX_SAMPLE_BUFFERS                 100000
-#    define GLX_SAMPLES                        100001
-#  endif
-
-#  include "glxenumerants.h"
+//#  ifdef GLX_VERSION_1_4
+//#    define GLX_SAMPLE_BUFFERS                 100000
+//#    define GLX_SAMPLES                        100001
+//#  endif
+#include "glenumerants.h"
+#include "generated/glenumerants.h"
+#include "generated/glxenumerants.h"
 #endif
 
 #ifdef GLSLDB_WIN32
 #  include <windows.h>
 #  include <GL/wglext.h>
-#  include "wglenumerants.h"
+#  include "generated/wglenumerants.h"
 #endif
 
 static void concatenate(char **dst, const char *src)
 {
-	if (!src || strlen(src) == 0)
-	{
+	if (!src || strlen(src) == 0) {
 		return;
 	}
 
 	if (*dst) {
-		*dst = realloc(*dst, strlen(*dst) + strlen(src) + 1); 
+		*dst = realloc(*dst, strlen(*dst) + strlen(src) + 1);
 		if (!dst) {
 			fprintf(stderr, "concatenate'ing strings failed\n");
 			exit(1);
@@ -79,16 +74,16 @@ static void concatenate(char **dst, const char *src)
 		strcat(*dst, src);
 	} else {
 #ifdef _WIN32
-        /* strdup is not ANSI but Microsoft-specific, _strdup is ISO C++. */
-        if (!(*dst = _strdup(src))) {
+		/* strdup is not ANSI but Microsoft-specific, _strdup is ISO C++. */
+		if (!(*dst = _strdup(src))) {
 #else /* _WIN32 */
-        if (!(*dst = strdup(src))) {
+		if (!(*dst = strdup(src))) {
 #endif /* _WIN32 */
 			fprintf(stderr, "concatenate'ing strings failed\n");
 			exit(1);
 		}
 	}
-} 
+}
 
 const char *lookupEnum(GLenum e)
 {
@@ -125,9 +120,9 @@ char *lookupAllEnum(GLenum e)
 		if (glxEnumerantsMap[i].value == e) {
 			const char *s = glxEnumerantsMap[i].string;
 #else
-	while (wglEnumerantsMap[i].string != NULL) {
-		if (wglEnumerantsMap[i].value == e) {
-			const char *s = wglEnumerantsMap[i].string;
+			while (wglEnumerantsMap[i].string != NULL) {
+				if (wglEnumerantsMap[i].value == e) {
+					const char *s = wglEnumerantsMap[i].string;
 #endif
 			/* assumes enums are unique! */
 			concatenate(&result, s);
@@ -136,10 +131,10 @@ char *lookupAllEnum(GLenum e)
 		i++;
 	}
 	if (strlen(result) == 1) {
-		result = realloc(result, 14*sizeof(char));
+		result = realloc(result, 14 * sizeof(char));
 		strcpy(result, "UNKNOWN ENUM!");
 	} else {
-		result[strlen(result)-1] = '}';
+		result[strlen(result) - 1] = '}';
 	}
 	return result;
 }
@@ -163,3 +158,38 @@ char *dissectBitfield(GLbitfield b)
 	return result;
 }
 
+#ifdef _WIN32
+
+const char *lookupWGLEnum(int e)
+{
+	int i;
+
+	i = 0;
+	while (wglEnumerantsMap[i].string != NULL) {
+		if (wglEnumerantsMap[i].value == e) {
+			/* assumes enums are unique! */
+			return wglEnumerantsMap[i].string;
+		}
+		i++;
+	}
+	return "UNKNOWN ENUM!";
+}
+
+#else
+
+const char *lookupGLXEnum(int e)
+{
+	int i;
+
+	i = 0;
+	while (glxEnumerantsMap[i].string != NULL) {
+		if (glxEnumerantsMap[i].value == e) {
+			/* assumes enums are unique! */
+			return glxEnumerantsMap[i].string;
+		}
+		i++;
+	}
+	return "UNKNOWN ENUM!";
+}
+
+#endif

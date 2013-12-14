@@ -40,8 +40,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 
 #define DBGLIB_EXTERNAL
-
-#include "../debuglib.h"
+#include "GL/gl.h"
+#include "GL/glext.h"
+//typedef GLint GLfixed;
+#include "../DebugLib/debuglib.h"
 #include "../DebugLib/debuglibInternal.h"
 #include "../utils/dbgprint.h"
 
@@ -50,9 +52,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _WIN32 */
 
 /*
- * Note (Windows): 'provides' and 'glEnd' are exported using the module 
- * definition file and not by __declspec. We cannot achieve a consistent 
- * storage class with __declspec, and as the symbols are retrieved by 
+ * Note (Windows): 'provides' and 'glEnd' are exported using the module
+ * definition file and not by __declspec. We cannot achieve a consistent
+ * storage class with __declspec, and as the symbols are retrieved by
  * GetProcAddress anyway, allowing only explicit binding does not hurt.
  */
 
@@ -62,10 +64,10 @@ void APIENTRY glEnd(void)
 {
 #if 0
 	/* HAZARD maximally dangerous. this relies upon the fact that the debuglib is already loaded
-	   (sure, this here lib is loaded by it) to grab the correct address of the opengl32.dll
-	   glEnd. We do this because the contents of OrigglEnd are, as a matter of fact, fucked
-	   in the head and we end up in a totally wrong memory segment. This might have to do
-	   something with improper relocation of all the library goo, but we do not know. yet. */
+	 (sure, this here lib is loaded by it) to grab the correct address of the opengl32.dll
+	 glEnd. We do this because the contents of OrigglEnd are, as a matter of fact, fucked
+	 in the head and we end up in a totally wrong memory segment. This might have to do
+	 something with improper relocation of all the library goo, but we do not know. yet. */
 	HANDLE lib = LoadLibraryA("debuglib.dll");
 	dbgPrint(DBGLVL_DEBUG, "using special glEnd: 0x%x\n", OrigglEnd);
 	dbgPrint(DBGLVL_DEBUG, "origglend = 0x%x\n", *((GetProcAddress(lib, "OrigglEnd"))));

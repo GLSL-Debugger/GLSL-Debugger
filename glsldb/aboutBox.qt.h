@@ -37,8 +37,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QDialog>
 #include "ui_aboutBox.h"
 
-class Dialog_AboutBox : public QDialog, public Ui::Dialog_AboutBox {
-	Q_OBJECT
+class Dialog_AboutBox: public QDialog, public Ui::Dialog_AboutBox {
+Q_OBJECT
 
 public:
 	Dialog_AboutBox(QWidget *parent = 0);

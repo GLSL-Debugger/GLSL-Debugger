@@ -40,22 +40,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 GlCallStatistics::GlCallStatistics(QTableView *parent)
 {
-    m_pTableView = parent;
-    
+	m_pTableView = parent;
 
-    m_pModel = new QStandardItemModel(m_pTableView);
-    m_pProxyModel = new QSortFilterProxyModel(parent);
-    m_pProxyModel->setSourceModel(m_pModel);
-    m_pProxyModel->setDynamicSortFilter(true);
-    
-    m_pTableView->setModel(m_pProxyModel);
-    
-    m_pTableView->setSortingEnabled(true);
-    m_pTableView->sortByColumn(0, Qt::DescendingOrder);
+	m_pModel = new QStandardItemModel(m_pTableView);
+	m_pProxyModel = new QSortFilterProxyModel(parent);
+	m_pProxyModel->setSourceModel(m_pModel);
+	m_pProxyModel->setDynamicSortFilter(true);
 
-    resetStatistic();
-    
-    m_nNumCalls = 0;
+	m_pTableView->setModel(m_pProxyModel);
+
+	m_pTableView->setSortingEnabled(true);
+	m_pTableView->sortByColumn(0, Qt::DescendingOrder);
+
+	resetStatistic();
+
+	m_nNumCalls = 0;
 }
 
 GlCallStatistics::~GlCallStatistics()
@@ -64,62 +63,64 @@ GlCallStatistics::~GlCallStatistics()
 
 void GlCallStatistics::resetStatistic(void)
 {
-    m_pModel->clear();
-    m_pModel->setColumnCount(2);
-    m_pModel->setRowCount(0);
-    m_pModel->setHeaderData(0, Qt::Horizontal, "#");
-    m_pModel->setHeaderData(1, Qt::Horizontal, "Function Call");
-    
-    m_pTableView->setColumnWidth(0, 50);
-    m_pTableView->setColumnWidth(1, 250);
-    
-    TextPercentDelegate *delegate = new TextPercentDelegate(m_pTableView);
-    m_pTableView->setItemDelegateForColumn(1, delegate);
-    m_pTableView->verticalHeader()->hide();
-    
-    m_nNumCalls = 0;
+	m_pModel->clear();
+	m_pModel->setColumnCount(2);
+	m_pModel->setRowCount(0);
+	m_pModel->setHeaderData(0, Qt::Horizontal, "#");
+	m_pModel->setHeaderData(1, Qt::Horizontal, "Function Call");
+
+	m_pTableView->setColumnWidth(0, 50);
+	m_pTableView->setColumnWidth(1, 250);
+
+	TextPercentDelegate *delegate = new TextPercentDelegate(m_pTableView);
+	m_pTableView->setItemDelegateForColumn(1, delegate);
+	m_pTableView->verticalHeader()->hide();
+
+	m_nNumCalls = 0;
 }
 
 void GlCallStatistics::incCallStatistic(QString i_qFName)
 {
-    m_nNumCalls++;
+	m_nNumCalls++;
 
-    /* Search for entry */
-    QList<QStandardItem*> resultList;
-    int row = 0;
-    int i;
+	/* Search for entry */
+	QList<QStandardItem*> resultList;
+	int row = 0;
+	int i;
 
-    resultList = m_pModel->findItems(i_qFName, Qt::MatchExactly, 1);
+	resultList = m_pModel->findItems(i_qFName, Qt::MatchExactly, 1);
 
-    if (resultList.count() == 0) {
-        /* Add item to list */
-        m_pModel->setRowCount(m_pModel->rowCount()+1);
-        row = m_pModel->rowCount()-1;
-        m_pModel->setData(m_pModel->index(row, 0), 
-                          QVariant(Qt::AlignRight|Qt::AlignVCenter), 
-                          Qt::TextAlignmentRole);
-        m_pModel->setData(m_pModel->index(row, 0), 1);
-        m_pModel->item(row, 0)->setEditable(false);
-        m_pModel->setData(m_pModel->index(row, 1), i_qFName);
-        m_pModel->item(row, 1)->setEditable(false);
+	if (resultList.count() == 0) {
+		/* Add item to list */
+		m_pModel->setRowCount(m_pModel->rowCount() + 1);
+		row = m_pModel->rowCount() - 1;
+		m_pModel->setData(m_pModel->index(row, 0),
+				QVariant(Qt::AlignRight | Qt::AlignVCenter),
+				Qt::TextAlignmentRole);
+		m_pModel->setData(m_pModel->index(row, 0), 1);
+		m_pModel->item(row, 0)->setEditable(false);
+		m_pModel->setData(m_pModel->index(row, 1), i_qFName);
+		m_pModel->item(row, 1)->setEditable(false);
 
-        /* set row height of view */
-        m_pTableView->setRowHeight(
-                m_pProxyModel->mapFromSource(m_pModel->index(row, 0)).row(), 22);
-    } else if (resultList.count() == 1) {
-        /* Exiting item */
-        row = resultList[0]->row();
-        int count = m_pModel->data(m_pModel->index(row, 0)).toInt();
-        m_pModel->setData(m_pModel->index(row, 0), count + 1);
-    } else {
-        fprintf(stderr, "E! multiple entries for single call\n");
-        exit(1);
-    }
+		/* set row height of view */
+		m_pTableView->setRowHeight(
+				m_pProxyModel->mapFromSource(m_pModel->index(row, 0)).row(),
+				22);
+	} else if (resultList.count() == 1) {
+		/* Exiting item */
+		row = resultList[0]->row();
+		int count = m_pModel->data(m_pModel->index(row, 0)).toInt();
+		m_pModel->setData(m_pModel->index(row, 0), count + 1);
+	} else {
+		fprintf(stderr, "E! multiple entries for single call\n");
+		exit(1);
+	}
 
-    /* Adapt percentages */
-    for (i=0; i<m_pModel->rowCount(); i++) {
-        QModelIndex iCount = m_pModel->index(i, 0);
-        int count = m_pModel->data(iCount).toInt();
-        m_pModel->setData(m_pModel->index(i, 1), count/(float)m_nNumCalls, Qt::UserRole);
-    }
+	/* Adapt percentages */
+	for (i = 0; i < m_pModel->rowCount(); i++) {
+		QModelIndex iCount = m_pModel->index(i, 0);
+		int count = m_pModel->data(iCount).toInt();
+		m_pModel->setData(m_pModel->index(i, 1), count / (float) m_nNumCalls,
+				Qt::UserRole);
+	}
 }

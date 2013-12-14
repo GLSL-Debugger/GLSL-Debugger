@@ -1,20 +1,20 @@
 add_subdirectory(preprocessor)
 
 set(SRC
-	generated_glsl_lexer.cpp
-	generated_glsl_parser.cpp 
-	Initialize.cpp 
-	IntermTraverse.cpp
-	Intermediate.cpp 
-	ParseHelper.cpp 
-	PoolAlloc.cpp
-	QualifierAlive.cpp
-	RemoveTree.cpp 
-	ShaderLang.cpp 
-	SymbolTable.cpp 
-	intermOut.cpp
-	parseConst.cpp 
-	InfoSink.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_lexer.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_parser.cpp
+    Initialize.cpp
+    IntermTraverse.cpp
+    Intermediate.cpp
+    ParseHelper.cpp
+    PoolAlloc.cpp
+    QualifierAlive.cpp
+    RemoveTree.cpp
+    ShaderLang.cpp
+    SymbolTable.cpp
+    intermOut.cpp
+    parseConst.cpp
+    InfoSink.cpp
 )
 
 find_package(BISON REQUIRED)
@@ -31,8 +31,8 @@ add_flex_bison_dependency(GLSLScanner GLSLParser)
 
 # FIXME
 # modify this for windows support
-# make-solution wasn't used on Windows. Hence, Os-dependent stuff was hard coded 
-# in make/VS-projects. 
+# make-solution wasn't used on Windows. Hence, Os-dependent stuff was hard coded
+# in make/VS-projects.
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ 
 	${CMAKE_CURRENT_SOURCE_DIR}/../Include 

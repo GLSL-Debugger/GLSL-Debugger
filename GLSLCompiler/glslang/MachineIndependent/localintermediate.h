@@ -40,8 +40,8 @@
 #include "SymbolTable.h"
 
 struct TVectorFields {
-    int offsets[4];
-    int num;
+	int offsets[4];
+	int num;
 };
 
 //
@@ -49,47 +49,71 @@ struct TVectorFields {
 //
 class TInfoSink;
 class TIntermediate {
-public:    
-    POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
+public:
+	POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
 
-    TIntermediate(TInfoSink& i) : infoSink(i) { }
-    TIntermSymbol* addSymbol(int Id, const TString&, const TType&, TSourceRange, TExtensionList&);
-    TIntermFuncParam* addFuncParam(int Id, const TString&, const TType&, TSourceRange, TExtensionList&);
-    TIntermTyped* addConversion(TOperator, const TType&, TIntermTyped*, TExtensionList&);
-    TIntermTyped* addBinaryMath(TOperator op, TIntermTyped* left, TIntermTyped* right, TSourceRange, TSymbolTable&, TExtensionList&);
-    TIntermTyped* addAssign(TOperator op, TIntermTyped* left, TIntermTyped* right, TSourceRange, TExtensionList&);
-    TIntermTyped* addIndex(TOperator op, TIntermTyped* base, TIntermTyped* index, TSourceRange, TExtensionList&);
-    TIntermTyped* addUnaryMath(TOperator op, TIntermNode* child, TSourceRange, TSymbolTable&, TExtensionList&);
-    TIntermAggregate* growAggregate(TIntermNode* left, TIntermNode* right, TExtensionList&);
-    TIntermAggregate* makeAggregate(TIntermNode* node, TExtensionList&);
-    TIntermAggregate* setAggregateOperator(TIntermNode*, TOperator, TSourceRange, TExtensionList&);
-    TIntermConstantUnion* foldAggregate(TIntermAggregate* node, TOperator op, const TType &type, TSourceRange range, TExtensionList &extMap);
-    TIntermNode*  addSelection(TIntermTyped* cond, TIntermNodePair code, TSourceRange, TExtensionList&);
-    TIntermTyped* addSelection(TIntermTyped* cond, TIntermTyped* trueBlock, TIntermTyped* falseBlock, TSourceRange, TExtensionList&);
-    TIntermNode* addSwitch(TIntermTyped* cond, TIntermAggregate* nodeList, TSourceRange range, TExtensionList &extMap);
-    TIntermNode* addCase(TIntermTyped* expr, TSourceRange range, TExtensionList &extMap);
-    TIntermTyped* addComma(TIntermTyped* left, TIntermTyped* right, TSourceRange, TExtensionList&);
-    TIntermConstantUnion* addConstantUnion(constUnion*, const TType&, TSourceRange, TExtensionList&);
-    TIntermTyped* promoteConstantUnion(TBasicType, TIntermConstantUnion*, TExtensionList&) ;
-    bool parseConstTree(TSourceRange, TIntermNode*, constUnion*, TOperator, TSymbolTable&, TType, bool singleConstantParam = false);
-    TIntermNode* addLoop(TIntermNode*, TIntermNode*, TIntermTyped*, TIntermTyped*, LoopT, TSourceRange, TExtensionList&);
-    TIntermBranch* addBranch(TOperator, TSourceRange, TExtensionList&);
-    TIntermBranch* addBranch(TOperator, TIntermTyped*, TSourceRange, TExtensionList&);
-    TIntermTyped* addSwizzle(TVectorFields&, TSourceRange, TExtensionList&);
-    TIntermNode* addDeclaration(TSourceRange, TVariable*, TIntermNode*, TExtensionList&);
-    TIntermNode* addFuncDeclaration(TSourceRange, TFunction*, TExtensionList&);
-    TIntermNode* addSpecification(TSourceRange, TType* type, TExtensionList&);
-    TIntermNode* addParameter(TSourceRange, TType* type, TExtensionList&);
-    TIntermDummy* addDummy(TSourceRange, TExtensionList&);
-    bool postProcess(TIntermNode*, EShLanguage);
+	TIntermediate(TInfoSink& i) :
+			infoSink(i)
+	{
+	}
+	TIntermSymbol* addSymbol(int Id, const TString&, const TType&, TSourceRange,
+			TExtensionList&);
+	TIntermFuncParam* addFuncParam(int Id, const TString&, const TType&,
+			TSourceRange, TExtensionList&);
+	TIntermTyped* addConversion(TOperator, const TType&, TIntermTyped*,
+			TExtensionList&);
+	TIntermTyped* addBinaryMath(TOperator op, TIntermTyped* left,
+			TIntermTyped* right, TSourceRange, TSymbolTable&, TExtensionList&);
+	TIntermTyped* addAssign(TOperator op, TIntermTyped* left,
+			TIntermTyped* right, TSourceRange, TExtensionList&);
+	TIntermTyped* addIndex(TOperator op, TIntermTyped* base,
+			TIntermTyped* index, TSourceRange, TExtensionList&);
+	TIntermTyped* addUnaryMath(TOperator op, TIntermNode* child, TSourceRange,
+			TSymbolTable&, TExtensionList&);
+	TIntermAggregate* growAggregate(TIntermNode* left, TIntermNode* right,
+			TExtensionList&);
+	TIntermAggregate* makeAggregate(TIntermNode* node, TExtensionList&);
+	TIntermAggregate* setAggregateOperator(TIntermNode*, TOperator,
+			TSourceRange, TExtensionList&);
+	TIntermConstantUnion* foldAggregate(TIntermAggregate* node, TOperator op,
+			const TType &type, TSourceRange range, TExtensionList &extMap);
+	TIntermNode* addSelection(TIntermTyped* cond, TIntermNodePair code,
+			TSourceRange, TExtensionList&);
+	TIntermTyped* addSelection(TIntermTyped* cond, TIntermTyped* trueBlock,
+			TIntermTyped* falseBlock, TSourceRange, TExtensionList&);
+	TIntermNode* addSwitch(TIntermTyped* cond, TIntermAggregate* nodeList,
+			TSourceRange range, TExtensionList &extMap);
+	TIntermNode* addCase(TIntermTyped* expr, TSourceRange range,
+			TExtensionList &extMap);
+	TIntermTyped* addComma(TIntermTyped* left, TIntermTyped* right,
+			TSourceRange, TExtensionList&);
+	TIntermConstantUnion* addConstantUnion(constUnion*, const TType&,
+			TSourceRange, TExtensionList&);
+	TIntermTyped* promoteConstantUnion(TBasicType, TIntermConstantUnion*,
+			TExtensionList&);
+	bool parseConstTree(TSourceRange, TIntermNode*, constUnion*, TOperator,
+			TSymbolTable&, TType, bool singleConstantParam = false);
+	TIntermNode* addLoop(TIntermNode*, TIntermNode*, TIntermTyped*,
+			TIntermTyped*, LoopT, TSourceRange, TExtensionList&);
+	TIntermBranch* addBranch(TOperator, TSourceRange, TExtensionList&);
+	TIntermBranch* addBranch(TOperator, TIntermTyped*, TSourceRange,
+			TExtensionList&);
+	TIntermTyped* addSwizzle(TVectorFields&, TSourceRange, TExtensionList&);
+	TIntermNode* addDeclaration(TSourceRange, TVariable*, TIntermNode*,
+			TExtensionList&);
+	TIntermNode* addFuncDeclaration(TSourceRange, TFunction*, TExtensionList&);
+	TIntermNode* addSpecification(TSourceRange, TType* type, TExtensionList&);
+	TIntermNode* addParameter(TSourceRange, TType* type, TExtensionList&);
+	TIntermDummy* addDummy(TSourceRange, TExtensionList&);
+	bool postProcess(TIntermNode*, EShLanguage);
 	void remove(TIntermNode*);
-    void outputTree(TIntermNode*);
-    
+	void outputTree(TIntermNode*);
+
 protected:
-    TInfoSink& infoSink;
+	TInfoSink& infoSink;
 
 private:
-    void operator=(TIntermediate&); // prevent assignments
+	void operator=(TIntermediate&);  // prevent assignments
 };
 
 #endif // _LOCAL_INTERMEDIATE_INCLUDED_

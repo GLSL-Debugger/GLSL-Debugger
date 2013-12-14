@@ -35,12 +35,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "aboutBox.qt.h"
 
-
-Dialog_AboutBox::Dialog_AboutBox(QWidget *parent) : QDialog(parent)
+Dialog_AboutBox::Dialog_AboutBox(QWidget *parent) :
+		QDialog(parent)
 {
 	this->setupUi(this);
 
-    QFile license(":/doc/doc/license.txt");
+	QFile license(":/doc/doc/license.txt");
 
 	if (!license.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		fprintf(stderr, "E: Failed to open license file resource\n");
@@ -49,7 +49,7 @@ Dialog_AboutBox::Dialog_AboutBox(QWidget *parent) : QDialog(parent)
 	tbLicense->setHtml(license.readAll());
 	license.close();
 
-    QFile credits(":/doc/doc/credits.txt");
+	QFile credits(":/doc/doc/credits.txt");
 	if (!credits.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		fprintf(stderr, "E: Failed to open credits file resource\n");
 		exit(1);
@@ -57,7 +57,6 @@ Dialog_AboutBox::Dialog_AboutBox(QWidget *parent) : QDialog(parent)
 	tbCredits->setHtml(credits.readAll());
 	credits.close();
 }
-
 
 Dialog_AboutBox::~Dialog_AboutBox(void)
 {

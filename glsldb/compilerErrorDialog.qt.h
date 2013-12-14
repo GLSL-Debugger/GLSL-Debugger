@@ -38,22 +38,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ui_compilerErrorDialog.h"
 #include "compilerErrorDetails.qt.h"
 
-class Dialog_CompilerError : public QDialog, public Ui::Dialog_CompilerError {
-	Q_OBJECT
+class Dialog_CompilerError: public QDialog, public Ui::Dialog_CompilerError {
+Q_OBJECT
 
 public:
 	Dialog_CompilerError(QWidget *parent = 0);
 	~Dialog_CompilerError(void);
 
-    void setDetailedOutput(const char *text);
+	void setDetailedOutput(const char *text);
 
 private slots:
-    
-    void toggleDetails(void);
+
+	void toggleDetails(void);
 
 private:
 
-    Widget_CompilerError *details;
+	Widget_CompilerError *details;
 
 };
 

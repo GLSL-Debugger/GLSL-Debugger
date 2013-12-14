@@ -43,36 +43,37 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dbgprint.h"
 
 /* Fragment Shader */
-SelectionDialog::SelectionDialog(PixelBoxFloat *fb, bool elseBranch, QWidget *parent)
-    : QDialog(parent)
+SelectionDialog::SelectionDialog(PixelBoxFloat *fb, bool elseBranch,
+		QWidget *parent) :
+		QDialog(parent)
 {
-    /* Statistics */
-    m_nTotal = 0;
-    m_nActive = 0;
-    m_nIf = 0;
-    m_nElse = 0;
-    int x,y;
-    
-    /* Setup GUI */
-    setupUi(this);
+	/* Statistics */
+	m_nTotal = 0;
+	m_nActive = 0;
+	m_nIf = 0;
+	m_nElse = 0;
+	int x, y;
 
-    QGridLayout *gridLayout;
-    gridLayout = new QGridLayout(fContent);
-    gridLayout->setSpacing(0);
-    gridLayout->setMargin(0);
+	/* Setup GUI */
+	setupUi(this);
 
-    QScrollArea *scrollArea = new QScrollArea();
-    scrollArea->setBackgroundRole(QPalette::Dark);
-    gridLayout->addWidget(scrollArea);
-	
+	QGridLayout *gridLayout;
+	gridLayout = new QGridLayout(fContent);
+	gridLayout->setSpacing(0);
+	gridLayout->setMargin(0);
+
+	QScrollArea *scrollArea = new QScrollArea();
+	scrollArea->setBackgroundRole(QPalette::Dark);
+	gridLayout->addWidget(scrollArea);
+
 	QImage image;
 
 	if (fb) {
 		if (fb->getChannel() != 1) {
 			fprintf(stderr, "W! SelectionDialog expects scalar pixelBox\n");
 		}
-	   
-        m_nTotal = fb->getWidth() * fb->getHeight();
+
+		m_nTotal = fb->getWidth() * fb->getHeight();
 		if (m_nTotal == 0) {
 			/* Allow all possibilities */
 			m_nTotal = 2;
@@ -80,10 +81,10 @@ SelectionDialog::SelectionDialog(PixelBoxFloat *fb, bool elseBranch, QWidget *pa
 			m_nIf = 1;
 			m_nElse = 1;
 		}
-       
+
 		image = QImage(fb->getWidth(), fb->getHeight(), QImage::Format_RGB32);
-		for (y=0; y<fb->getHeight(); y++) {
-			for (x=0; x<fb->getWidth(); x++) {
+		for (y = 0; y < fb->getHeight(); y++) {
+			for (x = 0; x < fb->getWidth(); x++) {
 				float v;
 				if (fb->getDataValue(x, y, &v)) {
 					if (v > 0.75) {
@@ -96,81 +97,78 @@ SelectionDialog::SelectionDialog(PixelBoxFloat *fb, bool elseBranch, QWidget *pa
 					m_nActive++;
 				} else {
 					/* no data, print checkerboard */
-					if ( ((x/8)%2) == ((y/8)%2)) {
-						image.setPixel(x, y, QColor(255,255,255).rgb());
+					if (((x / 8) % 2) == ((y / 8) % 2)) {
+						image.setPixel(x, y, QColor(255, 255, 255).rgb());
 					} else {
-						image.setPixel(x, y, QColor(204,204,204).rgb());
+						image.setPixel(x, y, QColor(204, 204, 204).rgb());
 					}
 				}
 			}
 		}
 	} else {
-        m_nTotal = 2;
+		m_nTotal = 2;
 		m_nElse = 1;
 		m_nActive = 2;
 		m_nIf = 1;
 		image = QImage(512, 512, QImage::Format_RGB32);
 	}
-		
-    QLabel *label = new QLabel();
-    label->setPixmap(QPixmap::fromImage(image));
-    scrollArea->setWidget(label);
 
+	QLabel *label = new QLabel();
+	label->setPixmap(QPixmap::fromImage(image));
+	scrollArea->setWidget(label);
 
-    /* Activate necessary buttons */
-    if (elseBranch) {
-        pbElse->setEnabled(true);
-    } else {
-        pbElse->setEnabled(false);
-        lElseCount->setText(QString(""));
-    }
-    m_bElseBranch = elseBranch;
+	/* Activate necessary buttons */
+	if (elseBranch) {
+		pbElse->setEnabled(true);
+	} else {
+		pbElse->setEnabled(false);
+		lElseCount->setText(QString(""));
+	}
+	m_bElseBranch = elseBranch;
 
-    /* Show statistic data */
-    displayStatistics();
+	/* Show statistic data */
+	displayStatistics();
 
-    /* Disable options that no pixel is following */
-    if (!m_nIf) {
-        pbIf->setEnabled(false);
-    }
-    if (!m_nElse) {
-        pbElse->setEnabled(false);
-    }
+	/* Disable options that no pixel is following */
+	if (!m_nIf) {
+		pbIf->setEnabled(false);
+	}
+	if (!m_nElse) {
+		pbElse->setEnabled(false);
+	}
 }
 
 /* Geometry Shader */
-SelectionDialog::SelectionDialog(VertexBox *vbCondition, 
-                                 QList<ShVarItem*> &watchItems,
-								 int inPrimitiveType, int outPrimitiveType,
-								 VertexBox *primitiveMap,
-                                 VertexBox *vertexCountMap,
-                                 bool elseBranch, QWidget *parent)
-    : QDialog(parent)
+SelectionDialog::SelectionDialog(VertexBox *vbCondition,
+		QList<ShVarItem*> &watchItems, int inPrimitiveType,
+		int outPrimitiveType, VertexBox *primitiveMap,
+		VertexBox *vertexCountMap, bool elseBranch, QWidget *parent) :
+		QDialog(parent)
 {
-    /* Statistics */
-    m_nTotal = 0;
-    m_nActive = 0;
-    m_nIf = 0;
-    m_nElse = 0;
-    
-    /* Setup GUI */
-    setupUi(this);
+	/* Statistics */
+	m_nTotal = 0;
+	m_nActive = 0;
+	m_nIf = 0;
+	m_nElse = 0;
 
-    QGridLayout *gridLayout;
-    gridLayout = new QGridLayout(fContent);
-    gridLayout->setSpacing(0);
-    gridLayout->setMargin(0);
+	/* Setup GUI */
+	setupUi(this);
 
-    QTreeView *tv = new QTreeView(this);
+	QGridLayout *gridLayout;
+	gridLayout = new QGridLayout(fContent);
+	gridLayout->setSpacing(0);
+	gridLayout->setMargin(0);
+
+	QTreeView *tv = new QTreeView(this);
 	tv->setAlternatingRowColors(true);
 
-    /* Display data and count */
+	/* Display data and count */
 	if (vbCondition) {
-        int i;
-        float *condition = vbCondition->getDataPointer();
-        bool  *coverage  = vbCondition->getCoveragePointer();
+		int i;
+		float *condition = vbCondition->getDataPointer();
+		bool *coverage = vbCondition->getCoveragePointer();
 
-        m_nTotal = vbCondition->getNumVertices();
+		m_nTotal = vbCondition->getNumVertices();
 		if (m_nTotal == 0) {
 			/* Allow all possibilities */
 			m_nTotal = 2;
@@ -178,94 +176,93 @@ SelectionDialog::SelectionDialog(VertexBox *vbCondition,
 			m_nIf = 1;
 			m_nElse = 1;
 		}
-        
-        for (i=0; i<vbCondition->getNumVertices(); i++) {
+
+		for (i = 0; i < vbCondition->getNumVertices(); i++) {
 			if (*coverage) {
 				m_nActive++;
 
-	            if (*condition > 0.75f) {
-    	                m_nIf++;
-        	    } else if (0.25f < *condition && *condition < 0.75f) {
-            	        m_nElse++;
-                }
+				if (*condition > 0.75f) {
+					m_nIf++;
+				} else if (0.25f < *condition && *condition < 0.75f) {
+					m_nElse++;
+				}
 			}
 			coverage++;
-            condition++;
-        }
+			condition++;
+		}
 
-	    GeoShaderDataModel *model = new GeoShaderDataModel(inPrimitiveType,
-				outPrimitiveType, primitiveMap, vertexCountMap, vbCondition, NULL);
-		for (i=0; i<watchItems.count(); i++) {
+		GeoShaderDataModel *model = new GeoShaderDataModel(inPrimitiveType,
+				outPrimitiveType, primitiveMap, vertexCountMap, vbCondition,
+				NULL);
+		for (i = 0; i < watchItems.count(); i++) {
 			QString name = watchItems[i]->getFullName();
-			model->addData(watchItems[i]->getCurrentPointer(), 
-					       watchItems[i]->getVertexBoxPointer(), 
-						   name);
+			model->addData(watchItems[i]->getCurrentPointer(),
+					watchItems[i]->getVertexBoxPointer(), name);
 		}
 
 		tv->setModel(model);
 		if (watchItems.count() != 0) {
 			tv->setColumnHidden(1, true);
 		}
-    } else {
-    	m_nTotal = 2;
-    	m_nActive = 2;
-    	m_nIf = 1;
-    	m_nElse = 1;
+	} else {
+		m_nTotal = 2;
+		m_nActive = 2;
+		m_nIf = 1;
+		m_nElse = 1;
 	}
 
-    gridLayout->addWidget(tv);
+	gridLayout->addWidget(tv);
 
-    /* Activate necessary buttons */
-    if (elseBranch) {
-        pbElse->setEnabled(true);
-    } else {
-        pbElse->setEnabled(false);
-        lElseCount->setText(QString(""));
-    }
-    m_bElseBranch = elseBranch;
+	/* Activate necessary buttons */
+	if (elseBranch) {
+		pbElse->setEnabled(true);
+	} else {
+		pbElse->setEnabled(false);
+		lElseCount->setText(QString(""));
+	}
+	m_bElseBranch = elseBranch;
 
-    /* Show statistic data */
-    displayStatistics();
+	/* Show statistic data */
+	displayStatistics();
 
-    /* Disable options that no pixel is following */
-    if (!m_nIf) {
-        pbIf->setEnabled(false);
-    }
-    if (!m_nElse) {
-        pbElse->setEnabled(false);
-    }
+	/* Disable options that no pixel is following */
+	if (!m_nIf) {
+		pbIf->setEnabled(false);
+	}
+	if (!m_nElse) {
+		pbElse->setEnabled(false);
+	}
 }
 
 /* Vertex Shader */
-SelectionDialog::SelectionDialog(VertexBox *vbCondition, 
-                                 QList<ShVarItem*> &watchItems,
-                                 bool elseBranch, QWidget *parent)
-    : QDialog(parent)
+SelectionDialog::SelectionDialog(VertexBox *vbCondition,
+		QList<ShVarItem*> &watchItems, bool elseBranch, QWidget *parent) :
+		QDialog(parent)
 {
-    /* Statistics */
-    m_nTotal = 0;
-    m_nActive = 0;
-    m_nIf = 0;
-    m_nElse = 0;
+	/* Statistics */
+	m_nTotal = 0;
+	m_nActive = 0;
+	m_nIf = 0;
+	m_nElse = 0;
 
-    /* Setup GUI */
-    setupUi(this);
+	/* Setup GUI */
+	setupUi(this);
 
-    QGridLayout *gridLayout;
-    gridLayout = new QGridLayout(fContent);
-    gridLayout->setSpacing(0);
-    gridLayout->setMargin(0);
+	QGridLayout *gridLayout;
+	gridLayout = new QGridLayout(fContent);
+	gridLayout->setSpacing(0);
+	gridLayout->setMargin(0);
 
-    QTableView *table = new QTableView(this);
+	QTableView *table = new QTableView(this);
 	table->setAlternatingRowColors(true);
 
-    /* Display data and count */
+	/* Display data and count */
 	if (vbCondition) {
-        int i;
-        float *condition = vbCondition->getDataPointer();
-        bool  *coverage  = vbCondition->getCoveragePointer();
+		int i;
+		float *condition = vbCondition->getDataPointer();
+		bool *coverage = vbCondition->getCoveragePointer();
 
-        m_nTotal = vbCondition->getNumVertices();
+		m_nTotal = vbCondition->getNumVertices();
 		if (m_nTotal == 0) {
 			/* Allow all possibilities */
 			m_nTotal = 2;
@@ -273,36 +270,34 @@ SelectionDialog::SelectionDialog(VertexBox *vbCondition,
 			m_nIf = 1;
 			m_nElse = 1;
 		}
-        
-        for (i=0; i<vbCondition->getNumVertices(); i++) {
+
+		for (i = 0; i < vbCondition->getNumVertices(); i++) {
 			if (*coverage) {
 				m_nActive++;
 
-	            if (*condition > 0.75f) {
-    	                m_nIf++;
-        	    } else if (0.25f < *condition && *condition < 0.75f) {
-            	        m_nElse++;
-                }
+				if (*condition > 0.75f) {
+					m_nIf++;
+				} else if (0.25f < *condition && *condition < 0.75f) {
+					m_nElse++;
+				}
 			}
 			coverage++;
-            condition++;
-        }
+			condition++;
+		}
 
-	    VertexTableModel *model = new VertexTableModel();
-		for (i=0; i<watchItems.count(); i++) {
+		VertexTableModel *model = new VertexTableModel();
+		for (i = 0; i < watchItems.count(); i++) {
 			QString name = watchItems[i]->getFullName();
 			model->addVertexBox(watchItems[i]->getVertexBoxPointer(), name);
 		}
 		model->setCondition(vbCondition);
-
 
 		table->setModel(model);
 		if (watchItems.count() != 0) {
 			table->setColumnHidden(0, true);
 		}
 
-
-    } else {
+	} else {
 		/* Allow all possibilities */
 		m_nTotal = 2;
 		m_nActive = 2;
@@ -310,88 +305,88 @@ SelectionDialog::SelectionDialog(VertexBox *vbCondition,
 		m_nElse = 1;
 	}
 
-    gridLayout->addWidget(table);
-	
-    /* Activate necessary buttons */
-    if (elseBranch) {
-        pbElse->setEnabled(true);
-    } else {
-        pbElse->setEnabled(false);
-        lElseCount->setText(QString(""));
-    }
-    m_bElseBranch = elseBranch;
+	gridLayout->addWidget(table);
 
-    /* Show statistic data */
-    displayStatistics();
+	/* Activate necessary buttons */
+	if (elseBranch) {
+		pbElse->setEnabled(true);
+	} else {
+		pbElse->setEnabled(false);
+		lElseCount->setText(QString(""));
+	}
+	m_bElseBranch = elseBranch;
 
-    /* Disable options that no pixel is following */
-    if (!m_nIf) {
-        pbIf->setEnabled(false);
-    }
-    if (!m_nElse) {
-        pbElse->setEnabled(false);
-    }
+	/* Show statistic data */
+	displayStatistics();
+
+	/* Disable options that no pixel is following */
+	if (!m_nIf) {
+		pbIf->setEnabled(false);
+	}
+	if (!m_nElse) {
+		pbElse->setEnabled(false);
+	}
 }
 
 void SelectionDialog::displayStatistics(void)
 {
-    QString string;
-    
-    string = QString(QVariant(m_nActive).toString());
-    string.append(" (");
-    string.append(QVariant((m_nActive*100)/m_nTotal).toString());
-    string.append("%)");
-    lActiveCount->setText(string);
+	QString string;
 
-    if (m_nActive != 0) {
-        string = QString(QVariant(m_nIf).toString());
-        string.append(" (");
-        string.append(QVariant((m_nIf*100)/(m_nActive)).toString());
-        string.append("%)");
-        lIfCount->setText(string);
-    
-        if (m_bElseBranch) {
-            string = QString(QVariant(m_nElse).toString());
-            string.append(" (");
-            string.append(QVariant((m_nElse*100)/(m_nActive)).toString());
-            string.append("%)");
-            lElseCount->setText(string);
-        } else {
-            lElseCount->setText("");
-        }
-    } else {
-        lIfCount->setText("");
-        lElseCount->setText("");
-    }
+	string = QString(QVariant(m_nActive).toString());
+	string.append(" (");
+	string.append(QVariant((m_nActive * 100) / m_nTotal).toString());
+	string.append("%)");
+	lActiveCount->setText(string);
+
+	if (m_nActive != 0) {
+		string = QString(QVariant(m_nIf).toString());
+		string.append(" (");
+		string.append(QVariant((m_nIf * 100) / (m_nActive)).toString());
+		string.append("%)");
+		lIfCount->setText(string);
+
+		if (m_bElseBranch) {
+			string = QString(QVariant(m_nElse).toString());
+			string.append(" (");
+			string.append(QVariant((m_nElse * 100) / (m_nActive)).toString());
+			string.append("%)");
+			lElseCount->setText(string);
+		} else {
+			lElseCount->setText("");
+		}
+	} else {
+		lIfCount->setText("");
+		lElseCount->setText("");
+	}
 
 }
 
-int  SelectionDialog::exec()
+int SelectionDialog::exec()
 {
-    /* Skip dialog if there is only one option for user input left */
-    if (!m_nActive) {
-        return SB_SKIP;
-    }
+	/* Skip dialog if there is only one option for user input left */
+	if (!m_nActive) {
+		return SB_SKIP;
+	}
 
-    if (!m_nIf && !m_bElseBranch) {
-        return SB_SKIP;
-    }
+	if (!m_nIf && !m_bElseBranch) {
+		return SB_SKIP;
+	}
 
-    return QDialog::exec();
+	return QDialog::exec();
 }
 
 void SelectionDialog::on_pbSkip_clicked()
 {
-    done(SB_SKIP);
+	done(SB_SKIP);
 }
 
 void SelectionDialog::on_pbIf_clicked()
 {
-    done(SB_IF);
+	done(SB_IF);
 }
 
 void SelectionDialog::on_pbElse_clicked()
 {
-    done(SB_ELSE);
+	done(SB_ELSE);
 }
 

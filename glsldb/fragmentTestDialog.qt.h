@@ -36,47 +36,76 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ui_fragmentTestDialog.h"
 
-class FragmentTestDialog : public QDialog, public Ui::dFragmentTest
-{
-	Q_OBJECT
+class FragmentTestDialog: public QDialog, public Ui::dFragmentTest {
+Q_OBJECT
 
-	public:
-		FragmentTestDialog(QWidget *parent = 0);
+public:
+	FragmentTestDialog(QWidget *parent = 0);
 
-		int alphaTestOption() { return m_alphaTest; }
-		int depthTestOption() { return m_depthTest; }
-		int stencilTestOption() { return m_stencilTest; }
-		int blendingOption() { return m_blending; }
+	int alphaTestOption()
+	{
+		return m_alphaTest;
+	}
+	int depthTestOption()
+	{
+		return m_depthTest;
+	}
+	int stencilTestOption()
+	{
+		return m_stencilTest;
+	}
+	int blendingOption()
+	{
+		return m_blending;
+	}
 
-		bool copyAlpha() { return m_copyAlpha; }
-		bool copyDepth() { return m_copyDepth; }
-		bool copyStencil() { return m_copyStencil; }
+	bool copyAlpha()
+	{
+		return m_copyAlpha;
+	}
+	bool copyDepth()
+	{
+		return m_copyDepth;
+	}
+	bool copyStencil()
+	{
+		return m_copyStencil;
+	}
 
-		float alphaValue() { return m_alphaValue; }
-		float depthValue() { return m_depthValue; }
-		int   stencilValue() { return m_stencilValue; }
-		
-	public slots:	
-		void setDefaults();
-	
-	private slots:
-		void resetSettings();
-		void apply();
-		void cancel();
-		
-	private:
-		int m_alphaTest;
-		int m_depthTest;
-		int m_stencilTest;
-		int m_blending;
+	float alphaValue()
+	{
+		return m_alphaValue;
+	}
+	float depthValue()
+	{
+		return m_depthValue;
+	}
+	int stencilValue()
+	{
+		return m_stencilValue;
+	}
 
-		bool m_copyAlpha;
-		bool m_copyDepth;
-		bool m_copyStencil;
+public slots:
+	void setDefaults();
 
-		float m_alphaValue;
-		float m_depthValue;
-		int   m_stencilValue;
+private slots:
+	void resetSettings();
+	void apply();
+	void cancel();
+
+private:
+	int m_alphaTest;
+	int m_depthTest;
+	int m_stencilTest;
+	int m_blending;
+
+	bool m_copyAlpha;
+	bool m_copyDepth;
+	bool m_copyStencil;
+
+	float m_alphaValue;
+	float m_depthValue;
+	int m_stencilValue;
 };
 
 #endif
