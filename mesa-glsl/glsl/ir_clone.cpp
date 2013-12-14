@@ -447,12 +447,12 @@ ir_typedecl_statement::clone(void *mem_ctx, struct hash_table *ht) const
 
 
 #ifdef IR_AST_LOCATION
-ir_list_dummy*
-ir_list_dummy::clone(void *mem_ctx, struct hash_table *ht) const
+ir_dummy*
+ir_dummy::clone(void *mem_ctx, struct hash_table *ht) const
 {
    (void) ht;
-   COPY_RETURN_AST_LOCATION(ir_list_dummy, this->yy_location,
-	   new(mem_ctx) ir_list_dummy())
+   COPY_RETURN_AST_LOCATION(ir_dummy, this->yy_location,
+	   new(mem_ctx) ir_dummy(this->dummy_type))
 };
 #endif
 

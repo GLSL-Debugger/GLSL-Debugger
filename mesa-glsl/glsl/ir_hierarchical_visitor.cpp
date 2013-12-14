@@ -97,7 +97,7 @@ ir_hierarchical_visitor::visit(ir_end_primitive *ir)
 
 #ifdef IR_DEBUG_STATE
 ir_visitor_status
-ir_hierarchical_visitor::visit(class ir_list_dummy *ir)
+ir_hierarchical_visitor::visit(class ir_dummy *ir)
 {
     if (this->callback != NULL)
        this->callback(ir, this->data);

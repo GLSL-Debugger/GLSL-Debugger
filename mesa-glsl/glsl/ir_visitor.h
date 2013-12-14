@@ -67,7 +67,7 @@ public:
    virtual void visit(class ir_emit_vertex *) = 0;
    virtual void visit(class ir_end_primitive *) = 0;
 #ifdef IR_DEBUG_STATE
-   virtual void visit(class ir_list_dummy *) = 0;
+   virtual void visit(class ir_dummy *) = 0;
 #endif
    /*@}*/
 };
@@ -90,7 +90,7 @@ public:
    virtual void visit(class ir_emit_vertex *) {}
    virtual void visit(class ir_end_primitive *) {}
 #ifdef IR_DEBUG_STATE
-   virtual void visit(class ir_list_dummy *) {}
+   virtual void visit(class ir_dummy *) {}
 #endif
 };
 #endif /* __cplusplus */

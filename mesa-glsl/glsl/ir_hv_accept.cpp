@@ -442,7 +442,7 @@ ir_end_primitive::accept(ir_hierarchical_visitor *v)
 
 #ifdef IR_DEBUG_STATE
 ir_visitor_status
-ir_list_dummy::accept(ir_hierarchical_visitor *v)
+ir_dummy::accept(ir_hierarchical_visitor *v)
 {
    return v->visit(this);
 }

@@ -146,7 +146,7 @@ enum ir_node_type {
    ir_type_emit_vertex,
    ir_type_end_primitive,
 #ifdef IR_DEBUG_STATE
-   ir_type_list_dummy,
+   ir_type_dummy,
 #endif
    ir_type_max /**< maximum ir_type enum number, for validation */
 };
@@ -253,6 +253,9 @@ public:
    virtual class ir_discard *           as_discard()          { return NULL; }
    virtual class ir_jump *              as_jump()             { return NULL; }
    /*@}*/
+#ifdef IR_DEBUG_STATE
+   virtual class ir_dummy *             as_dummy()             { return NULL; }
+#endif
 
 protected:
    ir_instruction()
@@ -266,14 +269,37 @@ protected:
 
 
 #ifdef IR_DEBUG_STATE
-class ir_list_dummy : public ir_instruction {
+/**
+ * This class provides additional hooks for debugger.
+ */
+
+enum ir_dummy_type {
+	ir_dummy_no_type,
+	ir_dummy_function_end,
+	ir_dummy_traversable_last,
+	/* Types below this is for internal use */
+	ir_dummy_loop_init,
+	ir_dummy_loop_initialized,
+	ir_dummy_loop_condition,
+	ir_dummy_loop_condition_end,
+	ir_dummy_loop_iter,
+	ir_dummy_loop_iterated,
+};
+
+class ir_dummy : public ir_instruction {
 public:
-   ir_list_dummy()
+   ir_dummy(enum ir_dummy_type type)
    {
-      ir_type = ir_type_list_dummy;
+      ir_type = ir_type_dummy;
       debug_state = ir_dbg_state_unset;
       debug_overwrite = ir_dbg_ow_unset;
       debug_target = false;
+      dummy_type = type;
+   }
+
+   virtual ir_dummy* as_dummy()
+   {
+	   return this;
    }
 
    virtual void accept(ir_visitor *v)
@@ -282,9 +308,29 @@ public:
    }
 
    virtual ir_visitor_status accept(ir_hierarchical_visitor *);
-   virtual ir_list_dummy *clone(void *mem_ctx, struct hash_table *ht) const;
+   virtual ir_dummy *clone(void *mem_ctx, struct hash_table *ht) const;
 
-   virtual ~ir_list_dummy( ) {}
+   virtual ~ir_dummy( ) {}
+
+   static int pair_type(enum ir_dummy_type t)
+   {
+	   switch (t) {
+	   	   case ir_dummy_loop_init:
+	   		   return ir_dummy_loop_initialized;
+	   		   break;
+	   	   case ir_dummy_loop_condition:
+	   		   return ir_dummy_loop_condition_end;
+	   		   break;
+	   	   case ir_dummy_loop_iter:
+	   		   return ir_dummy_loop_iterated;
+	   		   break;
+	   	   default:
+	   		   break;
+	   }
+	   return -1;
+   }
+
+   enum ir_dummy_type dummy_type;
 };
 #endif
 
@@ -1166,8 +1212,12 @@ public:
 #endif
 
 #ifdef IR_DEBUG_STATE
+   ir_dummy* debug_init;
+   ir_dummy* debug_check_block;
+   ir_dummy* debug_terminal;
    enum ir_dbg_state_internal_loop debug_state_internal;
    int debug_iter;
+   char* debug_iter_name;
 #endif
 };
 

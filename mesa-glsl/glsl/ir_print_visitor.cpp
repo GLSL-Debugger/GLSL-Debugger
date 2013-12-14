@@ -575,7 +575,7 @@ ir_print_visitor::visit(ir_end_primitive *ir)
 
 #ifdef IR_DEBUG_STATE
 void
-ir_print_visitor::visit(ir_list_dummy *ir)
+ir_print_visitor::visit(ir_dummy *ir)
 {
 }
 #endif

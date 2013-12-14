@@ -91,7 +91,7 @@ public:
    virtual ir_visitor_status visit(class ir_emit_vertex *);
    virtual ir_visitor_status visit(class ir_end_primitive *);
 #ifdef IR_DEBUG_STATE
-   virtual ir_visitor_status visit(class ir_list_dummy *);
+   virtual ir_visitor_status visit(class ir_dummy *);
 #endif
 
    /**

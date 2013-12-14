@@ -3891,7 +3891,7 @@ ast_function_definition::hir(exec_list *instructions,
 
 #ifdef IR_DEBUG_STATE
    /* Add closing directive. It needed for better functions debug. */
-   ir_list_dummy* body_end = new(state) ir_list_dummy;
+   ir_dummy* body_end = new(state) ir_dummy(ir_dummy_function_end);
    COPY_AST_LOCATION_BEGIN(body_end, this)
    COPY_AST_LOCATION_END(body_end, this)
    signature->body.push_tail(body_end);
@@ -4390,6 +4390,14 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
    void *ctx = state;
 
    if (condition != NULL) {
+
+#ifdef IR_DEBUG_STATE
+      ir_dummy* cond_start = new((void*)state) ir_dummy(ir_dummy_loop_condition);
+      COPY_AST_LOCATION_FROM_HERE(cond_start->yy_location);
+      stmt->body_instructions.push_tail(cond_start);
+      stmt->debug_check_block = cond_start;
+#endif
+
       ir_rvalue *const cond =
 	 condition->hir(& stmt->body_instructions, state);
 
@@ -4415,6 +4423,11 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
 	 if_stmt->then_instructions.push_tail(break_stmt);
 	 stmt->body_instructions.push_tail(if_stmt);
       }
+
+#ifdef IR_DEBUG_STATE
+      stmt->body_instructions.push_tail(new(
+	 (void*)state) ir_dummy(ir_dummy_loop_condition_end));
+#endif
    }
 }
 
@@ -4430,11 +4443,23 @@ ast_iteration_statement::hir(exec_list *instructions,
    if (mode != ast_do_while)
       state->symbols->push_scope();
 
+#ifdef IR_DEBUG_STATE
+   ir_dummy* init_start = new((void*)state) ir_dummy(ir_dummy_loop_init);
+   COPY_AST_LOCATION_FROM_HERE(init_start->yy_location);
+   instructions->push_tail(init_start);
+#endif
+
    if (init_statement != NULL)
-      init_statement->hir(instructions, state);
+	   init_statement->hir(instructions, state);
 
    ir_loop *const stmt = new(ctx) ir_loop();
    COPY_AST_LOCATION_FROM_HERE(stmt->yy_location);
+
+#ifdef IR_DEBUG_STATE
+   instructions->push_tail(new((void*)state) ir_dummy(ir_dummy_loop_initialized));
+   stmt->debug_init = init_start;
+#endif
+
    instructions->push_tail(stmt);
 
    /* Track the current loop nesting. */
@@ -4458,8 +4483,21 @@ ast_iteration_statement::hir(exec_list *instructions,
    if (body != NULL)
       body->hir(& stmt->body_instructions, state);
 
-   if (rest_expression != NULL)
+
+   if (rest_expression != NULL) {
+#ifdef IR_DEBUG_STATE
+      ir_dummy* iter_start = new((void*)state) ir_dummy(ir_dummy_loop_iter);
+      COPY_AST_LOCATION_FROM_HERE(iter_start->yy_location);
+      stmt->body_instructions.push_tail(iter_start);
+#endif
+
       rest_expression->hir(& stmt->body_instructions, state);
+
+#ifdef IR_DEBUG_STATE
+      stmt->body_instructions.push_tail(new((void*)state) ir_dummy(ir_dummy_loop_iterated));
+      stmt->debug_terminal = iter_start;
+#endif
+   }
 
    if (mode == ast_do_while)
       condition_to_hir(stmt, state);
