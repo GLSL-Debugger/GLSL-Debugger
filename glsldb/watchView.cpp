@@ -33,13 +33,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "watchView.qt.h"
 
-WatchView::WatchView(QWidget *parent) : QWidget(parent)
+WatchView::WatchView(QWidget *parent) :
+		QWidget(parent)
 {
-    setAttribute(Qt::WA_DeleteOnClose, true);
+	setAttribute(Qt::WA_DeleteOnClose, true);
 }
 
 void WatchView::setActive(bool b)
 {
-    m_bActive = b;
+	m_bActive = b;
 }
 

@@ -39,6 +39,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 DBGLIBLOCAL int saveGLState(void);
 DBGLIBLOCAL int setSavedGLState(int target);
 DBGLIBLOCAL int restoreGLState(void);
-	
+
 #endif
 

@@ -35,7 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dbgprint.h"
 
-PixelBox::PixelBox(QObject *i_qParent) : QObject(i_qParent)
+PixelBox::PixelBox(QObject *i_qParent) :
+		QObject(i_qParent)
 {
 	m_nWidth = 0;
 	m_nHeight = 0;
@@ -46,49 +47,50 @@ PixelBox::PixelBox(QObject *i_qParent) : QObject(i_qParent)
 
 PixelBox::~PixelBox()
 {
-    emit dataDeleted();
+	emit dataDeleted();
 
-    delete[] m_pDataMap;
+	delete[] m_pDataMap;
 }
 
 bool PixelBox::isAllDataAvailable()
 {
-    int x, y;
-    bool  *pDataMap;
-    bool  *pCoverage;
-    
-    if (!m_pDataMap) {
-        return false;
-    }
+	int x, y;
+	bool *pDataMap;
+	bool *pCoverage;
 
-    pDataMap = m_pDataMap;
-    pCoverage  = m_pCoverage;
+	if (!m_pDataMap) {
+		return false;
+	}
 
-    for (y=0; y<m_nHeight; y++) {
-        for (x=0; x<m_nWidth; x++) {
-            if (*pCoverage && !*pDataMap) {
-                dbgPrint(DBGLVL_INFO, "NOT ALL DATA AVILABLE, NEED READBACK =========================\n");
-                return false;
-            }
-            pDataMap++;
-            pCoverage++;
-        }
-    }
-    return true;
+	pDataMap = m_pDataMap;
+	pCoverage = m_pCoverage;
+
+	for (y = 0; y < m_nHeight; y++) {
+		for (x = 0; x < m_nWidth; x++) {
+			if (*pCoverage && !*pDataMap) {
+				dbgPrint(DBGLVL_INFO,
+						"NOT ALL DATA AVILABLE, NEED READBACK =========================\n");
+				return false;
+			}
+			pDataMap++;
+			pCoverage++;
+		}
+	}
+	return true;
 }
 
-void  PixelBox::setMinMaxArea(const QRect& minMaxArea) {
-    this->m_minMaxArea = minMaxArea;
-    emit minMaxAreaChanged();
+void PixelBox::setMinMaxArea(const QRect& minMaxArea)
+{
+	this->m_minMaxArea = minMaxArea;
+	emit minMaxAreaChanged();
 }
 
+template<> const float TypedPixelBox<float>::sc_minVal = -FLT_MAX;
+template<> const float TypedPixelBox<float>::sc_maxVal = FLT_MAX;
 
-template <> const float TypedPixelBox<float>::sc_minVal = -FLT_MAX;
-template <> const float TypedPixelBox<float>::sc_maxVal = FLT_MAX;
+template<> const int TypedPixelBox<int>::sc_minVal = INT_MIN;
+template<> const int TypedPixelBox<int>::sc_maxVal = INT_MAX;
 
-template <> const int TypedPixelBox<int>::sc_minVal = INT_MIN;
-template <> const int TypedPixelBox<int>::sc_maxVal = INT_MAX;
-
-template <> const unsigned int TypedPixelBox<unsigned int>::sc_minVal = 0;
-template <> const unsigned int TypedPixelBox<unsigned int>::sc_maxVal = UINT_MAX;
+template<> const unsigned int TypedPixelBox<unsigned int>::sc_minVal = 0;
+template<> const unsigned int TypedPixelBox<unsigned int>::sc_maxVal = UINT_MAX;
 

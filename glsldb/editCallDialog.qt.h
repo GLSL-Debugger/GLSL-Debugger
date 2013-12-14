@@ -39,23 +39,23 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ui_editCallDialog.h"
 #include "functionCall.h"
 
-class EditCallDialog : public QDialog, public Ui::dEditCall {
-    Q_OBJECT
+class EditCallDialog: public QDialog, public Ui::dEditCall {
+Q_OBJECT
 
 public:
-    EditCallDialog(const FunctionCall *fc);
-    ~EditCallDialog();
+	EditCallDialog(const FunctionCall *fc);
+	~EditCallDialog();
 
-    const FunctionCall* getChangedFunction(void);
+	const FunctionCall* getChangedFunction(void);
 
 private slots:
-    void checkValidity(void);
-    
+	void checkValidity(void);
+
 private:
-    QWidget* getManipulator(const FunctionCall::Argument *arg);
-    
-    QVector<QWidget*>  m_qObjects;
-    FunctionCall      *m_pChangedCall;
+	QWidget* getManipulator(const FunctionCall::Argument *arg);
+
+	QVector<QWidget*> m_qObjects;
+	FunctionCall *m_pChangedCall;
 };
 
 #endif

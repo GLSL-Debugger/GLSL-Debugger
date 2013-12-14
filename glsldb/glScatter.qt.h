@@ -43,48 +43,57 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtOpenGL/QGLWidget>
 extern "C" {
-   #include "mmath.h"
+#include "mmath.h"
 }
 
-class GLScatter : public QGLWidget {
-    Q_OBJECT
-    
+class GLScatter: public QGLWidget {
+Q_OBJECT
+
 public:
-    GLScatter(QWidget *parent = 0);
-    ~GLScatter();
+	GLScatter(QWidget *parent = 0);
+	~GLScatter();
 
-    void   setClearColor(QColor c);
-    QColor getClearColor(void)     { return m_qClearColor; }
+	void setClearColor(QColor c);
+	QColor getClearColor(void)
+	{
+		return m_qClearColor;
+	}
 
-	void   setPointSize(float ps) { m_psize = ps; }
-	float  getPointSize() { return m_psize; }
-	
-    void   resetView(void);
+	void setPointSize(float ps)
+	{
+		m_psize = ps;
+	}
+	float getPointSize()
+	{
+		return m_psize;
+	}
 
-    void   setData(float *positions, float *colors, int numPoints);
+	void resetView(void);
+
+	void setData(float *positions, float *colors, int numPoints);
 
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
+	void initializeGL();
+	void paintGL();
+	void resizeGL(int width, int height);
 
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
 
 private:
-    Quaternion m_Rotation;
-    Vector3    m_Translation;
-    GLfloat    m_CamDist;
-    
-    QPoint m_qLastMousePos;
-    QColor m_qClearColor;
+	Quaternion m_Rotation;
+	Vector3 m_Translation;
+	GLfloat m_CamDist;
 
-    GLint    m_iNumPoints;
-    GLfloat *m_pVertices;
-    GLfloat *m_pColors;
+	QPoint m_qLastMousePos;
+	QColor m_qClearColor;
+
+	GLint m_iNumPoints;
+	GLfloat *m_pVertices;
+	GLfloat *m_pColors;
 	GLfloat m_psize;
 
-    GLuint   m_Shader;
+	GLuint m_Shader;
 };
 
 #endif

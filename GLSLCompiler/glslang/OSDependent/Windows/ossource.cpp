@@ -41,7 +41,6 @@
 #error Trying to build a windows specific file in a non windows build.
 #endif
 
-
 //
 // Thread Local Storage Operations
 //
@@ -49,13 +48,13 @@ OS_TLSIndex OS_AllocTLSIndex()
 {
 	DWORD dwIndex = TlsAlloc();
 	if (dwIndex == TLS_OUT_OF_INDEXES) {
-		assert(0 && "OS_AllocTLSIndex(): Unable to allocate Thread Local Storage");
+		assert(
+				0 && "OS_AllocTLSIndex(): Unable to allocate Thread Local Storage");
 		return OS_INVALID_TLS_INDEX;
 	}
 
 	return dwIndex;
 }
-
 
 bool OS_SetTLSValue(OS_TLSIndex nIndex, void *lpvValue)
 {
@@ -69,7 +68,6 @@ bool OS_SetTLSValue(OS_TLSIndex nIndex, void *lpvValue)
 	else
 		return false;
 }
-
 
 bool OS_FreeTLSIndex(OS_TLSIndex nIndex)
 {

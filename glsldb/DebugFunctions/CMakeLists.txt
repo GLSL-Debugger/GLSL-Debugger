@@ -10,7 +10,9 @@ endif()
 
 set(LIBRARY_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/lib/plugins")
 
-include_directories(${X11_INCLUDE_DIR})
+include_directories(${X11_INCLUDE_DIR}
+	${PROJECT_SOURCE_DIR}/glsldb
+)
 
 add_library(glEnd MODULE ${SRC})
 

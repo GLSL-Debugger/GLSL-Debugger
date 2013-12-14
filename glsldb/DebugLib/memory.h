@@ -39,5 +39,5 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 DBGLIBLOCAL void allocMem(void);
 
 DBGLIBLOCAL void freeMem(void);
-	
+
 #endif

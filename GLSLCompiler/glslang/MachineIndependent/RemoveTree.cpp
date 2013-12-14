@@ -41,7 +41,7 @@
 bool RemoveAggregate(bool, TIntermAggregate* node, TIntermTraverser*)
 {
 	delete node;
-    node = NULL;
+	node = NULL;
 
 	return true;
 }
@@ -79,54 +79,54 @@ bool RemoveCase(bool, TIntermCase* node, TIntermTraverser*)
 	return true;
 }
 
-void RemoveSymbol(TIntermSymbol* node, TIntermTraverser* it)
+void RemoveSymbol(TIntermSymbol* node, TIntermTraverser*)
 {
 	delete node;
 }
 
-void RemoveFuncParam(TIntermFuncParam* node, TIntermTraverser* it)
+void RemoveFuncParam(TIntermFuncParam* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 }
 
 bool RemoveUnary(bool, TIntermUnary* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 
 	return true;
 }
 
-bool RemoveLoop(bool, TIntermLoop* node, TIntermTraverser* it)
+bool RemoveLoop(bool, TIntermLoop* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 
-    return true;
+	return true;
 }
 
-bool RemoveBranch(bool, TIntermBranch* node, TIntermTraverser* it)
+bool RemoveBranch(bool, TIntermBranch* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 
-    return true;
+	return true;
 }
 
-bool RemoveDeclaration(TIntermDeclaration* node, TIntermTraverser* it)
+bool RemoveDeclaration(TIntermDeclaration* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 
-    return true;
+	return true;
 }
 
-bool RemoveSpecification(TIntermSpecification* node, TIntermTraverser* it)
+bool RemoveSpecification(TIntermSpecification* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 
-    return true;
+	return true;
 }
 
-void RemoveParameter(TIntermParameter* node, TIntermTraverser* it)
+void RemoveParameter(TIntermParameter* node, TIntermTraverser*)
 {
-    delete node;
+	delete node;
 }
 
 //
@@ -134,30 +134,30 @@ void RemoveParameter(TIntermParameter* node, TIntermTraverser* it)
 //
 void RemoveAllTreeNodes(TIntermNode* root)
 {
-    TIntermTraverser it;
+	TIntermTraverser it;
 
-    it.visitAggregate     = RemoveAggregate;
-    it.visitBinary        = RemoveBinary;
-    it.visitConstantUnion = RemoveConstantUnion;
-    it.visitSelection     = RemoveSelection;
-    it.visitSwitch        = RemoveSwitch;
-    it.visitCase          = RemoveCase;
-    it.visitSymbol        = RemoveSymbol;
-    it.visitFuncParam     = RemoveFuncParam;
-    it.visitUnary         = RemoveUnary;
-    it.visitLoop          = RemoveLoop;
-    it.visitBranch        = RemoveBranch;
-    it.visitDeclaration   = RemoveDeclaration;
-    it.visitSpecification = RemoveSpecification;
-    it.visitParameter     = RemoveParameter;
+	it.visitAggregate = RemoveAggregate;
+	it.visitBinary = RemoveBinary;
+	it.visitConstantUnion = RemoveConstantUnion;
+	it.visitSelection = RemoveSelection;
+	it.visitSwitch = RemoveSwitch;
+	it.visitCase = RemoveCase;
+	it.visitSymbol = RemoveSymbol;
+	it.visitFuncParam = RemoveFuncParam;
+	it.visitUnary = RemoveUnary;
+	it.visitLoop = RemoveLoop;
+	it.visitBranch = RemoveBranch;
+	it.visitDeclaration = RemoveDeclaration;
+	it.visitSpecification = RemoveSpecification;
+	it.visitParameter = RemoveParameter;
 
-    it.preVisit = false;
-    it.postVisit = true;
+	it.preVisit = false;
+	it.postVisit = true;
 
-    if (!root) {
-        return;
-    }
+	if (!root) {
+		return;
+	}
 
-    root->traverse(&it);
+	root->traverse(&it);
 }
 

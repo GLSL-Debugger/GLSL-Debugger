@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "hash.h"
 
 void hash_create(Hash *hash, HashFunc hashFunc, CompFunc compFunc,
-                 int numBuckets, int freeDataPointers)
+		int numBuckets, int freeDataPointers)
 {
 	int i;
 	hash->numBuckets = numBuckets;
@@ -44,7 +44,7 @@ void hash_create(Hash *hash, HashFunc hashFunc, CompFunc compFunc,
 	hash->compFunc = compFunc;
 	hash->freeDataPointers = freeDataPointers;
 	/* TODO: mem check */
-	hash->table = (HashNode**)malloc(numBuckets*sizeof(HashNode*));
+	hash->table = (HashNode**) malloc(numBuckets * sizeof(HashNode*));
 	for (i = 0; i < numBuckets; i++) {
 		hash->table[i] = NULL;
 	}
@@ -53,7 +53,7 @@ void hash_create(Hash *hash, HashFunc hashFunc, CompFunc compFunc,
 void hash_free(Hash *hash)
 {
 	int i;
-	
+
 	for (i = 0; i < hash->numBuckets; i++) {
 		if (hash->table[i]) {
 			HashNode *node = hash->table[i];
@@ -72,7 +72,7 @@ void hash_free(Hash *hash)
 	hash->numBuckets = 0;
 }
 
-int hash_insert(Hash *hash, void *key, void *data)
+int hash_insert(Hash *hash, const void *key, void *data)
 {
 	int n = hash->hashFunc(key, hash->numBuckets);
 	HashNode *node = hash->table[n];
@@ -87,11 +87,11 @@ int hash_insert(Hash *hash, void *key, void *data)
 	}
 	if (prev == NULL) {
 		/* TODO: mem check */
-		hash->table[n] = (HashNode*)malloc(sizeof(HashNode));
+		hash->table[n] = (HashNode*) malloc(sizeof(HashNode));
 		node = hash->table[n];
 	} else {
 		/* TODO: mem check */
-		prev->next = (HashNode*)malloc(sizeof(HashNode));
+		prev->next = (HashNode*) malloc(sizeof(HashNode));
 		node = prev->next;
 	}
 	node->data = data;
@@ -123,7 +123,7 @@ void hash_remove(Hash *hash, void *key)
 	}
 }
 
-void *hash_find(Hash *hash, void *key)
+void *hash_find(Hash *hash, const void *key)
 {
 	HashNode *node = hash->table[hash->hashFunc(key, hash->numBuckets)];
 	while (node) {
@@ -172,30 +172,30 @@ void *hash_element(Hash *hash, int n)
 
 /* some common hash and comparison functions */
 
-int hashInt(void *key, int numBuckets)
+int hashInt(const void *key, int numBuckets)
 {
-	return *(int*)key % numBuckets;
+	return *(int*) key % numBuckets;
 }
 
-int compInt(void *key1, void *key2)
+int compInt(const void *key1, const void *key2)
 {
-	return *(int*)key1 == *(int*)key2;
+	return *(int*) key1 == *(int*) key2;
 }
 
-int hashString(void *key, int numBuckets)
+int hashString(const void *key, int numBuckets)
 {
-	char *s = (char *)key;
+	char *s = (char *) key;
 	/* universal hash function, R. Sedgewick, Algorithms in C++, p. 593 */
 	int h, a = 31415, b = 27183;
-	for (h = 0; *s != 0; s++, a = a*b % (numBuckets - 1)) {
-		h = (a*h + *s) % numBuckets;
+	for (h = 0; *s != 0; s++, a = a * b % (numBuckets - 1)) {
+		h = (a * h + *s) % numBuckets;
 	}
 	return (h < 0) ? (h + numBuckets) : h;
 }
 
-int compString(void *key1, void *key2)
+int compString(const void *key1, const void *key2)
 {
-	return !strcmp((const char*)key1, (const char*)key2);
+	return !strcmp((const char*) key1, (const char*) key2);
 }
 
 

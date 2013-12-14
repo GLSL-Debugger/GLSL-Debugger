@@ -101,5 +101,4 @@ void mul4x4d_d3(double *dst, double *m, double *v);
 }
 #endif
 
-
 #endif

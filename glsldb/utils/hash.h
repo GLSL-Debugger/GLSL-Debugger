@@ -38,12 +38,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "common.h"
 
-typedef int (*HashFunc)(void *key, int numBuckets);
-typedef int (*CompFunc)(void *key1, void *key2);
+typedef int (*HashFunc)(const void *key, int numBuckets);
+typedef int (*CompFunc)(const void *key1, const void *key2);
 
 typedef struct tHashNode {
 	struct tHashNode *next;
-	void *key;
+	const void *key;
 	void *data;
 } HashNode;
 
@@ -55,36 +55,33 @@ typedef struct {
 	int freeDataPointers;
 } Hash;
 
-/* initialize hash */
-UTILSLOCAL void hash_create(Hash *hash, HashFunc hashFunc, CompFunc compFunc,
-                 int numBuckets, int freeDataPointers);
+/* initialize hash */UTILSLOCAL void hash_create(Hash *hash, HashFunc hashFunc,
+		CompFunc compFunc, int numBuckets, int freeDataPointers);
 
-/* free memory associated eith this hash */
-UTILSLOCAL void hash_free(Hash *hash);
+/* free memory associated eith this hash */UTILSLOCAL void hash_free(
+		Hash *hash);
 
-/* insert (key, data) pair; iff the key already exits data is replaced. In the
- * latter case 1 is returned, 0 else. 
- */
-UTILSLOCAL int hash_insert(Hash *hash, void *key, void *data);
+/* insert (key, data) pair; if the key already exits data is replaced. In the
+ * latter case 1 is returned, 0 else.
+ */UTILSLOCAL int hash_insert(Hash *hash, const void *key, void *data);
 
-/* remove data item associated with key */
-UTILSLOCAL void hash_remove(Hash *hash, void *key);
+/* remove data item associated with key */UTILSLOCAL void hash_remove(
+		Hash *hash, void *key);
 
-/* return data associated with key */
-UTILSLOCAL void *hash_find(Hash *hash, void *key);
+/* return data associated with key */UTILSLOCAL void *hash_find(Hash *hash,
+		const void *key);
 
-/* return number of elements in hash */
-UTILSLOCAL int hash_count(Hash *hash);
+/* return number of elements in hash */UTILSLOCAL int hash_count(Hash *hash);
 
-/* return the n-th elemnt in the hash */
-UTILSLOCAL void *hash_element(Hash *hash, int n);
+/* return the n-th elemnt in the hash */UTILSLOCAL void *hash_element(
+		Hash *hash, int n);
 
 /* some common hash and comparison functions */
 
-UTILSLOCAL int hashInt(void *key, int numBuckets);
-UTILSLOCAL int compInt(void *key1, void *key2);
+UTILSLOCAL int hashInt(const void *key, int numBuckets);
+UTILSLOCAL int compInt(const void *key1, const void *key2);
 
-UTILSLOCAL int hashString(void *key, int numBuckets);
-UTILSLOCAL int compString(void *key1, void *key2);
+UTILSLOCAL int hashString(const void *key, int numBuckets);
+UTILSLOCAL int compString(const void *key1, const void *key2);
 
 #endif

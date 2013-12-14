@@ -35,30 +35,35 @@
 #include "ParseHelper.h"
 
 //
-// Use this class to carry along data from node to node in 
+// Use this class to carry along data from node to node in
 // the traversal
 //
-class TConstTraverser : public TIntermTraverser {
+class TConstTraverser: public TIntermTraverser {
 public:
-    TConstTraverser(constUnion* cUnion, bool singleConstParam, TOperator constructType, TInfoSink& sink, TSymbolTable& symTable, TType& t) : unionArray(cUnion), type(t),
-        constructorType(constructType), singleConstantParam(singleConstParam), infoSink(sink), symbolTable(symTable), error(false), isMatrix(false) {  
-            index = 0; 
-            tOp = EOpNull;
-            matrixSize[0] = 1;
-            matrixSize[1] = 1;
-        }
-    int index ;
-    constUnion *unionArray;
-    TOperator tOp;
-    TType type;
-    TOperator constructorType;
-    bool singleConstantParam;
-    TInfoSink& infoSink;
-    TSymbolTable& symbolTable;
-    bool error;
-    int size; // size of the constructor ( 4 for vec4)
-    bool isMatrix;
-    int matrixSize[2]; // dimension of the matrix (nominal size and not the instance size)
+	TConstTraverser(constUnion* cUnion, bool singleConstParam,
+			TOperator constructType, TInfoSink& sink, TSymbolTable& symTable,
+			TType& t) :
+			unionArray(cUnion), type(t), constructorType(constructType), singleConstantParam(
+					singleConstParam), infoSink(sink), symbolTable(symTable), error(
+					false), isMatrix(false)
+	{
+		index = 0;
+		tOp = EOpNull;
+		matrixSize[0] = 1;
+		matrixSize[1] = 1;
+	}
+	int index;
+	constUnion *unionArray;
+	TOperator tOp;
+	TType type;
+	TOperator constructorType;
+	bool singleConstantParam;
+	TInfoSink& infoSink;
+	TSymbolTable& symbolTable;
+	bool error;
+	int size;  // size of the constructor ( 4 for vec4)
+	bool isMatrix;
+	int matrixSize[2];  // dimension of the matrix (nominal size and not the instance size)
 };
 
 //
@@ -72,194 +77,205 @@ public:
 
 void ParseSymbol(TIntermSymbol* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Symbol Node found in constant constructor", node->getRange());
-    return;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Symbol Node found in constant constructor", node->getRange());
+	return;
 
 }
 
 bool ParseBinary(bool /* preVisit */, TIntermBinary* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    
-    TQualifier qualifier = node->getType().getQualifier();
-    
-    if (!(qualifier == EvqConst || qualifier == EvqConstNoValue)) {
-        char buf[200];
-        sprintf(buf, "'constructor' : assigning non-constant to %s", oit->type.getCompleteString().c_str());
-        oit->infoSink.info.message(EPrefixError, buf, node->getRange());
-        oit->error = true;
-        return false;  
-    }
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
 
-   oit->infoSink.info.message(EPrefixInternalError, "Binary Node found in constant constructor", node->getRange());
-    
-    return false;
+	TQualifier qualifier = node->getType().getQualifier();
+
+	if (!(qualifier == EvqConst || qualifier == EvqConstNoValue)) {
+		char buf[200];
+		sprintf(buf, "'constructor' : assigning non-constant to %s",
+				oit->type.getCompleteString().c_str());
+		oit->infoSink.info.message(EPrefixError, buf, node->getRange());
+		oit->error = true;
+		return false;
+	}
+
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Binary Node found in constant constructor", node->getRange());
+
+	return false;
 }
 
 bool ParseUnary(bool /* preVisit */, TIntermUnary* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
 
-    char buf[200];
-    sprintf(buf, "'constructor' : assigning non-constant to '%s'", oit->type.getCompleteString().c_str());
-    oit->infoSink.info.message(EPrefixError, buf, node->getRange());
-    oit->error = true;
-    return false;  
+	char buf[200];
+	sprintf(buf, "'constructor' : assigning non-constant to '%s'",
+			oit->type.getCompleteString().c_str());
+	oit->infoSink.info.message(EPrefixError, buf, node->getRange());
+	oit->error = true;
+	return false;
 }
 
-bool ParseAggregate(bool /* preVisit */, TIntermAggregate* node, TIntermTraverser* it)
+bool ParseAggregate(bool /* preVisit */, TIntermAggregate* node,
+		TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
 
-    if (!node->isConstructor() && node->getOp() != EOpComma) {
-        char buf[200];
-        sprintf(buf, "'constructor' : assigning non-constant to '%s'", oit->type.getCompleteString().c_str());
-        oit->infoSink.info.message(EPrefixError, buf, node->getRange());
-        oit->error = true;
-        return false;  
-    }
+	if (!node->isConstructor() && node->getOp() != EOpComma) {
+		char buf[200];
+		sprintf(buf, "'constructor' : assigning non-constant to '%s'",
+				oit->type.getCompleteString().c_str());
+		oit->infoSink.info.message(EPrefixError, buf, node->getRange());
+		oit->error = true;
+		return false;
+	}
 
-    if (node->getSequence().size() == 0) {
-        oit->error = true;
-        return false;
-    }
+	if (node->getSequence().size() == 0) {
+		oit->error = true;
+		return false;
+	}
 
-    bool flag = node->getSequence().size() == 1 && node->getSequence()[0]->getAsTyped()->getAsConstantUnion();
-    if (flag) 
-    {
-        oit->singleConstantParam = true; 
-        oit->constructorType = node->getOp();
-        oit->size = node->getType().getObjectSize();
+	bool flag = node->getSequence().size() == 1
+			&& node->getSequence()[0]->getAsTyped()->getAsConstantUnion();
+	if (flag) {
+		oit->singleConstantParam = true;
+		oit->constructorType = node->getOp();
+		oit->size = node->getType().getObjectSize();
 
-        if (node->getType().isMatrix()) {
-            oit->isMatrix = true;
-            oit->matrixSize[0] = node->getType().getMatrixSize(0);
-            oit->matrixSize[1] = node->getType().getMatrixSize(1);
-        }
-    }       
+		if (node->getType().isMatrix()) {
+			oit->isMatrix = true;
+			oit->matrixSize[0] = node->getType().getMatrixSize(0);
+			oit->matrixSize[1] = node->getType().getMatrixSize(1);
+		}
+	}
 
-    for (TIntermSequence::iterator p = node->getSequence().begin(); 
-                                   p != node->getSequence().end(); p++) {
+	for (TIntermSequence::iterator p = node->getSequence().begin();
+			p != node->getSequence().end(); p++) {
 
-        if (node->getOp() == EOpComma)
-            oit->index = 0;           
+		if (node->getOp() == EOpComma)
+			oit->index = 0;
 
-        (*p)->traverse(oit);
-    }   
-    if (flag) 
-    {
-        oit->singleConstantParam = false;   
-        oit->constructorType = EOpNull;
-        oit->size = 0;
-        oit->isMatrix = false;
-        oit->matrixSize[0] = 1;
-        oit->matrixSize[1] = 1;
-    }
-    return false;
+		(*p)->traverse(oit);
+	}
+	if (flag) {
+		oit->singleConstantParam = false;
+		oit->constructorType = EOpNull;
+		oit->size = 0;
+		oit->isMatrix = false;
+		oit->matrixSize[0] = 1;
+		oit->matrixSize[1] = 1;
+	}
+	return false;
 }
 
-bool ParseSelection(bool /* preVisit */, TIntermSelection* node, TIntermTraverser* it)
+bool ParseSelection(bool /* preVisit */, TIntermSelection* node,
+		TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Selection Node found in constant constructor", node->getRange());
-    oit->error = true;
-    return false;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Selection Node found in constant constructor", node->getRange());
+	oit->error = true;
+	return false;
 }
 
 bool ParseSwitch(bool /* preVisit */, TIntermSwitch* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Switch Node found in constant constructor", node->getRange());
-    oit->error = true;
-    return false;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Switch Node found in constant constructor", node->getRange());
+	oit->error = true;
+	return false;
 }
 
 bool ParseCase(bool /* preVisit */, TIntermCase* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Case Node found in constant constructor", node->getRange());
-    oit->error = true;
-    return false;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Case Node found in constant constructor", node->getRange());
+	oit->error = true;
+	return false;
 }
 
 void ParseConstantUnion(TIntermConstantUnion* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    constUnion* leftUnionArray = oit->unionArray;
-    int instanceSize = oit->type.getObjectSize();
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	constUnion* leftUnionArray = oit->unionArray;
+	int instanceSize = oit->type.getObjectSize();
 
-    if (oit->index >= instanceSize)
-        return;
+	if (oit->index >= instanceSize)
+		return;
 
-    if (!oit->singleConstantParam) {
-        int size = node->getType().getObjectSize();
-    
-        constUnion *rightUnionArray = node->getUnionArrayPointer();
-        for (int i=0; i < size; i++) {
-            if (oit->index >= instanceSize)
-                return;
-            leftUnionArray[oit->index] = rightUnionArray[i];
+	if (!oit->singleConstantParam) {
+		int size = node->getType().getObjectSize();
 
-            (oit->index)++;
-        }
-    } else {
-        int size, totalSize, matrixSize[2];
-        bool isMatrix = false;
-        size = oit->size;
-        matrixSize[0] = oit->matrixSize[0];
-        matrixSize[1] = oit->matrixSize[1];
-        isMatrix = oit->isMatrix;
-        totalSize = oit->index + size ;
-        constUnion *rightUnionArray = node->getUnionArrayPointer();
-        if (!isMatrix) {
-            int count = 0;
-            for (int i = oit->index; i < totalSize; i++) {
-                if (i >= instanceSize)
-                    return;
+		constUnion *rightUnionArray = node->getUnionArrayPointer();
+		for (int i = 0; i < size; i++) {
+			if (oit->index >= instanceSize)
+				return;
+			leftUnionArray[oit->index] = rightUnionArray[i];
 
-                leftUnionArray[i] = rightUnionArray[count];
+			(oit->index)++;
+		}
+	} else {
+		int size, totalSize, matrixSize[2];
+		bool isMatrix = false;
+		size = oit->size;
+		matrixSize[0] = oit->matrixSize[0];
+		matrixSize[1] = oit->matrixSize[1];
+		isMatrix = oit->isMatrix;
+		totalSize = oit->index + size;
+		constUnion *rightUnionArray = node->getUnionArrayPointer();
+		if (!isMatrix) {
+			int count = 0;
+			for (int i = oit->index; i < totalSize; i++) {
+				if (i >= instanceSize)
+					return;
 
-                (oit->index)++;
-                
-                if (node->getType().getObjectSize() > 1)
-                    count++;
-            }
-        } else {  // for matrix constructors
-            int count = 0;
-            int index = oit->index;
-            for (int i = index; i < totalSize; i++) {
-                if (i >= instanceSize)
-                    return;
-                /* set diagonal */
-                if (index - i == 0 || (i - index) % (matrixSize[0] + 1) == 0 )
-                    leftUnionArray[i] = rightUnionArray[count];
-                else 
-                    leftUnionArray[i].setFConst(0.0f);
+				leftUnionArray[i] = rightUnionArray[count];
 
-                (oit->index)++;
+				(oit->index)++;
 
-                if (node->getType().getObjectSize() > 1)
-                    count++;                
-            }
-        }
-    }
+				if (node->getType().getObjectSize() > 1)
+					count++;
+			}
+		} else {  // for matrix constructors
+			int count = 0;
+			int index = oit->index;
+			for (int i = index; i < totalSize; i++) {
+				if (i >= instanceSize)
+					return;
+				/* set diagonal */
+				if (index - i == 0 || (i - index) % (matrixSize[0] + 1) == 0)
+					leftUnionArray[i] = rightUnionArray[count];
+				else
+					leftUnionArray[i].setFConst(0.0f);
+
+				(oit->index)++;
+
+				if (node->getType().getObjectSize() > 1)
+					count++;
+			}
+		}
+	}
 }
 
 bool ParseLoop(bool /* preVisit */, TIntermLoop* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Loop Node found in constant constructor", node->getRange());
-    oit->error = true;
-    return false;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Loop Node found in constant constructor", node->getRange());
+	oit->error = true;
+	return false;
 }
 
 bool ParseBranch(bool /* previsit*/, TIntermBranch* node, TIntermTraverser* it)
 {
-    TConstTraverser* oit = static_cast<TConstTraverser*>(it);
-    oit->infoSink.info.message(EPrefixInternalError, "Branch Node found in constant constructor", node->getRange());
-    oit->error = true;
-    return false;
+	TConstTraverser* oit = static_cast<TConstTraverser*>(it);
+	oit->infoSink.info.message(EPrefixInternalError,
+			"Branch Node found in constant constructor", node->getRange());
+	oit->error = true;
+	return false;
 }
 
 //
@@ -267,27 +283,32 @@ bool ParseBranch(bool /* previsit*/, TIntermBranch* node, TIntermTraverser* it)
 // Individual functions can be initialized to 0 to skip processing of that
 // type of node.  It's children will still be processed.
 //
-bool TIntermediate::parseConstTree(TSourceRange range, TIntermNode* root, constUnion* unionArray, TOperator constructorType, TSymbolTable& symbolTable, TType t, bool singleConstantParam)
+bool TIntermediate::parseConstTree(TSourceRange range, TIntermNode* root,
+		constUnion* unionArray, TOperator constructorType,
+		TSymbolTable& symbolTable, TType t, bool singleConstantParam)
 {
-    if (root == 0)
-        return false;
+	UNUSED_ARG(range)
 
-    TConstTraverser it(unionArray, singleConstantParam, constructorType, infoSink, symbolTable, t);
-    
-    it.visitAggregate = ParseAggregate;
-    it.visitBinary = ParseBinary;
-    it.visitConstantUnion = ParseConstantUnion;
-    it.visitSelection = ParseSelection;
-    it.visitSwitch = ParseSwitch;
-    it.visitCase = ParseCase;
-    it.visitSymbol = ParseSymbol;
-    it.visitUnary = ParseUnary;
-    it.visitLoop = ParseLoop;
-    it.visitBranch = ParseBranch;
+	if (root == 0)
+		return false;
 
-    root->traverse(&it);
-    if (it.error)
-        return true;
-    else
-        return false;
+	TConstTraverser it(unionArray, singleConstantParam, constructorType,
+			infoSink, symbolTable, t);
+
+	it.visitAggregate = ParseAggregate;
+	it.visitBinary = ParseBinary;
+	it.visitConstantUnion = ParseConstantUnion;
+	it.visitSelection = ParseSelection;
+	it.visitSwitch = ParseSwitch;
+	it.visitCase = ParseCase;
+	it.visitSymbol = ParseSymbol;
+	it.visitUnary = ParseUnary;
+	it.visitLoop = ParseLoop;
+	it.visitBranch = ParseBranch;
+
+	root->traverse(&it);
+	if (it.error)
+		return true;
+	else
+		return false;
 }

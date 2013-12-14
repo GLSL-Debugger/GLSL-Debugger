@@ -39,72 +39,66 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class VertexBox;
 
-class GeoShaderTreeItem
-{
-	public:
-		GeoShaderTreeItem(QString name, int dataIdx, QList<VertexBox*> *data,
-		                  GeoShaderTreeItem *parent = 0);
-		virtual ~GeoShaderTreeItem();
+class GeoShaderTreeItem {
+public:
+	GeoShaderTreeItem(QString name, int dataIdx, QList<VertexBox*> *data,
+			GeoShaderTreeItem *parent = 0);
+	virtual ~GeoShaderTreeItem();
 
-		void appendChild(GeoShaderTreeItem *child);
+	void appendChild(GeoShaderTreeItem *child);
 
-		GeoShaderTreeItem *child(int row);
-		int childCount() const;
-		virtual int columnCount() const;
-		virtual QVariant data(int column) const;
-		virtual Qt::ItemFlags flags(int column) const;
-		virtual QVariant displayColor(int column) const;
-		int row() const;
-		GeoShaderTreeItem *parent();
+	GeoShaderTreeItem *child(int row);
+	int childCount() const;
+	virtual int columnCount() const;
+	virtual QVariant data(int column) const;
+	virtual Qt::ItemFlags flags(int column) const;
+	virtual QVariant displayColor(int column) const;
+	int row() const;
+	GeoShaderTreeItem *parent();
 
-		int getDataIndex() const;
-		virtual int isVertexItem() const;
+	int getDataIndex() const;
+	virtual int isVertexItem() const;
 
-	protected:
-		QList<GeoShaderTreeItem*> m_children;
-		GeoShaderTreeItem *m_parentItem;
-		QString m_name;
-		int m_dataIdx;
-		QList<VertexBox*> *m_data;
+protected:
+	QList<GeoShaderTreeItem*> m_children;
+	GeoShaderTreeItem *m_parentItem;
+	QString m_name;
+	int m_dataIdx;
+	QList<VertexBox*> *m_data;
 };
 
-class GeoShaderTreeInPrimItem : public GeoShaderTreeItem
-{
-	public:
-		GeoShaderTreeInPrimItem(QString name, int dataIdx,
-		                        QList<VertexBox*> *data,
-		                        VertexBox *condition,
-                                bool *initialCondition,
-		                        GeoShaderTreeItem *parent = 0);
+class GeoShaderTreeInPrimItem: public GeoShaderTreeItem {
+public:
+	GeoShaderTreeInPrimItem(QString name, int dataIdx, QList<VertexBox*> *data,
+			VertexBox *condition, bool *initialCondition,
+			GeoShaderTreeItem *parent = 0);
 
-		virtual int columnCount() const;
-		virtual QVariant data(int column) const;
-		virtual QVariant displayColor(int column) const;
-		virtual Qt::ItemFlags flags(int column) const;
+	virtual int columnCount() const;
+	virtual QVariant data(int column) const;
+	virtual QVariant displayColor(int column) const;
+	virtual Qt::ItemFlags flags(int column) const;
 
-	protected:
-		VertexBox *m_condition;
-        bool      *m_initialCondition;
+protected:
+	VertexBox *m_condition;
+	bool *m_initialCondition;
 };
 
-class GeoShaderTreeOutPrimItem : public GeoShaderTreeItem
-{
-	public:
-		GeoShaderTreeOutPrimItem(QString name, GeoShaderTreeItem *parent = 0);
+class GeoShaderTreeOutPrimItem: public GeoShaderTreeItem {
+public:
+	GeoShaderTreeOutPrimItem(QString name, GeoShaderTreeItem *parent = 0);
 
-		virtual QVariant data(int column) const;
-		virtual Qt::ItemFlags flags(int column) const;
+	virtual QVariant data(int column) const;
+	virtual Qt::ItemFlags flags(int column) const;
 };
 
-class GeoShaderTreeVertexItem : public GeoShaderTreeItem
-{
-	public:
-		GeoShaderTreeVertexItem(QString name, int dataIdx, QList<VertexBox*> *data,
-		                        GeoShaderTreeItem *parent = 0);
+class GeoShaderTreeVertexItem: public GeoShaderTreeItem {
+public:
+	GeoShaderTreeVertexItem(QString name, int dataIdx, QList<VertexBox*> *data,
+			GeoShaderTreeItem *parent = 0);
 
-		virtual QVariant data(int column) const;
-		virtual Qt::ItemFlags flags(int column) const;
-		virtual int isVertexItem() const;
+	virtual QVariant data(int column) const;
+	virtual Qt::ItemFlags flags(int column) const;
+	virtual int isVertexItem() const;
 };
 #endif
 

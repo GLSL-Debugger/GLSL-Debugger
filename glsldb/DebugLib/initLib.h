@@ -43,32 +43,27 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger);
 
-
 /**
  * Open the shared memory segment specified by the GLSL_DEBUGGER_SHMID
  * environment variable.
  */
 BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size);
 
-
 /**
  * Close the synchronisation events.
  */
 BOOL closeEvents(HANDLE hEvtDebugee, HANDLE hEvtDebugger);
-
 
 /**
  * Unmap the shared memory segment and close it.
  */
 BOOL closeSharedMemory(HANDLE hShMem, void *baseAddr);
 
-
 typedef struct GlInitContext_t {
 	HWND hWnd;
 	HDC hDC;
 	HGLRC hRC;
-} GlInitContext;
-
+}GlInitContext;
 
 BOOL createGlInitContext(GlInitContext *outCtx);
 

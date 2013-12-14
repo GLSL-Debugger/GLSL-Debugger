@@ -37,8 +37,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QWidget>
 #include "ui_compilerErrorDetails.h"
 
-class Widget_CompilerError : public QWidget, public Ui::Widget_CompilerError {
-	Q_OBJECT
+class Widget_CompilerError: public QWidget, public Ui::Widget_CompilerError {
+Q_OBJECT
 
 public:
 	Widget_CompilerError(QWidget *parent = 0);

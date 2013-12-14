@@ -35,46 +35,42 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtGui/QFileDialog>
 
-
 Dialog_OpenProgram::Dialog_OpenProgram()
 {
-    setupUi(this);
+	setupUi(this);
 
-    this->dirModel = new QDirModel();
-    this->completer = new QCompleter();
-    this->completer->setModel(this->dirModel);
-    //this->leProgram->setCompleter(this->completer);
-    //this->leWorkDir->setCompleter(this->completer);
+	this->dirModel = new QDirModel();
+	this->completer = new QCompleter();
+	this->completer->setModel(this->dirModel);
+	//this->leProgram->setCompleter(this->completer);
+	//this->leWorkDir->setCompleter(this->completer);
 
-    // Auto-Connect somehow does not work for this button ...
-    connect(pbWorkDirSelect, SIGNAL(clicked()), this, 
-        SLOT(ob_pbWorkDirSelect_clicked()));
+	// Auto-Connect somehow does not work for this button ...
+	connect(pbWorkDirSelect, SIGNAL(clicked()), this,
+			SLOT(ob_pbWorkDirSelect_clicked()));
 }
 
-
-Dialog_OpenProgram::~Dialog_OpenProgram(void) 
+Dialog_OpenProgram::~Dialog_OpenProgram(void)
 {
-    delete this->completer;
-    delete this->dirModel;
+	delete this->completer;
+	delete this->dirModel;
 }
-
 
 void Dialog_OpenProgram::on_pbSelect_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Select Program");
+	QString fileName = QFileDialog::getOpenFileName(this, "Select Program");
 
-    if (!fileName.isEmpty()) {
-        leProgram->setText(fileName);
-    }
+	if (!fileName.isEmpty()) {
+		leProgram->setText(fileName);
+	}
 }
-
 
 void Dialog_OpenProgram::ob_pbWorkDirSelect_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, 
-        "Select Working Directory");
+	QString dir = QFileDialog::getExistingDirectory(this,
+			"Select Working Directory");
 
-    if (!dir.isEmpty()) {
-        leWorkDir->setText(dir);
-    }
+	if (!dir.isEmpty()) {
+		leWorkDir->setText(dir);
+	}
 }

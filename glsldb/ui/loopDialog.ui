@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>dLoop</class>
- <widget class="QDialog" name="dLoop" >
-  <property name="geometry" >
+ <widget class="QDialog" name="dLoop">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,56 +10,58 @@
     <height>617</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Loop</string>
   </property>
-  <property name="windowIcon" >
-   <iconset/>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff/>
+   </iconset>
   </property>
-  <property name="modal" >
+  <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" >
-   <property name="margin" >
+  <layout class="QVBoxLayout">
+   <property name="spacing">
     <number>0</number>
    </property>
-   <property name="spacing" >
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="currentIndex" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
        <string>Condition</string>
       </attribute>
-      <layout class="QGridLayout" >
-       <property name="margin" >
+      <layout class="QGridLayout">
+       <property name="margin">
         <number>0</number>
        </property>
-       <property name="spacing" >
+       <property name="spacing">
         <number>0</number>
        </property>
-       <item row="0" column="0" >
-        <widget class="QFrame" name="fContent" >
-         <property name="frameShape" >
+       <item row="0" column="0">
+        <widget class="QFrame" name="fContent">
+         <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
-         <property name="frameShadow" >
+         <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tStatistics" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tStatistics">
+      <attribute name="title">
        <string>Statistics</string>
       </attribute>
-      <widget class="QTableView" name="tvStatTable" >
-       <property name="geometry" >
+      <widget class="QTableView" name="tvStatTable">
+       <property name="geometry">
         <rect>
          <x>9</x>
          <y>9</y>
@@ -66,27 +69,27 @@
          <height>251</height>
         </rect>
        </property>
-       <property name="selectionMode" >
+       <property name="selectionMode">
         <enum>QAbstractItemView::NoSelection</enum>
        </property>
-       <property name="selectionBehavior" >
+       <property name="selectionBehavior">
         <enum>QAbstractItemView::SelectRows</enum>
        </property>
-       <property name="verticalScrollMode" >
+       <property name="verticalScrollMode">
         <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>
-       <property name="horizontalScrollMode" >
+       <property name="horizontalScrollMode">
         <enum>QAbstractItemView::ScrollPerPixel</enum>
        </property>
-       <property name="showGrid" >
+       <property name="showGrid">
         <bool>false</bool>
        </property>
-       <property name="sortingEnabled" >
+       <property name="sortingEnabled">
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QFrame" name="fCurves" >
-       <property name="geometry" >
+      <widget class="QFrame" name="fCurves">
+       <property name="geometry">
         <rect>
          <x>10</x>
          <y>270</y>
@@ -94,53 +97,53 @@
          <height>171</height>
         </rect>
        </property>
-       <property name="frameShape" >
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <layout class="QVBoxLayout" >
-        <property name="margin" >
+       <layout class="QVBoxLayout">
+        <property name="spacing">
          <number>0</number>
         </property>
-        <property name="spacing" >
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" >
-          <property name="margin" >
+         <layout class="QHBoxLayout">
+          <property name="spacing">
            <number>0</number>
           </property>
-          <property name="spacing" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QCheckBox" name="cbActive" >
-            <property name="text" >
+           <widget class="QCheckBox" name="cbActive">
+            <property name="text">
              <string>Active</string>
             </property>
-            <property name="checked" >
+            <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="cbDone" >
-            <property name="text" >
+           <widget class="QCheckBox" name="cbDone">
+            <property name="text">
              <string>Done</string>
             </property>
-            <property name="checked" >
+            <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="cbOut" >
-            <property name="text" >
+           <widget class="QCheckBox" name="cbOut">
+            <property name="text">
              <string>Out</string>
             </property>
-            <property name="checked" >
+            <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
@@ -148,11 +151,11 @@
          </layout>
         </item>
         <item>
-         <widget class="QFrame" name="fCurvesDisplay" >
-          <property name="frameShape" >
+         <widget class="QFrame" name="fCurvesDisplay">
+          <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
-          <property name="frameShadow" >
+          <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
          </widget>
@@ -163,63 +166,61 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" >
-     <property name="margin" >
+    <layout class="QVBoxLayout">
+     <property name="spacing">
       <number>0</number>
      </property>
-     <property name="spacing" >
+     <property name="margin">
       <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" >
-       <property name="margin" >
+      <layout class="QHBoxLayout">
+       <property name="spacing">
         <number>0</number>
        </property>
-       <property name="spacing" >
+       <property name="margin">
         <number>0</number>
        </property>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
+      <layout class="QHBoxLayout">
+       <property name="spacing">
         <number>5</number>
        </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
        <item>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
+        <layout class="QHBoxLayout">
+         <property name="spacing">
           <number>2</number>
          </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="lTotal" >
-           <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>5</vsizetype>
+          <widget class="QLabel" name="lTotal">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="font" >
+           <property name="font">
             <font>
              <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Total:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lTotalCount" >
-           <property name="text" >
+          <widget class="QLabel" name="lTotalCount">
+           <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
@@ -227,37 +228,35 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
+        <layout class="QHBoxLayout">
+         <property name="spacing">
           <number>2</number>
          </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="lActive" >
-           <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>5</vsizetype>
+          <widget class="QLabel" name="lActive">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="font" >
+           <property name="font">
             <font>
              <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Active:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lActiveCount" >
-           <property name="text" >
+          <widget class="QLabel" name="lActiveCount">
+           <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
@@ -265,37 +264,35 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
+        <layout class="QHBoxLayout">
+         <property name="spacing">
           <number>2</number>
          </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="lDone" >
-           <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>5</vsizetype>
+          <widget class="QLabel" name="lDone">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="font" >
+           <property name="font">
             <font>
              <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Done:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lDoneCount" >
-           <property name="text" >
+          <widget class="QLabel" name="lDoneCount">
+           <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
@@ -303,37 +300,35 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
+        <layout class="QHBoxLayout">
+         <property name="spacing">
           <number>2</number>
          </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
          <item>
-          <widget class="QLabel" name="lOut" >
-           <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>5</vsizetype>
+          <widget class="QLabel" name="lOut">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="font" >
+           <property name="font">
             <font>
              <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Out:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lOutCount" >
-           <property name="text" >
+          <widget class="QLabel" name="lOutCount">
+           <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
@@ -343,37 +338,37 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
+      <layout class="QHBoxLayout">
+       <property name="spacing">
         <number>2</number>
        </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QPushButton" name="pbBreak" >
-         <property name="text" >
+        <widget class="QPushButton" name="pbBreak">
+         <property name="text">
           <string>Break</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pbStatistics" >
-         <property name="text" >
+        <widget class="QPushButton" name="pbStatistics">
+         <property name="text">
           <string>Full statistic</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pbJump" >
-         <property name="text" >
+        <widget class="QPushButton" name="pbJump">
+         <property name="text">
           <string>Jump</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pbNext" >
-         <property name="text" >
+        <widget class="QPushButton" name="pbNext">
+         <property name="text">
           <string>Next</string>
          </property>
         </widget>
@@ -381,45 +376,46 @@
       </layout>
      </item>
      <item>
-      <widget class="QFrame" name="fProgress" >
-       <property name="frameShape" >
+      <widget class="QFrame" name="fProgress">
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <layout class="QHBoxLayout" >
-        <property name="margin" >
+       <layout class="QHBoxLayout">
+        <property name="spacing">
          <number>0</number>
         </property>
-        <property name="spacing" >
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
-         <widget class="QToolButton" name="pbStopProgress" >
-          <property name="toolTip" >
+         <widget class="QToolButton" name="pbStopProgress">
+          <property name="toolTip">
            <string>Stop processing</string>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>...</string>
           </property>
-          <property name="icon" >
-           <iconset resource="../glslDevil.qrc" >:/icons/icons/process-stop_32.png</iconset>
+          <property name="icon">
+           <iconset resource="../glslDevil.qrc">
+            <normaloff>:/icons/icons/process-stop_32.png</normaloff>:/icons/icons/process-stop_32.png</iconset>
           </property>
-          <property name="autoRaise" >
+          <property name="autoRaise">
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QProgressBar" name="pbProgress" >
-          <property name="value" >
+         <widget class="QProgressBar" name="pbProgress">
+          <property name="value">
            <number>24</number>
           </property>
-          <property name="orientation" >
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="format" >
+          <property name="format">
            <string>%v/%m</string>
           </property>
          </widget>
@@ -428,52 +424,53 @@
       </widget>
      </item>
      <item>
-      <widget class="QFrame" name="fJump" >
-       <property name="frameShape" >
+      <widget class="QFrame" name="fJump">
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <layout class="QHBoxLayout" >
-        <property name="margin" >
+       <layout class="QHBoxLayout">
+        <property name="spacing">
          <number>0</number>
         </property>
-        <property name="spacing" >
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
-         <widget class="QToolButton" name="pbStopJump" >
-          <property name="toolTip" >
+         <widget class="QToolButton" name="pbStopJump">
+          <property name="toolTip">
            <string>Stop processing</string>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>...</string>
           </property>
-          <property name="icon" >
-           <iconset resource="../glslDevil.qrc" >:/icons/icons/process-stop_32.png</iconset>
+          <property name="icon">
+           <iconset resource="../glslDevil.qrc">
+            <normaloff>:/icons/icons/process-stop_32.png</normaloff>:/icons/icons/process-stop_32.png</iconset>
           </property>
-          <property name="autoRaise" >
+          <property name="autoRaise">
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="hsJump" >
-          <property name="orientation" >
+         <widget class="QSlider" name="hsJump">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="tickPosition" >
+          <property name="tickPosition">
            <enum>QSlider::NoTicks</enum>
           </property>
-          <property name="tickInterval" >
+          <property name="tickInterval">
            <number>10</number>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lJump" >
-          <property name="text" >
+         <widget class="QLabel" name="lJump">
+          <property name="text">
            <string>TextLabel</string>
           </property>
          </widget>
@@ -483,13 +480,13 @@
      </item>
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <property name="sizeType" >
+       <property name="sizeType">
         <enum>QSizePolicy::Fixed</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
          <height>2</height>
@@ -502,7 +499,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../glslDevil.qrc" />
+  <include location="../glslDevil.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -511,11 +508,11 @@
    <receiver>lJump</receiver>
    <slot>setNum(int)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>344</x>
      <y>602</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>485</x>
      <y>599</y>
     </hint>

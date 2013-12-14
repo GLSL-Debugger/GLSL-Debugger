@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "streamRecorder.h"
 #include "replayFunction.h"
-#include "../utils/dbgprint.h"
+#include "utils/dbgprint.h"
 
 void initStreamRecorder(StreamRecorder *rec)
 {
@@ -52,33 +52,33 @@ void recordFunctionCall(StreamRecorder *rec, const char *fname, int numArgs, ...
 	int i;
 	va_list argp;
 	StoredCall *newCall;
-	
+
 	dbgPrint(DBGLVL_INFO, "RECORD CALL: %s\n", fname);
 
 	rec->numCalls++;
-	newCall =  malloc(sizeof(StoredCall));
+	newCall = malloc(sizeof(StoredCall));
 	if (!newCall) {
 		dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
 		exit(1); /* TODO: proper error handling */
 	}
 	newCall->fname = strdup(fname);
 	newCall->numArguments = numArgs;
-	newCall->arguments = malloc(numArgs*sizeof(sizeof(void*)));
+	newCall->arguments = malloc(numArgs * sizeof(sizeof(void*)));
 	if (!newCall->fname || !newCall->arguments) {
 		dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
 		exit(1); /* TODO: proper error handling */
 	}
 	va_start(argp, numArgs);
 	for (i = 0; i < numArgs; i++) {
-		void *ptr = (void*)va_arg(argp, void*);
-		int size = (int)va_arg(argp, int);
+		void *ptr = (void*) va_arg(argp, void*);
+		int size = (int) va_arg(argp, int);
 		newCall->arguments[i] = malloc(size);
 		if (!newCall->arguments[i]) {
 			dbgPrint(DBGLVL_ERROR, "Allocation of recorded call failed\n");
 			exit(1); /* TODO: proper error handling */
 		}
 		memcpy(newCall->arguments[i], ptr, size);
-	}	
+	}
 	va_end(argp);
 	if (rec->calls) {
 		rec->lastCall->nextCall = newCall;
@@ -87,7 +87,6 @@ void recordFunctionCall(StreamRecorder *rec, const char *fname, int numArgs, ...
 	}
 	rec->lastCall = newCall;
 }
-
 
 void replayFunctionCalls(StreamRecorder *rec, int final)
 {
@@ -103,8 +102,8 @@ void replayFunctionCalls(StreamRecorder *rec, int final)
 void clearRecordedCalls(StreamRecorder *rec)
 {
 	int i, j;
-	
-	StoredCall *sc =  rec->calls;
+
+	StoredCall *sc = rec->calls;
 	for (i = 0; i < rec->numCalls; i++) {
 		StoredCall *current = sc;
 		free(current->fname);

@@ -36,11 +36,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ui_dbgShaderView.h"
 
-class DbgShaderView : public QDialog, public Ui::dDbgShaderView {
-    Q_OBJECT
+class DbgShaderView: public QDialog, public Ui::dDbgShaderView {
+Q_OBJECT
 
 public:
-    DbgShaderView(QWidget *parent = 0);
+	DbgShaderView(QWidget *parent = 0);
 
 };
 

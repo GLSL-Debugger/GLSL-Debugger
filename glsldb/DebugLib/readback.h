@@ -42,19 +42,17 @@ DBGLIBLOCAL void restoreOutputTarget(void);
 
 DBGLIBLOCAL void readRenderBuffer(void);
 
-DBGLIBLOCAL int readBackRenderBuffer(int numComponents, int format,
-                                     int *width, int *height,
-                                     void **buffer);
+DBGLIBLOCAL int readBackRenderBuffer(int numComponents, int format, int *width,
+		int *height, void **buffer);
 
 DBGLIBLOCAL void clearRenderBuffer(void);
 
 /* FIXME CHECK AGAIN!!!
-DBGLIBLOCAL int setDbgRenderState(int target);
-*/
+ DBGLIBLOCAL int setDbgRenderState(int target);
+ */
 
 DBGLIBLOCAL int endTransformFeedback(int primitiveType, int numFloatsPerVertex,
-                                     float **data, int *numPrimitives,
-                                     int *numVertices);
+		float **data, int *numPrimitives, int *numVertices);
 
 DBGLIBLOCAL int beginTransformFeedback(int primitiveType);
 

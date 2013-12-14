@@ -44,42 +44,40 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vertexBox.qt.h"
 #include "shVarModel.qt.h"
 
-class SelectionDialog : public QDialog, public Ui::dSelection {
-    Q_OBJECT
+class SelectionDialog: public QDialog, public Ui::dSelection {
+Q_OBJECT
 
 public:
-    SelectionDialog(PixelBoxFloat *fb, bool elseBranch, QWidget *parent = 0);
+	SelectionDialog(PixelBoxFloat *fb, bool elseBranch, QWidget *parent = 0);
 	SelectionDialog(VertexBox *vbCondition, QList<ShVarItem*> &watchItems,
-					int inPrimitiveType, int outPrimitiveType,
-					VertexBox *primitiveMap,
-                    VertexBox *vertexCountMap,
-                    bool elseBranch, QWidget *parent);
-    SelectionDialog(VertexBox *vbCondition, QList<ShVarItem*> &watchItems,
-                    bool elseBranch, QWidget *parent);
+			int inPrimitiveType, int outPrimitiveType, VertexBox *primitiveMap,
+			VertexBox *vertexCountMap, bool elseBranch, QWidget *parent);
+	SelectionDialog(VertexBox *vbCondition, QList<ShVarItem*> &watchItems,
+			bool elseBranch, QWidget *parent);
 
-    typedef enum {
-        SB_IF = 0,
-        SB_SKIP,
-        SB_ELSE
-    } selectedBranch;
-    
-    int exec();
+	typedef enum {
+		SB_IF = 0,
+		SB_SKIP,
+		SB_ELSE
+	} selectedBranch;
+
+	int exec();
 
 protected:
-    void displayStatistics(void);
+	void displayStatistics(void);
 
 private slots:
-    /* auto-connect */
-    void on_pbSkip_clicked();
-    void on_pbIf_clicked();
-    void on_pbElse_clicked();
+	/* auto-connect */
+	void on_pbSkip_clicked();
+	void on_pbIf_clicked();
+	void on_pbElse_clicked();
 
 private:
-    bool m_bElseBranch;
-    int  m_nTotal;
-    int  m_nActive;
-    int  m_nIf;
-    int  m_nElse;
+	bool m_bElseBranch;
+	int m_nTotal;
+	int m_nActive;
+	int m_nIf;
+	int m_nElse;
 };
 
 #endif

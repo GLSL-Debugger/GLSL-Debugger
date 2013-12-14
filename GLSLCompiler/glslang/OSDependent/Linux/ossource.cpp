@@ -42,27 +42,25 @@
 #error Trying to build a Linux specific file in a non-Linux build.
 #endif
 
-
 //
 // Thread cleanup
 //
 
 //
-// Wrapper for Linux call to DetachThread.  This is required as pthread_cleanup_push() expects 
+// Wrapper for Linux call to DetachThread.  This is required as pthread_cleanup_push() expects
 // the cleanup routine to return void.
-// 
+//
 void DetachThreadLinux(void *)
 {
 	DetachThread();
 }
 
-
 //
 // Registers cleanup handler, sets cancel type and state, and excecutes the thread specific
-// cleanup handler.  This function will be called in the Standalone.cpp for regression 
-// testing.  When OpenGL applications are run with the driver code, Linux OS does the 
+// cleanup handler.  This function will be called in the Standalone.cpp for regression
+// testing.  When OpenGL applications are run with the driver code, Linux OS does the
 // thread cleanup.
-// 
+//
 void OS_CleanupThreadData(void)
 {
 	int old_cancel_state, old_cancel_type;
@@ -74,22 +72,21 @@ void OS_CleanupThreadData(void)
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &old_cancel_state);
 	pthread_cleanup_push(DetachThreadLinux, (void *) cleanupArg);
 
-	//
-	// Put the thread in deferred cancellation mode.
-	//
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &old_cancel_type);
+			//
+			// Put the thread in deferred cancellation mode.
+			//
+			pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &old_cancel_type);
 
-	//
-	// Pop cleanup handler and execute it prior to unregistering the cleanup handler.
-	//
-	pthread_cleanup_pop(1);
+			//
+			// Pop cleanup handler and execute it prior to unregistering the cleanup handler.
+			//
+			pthread_cleanup_pop(1);
 
-	//
-	// Restore the thread's previous cancellation mode.
-	//
+			//
+			// Restore the thread's previous cancellation mode.
+			//
 	pthread_setcanceltype(old_cancel_state, NULL);
 }
-
 
 //
 // Thread Local Storage Operations
@@ -102,13 +99,12 @@ OS_TLSIndex OS_AllocTLSIndex()
 	// Create global pool key.
 	//
 	if ((pthread_key_create(&pPoolIndex, NULL)) != 0) {
-		assert(0 && "OS_AllocTLSIndex(): Unable to allocate Thread Local Storage");
+		assert(
+				0 && "OS_AllocTLSIndex(): Unable to allocate Thread Local Storage");
 		return false;
-	}
-	else
+	} else
 		return pPoolIndex;
 }
-
 
 bool OS_SetTLSValue(OS_TLSIndex nIndex, void *lpvValue)
 {
@@ -122,7 +118,6 @@ bool OS_SetTLSValue(OS_TLSIndex nIndex, void *lpvValue)
 	else
 		return false;
 }
-
 
 bool OS_FreeTLSIndex(OS_TLSIndex nIndex)
 {

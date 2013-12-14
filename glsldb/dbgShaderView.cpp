@@ -34,10 +34,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dbgShaderView.qt.h"
 #include <QtGui/QFrame>
 
-DbgShaderView::DbgShaderView(QWidget *parent) 
-    : QDialog(parent)
+DbgShaderView::DbgShaderView(QWidget *parent) :
+		QDialog(parent)
 {
-    /* Setup GUI */
-    setupUi(this);
+	/* Setup GUI */
+	setupUi(this);
 }
 

@@ -46,39 +46,37 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int saveGLState(void)
 {
 	int error;
-	
-	DMARK
-	/* save original gl state */
+
+DMARK	/* save original gl state */
 	ORIG_GL(glPushAttrib)(GL_ALL_ATTRIB_BITS);
 	error = glError();
 	if (error) {
 		return error;
 	}
-	
+
 	/*glPushClientAttrib*/
-	
+
 	return DBG_NO_ERROR;
 }
 
 int setSavedGLState(int target)
-{ 
+{
 	int error;
-	
-	DMARK
-	/* restore original gl state */
+
+DMARK	/* restore original gl state */
 	ORIG_GL(glPopAttrib)();
 	error = glError();
 	if (error) {
 		return error;
 	}
-	
+
 	/* save original gl state */
 	error = saveGLState();
 	if (error) {
 		return error;
 	}
-	
-/* FIXME CHECK AGAIN!!!! 	*/
+
+	/* FIXME CHECK AGAIN!!!! 	*/
 #if 0
 	/* disable everything that could interfere when writting the debug result to
 	 * the debug buffer and setup draw and read buffer.
@@ -87,14 +85,13 @@ int setSavedGLState(int target)
 	if (error) {
 		return error;
 	}
-#endif	
+#endif
 	return DBG_NO_ERROR;
 }
 
 int restoreGLState(void)
 {
-	DMARK
-	/* restore original gl state */
+DMARK	/* restore original gl state */
 	ORIG_GL(glPopAttrib)();
 	return glError();
 }

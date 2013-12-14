@@ -53,7 +53,6 @@ void cpyFromProcess(DWORD pid, void *dst, void *src, size_t size);
 UTILSLOCAL void cpyFromProcess(pid_t pid, void *dst, void *src, size_t size);
 #endif /* _WIN32 */
 
-
 /* copy <size> bytes from local address <src> to address <dst> in context of
  * process <pid>
  */
