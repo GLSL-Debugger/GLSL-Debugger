@@ -1210,10 +1210,10 @@ int checkGLExtensionSupported(const char *extension)
 		dbgPrint(DBGLVL_DEBUG, "Creating extension hashes\n");
         hash_create(&extensions, hashString, compString, 512, 0);
         int i = 0;
-        while(1) {
-            const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i++);
-            if(!name)
-                break;
+        int n;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+        for(i = 0; i < n; ++i) {
+            const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
             // we don't need to store any relevant data. we just want a quick
             // string lookup.
             hash_insert(&extensions, name, &dummy);
