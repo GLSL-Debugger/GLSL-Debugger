@@ -642,12 +642,10 @@ static void addLoopHeader(char** prog, IRGenStack* stack)
         for(iter = stack->begin(); iter != stack->end(); iter++) {
         	ir_loop* ir = (*iter)->as_loop();
         	if( needDbgLoopIter(ir) ){
-        		char** iter_name = dbg_iter_name(ir);
-        		if( *iter_name == NULL )
+        		if (ir->debug_iter_name == NULL)
         			printf("No iter name, crash ahead");
-
         		ralloc_asprintf_append (prog, "%s == %i &&",
-        				*iter_name, ir->debug_iter );
+        					ir->debug_iter_name, ir->debug_iter);
         	}
         }
 

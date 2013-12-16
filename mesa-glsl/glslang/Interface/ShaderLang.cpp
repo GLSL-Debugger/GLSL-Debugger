@@ -355,6 +355,7 @@ int ShLink(const ShHandle linkHandle, const ShHandle compHandles[], const int nu
 		ShHandle uniformMapHandle, short int** uniformsAccessed, int* numUniformsAccessed)
 
 {
+	UNUSED_ARG( compHandles )
 	UNUSED_ARG( uniformMapHandle )
 	UNUSED_ARG( uniformsAccessed )
 	UNUSED_ARG( numUniformsAccessed )

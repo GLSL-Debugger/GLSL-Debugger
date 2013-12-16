@@ -157,14 +157,13 @@ DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBe
     clearGlobalChangeables();
 
     /* Check for empty parse tree */
-    if (shader == 0) {
+    if (!shader) {
         g.result.status = DBG_RS_STATUS_ERROR;
         g.result.position = DBG_RS_POSITION_UNSET;
         return &g.result;
     }
 
     /* Check validity of debug request */
-
     g.result.status = DBG_RS_STATUS_UNSET;
     g.result.position = DBG_RS_POSITION_UNSET;
     g.result.loopIteration = 0;

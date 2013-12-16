@@ -20,13 +20,13 @@ public:
 	{
 	}
 
-	virtual bool visitIr(ir_function *ir)
+	virtual bool visitIr(ir_function *)
 	{
 		hasSideEffects = true;
 		return false;
 	}
 
-	virtual bool visitIr(ir_assignment *ir)
+	virtual bool visitIr(ir_assignment *)
 	{
 		hasSideEffects = true;
 		return false;

@@ -103,6 +103,36 @@ void ir_output_traverser_visitor::run(exec_list* instructions)
 	visit_block(instructions, ";\n", false);
 }
 
+void ir_output_traverser_visitor::visit_block(ir_dummy* ir, const char* sep, bool do_indent)
+{
+	if (!ir->next || ir->block_empty())
+		return;
+
+	if (do_indent){
+		indentation++;
+		indent();
+	}
+	int end_token = ir_dummy::pair_type(ir->dummy_type);
+	if (end_token >= 0) {
+		bool first = true;
+		foreach_node_safe(node, ir->next) {
+			ir_instruction * const inst = (ir_instruction *) node;
+			ir_dummy * const dm = inst->as_dummy();
+			if (dm && end_token == dm->dummy_type)
+				break;
+			if (!first && sep){
+				ralloc_asprintf_append (&buffer, sep);
+				if (do_indent)
+					indent();
+			}
+			inst->accept(this);
+			first = false;
+		}
+	}
+	if (do_indent)
+		indentation--;
+}
+
 void ir_output_traverser_visitor::visit_block(exec_list* instructions,
 					 const char* sep, bool do_indent)
 {
@@ -136,6 +166,8 @@ void ir_output_traverser_visitor::visit_block(exec_list* instructions,
 	if (do_indent)
 		indentation--;
 }
+
+
 
 void ir_output_traverser_visitor::indent(void)
 {
@@ -1302,18 +1334,15 @@ ir_output_traverser_visitor::visit(ir_if *ir)
 void
 ir_output_traverser_visitor::visit(ir_loop *ir)
 {
-	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
-
+	ir_rvalue* check = ir->condition();
 	if (ir->mode == ir_loop_for) {
 		ralloc_asprintf_append (&buffer, "for (");
-		if( ir->debug_init )
-			ir->debug_init->accept(this);
+		visit_block(ir->debug_init, ", ");
 		ralloc_asprintf_append (&buffer, "; ");
-		if( check->condition )
-			check->condition->accept(this);
+		if (check)
+			check->accept(this);
 		ralloc_asprintf_append (&buffer, "; ");
-		if( ir->debug_terminal )
-			ir->debug_terminal->accept(this);
+		visit_block(ir->debug_terminal, ", ");
 		ralloc_asprintf_append (&buffer, ") {\n");
 		visit_block(&ir->body_instructions, ";\n");
 		ralloc_asprintf_append (&buffer, "}");
@@ -1322,123 +1351,27 @@ ir_output_traverser_visitor::visit(ir_loop *ir)
 
 	// While loops
 
-
 	if (ir->mode == ir_loop_while) {
 		ralloc_asprintf_append (&buffer, "while (");
-		if( check->condition )
-			check->condition->accept(this);
+		if (check)
+			check->accept(this);
 		ralloc_asprintf_append (&buffer, ") {\n");
 	} else {
 		ralloc_asprintf_append (&buffer, "do {\n");
 	}
 
-	if( ir->debug_init )
-		ir->debug_init->accept(this);
+	visit_block(ir->debug_init, ";\n", true);
 	visit_block(&ir->body_instructions, ";\n");
-	if( ir->debug_terminal )
-		ir->debug_terminal->accept(this);
+	visit_block(ir->debug_terminal, ";\n", true);
 
 	if (ir->mode == ir_loop_while) {
 		ralloc_asprintf_append (&buffer, "}");
 	} else {
 		ralloc_asprintf_append (&buffer, "while (");
-		if( check->condition )
-			check->condition->accept(this);
+		if (check)
+			check->accept(this);
 		ralloc_asprintf_append (&buffer, ")");
 	}
-
-
-//	// TODO: loop
-//	printf("TODO: loop debug output");
-//
-//	bool noData = (ir->counter == NULL && ir->from == NULL && ir->to == NULL && ir->increment == NULL);
-//	if (noData) {
-//		ralloc_asprintf_append (&buffer, "while (true) {\n");
-//		indentation++;
-//		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-//			ir_instruction *const inst = (ir_instruction *) iter.get();
-//			indent();
-//			inst->accept(this);
-//			ralloc_asprintf_append (&buffer, ";\n");
-//		}
-//		indentation--;
-//		indent();
-//		ralloc_asprintf_append (&buffer, "}");
-//		return;
-//	}
-//
-//	bool canonicalFor = (ir->counter && ir->from && ir->to && ir->increment);
-//	if (canonicalFor)
-//	{
-//		ralloc_asprintf_append (&buffer, "for (");
-//		ir->counter->accept (this);
-//		ralloc_asprintf_append (&buffer, " = ");
-//		ir->from->accept (this);
-//		ralloc_asprintf_append (&buffer, "; ");
-//		print_var_name (ir->counter);
-//
-//		// IR cmp operator is when to terminate loop; whereas GLSL for loop syntax
-//		// is while to continue the loop. Invert the meaning of operator when outputting.
-//		const char* termOp = NULL;
-//		switch (ir->cmp) {
-//		case ir_binop_less: termOp = ">="; break;
-//		case ir_binop_greater: termOp = "<="; break;
-//		case ir_binop_lequal: termOp = ">"; break;
-//		case ir_binop_gequal: termOp = "<"; break;
-//		case ir_binop_equal: termOp = "!="; break;
-//		case ir_binop_nequal: termOp = "=="; break;
-//		default: assert(false);
-//		}
-//		ralloc_asprintf_append (&buffer, " %s ", termOp);
-//		ir->to->accept (this);
-//		ralloc_asprintf_append (&buffer, "; ");
-//		// IR already has instructions that modify the loop counter in the body
-//		//print_var_name (ir->counter);
-//		//ralloc_asprintf_append (&buffer, " = ");
-//		//print_var_name (ir->counter);
-//		//ralloc_asprintf_append (&buffer, "+(");
-//		//ir->increment->accept (this);
-//		//ralloc_asprintf_append (&buffer, ")");
-//		ralloc_asprintf_append (&buffer, ") {\n");
-//		indentation++;
-//		foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-//			ir_instruction *const inst = (ir_instruction *) iter.get();
-//			indent();
-//			inst->accept(this);
-//			ralloc_asprintf_append (&buffer, ";\n");
-//		}
-//		indentation--;
-//		indent();
-//		ralloc_asprintf_append (&buffer, "}");
-//		return;
-//	}
-//
-//
-//   ralloc_asprintf_append (&buffer, "( TODO loop (");
-//   if (ir->counter != NULL)
-//      ir->counter->accept(this);
-//   ralloc_asprintf_append (&buffer, ") (");
-//   if (ir->from != NULL)
-//      ir->from->accept(this);
-//   ralloc_asprintf_append (&buffer, ") (");
-//   if (ir->to != NULL)
-//      ir->to->accept(this);
-//   ralloc_asprintf_append (&buffer, ") (");
-//   if (ir->increment != NULL)
-//      ir->increment->accept(this);
-//   ralloc_asprintf_append (&buffer, ") (\n");
-//   indentation++;
-//
-//   foreach_iter(exec_list_iterator, iter, ir->body_instructions) {
-//      ir_instruction *const inst = (ir_instruction *) iter.get();
-//
-//      indent();
-//      inst->accept(this);
-//      ralloc_asprintf_append (&buffer, ";\n");
-//   }
-//   indentation--;
-//   indent();
-//   ralloc_asprintf_append (&buffer, "))\n");
 }
 
 
@@ -1451,29 +1384,11 @@ ir_output_traverser_visitor::visit(ir_loop_jump *ir)
 void
 ir_output_traverser_visitor::visit(ir_dummy* ir)
 {
-	int end_token = ir_dummy::pair_type(ir->dummy_type);
-
-	// Skip non-blocks
-	if (end_token >= 0) {
-        if (!ir->next)
-            return;
-        foreach_node_safe(node, ir->next){
-            ir_instruction * const inst = (ir_instruction *)node;
-            if (inst->ir_type == ir_type_dummy) {
-                ir_dummy * const dm = (ir_dummy* const)inst;
-                // End traverse
-                if ( end_token == dm->dummy_type )
-                    return;
-            }
-            inst->accept(this);
-        }
-	} else {
-	    if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
-	        this->dbgTargetProcessed = true;
-	        indent();
-	        cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
-	        ralloc_asprintf_append( &buffer, ";\n" );
-	    }
+	if (ir->debug_target && this->cgOptions != DBG_CG_ORIGINAL_SRC) {
+	    this->dbgTargetProcessed = true;
+	    indent();
+	    cgAddDbgCode( CG_TYPE_RESULT, &buffer, cgOptions, cgbl, vl, dbgStack, 0 );
+	    ralloc_asprintf_append( &buffer, ";\n" );
 	}
 }
 

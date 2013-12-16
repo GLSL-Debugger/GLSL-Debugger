@@ -111,7 +111,7 @@ bool ir_stack_traverser_visitor::visitIr(ir_if* ir)
 
 bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 {
-	// FIXME: Here is a leak. We creates new names in ir, but nobody clear it
+	// FIXME: Here is a leak. We created new names in ir, but nobody clear it
 	// on ir destruction.
 
 	/* Clear old name for dbgLoopIter */
@@ -137,15 +137,14 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 			case ir_dbg_loop_wrk_init:
 				this->dbgStack.push_back( ir );
 				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
-				if( ir->debug_init )
-					ir->debug_init->accept(this);
+				this->visit_block(ir->debug_init);
 				return false;
 			case ir_dbg_loop_wrk_test: {
 				this->dbgStack.push_back( ir );
 				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
-				ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
-				if( check->condition )
-					check->condition->accept(this);
+				ir_rvalue* check = ir->condition();
+				if (check)
+					check->accept(this);
 				return false;
 			}
 			case ir_dbg_loop_wrk_body:
@@ -156,12 +155,10 @@ bool ir_stack_traverser_visitor::visitIr(ir_loop* ir)
 			case ir_dbg_loop_wrk_terminal:
 				this->dbgStack.push_back( ir );
 				cgSetLoopIterName( &ir->debug_iter_name, this->vl );
-				if( ir->debug_terminal )
-					ir->debug_terminal->accept(this);
+				this->visit_block(ir->debug_terminal);
 				return false;
 			default:
-				dbgPrint( DBGLVL_ERROR,
-						"CodeGen - loop path has invalid internal state\n" );
+				dbgPrint( DBGLVL_ERROR, "CodeGen - loop path has invalid internal state\n" );
 				exit( 1 );
 		}
 	}

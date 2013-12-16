@@ -25,7 +25,8 @@ bool containsEmitVertex( ir_instruction* );
 bool containsEmitVertex( exec_list* );
 
 bool dbg_state_not_match( exec_list*, enum ir_dbg_state );
-char** dbg_iter_name( ir_loop* );
+bool dbg_state_not_match( ir_dummy*, enum ir_dbg_state );
+//char** dbg_iter_name( ir_loop* );
 //ir_list_dummy* list_dummy( exec_list*, ir_function_signature* );
 
 void init_shader();

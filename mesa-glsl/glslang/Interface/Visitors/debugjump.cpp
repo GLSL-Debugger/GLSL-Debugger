@@ -197,22 +197,6 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 								newState = ir_dbg_state_path;
 							break;
                     	}
-                    	case ir_type_dummy:
-                    	{
-                    		ir_dummy* ird = node->as_dummy();
-                    		int end_token = ir_dummy::pair_type(ird->dummy_type);
-                    		if (ird && ird->next && end_token >= 0){
-                    			foreach_node_safe(node, ird->next){
-                    				ir_instruction * const inst = (ir_instruction *)node;
-                    				ir_dummy * const dm = inst->as_dummy();
-                    				if (dm && end_token == dm->dummy_type)
-                    					break;
-                    				if (inst->debug_state != ir_dbg_state_unset)
-                    					newState = ir_dbg_state_path;
-                    			}
-                    		}
-                    		break;
-                    	}
                     	default:
                     		break;
                     }
@@ -489,17 +473,50 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_discard* ir)
 static void addShChangeablesFromList(ir_debugjump_traverser_visitor* it,
 		exec_list* listin)
 {
+	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *listin) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
+		if (inst->ir_type == ir_type_dummy) {
+			ir_dummy * const dm = inst->as_dummy();
+			if ( skip_pair < 0 ) {
+				skip_pair = ir_dummy::pair_type(dm->dummy_type);
+			} else if ( skip_pair == dm->dummy_type ) {
+				skip_pair = -1;
+				continue;
+			}
+		}
+		if (skip_pair >= 0)
+			continue;
 		copyShChangeableList( &it->result.cgbls, get_changeable_list( inst ) );
 		checkReturns( inst, it );
+	}
+}
+
+static void addShChangeablesFromBlock(ir_debugjump_traverser_visitor* it,
+		ir_dummy* first)
+{
+	if (!first || !first->next)
+		return;
+
+	int end_token = ir_dummy::pair_type(first->dummy_type);
+
+	if (end_token < 0)
+		return;
+
+	foreach_node_safe(node, first->next){
+		ir_instruction * const inst = (ir_instruction *)node;
+		ir_dummy * const dm = inst->as_dummy();
+		if ( dm && end_token == dm->dummy_type )
+			return;
+		copyShChangeableList(&it->result.cgbls, get_changeable_list(inst));
+		checkReturns(inst, it);
 	}
 }
 
 static inline void addShChangeables(ir_debugjump_traverser_visitor* it,
 		ir_instruction* ir)
 {
-	if( !ir )
+	if (!ir)
 		return;
 
 	copyShChangeableList( &it->result.cgbls, get_changeable_list( ir ) );
@@ -698,7 +715,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 {
 	VPRINT( 1, "process Loop L:%s DbgSt:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->debug_state );
-	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
+	ir_rvalue* check = ir->condition();
 
 	switch( this->operation ){
 		case OTOpTargetUnset:
@@ -719,14 +736,14 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 
 							if( this->dbgBehaviour & DBG_BH_JUMPINTO ){
 								// visit initialization
-								ir->debug_init->accept( this );
+								this->visit_block(ir->debug_init);
 
 								if( this->operation == OTOpTargetSet ){
 									// there was not target in condition, so copy all
 									// changeables; it's unlikely that there is a
 									// changeable and no target, but anyway be on the
 									// safe side
-									addShChangeables( this, ir->debug_init );
+									addShChangeablesFromBlock( this, ir->debug_init );
 								}
 							}else{
 								/* Finish debugging this loop */
@@ -734,10 +751,10 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 								ir->debug_iter = 0;
 
 								/* Copy all changeables from condition, test, body, terminal */
-								addShChangeables( this, ir->debug_init );
-								addShChangeables( this, check->condition );
+								addShChangeablesFromBlock( this, ir->debug_init );
+								addShChangeables(this, check);
 								addShChangeablesFromList( this, &ir->body_instructions );
-								addShChangeables( this, ir->debug_terminal );
+								addShChangeablesFromBlock( this, ir->debug_terminal );
 							}
 							return false;
 						case ir_dbg_loop_qyr_test:
@@ -747,20 +764,21 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 							ir->debug_state_internal = ir_dbg_loop_wrk_test;
 							result.position = DBG_RS_POSITION_UNSET;
 
-							if( this->dbgBehaviour & DBG_BH_JUMPINTO ){
+							if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
 								// visit test
-								check->condition->accept( this );
+								if (check)
+									check->accept(this);
 								if( this->operation == OTOpTargetSet )
-									addShChangeables( this, check->condition );
-							}else{
+									addShChangeables(this, check);
+							} else {
 								/* Finish debugging this loop */
 								ir->debug_state_internal = ir_dbg_loop_unset;
 								ir->debug_iter = 0;
 
 								/* Copy all changeables from test, body, terminal */
-								addShChangeables( this, check->condition );
+								addShChangeables(this, check);
 								addShChangeablesFromList( this, &ir->body_instructions );
-								addShChangeables( this, ir->debug_terminal );
+								addShChangeablesFromBlock( this, ir->debug_terminal );
 							}
 							return false;
 						case ir_dbg_loop_select_flow:
@@ -770,17 +788,17 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 							ir->debug_state_internal = ir_dbg_loop_wrk_test;
 							result.position = DBG_RS_POSITION_UNSET;
 
-							if( this->dbgBehaviour & DBG_BH_SELECTION_JUMP_OVER ) {
+							if (this->dbgBehaviour & DBG_BH_SELECTION_JUMP_OVER) {
 								/* Finish debugging this loop */
 								ir->debug_state_internal = ir_dbg_loop_unset;
 								ir->debug_iter = 0;
 
 								/* Copy all changeables from test, body, terminal */
-								addShChangeables( this, check->condition );
+								addShChangeables(this, check);
 								addShChangeablesFromList( this, &ir->body_instructions );
-								addShChangeables( this, ir->debug_terminal );
+								addShChangeablesFromBlock( this, ir->debug_terminal );
 								return false;
-							} else if( this->dbgBehaviour & DBG_BH_LOOP_NEXT_ITER ) {
+							} else if (this->dbgBehaviour & DBG_BH_LOOP_NEXT_ITER) {
 								/* Perform one iteration without further debugging
 								 *  - target stays the same
 								 *  - increase loop iter counter
@@ -807,9 +825,9 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 									result.loopIteration = ir->debug_iter;
 								setDbgResultRange( result.range, ir->yy_location );
 
-								addShChangeables( this, check->condition );
+								addShChangeables(this, check);
 								addShChangeablesFromList( this, &ir->body_instructions );
-								addShChangeables( this, ir->debug_terminal );
+								addShChangeablesFromBlock( this, ir->debug_terminal );
 
 								setGobalScope( get_scope( ir ) );
 							} else {
@@ -824,12 +842,12 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 							result.position = DBG_RS_POSITION_UNSET;
 							if( this->dbgBehaviour & DBG_BH_JUMPINTO ){
 								// visit terminal
-								ir->debug_terminal->accept( this );
+								visit_block(ir->debug_terminal);
 								if( this->operation == OTOpTargetSet )
-									addShChangeables( this, ir->debug_terminal );
+									addShChangeablesFromBlock( this, ir->debug_terminal );
 							}else{
 								// do not visit terminal
-								addShChangeables( this, ir->debug_terminal );
+								addShChangeablesFromBlock( this, ir->debug_terminal );
 							}
 							return false;
 						default:
@@ -842,7 +860,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 			break;
 		case OTOpTargetSet:
 			if( ir->debug_state == ir_dbg_state_unset ){
-				printf("TODO: This will be fucked up now. Completely new logic must be added." );
+
 				if( ir->debug_state_internal == ir_dbg_loop_unset && ir->mode == ir_loop_do_while ){
 					/* Process body imediately */
 					ir->debug_state_internal = ir_dbg_loop_wrk_body;
@@ -858,10 +876,10 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 					switch( ir->debug_state_internal ){
 						case ir_dbg_loop_unset:
 						{
-							if( ir->debug_init ){
+							if( ir->debug_init && !ir->debug_init->block_empty() ){
 								ir->debug_state_internal = ir_dbg_loop_qyr_init;
 								result.position = loop_position( ir->mode );
-							}else if( check->condition ){
+							}else if( check ){
 								ir->debug_state_internal = ir_dbg_loop_qyr_test;
 								result.position = loop_position( ir->mode );
 							}else{
@@ -873,7 +891,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 						}
 						case ir_dbg_loop_wrk_init:
 						{
-							if( check->condition )
+							if( check )
 								ir->debug_state_internal = ir_dbg_loop_qyr_test;
 							else
 								ir->debug_state_internal = ir_dbg_loop_select_flow;
@@ -892,10 +910,10 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 						}
 						case ir_dbg_loop_wrk_body:
 						{
-							if( ir->debug_terminal ){
+							if( ir->debug_terminal && !ir->debug_terminal->block_empty() ){
 								ir->debug_state_internal = ir_dbg_loop_qyr_terminal;
 								result.position = loop_position( ir->mode );
-							}else if( check->condition ){
+							}else if( check ){
 								ir->debug_state_internal = ir_dbg_loop_qyr_test;
 								result.position = loop_position( ir->mode );
 								/* Increase the loop counter */
@@ -914,7 +932,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 						}
 						case ir_dbg_loop_wrk_terminal:
 						{
-							if( check->condition ){
+							if( check ){
 								ir->debug_state_internal = ir_dbg_loop_qyr_test;
 								result.position = loop_position( ir->mode );
 							}else{
@@ -929,8 +947,8 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 						default:
 							break;
 					}
-					setDbgResultRange( result.range, ir->yy_location );
-					setGobalScope( get_scope( ir ) );
+					setDbgResultRange(result.range, ir->yy_location);
+					setGobalScope(get_scope(ir));
 					return false;
 				}
 			}
@@ -942,21 +960,19 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 		case OTOpPathBuild:
 			if( ir->debug_state == ir_dbg_state_unset ){
 				/* Check init, test, terminal, and body */
-				if( ( ir->debug_init && ir->debug_init->debug_state != ir_dbg_state_unset )
-						|| ( check->condition && check->condition->debug_state != ir_dbg_state_unset )
-						|| ( ir->debug_terminal && ir->debug_terminal->debug_state != ir_dbg_state_unset )
-						|| dbg_state_not_match( &ir->body_instructions, ir_dbg_state_unset ) )
+				if( dbg_state_not_match(ir->debug_init, ir_dbg_state_unset ) ||
+						check->debug_state != ir_dbg_state_unset ||
+						dbg_state_not_match(ir->debug_terminal, ir_dbg_state_unset) ||
+						dbg_state_not_match(&ir->body_instructions, ir_dbg_state_unset) )
 					ir->debug_state = ir_dbg_state_path;
 			}
 			return false;
 		case OTOpReset:
-			if( ir->debug_init )
-				ir->debug_init->accept( this );
-			if( check->condition )
-				check->condition->accept( this );
-			if( ir->debug_terminal )
-				ir->debug_terminal->accept( this );
-			this->visit( &ir->body_instructions );
+			this->visit_block(ir->debug_init);
+			if (check)
+				check->accept(this);
+			this->visit_block(ir->debug_terminal);
+			this->visit(&ir->body_instructions);
 			ir->debug_state = ir_dbg_state_unset;
 			ir->debug_state_internal = ir_dbg_loop_unset;
 			/* Reset loop counter */
@@ -975,6 +991,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_dummy* ir)
 {
 	VPRINT(2, "process Dummy L:%s DbgSt:%i\n",
             FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+	assert(ir_dummy::pair_type(ir->dummy_type) < 0);
 	processDebugable(ir, &this->operation);
 	return false;
 }

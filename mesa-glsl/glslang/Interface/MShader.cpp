@@ -12,8 +12,8 @@
 #include <map>
 
 namespace {
-	typedef std::map< ir_loop*, char* > IterNameMap;
-	IterNameMap iter_names;
+//	typedef std::map< ir_loop*, char* > IterNameMap;
+//	IterNameMap iter_names;
 }
 
 
@@ -177,24 +177,57 @@ bool containsEmitVertex( exec_list* list )
 
 bool dbg_state_not_match(exec_list* list, enum ir_dbg_state state)
 {
+	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *list) {
-		if( ( (ir_instruction *)iter.get() )->debug_state != state )
+		ir_instruction * const inst = (ir_instruction *) iter.get();
+		if (inst->ir_type == ir_type_dummy) {
+			ir_dummy * const dm = inst->as_dummy();
+			if (skip_pair < 0) {
+				skip_pair = ir_dummy::pair_type(dm->dummy_type);
+			} else if (skip_pair == dm->dummy_type) {
+				skip_pair = -1;
+				continue;
+			}
+		}
+		if (skip_pair >= 0)
+			continue;
+		if (inst->debug_state != state)
 			return true;
 	}
 	return false;
 }
 
-char** dbg_iter_name( ir_loop* ir )
+bool dbg_state_not_match(ir_dummy* first, enum ir_dbg_state state)
 {
-	IterNameMap::iterator it = iter_names.find(ir);
-	if( it != iter_names.end() )
-		return &it->second;
-	char* name = (char*)malloc(1);
-	name[0] = '\0';
-	iter_names[ir] = name;
-	return &iter_names[ir];
+	if (!first || !first->next)
+		return false;
+
+	int end_token = ir_dummy::pair_type(first->dummy_type);
+	if (end_token >= 0) {
+		foreach_node_safe(node, first->next) {
+			ir_instruction * const inst = (ir_instruction *) node;
+			ir_dummy * const dm = inst->as_dummy();
+			if (dm && end_token == dm->dummy_type)
+				break;
+			if (inst->debug_state != state)
+				return true;
+		}
+	}
+
+	return false;
 }
 
+//char** dbg_iter_name( ir_loop* ir )
+//{
+//	IterNameMap::iterator it = iter_names.find(ir);
+//	if( it != iter_names.end() )
+//		return &it->second;
+//	char* name = (char*)malloc(1);
+//	name[0] = '\0';
+//	iter_names[ir] = name;
+//	return &iter_names[ir];
+//}
+//
 
 void init_shader( )
 {
@@ -202,7 +235,7 @@ void init_shader( )
 
 void clean_shader( )
 {
-	iter_names.clear();
+//	iter_names.clear();
 }
 
 

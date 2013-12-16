@@ -305,7 +305,7 @@ void ir_traverse_visitor::visit(ir_if* ir)
 void ir_traverse_visitor::visit(ir_loop* ir)
 {
 	bool visit = true;
-	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
+	ir_rvalue* check = ir->condition();
 
 	if( this->debugVisit ){
 		/* Visit node first */
@@ -313,7 +313,7 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 				|| ir->debug_state_internal == ir_dbg_loop_qyr_init )
 			visit = this->visitIr( ir );
 
-		if( ir->debug_state_internal == ir_dbg_loop_wrk_init ){
+		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_init ){
 			++this->depth;
 			this->visit_block(ir->debug_init);
 			--this->depth;
@@ -326,8 +326,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit && ir->debug_state_internal == ir_dbg_loop_wrk_test ){
 			++this->depth;
-			if (check->condition)
-				check->condition->accept(this);
+			if (check)
+				check->accept(this);
 			--this->depth;
 		}
 
@@ -363,8 +363,8 @@ void ir_traverse_visitor::visit(ir_loop* ir)
 
 		if( visit ){
 			++this->depth;
-			if (check->condition)
-				check->condition->accept(this);
+			if (check)
+				check->accept(this);
 			this->visit( &ir->body_instructions );
 			this->visit_block(ir->debug_init);
 			this->visit_block(ir->debug_terminal);
@@ -407,11 +407,11 @@ void ir_traverse_visitor::visit(exec_list* instructions)
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
 		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
-			ir_variable *var = inst->as_variable();
+			ir_variable * const var = inst->as_variable();
 			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
 				continue;
 		} else if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = (ir_dummy* const)inst;
+			ir_dummy * const dm = inst->as_dummy();
 			if ( skip_pair < 0 ) {
 				skip_pair = ir_dummy::pair_type(dm->dummy_type);
 			} else if ( skip_pair == dm->dummy_type ) {

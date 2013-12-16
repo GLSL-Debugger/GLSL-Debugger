@@ -12,6 +12,58 @@
 #include "glsldb/utils/dbgprint.h"
 
 
+static void get_block_cgbls(ShChangeableList* node_cgbl, exec_list* list,
+							ir_debugchange_traverser_visitor* it)
+{
+	if ( !list->is_empty() ) {
+    	ShChangeableList* list_cgbl = get_changeable_list( list );
+
+    	int skip_pair = -1;
+    	foreach_iter( exec_list_iterator, iter, *list ) {
+			ir_instruction* inst = (ir_instruction *)iter.get();
+			ir_dummy * const dm = inst->as_dummy();
+			if (dm) {
+				if ( skip_pair < 0 ) {
+					skip_pair = ir_dummy::pair_type(dm->dummy_type);
+				} else if ( skip_pair == dm->dummy_type ) {
+					skip_pair = -1;
+					continue;
+				}
+			}
+			if (skip_pair >= 0)
+				continue;
+			inst->accept( it );
+			// copy changeables
+			copyShChangeableList( list_cgbl, get_changeable_list( inst ) );
+		}
+
+    	copyShChangeableList(node_cgbl, list_cgbl);
+    }
+}
+
+
+static void get_tokenized_block_cgbls(ShChangeableList* node_cgbl, ir_dummy* ir,
+							ir_debugchange_traverser_visitor* it)
+{
+	if (!ir || !ir->next)
+		return;
+
+	int end_token = ir_dummy::pair_type(ir->dummy_type);
+	if (end_token >= 0) {
+		ShChangeableList* ir_cgbl = get_changeable_list(ir);
+		foreach_node_safe(node, ir->next) {
+			ir_instruction * const inst = (ir_instruction *)node;
+			ir_dummy * const dm = inst->as_dummy();
+			if (dm && end_token == dm->dummy_type)
+				return;
+			inst->accept(it);
+			copyShChangeableList(ir_cgbl, get_changeable_list(inst));
+		}
+		copyShChangeableList(node_cgbl, ir_cgbl);
+	}
+}
+
+
 bool ir_debugchange_traverser_visitor::visitIr(ir_variable* ir)
 {
 	ShChangeableList* node_cgbl = get_changeable_list(ir);
@@ -80,12 +132,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 		copyShChangeableList( node_param_cgbl, inst_list );
 	}
 
-	foreach_iter( exec_list_iterator, iter, ir->body ){
-		ir_instruction* inst = (ir_instruction *)iter.get();
-		inst->accept(this);
-		// copy changeables
-		copyShChangeableList( node_cgbl, get_changeable_list( inst ) );
-	}
+	get_block_cgbls(node_cgbl, &ir->body, this);
 
     // copy parameters to local parameter list
     // Assumption: first child is responsible for parameters,
@@ -395,34 +442,17 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_discard* ir)
     return false;
 }
 
-void get_block_cgbls(ir_instruction* parent, exec_list* list, ir_debugchange_traverser_visitor* it)
-{
-	ShChangeableList* node_cgbl = get_changeable_list( parent );
-
-	if ( !list->is_empty() ) {
-    	ShChangeableList* list_cgbl = get_changeable_list( list );
-
-    	foreach_iter( exec_list_iterator, iter, *list ) {
-			ir_instruction* inst = (ir_instruction *)iter.get();
-			inst->accept( it );
-			// copy changeables
-			copyShChangeableList( list_cgbl, get_changeable_list( inst ) );
-		}
-
-    	copyShChangeableList(node_cgbl, list_cgbl);
-    }
-}
-
 bool ir_debugchange_traverser_visitor::visitIr(ir_if* ir)
 {
-    // just traverse and copy changeables all together
+	ShChangeableList* node_cgbl = get_changeable_list(ir);
+
+	// just traverse and copy changeables all together
     this->deactivate();
     ir->condition->accept(this);
-    copyShChangeableList(get_changeable_list( ir ),
-    					 get_changeable_list( ir->condition ));
+    copyShChangeableList(node_cgbl, get_changeable_list(ir->condition));
 
-    get_block_cgbls( ir, &ir->then_instructions, this );
-    get_block_cgbls( ir, &ir->else_instructions, this );
+    get_block_cgbls(node_cgbl, &ir->then_instructions, this);
+    get_block_cgbls(node_cgbl, &ir->else_instructions, this);
 
     return false;
 }
@@ -434,55 +464,30 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_loop* ir)
 	this->deactivate();
 
 	// visit optional initialization
-	if( ir->debug_init ){
-		ir->debug_init->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( ir->debug_init ) );
-	}
+	get_tokenized_block_cgbls(node_cgbl, ir->debug_init, this);
 
 	// visit test, this should not change the changeables, but to be sure
-	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
-	if( check ){
-		check->condition->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( check->condition ) );
+	ir_rvalue* check = ir->condition();
+	if (check){
+		check->accept(this);
+		copyShChangeableList(node_cgbl, get_changeable_list(check));
 	}
 
 	// visit optional terminal, this cannot change the changeables either
-	if( ir->debug_terminal ){
-		ir->debug_terminal->accept( this );
-		copyShChangeableList( node_cgbl, get_changeable_list( ir->debug_terminal ) );
-	}
+	get_tokenized_block_cgbls(node_cgbl, ir->debug_terminal, this);
 
 	// visit body
-	get_block_cgbls( ir, &ir->body_instructions, this );
+	get_block_cgbls( node_cgbl, &ir->body_instructions, this );
 
 	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_loop_jump* ir)
+bool ir_debugchange_traverser_visitor::visitIr(ir_loop_jump*)
 {
     return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_dummy *ir)
+bool ir_debugchange_traverser_visitor::visitIr(ir_dummy *)
 {
-	if (!ir || !ir->next)
-		return false;
-
-	int end_token = ir_dummy::pair_type(ir->dummy_type);
-	if (end_token >= 0) {
-		ShChangeableList* node_cgbl = get_changeable_list( ir );
-		foreach_node_safe(node, ir->next){
-			ir_instruction * const inst = (ir_instruction *)node;
-			if (inst->ir_type == ir_type_dummy) {
-				ir_dummy * const dm = (ir_dummy* const)inst;
-				// End traverse
-				if ( end_token == dm->dummy_type )
-					return false;
-			}
-			inst->accept(this);
-			copyShChangeableList( node_cgbl, get_changeable_list( inst ) );
-		}
-	}
-
 	return false;
 }

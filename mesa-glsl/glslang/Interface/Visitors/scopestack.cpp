@@ -220,8 +220,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop* ir)
         return false;
     }
 
-    ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
-
+	ir_rvalue* check = ir->condition();
     switch (ir->debug_state_internal) {
         case ir_dbg_loop_unset:
         case ir_dbg_loop_qyr_init:
@@ -229,31 +228,26 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop* ir)
             break;
         case ir_dbg_loop_wrk_init:
         case ir_dbg_loop_qyr_test:
-        	if( ir->debug_init )
-        		ir->debug_init->accept(this);
+        	this->visit_block(ir->debug_init);
             break;
         case ir_dbg_loop_wrk_test:
         case ir_dbg_loop_select_flow:
         case ir_dbg_loop_qyr_terminal:
-        	if( ir->debug_init )
-        		ir->debug_init->accept(this);
-        	if( check->condition )
-        		check->condition->accept(this);
+        	this->visit_block(ir->debug_init);
+        	if (check)
+        		check->accept(this);
             break;
         case ir_dbg_loop_wrk_body:
-        	if( ir->debug_init )
-        		ir->debug_init->accept(this);
-        	if( check->condition )
-        		check->condition->accept(this);
+        	this->visit_block(ir->debug_init);
+        	if (check)
+        		check->accept(this);
         	this->visit(&ir->body_instructions);
             break;
         case ir_dbg_loop_wrk_terminal:
-        	if( ir->debug_init )
-        		ir->debug_init->accept(this);
-        	if( check->condition )
-        		check->condition->accept(this);
-        	if( ir->debug_terminal )
-        		ir->debug_terminal->accept(this);
+        	this->visit_block(ir->debug_init);
+        	if (check)
+        		check->accept(this);
+        	this->visit_block(ir->debug_terminal);
             break;
         default:
         	return true;

@@ -11,6 +11,7 @@
 
 static void traverse_block( exec_list* list, ir_debugvar_traverser_visitor* it )
 {
+	it->depth++;
 	if( !list->is_empty() ){
 		scopeList& scope = it->getScope();
 
@@ -28,6 +29,7 @@ static void traverse_block( exec_list* list, ir_debugvar_traverser_visitor* it )
 		else
 			scope.erase( scope.begin(), scope.end() );
 	}
+	it->depth--;
 }
 
 
@@ -65,12 +67,16 @@ void ir_debugvar_traverser_visitor::dumpScope(void)
 
 scopeList* ir_debugvar_traverser_visitor::getCopyOfScope(void)
 {
-    // Hiding of variables in outer scope by local definitions is
+	// Hiding of variables in outer scope by local definitions is
     // implemented here. Out of all variables named the same, only the last
     // one is copied to the list!
     scopeList *copiedList = new scopeList();
     scopeList::reverse_iterator rit = scope.rbegin();
 
+    // FIXME: It looks like some weird things happens here.
+	// first we iterate scope here and vl in findShVar..,
+	// next we iterate in nameIsAlreadyInList and then we
+	// iterate things again in calls there. It must be rewritten somehow.
     while (rit != scope.rend()) {
         // Check if variable with same name is already in copiedList
         ShVariable *v = findShVariableFromId(vl, *rit);
@@ -161,14 +167,13 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_function_signature *ir)
 	if (restoreScope)
 		end = --(scope.end());
 
+	depth++;
 	foreach_iter( exec_list_iterator, iter, ir->parameters ){
 		traverse_func_param(((ir_instruction*)iter.get())->as_variable(), this);
 	}
 
-	foreach_iter( exec_list_iterator, iter, ir->body ){
-		ir_instruction* inst = (ir_instruction*)iter.get();
-		inst->accept(this);
-	}
+	this->visit(&ir->body);
+	depth--;
 
 	VPRINT(3, "%c%send function signature %s at %s %c%s\n", ESC_CHAR, ESC_BOLD,
 					ir->function_name(), FormatSourceRange(ir->yy_location).c_str(),
@@ -214,7 +219,6 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_if* ir)
 	set_scope( ir,  getCopyOfScope() );
 
 	ir->condition->accept(this);
-
 	traverse_block(&ir->then_instructions, this);
 	traverse_block(&ir->else_instructions, this);
 
@@ -224,7 +228,7 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_if* ir)
 bool ir_debugvar_traverser_visitor::visitIr(ir_loop* ir)
 {
 	// declarations made in the initialization are not in scope of the loop
-	set_scope(ir,  getCopyOfScope());
+	set_scope(ir, getCopyOfScope());
 
 	// remember end of actual scope, initialization only changes scope of body
 	scopeList::iterator end;
@@ -232,21 +236,21 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_loop* ir)
 	if( restoreScope )
 		end = --( scope.end() );
 
+	depth++;
 	// visit optional initialization
-	if( ir->debug_init )
-		ir->debug_init->accept(this);
+	this->visit_block(ir->debug_init);
 
 	// visit test, this cannot change scope anyway, so order is unimportant
-	ir_if* check = ((ir_instruction*)ir->debug_check_block->next)->as_if();
-	if( check->condition )
-		check->condition->accept(this);
+	ir_rvalue* check = ir->condition();
+	if (check)
+		check->accept(this);
 
 	// visit optional terminal, this cannot change the scope either
-	if( ir->debug_terminal )
-		ir->debug_terminal->accept(this);
+	this->visit_block(ir->debug_terminal);
 
 	// visit body
 	this->visit(&ir->body_instructions);
+	depth--;
 
 	// restore global scope list
 	if( restoreScope )

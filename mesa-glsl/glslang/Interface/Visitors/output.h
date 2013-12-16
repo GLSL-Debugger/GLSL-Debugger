@@ -63,7 +63,9 @@ public:
 	virtual void visit(ir_end_primitive *);
 	virtual void visit(ir_dummy*);
 
+	void visit_block(ir_dummy* first, const char* sep, bool do_indent = false);
 	void visit_block(exec_list* instructions, const char* sep, bool do_indent = true);
+
 
 	void emit_assignment_part (ir_dereference* lhs, ir_rvalue* rhs, unsigned write_mask, ir_rvalue* dstIndex);
 
