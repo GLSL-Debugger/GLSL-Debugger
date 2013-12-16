@@ -4395,7 +4395,7 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
       ir_dummy* cond_start = new((void*)state) ir_dummy(ir_dummy_loop_condition);
       COPY_AST_LOCATION_FROM_HERE(cond_start->yy_location);
       stmt->body_instructions.push_tail(cond_start);
-      stmt->debug_check_block = cond_start;
+      stmt->debug_check = cond_start;
 #endif
 
       ir_rvalue *const cond =

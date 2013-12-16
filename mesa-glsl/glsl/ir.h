@@ -312,6 +312,21 @@ public:
 
    virtual ~ir_dummy( ) {}
 
+   /**
+    * Everything is empty block except block with end token
+    * not next to the first token
+    */
+   bool block_empty( )
+   {
+	   int pair = pair_type(this->dummy_type);
+	   if (pair >= 0 && this->next){
+		   ir_dummy* next = ((ir_instruction*)this->next)->as_dummy();
+		   if (!next || next->dummy_type != pair)
+			   return false;
+	   }
+	   return true;
+   }
+
    static int pair_type(enum ir_dummy_type t)
    {
 	   switch (t) {
@@ -1212,8 +1227,18 @@ public:
 #endif
 
 #ifdef IR_DEBUG_STATE
+   ir_rvalue* condition()
+   {
+      if (this->debug_check) {
+         ir_if* sel = ((ir_instruction*)this->debug_check->next)->as_if();
+         if (sel)
+            return sel->condition;
+      }
+      return NULL;
+   }
+
    ir_dummy* debug_init;
-   ir_dummy* debug_check_block;
+   ir_dummy* debug_check;
    ir_dummy* debug_terminal;
    enum ir_dbg_state_internal_loop debug_state_internal;
    int debug_iter;
