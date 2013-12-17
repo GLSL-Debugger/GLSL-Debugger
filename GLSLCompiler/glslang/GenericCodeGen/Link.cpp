@@ -42,11 +42,20 @@
 //
 // Actual link object, derived from the shader handle base classes.
 //
-class TGenericLinker : public TLinker {
+class TGenericLinker: public TLinker {
 public:
-	TGenericLinker(EShExecutable e, int dOptions) : TLinker(e, infoSink), debugOptions(dOptions) { }
-	bool link(TCompilerList&, TUniformMap*) { return true; }
-	void getAttributeBindings(ShBindingTable const **t) const { UNUSED_ARG(t) }
+	TGenericLinker(EShExecutable e, int dOptions) :
+			TLinker(e, infoSink), debugOptions(dOptions)
+	{
+	}
+	bool link(TCompilerList&, TUniformMap*)
+	{
+		return true;
+	}
+	void getAttributeBindings(ShBindingTable const **t) const
+	{
+		UNUSED_ARG(t)
+	}
 	TInfoSink infoSink;
 	int debugOptions;
 };
@@ -54,10 +63,13 @@ public:
 //
 // The internal view of a uniform/float object exchanged with the driver.
 //
-class TUniformLinkedMap : public TUniformMap {
+class TUniformLinkedMap: public TUniformMap {
 public:
-	TUniformLinkedMap() { }
-	virtual int getLocation(const char* name) {
+	TUniformLinkedMap()
+	{
+	}
+	virtual int getLocation(const char* name)
+	{
 		UNUSED_ARG(name)
 		return 0;
 	}

@@ -36,33 +36,32 @@
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-	switch (fdwReason)
-	{
-		case DLL_PROCESS_ATTACH:
+	switch (fdwReason) {
+	case DLL_PROCESS_ATTACH:
 
-            if (!InitProcess())
-                return FALSE;
-            break;
-		case DLL_THREAD_ATTACH:
-
-            if (!InitThread())
-                return FALSE;
-            break;
-
-		case DLL_THREAD_DETACH:
-
-			if (!DetachThread())
-				return FALSE;
-			break;
-
-		case DLL_PROCESS_DETACH:
-
-			DetachProcess();
-			break;
-
-		default:
-			assert(0 && "DllMain(): Reason for calling DLL Main is unknown");
+		if (!InitProcess())
 			return FALSE;
+		break;
+	case DLL_THREAD_ATTACH:
+
+		if (!InitThread())
+			return FALSE;
+		break;
+
+	case DLL_THREAD_DETACH:
+
+		if (!DetachThread())
+			return FALSE;
+		break;
+
+	case DLL_PROCESS_DETACH:
+
+		DetachProcess();
+		break;
+
+	default:
+		assert(0 && "DllMain(): Reason for calling DLL Main is unknown");
+		return FALSE;
 	}
 
 	return TRUE;

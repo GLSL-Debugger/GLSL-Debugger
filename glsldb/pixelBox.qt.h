@@ -43,23 +43,40 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mappings.h"
 
-class PixelBox : public QObject
-{
-    Q_OBJECT
+class PixelBox: public QObject {
+Q_OBJECT
 
 public:
-    PixelBox(QObject *i_qParent = 0);
-    virtual ~PixelBox();
+	PixelBox(QObject *i_qParent = 0);
+	virtual ~PixelBox();
 
-    void setNewCoverage(bool* i_pCoverage) { m_pCoverage = i_pCoverage; }
-    
-    virtual bool* getCoverageFromData(int *i_pActivePixels = NULL) = 0;
-    bool* getCoveragePointer(void) { return m_pCoverage; }
-    bool* getDataMapPointer(void) { return m_pDataMap; }
+	void setNewCoverage(bool* i_pCoverage)
+	{
+		m_pCoverage = i_pCoverage;
+	}
 
-    int getWidth(void)   { return m_nWidth; }
-    int getHeight(void)  { return m_nHeight; }
-    int getChannel(void) { return m_nChannel; }
+	virtual bool* getCoverageFromData(int *i_pActivePixels = NULL) = 0;
+	bool* getCoveragePointer(void)
+	{
+		return m_pCoverage;
+	}
+	bool* getDataMapPointer(void)
+	{
+		return m_pDataMap;
+	}
+
+	int getWidth(void)
+	{
+		return m_nWidth;
+	}
+	int getHeight(void)
+	{
+		return m_nHeight;
+	}
+	int getChannel(void)
+	{
+		return m_nChannel;
+	}
 
 	/* get min/max data values per channel, channel == -1 means all channels */
 	virtual double getMin(int channel = -1) = 0;
@@ -67,63 +84,56 @@ public:
 	virtual double getAbsMin(int channel = -1) = 0;
 	virtual double getAbsMax(int channel = -1) = 0;
 
-    enum FBMapping {
-        FBM_CLAMP,
-        FBM_MIN_MAX
-    };
-    virtual QImage getByteImage(FBMapping i_eMapping) = 0;
-	virtual void setByteImageRedChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha) = 0;
-	virtual void setByteImageGreenChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha) = 0;
-	virtual void setByteImageBlueChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha) = 0;
+	enum FBMapping {
+		FBM_CLAMP,
+		FBM_MIN_MAX
+	};
+	virtual QImage getByteImage(FBMapping i_eMapping) = 0;
+	virtual void setByteImageRedChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha) = 0;
+	virtual void setByteImageGreenChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha) = 0;
+	virtual void setByteImageBlueChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha) = 0;
 
 	virtual bool getDataValue(int x, int y, QVariant *v) = 0;
 
-    bool isAllDataAvailable();
+	bool isAllDataAvailable();
 	virtual void invalidateData() = 0;
 
 signals:
-    void dataChanged();
-    void dataDeleted();
-    void minMaxAreaChanged();
+	void dataChanged();
+	void dataDeleted();
+	void minMaxAreaChanged();
 
 public slots:
-    void setMinMaxArea(const QRect& minMaxArea);
+	void setMinMaxArea(const QRect& minMaxArea);
 
 protected:
-    int    m_nWidth;
-    int    m_nHeight;
-    int    m_nChannel;
-    bool  *m_pDataMap;
-    bool  *m_pCoverage;
-    QRect m_minMaxArea;
+	int m_nWidth;
+	int m_nHeight;
+	int m_nChannel;
+	bool *m_pDataMap;
+	bool *m_pCoverage;
+	QRect m_minMaxArea;
 };
 
-template <typename vType> class TypedPixelBox : public PixelBox
-{
+template<typename vType> class TypedPixelBox: public PixelBox {
 public:
-    TypedPixelBox(int i_nWidth, int i_nHeight, int i_nChannel,
-             vType *i_pData, bool *i_pCoverage = 0, QObject *i_qParent = 0);
-    TypedPixelBox(TypedPixelBox *src);
-    virtual ~TypedPixelBox();
+	TypedPixelBox(int i_nWidth, int i_nHeight, int i_nChannel, vType *i_pData,
+			bool *i_pCoverage = 0, QObject *i_qParent = 0);
+	TypedPixelBox(TypedPixelBox *src);
+	virtual ~TypedPixelBox();
 
-    void setData(int i_nWidth, int i_nHeight, int i_nChannel,
-                 vType *i_pData, bool *i_pCoverage = 0);
-    void addPixelBox(TypedPixelBox *f);
-    
-    virtual bool* getCoverageFromData(int *i_pActivePixels = NULL);
-    vType* getDataPointer(void) { return m_pData; }
+	void setData(int i_nWidth, int i_nHeight, int i_nChannel, vType *i_pData,
+			bool *i_pCoverage = 0);
+	void addPixelBox(TypedPixelBox *f);
+
+	virtual bool* getCoverageFromData(int *i_pActivePixels = NULL);
+	vType* getDataPointer(void)
+	{
+		return m_pData;
+	}
 	bool getDataValue(int x, int y, vType *v);
 	virtual bool getDataValue(int x, int y, QVariant *v);
 
@@ -133,23 +143,14 @@ public:
 	virtual double getAbsMin(int channel = -1);
 	virtual double getAbsMax(int channel = -1);
 
-    virtual QImage getByteImage(FBMapping i_eMapping);
+	virtual QImage getByteImage(FBMapping i_eMapping);
 
-	virtual void setByteImageRedChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha);
-	virtual void setByteImageGreenChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha);
-	virtual void setByteImageBlueChannel(QImage *image,
-			Mapping *mapping, 
-			RangeMapping *rangeMapping,
-			float minmax[2],
-			bool  useAlpha);
+	virtual void setByteImageRedChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha);
+	virtual void setByteImageGreenChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha);
+	virtual void setByteImageBlueChannel(QImage *image, Mapping *mapping,
+			RangeMapping *rangeMapping, float minmax[2], bool useAlpha);
 
 	virtual void invalidateData();
 
@@ -158,14 +159,14 @@ protected:
 	static const vType sc_minVal;
 	static const vType sc_maxVal;
 
-    void calcMinMax(QRect area);
-    int mapFromValue(FBMapping i_eMapping, vType i_nF, int i_nC);
-    
-    vType *m_pData;
-    vType *m_nMinData;
-    vType *m_nMaxData;
-    vType *m_nAbsMinData;
-    vType *m_nAbsMaxData;
+	void calcMinMax(QRect area);
+	int mapFromValue(FBMapping i_eMapping, vType i_nF, int i_nC);
+
+	vType *m_pData;
+	vType *m_nMinData;
+	vType *m_nMaxData;
+	vType *m_nAbsMinData;
+	vType *m_nAbsMaxData;
 };
 
 typedef TypedPixelBox<float> PixelBoxFloat;

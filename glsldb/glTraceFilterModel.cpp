@@ -44,9 +44,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined GLSLDB_LINUX || GLSLDB_OSX
 #include "GL/glx.h"
-#endif 
+#endif
 
-void GlTraceFilterModel::GlTraceFilterItem::appendChild(GlTraceFilterModel::GlTraceFilterItem *item) {
+void GlTraceFilterModel::GlTraceFilterItem::appendChild(
+		GlTraceFilterModel::GlTraceFilterItem *item)
+{
 	childItems.append(item);
 }
 
@@ -63,93 +65,102 @@ void GlTraceFilterModel::GlTraceFilterItem::checkChildsToggleState()
 		return;
 	}
 
-	for (i=1; i<childItems.count(); i++) {
-		if (childItems[i-1]->showInTrace != childItems[i]->showInTrace) {
+	for (i = 1; i < childItems.count(); i++) {
+		if (childItems[i - 1]->showInTrace != childItems[i]->showInTrace) {
 			showInTrace = Qt::PartiallyChecked;
 			return;
 		}
 	}
 
-	showInTrace = childItems[i-1]->showInTrace;
+	showInTrace = childItems[i - 1]->showInTrace;
 }
 
 void GlTraceFilterModel::GlTraceFilterItem::setChildsToggleState(int newState)
 {
 	int i;
 
-	for (i=0; i<childItems.count(); i++) {
+	for (i = 0; i < childItems.count(); i++) {
 		childItems[i]->showInTrace = newState;
 	}
 }
 
-void GlTraceFilterModel::GlTraceFilterItem::setChildsToggleStateRecursive(int newState)
+void GlTraceFilterModel::GlTraceFilterItem::setChildsToggleStateRecursive(
+		int newState)
 {
-    int i;
-    for (i=0; i<childItems.count(); i++) {
-        childItems[i]->showInTrace = newState;
-        childItems[i]->setChildsToggleStateRecursive(newState);
-    }
+	int i;
+	for (i = 0; i < childItems.count(); i++) {
+		childItems[i]->showInTrace = newState;
+		childItems[i]->setChildsToggleStateRecursive(newState);
+	}
 }
 
-
-GlTraceFilterModel::GlTraceFilterItem::GlTraceFilterItem(GLFunctionList *theFunction, int show,
-		GlTraceFilterItem *parent) {
+GlTraceFilterModel::GlTraceFilterItem::GlTraceFilterItem(
+		GLFunctionList *theFunction, int show, GlTraceFilterItem *parent)
+{
 	showInTrace = show;
 	function = theFunction;
 	parentItem = parent;
 	isSupported = false;
 }
 
-GlTraceFilterModel::GlTraceFilterItem::~GlTraceFilterItem() {
+GlTraceFilterModel::GlTraceFilterItem::~GlTraceFilterItem()
+{
 	qDeleteAll(childItems);
 }
 
-
-GlTraceFilterModel::GlTraceFilterItem *GlTraceFilterModel::GlTraceFilterItem::child(int row) {
+GlTraceFilterModel::GlTraceFilterItem *GlTraceFilterModel::GlTraceFilterItem::child(
+		int row)
+{
 	return childItems.value(row);
 }
 
-int GlTraceFilterModel::GlTraceFilterItem::childCount() const {
+int GlTraceFilterModel::GlTraceFilterItem::childCount() const
+{
 	return childItems.count();
 }
 
-int GlTraceFilterModel::GlTraceFilterItem::columnCount() const {
+int GlTraceFilterModel::GlTraceFilterItem::columnCount() const
+{
 	return NUM_COLUMNS;
 }
 
-QVariant GlTraceFilterModel::GlTraceFilterItem::data(int column) const {
-	switch(column) {
-		case FUNCTION_NAME:
-			if (this->parentItem != NULL) {
-				if (this->parentItem->function == NULL) {
-					return function->extname;
-				} else {
-					return function->fname;
-				}
+QVariant GlTraceFilterModel::GlTraceFilterItem::data(int column) const
+{
+	switch (column) {
+	case FUNCTION_NAME:
+		if (this->parentItem != NULL) {
+			if (this->parentItem->function == NULL) {
+				return function->extname;
 			} else {
-				return QVariant();
+				return function->fname;
 			}
-			break; 
-		default:
+		} else {
 			return QVariant();
+		}
+		break;
+	default:
+		return QVariant();
 	}
 }
 
-GlTraceFilterModel::GlTraceFilterItem *GlTraceFilterModel::GlTraceFilterItem::parent() {
+GlTraceFilterModel::GlTraceFilterItem *GlTraceFilterModel::GlTraceFilterItem::parent()
+{
 	return parentItem;
 }
 
-int GlTraceFilterModel::GlTraceFilterItem::row() const {
+int GlTraceFilterModel::GlTraceFilterItem::row() const
+{
 	if (parentItem)
-		return parentItem->childItems.indexOf(const_cast<GlTraceFilterItem*>(this));
+		return parentItem->childItems.indexOf(
+				const_cast<GlTraceFilterItem*>(this));
 
 	return 0;
 }
 
-
-
-GlTraceFilterModel::GlTraceFilterModel(GLFunctionList *functions, QObject *parent)
-	: QAbstractItemModel(parent) {
+GlTraceFilterModel::GlTraceFilterModel(GLFunctionList *functions,
+		QObject *parent) :
+		QAbstractItemModel(parent)
+{
 
 	rootItem = new GlTraceFilterItem(NULL, true, 0);
 
@@ -157,14 +168,16 @@ GlTraceFilterModel::GlTraceFilterModel(GLFunctionList *functions, QObject *paren
 	int i = 0;
 
 	GlTraceFilterItem *tfiExtension = NULL, *tfiChild;
-	
-	while(functions[i].extname != NULL) {
+
+	while (functions[i].extname != NULL) {
 		if (currExtension.compare(QString(functions[i].extname))) {
 			currExtension = QString(functions[i].extname);
-			tfiExtension = new GlTraceFilterItem(&functions[i], Qt::Checked, rootItem);
+			tfiExtension = new GlTraceFilterItem(&functions[i], Qt::Checked,
+					rootItem);
 			rootItem->appendChild(tfiExtension);
 		}
-		tfiChild = new GlTraceFilterItem(&functions[i], Qt::Checked, tfiExtension);
+		tfiChild = new GlTraceFilterItem(&functions[i], Qt::Checked,
+				tfiExtension);
 		tfiExtension->appendChild(tfiChild);
 		i++;
 	}
@@ -172,156 +185,159 @@ GlTraceFilterModel::GlTraceFilterModel(GLFunctionList *functions, QObject *paren
 	this->checkExtensions();
 	this->constructHashMap();
 
-    load();
+	load();
 }
 
-GlTraceFilterModel::~GlTraceFilterModel() {
+GlTraceFilterModel::~GlTraceFilterModel()
+{
 	delete rootItem;
 }
 
 void GlTraceFilterModel::resetToDefaults(void)
 {
-    if (rootItem) {
-    	layoutAboutToBeChanged();
-        rootItem->setChildsToggleStateRecursive(Qt::Checked);
-        layoutChanged();
-    }
+	if (rootItem) {
+		layoutAboutToBeChanged();
+		rootItem->setChildsToggleStateRecursive(Qt::Checked);
+		layoutChanged();
+	}
 }
 
-bool GlTraceFilterModel::itemContainsPatternRecursive(
-        const QModelIndex &index, const QString &pattern)
+bool GlTraceFilterModel::itemContainsPatternRecursive(const QModelIndex &index,
+		const QString &pattern)
 {
-    if (index.isValid()) {
+	if (index.isValid()) {
 
-        GlTraceFilterItem *item = 
-            static_cast<GlTraceFilterItem*>(index.internalPointer());
+		GlTraceFilterItem *item =
+				static_cast<GlTraceFilterItem*>(index.internalPointer());
 
-        return item->containsFilterPatternRecursive(pattern);
-    }
+		return item->containsFilterPatternRecursive(pattern);
+	}
 
-    return true;
+	return true;
 }
 
 bool GlTraceFilterModel::GlTraceFilterItem::containsFilterPatternRecursive(
-        const QString &pattern)
+		const QString &pattern)
 {
-    int i;
-    if (parentItem->function == NULL) {
-        if (function) {
-            if (QString(function->extname).contains(pattern, 
-                                                    Qt::CaseInsensitive)) {
-                return true;
-            }
-            for (i=0; i<childCount(); i++) {
-                if (childItems[i]->containsFilterPatternRecursive(pattern)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    } else {
-        if (function) {
-            return QString(function->fname).contains(pattern, 
-                                                     Qt::CaseInsensitive);
-        }
-    }
-    return true;
+	int i;
+	if (parentItem->function == NULL) {
+		if (function) {
+			if (QString(function->extname).contains(pattern,
+					Qt::CaseInsensitive)) {
+				return true;
+			}
+			for (i = 0; i < childCount(); i++) {
+				if (childItems[i]->containsFilterPatternRecursive(pattern)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	} else {
+		if (function) {
+			return QString(function->fname).contains(pattern,
+					Qt::CaseInsensitive);
+		}
+	}
+	return true;
 }
 
 void GlTraceFilterModel::save(void)
 {
-    QSettings settings;
+	QSettings settings;
 
-    settings.beginGroup("GLTRACE/");
+	settings.beginGroup("GLTRACE/");
 
-    if (rootItem) {
-        rootItem->saveRecursive(settings);
-    }
+	if (rootItem) {
+		rootItem->saveRecursive(settings);
+	}
 
-    settings.endGroup();
+	settings.endGroup();
 }
 
 void GlTraceFilterModel::GlTraceFilterItem::saveRecursive(QSettings &settings)
 {
-    int i;
-    QString   key = QString("");
+	int i;
+	QString key = QString("");
 
-    if (parentItem) {
-        if (parentItem->function == NULL) {
-            /* Extension descriptor */
-            key.append(function->extname);
-            settings.setValue(key, showInTrace);
-            for ( i=0; i<childCount(); i++) {
-                childItems[i]->saveRecursive(settings);
-            }
-        } else {
-            /* Function descriptor */
-            key.append(parentItem->function->extname);
-            key.append("/");
-            key.append(function->fname);
-            settings.setValue(key, showInTrace);
-        }
-    } else {
-        for ( i=0; i<childCount(); i++) {
-            childItems[i]->saveRecursive(settings);
-        }
-    }
+	if (parentItem) {
+		if (parentItem->function == NULL) {
+			/* Extension descriptor */
+			key.append(function->extname);
+			settings.setValue(key, showInTrace);
+			for (i = 0; i < childCount(); i++) {
+				childItems[i]->saveRecursive(settings);
+			}
+		} else {
+			/* Function descriptor */
+			key.append(parentItem->function->extname);
+			key.append("/");
+			key.append(function->fname);
+			settings.setValue(key, showInTrace);
+		}
+	} else {
+		for (i = 0; i < childCount(); i++) {
+			childItems[i]->saveRecursive(settings);
+		}
+	}
 }
 
 void GlTraceFilterModel::load(void)
 {
-    QSettings settings;
+	QSettings settings;
 
-    settings.beginGroup("GLTRACE/");
+	settings.beginGroup("GLTRACE/");
 
-    if (rootItem) {
-    	layoutAboutToBeChanged();
-        rootItem->loadRecursive(settings);
-    }
+	if (rootItem) {
+		layoutAboutToBeChanged();
+		rootItem->loadRecursive(settings);
+	}
 
-    settings.endGroup();
-        
-    layoutChanged();
+	settings.endGroup();
+
+	layoutChanged();
 }
 
 void GlTraceFilterModel::GlTraceFilterItem::loadRecursive(QSettings &settings)
 {
-    int i;
-    QString   key = QString("");
+	int i;
+	QString key = QString("");
 
-    if (parentItem) {
-        if (parentItem->function == NULL) {
-            /* Extension descriptor */
-            key.append(function->extname);
-            if (settings.contains(key)) {
-                showInTrace = settings.value(key).toInt();
-            } else {
-                showInTrace = Qt::Checked;
-            }
+	if (parentItem) {
+		if (parentItem->function == NULL) {
+			/* Extension descriptor */
+			key.append(function->extname);
+			if (settings.contains(key)) {
+				showInTrace = settings.value(key).toInt();
+			} else {
+				showInTrace = Qt::Checked;
+			}
 
-            for ( i=0; i<childCount(); i++) {
-                childItems[i]->loadRecursive(settings);
-            }
-        } else {
-            /* Function descriptor */
-            key.append(parentItem->function->extname);
-            key.append("/");
-            key.append(function->fname);
+			for (i = 0; i < childCount(); i++) {
+				childItems[i]->loadRecursive(settings);
+			}
+		} else {
+			/* Function descriptor */
+			key.append(parentItem->function->extname);
+			key.append("/");
+			key.append(function->fname);
 
-            if (settings.contains(key)) {
-            showInTrace = settings.value(key).toInt();
-            } else {
-                showInTrace = Qt::Checked;
-            }
-        }
-    } else {
-        for ( i=0; i<childCount(); i++) {
-            childItems[i]->loadRecursive(settings);
-        }
-    }
+			if (settings.contains(key)) {
+				showInTrace = settings.value(key).toInt();
+			} else {
+				showInTrace = Qt::Checked;
+			}
+		}
+	} else {
+		for (i = 0; i < childCount(); i++) {
+			childItems[i]->loadRecursive(settings);
+		}
+	}
 }
 
-QModelIndex GlTraceFilterModel::index (int row, int column, const QModelIndex &parent) const {
+QModelIndex GlTraceFilterModel::index(int row, int column,
+		const QModelIndex &parent) const
+{
 	if (!hasIndex(row, column, parent))
 		return QModelIndex();
 
@@ -339,11 +355,13 @@ QModelIndex GlTraceFilterModel::index (int row, int column, const QModelIndex &p
 		return QModelIndex();
 }
 
-QModelIndex GlTraceFilterModel::parent (const QModelIndex &index) const {
+QModelIndex GlTraceFilterModel::parent(const QModelIndex &index) const
+{
 	if (!index.isValid())
 		return QModelIndex();
 
-	GlTraceFilterItem *childItem = static_cast<GlTraceFilterItem*>(index.internalPointer());
+	GlTraceFilterItem *childItem =
+			static_cast<GlTraceFilterItem*>(index.internalPointer());
 	GlTraceFilterItem *parentItem = childItem->parent();
 
 	if (parentItem == rootItem)
@@ -352,7 +370,8 @@ QModelIndex GlTraceFilterModel::parent (const QModelIndex &index) const {
 	return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int GlTraceFilterModel::rowCount (const QModelIndex &parent) const {
+int GlTraceFilterModel::rowCount(const QModelIndex &parent) const
+{
 	GlTraceFilterItem *parentItem;
 	if (parent.column() > 0)
 		return 0;
@@ -365,68 +384,76 @@ int GlTraceFilterModel::rowCount (const QModelIndex &parent) const {
 	return parentItem->childCount();
 }
 
-int GlTraceFilterModel::columnCount (const QModelIndex &parent) const {
+int GlTraceFilterModel::columnCount(const QModelIndex &parent) const
+{
 	if (parent.isValid())
 		return static_cast<GlTraceFilterItem*>(parent.internalPointer())->columnCount();
 	else
 		return rootItem->columnCount();
 }
 
-QVariant GlTraceFilterModel::data (const QModelIndex &index, int role) const {
+QVariant GlTraceFilterModel::data(const QModelIndex &index, int role) const
+{
 	if (!index.isValid())
 		return QVariant();
 
-	GlTraceFilterItem *item = static_cast<GlTraceFilterItem*>(index.internalPointer());
+	GlTraceFilterItem *item =
+			static_cast<GlTraceFilterItem*>(index.internalPointer());
 
-	switch(index.column()) {
-		case FUNCTION_NAME:
-			if (role == Qt::DisplayRole) {
-				return item->data(index.column());
-			}
-			if (role == Qt::DecorationRole) {
-				if (item->parent() == rootItem) {
-					if (item->isSupported) {
-						return QIcon(QString::fromUtf8(":/icons/icons/dialog-ok_32.png"));
-					} else {
-						return QIcon(QString::fromUtf8(":/icons/icons/process-stop_32.png"));
-					}
+	switch (index.column()) {
+	case FUNCTION_NAME:
+		if (role == Qt::DisplayRole) {
+			return item->data(index.column());
+		}
+		if (role == Qt::DecorationRole) {
+			if (item->parent() == rootItem) {
+				if (item->isSupported) {
+					return QIcon(
+							QString::fromUtf8(":/icons/icons/dialog-ok_32.png"));
 				} else {
-					return QVariant();
+					return QIcon(
+							QString::fromUtf8(
+									":/icons/icons/process-stop_32.png"));
 				}
+			} else {
+				return QVariant();
 			}
-			if (role == Qt::CheckStateRole) {
-				switch (item->showInTrace) {
-					case 0:
-						return Qt::Unchecked;
-					case 1:
-						return Qt::PartiallyChecked;
-					case 2:
-						return Qt::Checked;
-					default:
-						return QVariant();
-				}
+		}
+		if (role == Qt::CheckStateRole) {
+			switch (item->showInTrace) {
+			case 0:
+				return Qt::Unchecked;
+			case 1:
+				return Qt::PartiallyChecked;
+			case 2:
+				return Qt::Checked;
+			default:
+				return QVariant();
 			}
-			break;
+		}
+		break;
 	}
 	return QVariant();
 }
 
-QVariant GlTraceFilterModel::headerData(int section, Qt::Orientation orientation,
-		int role) const {
-	
+QVariant GlTraceFilterModel::headerData(int section,
+		Qt::Orientation orientation, int role) const
+{
+
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-		switch(section) {
-			case FUNCTION_NAME:
-				return QString("Function Name");
-				break;
-			default:
-				return QVariant();
+		switch (section) {
+		case FUNCTION_NAME:
+			return QString("Function Name");
+			break;
+		default:
+			return QVariant();
 		}
 	}
 	return QVariant();
 }
 
-Qt::ItemFlags GlTraceFilterModel::flags (const QModelIndex &index) const {
+Qt::ItemFlags GlTraceFilterModel::flags(const QModelIndex &index) const
+{
 	if (!index.isValid()) {
 		return Qt::ItemIsEnabled;
 	}
@@ -437,28 +464,33 @@ Qt::ItemFlags GlTraceFilterModel::flags (const QModelIndex &index) const {
 	return f;
 }
 
-bool GlTraceFilterModel::setData (const QModelIndex & index, const QVariant & value, int role) {
+bool GlTraceFilterModel::setData(const QModelIndex & index,
+		const QVariant & value, int role)
+{
 	if (index.isValid() && role == Qt::CheckStateRole) {
-		switch(index.column()) {
-			case FUNCTION_NAME:
-				(static_cast<GlTraceFilterItem*>(index.internalPointer()))->showInTrace = value.toInt();
+		switch (index.column()) {
+		case FUNCTION_NAME:
+			(static_cast<GlTraceFilterItem*>(index.internalPointer()))->showInTrace =
+					value.toInt();
 
-				if (index.parent().isValid()) {
-					(static_cast<GlTraceFilterItem*>(index.parent().internalPointer()))->checkChildsToggleState();
-					emit dataChanged(index.parent(),index.parent());
-				} else {
-				    layoutAboutToBeChanged();
-					(static_cast<GlTraceFilterItem*>(index.internalPointer()))->setChildsToggleState(value.toInt());
-                    layoutChanged();
-				}
-				return true;
-				break;
+			if (index.parent().isValid()) {
+				(static_cast<GlTraceFilterItem*>(index.parent().internalPointer()))->checkChildsToggleState();
+				emit dataChanged(index.parent(), index.parent());
+			} else {
+				layoutAboutToBeChanged();
+				(static_cast<GlTraceFilterItem*>(index.internalPointer()))->setChildsToggleState(
+						value.toInt());
+				layoutChanged();
+			}
+			return true;
+			break;
 		}
 	}
 	return false;
 }
 
-void GlTraceFilterModel::checkExtensions() {
+void GlTraceFilterModel::checkExtensions()
+{
 	const GLubyte *extensionString, *versionString;
 	int supportedMajor, supportedMinor;
 
@@ -470,8 +502,8 @@ void GlTraceFilterModel::checkExtensions() {
 	supportedMajor = versionString[0] - '0';
 	supportedMinor = versionString[2] - '0';
 
-
-	QByteArray extensions = QByteArray(reinterpret_cast<const char*>(extensionString));
+	QByteArray extensions = QByteArray(
+			reinterpret_cast<const char*>(extensionString));
 
 #ifdef GLSLDB_WIN32
 	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = 0;
@@ -481,24 +513,31 @@ void GlTraceFilterModel::checkExtensions() {
 		extensions.append(QByteArray(reinterpret_cast<const char*>(wglGetExtensionsStringARB(wglGetCurrentDC()))));
 	}
 #elif defined(GLSLDB_LINUX)
-    int supportedXMajor, supportedXMinor;
-    const char *versionXString;
+	int supportedXMajor, supportedXMinor;
+	const char *versionXString;
 
-    versionXString = glXQueryServerString(XOpenDisplay(NULL), 0, GLX_VERSION);
+	versionXString = glXQueryServerString(XOpenDisplay(NULL), 0, GLX_VERSION);
 
-    supportedXMajor = versionXString[0] - '0';
-    supportedXMinor = versionXString[2] - '0';
+	supportedXMajor = versionXString[0] - '0';
+	supportedXMinor = versionXString[2] - '0';
 
-    extensions.append(' ');
-    extensions.append(QByteArray(reinterpret_cast<const char*>(glXQueryServerString(XOpenDisplay(NULL), 
-                                                                                    0, GLX_EXTENSIONS))));
+	extensions.append(' ');
+	extensions.append(
+			QByteArray(
+					reinterpret_cast<const char*>(glXQueryServerString(
+							XOpenDisplay(NULL), 0, GLX_EXTENSIONS))));
 
-    extensions.append(' ');
-    extensions.append(QByteArray(reinterpret_cast<const char*>(glXGetClientString(XOpenDisplay(NULL), 
-                                                                                  GLX_EXTENSIONS))));
+	extensions.append(' ');
+	extensions.append(
+			QByteArray(
+					reinterpret_cast<const char*>(glXGetClientString(
+							XOpenDisplay(NULL), GLX_EXTENSIONS))));
 
-    extensions.append(' ');
-    extensions.append(QByteArray(reinterpret_cast<const char*>(glXQueryExtensionsString(XOpenDisplay(NULL), 0))));
+	extensions.append(' ');
+	extensions.append(
+			QByteArray(
+					reinterpret_cast<const char*>(glXQueryExtensionsString(
+							XOpenDisplay(NULL), 0))));
 #elif defined(GLSLDB_OSX)
 
 #warning "FIXME: any OSX specific extensions wee need to add here?"
@@ -506,13 +545,15 @@ void GlTraceFilterModel::checkExtensions() {
 #endif
 
 	QList<QByteArray> extList = extensions.split(' ');
-	for(int i = 0; i < this->rootItem->childCount(); i++) {
+	for (int i = 0; i < this->rootItem->childCount(); i++) {
 		GlTraceFilterItem *item = this->rootItem->child(i);
-		if (strstr(item->function->extname, "GL_VERSION_") == item->function->extname) {
+		if (strstr(item->function->extname, "GL_VERSION_")
+				== item->function->extname) {
 			int major, minor;
 			major = item->function->extname[11] - '0';
 			minor = item->function->extname[13] - '0';
-			if (major < supportedMajor || (major == supportedMajor && minor <= supportedMinor)) {
+			if (major < supportedMajor
+					|| (major == supportedMajor && minor <= supportedMinor)) {
 				item->isSupported = true;
 			} else {
 				item->isSupported = false;
@@ -522,19 +563,21 @@ void GlTraceFilterModel::checkExtensions() {
 		else if (strstr(item->function->extname, "WGL_VERSION_") == item->function->extname) {
 			item->isSupported = true;
 		}
-#elif defined(GLSLDB_LINUX)           
-		else if (strstr(item->function->extname, "GLX_VERSION_") == item->function->extname) {
+#elif defined(GLSLDB_LINUX)
+		else if (strstr(item->function->extname, "GLX_VERSION_")
+				== item->function->extname) {
 			int major, minor;
 			major = item->function->extname[12] - '0';
 			minor = item->function->extname[14] - '0';
-			if (major < supportedXMajor || (major == supportedXMajor && minor <= supportedXMinor)) {
+			if (major < supportedXMajor
+					|| (major == supportedXMajor && minor <= supportedXMinor)) {
 				item->isSupported = true;
 			} else {
 				item->isSupported = false;
-            }
-        }
+			}
+		}
 #elif defined(GLSLDB_OSX)
-#warning "FIXME: any OSX specific extensions wee need to add here?"	
+#warning "FIXME: any OSX specific extensions wee need to add here?"
 #endif
 		else {
 			item->isSupported = extList.contains(item->function->extname);
@@ -542,17 +585,19 @@ void GlTraceFilterModel::checkExtensions() {
 	}
 }
 
-void GlTraceFilterModel::constructHashMap() {
-	for(int i = 0; i < this->rootItem->childCount(); i++) {
+void GlTraceFilterModel::constructHashMap()
+{
+	for (int i = 0; i < this->rootItem->childCount(); i++) {
 		GlTraceFilterItem *item = this->rootItem->child(i);
-		for(int j = 0; j < item->childCount(); j++) {
+		for (int j = 0; j < item->childCount(); j++) {
 			GlTraceFilterItem *subItem = item->child(j);
 			functionHash[QString(subItem->function->fname)] = subItem;
 		}
 	}
 }
 
-bool GlTraceFilterModel::isFunctionVisible(const QString &fname) {
+bool GlTraceFilterModel::isFunctionVisible(const QString &fname)
+{
 	GlTraceFilterItem *item = functionHash.value(fname, NULL);
 	if (item) {
 		return (item->showInTrace == Qt::Checked);

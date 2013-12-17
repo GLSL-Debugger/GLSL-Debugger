@@ -42,75 +42,98 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "glTraceFilterModel.qt.h"
 
-class GlTraceListItem
-{
- public:
-     GlTraceListItem();
-     ~GlTraceListItem();
+class GlTraceListItem {
+public:
+	GlTraceListItem();
+	~GlTraceListItem();
 
-     enum IconType {IT_EMPTY, IT_ACTUAL, IT_OK, IT_ERROR, IT_WARNING, IT_IMPORTANT, IT_RECORD};
+	enum IconType {
+		IT_EMPTY,
+		IT_ACTUAL,
+		IT_OK,
+		IT_ERROR,
+		IT_WARNING,
+		IT_IMPORTANT,
+		IT_RECORD
+	};
 
-     void    setIconType(IconType type);
-     void    setText(const QString &text) { m_qText = text; }
+	void setIconType(IconType type);
+	void setText(const QString &text)
+	{
+		m_qText = text;
+	}
 
-     QIcon   getIcon(void) const { return m_qItem; }
-     QString getText(void) const { return m_qText; }
+	QIcon getIcon(void) const
+	{
+		return m_qItem;
+	}
+	QString getText(void) const
+	{
+		return m_qText;
+	}
 
-     void outputTXT(QTextStream &out) const;
+	void outputTXT(QTextStream &out) const;
 
- private:
-     QIcon    m_qItem;
-     QString  m_qText;
-     IconType m_eIconType;
+private:
+	QIcon m_qItem;
+	QString m_qText;
+	IconType m_eIconType;
 };
 
-class GlTraceListFilterModel : public QSortFilterProxyModel
-{
- public:
-     GlTraceListFilterModel(GlTraceFilterModel *traceFilter, QObject *parent = 0);
+class GlTraceListFilterModel: public QSortFilterProxyModel {
+public:
+	GlTraceListFilterModel(GlTraceFilterModel *traceFilter,
+			QObject *parent = 0);
 
- protected:
-     virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
- 	 void showCurrentItemAnyway(bool show);
+protected:
+	virtual bool filterAcceptsRow(int sourceRow,
+			const QModelIndex &sourceParent) const;
+	void showCurrentItemAnyway(bool show);
 
- private:
-	 GlTraceFilterModel *m_GlTraceFilterModel;
-	 bool currentShown;
+private:
+	GlTraceFilterModel *m_GlTraceFilterModel;
+	bool currentShown;
 };
 
+class GlTraceListModel: public QAbstractListModel {
+public:
+	GlTraceListModel(int maxListEntries, GlTraceFilterModel *traceFilter,
+			QObject *parent = 0);
+	~GlTraceListModel();
 
-class GlTraceListModel : public QAbstractListModel
-{
- public:
-     GlTraceListModel(int maxListEntries, GlTraceFilterModel *traceFilter, QObject *parent = 0);
-     ~GlTraceListModel();
+	void clear(void);
+	void resetLayout(void)
+	{
+		layoutAboutToBeChanged();
+		layoutChanged();
+	}
 
-     void    clear(void);
-     void    resetLayout(void) { layoutAboutToBeChanged(); layoutChanged(); }
+	void addGlTraceItem(const GlTraceListItem::IconType type,
+			const QString & text);
+	void addGlTraceWarningItem(const QString & text);
+	void addGlTraceErrorItem(const QString & text);
 
-     void addGlTraceItem(const GlTraceListItem::IconType type, const QString & text);
-     void addGlTraceWarningItem(const QString & text);
-     void addGlTraceErrorItem(const QString & text);
+	void setCurrentGlTraceIconType(const GlTraceListItem::IconType type,
+			int offset = 0);
+	void setCurrentGlTraceText(const QString &text, int offset = 0);
 
-     void setCurrentGlTraceIconType(const  GlTraceListItem::IconType type, int offset = 0);
-     void setCurrentGlTraceText(const QString &text, int offset = 0);
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-     int rowCount(const QModelIndex &parent = QModelIndex()) const;
-     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	 
-	 bool isCurrentCall(const QModelIndex &index);
+	bool isCurrentCall(const QModelIndex &index);
 
-     void traverse(QTextStream &out, void (GlTraceListItem::*outFunc)(QTextStream&) const);
+	void traverse(QTextStream &out,
+			void (GlTraceListItem::*outFunc)(QTextStream&) const);
 
- private:
-     int  getNextIndex(void);
-     int  getLastRowIndex(void);
-     
-     GlTraceListItem *m_pData;
-     int              m_iMax;
-     int              m_iFirst;
-     int              m_iNum;
-	 GlTraceFilterModel *m_pTraceFilterModel;
+private:
+	int getNextIndex(void);
+	int getLastRowIndex(void);
+
+	GlTraceListItem *m_pData;
+	int m_iMax;
+	int m_iFirst;
+	int m_iNum;
+	GlTraceFilterModel *m_pTraceFilterModel;
 };
 
 #endif

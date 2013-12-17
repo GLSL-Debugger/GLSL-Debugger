@@ -37,15 +37,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QWidget>
 #include "pixelBox.qt.h"
 
-class WatchView : public QWidget {
-    Q_OBJECT
+class WatchView: public QWidget {
+Q_OBJECT
 public:
-    WatchView(QWidget *parent = 0);
-    virtual void updateView(bool force) = 0;
-    void setActive(bool b);
+	WatchView(QWidget *parent = 0);
+	virtual void updateView(bool force) = 0;
+	void setActive(bool b);
 
 private:
-    bool m_bActive;
+	bool m_bActive;
 };
 
 #endif

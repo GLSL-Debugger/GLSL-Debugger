@@ -36,18 +36,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtGui/QItemDelegate>
 
-class TextPercentDelegate : public QItemDelegate
-{
-    Q_OBJECT
+class TextPercentDelegate: public QItemDelegate {
+Q_OBJECT
 
 public:
-    TextPercentDelegate(QObject *parent = 0);
-    ~TextPercentDelegate();
+	TextPercentDelegate(QObject *parent = 0);
+	~TextPercentDelegate();
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter *painter, const QStyleOptionViewItem &option,
+			const QModelIndex &index) const;
 
 private:
-    QBrush *m_qBrush;
+	QBrush *m_qBrush;
 };
 
 #endif

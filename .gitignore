@@ -23,13 +23,11 @@ Makefile
 Build/
 bin
 lib
-GLSLCompiler/glslang/MachineIndependent/Gen_glslang.cpp
-GLSLCompiler/glslang/MachineIndependent/Gen_glslang_tab.cpp
-GLSLCompiler/glslang/MachineIndependent/glslang.output
-GLSLCompiler/glslang/MachineIndependent/glslang_tab.h
-GLSLCompiler/glslang/MachineIndependent/glslang.tab.c
-GLSLCompiler/glslang/MachineIndependent/glslang.tab.h
 glsldb/DebugLib/generated/
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_lexer.cpp
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.cpp
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.output
+GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.hpp
 
 # QT stuff
 moc_*.cxx
@@ -38,13 +36,6 @@ qrc_*.cxx
 glsldb/glslDevil.qrc.depends
 
 *.bak
-
-#glsldb/DebugLib/functionList.c
-#glsldb/DebugLib/replayFunction.c
-#glsldb/DebugLib/getProcAddressHook.inc
-#glsldb/DebugLib/functionsAllowedInBeginEnd.pl
-#glsldb/DebugLib/functionPointerTypes.inc
-#glsldb/DebugLib/functionHooks.inc
 
 glsldb/.DS_Store
 

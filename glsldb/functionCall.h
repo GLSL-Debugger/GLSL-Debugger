@@ -36,51 +36,51 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class FunctionCall {
 public:
-    FunctionCall();
-    FunctionCall(const FunctionCall *copyOf);
-    ~FunctionCall();
+	FunctionCall();
+	FunctionCall(const FunctionCall *copyOf);
+	~FunctionCall();
 
-    struct Argument {
-        int   iType;
-        void *pData;
-        void *pAddress;
-    };
-    
-    const char* getName(void) const;
-    void setName(const char*);
+	struct Argument {
+		int iType;
+		void *pData;
+		void *pAddress;
+	};
 
-    const char* getExtension(void) const;
-    
-    int getNumArguments(void) const;
-    const Argument* getArgument(int) const;
-    void addArgument(int, void*, void*);
-    void editArgument(int, void*);
+	const char* getName(void) const;
+	void setName(const char*);
 
-    bool operator==(const FunctionCall&);
-    bool operator!=(const FunctionCall&);
+	const char* getExtension(void) const;
 
-    char* getCallString(void) const;
-    
-    bool isDebuggable(void) const;
-    bool isDebuggable(int *primitiveMode) const;
-    bool isEditable(void) const;
-    bool isDebuggableDrawCall(void) const;
-    bool isDebuggableDrawCall(int *primitiveMode) const;
-    bool isShaderSwitch(void) const;
-    bool isGlFunc(void) const;
-    bool isGlxFunc(void) const;
+	int getNumArguments(void) const;
+	const Argument* getArgument(int) const;
+	void addArgument(int, void*, void*);
+	void editArgument(int, void*);
+
+	bool operator==(const FunctionCall&);
+	bool operator!=(const FunctionCall&);
+
+	char* getCallString(void) const;
+
+	bool isDebuggable(void) const;
+	bool isDebuggable(int *primitiveMode) const;
+	bool isEditable(void) const;
+	bool isDebuggableDrawCall(void) const;
+	bool isDebuggableDrawCall(int *primitiveMode) const;
+	bool isShaderSwitch(void) const;
+	bool isGlFunc(void) const;
+	bool isGlxFunc(void) const;
 	bool isWglFunc(void) const;
-    bool isFrameEnd(void) const;
-    bool isFramebufferChange(void) const;
+	bool isFrameEnd(void) const;
+	bool isFramebufferChange(void) const;
 
 private:
-    char* getArgumentString(Argument arg) const;
-    void* copyArgument(int type, void *addr);
+	char* getArgumentString(Argument arg) const;
+	void* copyArgument(int type, void *addr);
 
-    char     *m_pName;
-    char     *m_pExtension;
-    int       m_iNumArgs;
-    Argument *m_pArguments;
+	char *m_pName;
+	char *m_pExtension;
+	int m_iNumArgs;
+	Argument *m_pArguments;
 
 };
 

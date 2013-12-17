@@ -5,7 +5,7 @@ extern "C" GLFunctionList glFunctions[];
 
 FunctionsMap& FunctionsMap::instance()
 {
-	if(!_instance) {
+	if (!_instance) {
 		_instance = new FunctionsMap;
 	}
 	return *_instance;
@@ -14,7 +14,7 @@ FunctionsMap& FunctionsMap::instance()
 void FunctionsMap::initialize()
 {
 	uint32_t i = 0;
-	while(glFunctions[i].fname) {
+	while (glFunctions[i].fname) {
 		_map[glFunctions[i].fname] = &glFunctions[i];
 		++i;
 	}
@@ -24,7 +24,7 @@ GLFunctionList* FunctionsMap::operator[](const std::string& name)
 {
 	GLFunctionList* func = 0;
 	GLFunctionsMap::const_iterator it = _map.find(name);
-	if(it != _map.end())
+	if (it != _map.end())
 		func = it->second;
 	return func;
 }

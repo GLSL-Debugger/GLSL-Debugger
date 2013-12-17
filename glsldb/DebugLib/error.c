@@ -56,12 +56,12 @@ void setErrorCode(int error)
 
 	UT_NOTIFY_VA(LV_INFO, "STORE ERROR: %i", error);
 	rec->result = DBG_ERROR_CODE;
-	rec->items[0] = (ALIGNED_DATA)error;
+	rec->items[0] = (ALIGNED_DATA) error;
 }
 
 /* work-around for external debug functions */
-/* TODO: do we need debug functions at all? */
-DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(int error)
+/* TODO: do we need debug functions at all? */DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(
+		int error)
 {
 	setErrorCode(error);
 }
@@ -69,24 +69,24 @@ DBGLIBEXPORT void DEBUGLIB_EXTERNAL_setErrorCode(int error)
 static const char *decodeError(GLenum error)
 {
 	switch (error) {
-		case GL_INVALID_ENUM:
-			return "GL_INVALID_ENUM";
-		case GL_INVALID_VALUE:
-			return "GL_INVALID_VALUE";
-		case GL_INVALID_OPERATION:
-			return "GL_INVALID_OPERATION";
-		case GL_STACK_OVERFLOW:
-			return "GL_STACK_OVERFLOW";
-		case GL_STACK_UNDERFLOW:
-			return "GL_STACK_UNDERFLOW";
-		case GL_OUT_OF_MEMORY:
-			return "GL_OUT_OF_MEMORY";
-		case GL_TABLE_TOO_LARGE:
-			return "GL_TABLE_TOO_LARGE";
-		case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-			return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
-		default:
-			return "UNKNOWN_ERROR";
+	case GL_INVALID_ENUM:
+		return "GL_INVALID_ENUM";
+	case GL_INVALID_VALUE:
+		return "GL_INVALID_VALUE";
+	case GL_INVALID_OPERATION:
+		return "GL_INVALID_OPERATION";
+	case GL_STACK_OVERFLOW:
+		return "GL_STACK_OVERFLOW";
+	case GL_STACK_UNDERFLOW:
+		return "GL_STACK_UNDERFLOW";
+	case GL_OUT_OF_MEMORY:
+		return "GL_OUT_OF_MEMORY";
+	case GL_TABLE_TOO_LARGE:
+		return "GL_TABLE_TOO_LARGE";
+	case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		return "GL_INVALID_FRAMEBUFFER_OPERATION_EXT";
+	default:
+		return "UNKNOWN_ERROR";
 	}
 }
 

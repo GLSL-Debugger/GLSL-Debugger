@@ -3,14 +3,13 @@
 
 #include <stdio.h>
 
-typedef enum
-{
-    LV_FATAL = 0,
-    LV_ERROR = 1,
-    LV_WARN = 2,
-    LV_INFO = 3,
-    LV_DEBUG = 4,
-    LV_TRACE = 5
+typedef enum {
+	LV_FATAL = 0,
+	LV_ERROR = 1,
+	LV_WARN = 2,
+	LV_INFO = 3,
+	LV_DEBUG = 4,
+	LV_TRACE = 5
 } severity_t;
 
 #define UTILS_NOTIFY_LEVEL(a) utils_notify_level(a)
@@ -48,7 +47,8 @@ extern const char* utils_notify_filename(const char* filename);
 extern severity_t utils_notify_level(const severity_t* value);
 extern void utils_notify_startup();
 extern void utils_notify_shutdown();
-extern void utils_notify_va(const severity_t sev, const char* filename, const char* func, unsigned int line, const char *fmt, ...);
+extern void utils_notify_va(const severity_t sev, const char* filename,
+		const char* func, unsigned int line, const char *fmt, ...);
 #if defined(__cplusplus)
 }
 #endif

@@ -46,7 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glCallStatistics.qt.h"
 #include "jumpToDialog.qt.h"
 
-#include "ShHandle.h"
+//#include "ShHandle.h"
 #include "ShaderLang.h"
 
 #include "progControl.qt.h"
@@ -68,171 +68,172 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class QWorkspace;
 
-class MainWindow : public QMainWindow, public Ui::MainWindow  {
-    Q_OBJECT
+class MainWindow: public QMainWindow, public Ui::MainWindow {
+Q_OBJECT
 
 public:
-    MainWindow(char *pname, const QStringList& args);
-    ~MainWindow();
-
+	MainWindow(char *pname, const QStringList& args);
+	~MainWindow();
 
 signals:
-    void changeRunLevel(int);
+	void changeRunLevel(int);
 
 private slots:
-    /****************
-     * auto connect *
-     ****************/
+	/****************
+	 * auto connect *
+	 ****************/
 
-    /* general */
-    void on_aQuit_triggered();
-    void on_aOpen_triggered();
-    void on_aAttach_triggered();
-    void on_aOnlineHelp_triggered();
-    void on_aAbout_triggered();
+	/* general */
+	void on_aQuit_triggered();
+	void on_aOpen_triggered();
+	void on_aAttach_triggered();
+	void on_aOnlineHelp_triggered();
+	void on_aAbout_triggered();
 
-    /* buffer view */
-    void on_tbBVCapture_clicked();
-    void on_tbBVCaptureAutomatic_toggled(bool);
-    void on_tbBVSave_clicked();
+	/* buffer view */
+	void on_tbBVCapture_clicked();
+	void on_tbBVCaptureAutomatic_toggled(bool);
+	void on_tbBVSave_clicked();
 
-    /* statistics */
-    void on_cbGlstCallOrigin_currentIndexChanged(int);
-    void on_cbGlstPfMode_currentIndexChanged(int);
+	/* statistics */
+	void on_cbGlstCallOrigin_currentIndexChanged(int);
+	void on_cbGlstPfMode_currentIndexChanged(int);
 
-    /* glTrace */
-    void on_tbExecute_clicked();
-    void on_tbStep_clicked();
-    void on_tbSkip_clicked();
-    void on_tbEdit_clicked();
-    void on_tbJumpToDrawCall_clicked();
-    void on_tbJumpToShader_clicked();
-    void on_tbJumpToUserDef_clicked();
-    void on_tbRun_clicked();
-    void on_tbPause_clicked();
-    void on_tbToggleGuiUpdate_clicked(bool);
-    void on_tbToggleNoTrace_clicked(bool);
-    void on_tbToggleHaltOnError_clicked(bool);
-    void on_tbGlTraceSettings_clicked();
-    void on_tbSave_clicked();
+	/* glTrace */
+	void on_tbExecute_clicked();
+	void on_tbStep_clicked();
+	void on_tbSkip_clicked();
+	void on_tbEdit_clicked();
+	void on_tbJumpToDrawCall_clicked();
+	void on_tbJumpToShader_clicked();
+	void on_tbJumpToUserDef_clicked();
+	void on_tbRun_clicked();
+	void on_tbPause_clicked();
+	void on_tbToggleGuiUpdate_clicked(bool);
+	void on_tbToggleNoTrace_clicked(bool);
+	void on_tbToggleHaltOnError_clicked(bool);
+	void on_tbGlTraceSettings_clicked();
+	void on_tbSave_clicked();
 
-    /* shader */
+	/* shader */
 	void on_twShader_currentChanged(int selection);
-    void on_tbShaderExecute_clicked();
-    void on_tbShaderReset_clicked();
-    void on_tbShaderStep_clicked();
-    void on_tbShaderStepOver_clicked();
-    void on_tbShaderFragmentOptions_clicked();
+	void on_tbShaderExecute_clicked();
+	void on_tbShaderReset_clicked();
+	void on_tbShaderStep_clicked();
+	void on_tbShaderStepOver_clicked();
+	void on_tbShaderFragmentOptions_clicked();
 
-    /* watch */
-    void on_tbWatchWindow_clicked();
-    void on_tbWatchWindowAdd_clicked();
-    void on_tbWatchDelete_clicked();
+	/* watch */
+	void on_tbWatchWindow_clicked();
+	void on_tbWatchWindowAdd_clicked();
+	void on_tbWatchDelete_clicked();
 	void watchWindowClosed();
 
-    /****************
-     * self connect *
-     ****************/
+	/****************
+	 * self connect *
+	 ****************/
 
-    void setRunLevel(int);
-    void updateWatchItemData(ShVarItem*);
-    void watchSelectionChanged(const QItemSelection&, const QItemSelection&);
-	void setMouseOverValues(int x, int y, const bool *active, const QVariant *values);
+	void setRunLevel(int);
+	void updateWatchItemData(ShVarItem*);
+	void watchSelectionChanged(const QItemSelection&, const QItemSelection&);
+	void setMouseOverValues(int x, int y, const bool *active,
+			const QVariant *values);
 	void newSelectedPixel(int x, int y);
 	void newSelectedVertex(int n);
 	void newSelectedPrimitive(int dataIdx);
-    void changedActiveWindow(QWidget *w);
-    void ShaderStep(int action, bool updateData = true, bool updateCovermap = true);
+	void changedActiveWindow(QWidget *w);
+	void ShaderStep(int action, bool updateData = true, bool updateCovermap =
+			true);
 
 	void singleStep();
 
 private:
-    void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event);
 
 	void killProgram(int hard);
 
-    void setErrorStatus(pcErrorCode);
-    void setStatusBarText(QString);
+	void setErrorStatus(pcErrorCode);
+	void setStatusBarText(QString);
 	void setShaderCodeText(char *shaders[3]);
 	void leaveDBGState();
 	void cleanupDBGShader();
-    bool getDebugImage(DbgCgOptions option, ShChangeableList *cl,
-                       int rbFormat, bool *coverage, PixelBox **fbData);
+	bool getDebugImage(DbgCgOptions option, ShChangeableList *cl, int rbFormat,
+			bool *coverage, PixelBox **fbData);
 	bool getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
-	                        bool *coverage, VertexBox *vdata);
+			bool *coverage, VertexBox *vdata);
 
-    /* Gui update handling */
-    void setGuiUpdates(bool);
-    void updateWatchGui(int s);
+	/* Gui update handling */
+	void setGuiUpdates(bool);
+	void updateWatchGui(int s);
 
-    void addGlTraceItem();
+	void addGlTraceItem();
 	void addGlTraceErrorItem(const char *text);
 	void addGlTraceWarningItem(const char *text);
-    void setGlTraceItemText(const char *text);
+	void setGlTraceItemText(const char *text);
 	void setGlTraceItemIconType(const GlTraceListItem::IconType type);
-    void clearGlTraceItemList(void);
+	void clearGlTraceItemList(void);
 
 	pcErrorCode getNextCall();
-    pcErrorCode nextStep(const FunctionCall *fCall);
+	pcErrorCode nextStep(const FunctionCall *fCall);
 	pcErrorCode recordCall();
 	void recordDrawCall();
 	void waitForEndOfExecution();
 
-    /* Workspace */
-    QWorkspace *workspace;
-    int    currentRunLevel;
+	/* Workspace */
+	QWorkspace *workspace;
+	int currentRunLevel;
 
-    /* GLTrace Model */
-    GlTraceListModel *m_pGlTraceModel;
+	/* GLTrace Model */
+	GlTraceListModel *m_pGlTraceModel;
 	GlTraceFilterModel *m_pGlTraceFilterModel;
 
 	/* watch window controls */
 	QActionGroup *agWatchControl;
 
-    /* Dock Widget: GL Buffer View */
-    QScrollArea *sBVArea;
-    QLabel      *lBVLabel;
+	/* Dock Widget: GL Buffer View */
+	QScrollArea *sBVArea;
+	QLabel *lBVLabel;
 
-    /* glTrace settings dialog */
-    GlTraceSettingsDialog *m_pgtDialog;
+	/* glTrace settings dialog */
+	GlTraceSettingsDialog *m_pgtDialog;
 
 	/* per fragment tests */
 	FragmentTestDialog *m_pftDialog;
 
-    QStringList dbgProgArgs;
-    QString workDir;
-    ProgramControl *pc;
+	QStringList dbgProgArgs;
+	QString workDir;
+	ProgramControl *pc;
 
-    const FunctionCall *m_pCurrentCall;
+	const FunctionCall *m_pCurrentCall;
 
 	/* == 1 if we are inside a glNewList-glEndList block */
 	bool m_bInDLCompilation;
 
-    void setGlStatisticTabs(int n, int m);
+	void setGlStatisticTabs(int n, int m);
 	void resetPerFrameStatistics(void);
 	void resetAllStatistics(void);
 
-    GlCallStatistics    *m_pGlCallSt;
-    GlCallStatistics    *m_pGlExtSt;
-    GlCallStatistics    *m_pGlCallPfst;
-    GlCallStatistics    *m_pGlExtPfst;
-    GlCallStatistics    *m_pGlxCallSt;
-    GlCallStatistics    *m_pGlxExtSt;
-    GlCallStatistics    *m_pGlxCallPfst;
-    GlCallStatistics    *m_pGlxExtPfst;
-	GlCallStatistics	*m_pWglCallSt;
-	GlCallStatistics	*m_pWglExtSt;
-	GlCallStatistics	*m_pWglCallPfst;
-	GlCallStatistics	*m_pWglExtPfst;
+	GlCallStatistics *m_pGlCallSt;
+	GlCallStatistics *m_pGlExtSt;
+	GlCallStatistics *m_pGlCallPfst;
+	GlCallStatistics *m_pGlExtPfst;
+	GlCallStatistics *m_pGlxCallSt;
+	GlCallStatistics *m_pGlxExtSt;
+	GlCallStatistics *m_pGlxCallPfst;
+	GlCallStatistics *m_pGlxExtPfst;
+	GlCallStatistics *m_pWglCallSt;
+	GlCallStatistics *m_pWglExtSt;
+	GlCallStatistics *m_pWglCallPfst;
+	GlCallStatistics *m_pWglExtPfst;
 
-    ShHandle            m_dShCompiler;
-    TBuiltInResource    m_dShResources;
-    ShVariableList      m_dShVariableList;
+	ShHandle m_dShCompiler;
+	TBuiltInResource m_dShResources;
+	ShVariableList m_dShVariableList;
 
-    ShVarModel         *m_pShVarModel;
-    QStack<LoopData*>   m_qLoopData;
+	ShVarModel *m_pShVarModel;
+	QStack<LoopData*> m_qLoopData;
 
-    char *m_pShaders[3];
+	char *m_pShaders[3];
 	bool m_bHaveValidShaderCode;
 
 	struct {
@@ -245,34 +246,35 @@ private:
 	VertexBox *m_pVertexCount;
 	//GeoShaderDataModel *m_pGeoDataModel;
 
-    bool *m_pCoverage;
+	bool *m_pCoverage;
 
-    enum CoverageMapStatus {
-        COVERAGEMAP_UNCHANGED,
-        COVERAGEMAP_GROWN,
-        COVERAGEMAP_SHRINKED
-    };
-    void updateWatchListData(CoverageMapStatus cmstatus, bool forceUpdate);
-    void updateWatchItemsCoverage(bool *coverage);
+	enum CoverageMapStatus {
+		COVERAGEMAP_UNCHANGED,
+		COVERAGEMAP_GROWN,
+		COVERAGEMAP_SHRINKED
+	};
+	void updateWatchListData(CoverageMapStatus cmstatus, bool forceUpdate);
+	void updateWatchItemsCoverage(bool *coverage);
 	void resetWatchListData(void);
 	void updateSelectedPixelValues(void);
-    QModelIndexList cleanupSelectionList(QModelIndexList input);
+	QModelIndexList cleanupSelectionList(QModelIndexList input);
 
 	WatchView* newWatchWindowGeoDataTree(QModelIndexList &list);
 	WatchView* newWatchWindowVertexTable(QModelIndexList &list);
 	WatchView* newWatchWindowFragment(QModelIndexList &list);
-	void addToWatchWindowGeoDataTree(WatchView *watchView, QModelIndexList &list);
-	void addToWatchWindowVertexTable(WatchView *watchView, QModelIndexList &list);
+	void addToWatchWindowGeoDataTree(WatchView *watchView,
+			QModelIndexList &list);
+	void addToWatchWindowVertexTable(WatchView *watchView,
+			QModelIndexList &list);
 	void addToWatchWindowFragment(WatchView *watchView, QModelIndexList &list);
 
 	int m_selectedPixel[2];
 
-    /* MRU program. */
-    bool loadMruProgram(QString& outProgram, QString& outArguments,
-        QString& outWorkDir);
-    bool saveMruProgram(const QString& program, const QString& arguments,
-        const QString& workDir);
+	/* MRU program. */
+	bool loadMruProgram(QString& outProgram, QString& outArguments,
+			QString& outWorkDir);
+	bool saveMruProgram(const QString& program, const QString& arguments,
+			const QString& workDir);
 };
-
 
 #endif

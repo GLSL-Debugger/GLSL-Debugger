@@ -47,91 +47,92 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class VertexBox;
 
-class GeoShaderDataSortFilterProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
+class GeoShaderDataSortFilterProxyModel: public QSortFilterProxyModel {
+Q_OBJECT
 
- public:
+public:
 
 	GeoShaderDataSortFilterProxyModel(QObject *parent = 0);
 
- public slots:
+public slots:
 
 	void setHideInactive(bool b);
 	void setHideEmpty(bool b);
 
- protected:
+protected:
 
-	virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+	virtual bool filterAcceptsRow(int sourceRow,
+			const QModelIndex &sourceParent) const;
 
- private:
+private:
 
 	bool m_hideInactive;
 	bool m_hideEmpty;
 };
 
-class GeoShaderDataModel : public QAbstractItemModel
-{
-	Q_OBJECT
+class GeoShaderDataModel: public QAbstractItemModel {
+Q_OBJECT
 
-	public:
-		GeoShaderDataModel(int inPrimitiveType, int outPrimitiveType,
-		                   VertexBox *primitiveMap,
-		                   VertexBox *vertexCount,
-		                   VertexBox *condition,
-                           bool      *initialCoverage,
-						   QObject *parent = 0);
-		~GeoShaderDataModel();
+public:
+	GeoShaderDataModel(int inPrimitiveType, int outPrimitiveType,
+			VertexBox *primitiveMap, VertexBox *vertexCount,
+			VertexBox *condition, bool *initialCoverage, QObject *parent = 0);
+	~GeoShaderDataModel();
 
-		QVariant data(const QModelIndex &index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex &index) const;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex &index) const;
-		int rowCount(const QModelIndex &parent = QModelIndex()) const;
-		int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const;
+	QVariant headerData(int section, Qt::Orientation orientation, int role =
+			Qt::DisplayRole) const;
+	QModelIndex index(int row, int column, const QModelIndex &parent =
+			QModelIndex()) const;
+	QModelIndex parent(const QModelIndex &index) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-		bool noOutputPrims(const QModelIndex &index) const;
+	bool noOutputPrims(const QModelIndex &index) const;
 
-		bool addData(VertexBox *currentData, VertexBox* vertexData, QString &name);
-		
-		static bool isBasicPrimitive(int primType);
-		static int getBasePrimitive(int type);
+	bool addData(VertexBox *currentData, VertexBox* vertexData, QString &name);
 
-        int getNumInPrimitives() const;
-        int getNumSubInPrimitives() const;
-        int getNumOutPrimitives() const;
-        int getNumOutVertices() const;
-	
-		int getDataColumnCount() const;
-		const QString &getDataColumnName(int column) const;
-		VertexBox* getDataColumnVertexData(int column);
-		VertexBox* getDataColumnCurrentData(int column);
-		
-		enum DataRoles {VertexRole = Qt::UserRole, IndexRole = Qt::UserRole+1};
+	static bool isBasicPrimitive(int primType);
+	static int getBasePrimitive(int type);
 
-	signals:
-		void empty();
-		void dataDeleted(int i);
+	int getNumInPrimitives() const;
+	int getNumSubInPrimitives() const;
+	int getNumOutPrimitives() const;
+	int getNumOutVertices() const;
 
-	private slots:
-		void updateData();
-		void detachData();
-		
-	private:
-		int               m_inPrimitiveType;
-		int               m_outPrimitiveType;
-		int               m_numInPrimitives;
-        int               m_numSubInPrimitives;
-		int               m_numOutPrimitives;
-		int               m_numOutVertices;
-		VertexBox *       m_condition;
-        bool *            m_initialCoverage;
-		QList<VertexBox*> m_currentData;
-		QList<VertexBox*> m_vertexData;
-		QList<QString>    m_dataNames;
+	int getDataColumnCount() const;
+	const QString &getDataColumnName(int column) const;
+	VertexBox* getDataColumnVertexData(int column);
+	VertexBox* getDataColumnCurrentData(int column);
 
-		GeoShaderTreeItem * m_rootItem;
+	enum DataRoles {
+		VertexRole = Qt::UserRole,
+		IndexRole = Qt::UserRole + 1
+	};
+
+signals:
+	void empty();
+	void dataDeleted(int i);
+
+private slots:
+	void updateData();
+	void detachData();
+
+private:
+	int m_inPrimitiveType;
+	int m_outPrimitiveType;
+	int m_numInPrimitives;
+	int m_numSubInPrimitives;
+	int m_numOutPrimitives;
+	int m_numOutVertices;
+	VertexBox * m_condition;
+	bool * m_initialCoverage;
+	QList<VertexBox*> m_currentData;
+	QList<VertexBox*> m_vertexData;
+	QList<QString> m_dataNames;
+
+	GeoShaderTreeItem * m_rootItem;
 };
 
 #endif

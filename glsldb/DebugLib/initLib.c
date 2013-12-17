@@ -43,7 +43,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "trampolines.h"
 #endif /* _WIN32 */
 
-
 #ifdef _WIN32
 
 /*
@@ -53,37 +52,36 @@ BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger) {
 #define EVENT_NAME_LEN (32)
 #define SHMEM_NAME_LEN (64)
 
-    wchar_t eventName[EVENT_NAME_LEN];
-    DWORD processId = 0;
+	wchar_t eventName[EVENT_NAME_LEN];
+	DWORD processId = 0;
 
-    /* Sanity checks. */
-    if ((outEvtDebugee == NULL) || (outEvtDebugger == NULL)) {
-        return TRUE;
-    }
+	/* Sanity checks. */
+	if ((outEvtDebugee == NULL) || (outEvtDebugger == NULL)) {
+		return TRUE;
+	}
 
-    /* TODO: Possible hazard when using multiple instances simultanously. */
-    processId = GetCurrentProcessId();
+	/* TODO: Possible hazard when using multiple instances simultanously. */
+	processId = GetCurrentProcessId();
 
-    _snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
-    if ((*outEvtDebugee = OpenEventW(EVENT_ALL_ACCESS, FALSE, eventName)) 
-            == NULL) {
-        UT_NOTIFY_VA(LV_ERROR, "OpenEvent(\"%s\") failed: %u.",
-		          eventName, GetLastError());
-        return FALSE;
-    }
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
+	if ((*outEvtDebugee = OpenEventW(EVENT_ALL_ACCESS, FALSE, eventName))
+			== NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "OpenEvent(\"%s\") failed: %u.",
+				eventName, GetLastError());
+		return FALSE;
+	}
 
-    _snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
-    if ((*outEvtDebugger = OpenEventW(EVENT_ALL_ACCESS, FALSE, eventName)) 
-            == NULL) {
-        UT_NOTIFY_VA(LV_ERROR, "OpenEvent(\"%s\") failed: %u.",
-		         eventName, GetLastError());
-        return FALSE;
-    }
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
+	if ((*outEvtDebugger = OpenEventW(EVENT_ALL_ACCESS, FALSE, eventName))
+			== NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "OpenEvent(\"%s\") failed: %u.",
+				eventName, GetLastError());
+		return FALSE;
+	}
 
-    return TRUE;
+	return TRUE;
 #undef EVENT_NAME_LEN
 }
-
 
 /*
  * ::openSharedMemory
@@ -91,214 +89,209 @@ BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger) {
 BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size) {
 #define SHMEM_NAME_LEN (64)
 
-    char shMemName[SHMEM_NAME_LEN];
+	char shMemName[SHMEM_NAME_LEN];
 
-    if (!GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", shMemName, 
-            SHMEM_NAME_LEN)) {
-        UT_NOTIFY_VA(LV_ERROR, "Oh Shit! No Shmid! Set GLSL_DEBUGGER_SHMID.");
-        return FALSE;
-    }
+	if (!GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", shMemName,
+					SHMEM_NAME_LEN)) {
+		UT_NOTIFY_VA(LV_ERROR, "Oh Shit! No Shmid! Set GLSL_DEBUGGER_SHMID.");
+		return FALSE;
+	}
 
-    /* This creates a non-inheritable shared memory mapping! */
-    *outShMem = OpenFileMappingA(FILE_MAP_WRITE, FALSE, shMemName);
-    if ((*outShMem == NULL) || (*outShMem == INVALID_HANDLE_VALUE)) {
-        UT_NOTIFY_VA(LV_ERROR, "Opening of shared mem segment \"%s\" failed: %u.", 
-            shMemName, GetLastError());
-        return FALSE;
-    }
-    
-    /* FILE_MAP_WRITE implies read */
-    *outBaseAddr = MapViewOfFile(*outShMem, FILE_MAP_WRITE, 0, 0, size);
-    if (*outBaseAddr == NULL) {
-        UT_NOTIFY_VA(LV_ERROR, "View mapping of shared mem segment \"%s\" failed: %u.",
-            shMemName, GetLastError());
-        CloseHandle(*outShMem);
-        return FALSE;
-    }
+	/* This creates a non-inheritable shared memory mapping! */
+	*outShMem = OpenFileMappingA(FILE_MAP_WRITE, FALSE, shMemName);
+	if ((*outShMem == NULL) || (*outShMem == INVALID_HANDLE_VALUE)) {
+		UT_NOTIFY_VA(LV_ERROR, "Opening of shared mem segment \"%s\" failed: %u.",
+				shMemName, GetLastError());
+		return FALSE;
+	}
 
-    return TRUE;
+	/* FILE_MAP_WRITE implies read */
+	*outBaseAddr = MapViewOfFile(*outShMem, FILE_MAP_WRITE, 0, 0, size);
+	if (*outBaseAddr == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "View mapping of shared mem segment \"%s\" failed: %u.",
+				shMemName, GetLastError());
+		CloseHandle(*outShMem);
+		return FALSE;
+	}
+
+	return TRUE;
 #undef SHMEM_NAME_LEN
 }
-
 
 /*
  * ::closeEvents
  */
 BOOL closeEvents(HANDLE hEvtDebugee, HANDLE hEvtDebugger) {
-    BOOL retval = TRUE;
-    
-    if (hEvtDebugee != NULL) {
-        if (!CloseHandle(hEvtDebugee)) {
-            UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugee,
-                GetLastError());
-            retval = FALSE;
-        }
-        hEvtDebugee = NULL;
-    }
-    
-    if (hEvtDebugger != NULL) {
-        if (!CloseHandle(hEvtDebugger)) {
-            UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugger,
-                GetLastError());
-            retval = FALSE;
-        }
-        hEvtDebugger = NULL;
-    }
+	BOOL retval = TRUE;
 
-    return retval;
+	if (hEvtDebugee != NULL) {
+		if (!CloseHandle(hEvtDebugee)) {
+			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugee,
+					GetLastError());
+			retval = FALSE;
+		}
+		hEvtDebugee = NULL;
+	}
+
+	if (hEvtDebugger != NULL) {
+		if (!CloseHandle(hEvtDebugger)) {
+			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugger,
+					GetLastError());
+			retval = FALSE;
+		}
+		hEvtDebugger = NULL;
+	}
+
+	return retval;
 }
-
 
 /*
  * ::closeSharedMemory
  */
 BOOL closeSharedMemory(HANDLE hShMem, void *baseAddr) {
-    BOOL retval = TRUE;
+	BOOL retval = TRUE;
 
-    if (baseAddr != NULL) {
-        if (!UnmapViewOfFile(baseAddr)) {
-            UT_NOTIFY_VA(LV_ERROR, "View unmapping of shared mem segment failed: %u", 
-                GetLastError());
-            retval = FALSE;
-        }
-        baseAddr = NULL;
-    }
-    
-    if ((hShMem != NULL) && (hShMem != INVALID_HANDLE_VALUE)) {
-        if (!CloseHandle(hShMem)) {
-            UT_NOTIFY_VA(LV_ERROR, "Closing handle of shared mem segment failed: %u", 
-                GetLastError());
-            retval = FALSE;
-        }
-        hShMem = INVALID_HANDLE_VALUE;
-    }
+	if (baseAddr != NULL) {
+		if (!UnmapViewOfFile(baseAddr)) {
+			UT_NOTIFY_VA(LV_ERROR, "View unmapping of shared mem segment failed: %u",
+					GetLastError());
+			retval = FALSE;
+		}
+		baseAddr = NULL;
+	}
 
-    return retval;
+	if ((hShMem != NULL) && (hShMem != INVALID_HANDLE_VALUE)) {
+		if (!CloseHandle(hShMem)) {
+			UT_NOTIFY_VA(LV_ERROR, "Closing handle of shared mem segment failed: %u",
+					GetLastError());
+			retval = FALSE;
+		}
+		hShMem = INVALID_HANDLE_VALUE;
+	}
+
+	return retval;
 }
-
 
 /** Window class for GL context window. */
 static const char *INITCTX_WNDCLASS_NAME = "GLSLDEVIL DEBUGLIB WINDOW";
-
 
 /*
  * ::createGlInitContext
  */
 BOOL createGlInitContext(GlInitContext *outCtx) {
-    HINSTANCE hInst = GetModuleHandle(NULL);
-    GLuint pixelFormat = 0;
-    PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR), 1,
-        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, 
-        PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0,
-        PFD_MAIN_PLANE, 0, 0, 0, 0 };
-    WNDCLASSEXA wndClass;
-    
-    if (outCtx == NULL) {
-        return FALSE;
-    }
+	HINSTANCE hInst = GetModuleHandle(NULL);
+	GLuint pixelFormat = 0;
+	PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0,
+		PFD_MAIN_PLANE, 0, 0, 0, 0};
+	WNDCLASSEXA wndClass;
 
-    outCtx->hWnd = NULL;
-    outCtx->hDC = NULL;
-    outCtx->hRC = NULL;
+	if (outCtx == NULL) {
+		return FALSE;
+	}
 
-    /* Register window class, if not yet available. */
-    if (!GetClassInfoExA(hInst, INITCTX_WNDCLASS_NAME, &wndClass)) {
-        ZeroMemory(&wndClass, sizeof(WNDCLASSEX));
-        wndClass.cbSize = sizeof(WNDCLASSEX);
-        wndClass.style = CS_CLASSDC;
-        wndClass.lpfnWndProc = DefWindowProc;
-        wndClass.hInstance = hInst;
-        wndClass.lpszClassName = INITCTX_WNDCLASS_NAME;
+	outCtx->hWnd = NULL;
+	outCtx->hDC = NULL;
+	outCtx->hRC = NULL;
 
-        if (!RegisterClassExA(&wndClass)) {
-            UT_NOTIFY_VA(LV_ERROR, "Registering window class for GL detours initialisation "
-                "failed: %u", GetLastError());
-            return FALSE;
-        }
-    }
+	/* Register window class, if not yet available. */
+	if (!GetClassInfoExA(hInst, INITCTX_WNDCLASS_NAME, &wndClass)) {
+		ZeroMemory(&wndClass, sizeof(WNDCLASSEX));
+		wndClass.cbSize = sizeof(WNDCLASSEX);
+		wndClass.style = CS_CLASSDC;
+		wndClass.lpfnWndProc = DefWindowProc;
+		wndClass.hInstance = hInst;
+		wndClass.lpszClassName = INITCTX_WNDCLASS_NAME;
 
-    /* Create window. */
-    if ((outCtx->hWnd = CreateWindowExA(WS_EX_APPWINDOW, 
-            INITCTX_WNDCLASS_NAME, "", WS_POPUP, 0, 0, 1, 1, NULL, NULL, hInst,
-            NULL)) == NULL) {
-        UT_NOTIFY_VA(LV_ERROR, "Creating window for GL detours initialisation failed:",
-            GetLastError());
-        releaseGlInitContext(outCtx);
-        return FALSE;
-    }
+		if (!RegisterClassExA(&wndClass)) {
+			UT_NOTIFY_VA(LV_ERROR, "Registering window class for GL detours initialisation "
+					"failed: %u", GetLastError());
+			return FALSE;
+		}
+	}
 
-    /* Create OpenGL context. */
-    outCtx->hDC = GetDC(outCtx->hWnd);
+	/* Create window. */
+	if ((outCtx->hWnd = CreateWindowExA(WS_EX_APPWINDOW,
+							INITCTX_WNDCLASS_NAME, "", WS_POPUP, 0, 0, 1, 1, NULL, NULL, hInst,
+							NULL)) == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "Creating window for GL detours initialisation failed:",
+				GetLastError());
+		releaseGlInitContext(outCtx);
+		return FALSE;
+	}
 
-    if ((pixelFormat = ChoosePixelFormat(outCtx->hDC, &pfd)) == 0) {
-        UT_NOTIFY_VA(LV_ERROR, "ChoosePixelFormat failed: %u", GetLastError());
-        releaseGlInitContext(outCtx);
-        return FALSE;
-    }
-    if (!SetPixelFormat(outCtx->hDC, pixelFormat, &pfd)) {
-        UT_NOTIFY_VA(LV_ERROR, "SetPixelFormat failed: %u", GetLastError());
-        releaseGlInitContext(outCtx);
-        return FALSE;
-    }
+	/* Create OpenGL context. */
+	outCtx->hDC = GetDC(outCtx->hWnd);
 
-    if ((outCtx->hRC = wglCreateContext(outCtx->hDC)) == NULL) {
-        UT_NOTIFY_VA(LV_ERROR, "wglCreateContext failed: %u", GetLastError());
-        releaseGlInitContext(outCtx);
-        return FALSE;
-    }
-    if (!wglMakeCurrent(outCtx->hDC, outCtx->hRC)) {
-        UT_NOTIFY_VA(LV_ERROR, "wglMakeCurrent failed: %u", GetLastError());
-        releaseGlInitContext(outCtx);
-        return FALSE;
-    }
+	if ((pixelFormat = ChoosePixelFormat(outCtx->hDC, &pfd)) == 0) {
+		UT_NOTIFY_VA(LV_ERROR, "ChoosePixelFormat failed: %u", GetLastError());
+		releaseGlInitContext(outCtx);
+		return FALSE;
+	}
+	if (!SetPixelFormat(outCtx->hDC, pixelFormat, &pfd)) {
+		UT_NOTIFY_VA(LV_ERROR, "SetPixelFormat failed: %u", GetLastError());
+		releaseGlInitContext(outCtx);
+		return FALSE;
+	}
 
-    return TRUE;
+	if ((outCtx->hRC = wglCreateContext(outCtx->hDC)) == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "wglCreateContext failed: %u", GetLastError());
+		releaseGlInitContext(outCtx);
+		return FALSE;
+	}
+	if (!wglMakeCurrent(outCtx->hDC, outCtx->hRC)) {
+		UT_NOTIFY_VA(LV_ERROR, "wglMakeCurrent failed: %u", GetLastError());
+		releaseGlInitContext(outCtx);
+		return FALSE;
+	}
+
+	return TRUE;
 }
-
 
 /*
  * ::releaseGlInitContext
  */
 BOOL releaseGlInitContext(GlInitContext *ctx) {
-    BOOL retval = TRUE;
-    BOOL (APIENTRYP myMakeCurrent)(HDC, HGLRC) = (OrigwglMakeCurrent != NULL) 
-        ? OrigwglMakeCurrent : wglMakeCurrent;
-    BOOL (APIENTRYP myDeleteContext)(HGLRC) = (OrigwglDeleteContext != NULL)
-        ? OrigwglDeleteContext : wglDeleteContext;
+	BOOL retval = TRUE;
+	BOOL (APIENTRYP myMakeCurrent)(HDC, HGLRC) = (OrigwglMakeCurrent != NULL)
+	? OrigwglMakeCurrent : wglMakeCurrent;
+	BOOL (APIENTRYP myDeleteContext)(HGLRC) = (OrigwglDeleteContext != NULL)
+	? OrigwglDeleteContext : wglDeleteContext;
 
-    if (ctx == NULL) {
-        UT_NOTIFY_VA(LV_WARN, "'ctx' must not be NULL when calling releaseGlInitContext");
-        return FALSE;
-    }
+	if (ctx == NULL) {
+		UT_NOTIFY_VA(LV_WARN, "'ctx' must not be NULL when calling releaseGlInitContext");
+		return FALSE;
+	}
 
-    myMakeCurrent(NULL, NULL);
+	myMakeCurrent(NULL, NULL);
 
-    if (ctx->hRC != NULL) {
-        if (!myDeleteContext(ctx->hRC)) {
-            UT_NOTIFY_VA(LV_ERROR, "wglDeleteContext failed: %u", GetLastError());
-            retval = FALSE;
-        }
-    }
+	if (ctx->hRC != NULL) {
+		if (!myDeleteContext(ctx->hRC)) {
+			UT_NOTIFY_VA(LV_ERROR, "wglDeleteContext failed: %u", GetLastError());
+			retval = FALSE;
+		}
+	}
 
-    if ((ctx->hWnd != NULL) && (ctx->hDC != NULL)) {
-        if (!ReleaseDC(ctx->hWnd, ctx->hDC)) {
-            UT_NOTIFY_VA(LV_ERROR, "ReleaseDC failed: %u", GetLastError());
-            retval = FALSE;
-        }
-    }
+	if ((ctx->hWnd != NULL) && (ctx->hDC != NULL)) {
+		if (!ReleaseDC(ctx->hWnd, ctx->hDC)) {
+			UT_NOTIFY_VA(LV_ERROR, "ReleaseDC failed: %u", GetLastError());
+			retval = FALSE;
+		}
+	}
 
-    if (ctx->hWnd != NULL) {
-        if (!DestroyWindow(ctx->hWnd)) {
-            UT_NOTIFY_VA(LV_ERROR, "DestroyWindow failed: %u", GetLastError());
-            retval = FALSE;
-        }
-    }
+	if (ctx->hWnd != NULL) {
+		if (!DestroyWindow(ctx->hWnd)) {
+			UT_NOTIFY_VA(LV_ERROR, "DestroyWindow failed: %u", GetLastError());
+			retval = FALSE;
+		}
+	}
 
-    ctx->hRC = NULL;
-    ctx->hDC = NULL;
-    ctx->hWnd = NULL;
+	ctx->hRC = NULL;
+	ctx->hDC = NULL;
+	ctx->hWnd = NULL;
 
-    return retval;
+	return retval;
 }
 
 #endif /* _WIN32 */

@@ -5,18 +5,18 @@
 
 class TIntermStack {
 public:
-    TIntermStack();
-    ~TIntermStack();
+	TIntermStack();
+	~TIntermStack();
 
-    void push(TIntermNode* n);
-    void pop(void);
-    TIntermNode* top(void);
+	void push(TIntermNode* n);
+	void pop(void);
+	TIntermNode* top(void);
 
-    int empty(void);
+	int empty(void);
 
 private:
-    int n;
-    TIntermNode **s;
+	int n;
+	TIntermNode **s;
 };
 
 #endif

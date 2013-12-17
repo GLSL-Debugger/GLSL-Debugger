@@ -39,51 +39,52 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QBrush>
 #include <QtGui/QPainter>
 
-TextPercentDelegate::TextPercentDelegate(QObject *parent)
-     : QItemDelegate(parent)
+TextPercentDelegate::TextPercentDelegate(QObject *parent) :
+		QItemDelegate(parent)
 {
-    QLinearGradient linearGrad(0, 0, 0, 20);
-    linearGrad.setColorAt(0, Qt::white);
-    linearGrad.setColorAt(1, Qt::green);
+	QLinearGradient linearGrad(0, 0, 0, 20);
+	linearGrad.setColorAt(0, Qt::white);
+	linearGrad.setColorAt(1, Qt::green);
 
-    m_qBrush = new QBrush(linearGrad);
+	m_qBrush = new QBrush(linearGrad);
 }
 
 TextPercentDelegate::~TextPercentDelegate()
 {
-    delete m_qBrush;
+	delete m_qBrush;
 }
 
-void TextPercentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void TextPercentDelegate::paint(QPainter *painter,
+		const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    double percentage = index.model()->data(index, Qt::UserRole).toDouble();
-    QString text   = index.model()->data(index).toString();
+	double percentage = index.model()->data(index, Qt::UserRole).toDouble();
+	QString text = index.model()->data(index).toString();
 
-    painter->save();
-    
-    if (option.state & QStyle::State_Selected) {
-        painter->fillRect(option.rect, option.palette.highlight());
-    }
+	painter->save();
 
-    QLinearGradient linearGrad(0, option.rect.y(), 0, option.rect.y()+0.5*option.rect.height());
-    linearGrad.setColorAt(0, QColor( 58, 129,  15));
-    linearGrad.setColorAt(1, QColor(214, 239, 182));
-    linearGrad.setSpread(QGradient::ReflectSpread);
-    
-    QBrush brush(linearGrad);
+	if (option.state & QStyle::State_Selected) {
+		painter->fillRect(option.rect, option.palette.highlight());
+	}
 
-    painter->fillRect(option.rect.x(), option.rect.y(), 
-                      (int)(option.rect.width()*percentage), option.rect.height() - 1, 
-                      brush);
+	QLinearGradient linearGrad(0, option.rect.y(), 0,
+			option.rect.y() + 0.5 * option.rect.height());
+	linearGrad.setColorAt(0, QColor(58, 129, 15));
+	linearGrad.setColorAt(1, QColor(214, 239, 182));
+	linearGrad.setSpread(QGradient::ReflectSpread);
 
-    
-    painter->fillRect(option.rect.x(), option.rect.y() + option.rect.height(), 
-                      (int)(option.rect.width()*percentage), option.rect.y() + option.rect.height(),
-                      Qt::white);
+	QBrush brush(linearGrad);
 
-    QItemDelegate::paint(painter, option, index);
+	painter->fillRect(option.rect.x(), option.rect.y(),
+			(int) (option.rect.width() * percentage), option.rect.height() - 1,
+			brush);
 
-    painter->restore();
+	painter->fillRect(option.rect.x(), option.rect.y() + option.rect.height(),
+			(int) (option.rect.width() * percentage),
+			option.rect.y() + option.rect.height(), Qt::white);
+
+	QItemDelegate::paint(painter, option, index);
+
+	painter->restore();
 }
 
 

@@ -36,9 +36,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <string.h>
 #ifndef _WIN32
-	#ifdef __APPLE__
-		#include "osx_ptrace_defs.h"
-	#endif /* __APPLE __ */
+#ifdef __APPLE__
+#include "osx_ptrace_defs.h"
+#endif /* __APPLE __ */
 #include <sys/ptrace.h>
 #else /* _WIN32 */
 #include <windows.h>
@@ -46,7 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _GNU_SOURCE
 #include <stdio.h>
 
-#include "notify.h"
+#include "dbgprint.h"
 #include "p2pcopy.h"
 
 /* works at least for Linux on x86 architecture and for windows*/
@@ -61,16 +61,16 @@ void cpyFromProcess(DWORD pid, void *dst, void *src, size_t size) {
 	SIZE_T numBytesRead;
 	HANDLE procHandle = OpenProcess(PROCESS_VM_READ, FALSE, pid);
 	if (procHandle == NULL) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: could not open process %u", procHandle);
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: could not open process %u\n", procHandle);
 		exit(1);
 	}
 	if (ReadProcessMemory(procHandle, src, dst, size, &numBytesRead) == 0) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: copying failed: %u", GetLastError());
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: copying failed: %u\n", GetLastError());
 		CloseHandle(procHandle);
 		exit(1);
 	}
 	if (numBytesRead != size) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: could copy only %u out of %u bytes.", numBytesRead, size);
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: could copy only %u out of %u bytes.\n", numBytesRead, size);
 		CloseHandle(procHandle);
 		exit(1);
 	}
@@ -84,25 +84,28 @@ void cpyFromProcess(pid_t pid, void *dst, void *src, size_t size)
 	int i;
 
 	/* Round starting address down to word boundary */
-	start = (ALIGNED_DATA)src & -(ALIGNED_DATA)sizeof(ALIGNED_DATA);
+	start = (ALIGNED_DATA) src & -(ALIGNED_DATA) sizeof(ALIGNED_DATA);
 
 	/* number of words to copy */
-	count = ((((ALIGNED_DATA)src + size) - start) + sizeof(ALIGNED_DATA) - 1)/sizeof(ALIGNED_DATA);
-	  
-	buffer = (ALIGNED_DATA*)malloc(count*sizeof(ALIGNED_DATA));
+	count = ((((ALIGNED_DATA) src + size) - start) + sizeof(ALIGNED_DATA) - 1)
+			/ sizeof(ALIGNED_DATA);
+
+	buffer = (ALIGNED_DATA*) malloc(count * sizeof(ALIGNED_DATA));
 	if (!buffer) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: Could not allocate buffer");
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: Could not allocate buffer\n");
 		exit(1);
 	}
 
 	/* read data from other process, word by word :-( */
 	for (i = 0; i < count; i++, start += sizeof(ALIGNED_DATA)) {
-		buffer[i] = ptrace(PTRACE_PEEKTEXT, pid, (void*)start, 0);
+		buffer[i] = ptrace(PTRACE_PEEKTEXT, pid, (void*) start, 0);
 	}
 
 	/* Copy appropriate bytes out of the buffer.  */
-	memcpy (dst, (char*)buffer + ((ALIGNED_DATA)src & (sizeof(ALIGNED_DATA) - 1)), size);
-	
+	memcpy(dst,
+			(char*) buffer + ((ALIGNED_DATA) src & (sizeof(ALIGNED_DATA) - 1)),
+			size);
+
 	free(buffer);
 }
 #endif /* _WIN32 */
@@ -112,16 +115,16 @@ void cpyToProcess(DWORD pid, void *dst, void *src, size_t size) {
 	SIZE_T numBytesWritten;
 	HANDLE procHandle = OpenProcess(PROCESS_VM_WRITE | PROCESS_VM_OPERATION, FALSE, pid);
 	if (procHandle == NULL) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: could not open process %u", procHandle);
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: could not open process %u\n", procHandle);
 		exit(1);
 	}
 	if (WriteProcessMemory(procHandle, dst, src, size, &numBytesWritten) == 0) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: copying failed: %u", GetLastError());
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: copying failed: %u\n", GetLastError());
 		CloseHandle(procHandle);
 		exit(1);
 	}
 	if (numBytesWritten != size) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyToProcess: could copy only %u out of %u bytes.", numBytesWritten, size);
+		dbgPrint(DBGLVL_ERROR, "cpyToProcess: could copy only %u out of %u bytes.\n", numBytesWritten, size);
 		CloseHandle(procHandle);
 		exit(1);
 	}
@@ -133,32 +136,34 @@ void cpyToProcess(pid_t pid, void *dst, void *src, size_t size)
 	ALIGNED_DATA start, *buffer;
 	size_t count;
 	int i;
-    
+
 	/* Round starting address down to word boundary */
-	start = (ALIGNED_DATA)dst & -(ALIGNED_DATA)sizeof(ALIGNED_DATA);
-	
+	start = (ALIGNED_DATA) dst & -(ALIGNED_DATA) sizeof(ALIGNED_DATA);
+
 	/* number of words to copy */
-	count = ((((ALIGNED_DATA)dst + size) - start) + sizeof(ALIGNED_DATA) - 1)/sizeof(ALIGNED_DATA);
-		
-	buffer = (ALIGNED_DATA*)malloc(count*sizeof(ALIGNED_DATA));
+	count = ((((ALIGNED_DATA) dst + size) - start) + sizeof(ALIGNED_DATA) - 1)
+			/ sizeof(ALIGNED_DATA);
+
+	buffer = (ALIGNED_DATA*) malloc(count * sizeof(ALIGNED_DATA));
 	if (!buffer) {
-		UT_NOTIFY_VA(LV_ERROR, "cpyFromProcess: Could not allocate buffer");
+		dbgPrint(DBGLVL_ERROR, "cpyFromProcess: Could not allocate buffer\n");
 		exit(1);
 	}
-	
+
 	/* fill extra bytes at start and end of buffer with existing data */
-	buffer[0] = ptrace(PTRACE_PEEKTEXT, pid, (void*)start, 0);
+	buffer[0] = ptrace(PTRACE_PEEKTEXT, pid, (void*) start, 0);
 	if (count > 1) {
 		buffer[count - 1] = ptrace(PTRACE_PEEKTEXT, pid,
-	                               (void*)(start + (count - 1)*sizeof(ALIGNED_DATA)), 0);
-    }
+				(void*) (start + (count - 1) * sizeof(ALIGNED_DATA)), 0);
+	}
 
 	/* copy data */
-	memcpy ((char*)buffer + ((ALIGNED_DATA)dst & (sizeof(ALIGNED_DATA) - 1)), src, size);
+	memcpy((char*) buffer + ((ALIGNED_DATA) dst & (sizeof(ALIGNED_DATA) - 1)),
+			src, size);
 
 	/* write buffer */
 	for (i = 0; i < count; i++) {
-		ptrace(PTRACE_POKETEXT, pid, (void*)start, buffer[i]);
+		ptrace(PTRACE_POKETEXT, pid, (void*) start, buffer[i]);
 		start += sizeof(ALIGNED_DATA);
 	}
 	free(buffer);

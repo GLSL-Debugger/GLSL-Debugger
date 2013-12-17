@@ -39,21 +39,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QSortFilterProxyModel>
 #include <QtCore/QString>
 
-class GlCallStatistics
-{
+class GlCallStatistics {
 public:
-    GlCallStatistics(QTableView *parent);
-    ~GlCallStatistics();
+	GlCallStatistics(QTableView *parent);
+	~GlCallStatistics();
 
-    void resetStatistic(void);
-    void incCallStatistic(QString i_qFName);
-    
+	void resetStatistic(void);
+	void incCallStatistic(QString i_qFName);
+
 private:
-    QStandardItemModel *m_pModel;
-    QSortFilterProxyModel * m_pProxyModel;
-    QTableView         *m_pTableView;
-    int m_nNumCalls;
-    
+	QStandardItemModel *m_pModel;
+	QSortFilterProxyModel * m_pProxyModel;
+	QTableView *m_pTableView;
+	int m_nNumCalls;
+
 };
 
 #endif

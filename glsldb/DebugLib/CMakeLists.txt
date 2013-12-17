@@ -12,6 +12,7 @@ endif()
 
 set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
 set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+file(MAKE_DIRECTORY ${GENERATOR_OUTPUT_DIR})
 
 set(DLSYM_SRC libdlsym.c)
 set(ENUMERANTS_SRC glenumerants.c)

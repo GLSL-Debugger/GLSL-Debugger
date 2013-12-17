@@ -43,22 +43,22 @@ class VertexTableModel;
 class VertexTableSortFilterProxyModel;
 class GLScatter;
 
-class WatchTable : public WatchView, public Ui::wWatchTable {
-    Q_OBJECT
+class WatchTable: public WatchView, public Ui::wWatchTable {
+Q_OBJECT
 
 public:
-    WatchTable(QWidget *parent = 0);
+	WatchTable(QWidget *parent = 0);
 	~WatchTable();
-    void updateView(bool force);
-    void attachVpData(VertexBox *f, QString name);
+	void updateView(bool force);
+	void attachVpData(VertexBox *f, QString name);
 
 public slots:
-    void closeView();
+	void closeView();
 
 signals:
 	void selectionChanged(int vertId);
-	
-private slots:	
+
+private slots:
 	void newSelection(const QModelIndex & index);
 
 	void on_tbMinRed_clicked();
@@ -67,35 +67,35 @@ private slots:
 	void on_tbMinX_clicked();
 	void on_tbMinY_clicked();
 	void on_tbMinZ_clicked();
-	
+
 	void on_tbMaxRed_clicked();
 	void on_tbMaxGreen_clicked();
 	void on_tbMaxBlue_clicked();
 	void on_tbMaxX_clicked();
 	void on_tbMaxY_clicked();
 	void on_tbMaxZ_clicked();
-	
+
 	void on_tbSwitchX_clicked();
 	void on_tbSwitchY_clicked();
 	void on_tbSwitchZ_clicked();
 	void on_tbSwitchRed_clicked();
 	void on_tbSwitchGreen_clicked();
 	void on_tbSwitchBlue_clicked();
-	
+
 	void on_cbRed_activated(int newIdx);
 	void on_cbGreen_activated(int newIdx);
 	void on_cbBlue_activated(int newIdx);
 	void on_cbX_activated(int newIdx);
 	void on_cbY_activated(int newIdx);
 	void on_cbZ_activated(int newIdx);
-	
+
 	void on_cbMapRed_activated(int newIdx);
 	void on_cbMapGreen_activated(int newIdx);
 	void on_cbMapBlue_activated(int newIdx);
 	void on_cbMapX_activated(int newIdx);
 	void on_cbMapY_activated(int newIdx);
 	void on_cbMapZ_activated(int newIdx);
-	
+
 	void on_dsMinRed_valueChanged(double d);
 	void on_dsMaxRed_valueChanged(double d);
 	void on_dsMinGreen_valueChanged(double d);
@@ -108,14 +108,14 @@ private slots:
 	void on_dsMaxY_valueChanged(double d);
 	void on_dsMinZ_valueChanged(double d);
 	void on_dsMaxZ_valueChanged(double d);
-	
+
 	void mappingDataChangedRed();
 	void mappingDataChangedGreen();
 	void mappingDataChangedBlue();
 	void mappingDataChangedX();
 	void mappingDataChangedY();
 	void mappingDataChangedZ();
-	
+
 #if 0
 	void mappingDataDetachedRed();
 	void mappingDataDetachedGreen();
@@ -135,17 +135,16 @@ private:
 	void setupMappingUI();
 	void addMappingOptions(int idx);
 	void delMappingOptions(int idx);
-	
+
 	bool countsAllZero();
 	void updateDataCurrent(float *data, int *count, int dataStride,
-                    VertexBox *srcData, Mapping *mapping,
-                    RangeMapping *rangeMapping,
-                    float min, float max);
+			VertexBox *srcData, Mapping *mapping, RangeMapping *rangeMapping,
+			float min, float max);
 
 	VertexTableModel *m_vertexTable;
 	VertexTableSortFilterProxyModel *m_filterProxy;
 
-    GLScatter *m_qGLscatter;
+	GLScatter *m_qGLscatter;
 
 	float *m_scatterPositions;
 	float *m_scatterColorsAndSizes;

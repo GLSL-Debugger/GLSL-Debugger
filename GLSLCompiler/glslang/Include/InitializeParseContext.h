@@ -41,5 +41,4 @@ bool InitializeGlobalParseContext();
 bool FreeParseContext();
 bool FreeParseContextIndex();
 
-
 #endif // __INITIALIZE_PARSE_CONTEXT_INCLUDED_

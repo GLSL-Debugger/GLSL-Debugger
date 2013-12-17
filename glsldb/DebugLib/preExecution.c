@@ -32,26 +32,26 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "preExecution.h"
+#include "dbgprint.h"
 #include "queries.h"
-#include "utils/notify.h"
 
 extern Globals G;
 
 void glBeginQuery_PREEXECUTE(GLenum *target, GLuint *id)
 {
 	hash_remove(&G.queries, id);
-	UT_NOTIFY_VA(LV_INFO, "%i %u", *target, *id);
+	dbgPrint(DBGLVL_INFO, "glBeginQuery_PREEXECUTE %i %u\n", *target, *id);
 }
 
 void glBeginQueryARB_PREEXECUTE(GLenum *target, GLuint *id)
 {
 	hash_remove(&G.queries, id);
-	UT_NOTIFY_VA(LV_INFO, "%i %u", *target, *id);
+	dbgPrint(DBGLVL_INFO, "glBeginQueryARB_PREEXECUTE %i %u\n", *target, *id);
 }
 
 void glBeginOcclusionQueryNV_PREEXECUTE(GLuint *id)
 {
 	hash_remove(&G.queries, id);
-	UT_NOTIFY_VA(LV_INFO, "%u", *id);
+	dbgPrint(DBGLVL_INFO, "glBeginOcclusionQueryNV_PREEXECUTE %u\n", *id);
 }
 

@@ -43,64 +43,70 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "debuglib.h"
 
-class GlTraceFilterModel : public QAbstractItemModel {
+class GlTraceFilterModel: public QAbstractItemModel {
 public:
 	GlTraceFilterModel(GLFunctionList *functions, QObject *parent = 0);
 	~GlTraceFilterModel();
 
-	QModelIndex index (int row, int column, const QModelIndex &parent = QModelIndex()) const;
-	QModelIndex parent (const QModelIndex &index) const;
-	int rowCount (const QModelIndex &parent = QModelIndex()) const;
-	int columnCount (const QModelIndex &parent = QModelIndex()) const;
-	QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const;
-	QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-	Qt::ItemFlags flags (const QModelIndex &index) const;
-	bool setData (const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+	QModelIndex index(int row, int column, const QModelIndex &parent =
+			QModelIndex()) const;
+	QModelIndex parent(const QModelIndex &index) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	QVariant headerData(int section, Qt::Orientation orientation,
+			int role) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const;
+	bool setData(const QModelIndex & index, const QVariant & value, int role =
+			Qt::EditRole);
 	bool isFunctionVisible(const QString &fname);
 	//bool hasChildren (const QModelIndex &parent = QModelIndex()) const;
 
-	enum columnName {FUNCTION_NAME, NUM_COLUMNS};
+	enum columnName {
+		FUNCTION_NAME,
+		NUM_COLUMNS
+	};
 
-    void resetToDefaults(void);
+	void resetToDefaults(void);
 
-    bool itemContainsPatternRecursive(const QModelIndex &index, 
-                                      const QString &pattern);
+	bool itemContainsPatternRecursive(const QModelIndex &index,
+			const QString &pattern);
 
-    void save(void);
-    void load(void);
+	void save(void);
+	void load(void);
 
 private:
 	class GlTraceFilterItem {
-		public:
-			  GlTraceFilterItem(GLFunctionList *theFunction, int show, 
-                                GlTraceFilterItem *parent = 0);
-			 ~GlTraceFilterItem();
+	public:
+		GlTraceFilterItem(GLFunctionList *theFunction, int show,
+				GlTraceFilterItem *parent = 0);
+		~GlTraceFilterItem();
 
-			 void appendChild(GlTraceFilterItem *child);
+		void appendChild(GlTraceFilterItem *child);
 
-			 void checkChildsToggleState();
-			 void setChildsToggleState(int newState);
-			 void setChildsToggleStateRecursive(int newState);
+		void checkChildsToggleState();
+		void setChildsToggleState(int newState);
+		void setChildsToggleStateRecursive(int newState);
 
-             bool containsFilterPatternRecursive(const QString &pattern);
+		bool containsFilterPatternRecursive(const QString &pattern);
 
-			 GlTraceFilterItem *child(int row);
-			 int childCount() const;
-			 int columnCount() const;
-			 QVariant data(int column) const;
-			 int row() const;
-			 GlTraceFilterItem *parent();
+		GlTraceFilterItem *child(int row);
+		int childCount() const;
+		int columnCount() const;
+		QVariant data(int column) const;
+		int row() const;
+		GlTraceFilterItem *parent();
 
-             void saveRecursive(QSettings &settings);
-             void loadRecursive(QSettings &settings);
+		void saveRecursive(QSettings &settings);
+		void loadRecursive(QSettings &settings);
 
-			 int showInTrace;
-			 bool isSupported;
-			 GLFunctionList *function;
+		int showInTrace;
+		bool isSupported;
+		GLFunctionList *function;
 
-		 private:
-			 QList<GlTraceFilterItem*> childItems;
-			 GlTraceFilterItem *parentItem;
+	private:
+		QList<GlTraceFilterItem*> childItems;
+		GlTraceFilterItem *parentItem;
 	};
 
 	void checkExtensions();

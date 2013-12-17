@@ -289,11 +289,16 @@ void handler(int UNUSED sig)
 {
 	void *buf[MAX_BACKTRACE_DEPTH];
 	int size = backtrace(buf, MAX_BACKTRACE_DEPTH);
-	std::cerr << "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************" << std::endl;
+	std::cerr
+			<< "**************** SEGMENTATION FAULT - BEGIN BACKTRACE ****************"
+			<< std::endl;
 	backtrace_symbols_fd(buf, size, STDERR_FILENO);
-	std::cerr << "**************** SEGMENTATION FAULT - END BACKTRACE   ****************" << std::endl;
-	if(size == MAX_BACKTRACE_DEPTH)
-		std::cerr << "Warning: backtrace might have been truncated" << std::endl;
+	std::cerr
+			<< "**************** SEGMENTATION FAULT - END BACKTRACE   ****************"
+			<< std::endl;
+	if (size == MAX_BACKTRACE_DEPTH)
+		std::cerr << "Warning: backtrace might have been truncated"
+				<< std::endl;
 	exit(EXIT_FAILURE);
 }
 #endif
@@ -302,26 +307,26 @@ void setNotifyLevel(int l)
 {
 	severity_t t;
 	switch (l) {
-    	case 0:
-			t = LV_FATAL;
-			break;
-		case 1:
-			t = LV_ERROR;
-			break;
-		case 2:
-			t = LV_WARN;
-			break;
-		case 3:
-			t = LV_INFO;
-			break;
-		case 4:
-			t = LV_DEBUG;
-			break;
-		case 5:
-			t = LV_TRACE;
-			break;
-		default:
-			t = LV_INFO;
+	case 0:
+		t = LV_FATAL;
+		break;
+	case 1:
+		t = LV_ERROR;
+		break;
+	case 2:
+		t = LV_WARN;
+		break;
+	case 3:
+		t = LV_INFO;
+		break;
+	case 4:
+		t = LV_DEBUG;
+		break;
+	case 5:
+		t = LV_TRACE;
+		break;
+	default:
+		t = LV_INFO;
 	}
 	UTILS_NOTIFY_LEVEL(&t);
 }
@@ -329,28 +334,30 @@ QStringList parseArguments(int argc, char** argv)
 {
 	int opt = getopt(argc, argv, "+hv:f");
 	bool abort = false;
-	while(opt != -1) {
-		switch(opt) {
-			case 'h':
-				std::cout << "Usage: " << argv[0] << " [options] debuggee [debugee_options]" << std::endl;
-				std::cout << "  -h      : this help message" << std::endl;
-				std::cout << "  -v value: log level from 0 (FATAL) to 5 (LV_TRACE) " << std::endl;
-				std::cout << "  -f value: log to file \"value\"" << std::endl;
-				exit(EXIT_SUCCESS);
-			case 'v':
-				setNotifyLevel(atoi(optarg));
-				break;
-			default:
-				std::cout << "def" << std::endl;
-				abort = true;
+	while (opt != -1) {
+		switch (opt) {
+		case 'h':
+			std::cout << "Usage: " << argv[0]
+					<< " [options] debuggee [debugee_options]" << std::endl;
+			std::cout << "  -h      : this help message" << std::endl;
+			std::cout << "  -v value: log level from 0 (FATAL) to 5 (LV_TRACE) "
+					<< std::endl;
+			std::cout << "  -f value: log to file \"value\"" << std::endl;
+			exit(EXIT_SUCCESS);
+		case 'v':
+			setNotifyLevel(atoi(optarg));
+			break;
+		default:
+			std::cout << "def" << std::endl;
+			abort = true;
 		}
-		if(abort)
+		if (abort)
 			break;
 		opt = getopt(argc, argv, "+hv:f");
 	}
 	int i = optind;
 	QStringList al;
-	while(i < argc)
+	while (i < argc)
 		al.push_back(argv[i++]);
 	return al;
 }
@@ -361,16 +368,16 @@ int main(int argc, char **argv)
 
 #ifndef GLSLDB_WINDOWS
 	// activate backtracing if log level is high enough
-	if(UTILS_NOTIFY_LEVEL(0) > LV_INFO)
+	if (UTILS_NOTIFY_LEVEL(0) > LV_INFO)
 		signal(SIGSEGV, handler);
 #endif
 
-    QApplication app(argc, argv);
+	QApplication app(argc, argv);
 
 #ifdef _WIN32
 	app.setStyle("windowsxp");
 #else /* _WIN32 */
-    app.setStyle("cleanlooks");
+	app.setStyle("cleanlooks");
 #endif /* _WIN32 */
 
 	QCoreApplication::setOrganizationName("VIS");
@@ -387,11 +394,11 @@ int main(int argc, char **argv)
 	FunctionsMap& map = FunctionsMap::instance();
 	map.initialize();
 
-    MainWindow mainWin(argv[0], al);
+	MainWindow mainWin(argv[0], al);
 
-    mainWin.show();
+	mainWin.show();
 
-    int returnValue = app.exec();
+	int returnValue = app.exec();
 
 	UTILS_NOTIFY_SHUTDOWN();
 	quitLogging();

@@ -32,96 +32,96 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "postExecution.h"
-#include "utils/notify.h"
+#include "dbgprint.h"
 #include "queries.h"
 
 extern Globals G;
 
-void glGetQueryObjectiv_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                    GLint **params, GLint *error)
+void glGetQueryObjectiv_POSTEXECUTE(GLuint *id, GLenum *pname, GLint **params,
+		GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjectiv_POSTEXECUTE %u %i %i error:%i\n", *id, *pname, **params, *error);
 }
 
-void glGetQueryObjectuiv_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                     GLuint **params,  GLint *error)
+void glGetQueryObjectuiv_POSTEXECUTE(GLuint *id, GLenum *pname, GLuint **params,
+		GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjectuiv_POSTEXECUTE %u %i %u error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetQueryObjectivARB_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                       GLint **params,  GLint *error)
+		GLint **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjectivARB_POSTEXECUTE %u %i %i error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetQueryObjectuivARB_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                        GLuint **params,  GLint *error)
+		GLuint **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjectuivARB_POSTEXECUTE %u %i %u error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetOcclusionQueryivNV_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                         GLint **params,  GLint *error)
+		GLint **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %i error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetOcclusionQueryivNV_POSTEXECUTE %u %i %i error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetOcclusionQueryuivNV_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                          GLuint **params,  GLint *error)
+		GLuint **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %u error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetOcclusionQueryuivNV_POSTEXECUTE %u %i %u error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetQueryObjecti64vEXT_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                         GLint64EXT **params, GLint *error)
+		GLint64EXT **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %li error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjecti64vEXT_POSTEXECUTE %u %i %li error:%i\n", *id, *pname, **params, *error);
 }
 
 void glGetQueryObjectui64vEXT_POSTEXECUTE(GLuint *id, GLenum *pname,
-                                          GLuint64EXT **params, GLint *error)
+		GLuint64EXT **params, GLint *error)
 {
-	Query *q = (Query*)hash_find(&G.queries, id);
+	Query *q = (Query*) hash_find(&G.queries, id);
 	if (q != NULL) {
 		**params += q->value;
 	}
-	UT_NOTIFY_VA(LV_INFO, "%u %i %lu error:%i",
-			 *id, *pname, **params, *error);
+	dbgPrint(DBGLVL_INFO,
+			"glGetQueryObjecti64vEXT_POSTEXECUTE %u %i %lu error:%i\n", *id, *pname, **params, *error);
 }
 

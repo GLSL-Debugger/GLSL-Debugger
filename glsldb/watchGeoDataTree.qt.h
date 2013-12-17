@@ -43,20 +43,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class GeoShaderDataModel;
 class GeoShaderDataSortFilterProxyModel;
 
-class WatchGeoDataTree : public WatchView, public Ui::wWatchGeoDataTree {
-    Q_OBJECT
+class WatchGeoDataTree: public WatchView, public Ui::wWatchGeoDataTree {
+Q_OBJECT
 
 public:
-    WatchGeoDataTree(int inPrimitiveType, int outPrimitiveType,
-	                 VertexBox *primitiveMap, VertexBox *vertexCount,
-	                 QWidget *parent = 0);
+	WatchGeoDataTree(int inPrimitiveType, int outPrimitiveType,
+			VertexBox *primitiveMap, VertexBox *vertexCount,
+			QWidget *parent = 0);
 	~WatchGeoDataTree();
 
-    void updateView(bool force);
-    void attachData(VertexBox *currentData, VertexBox *vertexData, QString name);
+	void updateView(bool force);
+	void attachData(VertexBox *currentData, VertexBox *vertexData,
+			QString name);
 
 public slots:
-    void closeView();
+	void closeView();
 
 signals:
 	void selectionChanged(int dataIdx);
@@ -71,35 +72,35 @@ private slots:
 	void on_tbMinX_clicked();
 	void on_tbMinY_clicked();
 	void on_tbMinZ_clicked();
-	
+
 	void on_tbMaxRed_clicked();
 	void on_tbMaxGreen_clicked();
 	void on_tbMaxBlue_clicked();
 	void on_tbMaxX_clicked();
 	void on_tbMaxY_clicked();
 	void on_tbMaxZ_clicked();
-	
+
 	void on_tbSwitchX_clicked();
 	void on_tbSwitchY_clicked();
 	void on_tbSwitchZ_clicked();
 	void on_tbSwitchRed_clicked();
 	void on_tbSwitchGreen_clicked();
 	void on_tbSwitchBlue_clicked();
-	
+
 	void on_cbRed_activated(int newIdx);
 	void on_cbGreen_activated(int newIdx);
 	void on_cbBlue_activated(int newIdx);
 	void on_cbX_activated(int newIdx);
 	void on_cbY_activated(int newIdx);
 	void on_cbZ_activated(int newIdx);
-	
+
 	void on_cbMapRed_activated(int newIdx);
 	void on_cbMapGreen_activated(int newIdx);
 	void on_cbMapBlue_activated(int newIdx);
 	void on_cbMapX_activated(int newIdx);
 	void on_cbMapY_activated(int newIdx);
 	void on_cbMapZ_activated(int newIdx);
-	
+
 	void on_dsMinRed_valueChanged(double d);
 	void on_dsMaxRed_valueChanged(double d);
 	void on_dsMinGreen_valueChanged(double d);
@@ -112,14 +113,14 @@ private slots:
 	void on_dsMaxY_valueChanged(double d);
 	void on_dsMinZ_valueChanged(double d);
 	void on_dsMaxZ_valueChanged(double d);
-	
+
 	void mappingDataChangedRed();
 	void mappingDataChangedGreen();
 	void mappingDataChangedBlue();
 	void mappingDataChangedX();
 	void mappingDataChangedY();
 	void mappingDataChangedZ();
-	
+
 #if 0
 	void mappingDataDetachedRed();
 	void mappingDataDetachedGreen();
@@ -132,11 +133,11 @@ private slots:
 	void detachData(int idx);
 
 	void on_tbDataSelection_clicked();
-	
+
 	void on_slPointSize_valueChanged(int value);
 
 private:
-    void updateGUI();
+	void updateGUI();
 	void setupMappingUI();
 	void addMappingOptions(int idx);
 	void delMappingOptions(int idx);
@@ -145,23 +146,24 @@ private:
 	float getDataMax(int column);
 	float getDataAbsMin(int column);
 	float getDataAbsMax(int column);
-	
+
 	bool countsAllZero();
 	void updateDataCurrent(float *data, int *count, int dataStride,
-                    VertexBox *srcData, Mapping *mapping,
-                    RangeMapping *rangeMapping,
-                    float min, float max);
+			VertexBox *srcData, Mapping *mapping, RangeMapping *rangeMapping,
+			float min, float max);
 	void updateDataVertex(float *data, int *count, int dataStride,
-                    VertexBox *srcData, Mapping *mapping,
-                    RangeMapping *rangeMapping,
-                    float min, float max);
-	
+			VertexBox *srcData, Mapping *mapping, RangeMapping *rangeMapping,
+			float min, float max);
+
 	GeoShaderDataModel *m_dataModel;
 	GeoShaderDataSortFilterProxyModel *m_filterProxy;
 
-	enum DataSelection {DATA_CURRENT, DATA_VERTEX} m_dataSelection;
-	
-    GLScatter *m_qGLscatter;
+	enum DataSelection {
+		DATA_CURRENT,
+		DATA_VERTEX
+	} m_dataSelection;
+
+	GLScatter *m_qGLscatter;
 
 	float *m_scatterPositions;
 	float *m_scatterColorsAndSizes;
