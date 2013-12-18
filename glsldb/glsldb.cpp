@@ -327,6 +327,7 @@ void setNotifyLevel(int l)
 		break;
 	default:
 		t = LV_INFO;
+		break;
 	}
 	UTILS_NOTIFY_LEVEL(&t);
 }
@@ -350,6 +351,7 @@ QStringList parseArguments(int argc, char** argv)
 		default:
 			std::cout << "def" << std::endl;
 			abort = true;
+			break;
 		}
 		if (abort)
 			break;

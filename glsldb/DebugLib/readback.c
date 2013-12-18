@@ -569,6 +569,7 @@ DMARK
 	default:
 		dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
 		error = GL_INVALID_OPERATION;
+		break;
 	}
 
 	return error;

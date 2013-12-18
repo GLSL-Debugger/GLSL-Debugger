@@ -676,6 +676,7 @@ static void printArgument(void *addr, int type)
 		break;
 	default:
 		dbgPrintNoPrefix(DBGLVL_INFO, "UNKNOWN TYPE [%i], ", type);
+		break;
 	}
 }
 
