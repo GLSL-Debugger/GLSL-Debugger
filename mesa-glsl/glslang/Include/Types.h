@@ -47,11 +47,11 @@
 //
 // Need to have association of line numbers to types in a list for building structs.
 //
-class TType;
-struct TTypeRange {
-    TType* type;
-    TSourceRange range;
-};
+//class TType;
+//struct TTypeRange {
+//    TType* type;
+//    TSourceRange range;
+//};
 //typedef TVector<TTypeRange> TTypeList;
 
 //inline TTypeList* NewPoolTTypeList()
@@ -69,86 +69,86 @@ struct TTypeRange {
 // Not as bad as it looks, there is no actual assumption that the fields
 // match up or are name the same or anything like that.
 //
-class TPublicType {
-public:
-    TBasicType type;
-    TQualifier qualifier;
-    TVaryingModifier varyingModifier;
-    int size;          // size of vector
-    bool matrix;
-    int matrixSize[2]; // size of matrix
-    bool array;
-    int arraySize[MAX_ARRAYS];     // size of array
-    TType* userDef;
-    TSourceRange range;
-
-    void setBasic(TBasicType bt, TQualifier q, TVaryingModifier vm = EvmNone, TSourceRange r = TSourceRangeInit)
-    {
-        int i;
-        type = bt;
-        qualifier = q;
-        varyingModifier = vm;
-        size = 1;
-        matrix = false;
-        matrixSize[0] = 1;
-        matrixSize[1] = 1;
-        array = false;
-        for (i=0; i<MAX_ARRAYS; i++) {
-            arraySize[i] = -1;
-        }
-        userDef = 0;
-        range = r;
-    }
-
-    void setAggregate(int s)
-    {
-        matrix = false;
-        size = s;
-    }
-
-    void setMatrix(int mS1, int mS2)
-    {
-        matrix = true;
-        matrixSize[0] = mS1;
-        matrixSize[1] = mS2;
-        /* Matrices are always of non-vector type */
-        size = 1;
-    }
-
-    void setArray(bool a, int s = 0)
-    {
-        array = a;
-        arraySize[0] = s;
-    }
-
-    void addArray(bool a, int s = 0, int i = 0)
-    {
-        array = a;
-        arraySize[i] = s;
-    }
-    void insertArray(int s = 0)
-    {
-        int i;
-        for (i=1; i<MAX_ARRAYS; i++) {
-            arraySize[i] = arraySize[i-1];
-        }
-        arraySize[0] = s;
-    }
-
-    int getNumArrays()
-    {
-        int i;
-        int n = 0;
-        for (i=1; i<MAX_ARRAYS; i++) {
-            if (arraySize[i] != -1) {
-                n++;
-            } else {
-                return n;
-            }
-        }
-        return n;
-    }
-};
+//class TPublicType {
+//public:
+//    TBasicType type;
+//    TQualifier qualifier;
+//    TVaryingModifier varyingModifier;
+//    int size;          // size of vector
+//    bool matrix;
+//    int matrixSize[2]; // size of matrix
+//    bool array;
+//    int arraySize[MAX_ARRAYS];     // size of array
+//    TType* userDef;
+//    TSourceRange range;
+//
+//    void setBasic(TBasicType bt, TQualifier q, TVaryingModifier vm = EvmNone, TSourceRange r = TSourceRangeInit)
+//    {
+//        int i;
+//        type = bt;
+//        qualifier = q;
+//        varyingModifier = vm;
+//        size = 1;
+//        matrix = false;
+//        matrixSize[0] = 1;
+//        matrixSize[1] = 1;
+//        array = false;
+//        for (i=0; i<MAX_ARRAYS; i++) {
+//            arraySize[i] = -1;
+//        }
+//        userDef = 0;
+//        range = r;
+//    }
+//
+//    void setAggregate(int s)
+//    {
+//        matrix = false;
+//        size = s;
+//    }
+//
+//    void setMatrix(int mS1, int mS2)
+//    {
+//        matrix = true;
+//        matrixSize[0] = mS1;
+//        matrixSize[1] = mS2;
+//        /* Matrices are always of non-vector type */
+//        size = 1;
+//    }
+//
+//    void setArray(bool a, int s = 0)
+//    {
+//        array = a;
+//        arraySize[0] = s;
+//    }
+//
+//    void addArray(bool a, int s = 0, int i = 0)
+//    {
+//        array = a;
+//        arraySize[i] = s;
+//    }
+//    void insertArray(int s = 0)
+//    {
+//        int i;
+//        for (i=1; i<MAX_ARRAYS; i++) {
+//            arraySize[i] = arraySize[i-1];
+//        }
+//        arraySize[0] = s;
+//    }
+//
+//    int getNumArrays()
+//    {
+//        int i;
+//        int n = 0;
+//        for (i=1; i<MAX_ARRAYS; i++) {
+//            if (arraySize[i] != -1) {
+//                n++;
+//            } else {
+//                return n;
+//            }
+//        }
+//        return n;
+//    }
+//};
 
 //typedef std::map<TTypeList*, TTypeList*> TStructureMap;
 //typedef std::map<TTypeList*, TTypeList*>::iterator TStructureMapIterator;

@@ -46,7 +46,7 @@
 
 //#include "../Include/Common.h"
 #include "../Include/Types.h"
-#include "../Include/ConstantUnion.h"
+//#include "../Include/ConstantUnion.h"
 
 
 //
@@ -277,25 +277,25 @@ enum TDebugOverwrite {
     DbgOwDebugCode
 };
 
-class TIntermTraverser;
-class TIntermAggregate;
-class TIntermBinary;
-class TIntermUnary;
-class TIntermBranch;
-class TIntermConstantUnion;
-class TIntermSelection;
-class TIntermSwitch;
-class TIntermCase;
-class TIntermLoop;
-class TIntermTyped;
-class TIntermSymbol;
-class TIntermFuncParam;
-class TInfoSink;
-class TIntermParameter;
-class TIntermDeclaration;
-class TIntermFuncDeclaration;
-class TIntermSpecification;
-class TIntermDummy;
+//class TIntermTraverser;
+//class TIntermAggregate;
+//class TIntermBinary;
+//class TIntermUnary;
+//class TIntermBranch;
+//class TIntermConstantUnion;
+//class TIntermSelection;
+//class TIntermSwitch;
+//class TIntermCase;
+//class TIntermLoop;
+//class TIntermTyped;
+//class TIntermSymbol;
+//class TIntermFuncParam;
+//class TInfoSink;
+//class TIntermParameter;
+//class TIntermDeclaration;
+//class TIntermFuncDeclaration;
+//class TIntermSpecification;
+//class TIntermDummy;
 
 //
 //
@@ -305,103 +305,103 @@ typedef std::list<int> scopeList;
 //
 // Base class for the tree nodes
 //
-class TIntermNode {
-public:
-    //POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
-    TIntermNode() :  dbgState(DbgStNone), scope(NULL), atomic(true), sideEffects(false), target(false), emitVertex(false), discard(false), dbgOverwrite(DbgOwNone) {
-        range.left.line = 0;
-        range.left.colum = 0;
-        range.right.line = 0;
-        range.right.colum = 0;
-        cgbl.numChangeables = 0;
-        cgbl.changeables = NULL;
-    }
-
-    virtual TSourceRange getRange() const { return range; }
-    virtual void setRange(TSourceRange r) { range = r; }
-    virtual void traverse(TIntermTraverser*) = 0;
-    virtual void setDebugState(TDebugState s) { dbgState = s; }
-    virtual TDebugState getDebugState(void) { return dbgState; }
-    virtual TIntermTyped*     getAsTyped()         { return 0; }
-    virtual TIntermConstantUnion*     getAsConstantUnion()         { return 0; }
-    virtual TIntermAggregate* getAsAggregate()     { return 0; }
-    virtual TIntermBinary*    getAsBinaryNode()    { return 0; }
-    virtual TIntermUnary*     getAsUnaryNode()    { return 0; }
-    virtual TIntermBranch*    getAsBranchNode()    { return 0; }
-    virtual TIntermSelection* getAsSelectionNode() { return 0; }
-    virtual TIntermSwitch*    getAsSwitchNode() { return 0; }
-    virtual TIntermCase*    getAsCaseNode() { return 0; }
-    virtual TIntermLoop*      getAsLoopNode() { return 0; }
-    virtual TIntermSymbol*    getAsSymbolNode()    { return 0; }
-    virtual TIntermFuncParam*    getAsFuncParamNode()    { return 0; }
-    virtual TIntermParameter*    getAsParameterNode()    { return 0; }
-    virtual TIntermDeclaration*    getAsDeclarationNode()    { return 0; }
-    virtual TIntermFuncDeclaration* getAsFuncDeclarationNode() { return 0; }
-    virtual TIntermSpecification*    getAsSpecificationNode()    { return 0; }
-    virtual TIntermDummy*     getAsDummy() { return 0; }
-    scopeList* getScope(void) { return scope; }
-    void setScope(scopeList *s) { scope = s; }
-    ShChangeableList* getCgbList(void) { return &cgbl; }
-
-    bool isAtomic(void)     { return atomic == true; }
-    void setNonAtomic(void) { atomic = false; }
-
-    bool hasNoSideEffects(void)  { return sideEffects == false; }
-    bool hasSideEffects(void)    { return sideEffects == true; }
-    void setHasSideEffects(void) { sideEffects = true; }
-
-    bool containsEmitVertex(void) { return emitVertex == true; }
-    void setEmitVertex(void)      { emitVertex = true; }
-
-    bool containsDiscard(void)    { return discard == true; }
-    void setContainsDiscard(void) { discard = true; }
-
-    void setTarget(void)      { target = true; }
-    void unsetTarget(void)    { target = false; }
-    bool isTarget(void)       { return target; }
-
-    void setDbgOverwrite(TDebugOverwrite o) { dbgOverwrite = o; }
-    TDebugOverwrite getDbgOverwrite(void)   { return dbgOverwrite; }
-
-    //void copyCPPExtensionChanges(TExtensionList&);
-    //void moveCPPExtensionChanges(TExtensionList&);
-    //TExtensionList& getCPPExtensionList(void) { return extensionList; }
-
-    virtual ~TIntermNode() { }
-protected:
-    TSourceRange range;
-    TDebugState dbgState;
-    scopeList *scope;
-    ShChangeableList cgbl;
-    bool atomic;
-    bool sideEffects;
-    bool target;
-    bool emitVertex;
-    bool discard;
-    TDebugOverwrite dbgOverwrite;
-
-    //TExtensionList extensionList;
-
-};
+//class TIntermNode {
+//public:
+//    //POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
+//    TIntermNode() :  dbgState(DbgStNone), scope(NULL), atomic(true), sideEffects(false), target(false), emitVertex(false), discard(false), dbgOverwrite(DbgOwNone) {
+//        range.left.line = 0;
+//        range.left.colum = 0;
+//        range.right.line = 0;
+//        range.right.colum = 0;
+//        cgbl.numChangeables = 0;
+//        cgbl.changeables = NULL;
+//    }
+//
+//    virtual TSourceRange getRange() const { return range; }
+//    virtual void setRange(TSourceRange r) { range = r; }
+//    virtual void traverse(TIntermTraverser*) = 0;
+//    virtual void setDebugState(TDebugState s) { dbgState = s; }
+//    virtual TDebugState getDebugState(void) { return dbgState; }
+//    virtual TIntermTyped*     getAsTyped()         { return 0; }
+//    virtual TIntermConstantUnion*     getAsConstantUnion()         { return 0; }
+//    virtual TIntermAggregate* getAsAggregate()     { return 0; }
+//    virtual TIntermBinary*    getAsBinaryNode()    { return 0; }
+//    virtual TIntermUnary*     getAsUnaryNode()    { return 0; }
+//    virtual TIntermBranch*    getAsBranchNode()    { return 0; }
+//    virtual TIntermSelection* getAsSelectionNode() { return 0; }
+//    virtual TIntermSwitch*    getAsSwitchNode() { return 0; }
+//    virtual TIntermCase*    getAsCaseNode() { return 0; }
+//    virtual TIntermLoop*      getAsLoopNode() { return 0; }
+//    virtual TIntermSymbol*    getAsSymbolNode()    { return 0; }
+//    virtual TIntermFuncParam*    getAsFuncParamNode()    { return 0; }
+//    virtual TIntermParameter*    getAsParameterNode()    { return 0; }
+//    virtual TIntermDeclaration*    getAsDeclarationNode()    { return 0; }
+//    virtual TIntermFuncDeclaration* getAsFuncDeclarationNode() { return 0; }
+//    virtual TIntermSpecification*    getAsSpecificationNode()    { return 0; }
+//    virtual TIntermDummy*     getAsDummy() { return 0; }
+//    scopeList* getScope(void) { return scope; }
+//    void setScope(scopeList *s) { scope = s; }
+//    ShChangeableList* getCgbList(void) { return &cgbl; }
+//
+//    bool isAtomic(void)     { return atomic == true; }
+//    void setNonAtomic(void) { atomic = false; }
+//
+//    bool hasNoSideEffects(void)  { return sideEffects == false; }
+//    bool hasSideEffects(void)    { return sideEffects == true; }
+//    void setHasSideEffects(void) { sideEffects = true; }
+//
+//    bool containsEmitVertex(void) { return emitVertex == true; }
+//    void setEmitVertex(void)      { emitVertex = true; }
+//
+//    bool containsDiscard(void)    { return discard == true; }
+//    void setContainsDiscard(void) { discard = true; }
+//
+//    void setTarget(void)      { target = true; }
+//    void unsetTarget(void)    { target = false; }
+//    bool isTarget(void)       { return target; }
+//
+//    void setDbgOverwrite(TDebugOverwrite o) { dbgOverwrite = o; }
+//    TDebugOverwrite getDbgOverwrite(void)   { return dbgOverwrite; }
+//
+//    //void copyCPPExtensionChanges(TExtensionList&);
+//    //void moveCPPExtensionChanges(TExtensionList&);
+//    //TExtensionList& getCPPExtensionList(void) { return extensionList; }
+//
+//    virtual ~TIntermNode() { }
+//protected:
+//    TSourceRange range;
+//    TDebugState dbgState;
+//    scopeList *scope;
+//    ShChangeableList cgbl;
+//    bool atomic;
+//    bool sideEffects;
+//    bool target;
+//    bool emitVertex;
+//    bool discard;
+//    TDebugOverwrite dbgOverwrite;
+//
+//    //TExtensionList extensionList;
+//
+//};
 
 //
 // This is just to help yacc.
 //
-struct TIntermNodePair {
-    TIntermNode* node1;
-    TIntermNode* node2;
-};
-
-class TIntermSymbol;
-class TIntermBinary;
+//struct TIntermNodePair {
+//    TIntermNode* node1;
+//    TIntermNode* node2;
+//};
+//
+//class TIntermSymbol;
+//class TIntermBinary;
 
 //
 // Intermediate class for nodes that have a type.
 //
-class TIntermTyped : public TIntermNode {
-public:
+//class TIntermTyped : public TIntermNode {
+//public:
 //	TIntermTyped(const TType& t) : type(t)  { }
-    virtual TIntermTyped* getAsTyped()         { return this; }
+//    virtual TIntermTyped* getAsTyped()         { return this; }
 //    virtual void setType(const TType& t) { type = t; }
 //    virtual TType getType() const { return type; }
 //    virtual TType* getTypePointer() { return &type; }
@@ -418,245 +418,245 @@ public:
 //    const char* getQualifierString(EShLanguage l)  const { return type.getQualifierString(l); }
     //TString getCompleteString() const { return type.getCompleteString(); }
 
-protected:
+//protected:
 //    TType type;
-};
+//};
 
 
 //
 // Internal states for loops
 //
-typedef enum {
-    DBG_STATE_LOOP_UNSET,
-    DBG_STATE_LOOP_QYR_INIT,
-    DBG_STATE_LOOP_WRK_INIT,
-    DBG_STATE_LOOP_QYR_TEST,
-    DBG_STATE_LOOP_WRK_TEST,
-    DBG_STATE_LOOP_SELECT_FLOW,
-    DBG_STATE_LOOP_WRK_BODY,
-    DBG_STATE_LOOP_QYR_TERMINAL,
-    DBG_STATE_LOOP_WRK_TERMINAL,
-    DBG_STATE_LOOP_PASSED
-} DbgStateLoop;
-
-enum LoopT {
-    LOOP_WHILE,
-    LOOP_DO,
-    LOOP_FOR
-};
+//typedef enum {
+//    DBG_STATE_LOOP_UNSET,
+//    DBG_STATE_LOOP_QYR_INIT,
+//    DBG_STATE_LOOP_WRK_INIT,
+//    DBG_STATE_LOOP_QYR_TEST,
+//    DBG_STATE_LOOP_WRK_TEST,
+//    DBG_STATE_LOOP_SELECT_FLOW,
+//    DBG_STATE_LOOP_WRK_BODY,
+//    DBG_STATE_LOOP_QYR_TERMINAL,
+//    DBG_STATE_LOOP_WRK_TERMINAL,
+//    DBG_STATE_LOOP_PASSED
+//} DbgStateLoop;
+//
+//enum LoopT {
+//    LOOP_WHILE,
+//    LOOP_DO,
+//    LOOP_FOR
+//};
 
 //
 // Handle for, do-while, and while loops.
 //
-class TIntermLoop : public TIntermNode {
-public:
-    TIntermLoop(TIntermNode* aBody, TIntermNode *aInit, TIntermTyped* aTest,
-                TIntermTyped* aTerminal, LoopT aLoopType) :
-        init(aInit),
-        body(aBody),
-        test(aTest),
-        terminal(aTerminal),
-        loopType(aLoopType),
-        dbgState(DBG_STATE_LOOP_UNSET),
-        dbgIteration(0),
-        dbgLoopIter(NULL) { }
-    virtual TIntermLoop* getAsLoopNode() { return this; }
-    virtual void traverse(TIntermTraverser*);
-    TIntermNode*  getInit() { return init; }
-    TIntermNode*  getBody() { return body; }
-    TIntermTyped* getTest() { return test; }
-    TIntermTyped* getTerminal() { return terminal; }
-    LoopT         getLoopType(void) { return loopType; }
-    virtual DbgStateLoop getDbgInternalState() { return dbgState; }
-    virtual void setDbgInternalState(DbgStateLoop ds) { dbgState = ds; }
-
-    virtual int  getDbgIter(void) { return dbgIteration; }
-    virtual void setDbgIter(int i) { dbgIteration = i; }
-    virtual void addDbgIter(int i) { dbgIteration += i; }
-
-    virtual char** getDbgIterNamePointer(void) { return &dbgLoopIter; }
-    virtual char*  getDbgIterName(void) { return dbgLoopIter; }
-    virtual void clearDbgIterName(void) { free(dbgLoopIter);
-                                          dbgLoopIter = NULL; }
-
-    virtual bool needDbgLoopIter(void);
-protected:
-    TIntermNode* init;
-    TIntermNode* body;       // code to loop over
-    TIntermTyped* test;      // exit condition associated with loop,
-                             // could be 0 for 'for' loops
-    TIntermTyped* terminal;  // exists for for-loops
-    LoopT loopType;
-
-    DbgStateLoop dbgState;   // internal state used for debugging
-    int dbgIteration;        // loop iteration that is currently debugged
-    char *dbgLoopIter;       // name of the temporary variable used
-};
+//class TIntermLoop : public TIntermNode {
+//public:
+//    TIntermLoop(TIntermNode* aBody, TIntermNode *aInit, TIntermTyped* aTest,
+//                TIntermTyped* aTerminal, LoopT aLoopType) :
+//        init(aInit),
+//        body(aBody),
+//        test(aTest),
+//        terminal(aTerminal),
+//        loopType(aLoopType),
+//        dbgState(DBG_STATE_LOOP_UNSET),
+//        dbgIteration(0),
+//        dbgLoopIter(NULL) { }
+//    virtual TIntermLoop* getAsLoopNode() { return this; }
+//    virtual void traverse(TIntermTraverser*);
+//    TIntermNode*  getInit() { return init; }
+//    TIntermNode*  getBody() { return body; }
+//    TIntermTyped* getTest() { return test; }
+//    TIntermTyped* getTerminal() { return terminal; }
+//    LoopT         getLoopType(void) { return loopType; }
+//    virtual DbgStateLoop getDbgInternalState() { return dbgState; }
+//    virtual void setDbgInternalState(DbgStateLoop ds) { dbgState = ds; }
+//
+//    virtual int  getDbgIter(void) { return dbgIteration; }
+//    virtual void setDbgIter(int i) { dbgIteration = i; }
+//    virtual void addDbgIter(int i) { dbgIteration += i; }
+//
+//    virtual char** getDbgIterNamePointer(void) { return &dbgLoopIter; }
+//    virtual char*  getDbgIterName(void) { return dbgLoopIter; }
+//    virtual void clearDbgIterName(void) { free(dbgLoopIter);
+//                                          dbgLoopIter = NULL; }
+//
+//    virtual bool needDbgLoopIter(void);
+//protected:
+//    TIntermNode* init;
+//    TIntermNode* body;       // code to loop over
+//    TIntermTyped* test;      // exit condition associated with loop,
+//                             // could be 0 for 'for' loops
+//    TIntermTyped* terminal;  // exists for for-loops
+//    LoopT loopType;
+//
+//    DbgStateLoop dbgState;   // internal state used for debugging
+//    int dbgIteration;        // loop iteration that is currently debugged
+//    char *dbgLoopIter;       // name of the temporary variable used
+//};
 
 //
 // Handle break, continue, return, and kill.
 //
-class TIntermBranch : public TIntermNode {
-public:
-    TIntermBranch(TOperator op, TIntermTyped* e) :
-        flowOp(op),
-        expression(e) { }
-    virtual TIntermBranch* getAsBranchNode()         { return this; }
-    virtual void traverse(TIntermTraverser*);
-    TOperator getFlowOp() { return flowOp; }
-    TIntermTyped* getExpression() { return expression; }
-protected:
-    TOperator flowOp;
-    TIntermTyped* expression;  // non-zero except for "return exp;" statements
-};
+//class TIntermBranch : public TIntermNode {
+//public:
+//    TIntermBranch(TOperator op, TIntermTyped* e) :
+//        flowOp(op),
+//        expression(e) { }
+//    virtual TIntermBranch* getAsBranchNode()         { return this; }
+//    virtual void traverse(TIntermTraverser*);
+//    TOperator getFlowOp() { return flowOp; }
+//    TIntermTyped* getExpression() { return expression; }
+//protected:
+//    TOperator flowOp;
+//    TIntermTyped* expression;  // non-zero except for "return exp;" statements
+//};
 
 //
 // Nodes that correspond to symbols or constants in the source code.
 //
-class TIntermSymbol : public TIntermTyped {
-public:
-	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
-	// per process globalpoolallocator, then it causes increased memory usage per compile
-	// it is essential to use "symbol = sym" to assign to symbol
-//    TIntermSymbol(int i, const TString& sym, const TType& t) :
-//        TIntermTyped(t), id(i)  { symbol = sym;}
-    virtual int getId() const { return id; }
-//    virtual const TString& getSymbol() const { return symbol;  }
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermSymbol* getAsSymbolNode() { return this; }
-protected:
-    int id;
-//    TString symbol;
-};
+//class TIntermSymbol : public TIntermTyped {
+//public:
+//	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
+//	// per process globalpoolallocator, then it causes increased memory usage per compile
+//	// it is essential to use "symbol = sym" to assign to symbol
+////    TIntermSymbol(int i, const TString& sym, const TType& t) :
+////        TIntermTyped(t), id(i)  { symbol = sym;}
+//    virtual int getId() const { return id; }
+////    virtual const TString& getSymbol() const { return symbol;  }
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermSymbol* getAsSymbolNode() { return this; }
+//protected:
+//    int id;
+////    TString symbol;
+//};
 
 //
 // Nodes that correspond to symbols or constants in the source code.
 //
-class TIntermFuncParam : public TIntermTyped {
-public:
-	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
-	// per process globalpoolallocator, then it causes increased memory usage per compile
-	// it is essential to use "symbol = sym" to assign to symbol
-//    TIntermFuncParam(int i, const TString& sym, const TType& t) :
-//        TIntermTyped(t), id(i)  { symbol = sym;}
-    virtual int getId() const { return id; }
-//    virtual const TString& getSymbol() const { return symbol;  }
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermFuncParam* getAsFuncParamNode() { return this; }
-protected:
-    int id;
-//    TString symbol;
-};
+//class TIntermFuncParam : public TIntermTyped {
+//public:
+//	// if symbol is initialized as symbol(sym), the memory comes from the poolallocator of sym. If sym comes from
+//	// per process globalpoolallocator, then it causes increased memory usage per compile
+//	// it is essential to use "symbol = sym" to assign to symbol
+////    TIntermFuncParam(int i, const TString& sym, const TType& t) :
+////        TIntermTyped(t), id(i)  { symbol = sym;}
+//    virtual int getId() const { return id; }
+////    virtual const TString& getSymbol() const { return symbol;  }
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermFuncParam* getAsFuncParamNode() { return this; }
+//protected:
+//    int id;
+////    TString symbol;
+//};
 
-class TIntermConstantUnion : public TIntermTyped {
-public:
-//    TIntermConstantUnion(constUnion *unionPointer, const TType& t) : TIntermTyped(t), unionArrayPointer(unionPointer) { }
-    constUnion* getUnionArrayPointer() const { return unionArrayPointer; }
-    void setUnionArrayPointer(constUnion *c) { unionArrayPointer = c; }
-    virtual TIntermConstantUnion* getAsConstantUnion()  { return this; }
-    virtual void traverse(TIntermTraverser* );
-    virtual TIntermTyped* fold(TOperator, TIntermTyped*, TInfoSink&);
-protected:
-    constUnion *unionArrayPointer;
-};
+//class TIntermConstantUnion : public TIntermTyped {
+//public:
+////    TIntermConstantUnion(constUnion *unionPointer, const TType& t) : TIntermTyped(t), unionArrayPointer(unionPointer) { }
+//    constUnion* getUnionArrayPointer() const { return unionArrayPointer; }
+//    void setUnionArrayPointer(constUnion *c) { unionArrayPointer = c; }
+//    virtual TIntermConstantUnion* getAsConstantUnion()  { return this; }
+//    virtual void traverse(TIntermTraverser* );
+//    virtual TIntermTyped* fold(TOperator, TIntermTyped*, TInfoSink&);
+//protected:
+//    constUnion *unionArrayPointer;
+//};
 
 //
 // Intermediate class for node types that hold operators.
 //
-class TIntermOperator : public TIntermTyped {
-public:
-    TOperator getOp() { return op; }
-    bool modifiesState() const;
-    bool isConstructor() const;
-    virtual bool promote(TInfoSink&) { return true; }
-protected:
-//    TIntermOperator(TOperator o) : TIntermTyped(TType(EbtFloat)), op(o) {}
-//    TIntermOperator(TOperator o, TType& t) : TIntermTyped(t), op(o) {}
-    TOperator op;
-};
+//class TIntermOperator : public TIntermTyped {
+//public:
+//    TOperator getOp() { return op; }
+//    bool modifiesState() const;
+//    bool isConstructor() const;
+//    virtual bool promote(TInfoSink&) { return true; }
+//protected:
+////    TIntermOperator(TOperator o) : TIntermTyped(TType(EbtFloat)), op(o) {}
+////    TIntermOperator(TOperator o, TType& t) : TIntermTyped(t), op(o) {}
+//    TOperator op;
+//};
 
 //
 // Nodes for all the basic binary math operators.
 //
-class TIntermBinary : public TIntermOperator {
-public:
-//    TIntermBinary(TOperator o) : TIntermOperator(o) {}
-    virtual void traverse(TIntermTraverser*);
-    virtual void setLeft(TIntermTyped* n) { left = n; }
-    virtual void setRight(TIntermTyped* n) { right = n; }
-    virtual TIntermTyped* getLeft() const { return left; }
-    virtual TIntermTyped* getRight() const { return right; }
-    virtual TIntermBinary* getAsBinaryNode() { return this; }
-    virtual bool promote(TInfoSink&);
-protected:
-    TIntermTyped* left;
-    TIntermTyped* right;
-};
+//class TIntermBinary : public TIntermOperator {
+//public:
+////    TIntermBinary(TOperator o) : TIntermOperator(o) {}
+//    virtual void traverse(TIntermTraverser*);
+//    virtual void setLeft(TIntermTyped* n) { left = n; }
+//    virtual void setRight(TIntermTyped* n) { right = n; }
+//    virtual TIntermTyped* getLeft() const { return left; }
+//    virtual TIntermTyped* getRight() const { return right; }
+//    virtual TIntermBinary* getAsBinaryNode() { return this; }
+//    virtual bool promote(TInfoSink&);
+//protected:
+//    TIntermTyped* left;
+//    TIntermTyped* right;
+//};
 
 //
 // Nodes for unary math operators.
 //
-class TIntermUnary : public TIntermOperator {
-public:
-//    TIntermUnary(TOperator o, TType& t) : TIntermOperator(o, t), operand(0) {}
-//    TIntermUnary(TOperator o) : TIntermOperator(o), operand(0) {}
-    virtual void traverse(TIntermTraverser*);
-    virtual void setOperand(TIntermTyped* o) { operand = o; }
-    virtual TIntermTyped* getOperand() { return operand; }
-    virtual TIntermUnary* getAsUnaryNode() { return this; }
-    virtual bool promote(TInfoSink&);
-protected:
-    TIntermTyped* operand;
-};
+//class TIntermUnary : public TIntermOperator {
+//public:
+////    TIntermUnary(TOperator o, TType& t) : TIntermOperator(o, t), operand(0) {}
+////    TIntermUnary(TOperator o) : TIntermOperator(o), operand(0) {}
+//    virtual void traverse(TIntermTraverser*);
+//    virtual void setOperand(TIntermTyped* o) { operand = o; }
+//    virtual TIntermTyped* getOperand() { return operand; }
+//    virtual TIntermUnary* getAsUnaryNode() { return this; }
+//    virtual bool promote(TInfoSink&);
+//protected:
+//    TIntermTyped* operand;
+//};
 
 //typedef TVector<TIntermNode*> TIntermSequence;
 //typedef TVector<int> TQualifierList;
 //
 // Nodes that operate on an arbitrary sized set of children.
 //
-class TIntermAggregate : public TIntermOperator {
-public:
-//    TIntermAggregate() : TIntermOperator(EOpNull), userDefined(false), pragmaTable(0), alreadyParsed(0) {
-//        cgbParameterList.numChangeables = 0;
-//        cgbParameterList.changeables = NULL;
-//    }
-//    TIntermAggregate(TOperator o) : TIntermOperator(o), userDefined(false), pragmaTable(0), alreadyParsed(0)
-//    {
-//        cgbParameterList.numChangeables = 0;
-//        cgbParameterList.changeables = NULL;
-//    }
-//	~TIntermAggregate() { delete pragmaTable; }
-    virtual TIntermAggregate* getAsAggregate() { return this; }
-    virtual void setOperator(TOperator o) { op = o; }
-//    virtual TIntermSequence& getSequence() { return sequence; }
-//	virtual void setName(const TString& n) { name = n; }
-//    virtual const TString& getName() const { return name; }
-    virtual void traverse(TIntermTraverser*);
-    virtual void setUserDefined() { userDefined = true; }
-    virtual bool isUserDefined() { return userDefined; }
-//    virtual TQualifierList& getQualifier() { return qualifier; }
-	void setOptimize(bool o) { optimize = o; }
-	void setDebug(bool d) { debug = d; }
-	bool getOptimize() { return optimize; }
-	bool getDebug() { return debug; }
-//	void addToPragmaTable(const TPragmaTable& pTable);
-//	const TPragmaTable& getPragmaTable() const { return *pragmaTable; }
-    ShChangeableList* getCgbParameterList(void) { return &cgbParameterList; }
-    bool isAlreadyParsed(void) { return alreadyParsed; }
-    void setAlreadyParsed(void) { alreadyParsed = true; }
-protected:
-	TIntermAggregate(const TIntermAggregate&); // disallow copy constructor
-	TIntermAggregate& operator=(const TIntermAggregate&); // disallow assignment operator
-//    TIntermSequence sequence;
-//    TQualifierList qualifier;
-//	TString name;
-    bool userDefined; // used for user defined function names
-	bool optimize;
-	bool debug;
-//	TPragmaTable *pragmaTable;
-    ShChangeableList cgbParameterList;
-    bool alreadyParsed;
-};
+//class TIntermAggregate : public TIntermOperator {
+//public:
+////    TIntermAggregate() : TIntermOperator(EOpNull), userDefined(false), pragmaTable(0), alreadyParsed(0) {
+////        cgbParameterList.numChangeables = 0;
+////        cgbParameterList.changeables = NULL;
+////    }
+////    TIntermAggregate(TOperator o) : TIntermOperator(o), userDefined(false), pragmaTable(0), alreadyParsed(0)
+////    {
+////        cgbParameterList.numChangeables = 0;
+////        cgbParameterList.changeables = NULL;
+////    }
+////	~TIntermAggregate() { delete pragmaTable; }
+//    virtual TIntermAggregate* getAsAggregate() { return this; }
+//    virtual void setOperator(TOperator o) { op = o; }
+////    virtual TIntermSequence& getSequence() { return sequence; }
+////	virtual void setName(const TString& n) { name = n; }
+////    virtual const TString& getName() const { return name; }
+//    virtual void traverse(TIntermTraverser*);
+//    virtual void setUserDefined() { userDefined = true; }
+//    virtual bool isUserDefined() { return userDefined; }
+////    virtual TQualifierList& getQualifier() { return qualifier; }
+//	void setOptimize(bool o) { optimize = o; }
+//	void setDebug(bool d) { debug = d; }
+//	bool getOptimize() { return optimize; }
+//	bool getDebug() { return debug; }
+////	void addToPragmaTable(const TPragmaTable& pTable);
+////	const TPragmaTable& getPragmaTable() const { return *pragmaTable; }
+//    ShChangeableList* getCgbParameterList(void) { return &cgbParameterList; }
+//    bool isAlreadyParsed(void) { return alreadyParsed; }
+//    void setAlreadyParsed(void) { alreadyParsed = true; }
+//protected:
+//	TIntermAggregate(const TIntermAggregate&); // disallow copy constructor
+//	TIntermAggregate& operator=(const TIntermAggregate&); // disallow assignment operator
+////    TIntermSequence sequence;
+////    TQualifierList qualifier;
+////	TString name;
+//    bool userDefined; // used for user defined function names
+//	bool optimize;
+//	bool debug;
+////	TPragmaTable *pragmaTable;
+//    ShChangeableList cgbParameterList;
+//    bool alreadyParsed;
+//};
 
 //
 // For if tests.
@@ -671,142 +671,142 @@ typedef enum {
     DBG_STATE_SELECTION_PASSED             // debugging is past selection
 } DbgStateSelection;
 
-class TIntermSelection : public TIntermTyped {
-public:
-    // 3 parameter equals 'if' operator
-//    TIntermSelection(TIntermTyped* cond, TIntermNode* trueB, TIntermNode* falseB) : TIntermTyped(TType(EbtVoid)), condition(cond), trueBlock(trueB), falseBlock(falseB), shortOperation(false), dbgState(DBG_STATE_SELECTION_UNSET) {}
-    // 4 parameter equals '?' operator
-//    TIntermSelection(TIntermTyped* cond, TIntermNode* trueB, TIntermNode* falseB, const TType& type) : TIntermTyped(type), condition(cond), trueBlock(trueB), falseBlock(falseB), shortOperation(true), dbgState(DBG_STATE_SELECTION_UNSET) {}
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermNode* getCondition() const { return condition; }
-    virtual TIntermNode* getTrueBlock() const { return trueBlock; }
-    virtual TIntermNode* getFalseBlock() const { return falseBlock; }
-    virtual TIntermSelection* getAsSelectionNode() { return this; }
-    virtual bool isShort(void) { return shortOperation; }
-    virtual DbgStateSelection getDbgInternalState() { return dbgState; }
-    virtual void setDbgInternalState(DbgStateSelection ds) { dbgState = ds; }
-protected:
-    TIntermTyped* condition;
-    TIntermNode* trueBlock;
-    TIntermNode* falseBlock;
-    bool shortOperation;
-    DbgStateSelection dbgState;
-};
+//class TIntermSelection : public TIntermTyped {
+//public:
+//    // 3 parameter equals 'if' operator
+////    TIntermSelection(TIntermTyped* cond, TIntermNode* trueB, TIntermNode* falseB) : TIntermTyped(TType(EbtVoid)), condition(cond), trueBlock(trueB), falseBlock(falseB), shortOperation(false), dbgState(DBG_STATE_SELECTION_UNSET) {}
+//    // 4 parameter equals '?' operator
+////    TIntermSelection(TIntermTyped* cond, TIntermNode* trueB, TIntermNode* falseB, const TType& type) : TIntermTyped(type), condition(cond), trueBlock(trueB), falseBlock(falseB), shortOperation(true), dbgState(DBG_STATE_SELECTION_UNSET) {}
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermNode* getCondition() const { return condition; }
+//    virtual TIntermNode* getTrueBlock() const { return trueBlock; }
+//    virtual TIntermNode* getFalseBlock() const { return falseBlock; }
+//    virtual TIntermSelection* getAsSelectionNode() { return this; }
+//    virtual bool isShort(void) { return shortOperation; }
+//    virtual DbgStateSelection getDbgInternalState() { return dbgState; }
+//    virtual void setDbgInternalState(DbgStateSelection ds) { dbgState = ds; }
+//protected:
+//    TIntermTyped* condition;
+//    TIntermNode* trueBlock;
+//    TIntermNode* falseBlock;
+//    bool shortOperation;
+//    DbgStateSelection dbgState;
+//};
 
 //
 // For switch tests.
 //
-class TIntermSwitch : public TIntermTyped {
-public:
-//    TIntermSwitch(TIntermTyped* cond, TIntermAggregate* caseList) : TIntermTyped(TType(EbtVoid)), condition(cond), caseList(caseList), dbgState(DBG_STATE_SELECTION_UNSET) {}
-
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermNode* getCondition() const { return condition; }
-    virtual TIntermNode* getCaseList() const { return caseList; }
-    virtual TIntermSwitch* getAsSwitchNode() { return this; }
-    virtual DbgStateSelection getDbgInternalState() { return dbgState; }
-    virtual void setDbgInternalState(DbgStateSelection ds) { dbgState = ds; }
-protected:
-    TIntermTyped* condition;
-    TIntermAggregate* caseList;
-    DbgStateSelection dbgState;
-};
+//class TIntermSwitch : public TIntermTyped {
+//public:
+////    TIntermSwitch(TIntermTyped* cond, TIntermAggregate* caseList) : TIntermTyped(TType(EbtVoid)), condition(cond), caseList(caseList), dbgState(DBG_STATE_SELECTION_UNSET) {}
+//
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermNode* getCondition() const { return condition; }
+//    virtual TIntermNode* getCaseList() const { return caseList; }
+//    virtual TIntermSwitch* getAsSwitchNode() { return this; }
+//    virtual DbgStateSelection getDbgInternalState() { return dbgState; }
+//    virtual void setDbgInternalState(DbgStateSelection ds) { dbgState = ds; }
+//protected:
+//    TIntermTyped* condition;
+//    TIntermAggregate* caseList;
+//    DbgStateSelection dbgState;
+//};
 
 //
 // For switch cases.
 //
-class TIntermCase : public TIntermTyped {
-public:
-//    TIntermCase(TIntermTyped* expr) : TIntermTyped( expr ? expr->getType() : TType(EbtVoid)), expression(expr) { caseBody = new TIntermAggregate(); }
-
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermTyped* getExpression() const { return expression; }
-    virtual TIntermNode* getCaseBody() const { return caseBody; }
-    virtual TIntermCase* getAsCaseNode() { return this; }
-
-protected:
-    TIntermTyped* expression;
-    TIntermAggregate* caseBody;
-};
+//class TIntermCase : public TIntermTyped {
+//public:
+////    TIntermCase(TIntermTyped* expr) : TIntermTyped( expr ? expr->getType() : TType(EbtVoid)), expression(expr) { caseBody = new TIntermAggregate(); }
+//
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermTyped* getExpression() const { return expression; }
+//    virtual TIntermNode* getCaseBody() const { return caseBody; }
+//    virtual TIntermCase* getAsCaseNode() { return this; }
+//
+//protected:
+//    TIntermTyped* expression;
+//    TIntermAggregate* caseBody;
+//};
 
 
 //
 // For variable declarations.
 //
-class TVariable;
-class TIntermDeclaration : public TIntermNode {
-public:
-    TIntermDeclaration(TVariable* v, TIntermNode* init);
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermDeclaration* getAsDeclarationNode() { return this; }
-    virtual TVariable* getVariable() const { return variable; }
-    virtual TIntermNode* getInitialization() const { return initialization; }
-    void setFirst(bool f) { first = f; }
-    bool isFirst() { return first; }
-protected:
-    TVariable* variable;
-    TIntermNode* initialization;
-    bool first;
-};
+//class TVariable;
+//class TIntermDeclaration : public TIntermNode {
+//public:
+//    TIntermDeclaration(TVariable* v, TIntermNode* init);
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermDeclaration* getAsDeclarationNode() { return this; }
+//    virtual TVariable* getVariable() const { return variable; }
+//    virtual TIntermNode* getInitialization() const { return initialization; }
+//    void setFirst(bool f) { first = f; }
+//    bool isFirst() { return first; }
+//protected:
+//    TVariable* variable;
+//    TIntermNode* initialization;
+//    bool first;
+//};
 
 //
 // For function declarations.
 //
-class TFunction;
-class TIntermFuncDeclaration : public TIntermNode {
-    public:
-        TIntermFuncDeclaration(TFunction* f) : function(f) { }
-        virtual void traverse(TIntermTraverser*);
-        virtual TIntermFuncDeclaration* getAsFuncDeclarationNode() {
-            return this; }
-        virtual TFunction* getFunction() const { return function; }
-    protected:
-        TFunction* function;
-};
+//class TFunction;
+//class TIntermFuncDeclaration : public TIntermNode {
+//    public:
+//        TIntermFuncDeclaration(TFunction* f) : function(f) { }
+//        virtual void traverse(TIntermTraverser*);
+//        virtual TIntermFuncDeclaration* getAsFuncDeclarationNode() {
+//            return this; }
+//        virtual TFunction* getFunction() const { return function; }
+//    protected:
+//        TFunction* function;
+//};
 
 //
 //
 //
-class TIntermSpecification : public TIntermNode {
-public:
-    TIntermSpecification(TType* t);
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermSpecification* getAsSpecificationNode() { return this; }
-    virtual TType* getType() const { return type; }
-    void setParameter(TIntermAggregate *pl) { parameter = pl; }
-    TIntermAggregate** getParameterPointer(void) { return &parameter; }
-    TIntermAggregate* getParameter(void) { return parameter; }
-    void setInstances(TIntermAggregate *in) { instances = in; }
-    TIntermAggregate** getInstancesPointer(void) { return &instances; }
-    TIntermAggregate* getInstances(void) { return instances; }
-protected:
-    TType* type;
-    TIntermAggregate* parameter;
-    TIntermAggregate* instances;
-};
+//class TIntermSpecification : public TIntermNode {
+//public:
+//    TIntermSpecification(TType* t);
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermSpecification* getAsSpecificationNode() { return this; }
+//    virtual TType* getType() const { return type; }
+//    void setParameter(TIntermAggregate *pl) { parameter = pl; }
+//    TIntermAggregate** getParameterPointer(void) { return &parameter; }
+//    TIntermAggregate* getParameter(void) { return parameter; }
+//    void setInstances(TIntermAggregate *in) { instances = in; }
+//    TIntermAggregate** getInstancesPointer(void) { return &instances; }
+//    TIntermAggregate* getInstances(void) { return instances; }
+//protected:
+//    TType* type;
+//    TIntermAggregate* parameter;
+//    TIntermAggregate* instances;
+//};
 
 //
 //
 //
-class TIntermParameter : public TIntermNode {
-public:
-    TIntermParameter(TType* t);
-    virtual void traverse(TIntermTraverser*);
-    virtual TIntermParameter* getAsParameterNode() { return this; }
-    virtual TType* getType() const { return type; }
-protected:
-    TType* type;
-};
+//class TIntermParameter : public TIntermNode {
+//public:
+//    TIntermParameter(TType* t);
+//    virtual void traverse(TIntermTraverser*);
+//    virtual TIntermParameter* getAsParameterNode() { return this; }
+//    virtual TType* getType() const { return type; }
+//protected:
+//    TType* type;
+//};
 
 //
 // Intermediate class for dummy nodes
 //
-class TIntermDummy : public TIntermNode {
-public:
-    TIntermDummy(void) { }
-    virtual TIntermDummy* getAsDummy()         { return this; }
-    virtual void traverse(TIntermTraverser*);
-};
+//class TIntermDummy : public TIntermNode {
+//public:
+//    TIntermDummy(void) { }
+//    virtual TIntermDummy* getAsDummy()         { return this; }
+//    virtual void traverse(TIntermTraverser*);
+//};
 
 
 //
@@ -817,57 +817,57 @@ public:
 // When using this, just fill in the methods for nodes you want visited.
 // Return false from a pre-visit to skip visiting that node's subtree.
 //
-class TIntermTraverser {
-public:
-    //POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
-
-    TIntermTraverser() :
-        visitSymbol(0),
-        visitFuncParam(0),
-        visitConstantUnion(0),
-        visitDeclaration(0),
-        visitFuncDeclaration(0),
-        visitSpecification(0),
-        visitParameter(0),
-        visitBinary(0),
-        visitUnary(0),
-        visitSelection(0),
-        visitSwitch(0),
-        visitCase(0),
-        visitAggregate(0),
-        visitAssignment(0),
-        visitLoop(0),
-        visitBranch(0),
-        visitDummy(0),
-        depth(0),
-        preVisit(true),
-        postVisit(false),
-        debugVisit(false),
-        rightToLeft(false) {}
-
-    void (*visitSymbol)(TIntermSymbol*, TIntermTraverser*);
-    bool (*visitFuncParam)(ir_variable*, TIntermTraverser*);
-    void (*visitConstantUnion)(TIntermConstantUnion*, TIntermTraverser*);
-    bool (*visitDeclaration)(ir_variable*, TIntermTraverser*);
-    bool (*visitFuncDeclaration)(ir_function*, TIntermTraverser*);
-    bool (*visitSpecification)(TIntermSpecification*, TIntermTraverser*);
-    void (*visitParameter)(TIntermParameter*, TIntermTraverser*);
-    bool (*visitBinary)(ir_expression*, TIntermTraverser*);
-    bool (*visitUnary)(ir_expression*, TIntermTraverser*);
-    bool (*visitSelection)(bool preVisit, TIntermSelection*, TIntermTraverser*);
-    bool (*visitSwitch)(bool preVisit, TIntermSwitch*, TIntermTraverser*);
-    bool (*visitCase)(bool preVisit, TIntermCase*, TIntermTraverser*);
-    bool (*visitAggregate)(ir_instruction*, TIntermTraverser*);
-    bool (*visitAssignment)(ir_assignment*, TIntermTraverser*);
-    bool (*visitLoop)(bool preVisit, TIntermLoop*, TIntermTraverser*);
-    bool (*visitBranch)(bool preVisit, TIntermBranch*,  TIntermTraverser*);
-    void (*visitDummy)(TIntermDummy*, TIntermTraverser*);
-
-    int  depth;
-    bool preVisit;
-    bool postVisit;
-    bool debugVisit;
-    bool rightToLeft;
-};
+//class TIntermTraverser {
+//public:
+//    //POOL_ALLOCATOR_NEW_DELETE(GlobalPoolAllocator)
+//
+//    TIntermTraverser() :
+//        visitSymbol(0),
+//        visitFuncParam(0),
+//        visitConstantUnion(0),
+//        visitDeclaration(0),
+//        visitFuncDeclaration(0),
+//        visitSpecification(0),
+//        visitParameter(0),
+//        visitBinary(0),
+//        visitUnary(0),
+//        visitSelection(0),
+//        visitSwitch(0),
+//        visitCase(0),
+//        visitAggregate(0),
+//        visitAssignment(0),
+//        visitLoop(0),
+//        visitBranch(0),
+//        visitDummy(0),
+//        depth(0),
+//        preVisit(true),
+//        postVisit(false),
+//        debugVisit(false),
+//        rightToLeft(false) {}
+//
+//    void (*visitSymbol)(TIntermSymbol*, TIntermTraverser*);
+//    bool (*visitFuncParam)(ir_variable*, TIntermTraverser*);
+//    void (*visitConstantUnion)(TIntermConstantUnion*, TIntermTraverser*);
+//    bool (*visitDeclaration)(ir_variable*, TIntermTraverser*);
+//    bool (*visitFuncDeclaration)(ir_function*, TIntermTraverser*);
+//    bool (*visitSpecification)(TIntermSpecification*, TIntermTraverser*);
+//    void (*visitParameter)(TIntermParameter*, TIntermTraverser*);
+//    bool (*visitBinary)(ir_expression*, TIntermTraverser*);
+//    bool (*visitUnary)(ir_expression*, TIntermTraverser*);
+//    bool (*visitSelection)(bool preVisit, TIntermSelection*, TIntermTraverser*);
+//    bool (*visitSwitch)(bool preVisit, TIntermSwitch*, TIntermTraverser*);
+//    bool (*visitCase)(bool preVisit, TIntermCase*, TIntermTraverser*);
+//    bool (*visitAggregate)(ir_instruction*, TIntermTraverser*);
+//    bool (*visitAssignment)(ir_assignment*, TIntermTraverser*);
+//    bool (*visitLoop)(bool preVisit, TIntermLoop*, TIntermTraverser*);
+//    bool (*visitBranch)(bool preVisit, TIntermBranch*,  TIntermTraverser*);
+//    void (*visitDummy)(TIntermDummy*, TIntermTraverser*);
+//
+//    int  depth;
+//    bool preVisit;
+//    bool postVisit;
+//    bool debugVisit;
+//    bool rightToLeft;
+//};
 
 #endif // __INTERMEDIATE_H

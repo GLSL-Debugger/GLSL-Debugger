@@ -140,7 +140,7 @@ inline TSourceRange addRange(TSourceRange a, TSourceRange b)
 //
 // Put POOL_ALLOCATOR_NEW_DELETE in base classes to make them use this scheme.
 //
-#define POOL_ALLOCATOR_NEW_DELETE(A)                                  \
+/*#define POOL_ALLOCATOR_NEW_DELETE(A)                                  \
     void* operator new(size_t s) { return (A).allocate(s); }          \
     void* operator new(size_t, void *_Where) { return (_Where);	}     \
     void operator delete(void*) { }                                   \
@@ -149,10 +149,11 @@ inline TSourceRange addRange(TSourceRange a, TSourceRange b)
     void* operator new[](size_t, void *_Where) { return (_Where);	} \
     void operator delete[](void*) { }                                 \
     void operator delete[](void *, void *) { }
+*/
 
-#define TBaseMap std::map
-#define TBaseList std::list
-#define TBaseSet std::set
+//#define TBaseMap std::map
+//#define TBaseList std::list
+//#define TBaseSet std::set
 
 //
 // Pool version of string.
@@ -209,8 +210,8 @@ typedef std::basic_string<char> TPersistString;
 //
 // templatized min and max functions.
 //
-template <class T> T Min(const T a, const T b) { return a < b ? a : b; }
-template <class T> T Max(const T a, const T b) { return a > b ? a : b; }
+//template <class T> T Min(const T a, const T b) { return a < b ? a : b; }
+//template <class T> T Max(const T a, const T b) { return a > b ? a : b; }
 
 //
 // Create a TString object from an integer.
