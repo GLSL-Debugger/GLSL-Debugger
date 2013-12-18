@@ -105,17 +105,17 @@ static struct {
 
 static int getTypeId(GLint type)
 {
-    switch (type) {
-        case GL_VERTEX_SHADER:
-            return 0;
-        case GL_GEOMETRY_SHADER_EXT:
-            return 1;
-        case GL_FRAGMENT_SHADER:
-            return 2;
-        default:
-            UT_NOTIFY_VA(LV_ERROR, "Wow, you found a new shader type %i", type);
-            exit(1);
-    }
+	switch (type) {
+	case GL_VERTEX_SHADER:
+		return 0;
+	case GL_GEOMETRY_SHADER_EXT:
+		return 1;
+	case GL_FRAGMENT_SHADER:
+		return 2;
+	default:
+		dbgPrint(DBGLVL_ERROR, "Wow, you found a new shader type %i", type);
+		exit(1);
+	}
 }
 
 int uniformNumElements(ActiveUniform *v)
@@ -1316,8 +1316,8 @@ void getShaderCode(void)
 	int error;
 
 	ShaderProgram shader;
-    DbgRec* rec;
-    int i, j;
+	DbgRec* rec;
+	int i, j;
 
 #ifdef _WIN32
 	/* HAZARD BUG OMGWTF This is plain wrong. Use GetCurrentThreadId() */
@@ -1344,38 +1344,40 @@ void getShaderCode(void)
 		return;
 	}
 
-    for (i = 0; i < shader.numObjects; i++) {
+	for (i = 0; i < shader.numObjects; i++) {
 		void *tmpAlloc;
-        int typeId = getTypeId(shader.objects[i].type);
-        numSourceStrings[typeId]++;
-        lenSourceStrings[typeId] += shader.objects[i].srcLength;
-        tmpAlloc = realloc(source[typeId], numSourceStrings[typeId]*sizeof(char*));
-        if (!tmpAlloc) {
-			dbgPrint(DBGLVL_ERROR, "Allocating memory for shaders failed: %s\n",
-					strerror(errno));
+		int typeId = getTypeId(shader.objects[i].type);
+		numSourceStrings[typeId]++;
+		lenSourceStrings[typeId] += shader.objects[i].srcLength;
+		tmpAlloc = realloc(source[typeId],
+				numSourceStrings[typeId] * sizeof(char*));
+		if (!tmpAlloc) {
+			dbgPrint(DBGLVL_ERROR,
+					"Allocating memory for shaders failed: %s\n", strerror(errno));
 			freeShaderProgram(&shader);
 			for (i = 0; i < 3; i++) {
 				free(source[i]);
 			}
 			setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 			return;
-        }
-        source[typeId] = tmpAlloc;
+		}
+		source[typeId] = tmpAlloc;
 		source[typeId][numSourceStrings[typeId] - 1] = shader.objects[i].src;
-		dbgPrint(DBGLVL_INFO, "source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1,
-            shader.objects[i].src);
+		dbgPrint(DBGLVL_INFO,
+				"source[%d][%d] = %s\n", typeId, numSourceStrings[typeId] - 1, shader.objects[i].src);
 	}
 
-    /* TODO: do something better than just append!!!!
-     *   GLSL allows for multiple strings per objects and the order is important for reconstructing
-     *   a correct single file code
-     */
+	/* TODO: do something better than just append!!!!
+	 *   GLSL allows for multiple strings per objects and the order is important for reconstructing
+	 *   a correct single file code
+	 */
 
-    for (i=0; i<3; i++) {
-        if (numSourceStrings[i] > 0) {
-            lenSourceStrings[i]++;
-            if (!(shaderSource[i] = malloc(lenSourceStrings[i]*sizeof(char)))) {
-				dbgPrint(DBGLVL_ERROR, "not enough memory to combine all your shaders\n");
+	for (i = 0; i < 3; i++) {
+		if (numSourceStrings[i] > 0) {
+			lenSourceStrings[i]++;
+			if (!(shaderSource[i] = malloc(lenSourceStrings[i] * sizeof(char)))) {
+				dbgPrint(DBGLVL_ERROR,
+						"not enough memory to combine all your shaders\n");
 				for (i = 0; i < 3; i++) {
 					free(source[i]);
 					free(shaderSource[i]);
@@ -1383,18 +1385,18 @@ void getShaderCode(void)
 				freeShaderProgram(&shader);
 				setErrorCode(DBG_ERROR_MEMORY_ALLOCATION_FAILED);
 				return;
-            }
-            shaderSource[i][0] = '\0';
-            for (j=0; j<numSourceStrings[i]; j++) {
-                strcat(shaderSource[i], source[i][j]);
-            }
-            free(source[i]);
+			}
+			shaderSource[i][0] = '\0';
+			for (j = 0; j < numSourceStrings[i]; j++) {
+				strcat(shaderSource[i], source[i][j]);
+			}
+			free(source[i]);
 			source[i] = NULL;
-        }
-    }
+		}
+	}
 
-	if (!serializeUniforms(&shader, &serializedUniforms, &serializedUniformsSize))
-	{
+	if (!serializeUniforms(&shader, &serializedUniforms,
+			&serializedUniformsSize)) {
 		for (i = 0; i < 3; i++) {
 			free(shaderSource[i]);
 		}
@@ -1403,7 +1405,7 @@ void getShaderCode(void)
 	}
 	numUniforms = shader.numUniforms;
 
-    freeShaderProgram(&shader);
+	freeShaderProgram(&shader);
 
 	/* query shader resources */
 	if (!(shaderResources = malloc(sizeof(struct TBuiltInResource)))) {
@@ -1426,15 +1428,15 @@ void getShaderCode(void)
 
 	/* set results */
 	rec->result = DBG_SHADER_CODE;
-    rec->numItems = 3;
-    for (i=0; i<3; i++) {
-        rec->items[2*i] = (ALIGNED_DATA) shaderSource[i];
-        rec->items[2*i+1] = (ALIGNED_DATA) lenSourceStrings[i];
-    }
-	rec->items[6] = (ALIGNED_DATA)shaderResources;
-	rec->items[7] = (ALIGNED_DATA)numUniforms;
-	rec->items[8] = (ALIGNED_DATA)serializedUniformsSize;
-	rec->items[9] = (ALIGNED_DATA)serializedUniforms;
+	rec->numItems = 3;
+	for (i = 0; i < 3; i++) {
+		rec->items[2 * i] = (ALIGNED_DATA) shaderSource[i];
+		rec->items[2 * i + 1] = (ALIGNED_DATA) lenSourceStrings[i];
+	}
+	rec->items[6] = (ALIGNED_DATA) shaderResources;
+	rec->items[7] = (ALIGNED_DATA) numUniforms;
+	rec->items[8] = (ALIGNED_DATA) serializedUniformsSize;
+	rec->items[9] = (ALIGNED_DATA) serializedUniforms;
 }
 
 /* TODO: error checking */
