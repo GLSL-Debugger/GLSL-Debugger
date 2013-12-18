@@ -29,7 +29,6 @@ extern "C" {
 #include "main/core.h" /* for struct gl_context */
 #include "main/context.h"
 #include "main/shaderobj.h"
-#include "main/errors.h"
 }
 
 #include "ralloc.h"
@@ -192,6 +191,8 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->gs_input_prim_type = GL_POINTS;
    this->gs_input_size = 0;
    this->out_qualifier = new(this) ast_type_qualifier();
+   memset(this->atomic_counter_offsets, 0,
+          sizeof(this->atomic_counter_offsets));
 }
 
 /**
@@ -920,7 +921,7 @@ void
 ast_compound_statement::print(void) const
 {
    printf("{\n");
-
+   
    foreach_list_const(n, &this->statements) {
       ast_node *ast = exec_node_data(ast_node, n, link);
       ast->print();
@@ -1246,7 +1247,7 @@ ast_selection_statement::print(void) const
       printf("else ");
       else_statement->print();
    }
-
+   
 }
 
 
