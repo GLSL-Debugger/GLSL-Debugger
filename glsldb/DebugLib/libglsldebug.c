@@ -193,7 +193,7 @@ static void setLogging(void)
 		setMaxDebugOutputLevel(level);
 		dbgPrint(DBGLVL_INFO, "Log level set to %i\n", level);
 	} else {
-		setMaxDebugOutputLevel(DBGLVL_ERROR);
+		setMaxDebugOutputLevel(DBGLVL_DEBUG);
 		dbgPrint(DBGLVL_WARNING, "Log level not set!\n");
 	}
 }
@@ -1211,12 +1211,15 @@ int checkGLExtensionSupported(const char *extension)
         hash_create(&extensions, hashString, compString, 512, 0);
         int i = 0;
         int n;
-        glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+        ORIG_GL(glGetIntegerv)(GL_NUM_EXTENSIONS, &n);
         for(i = 0; i < n; ++i) {
             const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
             // we don't need to store any relevant data. we just want a quick
             // string lookup.
-            hash_insert(&extensions, name, &dummy);
+            if(hash_insert(&extensions, name, &dummy) == 1) {
+            	dbgPrint(DBGLVL_ERROR, "Collision occured while hashing extensions\n");
+            	exit(1);
+            }
         }
     }
 
