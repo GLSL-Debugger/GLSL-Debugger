@@ -4,13 +4,19 @@ project(glsldb)
 # DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Maintainer")
 
-# path to custom modules 
+# path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
 
 set(MNT_C_FLAGS "")
 set(MNT_CXX_FLAGS "")
 set(MNT_EXE_FLAGS "")
 set(MNT_SHRD_FLAGS "")
+
+# Messages with level lower than OUTPUT_LEVEL will be printed
+# Levels:  DBGLVL_ERROR = 0,	DBGLVL_WARNING,
+#		   DBGLVL_INFO,			DBGLVL_INTERNAL_WARNING,
+#		   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,				DBGLVL_ALL = 6
+add_definitions(-DOUTPUT_LEVEL=6)
 
 # platform checks
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

@@ -32,9 +32,10 @@ typedef enum {
     while(0)
 
 #else   // C
-#define UT_NOTIFY(sev, ...)                                 \
+    #define UT_NOTIFY(sev, ...)                                 \
             utils_notify_va(sev, __FILE__, __func__, __LINE__, __VA_ARGS__)
 #endif  // __cplusplus
+
 #define UT_NOTIFY_VA(sev, ...)                                 \
             utils_notify_va(sev, __FILE__, __func__, __LINE__, __VA_ARGS__)
 
