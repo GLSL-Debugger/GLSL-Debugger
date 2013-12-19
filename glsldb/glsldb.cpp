@@ -306,31 +306,13 @@ void handler(int UNUSED sig)
 void setNotifyLevel(int l)
 {
 	severity_t t;
-	switch (l) {
-	case 0:
-		t = LV_FATAL;
-		break;
-	case 1:
-		t = LV_ERROR;
-		break;
-	case 2:
-		t = LV_WARN;
-		break;
-	case 3:
+	if (l < 0 || l > LV_TRACE)
 		t = LV_INFO;
-		break;
-	case 4:
-		t = LV_DEBUG;
-		break;
-	case 5:
-		t = LV_TRACE;
-		break;
-	default:
-		t = LV_INFO;
-		break;
-	}
+	else
+		t = static_cast<severity_t>(l);
 	UTILS_NOTIFY_LEVEL(&t);
 }
+
 QStringList parseArguments(int argc, char** argv)
 {
 	int opt = getopt(argc, argv, "+hv:f");
@@ -345,9 +327,12 @@ QStringList parseArguments(int argc, char** argv)
 					<< std::endl;
 			std::cout << "  -f value: log to file \"value\"" << std::endl;
 			exit(EXIT_SUCCESS);
-		case 'v':
-			setNotifyLevel(atoi(optarg));
+		case 'v': {
+			int lvl = atoi(optarg);
+			setNotifyLevel(lvl);
+			setMaxDebugOutputLevel(lvl);
 			break;
+		}
 		default:
 			std::cout << "def" << std::endl;
 			abort = true;
@@ -366,6 +351,7 @@ QStringList parseArguments(int argc, char** argv)
 
 int main(int argc, char **argv)
 {
+	setMaxDebugOutputLevel(OUTPUT_LEVEL);
 	QStringList al = parseArguments(argc, argv);
 
 #ifndef GLSLDB_WINDOWS
@@ -389,7 +375,6 @@ int main(int argc, char **argv)
 	// we need both for now...
 	UTILS_NOTIFY_STARTUP();
 	startLogging("glsldevil");
-	setMaxDebugOutputLevel(DBGLVL_DEBUG);
 
 	UT_NOTIFY(LV_INFO, "Application startup.");
 	// we'll need that later...

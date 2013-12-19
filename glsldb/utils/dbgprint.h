@@ -57,20 +57,18 @@ enum DBG_LEVELS {
 	DBGLVL_INFO,
 	DBGLVL_INTERNAL_WARNING,
 	DBGLVL_COMPILERINFO,
-	DBGLVL_DEBUG
+	DBGLVL_DEBUG,
+	DBGLVL_ALL
 };
 
-#if defined DEBUG
-#  define dbgPrint(LEVEL, ...) \
-    _dbgPrint_(LEVEL, 1, __VA_ARGS__)
-#  define dbgPrintNoPrefix(LEVEL, ...) \
-    _dbgPrint_(LEVEL, 0, __VA_ARGS__)
-#else
-#  define dbgPrint(LEVEL, ...) \
-    ((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 1, __VA_ARGS__) : 0))
-#  define dbgPrintNoPrefix(LEVEL, ...) \
-    ((void)(((LEVEL) < DBGLVL_DEBUG) ? _dbgPrint_(LEVEL, 0, __VA_ARGS__) : 0))
+#ifndef OUTPUT_LEVEL
+#define OUTPUT_LEVEL DBGLVL_DEBUG
 #endif
+
+#define dbgPrint(LEVEL, ...) \
+    ((void)(((LEVEL) < OUTPUT_LEVEL) ? _dbgPrint_(LEVEL, 1, __VA_ARGS__) : 0))
+#define dbgPrintNoPrefix(LEVEL, ...) \
+    ((void)(((LEVEL) < OUTPUT_LEVEL) ? _dbgPrint_(LEVEL, 0, __VA_ARGS__) : 0))
 
 #define VERBOSE 4
 #define VPRINT(level, ...) { if (level < VERBOSE) \
