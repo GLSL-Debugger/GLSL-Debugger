@@ -932,7 +932,6 @@ void ir_output_traverser_visitor::visit(ir_assignment *ir)
 	{
 		assert (!this->globals->main_function_done);
 		this->globals->global_assignements.push_tail (new(this->globals->mem_ctx) ga_entry(ir));
-		//ralloc_asprintf_append(&buffer, "//"); // for the ; that will follow (ugly, I know)
 		return;
 	}
 
@@ -951,16 +950,9 @@ void ir_output_traverser_visitor::visit(ir_assignment *ir)
 	if (rhsOp && rhsOp->operation == ir_triop_vector_insert)
 	{
 		// skip assignment if lhs and rhs would be the same
-		bool skip_assign = false;
 		ir_dereference_variable* lhsDeref = ir->lhs->as_dereference_variable();
 		ir_dereference_variable* rhsDeref = rhsOp->operands[0]->as_dereference_variable();
-		if (lhsDeref && rhsDeref)
-		{
-			if (lhsDeref->var == rhsDeref->var)
-				skip_assign = true;
-		}
-
-		if (!skip_assign)
+		if (!lhsDeref || !rhsDeref || lhsDeref->var != rhsDeref->var)
 		{
 			emit_assignment_part(ir->lhs, rhsOp->operands[0], ir->write_mask, NULL);
 			ralloc_asprintf_append(&buffer, "; ");
@@ -1329,22 +1321,164 @@ ir_output_traverser_visitor::visit(ir_if *ir)
    }
 }
 
+static void
+loop_debug_init(ir_loop* ir, ir_output_traverser_visitor* it)
+{
+	if (it->cgOptions == DBG_CG_ORIGINAL_SRC){
+		it->visit_block(ir->debug_init, ";\n");
+		return;
+	}
 
+	/* Add loop counter */
+	if (ir->need_dbgiter()) {
+		ralloc_asprintf_append (&it->buffer, "%s = 0;\n", ir->debug_iter_name);
+		it->indent();
+	}
+
+	/* Add debug temoprary register to copy condition */
+	if (ir->debug_target && ir->debug_state_internal == ir_dbg_loop_select_flow) {
+		switch (it->cgOptions) {
+		case DBG_CG_COVERAGE:
+		case DBG_CG_LOOP_CONDITIONAL:
+		case DBG_CG_CHANGEABLE:
+		case DBG_CG_GEOMETRY_CHANGEABLE:
+			cgInit(CG_TYPE_CONDITION, NULL, it->vl, it->mode);
+			cgAddDeclaration(CG_TYPE_CONDITION, &it->buffer, it->mode);
+			it->indent();
+			break;
+		default:
+			break;
+		}
+	}
+
+	/* Add debug code prior to loop */
+	if (ir->mode == ir_loop_for) {
+		if (ir->debug_target &&
+				ir->debug_state_internal == ir_dbg_loop_qyr_init) {
+			switch (it->cgOptions) {
+			case DBG_CG_COVERAGE:
+			case DBG_CG_CHANGEABLE:
+			case DBG_CG_GEOMETRY_CHANGEABLE:
+				cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
+								it->vl, it->dbgStack, 0);
+				ralloc_asprintf_append (&it->buffer, ";\n");
+				it->indent();
+				break;
+			default:
+				break;
+			}
+		} else if (!ir->debug_target &&
+				ir->debug_state_internal == ir_dbg_loop_wrk_init) {
+			it->indentation++;
+			ralloc_asprintf_append (&it->buffer, "{\n");
+			it->indent();
+		}
+	}
+
+	DbgCgOptions opts = it->cgOptions;
+	it->cgOptions = DBG_CG_ORIGINAL_SRC;
+	it->visit_block(ir->debug_init, ";\n ");
+	it->cgOptions = opts;
+	it->indent();
+}
+
+static void
+loop_debug_condition(ir_loop* ir, ir_output_traverser_visitor* it)
+{
+
+	if (it->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target) {
+		if (ir->debug_state_internal == ir_dbg_loop_qyr_test) {
+			cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
+							it->vl, it->dbgStack, 0);
+			ralloc_asprintf_append(&it->buffer, ", ");
+		} else if (ir->debug_state_internal == ir_dbg_loop_select_flow) {
+			/* Copy test */
+			cgAddDbgCode(CG_TYPE_CONDITION, &it->buffer, it->cgOptions, it->cgbl,
+							it->vl, it->dbgStack, 0);
+			ralloc_asprintf_append(&it->buffer, " = ( ");
+		}
+	}
+
+	/* Add original condition without any modifications */
+	ir_rvalue* check = ir->condition();
+	DbgCgOptions opts = it->cgOptions;
+	it->cgOptions = DBG_CG_ORIGINAL_SRC;
+	if (check)
+		check->accept(it);
+	else
+		ralloc_asprintf_append(&it->buffer, "true");
+	it->cgOptions = opts;
+
+	if (it->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target &&
+			ir->debug_state_internal == ir_dbg_loop_select_flow) {
+		ralloc_asprintf_append(&it->buffer, "), ");
+		/* Add debug code */
+		cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
+						it->vl, it->dbgStack, 0);
+		ralloc_asprintf_append(&it->buffer, ", ");
+		cgAddDbgCode(CG_TYPE_CONDITION, &it->buffer, it->cgOptions, it->cgbl,
+						it->vl, it->dbgStack, 0);
+	}
+}
+
+static void
+loop_debug_terminal(ir_loop* ir, ir_output_traverser_visitor* it)
+{
+	if (it->cgOptions == DBG_CG_ORIGINAL_SRC)
+		return;
+
+	if (ir->mode == ir_loop_for && ir->debug_target
+			&& ir->debug_state_internal == ir_dbg_loop_qyr_terminal) {
+		cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
+									it->vl, it->dbgStack, 0);
+		if (!ir->debug_terminal->block_empty())
+			ralloc_asprintf_append(&it->buffer, ", ");
+	}
+
+	DbgCgOptions opts = it->cgOptions;
+	it->cgOptions = DBG_CG_ORIGINAL_SRC;
+	it->visit_block(ir->debug_terminal, ", ");
+	it->cgOptions = opts;
+}
+
+static void
+loop_debug_end(ir_loop* ir, ir_output_traverser_visitor* it)
+{
+	if (it->cgOptions == DBG_CG_ORIGINAL_SRC)
+		return;
+
+	if (ir->need_dbgiter()) {
+		it->indent();
+		ralloc_asprintf_append (&it->buffer, "%s++;\n", ir->debug_iter_name);
+	}
+
+	if (ir->mode == ir_loop_for && !ir->debug_target &&
+			ir->debug_state_internal == ir_dbg_loop_wrk_init) {
+		it->indentation--;
+		it->indent();
+		ralloc_asprintf_append (&it->buffer, "}\n");
+	}
+
+	it->indent();
+}
 
 void
 ir_output_traverser_visitor::visit(ir_loop *ir)
 {
-	ir_rvalue* check = ir->condition();
+	if (this->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target)
+		this->dbgTargetProcessed = true;
+
+	loop_debug_init(ir, this);
+
 	if (ir->mode == ir_loop_for) {
 		ralloc_asprintf_append (&buffer, "for (");
-		visit_block(ir->debug_init, ", ");
 		ralloc_asprintf_append (&buffer, "; ");
-		if (check)
-			check->accept(this);
+		loop_debug_condition(ir, this);
 		ralloc_asprintf_append (&buffer, "; ");
-		visit_block(ir->debug_terminal, ", ");
+		loop_debug_terminal(ir, this);
 		ralloc_asprintf_append (&buffer, ") {\n");
 		visit_block(&ir->body_instructions, ";\n");
+		loop_debug_end(ir, this);
 		ralloc_asprintf_append (&buffer, "}");
 		return;
 	}
@@ -1353,23 +1487,21 @@ ir_output_traverser_visitor::visit(ir_loop *ir)
 
 	if (ir->mode == ir_loop_while) {
 		ralloc_asprintf_append (&buffer, "while (");
-		if (check)
-			check->accept(this);
+		loop_debug_condition(ir, this);
 		ralloc_asprintf_append (&buffer, ") {\n");
 	} else {
 		ralloc_asprintf_append (&buffer, "do {\n");
 	}
 
-	visit_block(ir->debug_init, ";\n", true);
 	visit_block(&ir->body_instructions, ";\n");
 	visit_block(ir->debug_terminal, ";\n", true);
+	loop_debug_end(ir, this);
 
 	if (ir->mode == ir_loop_while) {
 		ralloc_asprintf_append (&buffer, "}");
 	} else {
 		ralloc_asprintf_append (&buffer, "while (");
-		if (check)
-			check->accept(this);
+		loop_debug_condition(ir, this);
 		ralloc_asprintf_append (&buffer, ")");
 	}
 }

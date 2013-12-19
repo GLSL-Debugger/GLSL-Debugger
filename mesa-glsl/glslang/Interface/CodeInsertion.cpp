@@ -611,21 +611,12 @@ static void addVariableCodeFromList(char** prog, ShChangeableList* cgbl,
     	ralloc_asprintf_append (prog, ", 0.0");
 }
 
-static bool needDbgLoopIter(ir_loop* ir)
-{
-	if( ir && ( ir->debug_state_internal != ir_dbg_loop_unset
-			&& ir->debug_state_internal != ir_dbg_loop_qyr_init
-			&& ir->debug_state_internal != ir_dbg_loop_wrk_init ) )
-		return true;
-	return false;
-}
-
 static bool hasLoop(IRGenStack *stack) {
     IRGenStack::iterator iter;
 
     for(iter = stack->begin(); iter != stack->end(); iter++) {
     	ir_loop* ir = (*iter)->as_loop();
-    	if( needDbgLoopIter(ir) )
+    	if( ir && ir->need_dbgiter() )
     		return true;
     }
     return false;
@@ -641,7 +632,7 @@ static void addLoopHeader(char** prog, IRGenStack* stack)
         /* for each loop node inside stack, e.g. dbgPath add condition */
         for(iter = stack->begin(); iter != stack->end(); iter++) {
         	ir_loop* ir = (*iter)->as_loop();
-        	if( needDbgLoopIter(ir) ){
+        	if( ir && ir->need_dbgiter() ){
         		if (ir->debug_iter_name == NULL)
         			printf("No iter name, crash ahead");
         		ralloc_asprintf_append (prog, "%s == %i &&",

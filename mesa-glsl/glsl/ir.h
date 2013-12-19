@@ -1273,6 +1273,15 @@ public:
       return NULL;
    }
 
+   bool need_dbgiter()
+   {
+      if (this->debug_state_internal != ir_dbg_loop_unset &&
+            this->debug_state_internal != ir_dbg_loop_qyr_init &&
+            this->debug_state_internal != ir_dbg_loop_wrk_init)
+        return true;
+      return false;
+   }
+
    ir_dummy* debug_init;
    ir_dummy* debug_check;
    ir_dummy* debug_terminal;
