@@ -11,12 +11,12 @@ are permitted provided that the following conditions are met:
     list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-	list of conditions and the following disclaimer in the documentation and/or
-	other materials provided with the distribution.
+    list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-	of its contributors may be used to endorse or promote products derived from
-	this software without specific prior written permission.
+    of its contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -363,7 +363,7 @@ static void loadDbgFunctions(void)
 			}
 			free(file);
 		}
-	}while(! _findnext(handle, &fd));
+	} while (! _findnext(handle, &fd));
 #endif
 }
 
@@ -676,6 +676,7 @@ static void printArgument(void *addr, int type)
 		break;
 	default:
 		dbgPrintNoPrefix(DBGLVL_INFO, "UNKNOWN TYPE [%i], ", type);
+		break;
 	}
 }
 
@@ -793,35 +794,35 @@ static void endReplay(void)
 	setErrorCode(glError());
 }
 
-/*
- Does all operations necessary to get the result of a given debug shader
- back to the caller, i.e. setup the shader and its environment, replay the
- draw call and readback the result.
- Parameters:
- items[0] : pointer to vertex shader src
- items[1] : pointer to geometry shader src
- items[2] : pointer to fragment shader src
- items[3] : debug target, see DBG_TARGETS below
- if target == DBG_TARGET_FRAGMENT_SHADER:
- items[4] : number of components to read (1:R, 3:RGB, 4:RGBA)
- items[5] : format of readback (GL_FLOAT, GL_INT, GL_UINT)
- if target == DBG_TARGET_VERTEX_SHADER or DBG_TARGET_GEOMETRY_SHADER:
- items[4] : primitive mode
- items[5] : force primitive mode even for geometry shader target
- items[6] : expected size of debugResult (# floats) per vertex
- Returns:
- if target == DBG_TARGET_FRAGMENT_SHADER:
- result   : DBG_READBACK_RESULT_FRAGMENT_DATA or DBG_ERROR_CODE
- on error
- items[0] : buffer address
- items[1] : image width
- items[2] : image height
- if target == DBG_TARGET_VERTEX_SHADER or DBG_TARGET_GEOMETRY_SHADER:
- result   : DBG_READBACK_RESULT_VERTEX_DATA or DBG_ERROR_CODE on
- error
- items[0] : buffer address
- items[1] : number of vertices
- items[2] : number of primitives
+/**
+ *	Does all operations necessary to get the result of a given debug shader
+ *	back to the caller, i.e. setup the shader and its environment, replay the
+ *	draw call and readback the result.
+ *	Parameters:
+ *		items[0] : pointer to vertex shader src
+ *		items[1] : pointer to geometry shader src
+ *		items[2] : pointer to fragment shader src
+ *		items[3] : debug target, see DBG_TARGETS below
+ *		if target == DBG_TARGET_FRAGMENT_SHADER:
+ *			items[4] : number of components to read (1:R, 3:RGB, 4:RGBA)
+ *			items[5] : format of readback (GL_FLOAT, GL_INT, GL_UINT)
+ *		if target == DBG_TARGET_VERTEX_SHADER or DBG_TARGET_GEOMETRY_SHADER:
+ *			items[4] : primitive mode
+ *			items[5] : force primitive mode even for geometry shader target
+ *			items[6] : expected size of debugResult (# floats) per vertex
+ *	Returns:
+ *		if target == DBG_TARGET_FRAGMENT_SHADER:
+ *			result   : DBG_READBACK_RESULT_FRAGMENT_DATA or DBG_ERROR_CODE
+ *					   on error
+ *			items[0] : buffer address
+ *			items[1] : image width
+ *			items[2] : image height
+ *		if target == DBG_TARGET_VERTEX_SHADER or DBG_TARGET_GEOMETRY_SHADER:
+ *			result   : DBG_READBACK_RESULT_VERTEX_DATA or DBG_ERROR_CODE on
+ *					   error
+ *			items[0] : buffer address
+ *			items[1] : number of vertices
+ *			items[2] : number of primitives
  */
 static void shaderStep(void)
 {
@@ -1201,34 +1202,32 @@ void (*DEBUGLIB_EXTERNAL_getOrigFunc(const char *fname))(void)
 
 int checkGLExtensionSupported(const char *extension)
 {
-    // statics are set to zero
-    static Hash extensions;
-    static int dummy = 1;
+	// statics are set to zero
+	static Hash extensions;
+	static int dummy = 1;
 
-    //dbgPrint(DBGLVL_INFO, "EXTENSION STRING: %s\n", extString);
-    if(!extensions.table) {
+	//dbgPrint(DBGLVL_INFO, "EXTENSION STRING: %s\n", extString);
+	if (!extensions.table) {
+		int i, n;
 		dbgPrint(DBGLVL_DEBUG, "Creating extension hashes\n");
-        hash_create(&extensions, hashString, compString, 512, 0);
-        int i = 0;
-        int n;
-        ORIG_GL(glGetIntegerv)(GL_NUM_EXTENSIONS, &n);
-        dbgPrint(DBGLVL_INFO, "Extensions found %i\n", n);
-        for(i = 0; i < n; ++i) {
-            const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
-            // we don't need to store any relevant data. we just want a quick
-            // string lookup.
-            hash_insert(&extensions, name, &dummy);
-        }
-    }
+		hash_create(&extensions, hashString, compString, 512, 0);
+		ORIG_GL(glGetIntegerv)(GL_NUM_EXTENSIONS, &n);
+		dbgPrint(DBGLVL_INFO, "Extensions found %i\n", n);
+		for (i = 0; i < n; ++i) {
+			const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
+			// we don't need to store any relevant data. we just want a quick
+			// string lookup.
+			hash_insert(&extensions, name, &dummy);
+		}
+	}
 
-    // check support
-    void *data = hash_find(&extensions, extension);
-    if(!data) {
-        dbgPrint(DBGLVL_INFO, "not found: %s\n", extension);
-        return 0;
-    }
+	// check support
+	if (!hash_find(&extensions, extension)) {
+		dbgPrint(DBGLVL_INFO, "not found: %s\n", extension);
+		return 0;
+	}
 	dbgPrint(DBGLVL_INFO, "found: %s\n", extension);
-    return 1;
+	return 1;
 }
 
 int checkGLVersionSupported(int majorVersion, int minorVersion)

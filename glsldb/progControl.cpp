@@ -738,6 +738,7 @@ char* ProgramControl::printArgument(void *addr, int type)
 	default:
 		dbgPrintNoPrefix(DBGLVL_INFO, "UNKNOWN TYPE [%i]", type);
 		asprintf(&argString, "UNKNOWN_TYPE[%i]", type);
+		break;
 	}
 	free(tmp);
 	return argString;

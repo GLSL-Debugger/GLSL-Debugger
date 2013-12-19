@@ -103,9 +103,9 @@ void GlCallStatistics::incCallStatistic(QString i_qFName)
 		m_pModel->item(row, 1)->setEditable(false);
 
 		/* set row height of view */
-		m_pTableView->setRowHeight(
-				m_pProxyModel->mapFromSource(m_pModel->index(row, 0)).row(),
-				22);
+		QModelIndex rowIndex = m_pModel->index(row, 0);
+		if (rowIndex.isValid())
+			m_pTableView->setRowHeight(m_pProxyModel->mapFromSource(rowIndex).row(), 22);
 	} else if (resultList.count() == 1) {
 		/* Exiting item */
 		row = resultList[0]->row();

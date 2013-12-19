@@ -112,6 +112,7 @@ float getMappedValueF(float v, Mapping *mapping, RangeMapping *rangeMapping,
 		break;
 	case RANGE_MAP_ABSOLUTE:
 		value = mapValueF(fabs(v), minmax[0], minmax[1]);
+		break;
 	}
 	return value;
 }
@@ -141,6 +142,7 @@ int getMappedValueI(float v, Mapping *mapping, RangeMapping *rangeMapping,
 		break;
 	case RANGE_MAP_ABSOLUTE:
 		value = mapValueI(fabs(v), minmax[0], minmax[1]);
+		break;
 	}
 	return value;
 }
