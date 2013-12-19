@@ -1211,7 +1211,8 @@ int checkGLExtensionSupported(const char *extension)
         hash_create(&extensions, hashString, compString, 512, 0);
         int i = 0;
         int n;
-        glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+        ORIG_GL(glGetIntegerv)(GL_NUM_EXTENSIONS, &n);
+        dbgPrint(DBGLVL_INFO, "Extensions found %i\n", n);
         for(i = 0; i < n; ++i) {
             const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
             // we don't need to store any relevant data. we just want a quick
