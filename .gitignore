@@ -29,6 +29,7 @@ GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.hpp
 
 # QT stuff
 moc_*.cxx
+moc_*.cxx_parameters
 ui_*.h
 qrc_*.cxx
 glsldb/glslDevil.qrc.depends
