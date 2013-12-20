@@ -1244,10 +1244,9 @@ int checkGLVersionSupported(int majorVersion, int minorVersion)
 		char  *dot = NULL;
 		major = (int)strtol(versionString, &dot, 10);
 		minor = (int)strtol(++dot, NULL, 10);
-		dbgPrint(DBGLVL_INFO, "GL VENDOR: %s\n", rendererString);
 		dbgPrint(DBGLVL_INFO, "GL RENDERER: %s\n", rendererString);
-		dbgPrint(DBGLVL_INFO, "GL VERSION: %s\n", versionString);
 		dbgPrint(DBGLVL_INFO, "GL VENDOR: %s\n", vendorString);
+		dbgPrint(DBGLVL_INFO, "GL VERSION: %s\n", versionString);
 		dbgPrint(DBGLVL_INFO, "GL SHADING LANGUAGE: %s\n", shadingString);
 	}
 	if (majorVersion < major ||
