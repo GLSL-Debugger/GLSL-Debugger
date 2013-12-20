@@ -283,14 +283,13 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		}
 		return PCE_NONE;
 	} else if (WIFSTOPPED(status)) {
-		switch (WSTOPSIG(status)) {
+		int signal = WSTOPSIG(status);
+		switch (signal) {
 		case SIGSTOP:
-			dbgPrint(DBGLVL_DEBUG,
-					"debuggee process was stopped by SIGSTOP %i\n", WSTOPSIG(status));
+			dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGSTOP %i\n", signal);
 			return PCE_NONE;
 		case SIGTRAP:
-			dbgPrint(DBGLVL_DEBUG,
-					"debuggee process was stopped by SIGTRAP %i\n", WSTOPSIG(status));
+			dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGTRAP %i\n", signal);
 			return PCE_NONE;
 		case SIGHUP:
 		case SIGINT:
@@ -315,8 +314,8 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		case SIGXCPU:
 		case SIGVTALRM:
 		default:
-			dbgPrint(DBGLVL_INFO,
-					"debuggee process was stopped by signal %i\n", strsignal(status));
+			dbgPrint(DBGLVL_INFO, "debuggee process was stopped by signal %i: %s\n",
+					signal, strsignal(signal));
 			return PCE_EXIT;
 		}
 #ifdef WIFCONTINUED
