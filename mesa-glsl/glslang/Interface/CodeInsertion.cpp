@@ -624,24 +624,25 @@ static bool hasLoop(IRGenStack *stack) {
 
 static void addLoopHeader(char** prog, IRGenStack* stack)
 {
-    IRGenStack::iterator iter;
+	if (!hasLoop(stack))
+	    	return;
 
-    if (hasLoop(stack)) {
-    	ralloc_asprintf_append (prog, "(");
+	IRGenStack::iterator iter;
 
-        /* for each loop node inside stack, e.g. dbgPath add condition */
-        for(iter = stack->begin(); iter != stack->end(); iter++) {
-        	ir_loop* ir = (*iter)->as_loop();
-        	if( ir && ir->need_dbgiter() ){
-        		if (ir->debug_iter_name == NULL)
-        			printf("No iter name, crash ahead");
-        		ralloc_asprintf_append (prog, "%s == %i &&",
-        					ir->debug_iter_name, ir->debug_iter);
-        	}
-        }
+	ralloc_asprintf_append (prog, "(");
 
-    	ralloc_asprintf_append (prog, ")");
-    }
+	/* for each loop node inside stack, e.g. dbgPath add condition */
+	for (iter = stack->begin(); iter != stack->end(); iter++) {
+		ir_loop* ir = (*iter)->as_loop();
+		if (ir && ir->need_dbgiter()) {
+			if (ir->debug_iter_name == NULL)
+				dbgPrint(DBGLVL_ERROR, "No iter name, crash ahead");
+			ralloc_asprintf_append(prog, "%s == %i && ",
+						ir->debug_iter_name, ir->debug_iter);
+		}
+	}
+
+	ralloc_asprintf_append (prog, "(");
 }
 
 static void addLoopFooter(char** prog, IRGenStack* stack)

@@ -1330,10 +1330,9 @@ loop_debug_init(ir_loop* ir, ir_output_traverser_visitor* it)
 	}
 
 	/* Add loop counter */
-	if (ir->need_dbgiter()) {
+	if (ir->need_dbgiter())
 		ralloc_asprintf_append (&it->buffer, "%s = 0;\n", ir->debug_iter_name);
-		it->indent();
-	}
+
 
 	/* Add debug temoprary register to copy condition */
 	if (ir->debug_target && ir->debug_state_internal == ir_dbg_loop_select_flow) {
@@ -1342,9 +1341,9 @@ loop_debug_init(ir_loop* ir, ir_output_traverser_visitor* it)
 		case DBG_CG_LOOP_CONDITIONAL:
 		case DBG_CG_CHANGEABLE:
 		case DBG_CG_GEOMETRY_CHANGEABLE:
+			it->indent();
 			cgInit(CG_TYPE_CONDITION, NULL, it->vl, it->mode);
 			cgAddDeclaration(CG_TYPE_CONDITION, &it->buffer, it->mode);
-			it->indent();
 			break;
 		default:
 			break;
@@ -1362,7 +1361,6 @@ loop_debug_init(ir_loop* ir, ir_output_traverser_visitor* it)
 				cgAddDbgCode(CG_TYPE_RESULT, &it->buffer, it->cgOptions, it->cgbl,
 								it->vl, it->dbgStack, 0);
 				ralloc_asprintf_append (&it->buffer, ";\n");
-				it->indent();
 				break;
 			default:
 				break;
@@ -1371,14 +1369,13 @@ loop_debug_init(ir_loop* ir, ir_output_traverser_visitor* it)
 				ir->debug_state_internal == ir_dbg_loop_wrk_init) {
 			it->indentation++;
 			ralloc_asprintf_append (&it->buffer, "{\n");
-			it->indent();
 		}
 	}
 
-	DbgCgOptions opts = it->cgOptions;
-	it->cgOptions = DBG_CG_ORIGINAL_SRC;
-	it->visit_block(ir->debug_init, ";\n ");
-	it->cgOptions = opts;
+	if (!ir->debug_check->block_empty()){
+		it->visit_block(ir->debug_init, ";\n ", true);
+		ralloc_asprintf_append (&it->buffer, ";\n");
+	}
 	it->indent();
 }
 
@@ -1403,10 +1400,13 @@ loop_debug_condition(ir_loop* ir, ir_output_traverser_visitor* it)
 	ir_rvalue* check = ir->condition();
 	DbgCgOptions opts = it->cgOptions;
 	it->cgOptions = DBG_CG_ORIGINAL_SRC;
-	if (check)
+	if (check){
+		// Condition here is not-inverted. Invert it again.
+		ralloc_asprintf_append(&it->buffer, "!");
 		check->accept(it);
-	else
+	}else{
 		ralloc_asprintf_append(&it->buffer, "true");
+	}
 	it->cgOptions = opts;
 
 	if (it->cgOptions != DBG_CG_ORIGINAL_SRC && ir->debug_target &&
@@ -1447,6 +1447,7 @@ loop_debug_end(ir_loop* ir, ir_output_traverser_visitor* it)
 	if (it->cgOptions == DBG_CG_ORIGINAL_SRC)
 		return;
 
+	it->indentation++;
 	if (ir->need_dbgiter()) {
 		it->indent();
 		ralloc_asprintf_append (&it->buffer, "%s++;\n", ir->debug_iter_name);
@@ -1458,6 +1459,7 @@ loop_debug_end(ir_loop* ir, ir_output_traverser_visitor* it)
 		it->indent();
 		ralloc_asprintf_append (&it->buffer, "}\n");
 	}
+	it->indentation--;
 
 	it->indent();
 }
