@@ -35,17 +35,13 @@
 #include <string.h>
 #include "Program.h"
 #include "MShader.h"
+#include "CodeTools.h"
 #include "glsl/ir.h"
-//#include "glsl/glsl_symbol_table.h"
 #include "glsl/list.h"
 #include "Visitors/debugjump.h"
 #include "Visitors/scopestack.h"
-#include "IRScope.h"
-#include "CodeTools.h"
-
-#include "mesa-glsl/glslang/Include/ShHandle.h"
-#include "mesa-glsl/glslang/Include/intermediate.h"
 #include "glsldb/utils/dbgprint.h"
+
 
 static struct {
 	ir_debugjump_traverser_visitor* it;

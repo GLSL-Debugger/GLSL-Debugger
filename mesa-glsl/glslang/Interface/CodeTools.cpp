@@ -92,16 +92,16 @@ std::string getMangledName(ir_function_signature* fs)
 {
 	std::string mname = "";
 
-	if( !fs )
+	if (!fs)
 		return mname;
 
 	mname += std::string(fs->function_name()) + "(";
 
 	// Assume function has only one signature
-	foreach_iter( exec_list_iterator, param, fs->parameters ){
-		ir_variable* v = ((ir_instruction*)param.get())->as_variable();
-		if( v )
-			makeMangledName( v->type, mname );
+	foreach_iter( exec_list_iterator, param, fs->parameters ) {
+		ir_variable* v = ((ir_instruction*) param.get())->as_variable();
+		if (v)
+			makeMangledName(v->type, mname);
 	}
 
 	return mname;
@@ -129,13 +129,13 @@ char* getFunctionName(const char* manglName)
     return name;
 }
 
-ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader )
+ir_function* getFunctionBySignature(const char *sig, struct gl_shader* shader)
 // Assumption: 1. roots hold all function definitions.
 //                for single file shaders this should hold.
 // Todo: Add solution for multiple files compiled in one shader.
 {
-    VPRINT(3, "Search for function [%s]\n", sig);
-    return shader->symbols->get_function(sig);
+	VPRINT(3, "Search for function [%s]\n", sig);
+	return shader->symbols->get_function(sig);
 }
 
 //bool isChildofMain(TIntermNode *node, TIntermNode *root)
@@ -249,64 +249,41 @@ int getFunctionDebugParameter(ir_function_signature *node)
 
 ir_instruction* getIRDebugParameter(exec_list *list, int pnum)
 {
-    if (!list)
-        return NULL;
+	if (!list)
+		return NULL;
 
-    int i = 0;
-    ir_instruction* param = NULL;
-    foreach_iter( exec_list_iterator, iter, *list ){
-    	if( i == pnum )
-    		param = (ir_instruction*)iter.get();
-    	++i;
-    }
+	int i = 0;
+	ir_instruction* param = NULL;
+	foreach_iter( exec_list_iterator, iter, *list ) {
+		if (i == pnum)
+			param = (ir_instruction*) iter.get();
+		++i;
+	}
 
-    if ( param ) {
-        dbgPrint(DBGLVL_ERROR, "CodeTools -  function does not have this much parameter\n");
-        exit(1);
-    }
+	if (param) {
+		dbgPrint(DBGLVL_ERROR, "CodeTools -  function does not have this much parameter\n");
+		exit(1);
+	}
 
-    return param;
+	return param;
 }
-
-//bool getAtomicDebugParameter(TIntermAggregate *node, int pnum)
-//{
-//    if (!node)
-//        return false;
-//
-//    if ( node->getOp() != EOpFunctionCall)
-//        return false;
-//
-//    TIntermSequence funcCallSeq = node->getSequence();
-//
-//    if ((int) funcCallSeq.size() < pnum) {
-//        dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
-//        exit(1);
-//    }
-//
-//    if (!funcCallSeq[pnum]->getAsTyped()) {
-//        dbgPrint(DBGLVL_ERROR, "CodeTools - in parameter is not of type TIntermTyped\n");
-//        exit(1);
-//    }
-//
-//    return funcCallSeq[pnum]->getAsTyped()->isAtomic();
-//}
 
 ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum)
 {
-    if (!ir)
-        return NULL;
+	if (!ir)
+		return NULL;
 
-    int i = 0;
-    ir_sideeffects_traverser_visitor v;
-    foreach_iter(exec_list_iterator, iter, *ir) {
-    	ir_instruction* inst = (ir_instruction *)iter.get();
-    	if( i == pnum ){
-    		inst->accept(&v);
-    		return v.hasSideEffects ? inst : NULL;
-    	}
-    	++i;
-    }
+	int i = 0;
+	ir_sideeffects_traverser_visitor v;
+	foreach_iter(exec_list_iterator, iter, *ir) {
+		ir_instruction* inst = (ir_instruction *) iter.get();
+		if (i == pnum) {
+			inst->accept(&v);
+			return v.hasSideEffects ? inst : NULL;
+		}
+		++i;
+	}
 
-    dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
-    exit(1);
+	dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
+	exit(1);
 }

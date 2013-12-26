@@ -3,7 +3,7 @@
 
 #include "../Public/ShaderLang.h"
 #include "../Include/Common.h"
-#include "../Include/intermediate.h"
+#include "ir.h"
 
 #define MAIN_FUNC_SIGNATURE "main"
 
@@ -21,13 +21,9 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
 
 char* getFunctionName(const char* in);
 ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader );
-//bool isChildofMain(TIntermNode *node, TIntermNode *root);
 int getFunctionDebugParameter(ir_function_signature *node);
 ir_instruction* getIRDebugParameter(exec_list *list, int pnum);
-//bool getAtomicDebugParameter(TIntermAggregate *node, int pnum);
 ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum);
-//bool isPartofMain(TIntermNode *target, TIntermNode *root);
-//bool isPartofNode(TIntermNode *target, TIntermNode *node);
 
 #endif
 

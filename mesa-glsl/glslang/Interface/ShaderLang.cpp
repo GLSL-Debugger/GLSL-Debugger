@@ -277,7 +277,10 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 				break;
 		}
 
+		char* old_locale = setlocale(LC_NUMERIC, NULL);
+		setlocale(LC_NUMERIC, "POSIX");
 		compile_shader( holder->ctx, shader, debugOptions );
+		setlocale(LC_NUMERIC, old_locale);
 
 		// TODO: informative names
 		if( !shader->CompileStatus ){

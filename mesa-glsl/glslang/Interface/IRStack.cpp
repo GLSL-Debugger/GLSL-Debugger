@@ -8,42 +8,41 @@
 #include "glsl/ir.h"
 #include <stdlib.h>
 
-
-IRStack::IRStack( )
+IRStack::IRStack()
 {
-    n = 0;
-    s = NULL;
+	n = 0;
+	s = NULL;
 }
 
-IRStack::~IRStack( )
+IRStack::~IRStack()
 {
 	free(s);
 }
 
 void IRStack::push(ir_instruction* node)
 {
-    n++;
-    s = (ir_instruction**) realloc(s, n * sizeof(ir_instruction*));
-    s[n-1] = node;
+	n++;
+	s = (ir_instruction**) realloc(s, n * sizeof(ir_instruction*));
+	s[n - 1] = node;
 }
 
 void IRStack::pop(void)
 {
-    n--;
-    s = (ir_instruction**) realloc(s, n * sizeof(ir_instruction*));
+	n--;
+	s = (ir_instruction**) realloc(s, n * sizeof(ir_instruction*));
 }
 
 ir_instruction* IRStack::top(void)
 {
-    if (n==0) {
-        return NULL;
-    } else {
-        return s[n-1];
-    }
+	if (n == 0) {
+		return NULL;
+	} else {
+		return s[n - 1];
+	}
 }
 
 int IRStack::empty(void)
 {
-    return (n==0);
+	return (n == 0);
 }
 

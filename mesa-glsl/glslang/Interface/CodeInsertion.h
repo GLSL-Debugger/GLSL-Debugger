@@ -3,7 +3,7 @@
 
 #include "../Public/ShaderLang.h"
 #include "../Include/Common.h"
-#include "../Include/intermediate.h"
+#include "../Include/BaseTypes.h"
 
 enum cgTypes {
 	CG_TYPE_NONE,

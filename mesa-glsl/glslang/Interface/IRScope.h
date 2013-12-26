@@ -7,7 +7,10 @@
 #ifndef __IRSCOPE_H_
 #define __IRSCOPE_H_
 
-#include "intermediate.h"
+#include "ShaderLang.h"
+#include <list>
+
+typedef std::list<int> scopeList;
 
 class ir_instruction;
 

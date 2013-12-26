@@ -3,6 +3,8 @@
 #include "Visitors/debugvar.h"
 #include "Visitors/debugchange.h"
 #include "glsldb/utils/dbgprint.h"
+#include "mesa/main/mtypes.h"
+
 
 //
 //  Generate code from the given parse tree

@@ -37,9 +37,7 @@
 #include <stdlib.h>
 #include "glsl/ir.h"
 #include "glsl/list.h"
-#include "mesa-glsl/glslang/Include/ShHandle.h"
 #include "mesa-glsl/glslang/Public/ShaderLang.h"
-#include "mesa-glsl/glslang/Include/intermediate.h"
 
 #include "MShader.h"
 #include "CodeInsertion.h"
@@ -153,10 +151,10 @@ static void dumpDbgStack(IRGenStack *stack)
     	ir_instruction* ir = (*iter);
         dumpNodeInfo(ir);
         switch ( ir->debug_overwrite ) {
-            case DbgOwDebugCode:
+            case ir_dbg_ow_debug:
                 dbgPrint(DBGLVL_COMPILERINFO, " <ir_dbg_ow_debug> ");
                 break;
-            case DbgOwOriginalCode:
+            case ir_dbg_ow_original:
                 dbgPrint(DBGLVL_COMPILERINFO, " <ir_dbg_ow_original> ");
                 break;
             default:

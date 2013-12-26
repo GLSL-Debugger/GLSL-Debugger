@@ -9,12 +9,10 @@
 
 struct ir_instruction;
 
-
-class IRStack
-{
+class IRStack {
 public:
-	IRStack( );
-	~IRStack( );
+	IRStack();
+	~IRStack();
 
 	void push(ir_instruction* n);
 	void pop(void);
@@ -23,8 +21,8 @@ public:
 	int empty(void);
 
 private:
-    int n;
-    ir_instruction **s;
+	int n;
+	ir_instruction **s;
 };
 
 #endif /* __IRSTACK_H_ */
