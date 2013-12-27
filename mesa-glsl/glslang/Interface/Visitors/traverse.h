@@ -77,6 +77,7 @@ public:
 	// Dummy node
 	virtual bool visitIr(ir_dummy* ir) { return ir; };
 
+
     int  depth;
     bool preVisit;
     bool postVisit;

@@ -8,6 +8,7 @@
 #include "ShaderHolder.h"
 #include "Program.h"
 #include "MShader.h"
+#include "Visitors/sideeffects.h"
 
 // Mesa includes
 #include "glsl/standalone_scaffolding.h"
@@ -91,6 +92,10 @@ void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 	if( !state->error && dump_lir ){
 		_mesa_print_ir( shader->ir, state );
 	}
+
+	/* Check side effects, discards, vertex emits */
+	ir_sideeffects_traverser_visitor sideeffects;
+	sideeffects.visit(shader->ir);
 
 	return;
 }

@@ -274,13 +274,10 @@ ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum)
 		return NULL;
 
 	int i = 0;
-	ir_sideeffects_traverser_visitor v;
 	foreach_iter(exec_list_iterator, iter, *ir) {
 		ir_instruction* inst = (ir_instruction *) iter.get();
-		if (i == pnum) {
-			inst->accept(&v);
-			return v.hasSideEffects ? inst : NULL;
-		}
+		if (i == pnum)
+			return inst->debug_sideeffects & ir_dbg_se_general ? inst : NULL;
 		++i;
 	}
 

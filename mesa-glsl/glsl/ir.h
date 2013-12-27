@@ -188,6 +188,13 @@ enum ir_dbg_overwrite {
    ir_dbg_ow_debug,
    ir_dbg_ow_end
 };
+
+enum ir_dbg_sideefects {
+	ir_dbg_se_unset = 0,
+	ir_dbg_se_general = 1,
+	ir_dbg_se_discard = 2,
+	ir_dbg_se_emit_vertex = 4
+};
 #endif
 
 /**
@@ -205,6 +212,7 @@ public:
    enum ir_dbg_state debug_state;
    enum ir_dbg_overwrite debug_overwrite;
    bool debug_target;
+   int debug_sideeffects;
 #endif
 
    /**
@@ -263,6 +271,7 @@ protected:
       ir_type = ir_type_unset;
 #ifdef IR_DEBUG_STATE
       debug_state = ir_dbg_state_unset;
+      debug_sideeffects = ir_dbg_se_unset;
 #endif
    }
 };
@@ -1169,6 +1178,7 @@ public:
 
 #ifdef IR_DEBUG_STATE
       debug_state_internal = ir_dbg_if_unset;
+      debug_sideeffects_then = debug_sideeffects_else = ir_dbg_se_unset;
 #endif
    }
 
@@ -1194,6 +1204,8 @@ public:
 
 #ifdef IR_DEBUG_STATE
    enum ir_dbg_state_internal_if debug_state_internal;
+   int debug_sideeffects_then;
+   int debug_sideeffects_else;
 #endif
 };
 

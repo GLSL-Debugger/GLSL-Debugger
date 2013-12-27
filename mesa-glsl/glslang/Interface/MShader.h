@@ -19,10 +19,10 @@ std::string getCodeString( ir_variable* var, bool withQualifier = false,
 std::string getCodeString( const struct glsl_type* type );
 
 
-bool containsDiscard( ir_instruction* );
-bool containsDiscard( exec_list* );
-bool containsEmitVertex( ir_instruction* );
-bool containsEmitVertex( exec_list* );
+//bool containsDiscard( ir_instruction* );
+//bool containsDiscard( exec_list* );
+//bool containsEmitVertex( ir_instruction* );
+//bool containsEmitVertex( exec_list* );
 
 bool dbg_state_not_match( exec_list*, enum ir_dbg_state );
 bool dbg_state_not_match( ir_dummy*, enum ir_dbg_state );

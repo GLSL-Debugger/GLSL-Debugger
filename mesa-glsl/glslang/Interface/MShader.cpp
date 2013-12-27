@@ -78,85 +78,85 @@ std::string getCodeString(const struct glsl_type* type)
 	return out;
 }
 
-bool containsDiscard(ir_instruction* ir)
-{
-	switch (ir->ir_type) {
-	case ir_type_discard:
-		return true;
-		break;
-	case ir_type_assignment: {
-		ir_assignment* f = ir->as_assignment();
-		return containsDiscard(f->lhs) || containsDiscard(f->rhs);
-		break;
-	}
-	case ir_type_expression: {
-		ir_expression* e = ir->as_expression();
-		int operands = e->get_num_operands();
-		for (int i = 0; i < operands; ++i)
-			if (e->operands[i] && containsDiscard(e->operands[i]))
-				return true;
-		break;
-	}
-	case ir_type_call: {
-		ir_call* c = ir->as_call();
-		return containsDiscard(&(c->callee->body));
-		break;
-	}
-	default:
-		break;
-	}
-	return false;
-}
-
-bool containsDiscard(exec_list* list)
-{
-	foreach_iter( exec_list_iterator, iter, *list ) {
-		ir_instruction* ir = (ir_instruction*) iter.get();
-		if (containsDiscard(ir))
-			return true;
-	}
-	return false;
-}
-
-bool containsEmitVertex(ir_instruction* ir)
-{
-	switch (ir->ir_type) {
-	case ir_type_emit_vertex:
-		return true;
-		break;
-	case ir_type_assignment: {
-		ir_assignment* f = ir->as_assignment();
-		return containsEmitVertex(f->lhs) || containsEmitVertex(f->rhs);
-		break;
-	}
-	case ir_type_expression: {
-		ir_expression* e = ir->as_expression();
-		int operands = e->get_num_operands();
-		for (int i = 0; i < operands; ++i)
-			if (e->operands[i] && containsEmitVertex(e->operands[i]))
-				return true;
-		break;
-	}
-	case ir_type_call: {
-		ir_call* c = ir->as_call();
-		return containsEmitVertex(&(c->callee->body));
-		break;
-	}
-	default:
-		break;
-	}
-	return false;
-}
-
-bool containsEmitVertex(exec_list* list)
-{
-	foreach_iter( exec_list_iterator, iter, *list ) {
-		ir_instruction* ir = (ir_instruction*) iter.get();
-		if (containsEmitVertex(ir))
-			return true;
-	}
-	return false;
-}
+//bool containsDiscard(ir_instruction* ir)
+//{
+//	switch (ir->ir_type) {
+//	case ir_type_discard:
+//		return true;
+//		break;
+//	case ir_type_assignment: {
+//		ir_assignment* f = ir->as_assignment();
+//		return containsDiscard(f->lhs) || containsDiscard(f->rhs);
+//		break;
+//	}
+//	case ir_type_expression: {
+//		ir_expression* e = ir->as_expression();
+//		int operands = e->get_num_operands();
+//		for (int i = 0; i < operands; ++i)
+//			if (e->operands[i] && containsDiscard(e->operands[i]))
+//				return true;
+//		break;
+//	}
+//	case ir_type_call: {
+//		ir_call* c = ir->as_call();
+//		return containsDiscard(&(c->callee->body));
+//		break;
+//	}
+//	default:
+//		break;
+//	}
+//	return false;
+//}
+//
+//bool containsDiscard(exec_list* list)
+//{
+//	foreach_iter( exec_list_iterator, iter, *list ) {
+//		ir_instruction* ir = (ir_instruction*) iter.get();
+//		if (containsDiscard(ir))
+//			return true;
+//	}
+//	return false;
+//}
+//
+//bool containsEmitVertex(ir_instruction* ir)
+//{
+//	switch (ir->ir_type) {
+//	case ir_type_emit_vertex:
+//		return true;
+//		break;
+//	case ir_type_assignment: {
+//		ir_assignment* f = ir->as_assignment();
+//		return containsEmitVertex(f->lhs) || containsEmitVertex(f->rhs);
+//		break;
+//	}
+//	case ir_type_expression: {
+//		ir_expression* e = ir->as_expression();
+//		int operands = e->get_num_operands();
+//		for (int i = 0; i < operands; ++i)
+//			if (e->operands[i] && containsEmitVertex(e->operands[i]))
+//				return true;
+//		break;
+//	}
+//	case ir_type_call: {
+//		ir_call* c = ir->as_call();
+//		return containsEmitVertex(&(c->callee->body));
+//		break;
+//	}
+//	default:
+//		break;
+//	}
+//	return false;
+//}
+//
+//bool containsEmitVertex(exec_list* list)
+//{
+//	foreach_iter( exec_list_iterator, iter, *list ) {
+//		ir_instruction* ir = (ir_instruction*) iter.get();
+//		if (containsEmitVertex(ir))
+//			return true;
+//	}
+//	return false;
+//}
 
 bool dbg_state_not_match(exec_list* list, enum ir_dbg_state state)
 {

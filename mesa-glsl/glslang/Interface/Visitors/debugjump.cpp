@@ -284,24 +284,11 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_swizzle* ir)
 static void checkReturns(ir_instruction* ir, ir_debugjump_traverser_visitor* it)
 {
 	// Check if this operation would have emitted a vertex
-	if( containsEmitVertex( ir ) ){
+	if( ir->debug_sideeffects & ir_dbg_se_emit_vertex ){
 		it->vertexEmited = true;
 		VPRINT( 6, "passed Emit %i\n", __LINE__ );
 	}
-	if( containsDiscard( ir ) ){
-		it->discardPassed = true;
-		VPRINT( 6, "passed Discard %i\n", __LINE__ );
-	}
-}
-
-static void checkReturns(exec_list* ir, ir_debugjump_traverser_visitor* it)
-{
-	// Check if this operation would have emitted a vertex
-	if( containsEmitVertex( ir ) ){
-		it->vertexEmited = true;
-		VPRINT( 6, "passed Emit %i\n", __LINE__ );
-	}
-	if( containsDiscard( ir ) ){
+	if( ir->debug_sideeffects & ir_dbg_se_discard ){
 		it->discardPassed = true;
 		VPRINT( 6, "passed Discard %i\n", __LINE__ );
 	}
@@ -425,7 +412,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 					this->finishedDbgFunction = false;
 				}else{
 					copyShChangeableList( &result.cgbls, node_cgbl );
-					checkReturns( &fs->body, this );
+					checkReturns( fs, this );
 				}
 			}
 			break;
@@ -444,7 +431,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 					setGobalScope( get_scope( ir ) );
 					this->operation = OTOpDone;
 				}else
-					checkReturns( &( ir->callee->body ), this );
+					checkReturns( ir->callee, this );
 			}
 			break;
 		}
@@ -592,7 +579,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 								}else{
 									ir->debug_state_internal = ir_dbg_if_else;
 									// check other branch for discards
-									if( containsDiscard( &ir->then_instructions ) ){
+									if( ir->debug_sideeffects_then & ir_dbg_se_discard ){
 										this->discardPassed = true;
 										VPRINT( 6, "passed Discard %i\n", __LINE__ );
 									}
@@ -600,7 +587,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 							}else{
 								ir->debug_state_internal = ir_dbg_if_then;
 								// check other branch for discards
-								if( containsDiscard( &ir->else_instructions ) ){
+								if( ir->debug_sideeffects_else & ir_dbg_se_discard ){
 									this->discardPassed = true;
 									VPRINT( 6, "passed Discard %i\n", __LINE__ );
 								}
