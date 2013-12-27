@@ -4,7 +4,6 @@
 #include <math.h>
 
 #include "CodeTools.h"
-#include "MShader.h"
 
 #include "glsldb/utils/dbgprint.h"
 

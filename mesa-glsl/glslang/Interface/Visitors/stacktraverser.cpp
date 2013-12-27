@@ -6,7 +6,6 @@
 
 #include "glsl/list.h"
 #include "stacktraverser.h"
-#include "glslang/Interface/MShader.h"
 #include "glsldb/utils/dbgprint.h"
 
 

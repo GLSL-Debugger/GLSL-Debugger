@@ -7,7 +7,6 @@
 #include "traverse.h"
 #include "ir.h"
 #include "glsl/list.h"
-#include "glslang/Interface/MShader.h"
 #include <assert.h>
 
 

@@ -36,7 +36,6 @@
 #include "glsl/ir_unused_structs.h"
 #include "mesa/program/hash_table.h"
 #include "glslang/Interface/CodeTools.h"
-#include "glslang/Interface/MShader.h"
 #include "glslang/Interface/IRScope.h"
 
 

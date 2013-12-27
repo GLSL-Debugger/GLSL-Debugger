@@ -18,4 +18,5 @@ bool compileShaderCode(struct gl_shader* shader);
 bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 		ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code);
 
+
 #endif /* PROGRAM_INTERFACE_TO_MESA */

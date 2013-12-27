@@ -34,7 +34,6 @@
 
 #include <string.h>
 #include "Program.h"
-#include "MShader.h"
 #include "CodeTools.h"
 #include "glsl/ir.h"
 #include "glsl/list.h"

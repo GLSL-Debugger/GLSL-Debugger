@@ -7,7 +7,6 @@
 #include "debugjump.h"
 #include "ShaderLang.h"
 #include "glsl/list.h"
-#include "glslang/Interface/MShader.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
 

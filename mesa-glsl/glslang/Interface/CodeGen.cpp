@@ -39,7 +39,6 @@
 #include "glsl/list.h"
 #include "mesa-glsl/glslang/Public/ShaderLang.h"
 
-#include "MShader.h"
 #include "CodeInsertion.h"
 #include "CodeTools.h"
 #include "IRScope.h"
