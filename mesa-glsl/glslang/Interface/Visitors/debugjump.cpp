@@ -125,6 +125,7 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 									break;
 								}
 							}
+							// TODO: skip blocks
 							foreach_iter( exec_list_iterator, iter, fs->body ) {
 								ir_instruction* ir = (ir_instruction *)iter.get();
 								VPRINT( 6, "getDebugState: %i\n", ir->debug_state );
