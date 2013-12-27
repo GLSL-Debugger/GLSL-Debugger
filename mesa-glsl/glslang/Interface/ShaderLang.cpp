@@ -7,7 +7,6 @@
 #include "ShaderLang.h"
 #include "ShaderHolder.h"
 #include "Program.h"
-#include "MShader.h"
 #include "Visitors/sideeffects.h"
 
 // Mesa includes
@@ -154,8 +153,6 @@ void ShDestruct(ShHandle handle)
 		holder->program = NULL;
 	}
 
-	clean_shader();
-
 	if( holder->ctx )
 		delete holder->ctx, holder->ctx = NULL;
 
@@ -248,7 +245,6 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 	initialize_context(holder->ctx, resources);
-	init_shader();
 
 	holder->program = rzalloc(NULL, struct gl_shader_program);
 	assert( holder->program != NULL );
