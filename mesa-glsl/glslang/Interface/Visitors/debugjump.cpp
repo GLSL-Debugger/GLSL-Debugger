@@ -111,6 +111,7 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
             switch(node->debug_state) {
                 case ir_dbg_state_unset:
                 {
+                	// TODO: split in bunch of overloaded functions
                     /* Check children for DebugState */
                     newState = ir_dbg_state_unset;
                     switch (node->ir_type){
@@ -125,11 +126,13 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 									break;
 								}
 							}
-							// TODO: skip blocks
+							int skip_pair = -1;
 							foreach_iter( exec_list_iterator, iter, fs->body ) {
-								ir_instruction* ir = (ir_instruction *)iter.get();
-								VPRINT( 6, "getDebugState: %i\n", ir->debug_state );
-								if( ir->debug_state != ir_dbg_state_unset ){
+								ir_instruction* const inst = (ir_instruction *)iter.get();
+								if (!list_iter_check(inst, skip_pair))
+									continue;
+								VPRINT( 6, "getDebugState: %i\n", inst->debug_state );
+								if( inst->debug_state != ir_dbg_state_unset ){
 									newState = ir_dbg_state_path;
 									break;
 								}
@@ -463,16 +466,7 @@ static void addShChangeablesFromList(ir_debugjump_traverser_visitor* it,
 	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *listin) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
-		if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = inst->as_dummy();
-			if ( skip_pair < 0 ) {
-				skip_pair = ir_dummy::pair_type(dm->dummy_type);
-			} else if ( skip_pair == dm->dummy_type ) {
-				skip_pair = -1;
-				continue;
-			}
-		}
-		if (skip_pair >= 0)
+		if (!list_iter_check(inst, skip_pair))
 			continue;
 		copyShChangeableList( &it->result.cgbls, get_changeable_list( inst ) );
 		checkReturns( inst, it );

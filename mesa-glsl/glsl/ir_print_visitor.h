@@ -92,6 +92,10 @@ private:
 
    void *mem_ctx;
 
+protected:
+   /**
+    * Is this a big secret to keep it private?
+    */
    int indentation;
 };
 

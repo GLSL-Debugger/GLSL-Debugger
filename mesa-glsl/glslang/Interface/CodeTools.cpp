@@ -285,22 +285,44 @@ ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum)
 	exit(1);
 }
 
+/**
+ * Check node for spectial cases
+ * Return iteration flow status.
+ * False mean iteration must be skipped
+ */
+bool list_iter_check(ir_instruction* const inst, int& state)
+{
+	switch(inst->ir_type){
+	case ir_type_variable: {
+		ir_variable *var = static_cast<ir_variable*>(inst);
+		if ((strstr(var->name, "gl_") == var->name) && !var->invariant)
+			return false;
+		break;
+	}
+	case ir_type_dummy: {
+		ir_dummy * const dm = (ir_dummy* const ) inst;
+		if (state < 0) {
+			state = ir_dummy::pair_type(dm->dummy_type);
+		} else if (state == dm->dummy_type) {
+			state = -1;
+			return false;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	return (state < 0);
+}
+
 
 bool dbg_state_not_match(exec_list* list, enum ir_dbg_state state)
 {
 	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *list) {
 		ir_instruction * const inst = (ir_instruction *) iter.get();
-		if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = inst->as_dummy();
-			if (skip_pair < 0) {
-				skip_pair = ir_dummy::pair_type(dm->dummy_type);
-			} else if (skip_pair == dm->dummy_type) {
-				skip_pair = -1;
-				continue;
-			}
-		}
-		if (skip_pair >= 0)
+		if (!list_iter_check(inst, skip_pair))
 			continue;
 		if (inst->debug_state != state)
 			return true;

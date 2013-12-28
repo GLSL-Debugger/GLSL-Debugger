@@ -7,6 +7,7 @@
 #include "sideeffects.h"
 #include "glsl/ir.h"
 #include "glsl/list.h"
+#include "glslang/Interface/CodeTools.h"
 
 
 int ir_sideeffects_traverser_visitor::list_sideeffects(exec_list* instructions)
@@ -18,20 +19,7 @@ int ir_sideeffects_traverser_visitor::list_sideeffects(exec_list* instructions)
 
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
-		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
-			ir_variable * const var = inst->as_variable();
-			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
-				continue;
-		} else if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = inst->as_dummy();
-			if ( skip_pair < 0 ) {
-				skip_pair = ir_dummy::pair_type(dm->dummy_type);
-			} else if ( skip_pair == dm->dummy_type ) {
-				skip_pair = -1;
-				continue;
-			}
-		}
-		if (skip_pair >= 0)
+		if (!list_iter_check(inst, skip_pair))
 			continue;
 		effects |= inst->debug_sideeffects;
 	}

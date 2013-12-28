@@ -140,20 +140,7 @@ void ir_output_traverser_visitor::visit_block(exec_list* instructions,
 		indentation++;
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
-		if (inst->ir_type == ir_type_variable) {
-			ir_variable *var = static_cast<ir_variable*>(inst);
-			if ((strstr(var->name, "gl_") == var->name) && !var->invariant)
-				continue;
-		} else if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = (ir_dummy* const)inst;
-			if ( skip_pair < 0 ) {
-				skip_pair = ir_dummy::pair_type(dm->dummy_type);
-			} else if ( skip_pair == dm->dummy_type ) {
-				skip_pair = -1;
-				continue;
-			}
-		}
-		if (skip_pair >= 0)
+		if (!list_iter_check(inst, skip_pair))
 			continue;
 		if (do_indent)
 			indent();

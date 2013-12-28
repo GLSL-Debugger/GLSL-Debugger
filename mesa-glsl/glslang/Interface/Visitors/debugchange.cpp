@@ -20,17 +20,8 @@ static void get_block_cgbls(ShChangeableList* node_cgbl, exec_list* list,
 
     	int skip_pair = -1;
     	foreach_iter( exec_list_iterator, iter, *list ) {
-			ir_instruction* inst = (ir_instruction *)iter.get();
-			ir_dummy * const dm = inst->as_dummy();
-			if (dm) {
-				if ( skip_pair < 0 ) {
-					skip_pair = ir_dummy::pair_type(dm->dummy_type);
-				} else if ( skip_pair == dm->dummy_type ) {
-					skip_pair = -1;
-					continue;
-				}
-			}
-			if (skip_pair >= 0)
+			ir_instruction* const inst = (ir_instruction *)iter.get();
+			if (!list_iter_check(inst, skip_pair))
 				continue;
 			inst->accept( it );
 			// copy changeables

@@ -7,6 +7,7 @@
 #include "traverse.h"
 #include "ir.h"
 #include "glsl/list.h"
+#include "glslang/Interface/CodeTools.h"
 #include <assert.h>
 
 
@@ -205,10 +206,7 @@ void ir_traverse_visitor::visit(ir_call* ir)
 
 	if( visit ){
 		++this->depth;
-		foreach_iter(exec_list_iterator, iter, *ir) {
-			ir_instruction * const inst = (ir_instruction *)iter.get();
-			inst->accept( this );
-		}
+		this->visit(&ir->actual_parameters);
 		--this->depth;
 	}
 
@@ -405,20 +403,7 @@ void ir_traverse_visitor::visit(exec_list* instructions)
 	int skip_pair = -1;
 	foreach_iter(exec_list_iterator, iter, *instructions) {
 		ir_instruction * const inst = (ir_instruction *)iter.get();
-		if( !depth && skipInternal && inst->ir_type == ir_type_variable ){
-			ir_variable * const var = inst->as_variable();
-			if( ( strstr( var->name, "gl_" ) == var->name ) && !var->invariant )
-				continue;
-		} else if (inst->ir_type == ir_type_dummy) {
-			ir_dummy * const dm = inst->as_dummy();
-			if ( skip_pair < 0 ) {
-				skip_pair = ir_dummy::pair_type(dm->dummy_type);
-			} else if ( skip_pair == dm->dummy_type ) {
-				skip_pair = -1;
-				continue;
-			}
-		}
-		if (skip_pair >= 0)
+		if (!list_iter_check(inst, skip_pair))
 			continue;
 		inst->accept( this );
 	}
