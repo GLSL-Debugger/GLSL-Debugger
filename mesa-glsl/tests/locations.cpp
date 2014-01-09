@@ -1,0 +1,357 @@
+/*
+ * locations.cpp
+ *
+ *  Created on: 05.01.2014
+ */
+
+#include "ShaderLang.h"
+#include "glslang/Interface/Program.h"
+#include "glsl/ralloc.h"
+#include "glsl/standalone_scaffolding.h"
+#include "glsl/glsl_types.h"
+#include "glsl/ir.h"
+#include "mesa/main/mtypes.h"
+#include "glsldb/utils/dbgprint.h"
+#include <getopt.h>
+#include <stdlib.h>
+#include <locale.h>
+
+
+static void initialize_context(struct gl_context *ctx, gl_api api)
+{
+	initialize_context_to_defaults(ctx, api);
+
+	/* The standalone compiler needs to claim support for almost
+	 * everything in order to compile the built-in functions.
+	 */
+	ctx->Const.GLSLVersion = 150;
+	ctx->Extensions.ARB_ES3_compatibility = true;
+
+	switch (ctx->Const.GLSLVersion) {
+	case 100:
+		ctx->Const.MaxClipPlanes = 0;
+		ctx->Const.MaxCombinedTextureImageUnits = 8;
+		ctx->Const.MaxDrawBuffers = 2;
+		ctx->Const.MinProgramTexelOffset = 0;
+		ctx->Const.MaxProgramTexelOffset = 0;
+		ctx->Const.MaxLights = 0;
+		ctx->Const.MaxTextureCoordUnits = 0;
+		ctx->Const.MaxTextureUnits = 8;
+
+		ctx->Const.VertexProgram.MaxAttribs = 8;
+		ctx->Const.VertexProgram.MaxTextureImageUnits = 0;
+		ctx->Const.VertexProgram.MaxUniformComponents = 128 * 4;
+		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
+		ctx->Const.VertexProgram.MaxOutputComponents = 32;
+
+		ctx->Const.FragmentProgram.MaxTextureImageUnits =
+				ctx->Const.MaxCombinedTextureImageUnits;
+		ctx->Const.FragmentProgram.MaxUniformComponents = 16 * 4;
+		ctx->Const.FragmentProgram.MaxInputComponents =
+				ctx->Const.VertexProgram.MaxOutputComponents;
+		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+
+		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+				/ 4;
+		break;
+	case 110:
+	case 120:
+		ctx->Const.MaxClipPlanes = 6;
+		ctx->Const.MaxCombinedTextureImageUnits = 2;
+		ctx->Const.MaxDrawBuffers = 1;
+		ctx->Const.MinProgramTexelOffset = 0;
+		ctx->Const.MaxProgramTexelOffset = 0;
+		ctx->Const.MaxLights = 8;
+		ctx->Const.MaxTextureCoordUnits = 2;
+		ctx->Const.MaxTextureUnits = 2;
+
+		ctx->Const.VertexProgram.MaxAttribs = 16;
+		ctx->Const.VertexProgram.MaxTextureImageUnits = 0;
+		ctx->Const.VertexProgram.MaxUniformComponents = 512;
+		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
+		ctx->Const.VertexProgram.MaxOutputComponents = 32;
+
+		ctx->Const.FragmentProgram.MaxTextureImageUnits =
+				ctx->Const.MaxCombinedTextureImageUnits;
+		ctx->Const.FragmentProgram.MaxUniformComponents = 64;
+		ctx->Const.FragmentProgram.MaxInputComponents =
+				ctx->Const.VertexProgram.MaxOutputComponents;
+		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+
+		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+				/ 4;
+		break;
+	case 130:
+	case 140:
+		ctx->Const.MaxClipPlanes = 8;
+		ctx->Const.MaxCombinedTextureImageUnits = 16;
+		ctx->Const.MaxDrawBuffers = 8;
+		ctx->Const.MinProgramTexelOffset = -8;
+		ctx->Const.MaxProgramTexelOffset = 7;
+		ctx->Const.MaxLights = 8;
+		ctx->Const.MaxTextureCoordUnits = 8;
+		ctx->Const.MaxTextureUnits = 2;
+
+		ctx->Const.VertexProgram.MaxAttribs = 16;
+		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
+		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
+		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
+		ctx->Const.VertexProgram.MaxOutputComponents = 64;
+
+		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
+		ctx->Const.FragmentProgram.MaxUniformComponents = 1024;
+		ctx->Const.FragmentProgram.MaxInputComponents =
+				ctx->Const.VertexProgram.MaxOutputComponents;
+		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+
+		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+				/ 4;
+		break;
+	case 150:
+	case 330:
+		ctx->Const.MaxClipPlanes = 8;
+		ctx->Const.MaxDrawBuffers = 8;
+		ctx->Const.MinProgramTexelOffset = -8;
+		ctx->Const.MaxProgramTexelOffset = 7;
+		ctx->Const.MaxLights = 8;
+		ctx->Const.MaxTextureCoordUnits = 8;
+		ctx->Const.MaxTextureUnits = 2;
+
+		ctx->Const.VertexProgram.MaxAttribs = 16;
+		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
+		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
+		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
+		ctx->Const.VertexProgram.MaxOutputComponents = 64;
+
+		ctx->Const.GeometryProgram.MaxTextureImageUnits = 16;
+		ctx->Const.GeometryProgram.MaxUniformComponents = 1024;
+		ctx->Const.GeometryProgram.MaxInputComponents =
+				ctx->Const.VertexProgram.MaxOutputComponents;
+		ctx->Const.GeometryProgram.MaxOutputComponents = 128;
+
+		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
+		ctx->Const.FragmentProgram.MaxUniformComponents = 1024;
+		ctx->Const.FragmentProgram.MaxInputComponents =
+				ctx->Const.GeometryProgram.MaxOutputComponents;
+		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+
+		ctx->Const.MaxCombinedTextureImageUnits =
+				ctx->Const.VertexProgram.MaxTextureImageUnits
+						+ ctx->Const.GeometryProgram.MaxTextureImageUnits
+						+ ctx->Const.FragmentProgram.MaxTextureImageUnits;
+
+		ctx->Const.MaxGeometryOutputVertices = 256;
+		ctx->Const.MaxGeometryTotalOutputComponents = 1024;
+
+//      ctx->Const.MaxGeometryVaryingComponents = 64;
+
+		ctx->Const.MaxVarying = 60 / 4;
+		break;
+	case 300:
+		ctx->Const.MaxClipPlanes = 8;
+		ctx->Const.MaxCombinedTextureImageUnits = 32;
+		ctx->Const.MaxDrawBuffers = 4;
+		ctx->Const.MinProgramTexelOffset = -8;
+		ctx->Const.MaxProgramTexelOffset = 7;
+		ctx->Const.MaxLights = 0;
+		ctx->Const.MaxTextureCoordUnits = 0;
+		ctx->Const.MaxTextureUnits = 0;
+
+		ctx->Const.VertexProgram.MaxAttribs = 16;
+		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
+		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
+		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
+		ctx->Const.VertexProgram.MaxOutputComponents = 16 * 4;
+
+		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
+		ctx->Const.FragmentProgram.MaxUniformComponents = 224;
+		ctx->Const.FragmentProgram.MaxInputComponents = 15 * 4;
+		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+
+		ctx->Const.MaxVarying = ctx->Const.FragmentProgram.MaxInputComponents / 4;
+		break;
+	}
+
+	ctx->Driver.NewShader = _mesa_new_shader;
+}
+
+/* Returned string will have 'ctx' as its ralloc owner. */
+static char *
+load_text_file(void *ctx, const char *file_name)
+{
+	char *text = NULL;
+	size_t size;
+	size_t total_read = 0;
+	FILE *fp = fopen(file_name, "rb");
+
+	if (!fp) {
+		return NULL;
+	}
+
+	fseek(fp, 0L, SEEK_END);
+	size = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+
+	text = (char *) ralloc_size(ctx, size + 1);
+	if (text != NULL) {
+		do {
+			size_t bytes = fread(text + total_read,
+					     1, size - total_read, fp);
+			if (bytes < size - total_read) {
+				free(text);
+				text = NULL;
+				break;
+			}
+
+			if (bytes == 0) {
+				break;
+			}
+
+			total_read += bytes;
+		} while (total_read < size);
+
+		text[total_read] = '\0';
+	}
+
+	fclose(fp);
+
+	return text;
+}
+
+int dump_ast = 0;
+int dump_hir = 0;
+int dump_lir = 0;
+int do_link = 0;
+
+const struct option compiler_opts[] = {
+   { "dump-ast", no_argument, &dump_ast, 1 },
+   { "dump-hir", no_argument, &dump_hir, 1 },
+   { "dump-lir", no_argument, &dump_lir, 1 },
+   { "version",  required_argument, NULL, 'v' },
+   { NULL, 0, NULL, 0 }
+};
+
+/**
+ * \brief Print proper usage and exit with failure.
+ */
+void
+usage_fail(const char *name)
+{
+
+   const char *header =
+      "usage: %s [options] <file.vert | file.geom | file.frag>\n"
+      "\n"
+      "Possible options are:\n";
+   printf(header, name, name);
+   for (const struct option *o = compiler_opts; o->name != 0; ++o) {
+      printf("    --%s\n", o->name);
+   }
+   exit(EXIT_FAILURE);
+}
+
+
+int main(int argc, char **argv)
+{
+	int status = EXIT_SUCCESS;
+	struct gl_context local_ctx;
+	struct gl_context *ctx = &local_ctx;
+	bool glsl_es = false;
+	int glsl_version = 150;
+
+	setMaxDebugOutputLevel(DBGLVL_ALL);
+
+	int c;
+	int idx = 0;
+	while ((c = getopt_long(argc, argv, "", compiler_opts, &idx)) != -1) {
+		switch (c) {
+		case 'v':
+			glsl_version = strtol(optarg, NULL, 10);
+			switch (glsl_version) {
+			case 100:
+			case 300:
+				glsl_es = true;
+				break;
+			case 110:
+			case 120:
+			case 130:
+			case 140:
+			case 150:
+			case 330:
+				glsl_es = false;
+				break;
+			default:
+				fprintf(stderr, "Unrecognized GLSL version `%s'\n", optarg);
+				usage_fail(argv[0]);
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (argc <= optind)
+		usage_fail(argv[0]);
+
+	initialize_context(ctx, (glsl_es) ? API_OPENGLES2 : API_OPENGL_COMPAT);
+
+	struct gl_shader_program *whole_program;
+
+	whole_program = rzalloc (NULL, struct gl_shader_program);
+	assert(whole_program != NULL);
+	whole_program->InfoLog = ralloc_strdup(whole_program, "");
+
+	for (/* empty */; argc > optind; optind++) {
+		whole_program->Shaders =
+		reralloc(whole_program, whole_program->Shaders,
+				struct gl_shader *, whole_program->NumShaders + 1);
+		assert(whole_program->Shaders != NULL);
+
+		struct gl_shader *shader = rzalloc(whole_program, gl_shader);
+
+		whole_program->Shaders[whole_program->NumShaders] = shader;
+		whole_program->NumShaders++;
+
+		const unsigned len = strlen(argv[optind]);
+		if (len < 6)
+			usage_fail(argv[0]);
+
+		const char * const ext = &argv[optind][len - 5];
+		if (strncmp(".vert", ext, 5) == 0 || strncmp(".glsl", ext, 5) == 0)
+			shader->Type = GL_VERTEX_SHADER;
+		else if (strncmp(".geom", ext, 5) == 0)
+			shader->Type = GL_GEOMETRY_SHADER;
+		else if (strncmp(".frag", ext, 5) == 0)
+			shader->Type = GL_FRAGMENT_SHADER;
+		else
+			usage_fail(argv[0]);
+
+		shader->Source = load_text_file(whole_program, argv[optind]);
+		if (shader->Source == NULL) {
+			printf("File \"%s\" does not exist.\n", argv[optind]);
+			exit (EXIT_FAILURE);
+		}
+
+		char* old_locale = setlocale(LC_NUMERIC, NULL);
+		setlocale(LC_NUMERIC, "POSIX");
+		compile_shader(ctx, shader, 0);
+		setlocale(LC_NUMERIC, old_locale);
+
+		printShaderIr(shader);
+
+		if (strlen(shader->InfoLog) > 0)
+			printf("Info log for %s:\n%s\n", argv[optind], shader->InfoLog);
+
+		if (!shader->CompileStatus) {
+			status = EXIT_FAILURE;
+			break;
+		}
+
+	}
+
+	ralloc_free(whole_program);
+	_mesa_glsl_release_types();
+	_mesa_glsl_release_builtin_functions();
+
+	return status;
+}

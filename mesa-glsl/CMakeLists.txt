@@ -25,3 +25,4 @@ add_library(glsl_mesa_interface ${SRC_INTERFACE} ${SRC_VISITORS})
 target_link_libraries(glsl_mesa_interface glsl_lib)
 
 add_subdirectory(glsl)
+add_subdirectory(tests)

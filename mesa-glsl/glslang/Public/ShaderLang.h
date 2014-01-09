@@ -268,6 +268,8 @@ SH_IMPORT_EXPORT ShHandle ShConstructLinker(const EShExecutable, int debugOption
 SH_IMPORT_EXPORT ShHandle ShConstructUniformMap();                 // one per uniform namespace (currently entire program object)
 SH_IMPORT_EXPORT void ShDestruct(ShHandle);
 
+void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug);
+
 
 //
 // Typedefs for struct, variable, and builtin handling

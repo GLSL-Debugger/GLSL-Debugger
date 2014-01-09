@@ -78,19 +78,17 @@ void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 	 * 	EDebugOpObjectCode         = 0x004,
 	 * 	EDebugOpLinkMaps           = 0x008
 	 */
-	UNUSED_ARG(debug)
-	int dump_ast = 1;
-	int dump_hir = 1;
-	int dump_lir = 1;
-	struct _mesa_glsl_parse_state *state = new ( shader ) _mesa_glsl_parse_state( ctx,
-			shader->Type, shader );
+	int dump_ast = debug & EDebugOpIntermediate;
+	int dump_hir = debug & EDebugOpIntermediate;
+	int dump_lir = debug & EDebugOpAssembly;
+	struct _mesa_glsl_parse_state *state = new (shader) _mesa_glsl_parse_state(
+			ctx, shader->Type, shader);
 
-	_mesa_glsl_compile_shader( ctx, shader, dump_ast, dump_hir );
+	_mesa_glsl_compile_shader(ctx, shader, dump_ast, dump_hir);
 
 	/* Print out the resulting IR */
-	if( !state->error && dump_lir ){
-		_mesa_print_ir( shader->ir, state );
-	}
+	if (!state->error && dump_lir)
+		_mesa_print_ir(shader->ir, state);
 
 	/* Check side effects, discards, vertex emits */
 	ir_sideeffects_traverser_visitor sideeffects;
@@ -290,6 +288,8 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 			success = shader->CompileStatus;
 			break;
 		}
+
+		printShaderIr(shader);
 
 		// Recursively add global variables from ir tree
 		addShVariableList( vl, shader->ir, true );

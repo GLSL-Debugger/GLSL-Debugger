@@ -44,6 +44,7 @@
 #include "IRScope.h"
 #include "Visitors/output.h"
 #include "Visitors/stacktraverser.h"
+#include "Visitors/position_output.h"
 
 #include "glsldb/utils/dbgprint.h"
 
@@ -53,19 +54,14 @@
 #define EMIT_VERTEX_SIG   "EmitVertex("
 #define END_PRIMITIVE_SIG "EndPrimitive("
 
-bool appendVersion(struct gl_shader* shader, std::string& program)
+void printShaderIr(struct gl_shader* shader)
 {
-    if( !shader || shader->Version == 0 )
-    	return false;
+	ir_position_output_visitor pov(DBGLVL_COMPILERINFO);
 
-    char buf[10];
-    program += "#version ";
-    sprintf(buf, "%i", shader->Version);
-    program += buf;
-    program += "\n";
-    return true;
+	pov.print_header();
+	pov.run(shader->ir);
+	dbgPrint(DBGLVL_COMPILERINFO, "\n───────────────────────────────────────────────\n");
 }
-
 
 //
 //  Generate code from the given parse tree

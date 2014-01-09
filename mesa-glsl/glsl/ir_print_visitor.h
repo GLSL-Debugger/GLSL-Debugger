@@ -77,7 +77,7 @@ public:
 #endif
    /*@}*/
 
-private:
+protected:
    /**
     * Fetch/generate a unique name for ir_variable.
     *
@@ -90,13 +90,14 @@ private:
    hash_table *printable_names;
    _mesa_symbol_table *symbols;
 
-   void *mem_ctx;
-
-protected:
    /**
     * Is this a big secret to keep it private?
     */
    int indentation;
+
+private:
+   void *mem_ctx;
+
 };
 
 #endif /* IR_PRINT_VISITOR_H */

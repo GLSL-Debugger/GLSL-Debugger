@@ -1,0 +1,4 @@
+
+
+add_executable(glsl_locations_test locations.cpp)
+target_link_libraries(glsl_locations_test glsl_mesa_interface utils)
