@@ -172,8 +172,8 @@ int __fastcall ShFinalize( )
 int addShVariableList( ShVariableList *vl, exec_list* list, bool globals_only )
 {
 	int count = 0;
-	foreach_iter( exec_list_iterator, iter, *list ){
-		ir_instruction* ir = (ir_instruction *)iter.get();
+	foreach_list( node, list ){
+		ir_instruction* ir = (ir_instruction *)node;
 		if( globals_only && ir->ir_type != ir_type_variable )
 			continue;
 		count += addShVariableIr( vl, ir );
@@ -205,8 +205,8 @@ int addShVariableIr( ShVariableList *vl, ir_instruction* ir )
 		{
 			ir_function_signature* fs = ir->as_function_signature();
 			int count = 0;
-			foreach_iter( exec_list_iterator, iter, fs->parameters ) {
-				ir_instruction* ir = (ir_instruction *)iter.get();
+			foreach_list( node, &fs->parameters ) {
+				ir_instruction* ir = (ir_instruction *)node;
 				count += addShVariableIr( vl, ir );
 			}
 			return count + addShVariableList( vl, &fs->body );

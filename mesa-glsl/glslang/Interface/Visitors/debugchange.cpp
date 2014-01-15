@@ -19,8 +19,8 @@ static void get_block_cgbls(ShChangeableList* node_cgbl, exec_list* list,
     	ShChangeableList* list_cgbl = get_changeable_list( list );
 
     	int skip_pair = -1;
-    	foreach_iter( exec_list_iterator, iter, *list ) {
-			ir_instruction* const inst = (ir_instruction *)iter.get();
+    	foreach_list( node, list ) {
+			ir_instruction* const inst = (ir_instruction *)node;
 			if (!list_iter_check(inst, skip_pair))
 				continue;
 			inst->accept( it );
@@ -114,8 +114,8 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
 	ShChangeableList* node_param_cgbl = get_changeable_list( &ir->parameters );
 
 	// TODO: Not sure, parameters must be processed
-	foreach_iter( exec_list_iterator, iter, ir->parameters ){
-		ir_instruction* inst = (ir_instruction *)iter.get();
+	foreach_list( node, &ir->parameters ){
+		ir_instruction* inst = (ir_instruction *)node;
 		traverse_func_param(inst->as_variable());
 		// copy changeables
 		ShChangeableList* inst_list = get_changeable_list( inst );

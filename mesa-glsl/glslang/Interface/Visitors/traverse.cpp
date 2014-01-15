@@ -58,8 +58,8 @@ void ir_traverse_visitor::visit(ir_function* ir)
 		visit = this->visitIr( ir );
 
 	bool found_non_builtin_proto = false;
-	foreach_iter(exec_list_iterator, iter, *ir) {
-		ir_function_signature * const sig = (ir_function_signature *)iter.get();
+	foreach_list(node, &ir->signatures) {
+		ir_function_signature * const sig = (ir_function_signature *) node;
 		if( !sig->is_builtin() )
 			found_non_builtin_proto = true;
 	}
@@ -401,8 +401,8 @@ void ir_traverse_visitor::visit(ir_dummy* ir)
 void ir_traverse_visitor::visit(exec_list* instructions)
 {
 	int skip_pair = -1;
-	foreach_iter(exec_list_iterator, iter, *instructions) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
+	foreach_list(node, instructions) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		inst->accept( this );

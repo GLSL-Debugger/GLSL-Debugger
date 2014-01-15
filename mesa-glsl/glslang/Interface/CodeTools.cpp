@@ -98,8 +98,8 @@ std::string getMangledName(ir_function_signature* fs)
 	mname += std::string(fs->function_name()) + "(";
 
 	// Assume function has only one signature
-	foreach_iter( exec_list_iterator, param, fs->parameters ) {
-		ir_variable* v = ((ir_instruction*) param.get())->as_variable();
+	foreach_list(node, &fs->parameters) {
+		ir_variable* v = ((ir_instruction*) node)->as_variable();
 		if (v)
 			makeMangledName(v->type, mname);
 	}
@@ -228,16 +228,16 @@ ir_function* getFunctionBySignature(const char *sig, struct gl_shader* shader)
 //    return isPartofNode(target, main);
 //}
 
-int getFunctionDebugParameter(ir_function_signature *node)
+int getFunctionDebugParameter(ir_function_signature *ir)
 {
     int result = -1;
 
-    if (!node)
+    if (!ir)
         return result;
 
     int i = 0;
-    foreach_iter( exec_list_iterator, iter, node->parameters ){
-    	ir_variable* ir = ((ir_instruction*)iter.get())->as_variable();
+    foreach_list( node, &ir->parameters ){
+    	ir_variable* ir = ((ir_instruction*)node)->as_variable();
     	if( ir->mode == ir_var_function_in )
     		result = i;
     	++i;
@@ -254,9 +254,9 @@ ir_instruction* getIRDebugParameter(exec_list *list, int pnum)
 
 	int i = 0;
 	ir_instruction* param = NULL;
-	foreach_iter( exec_list_iterator, iter, *list ) {
+	foreach_list(node, list) {
 		if (i == pnum)
-			param = (ir_instruction*) iter.get();
+			param = (ir_instruction*) node;
 		++i;
 	}
 
@@ -274,8 +274,8 @@ ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum)
 		return NULL;
 
 	int i = 0;
-	foreach_iter(exec_list_iterator, iter, *ir) {
-		ir_instruction* inst = (ir_instruction *) iter.get();
+	foreach_list(node, &ir->actual_parameters) {
+		ir_instruction* inst = (ir_instruction *) node;
 		if (i == pnum)
 			return inst->debug_sideeffects & ir_dbg_se_general ? inst : NULL;
 		++i;
@@ -320,8 +320,8 @@ bool list_iter_check(ir_instruction* const inst, int& state)
 bool dbg_state_not_match(exec_list* list, enum ir_dbg_state state)
 {
 	int skip_pair = -1;
-	foreach_iter(exec_list_iterator, iter, *list) {
-		ir_instruction * const inst = (ir_instruction *) iter.get();
+	foreach_list(node, list) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		if (inst->debug_state != state)

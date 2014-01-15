@@ -168,8 +168,8 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_function_signature *ir)
 		end = --(scope.end());
 
 	depth++;
-	foreach_iter( exec_list_iterator, iter, ir->parameters ){
-		traverse_func_param(((ir_instruction*)iter.get())->as_variable(), this);
+	foreach_list(node, &ir->parameters){
+		traverse_func_param(((ir_instruction*) node)->as_variable(), this);
 	}
 
 	this->visit(&ir->body);

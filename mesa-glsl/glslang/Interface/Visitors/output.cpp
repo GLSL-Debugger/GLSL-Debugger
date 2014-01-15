@@ -138,8 +138,8 @@ void ir_output_traverser_visitor::visit_block(exec_list* instructions,
 	int skip_pair = -1;
 	if (do_indent)
 		indentation++;
-	foreach_iter(exec_list_iterator, iter, *instructions) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
+	foreach_list(node, instructions) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		if (do_indent)
@@ -333,8 +333,8 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 
 	   indentation++;
 	   bool first = true;
-	   foreach_iter(exec_list_iterator, iter, ir->parameters) {
-		  ir_variable *const inst = (ir_variable *) iter.get();
+	   foreach_list(nide, &ir->parameters) {
+		  ir_variable *const inst = (ir_variable *) node;
 
 		  if (!first)
 			  ralloc_asprintf_append (&buffer, ",\n");
@@ -365,9 +365,9 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 		indentation++;
 		assert (!globals->main_function_done);
 		globals->main_function_done = true;
-		foreach_iter(exec_list_iterator, it, globals->global_assignements)
+		foreach_list(node, &globals->global_assignements)
 		{
-			ir_instruction* as = ((ga_entry *)it.get())->ir;
+			ir_instruction* as = ((ga_entry *) node)->ir;
 			as->accept(this);
 			ralloc_asprintf_append(&buffer, ";\n");
 		}
@@ -385,8 +385,8 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
 {
    bool found_non_builtin_proto = false;
 
-   foreach_iter(exec_list_iterator, iter, *ir) {
-      ir_function_signature *const sig = (ir_function_signature *) iter.get();
+   foreach_list(node, &ir->signatures) {
+      ir_function_signature *const sig = (ir_function_signature *) node;
       if (!sig->is_builtin())
 	 found_non_builtin_proto = true;
    }
@@ -406,8 +406,8 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
       DbgCgOptions option = this->cgOptions;
       this->cgOptions = DBG_CG_ORIGINAL_SRC;
       // Add original function. The general route function will be debug one.
-      foreach_iter(exec_list_iterator, iter, *ir) {
-         ir_instruction* sig = (ir_instruction*)iter.get();
+      foreach_list(node, &ir->signatures) {
+         ir_instruction* sig = (ir_instruction*) node;
          // Double only path signature
          if( sig->debug_state != ir_dbg_state_path )
             continue;
@@ -419,8 +419,8 @@ void ir_output_traverser_visitor::visit(ir_function *ir)
       this->cgOptions = option;
    }
 
-   foreach_iter(exec_list_iterator, iter, *ir) {
-      ir_function_signature *const sig = (ir_function_signature *) iter.get();
+   foreach_list(node, &ir->signatures) {
+      ir_function_signature *const sig = (ir_function_signature *) node;
 
       indent();
       sig->accept(this);
@@ -1038,11 +1038,11 @@ void ir_output_traverser_visitor::visit(ir_constant *ir)
       }
    } else if (ir->type->is_record()) {
       bool first = true;
-      foreach_iter(exec_list_iterator, iter, ir->components){
+      foreach_list(node, &ir->components){
 	  if (!first)
 	    ralloc_asprintf_append (&buffer, ", ");
 	  first = false;
-	  ir_constant* inst = (ir_constant*)iter.get();
+	  ir_constant* inst = (ir_constant*) node;
 	  inst->accept(this);
       }
    } else {
@@ -1079,8 +1079,8 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 			ralloc_asprintf_append (&it->buffer, "%s (", ir->callee_name());
 			int i = 0;
 			bool first = true;
-			foreach_iter(exec_list_iterator, iter, *ir) {
-				ir_instruction * const inst = (ir_instruction *)iter.get();
+			foreach_list(node, &ir->actual_parameters) {
+				ir_instruction * const inst = (ir_instruction *) node;
 
 				if( !first )
 					ralloc_asprintf_append( &it->buffer, ", " );
@@ -1123,8 +1123,8 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 					it->cgbl, it->vl, it->dbgStack, 0 );
 			ralloc_asprintf_append (&it->buffer, ", %s (", ir->callee_name());
 			bool first = true;
-			foreach_iter(exec_list_iterator, iter, *ir) {
-				ir_instruction * const inst = (ir_instruction *)iter.get();
+			foreach_list(node, &ir->actual_parameters) {
+				ir_instruction * const inst = (ir_instruction *) node;
 				if( !first )
 					ralloc_asprintf_append( &it->buffer, ", " );
 				inst->accept( it );
@@ -1140,8 +1140,8 @@ bool process_debug_call(ir_call* ir, ir_output_traverser_visitor* it){
 		ralloc_asprintf_append (&it->buffer, ", %s (",
 				cgGetDebugName( ir->callee_name(), it->shader ));
 		bool first = true;
-		foreach_iter(exec_list_iterator, iter, *ir) {
-			ir_instruction * const inst = (ir_instruction *)iter.get();
+		foreach_list(node, &ir->actual_parameters) {
+			ir_instruction * const inst = (ir_instruction *) node;
 			if( !first )
 				ralloc_asprintf_append( &it->buffer, ", " );
 			inst->accept( it );
@@ -1175,8 +1175,8 @@ ir_output_traverser_visitor::visit(ir_call *ir)
 
    ralloc_asprintf_append (&buffer, "%s (", ir->callee_name());
    bool first = true;
-   foreach_iter(exec_list_iterator, iter, *ir) {
-      ir_instruction *const inst = (ir_instruction *) iter.get();
+   foreach_list(node, &ir->actual_parameters) {
+      ir_instruction *const inst = (ir_instruction *) node;
 	  if (!first)
 		  ralloc_asprintf_append (&buffer, ", ");
       inst->accept(this);

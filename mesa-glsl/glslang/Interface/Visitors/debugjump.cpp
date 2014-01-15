@@ -118,8 +118,8 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     	case ir_type_function_signature:
                     	{
                     		ir_function_signature* fs = node->as_function_signature();
-							foreach_iter( exec_list_iterator, iter, fs->parameters ) {
-								ir_instruction* ir = (ir_instruction *)iter.get();
+							foreach_list(node, &fs->parameters) {
+								ir_instruction* ir = (ir_instruction *) node;
 								VPRINT( 6, "getDebugState: %i\n", ir->debug_state );
 								if( ir->debug_state != ir_dbg_state_unset ){
 									newState = ir_dbg_state_path;
@@ -127,8 +127,8 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
 								}
 							}
 							int skip_pair = -1;
-							foreach_iter( exec_list_iterator, iter, fs->body ) {
-								ir_instruction* const inst = (ir_instruction *)iter.get();
+							foreach_list(node, &fs->body) {
+								ir_instruction* const inst = (ir_instruction *) node;
 								if (!list_iter_check(inst, skip_pair))
 									continue;
 								VPRINT( 6, "getDebugState: %i\n", inst->debug_state );
@@ -461,11 +461,11 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_discard* ir)
 }
 
 static void addShChangeablesFromList(ir_debugjump_traverser_visitor* it,
-		exec_list* listin)
+		exec_list* instructions)
 {
 	int skip_pair = -1;
-	foreach_iter(exec_list_iterator, iter, *listin) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
+	foreach_list(node, instructions) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		copyShChangeableList( &it->result.cgbls, get_changeable_list( inst ) );

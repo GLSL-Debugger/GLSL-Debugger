@@ -17,8 +17,8 @@ int ir_sideeffects_traverser_visitor::list_sideeffects(exec_list* instructions)
 	if (!instructions)
 		return effects;
 
-	foreach_iter(exec_list_iterator, iter, *instructions) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
+	foreach_list(node, instructions) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		effects |= inst->debug_sideeffects;

@@ -31,8 +31,8 @@ void ir_position_output_visitor::run(exec_list* instructions)
 {
 	int skip_pair = -1;
 	bool first = true;
-	foreach_iter(exec_list_iterator, iter, *instructions) {
-		ir_instruction * const inst = (ir_instruction *)iter.get();
+	foreach_list(node, instructions) {
+		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
 		if (!first)
@@ -352,10 +352,14 @@ void ir_position_output_visitor::visit(ir_call* ir)
 {
 	print_range(ir);
 	dbgPrint(output_level, "(call %s", ir->callee_name());
-	if (ir->return_deref)
+	if (ir->return_deref){
+		dbgPrint(output_level, "\n");
 		ir->return_deref->accept(this);
+	}
 	dbgPrint(output_level, " (\n");
+	indentation++;
 	this->run(&ir->actual_parameters);
+	indentation--;
 	dbgPrint(output_level, "))");
 }
 
