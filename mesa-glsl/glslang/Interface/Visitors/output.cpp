@@ -333,7 +333,7 @@ void ir_output_traverser_visitor::visit(ir_function_signature *ir)
 
 	   indentation++;
 	   bool first = true;
-	   foreach_list(nide, &ir->parameters) {
+	   foreach_list(node, &ir->parameters) {
 		  ir_variable *const inst = (ir_variable *) node;
 
 		  if (!first)
