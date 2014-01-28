@@ -53,31 +53,41 @@ typedef struct YYLTYPE {
 #endif
 
 #define LOCATION_PARAM(name) , name
-#define GET_AST_LOCATION_HERE YYLTYPE _loc = this->get_location();
-#define AST_LOCATION_EXPAND_FRONT(tgt, size) tgt->yy_location.first_column -= size;
-#define COPY_AST_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(YYLTYPE));
-#define COPY_AST_LOCATION_HERE(src) COPY_AST_LOCATION( this->yy_location, src )
-#define COPY_AST_LOCATION_FROM_HERE(tgt) {\
-    GET_AST_LOCATION_HERE                \
-    COPY_AST_LOCATION( tgt, _loc ) }
-#define COPY_RETURN_AST_LOCATION( type, src, func ) {\
-   type* c = func;                                   \
-   COPY_AST_LOCATION(c->yy_location, src)            \
-   return c; }
 
+#define GET_YY_LOCATION_HERE YYLTYPE _loc = this->get_location();
+#define COPY_YY_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(YYLTYPE));
+#define COPY_YY_LOCATION_FROM_HERE(tgt) {\
+    GET_YY_LOCATION_HERE                \
+    COPY_YY_LOCATION( tgt, _loc ) }
+
+#define COPY_IR_LOCATION(tgt, src) \
+		COPY_YY_LOCATION(tgt->yy_location, src->yy_location)
 #define COPY_IR_LOCATION_BEGIN(tgt, src) \
 	tgt->yy_location.first_column = src->yy_location.first_column; \
 	tgt->yy_location.first_line = src->yy_location.first_line;
 #define COPY_IR_LOCATION_END(tgt, src) \
 	tgt->yy_location.last_column = src->yy_location.last_column; \
 	tgt->yy_location.last_line = src->yy_location.last_line;
-#define COPY_AST_LOCATION_BEGIN(tgt, src) \
-	tgt->yy_location.first_column = src->location.column; \
-	tgt->yy_location.first_line = src->location.line;
-#define COPY_AST_LOCATION_END(tgt, src) \
-	tgt->yy_location.last_column = src->location.column; \
-	tgt->yy_location.last_line = src->location.line;
+#define COPY_IR_LOCATION_HERE(src) \
+		COPY_YY_LOCATION(this->yy_location, src->yy_location)
+#define COPY_RETURN_IR_LOCATION(type, src, func) {\
+   type* c = func;                                   \
+   COPY_YY_LOCATION(c->yy_location, src)            \
+   return c; }
+#define IR_LOCATION_EXPAND_FRONT(tgt, size) tgt->yy_location.first_column -= size;
+#define IR_LOCATION_MOVE(tgt, size) \
+	tgt->yy_location.first_column += size; \
+	tgt->yy_location.last_column += size;
 
+#define COPY_AST_LOCATION_BEGIN(tgt, src) \
+	tgt->yy_location.first_column = src->location.first_column; \
+	tgt->yy_location.first_line = src->location.first_line;
+#define COPY_AST_LOCATION_END(tgt, src) \
+	tgt->yy_location.last_column = src->location.last_column; \
+	tgt->yy_location.last_line = src->location.last_line;
+#define COPY_AST_LOCATION(tgt, src) \
+		COPY_AST_LOCATION_BEGIN(tgt, src) \
+		COPY_AST_LOCATION_END(tgt, src)
 
 enum ir_iteration_modes {
    ir_loop_for,
@@ -86,16 +96,22 @@ enum ir_iteration_modes {
 };
 
 #else
+#define LOCATION_PARAM(name)
+
 #define COPY_IR_LOCATION_BEGIN(tgt, src)
 #define COPY_IR_LOCATION_END(tgt, src)
+#define COPY_IR_LOCATION_HERE(src)
+#define COPY_RETURN_IR_LOCATION(type, src, func) return func;
+#define IR_LOCATION_EXPAND_FRONT(tgt, size)
+
 #define COPY_AST_LOCATION_BEGIN(tgt, src)
 #define COPY_AST_LOCATION_END(tgt, src)
-#define GET_AST_LOCATION_HERE
-#define AST_LOCATION_EXPAND_FONT(tgt, size)
 #define COPY_AST_LOCATION(tgt, src)
+
+#define GET_YY_LOCATION_HERE
+#define COPY_YY_LOCATION(tgt, src)
 #define COPY_AST_LOCATION_HERE(src)
-#define COPY_AST_LOCATION_FROM_HERE(tgt)
-#define COPY_RETURN_AST_LOCATION( type, src, func ) return func;
+#define COPY_YY_LOCATION_FROM_HERE(tgt)
 #endif
 
 
@@ -1174,7 +1190,7 @@ public:
       : condition(condition)
    {
       ir_type = ir_type_if;
-      COPY_AST_LOCATION_HERE( condition->yy_location );
+      COPY_IR_LOCATION_HERE(condition);
 
 #ifdef IR_DEBUG_STATE
       debug_state_internal = ir_dbg_if_unset;
@@ -1864,7 +1880,7 @@ public:
       : value(value)
    {
       this->ir_type = ir_type_return;
-      COPY_AST_LOCATION_HERE( value->yy_location );
+      COPY_IR_LOCATION_HERE(value);
    }
 
    virtual ir_return *clone(void *mem_ctx, struct hash_table *) const;

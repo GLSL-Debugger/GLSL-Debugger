@@ -447,9 +447,11 @@ ir_expression::constant_expression_value(struct hash_table *variable_context)
       assert(op[1] != NULL && op[1]->type->is_array());
       switch (this->operation) {
       case ir_binop_all_equal:
-	 return new(ctx) ir_constant(op[0]->has_value(op[1]));
+	 COPY_RETURN_IR_LOCATION(ir_constant, op[0]->yy_location,
+			 new(ctx) ir_constant(op[0]->has_value(op[1])))
       case ir_binop_any_nequal:
-	 return new(ctx) ir_constant(!op[0]->has_value(op[1]));
+	 COPY_RETURN_IR_LOCATION(ir_constant, op[0]->yy_location,
+			 new(ctx) ir_constant(!op[0]->has_value(op[1])))
       default:
 	 break;
       }
@@ -1512,7 +1514,8 @@ ir_expression::constant_expression_value(struct hash_table *variable_context)
       return NULL;
    }
 
-   return new(ctx) ir_constant(this->type, &data);
+   COPY_RETURN_IR_LOCATION(ir_constant, this->yy_location,
+		   new(ctx) ir_constant(this->type, &data))
 }
 
 
@@ -1547,7 +1550,8 @@ ir_swizzle::constant_expression_value(struct hash_table *variable_context)
       }
 
       void *ctx = ralloc_parent(this);
-      return new(ctx) ir_constant(this->type, &data);
+      COPY_RETURN_IR_LOCATION(ir_constant, this->yy_location,
+   		   new(ctx) ir_constant(this->type, &data))
    }
    return NULL;
 }
@@ -1688,11 +1692,13 @@ ir_dereference_array::constant_expression_value(struct hash_table *variable_cont
 	    break;
 	 }
 
-	 return new(ctx) ir_constant(column_type, &data);
+	 COPY_RETURN_IR_LOCATION(ir_constant, array->yy_location,
+			 new(ctx) ir_constant(column_type, &data))
       } else if (array->type->is_vector()) {
 	 const unsigned component = idx->value.u[0];
 
-	 return new(ctx) ir_constant(array, component);
+	 COPY_RETURN_IR_LOCATION(ir_constant, array->yy_location,
+			 new(ctx) ir_constant(array, component))
       } else {
 	 const unsigned index = idx->value.u[0];
 	 return array->get_array_element(index)->clone(ctx, NULL);

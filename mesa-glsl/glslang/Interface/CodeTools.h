@@ -14,8 +14,8 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
 {
     char locText[128];
 
-    sprintf(locText, "%4d:%3d - %4d:%3d", range.first_line, range.first_column,
-                                        range.last_line, range.last_column);
+    sprintf(locText, "%4d:%3d - %4d:%3d", range.first_line, range.first_column - 1,
+                                        range.last_line, range.last_column - 1);
     return std::string(locText);
 }
 

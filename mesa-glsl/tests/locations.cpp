@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <locale.h>
 
+extern int _mesa_glsl_debug;
 
 static void initialize_context(struct gl_context *ctx, gl_api api)
 {
@@ -252,6 +253,7 @@ usage_fail(const char *name)
 
 int main(int argc, char **argv)
 {
+	_mesa_glsl_debug = 1;
 	int status = EXIT_SUCCESS;
 	struct gl_context local_ctx;
 	struct gl_context *ctx = &local_ctx;
@@ -337,6 +339,7 @@ int main(int argc, char **argv)
 		compile_shader(ctx, shader, 0);
 		setlocale(LC_NUMERIC, old_locale);
 
+		printf("\n");
 		printShaderIr(shader);
 
 		if (strlen(shader->InfoLog) > 0)

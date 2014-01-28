@@ -302,7 +302,7 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
     * We get head as first parameter head and end as last parameter end
     */
    YYLTYPE _loc;
-   COPY_AST_LOCATION(_loc, _base_loc)
+   COPY_YY_LOCATION(_loc, _base_loc)
    {
       ir_instruction* first_param = (ir_instruction*)actual_iter.get();
       if (first_param != NULL){
@@ -358,7 +358,7 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
    if (state->is_version(120, 300)) {
       ir_constant *value = sig->constant_expression_value(actual_parameters, NULL);
       if (value != NULL) {
-	 COPY_AST_LOCATION(value->yy_location, _loc)
+	 COPY_YY_LOCATION(value->yy_location, _loc)
 	 return value;
       }
    }
@@ -372,15 +372,15 @@ generate_call(exec_list *instructions, ir_function_signature *sig,
 				 ralloc_asprintf(ctx, "%s_retval",
 						 sig->function_name()),
 				 ir_var_temporary);
-      COPY_AST_LOCATION(var->yy_location, _loc)
+      COPY_YY_LOCATION(var->yy_location, _loc)
       instructions->push_tail(var);
 
       deref = new(ctx) ir_dereference_variable(var);
    }
    ir_call *call = new(ctx) ir_call(sig, deref, actual_parameters);
-   COPY_AST_LOCATION(call->yy_location, _base_loc)
-   COPY_IR_LOCATION_BEGIN(call, deref)
-   AST_LOCATION_EXPAND_FRONT(call, strlen(sig->function_name()) + 2)
+   COPY_YY_LOCATION(call->yy_location, _base_loc)
+   //COPY_IR_LOCATION_BEGIN(call, deref)
+   //AST_LOCATION_EXPAND_FRONT(call, strlen(sig->function_name()) + 2)
    instructions->push_tail(call);
 
    /* Also emit any necessary out-parameter conversions. */
@@ -587,12 +587,12 @@ dereference_component(ir_rvalue *src, unsigned component LOCATION_PARAM(YYLTYPE&
     */
    ir_constant *constant = src->as_constant();
    if (constant)
-      COPY_RETURN_AST_LOCATION(ir_rvalue, _loc, new(ctx) ir_constant(constant, component))
+      COPY_RETURN_IR_LOCATION(ir_rvalue, _loc, new(ctx) ir_constant(constant, component))
 
    if (src->type->is_scalar()) {
       return src;
    } else if (src->type->is_vector()) {
-      COPY_RETURN_AST_LOCATION(ir_rvalue, _loc, new(ctx) ir_swizzle(src, component, 0, 0, 0, 1))
+      COPY_RETURN_IR_LOCATION(ir_rvalue, _loc, new(ctx) ir_swizzle(src, component, 0, 0, 0, 1))
    } else {
       assert(src->type->is_matrix());
 
@@ -901,7 +901,7 @@ emit_inline_vector_constructor(const glsl_type *type,
    assert(!parameters->is_empty());
 
    ir_variable *var = new(ctx) ir_variable(type, "vec_ctor", ir_var_temporary);
-   COPY_AST_LOCATION(var->yy_location, _loc)
+   COPY_YY_LOCATION(var->yy_location, _loc)
    instructions->push_tail(var);
 
    /* There are two kinds of vector constructors.
@@ -922,7 +922,7 @@ emit_inline_vector_constructor(const glsl_type *type,
       const unsigned mask = (1U << lhs_components) - 1;
 
       /* Temporary variables located at creation place */
-      COPY_AST_LOCATION(rhs->yy_location, _loc)
+      COPY_YY_LOCATION(rhs->yy_location, _loc)
 
       assert(rhs->type == lhs->type);
 
@@ -987,7 +987,7 @@ emit_inline_vector_constructor(const glsl_type *type,
 							     constant_components,
 							     1);
 	 ir_rvalue *rhs = new(ctx) ir_constant(rhs_type, &data);
-	 COPY_AST_LOCATION(rhs->yy_location, _loc)
+	 COPY_YY_LOCATION(rhs->yy_location, _loc)
 
 	 ir_instruction *inst =
 	    new(ctx) ir_assignment(lhs, rhs, NULL, constant_mask);
@@ -1018,7 +1018,7 @@ emit_inline_vector_constructor(const glsl_type *type,
 	     */
 	    ir_rvalue *rhs =
 	       new(ctx) ir_swizzle(param, 0, 1, 2, 3, rhs_components);
-	    COPY_AST_LOCATION(rhs->yy_location, _loc)
+	    COPY_YY_LOCATION(rhs->yy_location, _loc)
 
 	    ir_instruction *inst =
 	       new(ctx) ir_assignment(lhs, rhs, NULL, write_mask);
@@ -1097,7 +1097,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
    assert(!parameters->is_empty());
 
    ir_variable *var = new(ctx) ir_variable(type, "mat_ctor", ir_var_temporary);
-   COPY_AST_LOCATION(var->yy_location, _loc)
+   COPY_YY_LOCATION(var->yy_location, _loc)
    instructions->push_tail(var);
 
    /* There are three kinds of matrix constructors.
@@ -1122,7 +1122,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       ir_variable *rhs_var =
 	 new(ctx) ir_variable(glsl_type::vec4_type, "mat_ctor_vec",
 			      ir_var_temporary);
-      COPY_AST_LOCATION(rhs_var->yy_location, _loc)
+      COPY_YY_LOCATION(rhs_var->yy_location, _loc)
       instructions->push_tail(rhs_var);
 
       ir_constant_data zero;
@@ -1132,7 +1132,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       zero.f[3] = 0.0;
 
       ir_constant *lhs_const = new(ctx) ir_constant(rhs_var->type, &zero);
-      COPY_AST_LOCATION(lhs_const->yy_location, _loc)
+      COPY_YY_LOCATION(lhs_const->yy_location, _loc)
       ir_instruction *inst =
 	 new(ctx) ir_assignment(new(ctx) ir_dereference_variable(rhs_var),
 				lhs_const,
@@ -1161,13 +1161,13 @@ emit_inline_matrix_constructor(const glsl_type *type,
 					 type->vector_elements);
       for (unsigned i = 0; i < cols_to_init; i++) {
 	 ir_constant *const col_idx = new(ctx) ir_constant(i);
-	 COPY_AST_LOCATION(col_idx->yy_location, _loc)
+	 COPY_YY_LOCATION(col_idx->yy_location, _loc)
 	 ir_rvalue *const col_ref = new(ctx) ir_dereference_array(var, col_idx);
 
 	 ir_rvalue *const rhs_ref = new(ctx) ir_dereference_variable(rhs_var);
 	 ir_rvalue *const rhs = new(ctx) ir_swizzle(rhs_ref, rhs_swiz[i],
 						    type->vector_elements);
-	 COPY_AST_LOCATION(rhs->yy_location, _loc)
+	 COPY_YY_LOCATION(rhs->yy_location, _loc)
 
 	 inst = new(ctx) ir_assignment(col_ref, rhs, NULL);
 	 instructions->push_tail(inst);
@@ -1175,13 +1175,13 @@ emit_inline_matrix_constructor(const glsl_type *type,
 
       for (unsigned i = cols_to_init; i < type->matrix_columns; i++) {
 	 ir_constant *const col_idx = new(ctx) ir_constant(i);
-	 COPY_AST_LOCATION(col_idx->yy_location, _loc)
+	 COPY_YY_LOCATION(col_idx->yy_location, _loc)
 	 ir_rvalue *const col_ref = new(ctx) ir_dereference_array(var, col_idx);
 
 	 ir_rvalue *const rhs_ref = new(ctx) ir_dereference_variable(rhs_var);
 	 ir_rvalue *const rhs = new(ctx) ir_swizzle(rhs_ref, 1, 1, 1, 1,
 						    type->vector_elements);
-	 COPY_AST_LOCATION(rhs->yy_location, _loc)
+	 COPY_YY_LOCATION(rhs->yy_location, _loc)
 
 	 inst = new(ctx) ir_assignment(col_ref, rhs, NULL);
 	 instructions->push_tail(inst);
@@ -1225,7 +1225,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	    ident.f[col] = 1.0;
 
 	    ir_rvalue *const rhs = new(ctx) ir_constant(col_type, &ident);
-	    COPY_AST_LOCATION(rhs->yy_location, _loc)
+	    COPY_YY_LOCATION(rhs->yy_location, _loc)
 
 	    ir_rvalue *const lhs =
 	       new(ctx) ir_dereference_array(var, new(ctx) ir_constant(col));
@@ -1243,7 +1243,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       ir_variable *const rhs_var =
 	 new(ctx) ir_variable(first_param->type, "mat_ctor_mat",
 			      ir_var_temporary);
-      COPY_AST_LOCATION(rhs_var->yy_location, _loc)
+      COPY_YY_LOCATION(rhs_var->yy_location, _loc)
       instructions->push_tail(rhs_var);
 
       ir_dereference *const rhs_var_ref =
@@ -1280,7 +1280,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	 ir_rvalue *rhs;
 	 if (lhs->type->vector_elements != rhs_col->type->vector_elements) {
 	    rhs = new(ctx) ir_swizzle(rhs_col, swiz, last_row);
-	    COPY_AST_LOCATION(rhs->yy_location, _loc)
+	    COPY_YY_LOCATION(rhs->yy_location, _loc)
 	 } else {
 	    rhs = rhs_col;
 	 }
@@ -1306,7 +1306,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
 	  */
 	 ir_variable *rhs_var =
 	    new(ctx) ir_variable(rhs->type, "mat_ctor_vec", ir_var_temporary);
-	 COPY_AST_LOCATION(rhs_var->yy_location, _loc)
+	 COPY_YY_LOCATION(rhs_var->yy_location, _loc)
 	 instructions->push_tail(rhs_var);
 
 	 ir_dereference *rhs_var_ref =
@@ -1675,35 +1675,29 @@ ast_function_expression::hir(exec_list *instructions,
 	 }
       }
 
-#ifdef IR_AST_LOCATION
-      YYLTYPE _expr_loc = loc;
-      _expr_loc.last_column = this->location.column; \
-      _expr_loc.last_line = this->location.line;
-#endif
-
       /* If all of the parameters are trivially constant, create a
        * constant representing the complete collection of parameters.
        */
       if (all_parameters_are_constant) {
-         COPY_RETURN_AST_LOCATION(ir_rvalue, _expr_loc,
+         COPY_RETURN_IR_LOCATION(ir_rvalue, loc,
                new(ctx) ir_constant(constructor_type, &actual_parameters) )
       } else if (constructor_type->is_scalar()) {
 	 return dereference_component((ir_rvalue *) actual_parameters.head,
 				      0
-				      LOCATION_PARAM(_expr_loc));
+				      LOCATION_PARAM(loc));
       } else if (constructor_type->is_vector()) {
 	 return emit_inline_vector_constructor(constructor_type,
 					       instructions,
 					       &actual_parameters,
 					       ctx
-					       LOCATION_PARAM(_expr_loc));
+					       LOCATION_PARAM(loc));
       } else {
 	 assert(constructor_type->is_matrix());
 	 return emit_inline_matrix_constructor(constructor_type,
 					       instructions,
 					       &actual_parameters,
 					       ctx
-					       LOCATION_PARAM(_expr_loc));
+					       LOCATION_PARAM(loc));
       }
    } else {
       const ast_expression *id = subexpressions[0];
@@ -1711,9 +1705,7 @@ ast_function_expression::hir(exec_list *instructions,
       YYLTYPE loc = id->get_location();
       exec_list actual_parameters;
 
-#ifdef IR_AST_LOCATION
-      YYLTYPE _expr_loc = this->get_location();
-#endif
+      GET_YY_LOCATION_HERE
 
       process_parameters(instructions, &actual_parameters, &this->expressions,
 			 state);
@@ -1726,14 +1718,14 @@ ast_function_expression::hir(exec_list *instructions,
       if (sig == NULL) {
 	 no_matching_function_error(func_name, &loc, &actual_parameters, state);
 	 value = ir_rvalue::error_value(ctx);
-	 COPY_AST_LOCATION(value->yy_location, _expr_loc)
+	 COPY_YY_LOCATION(value->yy_location, _loc)
       } else if (!verify_parameter_modes(state, sig, actual_parameters, this->expressions)) {
 	 /* an error has already been emitted */
 	 value = ir_rvalue::error_value(ctx);
-	 COPY_AST_LOCATION(value->yy_location, _expr_loc)
+	 COPY_YY_LOCATION(value->yy_location, _loc)
       } else {
 	 value = generate_call(instructions, sig, &actual_parameters,
-			       &call, state LOCATION_PARAM(_expr_loc));
+			       &call, state LOCATION_PARAM(_loc));
       }
 
       return value;

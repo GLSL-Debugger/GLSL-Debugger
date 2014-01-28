@@ -353,8 +353,10 @@ void ir_position_output_visitor::visit(ir_call* ir)
 	print_range(ir);
 	dbgPrint(output_level, "(call %s", ir->callee_name());
 	if (ir->return_deref){
+		indentation++;
 		dbgPrint(output_level, "\n");
 		ir->return_deref->accept(this);
+		indentation--;
 	}
 	dbgPrint(output_level, " (\n");
 	indentation++;
@@ -446,7 +448,16 @@ void ir_position_output_visitor::visit(ir_loop_jump* ir)
 
 void ir_position_output_visitor::visit(ir_typedecl_statement* ir)
 {
-	ir_print_visitor::visit(ir);
+	const glsl_type *const s = ir->type_decl;
+	print_range(ir);
+	dbgPrint(output_level, "(");
+	print_type(s, output_level);
+	for (unsigned j = 0; j < s->length; j++) {
+		dbgPrint(output_level, " (");
+		print_type(s->fields.structure[j].type, false);
+		dbgPrint(output_level, "%s)", s->fields.structure[j].name);
+	}
+	dbgPrint(output_level, ")");
 }
 
 void ir_position_output_visitor::visit(ir_emit_vertex* ir)

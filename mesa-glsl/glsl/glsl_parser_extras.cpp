@@ -898,8 +898,10 @@ ast_node::print(void) const
 ast_node::ast_node(void)
 {
    this->location.source = 0;
-   this->location.line = 0;
-   this->location.column = 0;
+   this->location.first_line = 0;
+   this->location.first_column = 0;
+   this->location.last_line = 0;
+   this->location.last_column = 0;
 }
 
 
@@ -921,7 +923,7 @@ void
 ast_compound_statement::print(void) const
 {
    printf("{\n");
-   
+
    foreach_list_const(n, &this->statements) {
       ast_node *ast = exec_node_data(ast_node, n, link);
       ast->print();
@@ -1088,7 +1090,7 @@ ast_expression_statement::print(void) const
    if (expression)
       expression->print();
 
-   printf("; ");
+   printf(";\n");
 }
 
 
@@ -1190,7 +1192,7 @@ ast_declarator_list::print(void) const
       ast->print();
    }
 
-   printf("; ");
+   printf(";\n");
 }
 
 
@@ -1205,7 +1207,7 @@ ast_jump_statement::print(void) const
 {
    switch (mode) {
    case ast_continue:
-      printf("continue; ");
+      printf("continue;\n");
       break;
    case ast_break:
       printf("break; ");
@@ -1215,10 +1217,10 @@ ast_jump_statement::print(void) const
       if (opt_return_value)
 	 opt_return_value->print();
 
-      printf("; ");
+      printf(";\n");
       break;
    case ast_discard:
-      printf("discard; ");
+      printf("discard;\n");
       break;
    }
 }
@@ -1247,7 +1249,7 @@ ast_selection_statement::print(void) const
       printf("else ");
       else_statement->print();
    }
-   
+
 }
 
 

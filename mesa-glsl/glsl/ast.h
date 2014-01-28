@@ -75,10 +75,10 @@ public:
       struct YYLTYPE locp;
 
       locp.source = this->location.source;
-      locp.first_line = this->location.line;
-      locp.first_column = this->location.column;
-      locp.last_line = locp.first_line;
-      locp.last_column = locp.first_column;
+      locp.first_line = this->location.first_line;
+      locp.first_column = this->location.first_column;
+      locp.last_line = this->location.last_line;
+      locp.last_column = this->location.last_column;
 
       return locp;
    }
@@ -91,8 +91,24 @@ public:
    void set_location(const struct YYLTYPE &locp)
    {
       this->location.source = locp.source;
-      this->location.line = locp.first_line;
-      this->location.column = locp.first_column;
+      this->location.first_line = locp.first_line;
+      this->location.first_column = locp.first_column;
+      this->location.last_line = locp.last_line;
+      this->location.last_column = locp.last_column;
+   }
+
+   /**
+    * Set the source location range of an AST node using two location nodes
+    *
+    * \sa ast_node::get_location
+    */
+   void set_location_range(const struct YYLTYPE &begin, const struct YYLTYPE &end)
+   {
+      this->location.source = begin.source;
+      this->location.first_line = begin.first_line;
+      this->location.last_line = end.last_line;
+      this->location.first_column = begin.first_column;
+      this->location.last_column = end.last_column;
    }
 
    /**
@@ -100,8 +116,10 @@ public:
     */
    struct {
       unsigned source;    /**< GLSL source number. */
-      unsigned line;      /**< Line number within the source string. */
-      unsigned column;    /**< Column in the line. */
+      unsigned first_line;      /**< Line number within the source string. */
+      unsigned first_column;    /**< Column in the line. */
+      unsigned last_line;      /**< Line number within the source string. */
+      unsigned last_column;    /**< Column in the line. */
    } location;
 
    exec_node link;
@@ -330,7 +348,7 @@ public:
    virtual void print(void) const;
 
    const char *identifier;
-   
+
    bool is_array;
    ast_expression *array_size;
 
@@ -550,7 +568,7 @@ public:
    }
 
    /** Construct a type specifier from a type name */
-   ast_type_specifier(const char *name) 
+   ast_type_specifier(const char *name)
       : type_name(name), structure(NULL),
 	is_array(false), array_size(NULL),
 	default_precision(ast_precision_none)
@@ -838,7 +856,7 @@ public:
       ast_while,
       ast_do_while
    } mode;
-   
+
 
    ast_node *init_statement;
    ast_node *condition;

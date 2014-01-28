@@ -854,7 +854,7 @@ do_assignment(exec_list *instructions, struct _mesa_glsl_parse_state *state,
     */
    ir_variable *var = new(ctx) ir_variable(rhs->type, "assignment_tmp",
 					   ir_var_temporary);
-   COPY_AST_LOCATION(var->yy_location, lhs_loc);
+   COPY_YY_LOCATION(var->yy_location, rhs->yy_location);
    ir_dereference_variable *deref_var = new(ctx) ir_dereference_variable(var);
    instructions->push_tail(var);
    instructions->push_tail(new(ctx) ir_assignment(deref_var, rhs));
@@ -874,7 +874,7 @@ get_lvalue_copy(exec_list *instructions, ir_rvalue *lvalue)
 
    var = new(ctx) ir_variable(lvalue->type, "_post_incdec_tmp",
 			      ir_var_temporary);
-   COPY_AST_LOCATION(var->yy_location, lvalue->yy_location);
+   COPY_IR_LOCATION(var, lvalue);
    instructions->push_tail(var);
    var->mode = ir_var_auto;
 
@@ -968,7 +968,7 @@ do_comparison(void *mem_ctx, int operation, ir_rvalue *op0, ir_rvalue *op1)
 
    if (cmp == NULL){
       cmp = new(mem_ctx) ir_constant(true);
-      COPY_AST_LOCATION(cmp->yy_location, op0->yy_location);
+      COPY_IR_LOCATION(cmp, op0);
    }
 
    return cmp;
@@ -1004,7 +1004,7 @@ get_scalar_boolean_operand(exec_list *instructions,
 #ifdef IR_AST_LOCATION
    YYLTYPE yy_location = expr->get_location();
 #endif
-   COPY_RETURN_AST_LOCATION(ir_rvalue, yy_location, new(ctx) ir_constant(true));
+   COPY_RETURN_IR_LOCATION(ir_rvalue, yy_location, new(ctx) ir_constant(true));
 }
 
 /**
@@ -1267,7 +1267,7 @@ ast_expression::hir(exec_list *instructions,
 
       if (error_emitted) {
 	 result = new(ctx) ir_constant(false);
-	 COPY_AST_LOCATION(result->yy_location, loc);
+	 COPY_YY_LOCATION(result->yy_location, loc);
       } else {
 	 result = do_comparison(ctx, operations[this->oper], op[0], op[1]);
 	 assert(result->type == glsl_type::bool_type);
@@ -1316,7 +1316,7 @@ ast_expression::hir(exec_list *instructions,
 	 ir_variable *const tmp = new(ctx) ir_variable(glsl_type::bool_type,
 						       "and_tmp",
 						       ir_var_temporary);
-	 COPY_AST_LOCATION(tmp->yy_location, loc);
+	 COPY_YY_LOCATION(tmp->yy_location, loc);
 	 instructions->push_tail(tmp);
 
 	 ir_if *const stmt = new(ctx) ir_if(op[0]);
@@ -1330,7 +1330,7 @@ ast_expression::hir(exec_list *instructions,
 
 	 ir_dereference *const else_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_constant* cf = new(ctx) ir_constant(false);
-	 COPY_AST_LOCATION(cf->yy_location, loc);
+	 COPY_YY_LOCATION(cf->yy_location, loc);
 	 ir_assignment *const else_assign =
 	    new(ctx) ir_assignment(else_deref, cf);
 	 stmt->else_instructions.push_tail(else_assign);
@@ -1355,7 +1355,7 @@ ast_expression::hir(exec_list *instructions,
 	 ir_variable *const tmp = new(ctx) ir_variable(glsl_type::bool_type,
 						       "or_tmp",
 						       ir_var_temporary);
-	 COPY_AST_LOCATION(tmp->yy_location, loc);
+	 COPY_YY_LOCATION(tmp->yy_location, loc);
 	 instructions->push_tail(tmp);
 
 	 ir_if *const stmt = new(ctx) ir_if(op[0]);
@@ -1363,7 +1363,7 @@ ast_expression::hir(exec_list *instructions,
 
 	 ir_dereference *const then_deref = new(ctx) ir_dereference_variable(tmp);
 	 ir_constant* ct = new(ctx) ir_constant(true);
-	 COPY_AST_LOCATION(ct, loc);
+	 COPY_YY_LOCATION(ct->yy_location, loc);
 	 ir_assignment *const then_assign =
 	    new(ctx) ir_assignment(then_deref, ct);
 	 stmt->then_instructions.push_tail(then_assign);
@@ -1551,7 +1551,7 @@ ast_expression::hir(exec_list *instructions,
       } else {
 	 ir_variable *const tmp =
 	    new(ctx) ir_variable(type, "conditional_tmp", ir_var_temporary);
-	 COPY_AST_LOCATION(tmp->yy_location, loc);
+	 COPY_YY_LOCATION(tmp->yy_location, loc);
 	 instructions->push_tail(tmp);
 
 	 ir_if *const stmt = new(ctx) ir_if(op[0]);
@@ -1583,7 +1583,7 @@ ast_expression::hir(exec_list *instructions,
 
       op[0] = this->subexpressions[0]->hir(instructions, state);
       op[1] = constant_one_for_inc_dec(ctx, op[0]->type);
-      COPY_AST_LOCATION(op[1]->yy_location, loc);
+      COPY_YY_LOCATION(op[1]->yy_location, loc);
 
       type = arithmetic_result_type(op[0], op[1], false, state, & loc);
 
@@ -1605,7 +1605,7 @@ ast_expression::hir(exec_list *instructions,
 	 ? "post-increment operation" : "post-decrement operation";
       op[0] = this->subexpressions[0]->hir(instructions, state);
       op[1] = constant_one_for_inc_dec(ctx, op[0]->type);
-      COPY_AST_LOCATION(op[1]->yy_location, loc);
+      COPY_YY_LOCATION(op[1]->yy_location, loc);
 
       error_emitted = op[0]->type->is_error() || op[1]->type->is_error();
 
@@ -1666,8 +1666,8 @@ ast_expression::hir(exec_list *instructions,
       if (var != NULL) {
 	 var->used = true;
 	 result = new(ctx) ir_dereference_variable(var);
-	 COPY_AST_LOCATION(result->yy_location, loc)
-	 AST_LOCATION_EXPAND_FRONT(result, strlen(this->primary_expression.identifier))
+	 COPY_YY_LOCATION(result->yy_location, loc)
+	 //AST_LOCATION_EXPAND_FRONT(result, strlen(this->primary_expression.identifier))
       } else {
 	 _mesa_glsl_error(& loc, state, "`%s' undeclared",
 			  this->primary_expression.identifier);
@@ -1680,33 +1680,33 @@ ast_expression::hir(exec_list *instructions,
 
    case ast_int_constant:
       result = new(ctx) ir_constant(this->primary_expression.int_constant);
-      COPY_AST_LOCATION(result->yy_location, loc);
+      COPY_YY_LOCATION(result->yy_location, loc);
       /* log10 of value + one sign for negative, or 1 if value is zero */
-      AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
-            (floor(log10(abs(this->primary_expression.int_constant))) + 1) + (
-                  this->primary_expression.int_constant < 0 ? 1 : 0) : 1 ) )
+      //AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
+      //      (floor(log10(abs(this->primary_expression.int_constant))) + 1) + (
+      //            this->primary_expression.int_constant < 0 ? 1 : 0) : 1 ) )
       break;
 
    case ast_uint_constant:
       result = new(ctx) ir_constant(this->primary_expression.uint_constant);
-      COPY_AST_LOCATION(result->yy_location, loc);
+      COPY_YY_LOCATION(result->yy_location, loc);
       /* As for int, except useless abs */
-      AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
-            (floor(log10(this->primary_expression.int_constant)) + 1) : 1 ))
+      //AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
+      //      (floor(log10(this->primary_expression.int_constant)) + 1) : 1 ))
       break;
 
    case ast_float_constant: {
       result = new(ctx) ir_constant(this->primary_expression.float_constant);
-      COPY_AST_LOCATION(result->yy_location, loc);
+      COPY_YY_LOCATION(result->yy_location, loc);
       /* TODO */
       break;
    }
 
    case ast_bool_constant:
       result = new(ctx) ir_constant(bool(this->primary_expression.bool_constant));
-      COPY_AST_LOCATION(result->yy_location, loc);
+      COPY_YY_LOCATION(result->yy_location, loc);
       /* This case is simple, true is 4 symbols, false is 5 */
-      AST_LOCATION_EXPAND_FRONT(result, (bool(this->primary_expression.bool_constant) ? 4 : 5) )
+      //AST_LOCATION_EXPAND_FRONT(result, (bool(this->primary_expression.bool_constant) ? 4 : 5) )
       break;
 
    case ast_sequence: {
@@ -2657,7 +2657,7 @@ process_initializer(ir_variable *var, ast_declaration *decl,
 	 rhs = new_rhs;
 
 	 ir_constant *constant_value = rhs->constant_expression_value();
-	 COPY_AST_LOCATION(constant_value->yy_location, new_rhs->yy_location)
+	 COPY_IR_LOCATION(constant_value, new_rhs)
 	 if (!constant_value) {
             /* If ARB_shading_language_420pack is enabled, initializers of
              * const-qualified local variables do not have to be constant
@@ -2675,7 +2675,7 @@ process_initializer(ir_variable *var, ast_declaration *decl,
                if (var->type->is_numeric()) {
                   /* Reduce cascading errors. */
                   var->constant_value = ir_constant::zero(state, var->type);
-                  COPY_AST_LOCATION(var->constant_value->yy_location, new_rhs->yy_location)
+                  COPY_IR_LOCATION(var->constant_value, new_rhs)
                }
             }
          } else {
@@ -2686,7 +2686,7 @@ process_initializer(ir_variable *var, ast_declaration *decl,
 	 if (var->type->is_numeric()) {
 	    /* Reduce cascading errors. */
 	    var->constant_value = ir_constant::zero(state, var->type);
-	    COPY_AST_LOCATION(var->constant_value->yy_location, rhs->yy_location)
+	    COPY_IR_LOCATION(var->constant_value, rhs)
 	 }
       }
    }
@@ -3021,8 +3021,7 @@ ast_declarator_list::hir(exec_list *instructions,
       }
 
       var = new(ctx) ir_variable(var_type, decl->identifier, ir_var_auto);
-      COPY_AST_LOCATION_BEGIN(var, this->type)
-      COPY_AST_LOCATION_END(var, this)
+      COPY_AST_LOCATION(var, decl)
 
       /* The 'varying in' and 'varying out' qualifiers can only be used with
        * ARB_geometry_shader4 and EXT_geometry_shader4, which we don't support
@@ -3492,7 +3491,7 @@ ast_declarator_list::hir(exec_list *instructions,
 	 /* Push the variable declaration to the top.  It means that all the
 	  * variable declarations will appear in a funny last-to-first order,
 	  * but otherwise we run into trouble if a function is prototyped, a
-	  * global var is decled, then the function is defined with usage of
+	  * global var is declared, then the function is defined with usage of
 	  * the global var.  See glslparsertest's CorrectModule.frag.
 	  * However, do not insert declarations before default precision statements
 	  * or type declarations.
@@ -3590,7 +3589,9 @@ ast_parameter_declarator::hir(exec_list *instructions,
    is_void = false;
    ir_variable *var = new(ctx)
       ir_variable(type, this->identifier, ir_var_function_in);
-   COPY_AST_LOCATION(var->yy_location, loc);
+   COPY_YY_LOCATION(var->yy_location, loc);
+   //AST_LOCATION_EXPAND_FRONT(var, strlen(this->identifier))
+
 
    /* Apply any specified qualifiers to the parameter declaration.  Note that
     * for function parameters the default mode is 'in'.
@@ -3811,8 +3812,8 @@ ast_function::hir(exec_list *instructions,
       }
    } else {
       f = new(ctx) ir_function(name);
-      COPY_AST_LOCATION_BEGIN(f, this->return_type)
-      COPY_AST_LOCATION_END(f, this);
+      COPY_AST_LOCATION(f, this)
+
       if (!state->symbols->add_function(f)) {
 	 /* This function name shadows a non-function use of the same name. */
 	 YYLTYPE loc = this->get_location();
@@ -3845,7 +3846,7 @@ ast_function::hir(exec_list *instructions,
    if (sig == NULL) {
       sig = new(ctx) ir_function_signature(return_type);
       f->add_signature(sig);
-      COPY_AST_LOCATION(sig->yy_location, f->yy_location)
+      COPY_IR_LOCATION(sig, f)
    }
 
    sig->replace_parameters(&hir_parameters);
@@ -3901,8 +3902,8 @@ ast_function_definition::hir(exec_list *instructions,
 #ifdef IR_DEBUG_STATE
    /* Add closing directive. It needed for better functions debug. */
    ir_dummy* body_end = new(state) ir_dummy(ir_dummy_function_end);
-   COPY_AST_LOCATION_BEGIN(body_end, this)
-   COPY_AST_LOCATION_END(body_end, this)
+   COPY_AST_LOCATION(body_end, this)
+
    signature->body.push_tail(body_end);
 #endif
 
@@ -3991,7 +3992,7 @@ ast_jump_statement::hir(exec_list *instructions,
          }
 
 	 inst = new(ctx) ir_return(ret);
-	 COPY_AST_LOCATION_FROM_HERE(inst->yy_location);
+	 COPY_YY_LOCATION_FROM_HERE(inst->yy_location);
       } else {
 	 if (state->current_function->return_type->base_type !=
 	     GLSL_TYPE_VOID) {
@@ -4003,7 +4004,7 @@ ast_jump_statement::hir(exec_list *instructions,
 			     state->current_function->function_name());
 	 }
 	 inst = new(ctx) ir_return;
-	 COPY_AST_LOCATION_FROM_HERE(inst->yy_location);
+	 COPY_YY_LOCATION_FROM_HERE(inst->yy_location);
       }
 
       state->found_return = true;
@@ -4019,7 +4020,7 @@ ast_jump_statement::hir(exec_list *instructions,
 			  "`discard' may only appear in a fragment shader");
       }
       ir_discard* dsc = new(ctx) ir_discard;
-      COPY_AST_LOCATION_FROM_HERE(dsc->yy_location);
+      COPY_YY_LOCATION_FROM_HERE(dsc->yy_location);
       instructions->push_tail(dsc);
       break;
    }
@@ -4060,7 +4061,7 @@ ast_jump_statement::hir(exec_list *instructions,
 	    ir_dereference_variable *const deref_is_break_var =
 	       new(ctx) ir_dereference_variable(is_break_var);
 	    ir_constant *const true_val = new(ctx) ir_constant(true);
-	    COPY_AST_LOCATION_FROM_HERE(true_val->yy_location);
+	    COPY_YY_LOCATION_FROM_HERE(true_val->yy_location);
 	    ir_assignment *const set_break_var =
 	       new(ctx) ir_assignment(deref_is_break_var, true_val);
 
@@ -4071,7 +4072,7 @@ ast_jump_statement::hir(exec_list *instructions,
 	       new(ctx) ir_loop_jump((mode == ast_break)
 				     ? ir_loop_jump::jump_break
 				     : ir_loop_jump::jump_continue);
-	    COPY_AST_LOCATION_FROM_HERE(jump->yy_location);
+	    COPY_YY_LOCATION_FROM_HERE(jump->yy_location);
 	    instructions->push_tail(jump);
 	 }
       }
@@ -4167,15 +4168,15 @@ ast_switch_statement::hir(exec_list *instructions,
 
    /* Initalize is_fallthru state to false.
     */
-   GET_AST_LOCATION_HERE
+   GET_YY_LOCATION_HERE
 
    ir_rvalue *const is_fallthru_val = new (ctx) ir_constant(false);
-   COPY_AST_LOCATION(is_fallthru_val->yy_location, _loc);
+   COPY_YY_LOCATION(is_fallthru_val->yy_location, _loc);
    state->switch_state.is_fallthru_var =
       new(ctx) ir_variable(glsl_type::bool_type,
 			   "switch_is_fallthru_tmp",
 			   ir_var_temporary);
-   COPY_AST_LOCATION(state->switch_state.is_fallthru_var->yy_location, _loc);
+   COPY_YY_LOCATION(state->switch_state.is_fallthru_var->yy_location, _loc);
    instructions->push_tail(state->switch_state.is_fallthru_var);
 
    ir_dereference_variable *deref_is_fallthru_var =
@@ -4186,11 +4187,11 @@ ast_switch_statement::hir(exec_list *instructions,
    /* Initalize is_break state to false.
     */
    ir_rvalue *const is_break_val = new (ctx) ir_constant(false);
-   COPY_AST_LOCATION(is_break_val->yy_location, _loc);
+   COPY_YY_LOCATION(is_break_val->yy_location, _loc);
    state->switch_state.is_break_var = new(ctx) ir_variable(glsl_type::bool_type,
 							   "switch_is_break_tmp",
 							   ir_var_temporary);
-   COPY_AST_LOCATION(state->switch_state.is_break_var->yy_location, _loc);
+   COPY_YY_LOCATION(state->switch_state.is_break_var->yy_location, _loc);
    instructions->push_tail(state->switch_state.is_break_var);
 
    ir_dereference_variable *deref_is_break_var =
@@ -4229,7 +4230,7 @@ ast_switch_statement::test_to_hir(exec_list *instructions,
    state->switch_state.test_var = new(ctx) ir_variable(test_val->type,
 						       "switch_test_tmp",
 						       ir_var_temporary);
-   COPY_AST_LOCATION_FROM_HERE(state->switch_state.test_var->yy_location);
+   COPY_YY_LOCATION_FROM_HERE(state->switch_state.test_var->yy_location);
    ir_dereference_variable *deref_test_var =
       new(ctx) ir_dereference_variable(state->switch_state.test_var);
 
@@ -4268,7 +4269,7 @@ ast_case_statement::hir(exec_list *instructions,
 
    /* Conditionally set fallthru state based on break state. */
    ir_constant *const false_val = new(state) ir_constant(false);
-   COPY_AST_LOCATION_FROM_HERE(false_val->yy_location);
+   COPY_YY_LOCATION_FROM_HERE(false_val->yy_location);
    ir_dereference_variable *const deref_is_fallthru_var =
       new(state) ir_dereference_variable(state->switch_state.is_fallthru_var);
    ir_dereference_variable *const deref_is_break_var =
@@ -4315,8 +4316,8 @@ ast_case_label::hir(exec_list *instructions,
       new(ctx) ir_dereference_variable(state->switch_state.is_fallthru_var);
 
    ir_rvalue *const true_val = new(ctx) ir_constant(true);
-   GET_AST_LOCATION_HERE
-   COPY_AST_LOCATION(true_val->yy_location, _loc);
+   GET_YY_LOCATION_HERE
+   COPY_YY_LOCATION(true_val->yy_location, _loc);
 
    /* If not default case, ... */
    if (this->test_value != NULL) {
@@ -4335,7 +4336,7 @@ ast_case_label::hir(exec_list *instructions,
 
 	 /* Stuff a dummy value in to allow processing to continue. */
 	 label_const = new(ctx) ir_constant(0);
-	 COPY_AST_LOCATION(label_const->yy_location, _loc);
+	 COPY_YY_LOCATION(label_const->yy_location, _loc);
       } else {
 	 ast_expression *previous_label = (ast_expression *)
 	    hash_table_find(state->switch_state.labels_ht,
@@ -4402,7 +4403,7 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
 
 #ifdef IR_DEBUG_STATE
       ir_dummy* cond_start = new((void*)state) ir_dummy(ir_dummy_loop_condition);
-      COPY_AST_LOCATION_FROM_HERE(cond_start->yy_location);
+      COPY_YY_LOCATION_FROM_HERE(cond_start->yy_location);
       stmt->body_instructions.push_tail(cond_start);
       stmt->debug_check = cond_start;
 #endif
@@ -4427,7 +4428,7 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
 
 	 ir_jump *const break_stmt =
 	    new(ctx) ir_loop_jump(ir_loop_jump::jump_break);
-	 COPY_AST_LOCATION_FROM_HERE(break_stmt->yy_location);
+	 COPY_YY_LOCATION_FROM_HERE(break_stmt->yy_location);
 
 	 if_stmt->then_instructions.push_tail(break_stmt);
 	 stmt->body_instructions.push_tail(if_stmt);
@@ -4454,7 +4455,7 @@ ast_iteration_statement::hir(exec_list *instructions,
 
 #ifdef IR_DEBUG_STATE
    ir_dummy* init_start = new((void*)state) ir_dummy(ir_dummy_loop_init);
-   COPY_AST_LOCATION_FROM_HERE(init_start->yy_location);
+   COPY_YY_LOCATION_FROM_HERE(init_start->yy_location);
    instructions->push_tail(init_start);
 #endif
 
@@ -4462,7 +4463,7 @@ ast_iteration_statement::hir(exec_list *instructions,
       init_statement->hir(instructions, state);
 
    ir_loop *const stmt = new(ctx) ir_loop();
-   COPY_AST_LOCATION_FROM_HERE(stmt->yy_location);
+   COPY_YY_LOCATION_FROM_HERE(stmt->yy_location);
 
 #ifdef IR_DEBUG_STATE
    instructions->push_tail(new((void*)state) ir_dummy(ir_dummy_loop_initialized));
@@ -4495,7 +4496,7 @@ ast_iteration_statement::hir(exec_list *instructions,
    if (rest_expression != NULL) {
 #ifdef IR_DEBUG_STATE
       ir_dummy* iter_start = new((void*)state) ir_dummy(ir_dummy_loop_iter);
-      COPY_AST_LOCATION_FROM_HERE(iter_start->yy_location);
+      COPY_YY_LOCATION_FROM_HERE(iter_start->yy_location);
       stmt->body_instructions.push_tail(iter_start);
 #endif
 
@@ -4641,7 +4642,7 @@ ast_type_specifier::hir(exec_list *instructions,
          ir_variable *const junk =
             new(state) ir_variable(type, "#default precision",
                                    ir_var_temporary);
-         COPY_AST_LOCATION(junk->yy_location, loc);
+         COPY_YY_LOCATION(junk->yy_location, loc);
 
          state->symbols->add_variable(junk);
       }
@@ -4889,6 +4890,7 @@ ast_struct_specifier::hir(exec_list *instructions,
 	 state->user_structures = s;
 	 state->num_user_structures++;
 	 ir_typedecl_statement* stmt = new(state) ir_typedecl_statement(t);
+	 COPY_YY_LOCATION(stmt->yy_location, loc)
 
 		/* Push the struct declarations to the top.
 		 * However, do not insert declarations before default precision
@@ -5201,7 +5203,7 @@ ast_interface_block::hir(exec_list *instructions,
       if (state->target == geometry_shader && var_mode == ir_var_shader_in)
          handle_geometry_shader_input_decl(state, loc, var);
 
-      COPY_AST_LOCATION(var->yy_location, loc);
+      COPY_YY_LOCATION(var->yy_location, loc);
 
       if (ir_variable *earlier =
           state->symbols->get_variable(this->instance_name)) {
@@ -5231,7 +5233,7 @@ ast_interface_block::hir(exec_list *instructions,
          var->interpolation = fields[i].interpolation;
          var->centroid = fields[i].centroid;
          var->init_interface_type(block_type);
-         COPY_AST_LOCATION(var->yy_location, loc);
+         COPY_YY_LOCATION(var->yy_location, loc);
 
          if (redeclaring_per_vertex) {
             ir_variable *earlier =

@@ -78,9 +78,9 @@ void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 	 * 	EDebugOpObjectCode         = 0x004,
 	 * 	EDebugOpLinkMaps           = 0x008
 	 */
-	int dump_ast = debug & EDebugOpIntermediate;
+	int dump_ast = debug & EDebugOpAssembly;
 	int dump_hir = debug & EDebugOpIntermediate;
-	int dump_lir = debug & EDebugOpAssembly;
+	int dump_lir = debug & EDebugOpObjectCode;
 	struct _mesa_glsl_parse_state *state = new (shader) _mesa_glsl_parse_state(
 			ctx, shader->Type, shader);
 

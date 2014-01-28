@@ -79,9 +79,9 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %locations
 %initial-action {
    @$.first_line = 1;
-   @$.first_column = 1;
+   @$.first_column = 0;
    @$.last_line = 1;
-   @$.last_column = 1;
+   @$.last_column = 0;
    @$.source = 0;
 }
 
@@ -384,35 +384,35 @@ primary_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_identifier, NULL, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->primary_expression.identifier = $1;
    }
    | INTCONSTANT
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_int_constant, NULL, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->primary_expression.int_constant = $1;
    }
    | UINTCONSTANT
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_uint_constant, NULL, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->primary_expression.uint_constant = $1;
    }
    | FLOATCONSTANT
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_float_constant, NULL, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->primary_expression.float_constant = $1;
    }
    | BOOLCONSTANT
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_bool_constant, NULL, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->primary_expression.bool_constant = $1;
    }
    | '(' expression ')'
@@ -427,7 +427,7 @@ postfix_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_array_index, $1, $3, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @4);
    }
    | function_call
    {
@@ -437,20 +437,20 @@ postfix_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_field_selection, $1, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
       $$->primary_expression.identifier = $3;
    }
    | postfix_expression INC_OP
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_post_inc, $1, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    | postfix_expression DEC_OP
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_post_dec, $1, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    ;
 
@@ -468,7 +468,7 @@ function_call_or_method:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_field_selection, $1, $3, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -486,13 +486,13 @@ function_call_header_with_parameters:
    function_call_header assignment_expression
    {
       $$ = $1;
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->expressions.push_tail(& $2->link);
    }
    | function_call_header_with_parameters ',' assignment_expression
    {
       $$ = $1;
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->expressions.push_tail(& $3->link);
    }
    ;
@@ -509,21 +509,23 @@ function_identifier:
    {
       void *ctx = state;
       $$ = new(ctx) ast_function_expression($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       }
    | variable_identifier
    {
       void *ctx = state;
       ast_expression *callee = new(ctx) ast_expression($1);
+      callee->set_location(@1);
       $$ = new(ctx) ast_function_expression(callee);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       }
    | FIELD_SELECTION
    {
       void *ctx = state;
       ast_expression *callee = new(ctx) ast_expression($1);
+      callee->set_location(@1);
       $$ = new(ctx) ast_function_expression(callee);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       }
    ;
 
@@ -541,13 +543,13 @@ method_call_header_with_parameters:
    method_call_header assignment_expression
    {
       $$ = $1;
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->expressions.push_tail(& $2->link);
    }
    | method_call_header_with_parameters ',' assignment_expression
    {
       $$ = $1;
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->expressions.push_tail(& $3->link);
    }
    ;
@@ -560,8 +562,9 @@ method_call_header:
    {
       void *ctx = state;
       ast_expression *callee = new(ctx) ast_expression($1);
+      callee->set_location(@1);
       $$ = new(ctx) ast_function_expression(callee);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    ;
 
@@ -572,19 +575,19 @@ unary_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_pre_inc, $2, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | DEC_OP unary_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_pre_dec, $2, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | unary_operator unary_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression($1, $2, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    ;
 
@@ -602,19 +605,19 @@ multiplicative_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_mul, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | multiplicative_expression '/' unary_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_div, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | multiplicative_expression '%' unary_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_mod, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -624,13 +627,13 @@ additive_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_add, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | additive_expression '-' multiplicative_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_sub, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -640,13 +643,13 @@ shift_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_lshift, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | shift_expression RIGHT_OP additive_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_rshift, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -656,25 +659,25 @@ relational_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_less, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | relational_expression '>' shift_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_greater, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | relational_expression LE_OP shift_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_lequal, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | relational_expression GE_OP shift_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_gequal, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -684,13 +687,13 @@ equality_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_equal, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | equality_expression NE_OP relational_expression
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_nequal, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -700,7 +703,7 @@ and_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_bit_and, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -710,7 +713,7 @@ exclusive_or_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_bit_xor, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -720,7 +723,7 @@ inclusive_or_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_bit_or, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -730,7 +733,7 @@ logical_and_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_logic_and, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -740,7 +743,7 @@ logical_xor_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_logic_xor, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -750,7 +753,7 @@ logical_or_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_bin(ast_logic_or, $1, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -760,7 +763,7 @@ conditional_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression(ast_conditional, $1, $3, $5);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @5);
    }
    ;
 
@@ -770,7 +773,7 @@ assignment_expression:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression($2, $1, $3, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -798,7 +801,7 @@ expression:
       void *ctx = state;
       if ($1->oper != ast_sequence) {
          $$ = new(ctx) ast_expression(ast_sequence, NULL, NULL, NULL);
-         $$->set_location(yylloc);
+         $$->set_location_range(@1, @3);
          $$->expressions.push_tail(& $1->link);
       } else {
          $$ = $1;
@@ -860,7 +863,7 @@ function_header:
    {
       void *ctx = state;
       $$ = new(ctx) ast_function();
-      $$->set_location(yylloc);
+      $$->set_location(@2);
       $$->return_type = $1;
       $$->identifier = $2;
 
@@ -874,9 +877,9 @@ parameter_declarator:
    {
       void *ctx = state;
       $$ = new(ctx) ast_parameter_declarator();
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
       $$->type = new(ctx) ast_fully_specified_type();
-      $$->type->set_location(yylloc);
+      $$->type->set_location(@1);
       $$->type->specifier = $1;
       $$->identifier = $2;
    }
@@ -884,9 +887,9 @@ parameter_declarator:
    {
       void *ctx = state;
       $$ = new(ctx) ast_parameter_declarator();
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
       $$->type = new(ctx) ast_fully_specified_type();
-      $$->type->set_location(yylloc);
+      $$->type->set_location(@1);
       $$->type->specifier = $1;
       $$->identifier = $2;
       $$->is_array = true;
@@ -904,8 +907,9 @@ parameter_declaration:
    {
       void *ctx = state;
       $$ = new(ctx) ast_parameter_declarator();
-      $$->set_location(yylloc);
+      $$->set_location(@2);
       $$->type = new(ctx) ast_fully_specified_type();
+      $$->type->set_location_range(@1, @2);
       $$->type->qualifier = $1;
       $$->type->specifier = $2;
    }
@@ -977,44 +981,54 @@ init_declarator_list:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, false, NULL, NULL);
-      decl->set_location(yylloc);
+      decl->set_location(@3);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
    }
    | init_declarator_list ',' any_identifier '[' ']'
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, true, NULL, NULL);
-      decl->set_location(yylloc);
+      decl->set_location_range(@3, @5);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
    }
    | init_declarator_list ',' any_identifier '[' constant_expression ']'
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, true, $5, NULL);
-      decl->set_location(yylloc);
+      decl->set_location_range(@3, @6);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
+
    }
    | init_declarator_list ',' any_identifier '[' ']' '=' initializer
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, true, NULL, $7);
-      decl->set_location(yylloc);
+      decl->set_location_range(@3, @5);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
       if ($7->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$7;
          ast_type_specifier *type = new(ctx) ast_type_specifier($1->type->specifier, true, NULL);
+         type->set_location($1->type->specifier->get_location());
          _mesa_ast_set_aggregate_type(type, ai, state);
       }
    }
@@ -1022,14 +1036,17 @@ init_declarator_list:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, true, $5, $8);
-      decl->set_location(yylloc);
+      decl->set_location_range(@3, @6);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
       if ($8->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$8;
          ast_type_specifier *type = new(ctx) ast_type_specifier($1->type->specifier, true, $5);
+         type->set_location($1->type->specifier->get_location());
          _mesa_ast_set_aggregate_type(type, ai, state);
       }
    }
@@ -1037,11 +1054,13 @@ init_declarator_list:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($3, false, NULL, $5);
-      decl->set_location(yylloc);
+      decl->set_location(@3);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
-      state->symbols->add_variable(new(state) ir_variable(NULL, $3, ir_var_auto));
+      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
+      COPY_YY_LOCATION(v, @3)
+      state->symbols->add_variable(v);
       if ($5->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$5;
          _mesa_ast_set_aggregate_type($1->type->specifier, ai, state);
@@ -1056,46 +1075,51 @@ single_declaration:
       void *ctx = state;
       /* Empty declaration list is valid. */
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | fully_specified_type any_identifier
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, NULL);
+      decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
       $$->declarations.push_tail(&decl->link);
    }
    | fully_specified_type any_identifier '[' ']'
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, NULL, NULL);
+      decl->set_location_range(@2, @4);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @4);
       $$->declarations.push_tail(&decl->link);
    }
    | fully_specified_type any_identifier '[' constant_expression ']'
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, NULL);
+      decl->set_location_range(@1, @5);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location_range(@2, @5);
       $$->declarations.push_tail(&decl->link);
    }
    | fully_specified_type any_identifier '[' ']' '=' initializer
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, NULL, $6);
+      decl->set_location_range(@1, @4);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location_range(@2, @4);
       $$->declarations.push_tail(&decl->link);
       if ($6->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$6;
          ast_type_specifier *type = new(ctx) ast_type_specifier($1->specifier, true, NULL);
+         type->set_location(@1);
          _mesa_ast_set_aggregate_type(type, ai, state);
       }
    }
@@ -1103,13 +1127,15 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, $7);
+      decl->set_location_range(@1, @5);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location_range(@2, @5);
       $$->declarations.push_tail(&decl->link);
       if ($7->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$7;
          ast_type_specifier *type = new(ctx) ast_type_specifier($1->specifier, true, $4);
+         type->set_location(@1);
          _mesa_ast_set_aggregate_type(type, ai, state);
       }
    }
@@ -1117,9 +1143,10 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, $4);
+      decl->set_location_range(@1, @2);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
       $$->declarations.push_tail(&decl->link);
       if ($4->oper == ast_aggregate) {
          _mesa_ast_set_aggregate_type($1->specifier, $4, state);
@@ -1129,9 +1156,10 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, NULL);
+      decl->set_location_range(@1, @2);
 
       $$ = new(ctx) ast_declarator_list(NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
       $$->invariant = true;
 
       $$->declarations.push_tail(&decl->link);
@@ -1143,14 +1171,14 @@ fully_specified_type:
    {
       void *ctx = state;
       $$ = new(ctx) ast_fully_specified_type();
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->specifier = $1;
    }
    | type_qualifier type_specifier
    {
       void *ctx = state;
       $$ = new(ctx) ast_fully_specified_type();
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
       $$->qualifier = $1;
       $$->specifier = $2;
    }
@@ -1627,19 +1655,19 @@ type_specifier_nonarray:
    {
       void *ctx = state;
       $$ = new(ctx) ast_type_specifier($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | struct_specifier
    {
       void *ctx = state;
       $$ = new(ctx) ast_type_specifier($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | TYPE_IDENTIFIER
    {
       void *ctx = state;
       $$ = new(ctx) ast_type_specifier($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    ;
 
@@ -1737,7 +1765,7 @@ struct_specifier:
    {
       void *ctx = state;
       $$ = new(ctx) ast_struct_specifier($2, $4);
-      $$->set_location(yylloc);
+      $$->set_location_range(@2, @5);
       state->symbols->add_type($2, glsl_type::void_type);
       state->symbols->add_type_ast($2, new(ctx) ast_type_specifier($$));
    }
@@ -1745,7 +1773,7 @@ struct_specifier:
    {
       void *ctx = state;
       $$ = new(ctx) ast_struct_specifier(NULL, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@2, @4);
    }
    ;
 
@@ -1767,7 +1795,7 @@ struct_declaration:
    {
       void *ctx = state;
       ast_fully_specified_type *const type = $1;
-      type->set_location(yylloc);
+      type->set_location(@1);
 
       if (type->qualifier.flags.i != 0)
          _mesa_glsl_error(&@1, state,
@@ -1775,7 +1803,7 @@ struct_declaration:
 			  "structure members");
 
       $$ = new(ctx) ast_declarator_list(type);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
 
       $$->declarations.push_degenerate_list_at_head(& $2->link);
    }
@@ -1799,19 +1827,19 @@ struct_declarator:
    {
       void *ctx = state;
       $$ = new(ctx) ast_declaration($1, false, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | any_identifier '[' ']'
    {
       void *ctx = state;
       $$ = new(ctx) ast_declaration($1, true, NULL, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    | any_identifier '[' constant_expression ']'
    {
       void *ctx = state;
       $$ = new(ctx) ast_declaration($1, true, $3, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @4);
    }
    ;
 
@@ -1832,7 +1860,7 @@ initializer_list:
    {
       void *ctx = state;
       $$ = new(ctx) ast_aggregate_initializer();
-      $$->set_location(yylloc);
+      $$->set_location(@1);
       $$->expressions.push_tail(& $1->link);
    }
    | initializer_list ',' initializer
@@ -1866,7 +1894,7 @@ compound_statement:
    {
       void *ctx = state;
       $$ = new(ctx) ast_compound_statement(true, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    | '{'
    {
@@ -1876,7 +1904,7 @@ compound_statement:
    {
       void *ctx = state;
       $$ = new(ctx) ast_compound_statement(true, $3);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @4);
       state->symbols->pop_scope();
    }
    ;
@@ -1891,13 +1919,13 @@ compound_statement_no_new_scope:
    {
       void *ctx = state;
       $$ = new(ctx) ast_compound_statement(false, NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    | '{' statement_list '}'
    {
       void *ctx = state;
       $$ = new(ctx) ast_compound_statement(false, $2);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -1928,13 +1956,13 @@ expression_statement:
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_statement(NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | expression ';'
    {
       void *ctx = state;
       $$ = new(ctx) ast_expression_statement($1);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    ;
 
@@ -1943,7 +1971,7 @@ selection_statement:
    {
       $$ = new(state) ast_selection_statement($3, $5.then_statement,
                                               $5.else_statement);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @5);
    }
    ;
 
@@ -1970,8 +1998,8 @@ condition:
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, $4);
       ast_declarator_list *declarator = new(ctx) ast_declarator_list($1);
-      decl->set_location(yylloc);
-      declarator->set_location(yylloc);
+      decl->set_location_range(@2, @4);
+      declarator->set_location(@1);
 
       declarator->declarations.push_tail(&decl->link);
       $$ = declarator;
@@ -1986,7 +2014,7 @@ switch_statement:
    SWITCH '(' expression ')' switch_body
    {
       $$ = new(state) ast_switch_statement($3, $5);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @5);
    }
    ;
 
@@ -1994,12 +2022,12 @@ switch_body:
    '{' '}'
    {
       $$ = new(state) ast_switch_body(NULL);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    | '{' case_statement_list '}'
    {
       $$ = new(state) ast_switch_body($2);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -2007,12 +2035,12 @@ case_label:
    CASE expression ':'
    {
       $$ = new(state) ast_case_label($2);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
    }
    | DEFAULT ':'
    {
       $$ = new(state) ast_case_label(NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
    }
    ;
 
@@ -2023,7 +2051,7 @@ case_label_list:
 
       labels->labels.push_tail(& $1->link);
       $$ = labels;
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | case_label_list case_label
    {
@@ -2036,7 +2064,7 @@ case_statement:
    case_label_list statement
    {
       ast_case_statement *stmts = new(state) ast_case_statement($1);
-      stmts->set_location(yylloc);
+      stmts->set_location(@2);
 
       stmts->stmts.push_tail(& $2->link);
       $$ = stmts;
@@ -2052,7 +2080,7 @@ case_statement_list:
    case_statement
    {
       ast_case_statement_list *cases= new(state) ast_case_statement_list();
-      cases->set_location(yylloc);
+      cases->set_location(@1);
 
       cases->cases.push_tail(& $1->link);
       $$ = cases;
@@ -2070,21 +2098,21 @@ iteration_statement:
       void *ctx = state;
       $$ = new(ctx) ast_iteration_statement(ast_iteration_statement::ast_while,
                                             NULL, $3, NULL, $5);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @4);
    }
    | DO statement WHILE '(' expression ')' ';'
    {
       void *ctx = state;
       $$ = new(ctx) ast_iteration_statement(ast_iteration_statement::ast_do_while,
                                             NULL, $5, NULL, $2);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @6);
    }
    | FOR '(' for_init_statement for_rest_statement ')' statement_no_new_scope
    {
       void *ctx = state;
       $$ = new(ctx) ast_iteration_statement(ast_iteration_statement::ast_for,
                                             $3, $4.cond, $4.rest, $6);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @6);
    }
    ;
 
@@ -2120,31 +2148,31 @@ jump_statement:
    {
       void *ctx = state;
       $$ = new(ctx) ast_jump_statement(ast_jump_statement::ast_continue, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | BREAK ';'
    {
       void *ctx = state;
       $$ = new(ctx) ast_jump_statement(ast_jump_statement::ast_break, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | RETURN ';'
    {
       void *ctx = state;
       $$ = new(ctx) ast_jump_statement(ast_jump_statement::ast_return, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    | RETURN expression ';'
    {
       void *ctx = state;
       $$ = new(ctx) ast_jump_statement(ast_jump_statement::ast_return, $2);
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
    }
    | DISCARD ';' // Fragment shader only.
    {
       void *ctx = state;
       $$ = new(ctx) ast_jump_statement(ast_jump_statement::ast_discard, NULL);
-      $$->set_location(yylloc);
+      $$->set_location(@1);
    }
    ;
 
@@ -2160,7 +2188,7 @@ function_definition:
    {
       void *ctx = state;
       $$ = new(ctx) ast_function_definition();
-      $$->set_location(yylloc);
+      $$->set_location_range(@1, @2);
       $$->prototype = $1;
       $$->body = $2;
 
@@ -2309,16 +2337,19 @@ instance_name_opt:
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
                                           $1, false, NULL);
+      $$->set_location(@1);
    }
    | NEW_IDENTIFIER '[' constant_expression ']'
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
                                           $1, true, $3);
+      $$->set_location_range(@1, @4);
    }
    | NEW_IDENTIFIER '[' ']'
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
                                           $1, true, NULL);
+      $$->set_location_range(@1, @3);
    }
    ;
 
@@ -2340,7 +2371,7 @@ member_declaration:
    {
       void *ctx = state;
       ast_fully_specified_type *type = $1;
-      type->set_location(yylloc);
+      type->set_location(@1);
 
       if (type->qualifier.flags.q.attribute) {
          _mesa_glsl_error(& @1, state,
@@ -2353,7 +2384,7 @@ member_declaration:
       }
 
       $$ = new(ctx) ast_declarator_list(type);
-      $$->set_location(yylloc);
+      $$->set_location(@2);
 
       $$->declarations.push_degenerate_list_at_head(& $2->link);
    }

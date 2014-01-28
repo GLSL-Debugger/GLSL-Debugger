@@ -38,8 +38,9 @@ static int classify_identifier(struct _mesa_glsl_parse_state *, const char *);
    do {								\
       yylloc->source = 0;					\
       yylloc->first_column = yycolumn + 1;			\
-      yylloc->first_line = yylineno + 1;			\
+      yylloc->first_line = yylloc->last_line = yylineno + 1;	\
       yycolumn += yyleng;					\
+      yylloc->last_column = yycolumn + 1;			\
    } while(0);
 
 #define YY_USER_INIT yylineno = 0; yycolumn = 0;
@@ -165,7 +166,7 @@ HASH		^{SPC}#{SPC}
 
 [ \r\t]+		;
 
-    /* Preprocessor tokens. */ 
+    /* Preprocessor tokens. */
 ^[ \t]*#[ \t]*$			;
 ^[ \t]*#[ \t]*version		{ BEGIN PP; return VERSION_TOK; }
 ^[ \t]*#[ \t]*extension		{ BEGIN PP; return EXTENSION; }
@@ -237,6 +238,7 @@ HASH		^{SPC}#{SPC}
 <PP>\n				{ BEGIN 0; yylineno++; yycolumn = 0; return EOL; }
 
 \n		{ yylineno++; yycolumn = 0; }
+
 
 attribute	DEPRECATED_ES_KEYWORD(ATTRIBUTE);
 const		return CONST_TOK;
@@ -526,7 +528,7 @@ subroutine	KEYWORD(0, 300, 0, 0, SUBROUTINE);
 
 [_a-zA-Z][_a-zA-Z0-9]*	{
 			    struct _mesa_glsl_parse_state *state = yyextra;
-			    void *ctx = state;	
+			    void *ctx = state;
 			    yylval->identifier = ralloc_strdup(ctx, yytext);
 			    return classify_identifier(state, yytext);
 			}
