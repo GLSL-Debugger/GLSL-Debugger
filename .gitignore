@@ -18,7 +18,14 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 
+# VS stuff
+*.vcxproj.*
+*.suo
+*.sdf
+*.opensdf
+
 # output & generated stuff
+Build/
 bin
 lib
 glsldb/DebugLib/generated/

@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DE4FC688-F6D8-484A-AC8A-C9BF6DE2B4AD}</ProjectGuid>
+    <RootNamespace>DebugLib</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="..\glsldbg.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DEBUG;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ModuleDefinitionFile>debuglib.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>debuglib.def</ModuleDefinitionFile>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="error.c" />
+    <ClCompile Include="glstate.c" />
+    <ClCompile Include="hooks.c" />
+    <ClCompile Include="initLib.c" />
+    <ClCompile Include="libglsldebug.c" />
+    <ClCompile Include="memory.c" />
+    <ClCompile Include="postExecution.c" />
+    <ClCompile Include="preExecution.c" />
+    <ClCompile Include="queries.c" />
+    <ClCompile Include="readback.c" />
+    <ClCompile Include="shader.c">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
+    </ClCompile>
+    <ClCompile Include="streamRecorder.c" />
+    <ClCompile Include="streamRecording.c" />
+    <ClCompile Include="functionList.c" />
+    <ClCompile Include="replayFunction.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="debuglibExport.h" />
+    <ClInclude Include="debuglibInternal.h" />
+    <ClInclude Include="glstate.h" />
+    <ClInclude Include="initLib.h" />
+    <ClInclude Include="memory.h" />
+    <ClInclude Include="postExecution.h" />
+    <ClInclude Include="preExecution.h" />
+    <ClInclude Include="queries.h" />
+    <ClInclude Include="readback.h" />
+    <ClInclude Include="replayFunction.h" />
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="streamRecorder.h" />
+    <ClInclude Include="streamRecording.h" />
+    <ClInclude Include="trampolines.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Piped_Perl_Output Include="argumentListTools.pl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genArgSizeFuncs.pl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genArgSizeFuncsPrototypes.pl">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genFunctionHooks.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionHooks.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl functionsAllowedInBeginEnd.pl ../GL/gl.h ../GL/glext.h ../GL/wglext.h ../GL/WinGDI.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionHooks.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl functionsAllowedInBeginEnd.pl ../GL/gl.h ../GL/glext.h ../GL/wglext.h ../GL/WinGDI.h</Dependencies>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genFunctionList.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionList.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionList.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genFunctionPointerTypes.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionPointerTypes.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionPointerTypes.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genGetProcAddressHook.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">getProcAddressHook.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">getProcAddressHook.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="genReplayFunc.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">replayFunction.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">replayFunction.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
+    </Piped_Perl_Output>
+    <TrampolineRule Include="genTrampolines.pl" />
+    <Piped_Perl_Output Include="mergeAllowedInBeginEndList.pl">
+      <FileType>Document</FileType>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionsAllowedInBeginEnd.pl</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionsAllowedInBeginEnd.pl</OutputFile>
+    </Piped_Perl_Output>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debuglib.def" />
+    <None Include="functionHooks.inc" />
+    <None Include="functionPointerTypes.inc" />
+    <None Include="getProcAddressHook.inc" />
+    <None Include="trampolines.inc" />
+    <None Include="Makefile.mk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GLSLCompiler\compiler\compiler.vcxproj">
+      <Project>{972d4587-43b7-4569-b905-ae559a3db1ef}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GLSLCompiler\glslang\DebugCodeGen\DebugCodeGen.vcxproj">
+      <Project>{d592524c-a3a8-4d06-abc6-38fdf4771c92}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GLSLCompiler\glslang\GenericCodeGen\GenericCodeGen.vcxproj">
+      <Project>{c9097509-116e-48d2-97f1-b5773914ccd5}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GLSLCompiler\glslang\MachineIndependent\MachineIndependent.vcxproj">
+      <Project>{70ca80d4-4f67-464e-8e3d-70645ee0987d}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GLSLCompiler\glslang\MachineIndependent\preprocessor\preprocessor.vcxproj">
+      <Project>{8e19ac52-f575-4668-9a1d-a07bb7b155b5}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GLSLCompiler\glslang\OSDependent\Windows\Windows.vcxproj">
+      <Project>{743c109f-79ac-4ad4-8ce1-ca4581669e96}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\utils\utils.vcxproj">
+      <Project>{4acf0e86-5841-437a-8977-8309445be30b}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\glsldbg.targets" />
+  </ImportGroup>
+</Project>

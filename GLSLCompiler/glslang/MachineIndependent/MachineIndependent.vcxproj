@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{70CA80D4-4F67-464E-8E3D-70645EE0987D}</ProjectGuid>
+    <RootNamespace>MachineIndependent</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command>cd ..\..\tools
+flex.exe -oGen_glslang.cpp ..\glslang\MachineIndependent\glslang.l
+move Gen_glslang.cpp ..\glslang\MachineIndependent\
+bison.exe -t -v -d -o..\glslang\MachineIndependent\Gen_glslang ..\glslang\MachineIndependent\glslang.y
+cd ..\glslang\MachineIndependent
+echo #include "../../../glsldb/utils/dbgprint.h" &gt; Gen_glslang_tab.cpp
+perl -ne "s/fprintf\s*\(\s*stderr,\s*/dbgPrint\(DBGLVL_COMPILERINFO,/%3bprint%3b" gen_glslang &gt;&gt; Gen_glslang_tab.cpp
+move gen_glslang.h glslang_tab.h
+</Command>
+    </PreBuildEvent>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.\;..\;..\..\;..\OSDependent\Windows;..\..\compiler;..\..\..\glsldb\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;SH_EXPORTING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>cd ..\..\tools
+flex.exe -oGen_glslang.cpp ..\glslang\MachineIndependent\glslang.l
+move Gen_glslang.cpp ..\glslang\MachineIndependent\
+bison.exe -t -v -d -o..\glslang\MachineIndependent\Gen_glslang ..\glslang\MachineIndependent\glslang.y
+cd ..\glslang\MachineIndependent
+echo #include "../../../glsldb/utils/dbgprint.h" &gt; Gen_glslang_tab.cpp
+perl -ne "s/fprintf\s*\(stderr, /dbgPrint\(DBGLVL_COMPILERINFO,/%3bprint%3b" gen_glslang &gt;&gt; Gen_glslang_tab.cpp
+move gen_glslang.h glslang_tab.h
+</Command>
+    </PreBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\;..\;..\..\;..\OSDependent\Windows;..\..\compiler;..\..\..\glsldb\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;SH_EXPORTING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Gen_glslang.cpp" />
+    <ClCompile Include="Gen_glslang_tab.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4129;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4129;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="InfoSink.cpp" />
+    <ClCompile Include="Initialize.cpp" />
+    <ClCompile Include="Intermediate.cpp" />
+    <ClCompile Include="intermOut.cpp" />
+    <ClCompile Include="IntermTraverse.cpp" />
+    <ClCompile Include="parseConst.cpp" />
+    <ClCompile Include="ParseHelper.cpp" />
+    <ClCompile Include="PoolAlloc.cpp" />
+    <ClCompile Include="QualifierAlive.cpp" />
+    <ClCompile Include="RemoveTree.cpp" />
+    <ClCompile Include="ShaderLang.cpp" />
+    <ClCompile Include="SymbolTable.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="glslang_tab.h" />
+    <ClInclude Include="Initialize.h" />
+    <ClInclude Include="localintermediate.h" />
+    <ClInclude Include="MMap.h" />
+    <ClInclude Include="ParseHelper.h" />
+    <ClInclude Include="QualifierAlive.h" />
+    <ClInclude Include="RemoveTree.h" />
+    <ClInclude Include="SymbolTable.h" />
+    <ClInclude Include="unistd.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
