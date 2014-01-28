@@ -37,22 +37,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\$(Configuration)\lib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\GLSLCompiler\glslang\MachineIndependent\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\$(Configuration)\lib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\GLSLCompiler\glslang\MachineIndependent\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>cd ..\..\tools
-flex.exe -oGen_glslang.cpp ..\glslang\MachineIndependent\glslang.l
-move Gen_glslang.cpp ..\glslang\MachineIndependent\
-bison.exe -t -v -d -o..\glslang\MachineIndependent\Gen_glslang ..\glslang\MachineIndependent\glslang.y
-cd ..\glslang\MachineIndependent
-echo #include "../../../glsldb/utils/dbgprint.h" &gt; Gen_glslang_tab.cpp
-perl -ne "s/fprintf\s*\(\s*stderr,\s*/dbgPrint\(DBGLVL_COMPILERINFO,/%3bprint%3b" gen_glslang &gt;&gt; Gen_glslang_tab.cpp
-move gen_glslang.h glslang_tab.h
-</Command>
+      <Command>pushd ..\..\tools\
+set FILES_PATH=..\glslang\MachineIndependent
+flex.exe -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
+bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser %FILES_PATH%\glslang.y
+set FILES_PATH=
+popd</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -69,15 +66,12 @@ move gen_glslang.h glslang_tab.h
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>cd ..\..\tools
-flex.exe -oGen_glslang.cpp ..\glslang\MachineIndependent\glslang.l
-move Gen_glslang.cpp ..\glslang\MachineIndependent\
-bison.exe -t -v -d -o..\glslang\MachineIndependent\Gen_glslang ..\glslang\MachineIndependent\glslang.y
-cd ..\glslang\MachineIndependent
-echo #include "../../../glsldb/utils/dbgprint.h" &gt; Gen_glslang_tab.cpp
-perl -ne "s/fprintf\s*\(stderr, /dbgPrint\(DBGLVL_COMPILERINFO,/%3bprint%3b" gen_glslang &gt;&gt; Gen_glslang_tab.cpp
-move gen_glslang.h glslang_tab.h
-</Command>
+      <Command>pushd ..\..\tools\
+set FILES_PATH=..\glslang\MachineIndependent
+win_flex.exe -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
+win_bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser %FILES_PATH%\glslang.y
+set FILES_PATH=
+popd</Command>
     </PreBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\..\;..\OSDependent\Windows;..\..\compiler;..\..\..\glsldb\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
