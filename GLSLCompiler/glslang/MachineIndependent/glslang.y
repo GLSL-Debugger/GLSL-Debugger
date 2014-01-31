@@ -63,18 +63,18 @@ Jutta Degener, 1995
 
 #define EMIT_VERTEX_SIG   "EmitVertex("
 
-#ifdef _WIN32
+/*#ifdef _WIN32
     #define YYPARSE_PARAM parseContext
     #define YYPARSE_PARAM_DECL TParseContext&
     #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
     #define YYLEX_PARAM parseContext
-#else
+#else */
     #define YYPARSE_PARAM parseContextLocal
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
     extern void yyerror(void*, const char*);
-#endif
+//#endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
     if (parseContext.language != EShLangFragment &&                      \
@@ -191,9 +191,9 @@ Jutta Degener, 1995
 }
 
 %{
-#ifndef _WIN32
+//#ifndef _WIN32
     extern int yylex(YYSTYPE*, void*);
-#endif
+//#endif
 
 void addStructInstance(TIntermSpecification* specificationNode,
                        TIntermNode* intermNode,

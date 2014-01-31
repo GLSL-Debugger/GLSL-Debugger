@@ -88,7 +88,6 @@ int yytokenpos[2];
     extern int yyparse(void*);
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define parseContext (*((TParseContext*)(parseContextLocal)))		
-
 #endif
  
 #define YY_INPUT(buf,result,max_size) (result = yy_input(buf, max_size))

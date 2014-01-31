@@ -46,8 +46,8 @@
     <PreBuildEvent>
       <Command>pushd ..\..\tools\
 set FILES_PATH=..\glslang\MachineIndependent
-flex.exe -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
-bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser %FILES_PATH%\glslang.y
+win_flex.exe --wincompat -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
+win_bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser.cpp %FILES_PATH%\glslang.y
 set FILES_PATH=
 popd</Command>
     </PreBuildEvent>
@@ -62,33 +62,32 @@ popd</Command>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
       <Command>pushd ..\..\tools\
 set FILES_PATH=..\glslang\MachineIndependent
-win_flex.exe -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
-win_bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser %FILES_PATH%\glslang.y
+win_flex.exe --wincompat -o%FILES_PATH%\generated_glsl_lexer.cpp %FILES_PATH%\glslang.l
+win_bison.exe -t -v -d -o%FILES_PATH%\generated_glsl_parser.cpp %FILES_PATH%\glslang.y
 set FILES_PATH=
 popd</Command>
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;..\..\;..\OSDependent\Windows;..\..\compiler;..\..\..\glsldb\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;..\..\;..\OSDependent\Windows;..\..\compiler;..\..\..\glsldb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;SH_EXPORTING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Gen_glslang.cpp" />
-    <ClCompile Include="Gen_glslang_tab.cpp">
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4129;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4129;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-    </ClCompile>
+    <ClCompile Include="generated_glsl_lexer.cpp" />
+    <ClCompile Include="generated_glsl_parser.cpp" />
     <ClCompile Include="InfoSink.cpp" />
     <ClCompile Include="Initialize.cpp" />
     <ClCompile Include="Intermediate.cpp" />
@@ -103,7 +102,7 @@ popd</Command>
     <ClCompile Include="SymbolTable.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="glslang_tab.h" />
+    <ClInclude Include="generated_glsl_parser.hpp" />
     <ClInclude Include="Initialize.h" />
     <ClInclude Include="localintermediate.h" />
     <ClInclude Include="MMap.h" />

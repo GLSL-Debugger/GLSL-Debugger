@@ -1,3 +1,6 @@
+win flex-bison http://sourceforge.net/projects/winflexbison/
+Packed with upx, md5sum does not match.
+
 =======
 versions 2.4.1 2.5.1
 --------------

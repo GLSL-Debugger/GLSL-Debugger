@@ -58,7 +58,7 @@
     <StringProperty
       Name="WorkDir"
       HelpContext="0"
-      DisplayName="Wording Directory"
+      DisplayName="Working Directory"
       Description="Specify the working directory for execution."
       Switch="[value]" />
     <StringProperty
