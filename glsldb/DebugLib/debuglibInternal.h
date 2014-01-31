@@ -45,7 +45,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "streamRecorder.h"
 #include "queries.h"
 #include "../utils/hash.h"
-#include "GL/glx.h"
+//#include "GL/glx.h"
 
 #include "generated/functionPointerTypes.inc"
 

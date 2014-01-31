@@ -73,8 +73,7 @@ mkdir generated</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>rd generated /s /q; 
-mkdir generated</Command>
+      <Command>if not exist generated/ mkdir generated</Command>
     </PreBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

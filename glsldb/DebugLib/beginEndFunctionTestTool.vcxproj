@@ -14,6 +14,7 @@
     <ProjectGuid>{6904057B-B1E0-4271-82EA-8BB7D28A6B5E}</ProjectGuid>
     <RootNamespace>beginEndFunctionTestTool</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>beginEndFunctionTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -39,10 +40,10 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\$(Configuration)\bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\DebugFunctions\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\DebugLib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\$(Configuration)\bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\DebugFunctions\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\DebugLib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -74,6 +75,12 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if not exist generated/ mkdir generated</Command>
+    </PreBuildEvent>
+    <Piped_Perl_Output>
+      <WorkDir>generator\</WorkDir>
+    </Piped_Perl_Output>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildStep>
@@ -83,7 +90,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -104,28 +111,35 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <Piped_Perl_Output>
+      <WorkDir>generator\</WorkDir>
+    </Piped_Perl_Output>
+    <PreBuildEvent>
+      <Command>if not exist generated/ mkdir generated</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="beginEndFunctionTest.c">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Piped_Perl_Output Include="genBeginEndFunctionTest.pl">
+    <Piped_Perl_Output Include="BeginEndFunctionTest.pl">
       <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">beginEndFunctionTest.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl functionPointerTypes.inc</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">beginEndFunctionTest.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl functionPointerTypes.inc</Dependencies>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BeginEndFunctionTest.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\beginEndFunctionTest.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl generated/functionPointerTypes.inc</Dependencies>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">BeginEndFunctionTest.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\beginEndFunctionTest.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl generated/functionPointerTypes.inc</Dependencies>
     </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genFunctionPointerTypes.pl">
+    <Piped_Perl_Output Include="FunctionPointerTypes.pl">
       <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionPointerTypes.inc</OutputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">FunctionPointerTypes.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionPointerTypes.inc</OutputFile>
       <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionPointerTypes.inc</OutputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">FunctionPointerTypes.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionPointerTypes.inc</OutputFile>
       <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
     </Piped_Perl_Output>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="generated\beginEndFunctionTest.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
