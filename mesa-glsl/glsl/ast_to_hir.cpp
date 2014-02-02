@@ -1001,10 +1001,7 @@ get_scalar_boolean_operand(exec_list *instructions,
       *error_emitted = true;
    }
 
-#ifdef IR_AST_LOCATION
-   YYLTYPE yy_location = expr->get_location();
-#endif
-   COPY_RETURN_IR_LOCATION(ir_rvalue, yy_location, new(ctx) ir_constant(true));
+   COPY_RETURN_IR_LOCATION(ir_rvalue, expr->location, new(ctx) ir_constant(true));
 }
 
 /**
@@ -1667,7 +1664,6 @@ ast_expression::hir(exec_list *instructions,
 	 var->used = true;
 	 result = new(ctx) ir_dereference_variable(var);
 	 COPY_YY_LOCATION(result->yy_location, loc)
-	 //AST_LOCATION_EXPAND_FRONT(result, strlen(this->primary_expression.identifier))
       } else {
 	 _mesa_glsl_error(& loc, state, "`%s' undeclared",
 			  this->primary_expression.identifier);
@@ -1681,32 +1677,22 @@ ast_expression::hir(exec_list *instructions,
    case ast_int_constant:
       result = new(ctx) ir_constant(this->primary_expression.int_constant);
       COPY_YY_LOCATION(result->yy_location, loc);
-      /* log10 of value + one sign for negative, or 1 if value is zero */
-      //AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
-      //      (floor(log10(abs(this->primary_expression.int_constant))) + 1) + (
-      //            this->primary_expression.int_constant < 0 ? 1 : 0) : 1 ) )
       break;
 
    case ast_uint_constant:
       result = new(ctx) ir_constant(this->primary_expression.uint_constant);
       COPY_YY_LOCATION(result->yy_location, loc);
-      /* As for int, except useless abs */
-      //AST_LOCATION_EXPAND_FRONT(result, ( this->primary_expression.int_constant ?
-      //      (floor(log10(this->primary_expression.int_constant)) + 1) : 1 ))
       break;
 
    case ast_float_constant: {
       result = new(ctx) ir_constant(this->primary_expression.float_constant);
       COPY_YY_LOCATION(result->yy_location, loc);
-      /* TODO */
       break;
    }
 
    case ast_bool_constant:
       result = new(ctx) ir_constant(bool(this->primary_expression.bool_constant));
       COPY_YY_LOCATION(result->yy_location, loc);
-      /* This case is simple, true is 4 symbols, false is 5 */
-      //AST_LOCATION_EXPAND_FRONT(result, (bool(this->primary_expression.bool_constant) ? 4 : 5) )
       break;
 
    case ast_sequence: {

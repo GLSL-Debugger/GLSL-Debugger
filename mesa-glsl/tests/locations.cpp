@@ -253,7 +253,7 @@ usage_fail(const char *name)
 
 int main(int argc, char **argv)
 {
-	_mesa_glsl_debug = 1;
+	//_mesa_glsl_debug = 1;
 	int status = EXIT_SUCCESS;
 	struct gl_context local_ctx;
 	struct gl_context *ctx = &local_ctx;

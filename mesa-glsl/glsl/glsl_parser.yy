@@ -1101,20 +1101,20 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, NULL);
-      decl->set_location_range(@1, @5);
+      decl->set_location_range(@2, @5);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@2, @5);
+      $$->set_location_range(@1, @5);
       $$->declarations.push_tail(&decl->link);
    }
    | fully_specified_type any_identifier '[' ']' '=' initializer
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, NULL, $6);
-      decl->set_location_range(@1, @4);
+      decl->set_location_range(@2, @4);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@2, @4);
+      $$->set_location_range(@1, @4);
       $$->declarations.push_tail(&decl->link);
       if ($6->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$6;
@@ -1127,10 +1127,10 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, $7);
-      decl->set_location_range(@1, @5);
+      decl->set_location_range(@2, @5);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@2, @5);
+      $$->set_location_range(@1, @5);
       $$->declarations.push_tail(&decl->link);
       if ($7->oper == ast_aggregate) {
          ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$7;
@@ -1143,10 +1143,10 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, $4);
-      decl->set_location_range(@1, @2);
+      decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location(@2);
+      $$->set_location_range(@1, @2);
       $$->declarations.push_tail(&decl->link);
       if ($4->oper == ast_aggregate) {
          _mesa_ast_set_aggregate_type($1->specifier, $4, state);
@@ -1156,10 +1156,10 @@ single_declaration:
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, NULL);
-      decl->set_location_range(@1, @2);
+      decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list(NULL);
-      $$->set_location(@2);
+      $$->set_location_range(@1, @2);
       $$->invariant = true;
 
       $$->declarations.push_tail(&decl->link);
