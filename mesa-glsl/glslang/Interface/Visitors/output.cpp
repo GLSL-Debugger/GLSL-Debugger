@@ -183,11 +183,11 @@ void ir_output_traverser_visitor::newline_deindent()
 void ir_output_traverser_visitor::print_var_name (ir_variable* v)
 {
     long id = (long)hash_table_find (globals->var_hash, v);
-	if (!id && v->mode == ir_var_temporary)
+	if (!id && v->data.mode == ir_var_temporary)
 		id = globals->push_var(v);
     if (id)
     {
-        if (v->mode == ir_var_temporary)
+        if (v->data.mode == ir_var_temporary)
             ralloc_asprintf_append (&buffer, "tmpvar_%d", (int)id);
         else
             ralloc_asprintf_append (&buffer, "%s_%d", v->name, (int)id);
@@ -249,8 +249,8 @@ void check_initializer(ir_variable *ir, ir_output_traverser_visitor* it)
 
 void ir_output_traverser_visitor::visit(ir_variable *ir)
 {
-   const char *const cent = (ir->centroid) ? "centroid " : "";
-   const char *const inv = (ir->invariant) ? "invariant " : "";
+   const char *const cent = (ir->data.centroid) ? "centroid " : "";
+   const char *const inv = (ir->data.invariant) ? "invariant " : "";
    const char *const mode[4][ir_var_mode_count] =
    {
 	{ "", "uniform ", "in ",        "out ",     "in ", "out ", "inout ", "", "", "" },
@@ -269,7 +269,7 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 	}
 
 	// give an id to any variable defined in a function that is not an uniform
-	if ((this->mode == EShLangNone && ir->mode != ir_var_uniform))
+	if ((this->mode == EShLangNone && ir->data.mode != ir_var_uniform))
 	{
 		long id = (long)hash_table_find (globals->var_hash, ir);
 		if (id == 0)
@@ -286,7 +286,7 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 	}
 
 	ralloc_asprintf_append (&buffer, "%s%s%s%s",
-							cent, inv, interp[ir->interpolation], mode[decormode][ir->mode]);
+							cent, inv, interp[ir->data.interpolation], mode[decormode][ir->data.mode]);
 	print_precision (ir, ir->type);
 	buffer = print_type(buffer, ir->type, false);
 	ralloc_asprintf_append (&buffer, " ");
@@ -294,11 +294,11 @@ void ir_output_traverser_visitor::visit(ir_variable *ir)
 	buffer = print_type_post(buffer, ir->type, false);
 
 	if (ir->constant_value &&
-		ir->mode != ir_var_shader_in &&
-		ir->mode != ir_var_shader_out &&
-		ir->mode != ir_var_function_in &&
-		ir->mode != ir_var_function_out &&
-		ir->mode != ir_var_function_inout)
+		ir->data.mode != ir_var_shader_in &&
+		ir->data.mode != ir_var_shader_out &&
+		ir->data.mode != ir_var_function_in &&
+		ir->data.mode != ir_var_function_out &&
+		ir->data.mode != ir_var_function_inout)
 	{
 		ralloc_asprintf_append (&buffer, " = ");
 		visit (ir->constant_value);

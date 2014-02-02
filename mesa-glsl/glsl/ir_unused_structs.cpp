@@ -31,11 +31,11 @@ class ir_struct_usage_visitor : public ir_hierarchical_visitor {
 public:
 	ir_struct_usage_visitor();
 	~ir_struct_usage_visitor(void);
-	
+
 	virtual ir_visitor_status visit(ir_dereference_variable *);
-	
+
 	bool has_struct_entry(const glsl_type *t) const;
-	
+
 	exec_list struct_list;
 	void *mem_ctx;
 };
@@ -46,7 +46,7 @@ public:
 	: used_structs(used_structs)
 	{
 	}
-	
+
 	virtual ir_visitor_status visit(ir_typedecl_statement* ir)
 	{
 		if (!used_structs->has_struct_entry(ir->type_decl))
@@ -55,7 +55,7 @@ public:
 		}
 		return visit_continue;
 	}
-	
+
 	ir_struct_usage_visitor* used_structs;
 };
 
@@ -71,8 +71,8 @@ bool
 ir_struct_usage_visitor::has_struct_entry(const glsl_type *t) const
 {
 	assert(t);
-	foreach_iter(exec_list_iterator, iter, this->struct_list) {
-		struct_entry *entry = (struct_entry *)iter.get();
+	foreach_list(node, &this->struct_list) {
+		struct_entry *entry = (struct_entry *)node;
 		if (entry->type == t)
 			return true;
 	}
@@ -134,7 +134,7 @@ void do_remove_unused_typedecls(exec_list* instructions)
 {
 	ir_struct_usage_visitor v;
 	v.run (instructions);
-	
+
 	ir_decl_removal_visitor v2(&v);
 	v2.run (instructions);
 }

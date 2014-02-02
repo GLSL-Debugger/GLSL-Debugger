@@ -542,6 +542,13 @@ struct glsl_type {
     */
    int sampler_coordinate_components() const;
 
+   /**
+    * Compare a record type against another record type.
+    *
+    * This is useful for matching record types declared across shader stages.
+    */
+   bool record_compare(const glsl_type *b) const;
+
 private:
    /**
     * ralloc context for all glsl_type allocations
@@ -634,6 +641,12 @@ struct glsl_struct_field {
     * in ir_variable::centroid).  0 otherwise.
     */
    unsigned centroid:1;
+
+   /**
+    * For interface blocks, 1 if this variable uses sample interpolation (as
+    * in ir_variable::sample). 0 otherwise.
+    */
+   unsigned sample:1;
 };
 
 static inline unsigned int

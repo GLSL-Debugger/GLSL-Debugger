@@ -238,7 +238,7 @@ int getFunctionDebugParameter(ir_function_signature *ir)
     int i = 0;
     foreach_list( node, &ir->parameters ){
     	ir_variable* ir = ((ir_instruction*)node)->as_variable();
-    	if( ir->mode == ir_var_function_in )
+    	if( ir->data.mode == ir_var_function_in )
     		result = i;
     	++i;
     }
@@ -295,7 +295,7 @@ bool list_iter_check(ir_instruction* const inst, int& state)
 	switch(inst->ir_type){
 	case ir_type_variable: {
 		ir_variable *var = static_cast<ir_variable*>(inst);
-		if ((strstr(var->name, "gl_") == var->name) && !var->invariant)
+		if ((strstr(var->name, "gl_") == var->name) && !var->data.invariant)
 			return false;
 		break;
 	}

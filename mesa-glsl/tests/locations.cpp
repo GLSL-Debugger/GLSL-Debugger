@@ -39,20 +39,20 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.MaxTextureCoordUnits = 0;
 		ctx->Const.MaxTextureUnits = 8;
 
-		ctx->Const.VertexProgram.MaxAttribs = 8;
-		ctx->Const.VertexProgram.MaxTextureImageUnits = 0;
-		ctx->Const.VertexProgram.MaxUniformComponents = 128 * 4;
-		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
-		ctx->Const.VertexProgram.MaxOutputComponents = 32;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = 8;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 0;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = 128 * 4;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxInputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents = 32;
 
-		ctx->Const.FragmentProgram.MaxTextureImageUnits =
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits =
 				ctx->Const.MaxCombinedTextureImageUnits;
-		ctx->Const.FragmentProgram.MaxUniformComponents = 16 * 4;
-		ctx->Const.FragmentProgram.MaxInputComponents =
-				ctx->Const.VertexProgram.MaxOutputComponents;
-		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = 16 * 4;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents =
+				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents
 				/ 4;
 		break;
 	case 110:
@@ -66,20 +66,20 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.MaxTextureCoordUnits = 2;
 		ctx->Const.MaxTextureUnits = 2;
 
-		ctx->Const.VertexProgram.MaxAttribs = 16;
-		ctx->Const.VertexProgram.MaxTextureImageUnits = 0;
-		ctx->Const.VertexProgram.MaxUniformComponents = 512;
-		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
-		ctx->Const.VertexProgram.MaxOutputComponents = 32;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 0;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = 512;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxInputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents = 32;
 
-		ctx->Const.FragmentProgram.MaxTextureImageUnits =
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits =
 				ctx->Const.MaxCombinedTextureImageUnits;
-		ctx->Const.FragmentProgram.MaxUniformComponents = 64;
-		ctx->Const.FragmentProgram.MaxInputComponents =
-				ctx->Const.VertexProgram.MaxOutputComponents;
-		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = 64;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents =
+				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents
 				/ 4;
 		break;
 	case 130:
@@ -93,19 +93,19 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.MaxTextureCoordUnits = 8;
 		ctx->Const.MaxTextureUnits = 2;
 
-		ctx->Const.VertexProgram.MaxAttribs = 16;
-		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
-		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
-		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
-		ctx->Const.VertexProgram.MaxOutputComponents = 64;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxInputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents = 64;
 
-		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
-		ctx->Const.FragmentProgram.MaxUniformComponents = 1024;
-		ctx->Const.FragmentProgram.MaxInputComponents =
-				ctx->Const.VertexProgram.MaxOutputComponents;
-		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents =
+				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.VertexProgram.MaxOutputComponents
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents
 				/ 4;
 		break;
 	case 150:
@@ -118,28 +118,28 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.MaxTextureCoordUnits = 8;
 		ctx->Const.MaxTextureUnits = 2;
 
-		ctx->Const.VertexProgram.MaxAttribs = 16;
-		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
-		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
-		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
-		ctx->Const.VertexProgram.MaxOutputComponents = 64;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxInputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents = 64;
 
-		ctx->Const.GeometryProgram.MaxTextureImageUnits = 16;
-		ctx->Const.GeometryProgram.MaxUniformComponents = 1024;
-		ctx->Const.GeometryProgram.MaxInputComponents =
-				ctx->Const.VertexProgram.MaxOutputComponents;
-		ctx->Const.GeometryProgram.MaxOutputComponents = 128;
+		ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxInputComponents =
+				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
+		ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxOutputComponents = 128;
 
-		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
-		ctx->Const.FragmentProgram.MaxUniformComponents = 1024;
-		ctx->Const.FragmentProgram.MaxInputComponents =
-				ctx->Const.GeometryProgram.MaxOutputComponents;
-		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents =
+				ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxOutputComponents;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
 		ctx->Const.MaxCombinedTextureImageUnits =
-				ctx->Const.VertexProgram.MaxTextureImageUnits
-						+ ctx->Const.GeometryProgram.MaxTextureImageUnits
-						+ ctx->Const.FragmentProgram.MaxTextureImageUnits;
+				ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits
+						+ ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits
+						+ ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits;
 
 		ctx->Const.MaxGeometryOutputVertices = 256;
 		ctx->Const.MaxGeometryTotalOutputComponents = 1024;
@@ -158,18 +158,19 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.MaxTextureCoordUnits = 0;
 		ctx->Const.MaxTextureUnits = 0;
 
-		ctx->Const.VertexProgram.MaxAttribs = 16;
-		ctx->Const.VertexProgram.MaxTextureImageUnits = 16;
-		ctx->Const.VertexProgram.MaxUniformComponents = 1024;
-		ctx->Const.VertexProgram.MaxInputComponents = 0; /* not used */
-		ctx->Const.VertexProgram.MaxOutputComponents = 16 * 4;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = 1024;
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxInputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents = 16 * 4;
 
-		ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
-		ctx->Const.FragmentProgram.MaxUniformComponents = 224;
-		ctx->Const.FragmentProgram.MaxInputComponents = 15 * 4;
-		ctx->Const.FragmentProgram.MaxOutputComponents = 0; /* not used */
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = 224;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents = 15 * 4;
+		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.FragmentProgram.MaxInputComponents / 4;
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents
+				/ 4;
 		break;
 	}
 
@@ -196,8 +197,7 @@ load_text_file(void *ctx, const char *file_name)
 	text = (char *) ralloc_size(ctx, size + 1);
 	if (text != NULL) {
 		do {
-			size_t bytes = fread(text + total_read,
-					     1, size - total_read, fp);
+			size_t bytes = fread(text + total_read, 1, size - total_read, fp);
 			if (bytes < size - total_read) {
 				free(text);
 				text = NULL;
@@ -225,31 +225,48 @@ int dump_lir = 0;
 int do_link = 0;
 
 const struct option compiler_opts[] = {
-   { "dump-ast", no_argument, &dump_ast, 1 },
-   { "dump-hir", no_argument, &dump_hir, 1 },
-   { "dump-lir", no_argument, &dump_lir, 1 },
-   { "version",  required_argument, NULL, 'v' },
-   { NULL, 0, NULL, 0 }
-};
+	{
+		"dump-ast",
+		no_argument,
+		&dump_ast,
+		1 },
+	{
+		"dump-hir",
+		no_argument,
+		&dump_hir,
+		1 },
+	{
+		"dump-lir",
+		no_argument,
+		&dump_lir,
+		1 },
+	{
+		"version",
+		required_argument,
+		NULL,
+		'v' },
+	{
+		NULL,
+		0,
+		NULL,
+		0 } };
 
 /**
  * \brief Print proper usage and exit with failure.
  */
-void
-usage_fail(const char *name)
+void usage_fail(const char *name)
 {
 
-   const char *header =
-      "usage: %s [options] <file.vert | file.geom | file.frag>\n"
-      "\n"
-      "Possible options are:\n";
-   printf(header, name, name);
-   for (const struct option *o = compiler_opts; o->name != 0; ++o) {
-      printf("    --%s\n", o->name);
-   }
-   exit(EXIT_FAILURE);
+	const char *header =
+			"usage: %s [options] <file.vert | file.geom | file.frag>\n"
+					"\n"
+					"Possible options are:\n";
+	printf(header, name, name);
+	for (const struct option *o = compiler_opts; o->name != 0; ++o) {
+		printf("    --%s\n", o->name);
+	}
+	exit(EXIT_FAILURE);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -304,8 +321,7 @@ int main(int argc, char **argv)
 	whole_program->InfoLog = ralloc_strdup(whole_program, "");
 
 	for (/* empty */; argc > optind; optind++) {
-		whole_program->Shaders =
-		reralloc(whole_program, whole_program->Shaders,
+		whole_program->Shaders = reralloc(whole_program, whole_program->Shaders,
 				struct gl_shader *, whole_program->NumShaders + 1);
 		assert(whole_program->Shaders != NULL);
 
@@ -331,7 +347,7 @@ int main(int argc, char **argv)
 		shader->Source = load_text_file(whole_program, argv[optind]);
 		if (shader->Source == NULL) {
 			printf("File \"%s\" does not exist.\n", argv[optind]);
-			exit (EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		char* old_locale = setlocale(LC_NUMERIC, NULL);

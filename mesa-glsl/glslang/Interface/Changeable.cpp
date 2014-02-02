@@ -698,18 +698,18 @@ ShVariable* irToShVariable( ir_variable* variable )
 		return it->second;
 
 	const struct glsl_type* vtype = variable->type;
-	variableQualifier qualifier = qualifierToNative( variable->mode );
+	variableQualifier qualifier = qualifierToNative( variable->data.mode );
 	unsigned modifier = 0;
-	modifier |= variable->invariant ? SH_VM_INVARIANT : SH_VM_NONE;
+	modifier |= variable->data.invariant ? SH_VM_INVARIANT : SH_VM_NONE;
 	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_FLAT ) ? SH_VM_FLAT : SH_VM_NONE;
+			( variable->data.interpolation & INTERP_QUALIFIER_FLAT ) ? SH_VM_FLAT : SH_VM_NONE;
 	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_SMOOTH ) ?
+			( variable->data.interpolation & INTERP_QUALIFIER_SMOOTH ) ?
 					SH_VM_SMOOTH : SH_VM_NONE;
 	modifier |=
-			( variable->interpolation & INTERP_QUALIFIER_NOPERSPECTIVE ) ?
+			( variable->data.interpolation & INTERP_QUALIFIER_NOPERSPECTIVE ) ?
 					SH_VM_NOPERSPECTIVE : SH_VM_NONE;
-	modifier |= variable->centroid ? SH_VM_CENTROID : SH_VM_NONE;
+	modifier |= variable->data.centroid ? SH_VM_CENTROID : SH_VM_NONE;
 	ShVariable* var = glsltypeToShVariable( vtype, variable->name, qualifier, modifier );
 	var->uniqueId = VariablesCount++;
 	VariablesById[var->uniqueId] = var;

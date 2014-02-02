@@ -97,15 +97,15 @@ void ir_position_output_visitor::visit(ir_variable* ir)
 	print_range(ir);
 	dbgPrint(output_level, "(declare ");
 
-	const char * const cent = (ir->centroid) ? "centroid " : "";
-	const char * const inv = (ir->invariant) ? "invariant " : "";
+	const char * const cent = (ir->data.centroid) ? "centroid " : "";
+	const char * const inv = (ir->data.invariant) ? "invariant " : "";
 	const char * const mode[] = { "", "uniform ", "shader_in ", "shader_out ",
 					"in ", "out ", "inout ", "const_in ", "sys ", "temporary " };
 	STATIC_ASSERT(ARRAY_SIZE(mode) == ir_var_mode_count);
 	const char * const interp[] = { "", "smooth", "flat", "noperspective" };
 	STATIC_ASSERT(ARRAY_SIZE(interp) == INTERP_QUALIFIER_COUNT);
 
-	dbgPrint(output_level, "(%s%s%s%s) ", cent, inv, mode[ir->mode], interp[ir->interpolation]);
+	dbgPrint(output_level, "(%s%s%s%s) ", cent, inv, mode[ir->data.mode], interp[ir->data.interpolation]);
 
 	print_type(ir->type, output_level);
 	dbgPrint(output_level, " %s)", unique_name(ir));

@@ -44,12 +44,12 @@ static void initialize_context(struct gl_context *ctx, const TBuiltInResource* r
 	/* allow high amount */
 	ctx->Const.MaxTextureCoordUnits = resources->maxTextureCoords;
 
-	ctx->Const.VertexProgram.MaxAttribs = resources->maxVertexAttribs;
-	ctx->Const.VertexProgram.MaxUniformComponents = resources->maxVertexUniformComponents;
-	ctx->Const.FragmentProgram.MaxUniformComponents = resources->maxFragmentUniformComponents;
+	ctx->Const.Program[MESA_SHADER_VERTEX].MaxAttribs = resources->maxVertexAttribs;
+	ctx->Const.Program[MESA_SHADER_VERTEX].MaxUniformComponents = resources->maxVertexUniformComponents;
+	ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxUniformComponents = resources->maxFragmentUniformComponents;
 	ctx->Const.MaxVarying = resources->maxVaryingFloats;
 	ctx->Const.MaxCombinedTextureImageUnits = resources->maxCombinedTextureImageUnits;
-	ctx->Const.VertexProgram.MaxTextureImageUnits = resources->maxVertexTextureImageUnits;
+	ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = resources->maxVertexTextureImageUnits;
 //	ctx->Const.FragmentProgram.MaxTextureImageUnits = 16;
 //	ctx->Const.GeometryProgram.MaxTextureImageUnits = 16;
 
@@ -82,7 +82,7 @@ void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
 	int dump_hir = debug & EDebugOpIntermediate;
 	int dump_lir = debug & EDebugOpObjectCode;
 	struct _mesa_glsl_parse_state *state = new (shader) _mesa_glsl_parse_state(
-			ctx, shader->Type, shader);
+			ctx, shader->Stage, shader);
 
 	_mesa_glsl_compile_shader(ctx, shader, dump_ast, dump_hir);
 
@@ -145,7 +145,7 @@ void ShDestruct(ShHandle handle)
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 
 	if( holder->program ){
-		for( unsigned i = 0; i < MESA_SHADER_TYPES; i++ )
+		for( unsigned i = 0; i < MESA_SHADER_STAGES; i++ )
 			ralloc_free( holder->program->_LinkedShaders[i] );
 		ralloc_free( holder->program );
 		holder->program = NULL;

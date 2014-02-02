@@ -81,9 +81,9 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_variable* ir)
 
 static void traverse_func_param( ir_variable* ir )
 {
-	if( !ir || (ir->mode != ir_var_function_in &&
-			ir->mode != ir_var_const_in &&	/* check back with Magnus */
-			ir->mode != ir_var_function_inout ) )
+	if( !ir || (ir->data.mode != ir_var_function_in &&
+			ir->data.mode != ir_var_const_in &&	/* check back with Magnus */
+			ir->data.mode != ir_var_function_inout ) )
 		return;
 
 	ShChangeableList* node_cgbl = get_changeable_list(ir);
@@ -374,21 +374,19 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_call* ir)
 	//             function with the same parameters. So we trust ourselves,
 	//             even if we know we should not (:
 
-	exec_list_iterator pC = ir->iterator();
-	exec_list_iterator pD = funcDec->parameters.iterator();
 	ShChangeableList* node_cgbl = get_changeable_list( ir );
 	ShChangeableList* node_cgbl_param = get_changeable_paramerers_list( ir );
 
-	for( ; pC.has_next(); pC.next(), pD.next() ){
+	foreach_two_lists(pC, &ir->actual_parameters, pD, &funcDec->parameters){
 		// check if parameter is of interest
-		ir_variable* dir = ( (ir_instruction*)pD.get() )->as_variable();
+		ir_variable* dir = ((ir_instruction*)pD)->as_variable();
 		if( !dir )
 			continue;
 
-		ir_instruction* cir = (ir_instruction*)pC.get();
+		ir_instruction* cir = (ir_instruction*)pC;
 		ShChangeableList* cir_cgbl = get_changeable_list( cir );
-		if( dir->mode == ir_var_function_out || dir->mode == ir_var_function_inout
-				|| dir->mode == ir_var_shader_out ){ // FIXME: Not sure about shader_out
+		if( dir->data.mode == ir_var_function_out || dir->data.mode == ir_var_function_inout
+				|| dir->data.mode == ir_var_shader_out ){ // FIXME: Not sure about shader_out
 			this->activate();
 			cir->accept(this);
 			this->deactivate();

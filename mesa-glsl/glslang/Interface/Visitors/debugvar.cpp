@@ -131,7 +131,7 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_variable* ir)
 
 	// Now add the list to the actual scope and proceed
     // Prevent temporary variables to get in scope
-    if( ir->mode != ir_var_temporary ){
+    if( ir->data.mode != ir_var_temporary ){
     	addToScope( var->uniqueId );
     	dumpScope();
     }else

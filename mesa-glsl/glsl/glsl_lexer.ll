@@ -166,7 +166,7 @@ HASH		^{SPC}#{SPC}
 
 [ \r\t]+		;
 
-    /* Preprocessor tokens. */
+    /* Preprocessor tokens. */ 
 ^[ \t]*#[ \t]*$			;
 ^[ \t]*#[ \t]*version		{ BEGIN PP; return VERSION_TOK; }
 ^[ \t]*#[ \t]*extension		{ BEGIN PP; return EXTENSION; }
@@ -238,7 +238,6 @@ HASH		^{SPC}#{SPC}
 <PP>\n				{ BEGIN 0; yylineno++; yycolumn = 0; return EOL; }
 
 \n		{ yylineno++; yycolumn = 0; }
-
 
 attribute	DEPRECATED_ES_KEYWORD(ATTRIBUTE);
 const		return CONST_TOK;
@@ -522,13 +521,13 @@ readonly	KEYWORD(0, 300, 0, 0, READONLY);
 writeonly	KEYWORD(0, 300, 0, 0, WRITEONLY);
 resource	KEYWORD(0, 300, 0, 0, RESOURCE);
 patch		KEYWORD(0, 300, 0, 0, PATCH);
-sample		KEYWORD(0, 300, 0, 0, SAMPLE);
+sample		KEYWORD_WITH_ALT(400, 300, 400, 0, yyextra->ARB_gpu_shader5_enable, SAMPLE);
 subroutine	KEYWORD(0, 300, 0, 0, SUBROUTINE);
 
 
 [_a-zA-Z][_a-zA-Z0-9]*	{
 			    struct _mesa_glsl_parse_state *state = yyextra;
-			    void *ctx = state;
+			    void *ctx = state;	
 			    yylval->identifier = ralloc_strdup(ctx, yytext);
 			    return classify_identifier(state, yytext);
 			}

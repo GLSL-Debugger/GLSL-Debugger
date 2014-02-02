@@ -88,6 +88,12 @@ is_vec_one(ir_constant *ir)
 }
 
 static inline bool
+is_vec_two(ir_constant *ir)
+{
+   return (ir == NULL) ? false : ir->is_value(2.0, 2);
+}
+
+static inline bool
 is_vec_negative_one(ir_constant *ir)
 {
    return (ir == NULL) ? false : ir->is_negative_one();
@@ -279,6 +285,58 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
 	 reassociate_constant(ir, 0, op_const[0], op_expr[1]);
       if (op_const[1] && !op_const[0])
 	 reassociate_constant(ir, 1, op_const[1], op_expr[0]);
+
+      /* Replace (-x + y) * a + x and commutative variations with lrp(x, y, a).
+       *
+       * (-x + y) * a + x
+       * (x * -a) + (y * a) + x
+       * x + (x * -a) + (y * a)
+       * x * (1 - a) + y * a
+       * lrp(x, y, a)
+       */
+      for (int mul_pos = 0; mul_pos < 2; mul_pos++) {
+         ir_expression *mul = op_expr[mul_pos];
+
+         if (!mul || mul->operation != ir_binop_mul)
+            continue;
+
+         /* Multiply found on one of the operands. Now check for an
+          * inner addition operation.
+          */
+         for (int inner_add_pos = 0; inner_add_pos < 2; inner_add_pos++) {
+            ir_expression *inner_add =
+               mul->operands[inner_add_pos]->as_expression();
+
+            if (!inner_add || inner_add->operation != ir_binop_add)
+               continue;
+
+            /* Inner addition found on one of the operands. Now check for
+             * one of the operands of the inner addition to be the negative
+             * of x_operand.
+             */
+            for (int neg_pos = 0; neg_pos < 2; neg_pos++) {
+               ir_expression *neg =
+                  inner_add->operands[neg_pos]->as_expression();
+
+               if (!neg || neg->operation != ir_unop_neg)
+                  continue;
+
+               ir_rvalue *x_operand = ir->operands[1 - mul_pos];
+
+               if (!neg->operands[0]->equals(x_operand))
+                  continue;
+
+               ir_rvalue *y_operand = inner_add->operands[1 - neg_pos];
+               ir_rvalue *a_operand = mul->operands[1 - inner_add_pos];
+
+               if (x_operand->type != y_operand->type ||
+                   x_operand->type != a_operand->type)
+                  continue;
+
+               return lrp(x_operand, y_operand, a_operand);
+            }
+         }
+      }
       break;
 
    case ir_binop_sub:
@@ -357,7 +415,6 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
       break;
 
    case ir_binop_logic_and:
-      /* FINISHME: Also simplify (a && a) to (a). */
       if (is_vec_one(op_const[0])) {
 	 return ir->operands[1];
       } else if (is_vec_one(op_const[1])) {
@@ -371,11 +428,13 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
           */
          return logic_not(logic_or(op_expr[0]->operands[0],
                                    op_expr[1]->operands[0]));
+      } else if (ir->operands[0]->equals(ir->operands[1])) {
+         /* (a && a) == a */
+         return ir->operands[0];
       }
       break;
 
    case ir_binop_logic_xor:
-      /* FINISHME: Also simplify (a ^^ a) to (false). */
       if (is_vec_zero(op_const[0])) {
 	 return ir->operands[1];
       } else if (is_vec_zero(op_const[1])) {
@@ -384,11 +443,13 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
 	 return logic_not(ir->operands[1]);
       } else if (is_vec_one(op_const[1])) {
 	 return logic_not(ir->operands[0]);
+      } else if (ir->operands[0]->equals(ir->operands[1])) {
+         /* (a ^^ a) == false */
+	 return ir_constant::zero(mem_ctx, ir->type);
       }
       break;
 
    case ir_binop_logic_or:
-      /* FINISHME: Also simplify (a || a) to (a). */
       if (is_vec_zero(op_const[0])) {
 	 return ir->operands[1];
       } else if (is_vec_zero(op_const[1])) {
@@ -407,17 +468,32 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
           */
          return logic_not(logic_and(op_expr[0]->operands[0],
                                     op_expr[1]->operands[0]));
+      } else if (ir->operands[0]->equals(ir->operands[1])) {
+         /* (a || a) == a */
+         return ir->operands[0];
       }
+      break;
+
+   case ir_binop_pow:
+      /* 1^x == 1 */
+      if (is_vec_one(op_const[0]))
+         return op_const[0];
+
+      /* pow(2,x) == exp2(x) */
+      if (is_vec_two(op_const[0]))
+         return expr(ir_unop_exp2, ir->operands[1]);
+
       break;
 
    case ir_unop_rcp:
       if (op_expr[0] && op_expr[0]->operation == ir_unop_rcp)
 	 return op_expr[0]->operands[0];
 
-      /* FINISHME: We should do rcp(rsq(x)) -> sqrt(x) for some
-       * backends, except that some backends will have done sqrt ->
-       * rcp(rsq(x)) and we don't want to undo it for them.
+      /* While ir_to_mesa.cpp will lower sqrt(x) to rcp(rsq(x)), it does so at
+       * its IR level, so we can always apply this transformation.
        */
+      if (op_expr[0] && op_expr[0]->operation == ir_unop_rsq)
+         return sqrt(op_expr[0]->operands[0]);
 
       /* As far as we know, all backends are OK with rsq. */
       if (op_expr[0] && op_expr[0]->operation == ir_unop_sqrt) {

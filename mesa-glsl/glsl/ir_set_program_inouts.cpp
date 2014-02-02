@@ -27,7 +27,7 @@
  * Sets the InputsRead and OutputsWritten of Mesa programs.
  *
  * Additionally, for fragment shaders, sets the InterpQualifier array, the
- * IsCentroid bitfield, and the UsesDFdy flag.
+ * IsCentroid and IsSample bitfields, and the UsesDFdy flag.
  *
  * Mesa programs (gl_program, not gl_shader_program) have a set of
  * flags indicating which varyings are read and written.  Computing
@@ -46,10 +46,11 @@ namespace {
 
 class ir_set_program_inouts_visitor : public ir_hierarchical_visitor {
 public:
-   ir_set_program_inouts_visitor(struct gl_program *prog, GLenum shader_type)
+   ir_set_program_inouts_visitor(struct gl_program *prog,
+                                 gl_shader_stage shader_stage)
    {
       this->prog = prog;
-      this->shader_type = shader_type;
+      this->shader_stage = shader_stage;
    }
    ~ir_set_program_inouts_visitor()
    {
@@ -67,7 +68,7 @@ private:
    bool try_mark_partial_variable(ir_variable *var, ir_rvalue *index);
 
    struct gl_program *prog;
-   GLenum shader_type;
+   gl_shader_stage shader_stage;
 };
 
 } /* anonymous namespace */
@@ -75,9 +76,9 @@ private:
 static inline bool
 is_shader_inout(ir_variable *var)
 {
-   return var->mode == ir_var_shader_in ||
-          var->mode == ir_var_shader_out ||
-          var->mode == ir_var_system_value;
+   return var->data.mode == ir_var_shader_in ||
+          var->data.mode == ir_var_shader_out ||
+          var->data.mode == ir_var_system_value;
 }
 
 static void
@@ -93,20 +94,24 @@ mark(struct gl_program *prog, ir_variable *var, int offset, int len,
     */
 
    for (int i = 0; i < len; i++) {
-      GLbitfield64 bitfield = BITFIELD64_BIT(var->location + var->index + offset + i);
-      if (var->mode == ir_var_shader_in) {
+      GLbitfield64 bitfield =
+         BITFIELD64_BIT(var->data.location + var->data.index + offset + i);
+      if (var->data.mode == ir_var_shader_in) {
 	 prog->InputsRead |= bitfield;
          if (is_fragment_shader) {
             gl_fragment_program *fprog = (gl_fragment_program *) prog;
-            fprog->InterpQualifier[var->location + var->index + offset + i] =
-               (glsl_interp_qualifier) var->interpolation;
-            if (var->centroid)
+            fprog->InterpQualifier[var->data.location +
+                                   var->data.index + offset + i] =
+               (glsl_interp_qualifier) var->data.interpolation;
+            if (var->data.centroid)
                fprog->IsCentroid |= bitfield;
+            if (var->data.sample)
+               fprog->IsSample |= bitfield;
          }
-      } else if (var->mode == ir_var_system_value) {
+      } else if (var->data.mode == ir_var_system_value) {
          prog->SystemValuesRead |= bitfield;
       } else {
-         assert(var->mode == ir_var_shader_out);
+         assert(var->data.mode == ir_var_shader_out);
 	 prog->OutputsWritten |= bitfield;
       }
    }
@@ -120,13 +125,13 @@ void
 ir_set_program_inouts_visitor::mark_whole_variable(ir_variable *var)
 {
    const glsl_type *type = var->type;
-   if (this->shader_type == GL_GEOMETRY_SHADER &&
-       var->mode == ir_var_shader_in && type->is_array()) {
+   if (this->shader_stage == MESA_SHADER_GEOMETRY &&
+       var->data.mode == ir_var_shader_in && type->is_array()) {
       type = type->fields.array;
    }
 
    mark(this->prog, var, 0, type->count_attribute_slots(),
-        this->shader_type == GL_FRAGMENT_SHADER);
+        this->shader_stage == MESA_SHADER_FRAGMENT);
 }
 
 /* Default handler: Mark all the locations in the variable as used. */
@@ -159,8 +164,8 @@ ir_set_program_inouts_visitor::try_mark_partial_variable(ir_variable *var,
 {
    const glsl_type *type = var->type;
 
-   if (this->shader_type == GL_GEOMETRY_SHADER &&
-       var->mode == ir_var_shader_in) {
+   if (this->shader_stage == MESA_SHADER_GEOMETRY &&
+       var->data.mode == ir_var_shader_in) {
       /* The only geometry shader input that is not an array is
        * gl_PrimitiveIDIn, and in that case, this code will never be reached,
        * because gl_PrimitiveIDIn can't be indexed into in array fashion.
@@ -223,7 +228,7 @@ ir_set_program_inouts_visitor::try_mark_partial_variable(ir_variable *var,
    }
 
    mark(this->prog, var, index_as_constant->value.u[0] * elem_width,
-        elem_width, this->shader_type == GL_FRAGMENT_SHADER);
+        elem_width, this->shader_stage == MESA_SHADER_FRAGMENT);
    return true;
 }
 
@@ -241,8 +246,8 @@ ir_set_program_inouts_visitor::visit_enter(ir_dereference_array *ir)
        */
       if (ir_dereference_variable * const deref_var =
           inner_array->array->as_dereference_variable()) {
-         if (this->shader_type == GL_GEOMETRY_SHADER &&
-             deref_var->var->mode == ir_var_shader_in) {
+         if (this->shader_stage == MESA_SHADER_GEOMETRY &&
+             deref_var->var->data.mode == ir_var_shader_in) {
             /* foo is a geometry shader input, so i is the vertex, and j the
              * part of the input we're accessing.
              */
@@ -260,8 +265,8 @@ ir_set_program_inouts_visitor::visit_enter(ir_dereference_array *ir)
    } else if (ir_dereference_variable * const deref_var =
               ir->array->as_dereference_variable()) {
       /* ir => foo[i], where foo is a variable. */
-      if (this->shader_type == GL_GEOMETRY_SHADER &&
-          deref_var->var->mode == ir_var_shader_in) {
+      if (this->shader_stage == MESA_SHADER_GEOMETRY &&
+          deref_var->var->data.mode == ir_var_shader_in) {
          /* foo is a geometry shader input, so i is the vertex, and we're
           * accessing the entire input.
           */
@@ -300,7 +305,7 @@ ir_set_program_inouts_visitor::visit_enter(ir_function_signature *ir)
 ir_visitor_status
 ir_set_program_inouts_visitor::visit_enter(ir_expression *ir)
 {
-   if (this->shader_type == GL_FRAGMENT_SHADER &&
+   if (this->shader_stage == MESA_SHADER_FRAGMENT &&
        ir->operation == ir_unop_dFdy) {
       gl_fragment_program *fprog = (gl_fragment_program *) prog;
       fprog->UsesDFdy = true;
@@ -312,7 +317,7 @@ ir_visitor_status
 ir_set_program_inouts_visitor::visit_enter(ir_discard *)
 {
    /* discards are only allowed in fragment shaders. */
-   assert(this->shader_type == GL_FRAGMENT_SHADER);
+   assert(this->shader_stage == MESA_SHADER_FRAGMENT);
 
    gl_fragment_program *fprog = (gl_fragment_program *) prog;
    fprog->UsesKill = true;
@@ -330,17 +335,18 @@ ir_set_program_inouts_visitor::visit_enter(ir_texture *ir)
 
 void
 do_set_program_inouts(exec_list *instructions, struct gl_program *prog,
-                      GLenum shader_type)
+                      gl_shader_stage shader_stage)
 {
-   ir_set_program_inouts_visitor v(prog, shader_type);
+   ir_set_program_inouts_visitor v(prog, shader_stage);
 
    prog->InputsRead = 0;
    prog->OutputsWritten = 0;
    prog->SystemValuesRead = 0;
-   if (shader_type == GL_FRAGMENT_SHADER) {
+   if (shader_stage == MESA_SHADER_FRAGMENT) {
       gl_fragment_program *fprog = (gl_fragment_program *) prog;
       memset(fprog->InterpQualifier, 0, sizeof(fprog->InterpQualifier));
       fprog->IsCentroid = 0;
+      fprog->IsSample = 0;
       fprog->UsesDFdy = false;
       fprog->UsesKill = false;
    }

@@ -79,9 +79,9 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %locations
 %initial-action {
    @$.first_line = 1;
-   @$.first_column = 0;
+   @$.first_column = 1;
    @$.last_line = 1;
-   @$.last_column = 0;
+   @$.last_column = 1;
    @$.source = 0;
 }
 
@@ -97,6 +97,7 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 
    ast_node *node;
    ast_type_specifier *type_specifier;
+   ast_array_specifier *array_specifier;
    ast_fully_specified_type *fully_specified_type;
    ast_function *function;
    ast_parameter_declarator *parameter_declarator;
@@ -202,6 +203,7 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %type <type_qualifier> interface_qualifier
 %type <type_specifier> type_specifier
 %type <type_specifier> type_specifier_nonarray
+%type <array_specifier> array_specifier
 %type <identifier> basic_type_specifier_nonarray
 %type <fully_specified_type> fully_specified_type
 %type <function> function_prototype
@@ -883,17 +885,16 @@ parameter_declarator:
       $$->type->specifier = $1;
       $$->identifier = $2;
    }
-   | type_specifier any_identifier '[' constant_expression ']'
+   | type_specifier any_identifier array_specifier
    {
       void *ctx = state;
       $$ = new(ctx) ast_parameter_declarator();
-      $$->set_location_range(@1, @2);
+      $$->set_location_range(@1, @3);
       $$->type = new(ctx) ast_fully_specified_type();
       $$->type->set_location(@1);
       $$->type->specifier = $1;
       $$->identifier = $2;
-      $$->is_array = true;
-      $$->array_size = $4;
+      $$->array_specifier = $3;
    }
    ;
 
@@ -980,7 +981,7 @@ init_declarator_list:
    | init_declarator_list ',' any_identifier
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, false, NULL, NULL);
+      ast_declaration *decl = new(ctx) ast_declaration($3, NULL, NULL);
       decl->set_location(@3);
 
       $$ = $1;
@@ -989,11 +990,11 @@ init_declarator_list:
       COPY_YY_LOCATION(v, @3)
       state->symbols->add_variable(v);
    }
-   | init_declarator_list ',' any_identifier '[' ']'
+   | init_declarator_list ',' any_identifier array_specifier
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, true, NULL, NULL);
-      decl->set_location_range(@3, @5);
+      ast_declaration *decl = new(ctx) ast_declaration($3, $4, NULL);
+      decl->set_location_range(@3, @4);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
@@ -1001,59 +1002,22 @@ init_declarator_list:
       COPY_YY_LOCATION(v, @3)
       state->symbols->add_variable(v);
    }
-   | init_declarator_list ',' any_identifier '[' constant_expression ']'
+   | init_declarator_list ',' any_identifier array_specifier '=' initializer
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, true, $5, NULL);
-      decl->set_location_range(@3, @6);
+      ast_declaration *decl = new(ctx) ast_declaration($3, $4, $6);
+      decl->set_location_range(@3, @4);
 
       $$ = $1;
       $$->declarations.push_tail(&decl->link);
       ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
       COPY_YY_LOCATION(v, @3)
       state->symbols->add_variable(v);
-
-   }
-   | init_declarator_list ',' any_identifier '[' ']' '=' initializer
-   {
-      void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, true, NULL, $7);
-      decl->set_location_range(@3, @5);
-
-      $$ = $1;
-      $$->declarations.push_tail(&decl->link);
-      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
-      COPY_YY_LOCATION(v, @3)
-      state->symbols->add_variable(v);
-      if ($7->oper == ast_aggregate) {
-         ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$7;
-         ast_type_specifier *type = new(ctx) ast_type_specifier($1->type->specifier, true, NULL);
-         type->set_location($1->type->specifier->get_location());
-         _mesa_ast_set_aggregate_type(type, ai, state);
-      }
-   }
-   | init_declarator_list ',' any_identifier '[' constant_expression ']' '=' initializer
-   {
-      void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, true, $5, $8);
-      decl->set_location_range(@3, @6);
-
-      $$ = $1;
-      $$->declarations.push_tail(&decl->link);
-      ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
-      COPY_YY_LOCATION(v, @3)
-      state->symbols->add_variable(v);
-      if ($8->oper == ast_aggregate) {
-         ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$8;
-         ast_type_specifier *type = new(ctx) ast_type_specifier($1->type->specifier, true, $5);
-         type->set_location($1->type->specifier->get_location());
-         _mesa_ast_set_aggregate_type(type, ai, state);
-      }
    }
    | init_declarator_list ',' any_identifier '=' initializer
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($3, false, NULL, $5);
+      ast_declaration *decl = new(ctx) ast_declaration($3, NULL, $5);
       decl->set_location(@3);
 
       $$ = $1;
@@ -1061,10 +1025,6 @@ init_declarator_list:
       ir_variable* v = new(state) ir_variable(NULL, $3, ir_var_auto);
       COPY_YY_LOCATION(v, @3)
       state->symbols->add_variable(v);
-      if ($5->oper == ast_aggregate) {
-         ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$5;
-         _mesa_ast_set_aggregate_type($1->type->specifier, ai, state);
-      }
    }
    ;
 
@@ -1080,82 +1040,47 @@ single_declaration:
    | fully_specified_type any_identifier
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, NULL);
+      ast_declaration *decl = new(ctx) ast_declaration($2, NULL, NULL);
       decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list($1);
       $$->set_location_range(@1, @2);
       $$->declarations.push_tail(&decl->link);
    }
-   | fully_specified_type any_identifier '[' ']'
+   | fully_specified_type any_identifier array_specifier
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, true, NULL, NULL);
-      decl->set_location_range(@2, @4);
+      ast_declaration *decl = new(ctx) ast_declaration($2, $3, NULL);
+      decl->set_location_range(@2, @3);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@1, @4);
+      $$->set_location_range(@1, @3);
       $$->declarations.push_tail(&decl->link);
    }
-   | fully_specified_type any_identifier '[' constant_expression ']'
+   | fully_specified_type any_identifier array_specifier '=' initializer
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, NULL);
-      decl->set_location_range(@2, @5);
+      ast_declaration *decl = new(ctx) ast_declaration($2, $3, $5);
+      decl->set_location_range(@2, @3);
 
       $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@1, @5);
+      $$->set_location_range(@1, @3);
       $$->declarations.push_tail(&decl->link);
-   }
-   | fully_specified_type any_identifier '[' ']' '=' initializer
-   {
-      void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, true, NULL, $6);
-      decl->set_location_range(@2, @4);
-
-      $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@1, @4);
-      $$->declarations.push_tail(&decl->link);
-      if ($6->oper == ast_aggregate) {
-         ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$6;
-         ast_type_specifier *type = new(ctx) ast_type_specifier($1->specifier, true, NULL);
-         type->set_location(@1);
-         _mesa_ast_set_aggregate_type(type, ai, state);
-      }
-   }
-   | fully_specified_type any_identifier '[' constant_expression ']' '=' initializer
-   {
-      void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, true, $4, $7);
-      decl->set_location_range(@2, @5);
-
-      $$ = new(ctx) ast_declarator_list($1);
-      $$->set_location_range(@1, @5);
-      $$->declarations.push_tail(&decl->link);
-      if ($7->oper == ast_aggregate) {
-         ast_aggregate_initializer *ai = (ast_aggregate_initializer *)$7;
-         ast_type_specifier *type = new(ctx) ast_type_specifier($1->specifier, true, $4);
-         type->set_location(@1);
-         _mesa_ast_set_aggregate_type(type, ai, state);
-      }
    }
    | fully_specified_type any_identifier '=' initializer
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, $4);
+      ast_declaration *decl = new(ctx) ast_declaration($2, NULL, $4);
       decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list($1);
       $$->set_location_range(@1, @2);
       $$->declarations.push_tail(&decl->link);
-      if ($4->oper == ast_aggregate) {
-         _mesa_ast_set_aggregate_type($1->specifier, $4, state);
-      }
    }
    | INVARIANT variable_identifier // Vertex only.
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, NULL);
+      ast_declaration *decl = new(ctx) ast_declaration($2, NULL, NULL);
       decl->set_location(@2);
 
       $$ = new(ctx) ast_declarator_list(NULL);
@@ -1549,7 +1474,7 @@ type_qualifier:
    {
       if ($2.has_auxiliary_storage()) {
          _mesa_glsl_error(&@1, state,
-                          "duplicate auxiliary storage qualifier (centroid)");
+                          "duplicate auxiliary storage qualifier (centroid or sample)");
       }
 
       if (!state->ARB_shading_language_420pack_enable &&
@@ -1599,7 +1524,12 @@ auxiliary_storage_qualifier:
       memset(& $$, 0, sizeof($$));
       $$.flags.q.centroid = 1;
    }
-   /* TODO: "sample" and "patch" also go here someday. */
+   | SAMPLE
+   {
+      memset(& $$, 0, sizeof($$));
+      $$.flags.q.sample = 1;
+   }
+   /* TODO: "patch" also goes here someday. */
 
 storage_qualifier:
    CONST_TOK
@@ -1634,19 +1564,53 @@ storage_qualifier:
    }
    ;
 
+array_specifier:
+   '[' ']'
+   {
+      void *ctx = state;
+      $$ = new(ctx) ast_array_specifier(@1);
+      $$->set_location_range(@1, @2);
+   }
+   | '[' constant_expression ']'
+   {
+      void *ctx = state;
+      $$ = new(ctx) ast_array_specifier(@1, $2);
+      $$->set_location_range(@1, @3);
+   }
+   | array_specifier '[' ']'
+   {
+      $$ = $1;
+
+      if (!state->ARB_arrays_of_arrays_enable) {
+         _mesa_glsl_error(& @1, state,
+                          "GL_ARB_arrays_of_arrays "
+                          "required for defining arrays of arrays");
+      } else {
+         _mesa_glsl_error(& @1, state,
+                          "only the outermost array dimension can "
+                          "be unsized");
+      }
+   }
+   | array_specifier '[' constant_expression ']'
+   {
+      $$ = $1;
+
+      if (!state->ARB_arrays_of_arrays_enable) {
+         _mesa_glsl_error(& @1, state,
+                          "GL_ARB_arrays_of_arrays "
+                          "required for defining arrays of arrays");
+      }
+
+      $$->add_dimension($3);
+   }
+   ;
+
 type_specifier:
    type_specifier_nonarray
-   | type_specifier_nonarray '[' ']'
+   | type_specifier_nonarray array_specifier
    {
       $$ = $1;
-      $$->is_array = true;
-      $$->array_size = NULL;
-   }
-   | type_specifier_nonarray '[' constant_expression ']'
-   {
-      $$ = $1;
-      $$->is_array = true;
-      $$->array_size = $3;
+      $$->array_specifier = $2;
    }
    ;
 
@@ -1826,20 +1790,14 @@ struct_declarator:
    any_identifier
    {
       void *ctx = state;
-      $$ = new(ctx) ast_declaration($1, false, NULL, NULL);
+      $$ = new(ctx) ast_declaration($1, NULL, NULL);
       $$->set_location(@1);
    }
-   | any_identifier '[' ']'
+   | any_identifier array_specifier
    {
       void *ctx = state;
-      $$ = new(ctx) ast_declaration($1, true, NULL, NULL);
-      $$->set_location_range(@1, @3);
-   }
-   | any_identifier '[' constant_expression ']'
-   {
-      void *ctx = state;
-      $$ = new(ctx) ast_declaration($1, true, $3, NULL);
-      $$->set_location_range(@1, @4);
+      $$ = new(ctx) ast_declaration($1, $2, NULL);
+      $$->set_location_range(@1, @2);
    }
    ;
 
@@ -1996,7 +1954,7 @@ condition:
    | fully_specified_type any_identifier '=' initializer
    {
       void *ctx = state;
-      ast_declaration *decl = new(ctx) ast_declaration($2, false, NULL, $4);
+      ast_declaration *decl = new(ctx) ast_declaration($2, NULL, $4);
       ast_declarator_list *declarator = new(ctx) ast_declarator_list($1);
       decl->set_location_range(@2, @4);
       declarator->set_location(@1);
@@ -2242,11 +2200,11 @@ basic_interface_block:
        * "It is illegal to have an input block in a vertex shader
        *  or an output block in a fragment shader"
        */
-      if ((state->target == vertex_shader) && $1.flags.q.in) {
+      if ((state->stage == MESA_SHADER_VERTEX) && $1.flags.q.in) {
          _mesa_glsl_error(& @1, state,
                           "`in' interface block is not allowed for "
                           "a vertex shader");
-      } else if ((state->target == fragment_shader) && $1.flags.q.out) {
+      } else if ((state->stage == MESA_SHADER_FRAGMENT) && $1.flags.q.out) {
          _mesa_glsl_error(& @1, state,
                           "`out' interface block is not allowed for "
                           "a fragment shader");
@@ -2331,25 +2289,19 @@ instance_name_opt:
    /* empty */
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
-                                          NULL, false, NULL);
+                                          NULL, NULL);
    }
    | NEW_IDENTIFIER
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
-                                          $1, false, NULL);
+                                          $1, NULL);
       $$->set_location(@1);
    }
-   | NEW_IDENTIFIER '[' constant_expression ']'
+   | NEW_IDENTIFIER array_specifier
    {
       $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
-                                          $1, true, $3);
-      $$->set_location_range(@1, @4);
-   }
-   | NEW_IDENTIFIER '[' ']'
-   {
-      $$ = new(state) ast_interface_block(*state->default_uniform_qualifier,
-                                          $1, true, NULL);
-      $$->set_location_range(@1, @3);
+                                          $1, $2);
+      $$->set_location_range(@1, @2);
    }
    ;
 
@@ -2403,7 +2355,7 @@ layout_defaults:
    {
       void *ctx = state;
       $$ = NULL;
-      if (state->target != geometry_shader) {
+      if (state->stage != MESA_SHADER_GEOMETRY) {
          _mesa_glsl_error(& @1, state,
                           "input layout qualifiers only valid in "
                           "geometry shaders");
@@ -2431,7 +2383,7 @@ layout_defaults:
 
    | layout_qualifier OUT_TOK ';'
    {
-      if (state->target != geometry_shader) {
+      if (state->stage != MESA_SHADER_GEOMETRY) {
          _mesa_glsl_error(& @1, state,
                           "out layout qualifiers only valid in "
                           "geometry shaders");

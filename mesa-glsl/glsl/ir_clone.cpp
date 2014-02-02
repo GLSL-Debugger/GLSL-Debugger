@@ -41,36 +41,20 @@ ir_variable *
 ir_variable::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_variable *var = new(mem_ctx) ir_variable(this->type, this->name,
-					       (ir_variable_mode) this->mode);
+					       (ir_variable_mode) this->data.mode);
    COPY_IR_LOCATION(var, this)
 
-   var->max_array_access = this->max_array_access;
+   var->data.max_array_access = this->data.max_array_access;
    if (this->is_interface_instance()) {
       var->max_ifc_array_access =
          rzalloc_array(var, unsigned, this->interface_type->length);
       memcpy(var->max_ifc_array_access, this->max_ifc_array_access,
              this->interface_type->length * sizeof(unsigned));
    }
-   var->read_only = this->read_only;
-   var->centroid = this->centroid;
-   var->invariant = this->invariant;
-   var->interpolation = this->interpolation;
-   var->location = this->location;
-   var->index = this->index;
-   var->binding = this->binding;
-   var->atomic.buffer_index = this->atomic.buffer_index;
-   var->atomic.offset = this->atomic.offset;
+
+   memcpy(&var->data, &this->data, sizeof(var->data));
+
    var->warn_extension = this->warn_extension;
-   var->origin_upper_left = this->origin_upper_left;
-   var->pixel_center_integer = this->pixel_center_integer;
-   var->explicit_location = this->explicit_location;
-   var->explicit_index = this->explicit_index;
-   var->explicit_binding = this->explicit_binding;
-   var->has_initializer = this->has_initializer;
-   var->depth_layout = this->depth_layout;
-   var->assigned = this->assigned;
-   var->how_declared = this->how_declared;
-   var->used = this->used;
 
    var->num_state_slots = this->num_state_slots;
    if (this->state_slots) {
@@ -143,16 +127,15 @@ ir_if *
 ir_if::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_if *new_if = new(mem_ctx) ir_if(this->condition->clone(mem_ctx, ht));
-
    COPY_IR_LOCATION(new_if, this)
 
-   foreach_iter(exec_list_iterator, iter, this->then_instructions) {
-      ir_instruction *ir = (ir_instruction *)iter.get();
+   foreach_list(n, &this->then_instructions) {
+      ir_instruction *ir = (ir_instruction *) n;
       new_if->then_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
-   foreach_iter(exec_list_iterator, iter, this->else_instructions) {
-      ir_instruction *ir = (ir_instruction *)iter.get();
+   foreach_list(n, &this->else_instructions) {
+      ir_instruction *ir = (ir_instruction *) n;
       new_if->else_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
@@ -163,23 +146,13 @@ ir_loop *
 ir_loop::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_loop *new_loop = new(mem_ctx) ir_loop();
-
    COPY_IR_LOCATION(new_loop, this)
 
-   if (this->from)
-      new_loop->from = this->from->clone(mem_ctx, ht);
-   if (this->to)
-      new_loop->to = this->to->clone(mem_ctx, ht);
-   if (this->increment)
-      new_loop->increment = this->increment->clone(mem_ctx, ht);
-   new_loop->counter = counter;
-
-   foreach_iter(exec_list_iterator, iter, this->body_instructions) {
-      ir_instruction *ir = (ir_instruction *)iter.get();
+   foreach_list(n, &this->body_instructions) {
+      ir_instruction *ir = (ir_instruction *) n;
       new_loop->body_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
-   new_loop->cmp = this->cmp;
    return new_loop;
 }
 
@@ -192,8 +165,8 @@ ir_call::clone(void *mem_ctx, struct hash_table *ht) const
 
    exec_list new_parameters;
 
-   foreach_iter(exec_list_iterator, iter, this->actual_parameters) {
-      ir_instruction *ir = (ir_instruction *)iter.get();
+   foreach_list(n, &this->actual_parameters) {
+      ir_instruction *ir = (ir_instruction *) n;
       new_parameters.push_tail(ir->clone(mem_ctx, ht));
    }
 
@@ -212,7 +185,7 @@ ir_expression::clone(void *mem_ctx, struct hash_table *ht) const
    }
 
    return new(mem_ctx) ir_expression(this->operation, this->type,
-		     op[0], op[1], op[2], op[3]);
+				     op[0], op[1], op[2], op[3]);
 }
 
 ir_dereference_variable *
@@ -255,7 +228,6 @@ ir_texture::clone(void *mem_ctx, struct hash_table *ht) const
    new_tex->type = this->type;
 
    COPY_IR_LOCATION(new_tex, this)
-
    new_tex->sampler = this->sampler->clone(mem_ctx, ht);
    if (this->coordinate)
       new_tex->coordinate = this->coordinate->clone(mem_ctx, ht);
@@ -305,9 +277,9 @@ ir_assignment::clone(void *mem_ctx, struct hash_table *ht) const
       new_condition = this->condition->clone(mem_ctx, ht);
 
    return new(mem_ctx) ir_assignment(this->lhs->clone(mem_ctx, ht),
-			     this->rhs->clone(mem_ctx, ht),
-			     new_condition,
-			     this->write_mask);
+				     this->rhs->clone(mem_ctx, ht),
+				     new_condition,
+				     this->write_mask);
 }
 
 ir_function *
