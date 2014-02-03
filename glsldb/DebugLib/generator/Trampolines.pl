@@ -1,6 +1,6 @@
 ################################################################################
 #
-# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
+# Copyright (c) 2014 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -44,6 +44,28 @@ my @initializer = ();
 my @extinitializer = ();
 my @attach =();
 my @detach = ();
+
+sub defines {
+    my $mode = shift;
+    if ($mode eq "decl") {
+        print "#ifndef __TRAMPOLINES_H
+#define __TRAMPOLINES_H
+#pragma once
+
+/* needed for DebugFunctions to know where the functions are located */
+#ifdef DEBUGLIB_EXPORTS
+#define DEBUGLIBAPI __declspec(dllexport)
+#else /* DEBUGLIB_EXPORTS */
+#define DEBUGLIBAPI __declspec(dllimport)
+#endif /* DEBUGLIB_EXPORTS */
+
+";
+    } elsif ($mode eq "exp") {
+        print "LIBRARY \"DebugLib\"
+EXPORTS
+";
+    }
+}
 
 sub createUtils {
     print qq|
@@ -107,142 +129,10 @@ VOID WINAPI _dbg_Verify(PCHAR pszFunc, PVOID pvPointer)
 |;
 }
 
-sub createExtensionTrampolineDefinition
-{
-    my $retval = shift;
-    my $fname = shift;
-    my $argString = shift;
-    my @arguments = buildArgumentList($argString);
-    my $argList = join(", " @arguments);
-
-    print "$retval (APIENTRYP Orig$fname)($argList) = NULL;\n";
-    print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
-    push @extinitializer, "\tOrig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
-}
-
-
-sub createTrampolineDefinition
-{
-    my $retval = shift;
-    my $fname = shift;
-    my $argString = shift;
-    my @arguments = buildArgumentList($argString);
-    my $argList = "";
-    for (my $i = 0; $i <= $#arguments; $i++) {
-        $argList .= "@arguments[$i]";
-        if ($i != $#arguments) {
-            $argList .= ", ";
-        }
-    }
-    print "$retval (APIENTRYP Orig$fname)($argList";
-    #print ") = $fname;\n";
-    print ") = NULL;\n";
-    print "/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);\n";
-
-    push @initializer, "\tOrig$fname = $fname;\n\tdbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);\n";
-
-    push @attach, "\tdbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
-    /* _dbg_Verify(\"$fname\", (PBYTE)Orig$fname); */
-    retval = DetourAttach(&((PVOID)Orig$fname), Detoured$fname);
-    if (retval != NO_ERROR) {
-        dbgPrint(DBGLVL_DEBUG, \"DetourAttach($fname) failed: %u\\n\", retval);
-        return 0;
-    }";
-    push @detach, "\tretval = DetourDetach(&((PVOID)Orig$fname), Detoured$fname);
-    if (retval != NO_ERROR) {
-        dbgPrint(DBGLVL_DEBUG, \"DetourDetach($fname) failed: %u\\n\", retval);
-        return 0;
-    }";
-}
-
-sub createTrampolineDeclaration
-{
-    my $retval = shift;
-    my $fname = shift;
-    my $argString = shift;
-    my @arguments = buildArgumentList($argString);
-    print "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)(";
-    for (my $i = 0; $i <= $#arguments; $i++) {
-        print "@arguments[$i]";
-        if ($i != $#arguments) {
-            print ", ";
-        }
-    }
-    print ");\n";
-}
-
-if ($#ARGV == 0) {
-    $mode = $ARGV[0];
-} else {
-    die "argument must be decl, def or exp";
-}
-
-if ($mode eq "exp") {
-    print ";\n; THIS IS A GENERATED FILE!\n;\n\n";
-} else {
-    header_generated();
-}
-
-
-if ($mode eq "decl") {
-    print "#ifndef __TRAMPOLINES_H
-#define __TRAMPOLINES_H
-#pragma once
-
-/* needed for DebugFunctions to know where the functions are located */
-#ifdef DEBUGLIB_EXPORTS
-#define DEBUGLIBAPI __declspec(dllexport)
-#else /* DEBUGLIB_EXPORTS */
-#define DEBUGLIBAPI __declspec(dllimport)
-#endif /* DEBUGLIB_EXPORTS */
-
-";
-} elsif ($mode eq "exp") {
-    print "LIBRARY \"DebugLib\"
-EXPORTS
-";
-}
-
-
-sub gl_trampoline
-{
-    my $line = shift;
-    my $extname = shift;
-    if ($mode eq "decl") {
-        createTrampolineDeclaration(@_);
-    } elsif ($mode eq "def") {
-        createTrampolineDefinition(@_);
-    } elsif ($mode eq "exp") {
-        print "\tOrig$2\n";
-    }
-}
-
-my $gl_actions = {
-    $regexps{"wingdi"} => \&gl_trampoline,
-    $regexps{"glapi"} => \&gl_trampoline
-}
-
-my $win_actions = {
-    $regexps{"winapifunc"} => \&gl_trampoline,
-}
-
-my @params = ([$files{"gl"}, "GL_VERSION_1_0", "GL_", $gl_actions],
-              [$files{"wgl"}, "WGL_VERSION_1_0", "WGL_", $win_actions]);
-
-
-# This windows-specific call is everywhere
-gl_trampoline(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers", "HDC");
-
-foreach my $entry (@params) {
-    my $filenames = shift @$entry;
-    foreach my $filename (@$filenames) {
-        parse_output($filename, @$entry);
-    }
-}
-
-
-if ($mode eq "def") {
-    printf "
+sub footer {
+    my $mode = shift;
+    if ($mode eq "def") {
+        printf "
 void initTrampolines() {
 %s
 }
@@ -251,10 +141,11 @@ void initExtensionTrampolines() {
 %s
 }
 
-", join("\n\t", @initializer), join("\n\t", @extinitializer);
+", join("\n", @initializer), join("\n", @extinitializer);
 
-    createUtils();
-    printf qq|
+        createUtils();
+
+        printf qq|
 int attachTrampolines() {
     LONG retval = 0;
     initTrampolines();
@@ -270,9 +161,9 @@ int attachTrampolines() {
     }
     return 1;
 }
-|, join("\n\t", @attach);
+|, join("\n", @attach);
 
-    print qq|
+        print qq|
 int detachTrampolines() {
     LONG retval = 0;
     if ((retval = DetourTransactionBegin()) != NO_ERROR) {
@@ -287,15 +178,96 @@ int detachTrampolines() {
     }
     return 1;
 }
-|, join("\n\t", @detach);
-}
-
-if ($mode eq "decl") {
-    print "void initExtensionTrampolines();
+|, join("\n", @detach);
+    } elsif ($mode eq "decl") {
+        print "void initExtensionTrampolines();
 int attachTrampolines();
 int detachTrampolines();
 #endif /* __TRAMPOLINES_H */
 ";
+    }
+
+    print "\n";
 }
 
-print "\n" if $mode ne "exp";
+
+sub createTrampoline
+{
+    my ($mode, $extname, $retval, $fname, $argString) = @_;
+    my @arguments = buildArgumentList($argString);
+    my $argList = join(", ", @arguments);
+    my $ret = "    Orig$fname";
+
+    if ($mode eq "def") {
+        $ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
+/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);";
+
+        # TODO: check it
+        if ($extname !~ "^WGL"){
+            push @initializer, "    Orig$fname = $fname;
+    dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
+        } else {
+            push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
+        }
+
+        push @attach, "    dbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
+    /* _dbg_Verify(\"$fname\", (PBYTE)Orig$fname); */
+    retval = DetourAttach(&((PVOID)Orig$fname), Detoured$fname);
+    if (retval != NO_ERROR) {
+        dbgPrint(DBGLVL_DEBUG, \"DetourAttach($fname) failed: %u\\n\", retval);
+        return 0;
+    }";
+        push @detach, "    retval = DetourDetach(&((PVOID)Orig$fname), Detoured$fname);
+    if (retval != NO_ERROR) {
+        dbgPrint(DBGLVL_DEBUG, \"DetourDetach($fname) failed: %u\\n\", retval);
+        return 0;
+    }";
+    } elsif ($mode eq "decl") {
+        $ret = sprintf "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
+    }
+
+    return $ret;
+}
+
+
+my @modes = ("decl", "def", "exp");
+$mode = $ARGV[0];
+if (not grep(/^$mode$/, @modes)) {
+    die "Argument must be one of " . join(", ", @modes) . "\n";
+}
+
+
+# Setup parser
+sub gl_trampoline
+{
+    my $line = shift;
+    print createTrampoline($mode, @_) . "\n";
+}
+
+my $gl_actions = {
+    $regexps{"wingdi"} => \&gl_trampoline,
+    $regexps{"glapi"} => \&gl_trampoline
+};
+
+my $win_actions = {
+    $regexps{"winapifunc"} => \&gl_trampoline,
+};
+
+my @params = ([$files{"gl"}, "GL_VERSION_1_0", "GL_", $gl_actions],
+              [$files{"wgl"}, "WGL_VERSION_1_0", "WGL_", $win_actions]);
+
+
+# Begin output
+header_generated($mode eq "exp" ? ";" : "//");
+defines($mode);
+
+# This windows-specific call is everywhere
+gl_trampoline(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers", "HDC");
+foreach my $entry (@params) {
+    my $filenames = shift @$entry;
+    foreach my $filename (@$filenames) {
+        parse_output($filename, @$entry);
+    }
+}
+
+footer($mode);

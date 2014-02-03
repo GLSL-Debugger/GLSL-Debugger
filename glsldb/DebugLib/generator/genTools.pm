@@ -138,9 +138,10 @@ sub parse_output {
 
 
 sub header_generated {
+    my $style = shift;
     my $t = localtime;
     my $year = $t->year + 1900;
-    printf "////////////////////////////////////////////////////////
+    my $header = sprintf "////////////////////////////////////////////////////////
 //
 //   THIS FILE IS GENERATED AUTOMATICALLY %02d.%02d.%04d %02d:%02d:%02d
 //
@@ -166,6 +167,8 @@ sub header_generated {
 ////////////////////////////////////////////////////////
 
 ", $t->mday, $t->mon + 1, $year, $t->hour, $t->min, $t->sec, $year;
+    $header =~ s|^//|$style|mg if $style;
+    print $header;
 }
 
 

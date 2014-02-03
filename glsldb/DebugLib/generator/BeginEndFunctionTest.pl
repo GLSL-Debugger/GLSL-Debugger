@@ -113,6 +113,7 @@ print "#ifdef _WIN32
     #include <signal.h>
     #include <sys/types.h>
     #include <setjmp.h>
+    #include \"GL/glx.h\"
 #endif /* _WIN32 */
 #include <stdio.h>
 #include <stdlib.h>
