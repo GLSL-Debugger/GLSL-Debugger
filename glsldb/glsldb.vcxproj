@@ -52,7 +52,7 @@
       </Command>
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\;.\GeneratedFiles;detours\include;$(QTDIR)\include;.\GeneratedFiles\$(Configuration);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;..\GLSLCompiler\glslang\Public;..\GLSLCompiler\glslang\OSDependent\Windows;utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\;detours\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;..\GLSLCompiler\glslang\Public;..\GLSLCompiler\glslang\OSDependent\Windows;utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>UNICODE;WIN32;NDEBUG;QT_THREAD_SUPPORT;QT_NO_DEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
@@ -74,7 +74,7 @@
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\;.\GeneratedFiles;detours\include;$(QTDIR)\include;.\GeneratedFiles\$(Configuration);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;..\GLSLCompiler\glslang\Public;..\GLSLCompiler\glslang\OSDependent\Windows;utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\;$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\;detours\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;..\GLSLCompiler\glslang\Public;..\GLSLCompiler\glslang\OSDependent\Windows;utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>UNICODE;WIN32;DEBUG;_DEBUG;QT_THREAD_SUPPORT;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
@@ -87,6 +87,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\;..\;$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\;detours\include;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;..\GLSLCompiler\glslang\Public;..\GLSLCompiler\glslang\OSDependent\Windows;utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aboutBox.cpp" />
@@ -129,788 +134,691 @@
     <ClCompile Include="watchTable.cpp" />
     <ClCompile Include="watchVector.cpp" />
     <ClCompile Include="watchView.cpp" />
-    <ClCompile Include="generatedfiles\release\moc_aboutBox.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_aboutBox.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_aboutBox.qt.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-    </ClCompile>
-    <ClCompile Include="generatedfiles\release\moc_AttachToProcess.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_AttachToProcess.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_AttachToProcess.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="generatedfiles\release\moc_attachToProcessDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_attachToProcessDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_attachToProcessDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="generatedfiles\release\moc_compilerErrorDetails.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDetails.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_compilerErrorDetails.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="generatedfiles\release\moc_compilerErrorDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_compilerErrorDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_curveView.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_curveView.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_curveView.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_dbgShaderView.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_dbgShaderView.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_dbgShaderView.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_editCallDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_editCallDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_fragmentTestDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_editCallDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="generatedfiles\release\moc_fragmentTestDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_geoShaderDataModel.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="generatedfiles\debug\moc_fragmentTestDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_geoShaderDataModel.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glScatter.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_geoShaderDataModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_glScatter.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glslSyntaxHighlighter.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_glScatter.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_glslSyntaxHighlighter.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceFilterModel.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_glslSyntaxHighlighter.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceListModel.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_glTraceFilterModel.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceSettingsDialog.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_imageView.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_jumpToDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_glTraceFilterModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_glTraceListModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_glTraceListModel.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopData.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_glTraceSettingsDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_glTraceSettingsDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_imageView.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_mainWindow.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_imageView.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_jumpToDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_jumpToDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_openProgramDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_loopData.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_loopData.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_pixelBox.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_loopDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_selectionDialog.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_loopDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_shVarModel.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_mainWindow.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_textPercentDelegate.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_mainWindow.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexBox.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexTableModel.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchGeoDataTree.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchTable.qt.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchVector.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_openProgramDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_openProgramDialog.qt.cpp">
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchView.qt.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_pixelBox.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_pixelBox.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_selectionDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_selectionDialog.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_shVarModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_shVarModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_textPercentDelegate.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_textPercentDelegate.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_vertexBox.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_vertexBox.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_vertexTableModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_vertexTableModel.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_watchGeoDataTree.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_watchGeoDataTree.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_watchTable.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_watchTable.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_watchVector.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_watchVector.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_watchView.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_watchView.qt.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_glslDevil.cpp" />
+    <ClCompile Include="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\qrc_glslDevil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="aboutBox.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing aboutBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\aboutBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_aboutBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\aboutBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_aboutBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\aboutBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_aboutBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_aboutBox.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing aboutBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\aboutBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_aboutBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\aboutBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_aboutBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\aboutBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_aboutBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_aboutBox.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="attachToProcess.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing AttachToProcess.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcess.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_AttachToProcess.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcess.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_AttachToProcess.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\AttachToProcess.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_AttachToProcess.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_AttachToProcess.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing AttachToProcess.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcess.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_AttachToProcess.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcess.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_AttachToProcess.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\AttachToProcess.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_AttachToProcess.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_AttachToProcess.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="attachToProcessDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing attachToProcessDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcessDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_attachToProcessDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcessDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_attachToProcessDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\attachToProcessDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_attachToProcessDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_attachToProcessDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing attachToProcessDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcessDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_attachToProcessDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\attachToProcessDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_attachToProcessDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\attachToProcessDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_attachToProcessDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_attachToProcessDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="colors.qt.h" />
     <CustomBuild Include="compilerErrorDetails.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing compilerErrorDetails.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDetails.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_compilerErrorDetails.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDetails.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDetails.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\compilerErrorDetails.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_compilerErrorDetails.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDetails.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing compilerErrorDetails.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDetails.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_compilerErrorDetails.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDetails.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDetails.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\compilerErrorDetails.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_compilerErrorDetails.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDetails.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="compilerErrorDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing compilerErrorDialog.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_compilerErrorDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\compilerErrorDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_compilerErrorDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing compilerErrorDialog.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_compilerErrorDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\compilerErrorDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\compilerErrorDialog.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_compilerErrorDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_compilerErrorDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="curveView.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing curveView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\curveView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_curveView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\curveView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_curveView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\curveView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_curveView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_curveView.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing curveView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\curveView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_curveView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\curveView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_curveView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\curveView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_curveView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_curveView.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="dbgShaderView.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing dbgShaderView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\dbgShaderView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_dbgShaderView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\dbgShaderView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_dbgShaderView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\dbgShaderView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_dbgShaderView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_dbgShaderView.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing dbgShaderView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\dbgShaderView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_dbgShaderView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\dbgShaderView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_dbgShaderView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\dbgShaderView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_dbgShaderView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_dbgShaderView.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="debuglib.h" />
     <CustomBuild Include="editCallDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing editCallDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\editCallDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_editCallDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\editCallDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_editCallDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\editCallDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_editCallDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_editCallDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing editCallDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\editCallDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_editCallDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\editCallDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_editCallDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\editCallDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_editCallDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_editCallDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="errorCodes.h" />
     <CustomBuild Include="fragmentTestDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing fragmentTestDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\fragmentTestDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_fragmentTestDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\fragmentTestDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_fragmentTestDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\fragmentTestDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_fragmentTestDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_fragmentTestDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing fragmentTestDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\fragmentTestDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_fragmentTestDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\fragmentTestDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_fragmentTestDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\fragmentTestDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_fragmentTestDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_fragmentTestDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="functionCall.h" />
     <CustomBuild Include="geoShaderDataModel.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing geoShaderDataModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\geoShaderDataModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_geoShaderDataModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\geoShaderDataModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_geoShaderDataModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\geoShaderDataModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_geoShaderDataModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_geoShaderDataModel.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing geoShaderDataModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\geoShaderDataModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_geoShaderDataModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\geoShaderDataModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_geoShaderDataModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\geoShaderDataModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_geoShaderDataModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_geoShaderDataModel.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="geoShaderTreeItems.qt.h" />
     <ClInclude Include="glCallStatistics.qt.h" />
     <ClInclude Include="globaldefines.h" />
     <CustomBuild Include="glScatter.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing glScatter.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glScatter.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glScatter.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glScatter.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glScatter.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\glScatter.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_glScatter.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glScatter.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing glScatter.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glScatter.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glScatter.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glScatter.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glScatter.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\glScatter.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_glScatter.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glScatter.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="glslSyntaxHighlighter.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing glslSyntaxHighlighter.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glslSyntaxHighlighter.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glslSyntaxHighlighter.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glslSyntaxHighlighter.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glslSyntaxHighlighter.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\glslSyntaxHighlighter.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_glslSyntaxHighlighter.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glslSyntaxHighlighter.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing glslSyntaxHighlighter.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glslSyntaxHighlighter.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glslSyntaxHighlighter.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glslSyntaxHighlighter.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glslSyntaxHighlighter.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\glslSyntaxHighlighter.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_glslSyntaxHighlighter.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glslSyntaxHighlighter.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="glTraceFilterModel.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceFilterModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceFilterModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(Filename)%(Extension);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceFilterModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceFilterModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(Filename)%(Extension);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="glTraceListModel.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing glTraceListModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceListModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glTraceListModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceListModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceListModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\glTraceListModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_glTraceListModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceListModel.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing glTraceListModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceListModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_glTraceListModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceListModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceListModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\glTraceListModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_glTraceListModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_glTraceListModel.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="glTraceSettingsDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceSettingsDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceSettingsDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(Filename)%(Extension);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceSettingsDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\glTraceSettingsDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(Filename)%(Extension);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="imageView.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing imageView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\imageView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_imageView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\imageView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_imageView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\imageView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_imageView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_imageView.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing imageView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\imageView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_imageView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\imageView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_imageView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\imageView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_imageView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_imageView.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="jumpToDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing jumpToDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\jumpToDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_jumpToDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\jumpToDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_jumpToDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\jumpToDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_jumpToDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_jumpToDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing jumpToDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\jumpToDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_jumpToDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\jumpToDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_jumpToDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\jumpToDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_jumpToDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_jumpToDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="loopData.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing loopData.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopData.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_loopData.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopData.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopData.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\loopData.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_loopData.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopData.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing loopData.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopData.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_loopData.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopData.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopData.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\loopData.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_loopData.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopData.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="loopDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing loopDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_loopDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\loopDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_loopDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing loopDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_loopDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\loopDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\loopDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_loopDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_loopDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="mainWindow.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing mainWindow.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\mainWindow.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_mainWindow.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\mainWindow.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_mainWindow.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\mainWindow.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_mainWindow.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_mainWindow.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\mainWindow.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\mainWindow.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\%(Filename)%(Extension);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="mappings.h" />
     <ClInclude Include="mmath.h" />
     <CustomBuild Include="openProgramDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing openProgramDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\openProgramDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_openProgramDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\openProgramDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_openProgramDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\openProgramDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_openProgramDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_openProgramDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing openProgramDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\openProgramDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_openProgramDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\openProgramDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_openProgramDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\openProgramDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_openProgramDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_openProgramDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="pixelBox.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing pixelBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\pixelBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_pixelBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\pixelBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_pixelBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\pixelBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_pixelBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_pixelBox.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing pixelBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\pixelBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_pixelBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\pixelBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_pixelBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\pixelBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_pixelBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_pixelBox.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="progControl.qt.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="runLevel.h" />
     <CustomBuild Include="selectionDialog.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing selectionDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\selectionDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_selectionDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\selectionDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_selectionDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\selectionDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_selectionDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_selectionDialog.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing selectionDialog.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\selectionDialog.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_selectionDialog.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\selectionDialog.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_selectionDialog.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\selectionDialog.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_selectionDialog.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_selectionDialog.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="shVarModel.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing shVarModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\shVarModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_shVarModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\shVarModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_shVarModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\shVarModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_shVarModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_shVarModel.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing shVarModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\shVarModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_shVarModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\shVarModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_shVarModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\shVarModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_shVarModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_shVarModel.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="textPercentDelegate.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing textPercentDelegate.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\textPercentDelegate.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_textPercentDelegate.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\textPercentDelegate.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_textPercentDelegate.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\textPercentDelegate.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_textPercentDelegate.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_textPercentDelegate.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing textPercentDelegate.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\textPercentDelegate.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_textPercentDelegate.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\textPercentDelegate.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_textPercentDelegate.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\textPercentDelegate.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_textPercentDelegate.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_textPercentDelegate.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="vertexBox.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing vertexBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_vertexBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\vertexBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_vertexBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexBox.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing vertexBox.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexBox.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_vertexBox.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexBox.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexBox.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\vertexBox.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_vertexBox.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexBox.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="vertexTableModel.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing vertexTableModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexTableModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_vertexTableModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexTableModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexTableModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\vertexTableModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_vertexTableModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexTableModel.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing vertexTableModel.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexTableModel.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_vertexTableModel.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\vertexTableModel.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexTableModel.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\vertexTableModel.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_vertexTableModel.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_vertexTableModel.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="watchGeoDataTree.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing watchGeoDataTree.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchGeoDataTree.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchGeoDataTree.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchGeoDataTree.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchGeoDataTree.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\watchGeoDataTree.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchGeoDataTree.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchGeoDataTree.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing watchGeoDataTree.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchGeoDataTree.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchGeoDataTree.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchGeoDataTree.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchGeoDataTree.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\watchGeoDataTree.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchGeoDataTree.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchGeoDataTree.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="watchTable.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing watchTable.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchTable.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchTable.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchTable.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchTable.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\watchTable.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchTable.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchTable.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing watchTable.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchTable.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchTable.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchTable.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchTable.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\watchTable.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchTable.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchTable.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="watchVector.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing watchVector.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchVector.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchVector.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchVector.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchVector.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\watchVector.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchVector.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchVector.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing watchVector.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchVector.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchVector.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchVector.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchVector.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\watchVector.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchVector.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchVector.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="watchView.qt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing watchView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DDEBUG -D_DEBUG -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;.\watchView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchView.qt.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing watchView.qt.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I".\GeneratedFiles" -I".\detours\include" -I"$(QTDIR)\include" -I".\GeneratedFiles\$(Configuration)" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchView.qt.h" -o ".\GeneratedFiles\$(Configuration)\moc_watchView.qt.cpp"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  -DUNICODE -DWIN32 -DNDEBUG -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -I"." -I".\.." -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I".\detours\include" -I"$(QTDIR)\include" -I"$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" -I"$(QTDIR)\include\QtCore" -I"$(QTDIR)\include\QtGui" -I"$(QTDIR)\include\QtOpenGL" -I".\..\GLSLCompiler\glslang\Public" -I".\..\GLSLCompiler\glslang\OSDependent\Windows" -I".\utils" ".\watchView.qt.h" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchView.qt.cpp"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;.\watchView.qt.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(Configuration)\moc_watchView.qt.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\moc_watchView.qt.cpp;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="ui\aboutBox.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\attachToProcessDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\compilerErrorDetails.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\compilerErrorDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\dbgShaderView.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\editCallDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\fragmentTestDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\glTraceSettingsDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\jumpToDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\loopDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\mainWindow.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\openProgramDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\selectionDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\watchGeoDataTree.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\watchTable.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\watchVector.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="ui\watchViewDialog.ui">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(FullPath)...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "%(RootDir)%(Directory)%(Filename).ui.h" "%(FullPath)"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o "$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h" "%(FullPath)"
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)%(Filename).ui.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\ui_%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="icons\application-x-executable_32.png" />
     <None Include="icons\applications-system_32.png" />
@@ -935,15 +843,15 @@
     <None Include="icons\face-devil-grin_32.png" />
     <CustomBuild Include="glslDevil.qrc">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing glslDevil.qrc...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "glslDevil" -no-compress ".\glslDevil.qrc" -o .\GeneratedFiles\qrc_glslDevil.cpp
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "glslDevil" -no-compress ".\glslDevil.qrc" -o $(SolutionDir)\Build\tmp\$(Configuration)\glsldb\qrc_glslDevil.cpp
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\glslDevil.qrc;.\cursors\min-max.png;.\cursors\pick.png;.\cursors\zoom-in.png;.\cursors\zoom-out.png;.\cursors\zoom-reset.png;.\icons\application-x-executable_32.png;.\icons\applications-system_32.png;.\icons\buffer-view-auto-capture_32.png;.\icons\buffer-view-capture_32.png;.\icons\buffer-view-save-as_32.png;.\icons\crosshair_32.png;.\icons\dialog-error-blue_32.png;.\icons\dialog-error-green_32.png;.\icons\dialog-error-red_32.png;.\icons\dialog-error-yellow_32.png;.\icons\dialog-error_32.png;.\icons\dialog-glerror_32.png;.\icons\dialog-ok_32.png;.\icons\dialog-warning_32.png;.\icons\document-open_32.png;.\icons\emblem-important_32.png;.\icons\emblem-system_32.png;.\icons\empty_32.png;.\icons\face-devil-green-grin_32.png;.\icons\face-devil-grin_32.png;.\icons\gltrace-edit_32.png;.\icons\gltrace-execute-run_32.png;.\icons\gltrace-execute_32.png;.\icons\gltrace-jump-drawcall_32.png;.\icons\gltrace-jump-shader_32.png;.\icons\gltrace-no-gui-update_32.png;.\icons\gltrace-no-traceing_32.png;.\icons\gltrace-pause_32.png;.\icons\gltrace-play_32.png;.\icons\gltrace-settings_32.png;.\icons\go-actual_32.png;.\icons\go-jump-over_32.png;.\icons\go-jump_32.png;.\icons\go-last_32.png;.\icons\go-next_32.png;.\icons\help-browser_32.png;.\icons\list-abs_32.png;.\icons\list-add_32.png;.\icons\list-remove_32.png;.\icons\media-eject_32.png;.\icons\media-playback-pause_32.png;.\icons\media-playback-start_32.png;.\icons\media-playback-stop_32.png;.\icons\media-record_32.png;.\icons\media-skip-forward_32.png;.\icons\media-step_32.png;.\icons\min-max-lens.png;.\icons\preferences-system_32.png;.\icons\process-stop_32.png;.\icons\scatterplot-choose_32.png;.\icons\shader-dbg-code_32.png;.\icons\shader-execute_32.png;.\icons\shader-next_32.png;.\icons\shader-reset_32.png;.\icons\system-log-out_32.png;.\icons\system-search_32.png;.\icons\text-x-generic_32.png;.\icons\vector-view-save-as_32.png;.\icons\view-refresh_16.png;.\icons\view-refresh_32.png;.\icons\watch-add_32.png;.\icons\watch-black-absolute_32.png;.\icons\watch-black-negative_32.png;.\icons\watch-black-positive_32.png;.\icons\watch-black-solid_32.png;.\icons\watch-blue-absolute_32.png;.\icons\watch-blue-negative_32.png;.\icons\watch-blue-positive_32.png;.\icons\watch-blue-solid_32.png;.\icons\watch-delete_32.png;.\icons\watch-green-absolute_32.png;.\icons\watch-green-negative_32.png;.\icons\watch-green-positive_32.png;.\icons\watch-green-solid_32.png;.\icons\watch-hide-inactive_32.png;.\icons\watch-hide-no-child_32.png;.\icons\watch-icon_32.png;.\icons\watch-new_32.png;.\icons\watch-red-absolute_32.png;.\icons\watch-red-negative_32.png;.\icons\watch-red-positive_32.png;.\icons\watch-red-solid_32.png;.\icons\watch-vector-mapping_32.png;.\shaders\pointbased_spheres.fp;.\shaders\pointbased_spheres.vp;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_glslDevil.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\qrc_glslDevil.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing glslDevil.qrc...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "glslDevil" -no-compress ".\glslDevil.qrc" -o .\GeneratedFiles\qrc_glslDevil.cpp
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "glslDevil" -no-compress ".\glslDevil.qrc" -o $(SolutionDir)\Build\tmp\$(Configuration)\glsldb\qrc_glslDevil.cpp
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\glslDevil.qrc;.\cursors\min-max.png;.\cursors\pick.png;.\cursors\zoom-in.png;.\cursors\zoom-out.png;.\cursors\zoom-reset.png;.\icons\application-x-executable_32.png;.\icons\applications-system_32.png;.\icons\buffer-view-auto-capture_32.png;.\icons\buffer-view-capture_32.png;.\icons\buffer-view-save-as_32.png;.\icons\crosshair_32.png;.\icons\dialog-error-blue_32.png;.\icons\dialog-error-green_32.png;.\icons\dialog-error-red_32.png;.\icons\dialog-error-yellow_32.png;.\icons\dialog-error_32.png;.\icons\dialog-glerror_32.png;.\icons\dialog-ok_32.png;.\icons\dialog-warning_32.png;.\icons\document-open_32.png;.\icons\emblem-important_32.png;.\icons\emblem-system_32.png;.\icons\empty_32.png;.\icons\face-devil-green-grin_32.png;.\icons\face-devil-grin_32.png;.\icons\gltrace-edit_32.png;.\icons\gltrace-execute-run_32.png;.\icons\gltrace-execute_32.png;.\icons\gltrace-jump-drawcall_32.png;.\icons\gltrace-jump-shader_32.png;.\icons\gltrace-no-gui-update_32.png;.\icons\gltrace-no-traceing_32.png;.\icons\gltrace-pause_32.png;.\icons\gltrace-play_32.png;.\icons\gltrace-settings_32.png;.\icons\go-actual_32.png;.\icons\go-jump-over_32.png;.\icons\go-jump_32.png;.\icons\go-last_32.png;.\icons\go-next_32.png;.\icons\help-browser_32.png;.\icons\list-abs_32.png;.\icons\list-add_32.png;.\icons\list-remove_32.png;.\icons\media-eject_32.png;.\icons\media-playback-pause_32.png;.\icons\media-playback-start_32.png;.\icons\media-playback-stop_32.png;.\icons\media-record_32.png;.\icons\media-skip-forward_32.png;.\icons\media-step_32.png;.\icons\min-max-lens.png;.\icons\preferences-system_32.png;.\icons\process-stop_32.png;.\icons\scatterplot-choose_32.png;.\icons\shader-dbg-code_32.png;.\icons\shader-execute_32.png;.\icons\shader-next_32.png;.\icons\shader-reset_32.png;.\icons\system-log-out_32.png;.\icons\system-search_32.png;.\icons\text-x-generic_32.png;.\icons\vector-view-save-as_32.png;.\icons\view-refresh_16.png;.\icons\view-refresh_32.png;.\icons\watch-add_32.png;.\icons\watch-black-absolute_32.png;.\icons\watch-black-negative_32.png;.\icons\watch-black-positive_32.png;.\icons\watch-black-solid_32.png;.\icons\watch-blue-absolute_32.png;.\icons\watch-blue-negative_32.png;.\icons\watch-blue-positive_32.png;.\icons\watch-blue-solid_32.png;.\icons\watch-delete_32.png;.\icons\watch-green-absolute_32.png;.\icons\watch-green-negative_32.png;.\icons\watch-green-positive_32.png;.\icons\watch-green-solid_32.png;.\icons\watch-hide-inactive_32.png;.\icons\watch-hide-no-child_32.png;.\icons\watch-icon_32.png;.\icons\watch-new_32.png;.\icons\watch-red-absolute_32.png;.\icons\watch-red-negative_32.png;.\icons\watch-red-positive_32.png;.\icons\watch-red-solid_32.png;.\icons\watch-vector-mapping_32.png;.\shaders\pointbased_spheres.fp;.\shaders\pointbased_spheres.vp;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_glslDevil.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\qrc_glslDevil.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="icons\gltrace-edit_32.png" />
     <None Include="icons\gltrace-execute-run_32.png" />
@@ -1032,7 +940,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" QtVersion="4.3.0" RccDir=".\GeneratedFiles" UicDir=".\GeneratedFiles" />
+      <UserProperties MocDir="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb\" QtVersion="4.3.0" RccDir="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" UicDir="$(SolutionDir)\Build\tmp\$(Configuration)\glsldb" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

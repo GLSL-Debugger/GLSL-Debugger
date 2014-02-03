@@ -58,7 +58,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DEBUG;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -70,6 +70,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
     </Link>
+    <Piped_Perl_Output>
+      <WorkDir>.\generator\</WorkDir>
+    </Piped_Perl_Output>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
@@ -85,7 +88,7 @@
       <Outputs>%(Outputs)</Outputs>
     </CustomBuildStep>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -94,9 +97,14 @@
       <ModuleDefinitionFile>debuglib.def</ModuleDefinitionFile>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
     </Link>
+    <Piped_Perl_Output>
+      <WorkDir>.\generator\</WorkDir>
+    </Piped_Perl_Output>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="error.c" />
+    <ClCompile Include="generated\functionList.c" />
+    <ClCompile Include="generated\replayFunction.c" />
     <ClCompile Include="glstate.c" />
     <ClCompile Include="hooks.c" />
     <ClCompile Include="initLib.c" />
@@ -112,8 +120,6 @@
     </ClCompile>
     <ClCompile Include="streamRecorder.c" />
     <ClCompile Include="streamRecording.c" />
-    <ClCompile Include="functionList.c" />
-    <ClCompile Include="replayFunction.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debuglibExport.h" />
@@ -132,70 +138,92 @@
     <ClInclude Include="trampolines.h" />
   </ItemGroup>
   <ItemGroup>
-    <Piped_Perl_Output Include="argumentListTools.pl">
+    <Piped_Perl_Output Include="GetProcAddressHook.pl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GetProcAddressHook.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">GetProcAddressHook.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\getProcAddressHook.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\getProcAddressHook.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
     </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genArgSizeFuncs.pl">
+    <Piped_Perl_Output Include="FunctionPointerTypes.pl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">FunctionPointerTypes.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">FunctionPointerTypes.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionPointerTypes.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionPointerTypes.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
     </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genArgSizeFuncsPrototypes.pl">
+    <Piped_Perl_Output Include="ReplayFunc.pl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ReplayFunc.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ReplayFunc.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\replayFunction.c</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\replayFunction.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
     </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genFunctionHooks.pl">
+    <Piped_Perl_Output Include="FunctionList.pl">
       <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionHooks.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl functionsAllowedInBeginEnd.pl ../GL/gl.h ../GL/glext.h ../GL/wglext.h ../GL/WinGDI.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionHooks.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl functionsAllowedInBeginEnd.pl ../GL/gl.h ../GL/glext.h ../GL/wglext.h ../GL/WinGDI.h</Dependencies>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">FunctionList.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">FunctionList.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionList.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionList.c</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\WinGDI.h ..\..\GL\wglext.h</Dependencies>
     </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genFunctionList.pl">
-      <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionList.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionList.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-    </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genFunctionPointerTypes.pl">
-      <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionPointerTypes.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionPointerTypes.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-    </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genGetProcAddressHook.pl">
-      <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">getProcAddressHook.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">getProcAddressHook.inc</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-    </Piped_Perl_Output>
-    <Piped_Perl_Output Include="genReplayFunc.pl">
-      <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">replayFunction.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">replayFunction.c</OutputFile>
-      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">argumentListTools.pl ..\GL\gl.h ..\GL\glext.h ..\GL\WinGDI.h ..\GL\wglext.h</Dependencies>
-    </Piped_Perl_Output>
-    <TrampolineRule Include="genTrampolines.pl" />
     <Piped_Perl_Output Include="mergeAllowedInBeginEndList.pl">
       <FileType>Document</FileType>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">functionsAllowedInBeginEnd.pl</OutputFile>
-      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">functionsAllowedInBeginEnd.pl</OutputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mergeAllowedInBeginEndList.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mergeAllowedInBeginEndList.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionsAllowedInBeginEnd.pm</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionsAllowedInBeginEnd.pm</OutputFile>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="FunctionHooks.pl">
+      <FileType>Document</FileType>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">FunctionHooks.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">FunctionHooks.pl</InputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionHooks.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\functionsAllowedInBeginEnd.pm ..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\wglext.h ..\..\GL\WinGDI.h</Dependencies>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionHooks.inc</OutputFile>
+      <Dependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\functionsAllowedInBeginEnd.pm ..\..\GL\gl.h ..\..\GL\glext.h ..\..\GL\wglext.h ..\..\GL\WinGDI.h</Dependencies>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="TrampolinesDecl.pl">
+      <FileType>Document</FileType>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Trampolines.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Trampolines.pl</InputFile>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">decl</Parameters>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">decl</Parameters>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\trampolines.h</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\trampolines.h</OutputFile>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="TrampolinesDef.pl">
+      <FileType>Document</FileType>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Trampolines.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Trampolines.pl</InputFile>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">def</Parameters>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">def</Parameters>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\trampolines.inc</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\trampolines.inc</OutputFile>
+    </Piped_Perl_Output>
+    <Piped_Perl_Output Include="TrampolinesExp.pl">
+      <FileType>Document</FileType>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Trampolines.pl</InputFile>
+      <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Trampolines.pl</InputFile>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">exp</Parameters>
+      <Parameters Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">exp</Parameters>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\generated\debuglib.def</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\generated\debuglib.def</OutputFile>
     </Piped_Perl_Output>
   </ItemGroup>
   <ItemGroup>
     <None Include="debuglib.def" />
-    <None Include="functionHooks.inc" />
-    <None Include="functionPointerTypes.inc" />
-    <None Include="getProcAddressHook.inc" />
-    <None Include="trampolines.inc" />
-    <None Include="Makefile.mk" />
+    <None Include="generated\functionHooks.inc" />
+    <None Include="generated\functionPointerTypes.inc" />
+    <None Include="generated\getProcAddressHook.inc" />
+    <None Include="generated\trampolines.inc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\GLSLCompiler\compiler\compiler.vcxproj">

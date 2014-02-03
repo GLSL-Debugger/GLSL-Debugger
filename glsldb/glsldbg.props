@@ -23,26 +23,4 @@ popd
       <AdditionalDependencies>[Dependencies]</AdditionalDependencies>
     </Piped_Perl_Output>
   </ItemDefinitionGroup>
-  <PropertyGroup
-    Condition="'$(TrampolineRuleBeforeTargets)' == '' and '$(TrampolineRuleAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
-    <TrampolineRuleBeforeTargets>Midl</TrampolineRuleBeforeTargets>
-    <TrampolineRuleAfterTargets>CustomBuild</TrampolineRuleAfterTargets>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TrampolineRuleDependsOn
-      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(TrampolineRuleDependsOn)</TrampolineRuleDependsOn>
-  </PropertyGroup>
-  <ItemDefinitionGroup>
-    <TrampolineRule>
-      <CommandLineTemplate>@echo on
-perl.exe %(Filename).pl decl &gt; trampolines.h
-perl.exe %(Filename).pl def &gt; trampolines.inc
-perl.exe %(Filename).pl exp &gt; debuglib.def
-@echo off
-</CommandLineTemplate>
-      <Outputs>trampolines.h;trampolines.inc;debuglib.def</Outputs>
-      <ExecutionDescription>Generating Detours Trampolines ...</ExecutionDescription>
-      <AdditionalDependencies>[Dependencies]</AdditionalDependencies>
-    </TrampolineRule>
-  </ItemDefinitionGroup>
 </Project>

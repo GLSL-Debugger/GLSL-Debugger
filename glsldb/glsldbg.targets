@@ -7,19 +7,9 @@
       Include="Piped_Perl_Output">
       <Targets>_Piped_Perl_Output</Targets>
     </AvailableItemName>
-    <AvailableItemName
-      Include="TrampolineRule">
-      <Targets>_TrampolineRule</Targets>
-    </AvailableItemName>
   </ItemGroup>
   <UsingTask
     TaskName="Piped_Perl_Output"
-    TaskFactory="XamlTaskFactory"
-    AssemblyName="Microsoft.Build.Tasks.v4.0">
-    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
-  </UsingTask>
-  <UsingTask
-    TaskName="TrampolineRule"
     TaskFactory="XamlTaskFactory"
     AssemblyName="Microsoft.Build.Tasks.v4.0">
     <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
@@ -92,70 +82,5 @@
     </ItemGroup>
     <MakeDir
       Directories="@(Piped_Perl_OutputDirsToMake-&gt;'%(RootDir)%(Directory)')" />
-  </Target>
-  <Target
-    Name="_TrampolineRule"
-    BeforeTargets="$(TrampolineRuleBeforeTargets)"
-    AfterTargets="$(TrampolineRuleAfterTargets)"
-    Condition="'@(TrampolineRule)' != ''"
-    DependsOnTargets="$(TrampolineRuleDependsOn);ComputeTrampolineRuleOutput"
-    Outputs="@(TrampolineRule-&gt;Metadata('Outputs')-&gt;Distinct())"
-    Inputs="@(TrampolineRule);%(TrampolineRule.AdditionalDependencies);$(MSBuildProjectFile)">
-    <ItemGroup
-      Condition="'@(SelectedFiles)' != ''">
-      <TrampolineRule
-        Remove="@(TrampolineRule)"
-        Condition="'%(Identity)' != '@(SelectedFiles)'" />
-    </ItemGroup>
-    <ItemGroup>
-      <TrampolineRule_tlog
-        Include="%(TrampolineRule.Outputs)"
-        Condition="'%(TrampolineRule.Outputs)' != '' and '%(TrampolineRule.ExcludedFromBuild)' != 'true'">
-        <Source>@(TrampolineRule, '|')</Source>
-      </TrampolineRule_tlog>
-    </ItemGroup>
-    <Message
-      Importance="High"
-      Text="%(TrampolineRule.ExecutionDescription)" />
-    <WriteLinesToFile
-      Condition="'@(TrampolineRule_tlog)' != '' and '%(TrampolineRule_tlog.ExcludedFromBuild)' != 'true'"
-      File="$(IntDir)$(ProjectName).write.1.tlog"
-      Lines="^%(TrampolineRule_tlog.Source);@(TrampolineRule_tlog-&gt;'%(Fullpath)')" />
-    <TrampolineRule
-      Condition="'@(TrampolineRule)' != '' and '%(TrampolineRule.ExcludedFromBuild)' != 'true'"
-      CommandLineTemplate="%(TrampolineRule.CommandLineTemplate)"
-      Dependencies="%(TrampolineRule.Dependencies)"
-      AdditionalOptions="%(TrampolineRule.AdditionalOptions)"
-      Inputs="@(TrampolineRule)" />
-  </Target>
-  <PropertyGroup>
-    <ComputeLinkInputsTargets>
-            $(ComputeLinkInputsTargets);
-            ComputeTrampolineRuleOutput;
-          </ComputeLinkInputsTargets>
-    <ComputeLibInputsTargets>
-            $(ComputeLibInputsTargets);
-            ComputeTrampolineRuleOutput;
-          </ComputeLibInputsTargets>
-  </PropertyGroup>
-  <Target
-    Name="ComputeTrampolineRuleOutput"
-    Condition="'@(TrampolineRule)' != ''">
-    <ItemGroup>
-      <TrampolineRuleDirsToMake
-        Condition="'@(TrampolineRule)' != '' and '%(TrampolineRule.ExcludedFromBuild)' != 'true'"
-        Include="%(TrampolineRule.Outputs)" />
-      <Link
-        Include="%(TrampolineRuleDirsToMake.Identity)"
-        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
-      <Lib
-        Include="%(TrampolineRuleDirsToMake.Identity)"
-        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
-      <ImpLib
-        Include="%(TrampolineRuleDirsToMake.Identity)"
-        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
-    </ItemGroup>
-    <MakeDir
-      Directories="@(TrampolineRuleDirsToMake-&gt;'%(RootDir)%(Directory)')" />
   </Target>
 </Project>
