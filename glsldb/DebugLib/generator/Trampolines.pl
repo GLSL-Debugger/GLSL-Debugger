@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2014 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
-# (VIS), Universität Stuttgart.
+# (VIS), Universit?t Stuttgart.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -15,7 +15,7 @@
 #   list of conditions and the following disclaimer in the documentation and/or
 #   other materials provided with the distribution.
 #
-#   * Neither the name of the name of VIS, Universität Stuttgart nor the names
+#   * Neither the name of the name of VIS, UniversitÐ´t Stuttgart nor the names
 #   of its contributors may be used to endorse or promote products derived from
 #   this software without specific prior written permission.
 #
@@ -42,8 +42,9 @@ our %regexps;
 
 my @initializer = ();
 my @extinitializer = ();
-my @attach =();
+my @attach = ();
 my @detach = ();
+my %trampoline_generated = ();
 
 sub defines {
     my $mode = shift;
@@ -150,31 +151,31 @@ int attachTrampolines() {
     LONG retval = 0;
     initTrampolines();
     if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %%u\\n", retval);
     }
     if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %%u\\n", retval);
     }
 %s
     if ((retval = DetourTransactionCommit()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %%u\\n", retval);
     }
     return 1;
 }
 |, join("\n", @attach);
 
-        print qq|
+        printf qq|
 int detachTrampolines() {
     LONG retval = 0;
     if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %%u\\n", retval);
     }
     if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %%u\\n", retval);
     }
 %s
     if ((retval = DetourTransactionCommit()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %u\\n", retval);
+        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %%u\\n", retval);
     }
     return 1;
 }
@@ -194,16 +195,19 @@ int detachTrampolines();
 sub createTrampoline
 {
     my ($mode, $extname, $retval, $fname, $argString) = @_;
+    return if $trampoline_generated{$fname};
+
     my @arguments = buildArgumentList($argString);
     my $argList = join(", ", @arguments);
-    my $ret = "    Orig$fname";
+    my $ret = "    Orig$fname";    
+    $trampoline_generated{$fname} = 1;
 
     if ($mode eq "def") {
         $ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
 /* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);";
 
         # TODO: check it
-        if ($extname !~ "^WGL"){
+        if ($extname !~ /^WGL/){
             push @initializer, "    Orig$fname = $fname;
     dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
         } else {
@@ -244,12 +248,12 @@ sub gl_trampoline
     print createTrampoline($mode, @_) . "\n";
 }
 
-my $gl_actions = {
-    $regexps{"wingdi"} => \&gl_trampoline,
+my $gl_actions = {    
     $regexps{"glapi"} => \&gl_trampoline
 };
 
 my $win_actions = {
+    $regexps{"wingdi"} => \&gl_trampoline,
     $regexps{"winapifunc"} => \&gl_trampoline,
 };
 
@@ -263,8 +267,8 @@ defines($mode);
 
 # This windows-specific call is everywhere
 gl_trampoline(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers", "HDC");
-foreach my $entry (@params) {
-    my $filenames = shift @$entry;
+foreach my $entry (@params) {    
+    my $filenames = shift @$entry;	
     foreach my $filename (@$filenames) {
         parse_output($filename, @$entry);
     }

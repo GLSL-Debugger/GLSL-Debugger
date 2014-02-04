@@ -321,14 +321,14 @@ sub createBodyError {
 }
 
 my $gl_actions = {
-    $regexps{"typegl"} => \&addTypeMapping,
-    $regexps{"wingdi"} => \&createBodyError,
+    $regexps{"typegl"} => \&addTypeMapping,    
     $regexps{"glapi"} => \&createBodyError,
 };
 
 my $add_actions;
 if (defined $WIN32) {
     $add_actions = {
+        $regexps{"wingdi"} => \&createBodyError,
         $regexps{"typewgl"} => \&addTypeMapping,
         $regexps{"winapifunc"} => sub {
             my $fname = $_[3];

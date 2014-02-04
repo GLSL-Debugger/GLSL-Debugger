@@ -75,6 +75,7 @@
     <ClCompile Include="dbgprint.c" />
     <ClCompile Include="dlutils.c" />
     <ClCompile Include="hash.c" />
+    <ClCompile Include="notify.c" />
     <ClCompile Include="p2pcopy.c" />
     <ClCompile Include="pfm.c" />
     <ClCompile Include="sync.c" />
@@ -84,6 +85,7 @@
     <ClInclude Include="dbgprint.h" />
     <ClInclude Include="dlutils.h" />
     <ClInclude Include="hash.h" />
+    <ClInclude Include="notify.h" />
     <ClInclude Include="p2pcopy.h" />
     <ClInclude Include="pfm.h" />
     <ClInclude Include="sync.h" />

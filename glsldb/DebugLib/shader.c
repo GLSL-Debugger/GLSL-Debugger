@@ -52,7 +52,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../GLSLCompiler/glslang/Public/ResourceLimits.h"
 
 #ifdef _WIN32
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* _WIN32 */
 
 typedef struct {
@@ -674,6 +674,7 @@ static int getUniform(GLuint progHandle, ActiveUniform *u)
 static int setUniform(GLint progHandle, ActiveUniform *u)
 {
 	int error;
+	GLint location;
 
 	dbgPrint(DBGLVL_INFO, "setUniform(%i, %s)\n",  progHandle, u->name);
 
@@ -694,7 +695,7 @@ static int setUniform(GLint progHandle, ActiveUniform *u)
 		}
 	}
 
-	GLint location = ORIG_GL(glGetUniformLocation)(progHandle, u->name);
+	location = ORIG_GL(glGetUniformLocation)(progHandle, u->name);
 	error = glError();
 	if (error) {
 		return error;

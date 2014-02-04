@@ -3,9 +3,16 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <sys/time.h>
 #include <time.h>
 #include <string.h>
+
+#ifdef _WIN32
+    /* TODO: Windows have some complex on it. It must be reviewed. */
+	#define snprintf _snprintf
+#else
+	#include <sys/time.h>
+#endif /* _WIN32 */
+
 
 static struct {
 	severity_t level;
@@ -63,16 +70,18 @@ void utils_notify_shutdown()
 void utils_notify_va(const severity_t sev, const char* path, const char* func,
 		unsigned int line, const char *fmt, ...)
 {
-	if (sev > utils_notify_settings.level)
-		return;
-
 	va_list list;
 	static char p[12];
 	static char prefix[128];
 	static char msg[MAX_NOTIFY_SIZE];
 	static char t[22];
+	char *filename;
 	time_t timeval = time(0);
 	struct tm *tp = localtime(&timeval);
+
+	if (sev > utils_notify_settings.level)
+		return;
+
 	snprintf(t, 22, "%4d-%02d-%02d %02d:%02d:%02d", 1900 + tp->tm_year,
 			tp->tm_mon + 1, tp->tm_mday, tp->tm_hour, tp->tm_min, tp->tm_sec);
 	switch (sev) {
@@ -99,8 +108,7 @@ void utils_notify_va(const severity_t sev, const char* path, const char* func,
 		break;
 	}
 
-	char *filename = strrchr(path, '/');
-
+	filename = strrchr(path, '/');
 	snprintf(prefix, 128, "%s%s%s:%s()::%d: ", t, p, filename + 1, func, line);
 
 	va_start(list, fmt);

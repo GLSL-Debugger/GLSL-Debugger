@@ -137,14 +137,16 @@ sub createXFunctionHook {
 header_generated();
 createBodyHeader();
 
-my $gl_actions = {
-        $regexps{"wingdi"} => \&createFunctionHook,
+my $gl_actions = {       
         $regexps{"glapi"} => \&createFunctionHook
 };
 
 my $add_actions;
 if (defined $WIN32) {
-    $add_actions = {$regexps{"winapifunc"} => \&createXFunctionHook}
+    $add_actions = {
+        $regexps{"wingdi"} => \&createFunctionHook,
+        $regexps{"winapifunc"} => \&createXFunctionHook
+    }
 } else {
     $add_actions = {$regexps{"glxfunc"} => \&createXFunctionHook}
 }

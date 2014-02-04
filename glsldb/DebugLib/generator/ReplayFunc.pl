@@ -101,11 +101,5 @@ sub createFunctionHook
 
 header_generated();
 createBodyHeader();
-
-my $gl_actions = {
-    $regexps{"wingdi"} => \&createFunctionHook,
-    $regexps{"glapi"} => \&createFunctionHook
-};
-parse_gl_files($gl_actions);
-
+parse_gl_files({ $regexps{"glapi"} => \&createFunctionHook });
 createBodyFooter();

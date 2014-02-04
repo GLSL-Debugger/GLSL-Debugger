@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClInclude Include="debuglibExport.h" />
     <ClInclude Include="debuglibInternal.h" />
+    <ClInclude Include="generated\trampolines.h" />
     <ClInclude Include="glstate.h" />
     <ClInclude Include="initLib.h" />
     <ClInclude Include="memory.h" />
@@ -135,7 +136,6 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="streamRecorder.h" />
     <ClInclude Include="streamRecording.h" />
-    <ClInclude Include="trampolines.h" />
   </ItemGroup>
   <ItemGroup>
     <Piped_Perl_Output Include="GetProcAddressHook.pl">
@@ -219,7 +219,7 @@
     </Piped_Perl_Output>
   </ItemGroup>
   <ItemGroup>
-    <None Include="debuglib.def" />
+    <None Include="generated\debuglib.def" />
     <None Include="generated\functionHooks.inc" />
     <None Include="generated\functionPointerTypes.inc" />
     <None Include="generated\getProcAddressHook.inc" />

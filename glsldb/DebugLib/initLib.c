@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "utils/notify.h"
 #ifdef _WIN32
 #include "../GL/wglext.h"
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* _WIN32 */
 
 #ifdef _WIN32

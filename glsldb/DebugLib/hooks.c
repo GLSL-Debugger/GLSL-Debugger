@@ -43,8 +43,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <GL/gl.h>
 #include "../GL/glext.h"
 #include "../GL/wglext.h"
-#include "detours.h"
-#include "trampolines.h"
+//#include "detours.h"
+#include "generated/trampolines.h"
 #endif /* !_WIN32 */
 
 #include "debuglibInternal.h"

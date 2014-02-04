@@ -45,8 +45,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdarg.h>
 #include <signal.h>
+
 #ifdef _WIN32
-#define _WIN32_WINNT 0x0400
+//#define _WIN32_WINNT 0x0400
 #include <windows.h>
 #include <crtdbg.h>
 #include <io.h>
@@ -56,13 +57,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else /* _WIN32 */
 #include <dirent.h>
 #endif /* _WIN32 */
+
 #include "../GL/gl.h"
 //#include "../GL/glext.h"
 #ifndef _WIN32
 //#include "../GL/glx.h"
 #else /* _WIN32 */
+#include "../GL/WinGDI.h"
 #include "../GL/wglext.h"
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* !_WIN32 */
 
 #include "../utils/dbgprint.h"

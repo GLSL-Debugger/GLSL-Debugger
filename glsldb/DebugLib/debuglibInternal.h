@@ -40,6 +40,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GL/glx.h"
 #else /* _WIN32 */
 #include <windows.h>
+#include "GL/gl.h"
+#include "GL/wglext.h"
+#include "GL/WinGDI.h"
 #endif /* _WIN32 */
 #include "debuglibExport.h"
 #include "debuglib.h"

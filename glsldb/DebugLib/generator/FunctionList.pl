@@ -179,20 +179,22 @@ sub glx_entry
 }
 
 
-my $gl_actions = {
-    $regexps{"wingdi"} => \&gl_entry,
+my $gl_actions = {    
     $regexps{"glapi"} => \&gl_entry,
 };
 
 my $add_actions;
 if (defined $WIN32) {
-    $add_actions = { $regexps{"winapifunc"} => \&wgl_entry }
+    $add_actions = {
+        $regexps{"wingdi"} => \&wgl_entry,
+        $regexps{"winapifunc"} => \&wgl_entry
+    }
 } else {
     $add_actions = { $regexps{"glxfunc"} => \&glx_entry }
 }
 
 header_generated();
 createHeader();
-parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&glx_entry);
+parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&wgl_entry);
 createFooter();
 

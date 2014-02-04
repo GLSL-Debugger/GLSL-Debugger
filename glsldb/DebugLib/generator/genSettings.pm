@@ -33,8 +33,10 @@ our %extname_matches = (
 
 # defines #ifdef for which must be ignored
 # This defines does not prevent the parsing of block they surround
-our @skip_defines = (
-    "GL_GLEXT_PROTOTYPES"
+our @skip_defines = (    
+    "GL_GLEXT_PROTOTYPES",
+    "NOGDI",
+    "WGL_WGLEXT_PROTOTYPES",
 );
 
 
