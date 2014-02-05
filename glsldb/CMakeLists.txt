@@ -37,6 +37,7 @@ include_directories(${OPENGL_INCLUDE_DIR}
     ${QT_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
     ${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
     ${GLEW_INCLUDE_DIR}
@@ -44,6 +45,13 @@ include_directories(${OPENGL_INCLUDE_DIR}
 
 if(GLSLDB_LINUX)
     #add_definitions(-DUNIX)
+endif()
+if(GLSLDB_WIN)
+	find_package(DETOURS REQUIRED)
+	include_directories(
+		${DETOURS_INCLUDE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows
+	)
 endif()
 
 add_executable(glsldb ${SRC})

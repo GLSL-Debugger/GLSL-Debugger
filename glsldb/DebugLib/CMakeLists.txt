@@ -1,20 +1,27 @@
 find_package(Perl REQUIRED)
-find_package(DL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
+    find_package(DL REQUIRED)
     find_package(X11 REQUIRED)
+	set(DLSYM_SRC libdlsym.c)
+endif()
+if(GLSLDB_WIN)
+	set(DL_LIBRARIES ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+	find_package(DETOURS REQUIRED)
+	include_directories(
+		${DETOURS_INCLUDE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows
+	)
 endif()
 
 
 set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generator)
-set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated)
+set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATOR_OUTPUT_DIR})
-
-set(DLSYM_SRC libdlsym.c)
 set(ENUMERANTS_SRC glenumerants.c)
 set(BEGINENDTEST_SRC ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c)
 
@@ -22,6 +29,10 @@ set(GLSLDEBUG_GEN_SRC
     ${GENERATOR_OUTPUT_DIR}/replayFunction.c
     ${GENERATOR_OUTPUT_DIR}/functionList.c
 )
+
+if(GLSLDB_WIN)
+	set(GLSLDEBUG_GEN_SRC ${GLSLDEBUG_GEN_SRC} ${DETOURS_LIBRARIES} ${GENERATOR_OUTPUT_DIR}/glsldebug.def)
+endif()
 
 set(GLSLDEBUG_SRC
     libglsldebug.c
@@ -47,16 +58,17 @@ execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glenumerants.h
 )
 
-execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m glx
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
-)
-
-if(WIN32)
-execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m wgl
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/wglenumerants.h
-)
+if(GLSLDB_LINUX OR GLSLDB_OSX)
+	execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m glx
+		WORKING_DIRECTORY ${GENERATOR_DIR}
+		OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glxenumerants.h
+	)
+endif()
+if(GLSLDB_WIN)
+	execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl -m wgl
+		WORKING_DIRECTORY ${GENERATOR_DIR}
+		OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/wglenumerants.h
+	)
 endif()
 
 
@@ -101,14 +113,27 @@ execute_process(COMMAND ${PERL_EXECUTABLE}
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
 )
 
-# TODO: windows command for trampolines. Not sure, how much files must
-# be generated from it. It require to check VS project for this info.
-
+if(GLSLDB_WIN)
+	message(STATUS "Generate trampolines")
+	execute_process(COMMAND ${PERL_EXECUTABLE} Trampolines.pl decl
+		WORKING_DIRECTORY ${GENERATOR_DIR}
+		OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/trampolines.h
+	)
+	execute_process(COMMAND ${PERL_EXECUTABLE} Trampolines.pl def
+		WORKING_DIRECTORY ${GENERATOR_DIR}
+		OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/trampolines.inc
+	)
+	execute_process(COMMAND ${PERL_EXECUTABLE} Trampolines.pl exp
+		WORKING_DIRECTORY ${GENERATOR_DIR}
+		OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glsldebug.def
+	)
+endif()
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/glsldb
     ${PROJECT_SOURCE_DIR}/glsldb/DebugLib
     ${PROJECT_SOURCE_DIR}/glsldb/utils
+	${CMAKE_CURRENT_BINARY_DIR}
     ${X11_INCLUDE_DIR}
 )
 
@@ -123,5 +148,7 @@ add_library(functionList SHARED ${GENERATOR_OUTPUT_DIR}/functionList.c)
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
 target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})
 
-add_library(dlsym SHARED ${DLSYM_SRC})
-target_link_libraries(dlsym ${DL_LIBRARIES})
+if(GLSLDB_LINUX OR GLSLDB_OSX)
+	add_library(dlsym SHARED ${DLSYM_SRC})
+	target_link_libraries(dlsym ${DL_LIBRARIES})
+endif()

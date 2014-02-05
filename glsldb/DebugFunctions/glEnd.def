@@ -1,4 +1,4 @@
-LIBRARY	"DebugFunctions"
+LIBRARY	"glEnd"
 
 EXPORTS
     provides

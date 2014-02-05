@@ -25,14 +25,17 @@ VS projects is recommended.
 
 Windows building requires additional depencencies installed:
 
-- Qt library (  )
-- glut for windows ( http://user.xmission.com/~nate/glut.html )
-  Instalation instructions: (http://web.eecs.umich.edu/~sugih/courses/eecs487/glut-howto/#win)
+- flex & bison (winflexbison is recommended: http://sourceforge.net/projects/winflexbison/ 
+  gnu flex and bison might work too)
+- Qt library
+- glut for windows ( http://user.xmission.com/~nate/glut.html 
+	Instalation instructions: http://web.eecs.umich.edu/~sugih/courses/eecs487/glut-howto/#win)
+  or freeglut ( http://www.transmissionzero.co.uk/software/freeglut-devel/ )
 - The Microsoft Detours ( http://research.microsoft.com/en-us/projects/detours/ ).
   The 32-bit version of Detours is available for download under a license whose
   suitability for glslDevil is somewhat indeterminate to us. The 64-bit version
   of Detours is only available by commercial license ($10,000USD), which is why no
-  64-bit Windows version of glslDevil was ever produced.
+  64-bit Windows version of glslDevil was ever produced.  
 
 On osx build was not tested, but cmake files may be used.
 

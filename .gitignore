@@ -24,6 +24,9 @@ Makefile
 *.sdf
 *.opensdf
 
+# It required for windows build and have ugly distribution model.
+detours/
+
 # output & generated stuff
 Build/
 bin

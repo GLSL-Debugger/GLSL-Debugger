@@ -84,7 +84,7 @@ ProcessSnapshotModel::Item::Item(const char *exe, const char *owner, PID pid,
  * ProcessSnapshotModel::Item::Item
  */
 ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent)
-: child(NULL), exe(toQString(pe.szExeFile)), parent(parent),
+: child(NULL), exe(QString(pe.szExeFile)), parent(parent),
 isAttachable(false), pid(pe.th32ProcessID) {
 	HANDLE hProcess = NULL;     // Process handle.
 	HANDLE hToken = NULL;// Process security token.
@@ -155,7 +155,7 @@ isAttachable(false), pid(pe.th32ProcessID) {
 
 			if (::Module32First(hSnapshot, &me)) {
 				do {
-					QString name = toQString(me.szModule);
+					QString name(me.szModule);
 					if (name.contains("opengl", Qt::CaseInsensitive)) {
 						this->isAttachable = true;
 						break;
@@ -1060,6 +1060,13 @@ bool RemoteUpdateTopLevelWindows(HANDLE hProcess) {
 bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		DWORD desiredAccess, const char *libPath, const char *smName,
 		const char *dbgFuncPath) {
+// It seems DetourGetDetouredMarker() not in detourus now. You know how to fix it?
+// I don't, and know what? I don't even want to know. If you like to dig in this shit, well, go on
+// Detours must be dropped and replaced by new api. If you read this, then you are good windows developer, 
+// and it's your job. I'm just make it builds there and don't want to interact with this platform any more.
+	dbgPrint(DBGLVL_ERROR, "Attach to process is broken. Please fix me: attachToProcess.cpp:%s\n", __LINE__);
+	return false;
+#if 0
 	HMODULE hDetouredDll = NULL;
 	char detouredDllPath[_MAX_PATH];
 
@@ -1118,6 +1125,7 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 	//::RemoteUpdateTopLevelWindows(outAi.hProcess);
 
 	return true;
+#endif
 }
 
 /*

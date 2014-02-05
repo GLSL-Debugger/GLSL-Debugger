@@ -40,10 +40,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../GL/WinGDI.h"
 #define GL_GLEXT_PROTOTYPES 1
 #define WGL_WGLEXT_PROTOTYPES 1
-#include <GL/gl.h>
+#include "../GL/gl.h"
 #include "../GL/glext.h"
 #include "../GL/wglext.h"
-//#include "detours.h"
+#include <detours.h>
 #include "generated/trampolines.h"
 #endif /* !_WIN32 */
 
@@ -55,11 +55,13 @@ extern Globals G;
 
 #include "preExecution.h"
 #include "postExecution.h"
+
 #ifdef _WIN32
 #include "generated/trampolines.inc"
 #endif /* _WIN32 */
 #if defined(GLSLDB_LINUX) || defined(GLSLDB_OSX)
 #include "../GL/glxext.h"
 #endif
+
 #include "generated/functionHooks.inc"
 #include "generated/getProcAddressHook.inc"

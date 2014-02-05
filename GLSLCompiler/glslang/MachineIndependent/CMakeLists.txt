@@ -36,9 +36,9 @@ add_flex_bison_dependency(GLSLScanner GLSLParser)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../ 
 	${CMAKE_CURRENT_SOURCE_DIR}/../Include 
-	${CMAKE_CURRENT_SOURCE_DIR}/../Public 
-	${CMAKE_CURRENT_SOURCE_DIR}/../OSDependent/Linux 
+	${CMAKE_CURRENT_SOURCE_DIR}/../Public 	
 	${CMAKE_CURRENT_SOURCE_DIR}/../../compiler
+	${OSDEPENDENT_INCLUDES}
 	${PROJECT_SOURCE_DIR}/glsldb
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}

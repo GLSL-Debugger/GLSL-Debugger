@@ -44,6 +44,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined GLSLDB_LINUX || GLSLDB_OSX
 #include "GL/glx.h"
+#else
+#include "GL/wglext.h"
 #endif
 
 void GlTraceFilterModel::GlTraceFilterItem::appendChild(
@@ -505,7 +507,7 @@ void GlTraceFilterModel::checkExtensions()
 	QByteArray extensions = QByteArray(
 			reinterpret_cast<const char*>(extensionString));
 
-#ifdef GLSLDB_WIN32
+#ifdef GLSLDB_WIN
 	PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = 0;
 	wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
 	if(wglGetExtensionsStringARB) {

@@ -41,8 +41,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(GLSLDB_WIN32 1)
-    add_definitions(-DGLSLDB_WIN32)
+    set(GLSLDB_WIN 1)
+	# Add windows target & disable warnings
+    add_definitions(/DGLSLDB_WIN /W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo)
 endif()
 
 # maintainer mode

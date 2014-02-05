@@ -168,9 +168,7 @@ sub createBody
     $fname =~ s/^\s+|\s+$//g;
     $retval =~ s/^\s+|\s+$//g;
     # No mesa functions
-    if (grep(/^$fname$/i, @defined_types)) {
-        return;
-    }
+    return if grep(/^$fname$/i, @defined_types) or $fname eq "wglGetProcAddress";
     push(@defined_types, $fname);
 
     my @arguments = buildArgumentList($argString);
@@ -330,10 +328,7 @@ if (defined $WIN32) {
     $add_actions = {
         $regexps{"wingdi"} => \&createBodyError,
         $regexps{"typewgl"} => \&addTypeMapping,
-        $regexps{"winapifunc"} => sub {
-            my $fname = $_[3];
-            createBody(@_, 0) if $fname ne "wglGetProcAddress";
-        },
+        $regexps{"winapifunc"} => \&createBody,
     }
 } else {
     $add_actions = {

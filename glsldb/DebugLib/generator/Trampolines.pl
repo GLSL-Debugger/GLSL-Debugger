@@ -54,15 +54,15 @@ sub defines {
 #pragma once
 
 /* needed for DebugFunctions to know where the functions are located */
-#ifdef DEBUGLIB_EXPORTS
+#ifdef glsldebug_EXPORTS
 #define DEBUGLIBAPI __declspec(dllexport)
-#else /* DEBUGLIB_EXPORTS */
+#else /* glsldebug_EXPORTS */
 #define DEBUGLIBAPI __declspec(dllimport)
-#endif /* DEBUGLIB_EXPORTS */
+#endif /* glsldebug_EXPORTS */
 
 ";
     } elsif ($mode eq "exp") {
-        print "LIBRARY \"DebugLib\"
+        print "LIBRARY \"glsldebug\"
 EXPORTS
 ";
     }
@@ -114,7 +114,7 @@ static VOID _dbg_Decode(PCSTR pszDesc, PBYTE pbCode, PBYTE pbOther, PBYTE pbPoin
 
     pbSrc = pbCode;
     for (n = 0; n < nInst; n++) {
-        pbEnd = (PBYTE)DetourCopyInstruction(NULL, pbSrc, &pbTarget);
+        pbEnd = (PBYTE)DetourCopyInstruction(NULL, NULL, (PVOID)pbSrc, (PVOID*)(&pbTarget), NULL);
         _dbg_Dump(pbSrc, (int)(pbEnd - pbSrc), (PBYTE)pbTarget);
         pbSrc = pbEnd;
     }
@@ -195,7 +195,7 @@ int detachTrampolines();
 sub createTrampoline
 {
     my ($mode, $extname, $retval, $fname, $argString) = @_;
-    return if $trampoline_generated{$fname};
+    return "" if $trampoline_generated{$fname} or $fname eq "wglGetProcAddress";
 
     my @arguments = buildArgumentList($argString);
     my $argList = join(", ", @arguments);

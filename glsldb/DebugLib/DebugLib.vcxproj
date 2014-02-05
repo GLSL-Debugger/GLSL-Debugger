@@ -58,7 +58,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\..\detours\src;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DEBUG;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -66,9 +66,10 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <ModuleDefinitionFile>debuglib.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>generated/debuglib.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib</AdditionalLibraryDirectories>
     </Link>
     <Piped_Perl_Output>
       <WorkDir>.\generator\</WorkDir>
@@ -88,14 +89,16 @@
       <Outputs>%(Outputs)</Outputs>
     </CustomBuildStep>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\detoursExpress\include;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\..\detours\src;..\..\GLSLCompiler\glslang\OSDependent\Windows;..\;..\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DEBUGLIB_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>debuglib.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>generated/debuglib.def</ModuleDefinitionFile>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Piped_Perl_Output>
       <WorkDir>.\generator\</WorkDir>

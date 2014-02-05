@@ -284,7 +284,7 @@ void printResult(void)
 }
 #endif
 
-#ifndef GLSLDB_WINDOWS
+#ifndef GLSLDB_WIN
 void handler(int UNUSED sig)
 {
 	void *buf[MAX_BACKTRACE_DEPTH];

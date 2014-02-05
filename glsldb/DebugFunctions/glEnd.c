@@ -48,7 +48,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../utils/dbgprint.h"
 
 #ifdef _WIN32
-#include "../DebugLib/trampolines.h"
+#include "GL/wglext.h"
+#include "GL/WinGDI.h"
+#include "../DebugLib/generated/trampolines.h"
 #endif /* _WIN32 */
 
 /*
@@ -68,7 +70,7 @@ void APIENTRY glEnd(void)
 	 glEnd. We do this because the contents of OrigglEnd are, as a matter of fact, fucked
 	 in the head and we end up in a totally wrong memory segment. This might have to do
 	 something with improper relocation of all the library goo, but we do not know. yet. */
-	HANDLE lib = LoadLibraryA("debuglib.dll");
+	HANDLE lib = LoadLibraryA("glsldebug.dll");
 	dbgPrint(DBGLVL_DEBUG, "using special glEnd: 0x%x\n", OrigglEnd);
 	dbgPrint(DBGLVL_DEBUG, "origglend = 0x%x\n", *((GetProcAddress(lib, "OrigglEnd"))));
 	(*((GetProcAddress(lib, "OrigglEnd"))))();
