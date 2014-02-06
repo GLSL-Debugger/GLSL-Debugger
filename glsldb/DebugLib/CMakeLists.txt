@@ -9,9 +9,9 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
     find_package(X11 REQUIRED)
 	set(DLSYM_SRC libdlsym.c)
 endif()
-if(GLSLDB_WIN)
-	set(DL_LIBRARIES ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+if(GLSLDB_WIN)	
 	find_package(DETOURS REQUIRED)
+	set(DL_LIBRARIES ${DETOURS_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	include_directories(
 		${DETOURS_INCLUDE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows
@@ -29,9 +29,11 @@ set(GLSLDEBUG_GEN_SRC
     ${GENERATOR_OUTPUT_DIR}/replayFunction.c
     ${GENERATOR_OUTPUT_DIR}/functionList.c
 )
+set(GLSLDEBUG_OS_SRC "")
 
 if(GLSLDB_WIN)
-	set(GLSLDEBUG_GEN_SRC ${GLSLDEBUG_GEN_SRC} ${DETOURS_LIBRARIES} ${GENERATOR_OUTPUT_DIR}/glsldebug.def)
+	set(GLSLDEBUG_OS_SRC initLib.c)	
+	set(GLSLDEBUG_GEN_SRC ${GLSLDEBUG_GEN_SRC} ${GENERATOR_OUTPUT_DIR}/glsldebug.def)
 endif()
 
 set(GLSLDEBUG_SRC
@@ -47,6 +49,7 @@ set(GLSLDEBUG_SRC
     queries.c
     preExecution.c
     postExecution.c
+	${GLSLDEBUG_OS_SRC}
     ${GLSLDEBUG_GEN_SRC}
 )
 
@@ -107,9 +110,8 @@ execute_process(COMMAND ${PERL_EXECUTABLE}
     INPUT_FILE mergeAllowedInBeginEndList.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm
 )
-execute_process(COMMAND ${PERL_EXECUTABLE}
+execute_process(COMMAND ${PERL_EXECUTABLE} FunctionHooks.pl -p ${GENERATOR_OUTPUT_DIR}
     WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE FunctionHooks.pl
     OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
 )
 
@@ -143,7 +145,7 @@ add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
 target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
-add_library(functionList SHARED ${GENERATOR_OUTPUT_DIR}/functionList.c)
+add_library(functionList STATIC ${GENERATOR_OUTPUT_DIR}/functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
 target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})

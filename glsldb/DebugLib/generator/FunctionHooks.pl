@@ -32,10 +32,15 @@
 #
 ################################################################################
 
-require '../generated/functionsAllowedInBeginEnd.pm';
+use Getopt::Std;
 require prePostExecuteList;
 require genTools;
 require genTypes;
+
+# Use path provided by generator 
+getopt('p');
+require "$opt_p/functionsAllowedInBeginEnd.pm";
+
 our %regexps;
 our %typeMap;
 

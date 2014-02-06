@@ -41,6 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <execinfo.h>
 #endif /* _WIN32 */
 #include <string.h>
+#include "getopt.h"
 #ifndef _WIN32
 #include <sys/types.h>
 #include <sys/ptrace.h>
@@ -354,7 +355,7 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(OUTPUT_LEVEL);
 	QStringList al = parseArguments(argc, argv);
 
-#ifndef GLSLDB_WINDOWS
+#ifndef GLSLDB_WIN
 	// activate backtracing if log level is high enough
 	if (UTILS_NOTIFY_LEVEL(0) > LV_INFO)
 		signal(SIGSEGV, handler);

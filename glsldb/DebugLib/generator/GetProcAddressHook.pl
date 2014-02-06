@@ -95,6 +95,7 @@ sub createFunctionHook
     my $retval = shift;
     my $fname = shift;
     my $argString = shift;
+    return if $fname eq "wglGetProcAddress";
 
     if (defined $WIN32) {
         print "
@@ -137,7 +138,7 @@ sub createXFunctionHook {
 header_generated();
 createBodyHeader();
 
-my $gl_actions = {       
+my $gl_actions = {
         $regexps{"glapi"} => \&createFunctionHook
 };
 

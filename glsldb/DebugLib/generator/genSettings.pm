@@ -39,7 +39,6 @@ our @skip_defines = (
     "WGL_WGLEXT_PROTOTYPES",
 );
 
-
 # Hash of equivalents for #ifdef in generated files
 our %extnames_defines = (
     "GL_VERSION_1_0" => 0,

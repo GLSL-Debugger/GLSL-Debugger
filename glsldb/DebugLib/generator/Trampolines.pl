@@ -194,7 +194,7 @@ int detachTrampolines();
 
 sub createTrampoline
 {
-    my ($mode, $extname, $retval, $fname, $argString) = @_;
+    my ($isExtension, $mode, $extname, $retval, $fname, $argString) = @_;
     return "" if $trampoline_generated{$fname} or $fname eq "wglGetProcAddress";
 
     my @arguments = buildArgumentList($argString);
@@ -206,12 +206,11 @@ sub createTrampoline
         $ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
 /* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);";
 
-        # TODO: check it
-        if ($extname !~ /^WGL/){
+        if (!$isExtension){
             push @initializer, "    Orig$fname = $fname;
     dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
         } else {
-            push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
+            push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) wglGetProcAddress(\"$fname\");";
         }
 
         push @attach, "    dbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
@@ -245,7 +244,8 @@ if (not grep(/^$mode$/, @modes)) {
 sub gl_trampoline
 {
     my $line = shift;
-    print createTrampoline($mode, @_) . "\n";
+	my $isExtension = $line !~ /WINGDIAPI/;
+    print createTrampoline($isExtension, $mode, @_) . "\n";
 }
 
 my $gl_actions = {    

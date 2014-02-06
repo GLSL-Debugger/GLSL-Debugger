@@ -32,7 +32,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #ifdef _WIN32
-#define _WIN32_WINNT 0x0400
 #include <windows.h>	// MUST BE FIRST!!!
 #include "asprintf.h"
 #include "detours.h"
@@ -422,25 +421,25 @@ void ProgramControl::setDebugEnvVars(void)
 
 #else /* !_WIN32 */
 	{
-		std::string s = std::to_string(GetCurrentProcessId()) + std::string("SHM");
+		std::string s = QString::number(GetCurrentProcessId()).toStdString() + std::string("SHM");
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", s.c_str()))
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: %u\n", ::GetLastError());
 		dbgPrint(DBGLVL_DEBUG, "env shmid: \"%s\"\n", s.c_str());
 	}
 
-	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs)) {
+	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs.c_str())) {
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: %u\n", ::GetLastError());
 	}
 	dbgPrint(DBGLVL_INFO, "env dbgfctns: \"%s\"\n", _path_dbgfuncs.c_str());
 
 	{
-		std::string s = std::to_string(getMaxDebugOutputLevel());
+		std::string s = QString::number(getMaxDebugOutputLevel()).toStdString();
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGLEVEL", s.c_str()))
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: %u\n", ::GetLastError());
 		dbgPrint(DBGLVL_INFO, "env dbglvl: \"%s\"\n", s.c_str());
 	}
 
-	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGDIR", _path_log))
+	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGDIR", _path_log.c_str()))
 	dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: %u\n", ::GetLastError());
 	dbgPrint(DBGLVL_INFO, "env dbglogdir: \"%s\"\n", _path_log.c_str());
 #endif /* !_WIN32 */
@@ -1460,6 +1459,9 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
 #endif
 	return PCE_NONE;
 #else /* _WIN32 */
+// This is not supported also. We need to replace detours.
+	error = PCE_EXEC;
+#if 0
 	STARTUPINFOA startupInfo;
 	PROCESS_INFORMATION processInfo;
 	char dllPath[_MAX_PATH];			// Path to debugger preload DLL.
@@ -1540,7 +1542,9 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
 #ifdef DEBUG
 	printCall();
 #endif
+#endif /* 0 */
 	return error;
+
 #endif /* _WIN32 */
 }
 
@@ -1565,7 +1569,7 @@ pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
 	this->setDebugEnvVars();	// TODO dirty hack.
 	::GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", smName, _MAX_PATH);
 	if (!::AttachToProcess(_ai, pid, PROCESS_ALL_ACCESS, dllPath, smName,
-					_path_dbgfuncs)) {
+					_path_dbgfuncs.c_str())) {
 		return PCE_UNKNOWN_ERROR;   // TODO
 	}
 
@@ -2302,7 +2306,7 @@ void ProgramControl::freeShmem(void)
 			dbgPrint(DBGLVL_ERROR, "View unmapping of shared mem segment failed: %u\n", GetLastError());
 			exit(1);
 		}
-		fcalls = NULL;
+		_fcalls = NULL;
 	}
 	if (_hShMem != INVALID_HANDLE_VALUE && _hShMem != NULL) {
 		if (CloseHandle(_hShMem) == 0) {

@@ -48,7 +48,7 @@ my $func_match = qr/^\s*(?:GLAPI\b|WINGDIAPI\b|extern\b)\s+\S.*\S\s*\([^)]*?$/;
 # I wanted to make it clear
 # Well, shit...
 sub parse_output {
-    my ($filename, $bextname, $api, $actions) = (@_);    
+    my ($filename, $bextname, $api, $actions) = (@_);
     my $extname = $bextname;
     my @definitions = ($extname);
     my $proto = $extname;

@@ -1,5 +1,9 @@
 add_subdirectory(preprocessor)
 
+if(GLSLDB_WIN)
+	add_definitions(/D SH_EXPORTING)
+endif()
+
 set(SRC
     ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_lexer.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/generated_glsl_parser.cpp
