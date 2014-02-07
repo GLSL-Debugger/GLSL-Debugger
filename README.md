@@ -11,7 +11,7 @@ Thomas Klein, Magnus Strengert and Thomas Ertl.
 Building
 ------
 
-The only avaliable build system is cmake. Example build steps:
+The only available build system is cmake. Example build steps:
 
 ```
 mkdir Build && cd build
@@ -55,12 +55,9 @@ Long-term goals
 Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
 glIntercept ( https://code.google.com/p/glintercept/ ) or EasyHook ( http://easyhook.codeplex.com/ ).
 
-- [x] Check cmake-to-VS generation and fix it if needed.-
-
+- [x] Check cmake-to-VS generation and fix it if needed.
 - [ ] Support OSX.
-
 - [ ] Improve GLSL language grammar support to incorporate newer dialects including switch/case. (In progress)
-
 - [ ] Support OpenGL contexts for newer versions of OpenGL.
 
 

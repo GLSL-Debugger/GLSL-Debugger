@@ -39,14 +39,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <signal.h>
 #include <execinfo.h>
-#endif /* _WIN32 */
-#include <string.h>
-#include "getopt.h"
-#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
-#endif /* _WIN32 */
+#else /* !_WIN32 */
+#include "getopt_win.h"
+#endif /* !_WIN32 */
 
 #include <QtGui/QApplication>
 #include <QtCore/QStringList>
