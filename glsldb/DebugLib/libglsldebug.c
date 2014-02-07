@@ -1148,10 +1148,10 @@ void (*getDbgFunction(void))(void)
 
 /* HAZARD: Windows will never set G.errorCheckAllowed for Begin/End as below!!! */
 #ifdef _WIN32
-__declspec(dllexport) PROC APIENTRY DetouredwglGetProcAddress(LPCSTR arg0);
+__declspec(dllexport) PROC APIENTRY HookedwglGetProcAddress(LPCSTR arg0);
 void (*getOrigFunc(const char *fname))(void)
 {
-    return (void (*)(void)) DetouredwglGetProcAddress(fname);
+    return (void (*)(void)) HookedwglGetProcAddress(fname);
 }
 #else /* _WIN32 */
 void (*getOrigFunc(const char *fname))(void)

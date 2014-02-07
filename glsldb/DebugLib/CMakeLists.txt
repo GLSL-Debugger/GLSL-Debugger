@@ -10,10 +10,9 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	set(DLSYM_SRC libdlsym.c)
 endif()
 if(GLSLDB_WIN)	
-	find_package(DETOURS REQUIRED)
-	set(DL_LIBRARIES ${DETOURS_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+	set(DL_LIBRARIES mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	include_directories(
-		${DETOURS_INCLUDE_DIR}
+		${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib
 		${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows
 	)
 endif()

@@ -1,6 +1,6 @@
 ﻿################################################################################
 #
-# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
+# Copyright (c) 2013, 2014 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -216,7 +216,7 @@ sub createBody
     # create function head
     ###########################################################################
     if (defined $WIN32) {
-        $output .= "__declspec(dllexport) $retval APIENTRY Detoured$fname (";
+        $output .= "__declspec(dllexport) $retval APIENTRY Hooked$fname (";
     } else {
         $output .= "$retval $fname (";
     }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(glsldb)
 
 # DEBUG/Maintainer mode for now
@@ -77,3 +77,7 @@ set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
 
 add_subdirectory(GLSLCompiler)
 add_subdirectory(glsldb)
+
+if(GLSLDB_WIN)
+	add_subdirectory(3rdparty/mhook)
+endif()

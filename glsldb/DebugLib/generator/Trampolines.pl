@@ -42,8 +42,7 @@ our %regexps;
 
 my @initializer = ();
 my @extinitializer = ();
-my @attach = ();
-my @detach = ();
+my @functions = ();
 my %trampoline_generated = ();
 
 sub defines {
@@ -133,7 +132,25 @@ VOID WINAPI _dbg_Verify(PCHAR pszFunc, PVOID pvPointer)
 sub footer {
     my $mode = shift;
     if ($mode eq "def") {
-        printf "
+		my $count = scalar @functions;
+		my $orig, $hooked, $names;
+		my $iter = 0;
+		foreach (@functions) {
+			my $newline = ($iter++ % 10) ? "" : "\n";
+			$orig .= $newline . " &((PVOID)Orig$_),";
+			$hooked .= $newline . " Hooked$_,";
+			$names .= $newline . " \"$_\",";
+		}
+
+		printf "
+#define TRMP_FUNCS_COUNT $count
+PVOID* trmp_OrigFuncs[TRMP_FUNCS_COUNT] = {$orig
+};
+PVOID trmp_HookedFuncs[TRMP_FUNCS_COUNT] = {$hooked
+};
+const char* trmp_FuncsNames[TRMP_FUNCS_COUNT] = {$names
+};
+
 void initTrampolines() {
 %s
 }
@@ -141,45 +158,35 @@ void initTrampolines() {
 void initExtensionTrampolines() {
 %s
 }
-
 ", join("\n", @initializer), join("\n", @extinitializer);
 
-        createUtils();
-
-        printf qq|
+        print qq|
 int attachTrampolines() {
-    LONG retval = 0;
-    initTrampolines();
-    if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %%u\\n", retval);
-    }
-    if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %%u\\n", retval);
-    }
-%s
-    if ((retval = DetourTransactionCommit()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %%u\\n", retval);
-    }
+	int i;
+	initTrampolines();
+	for (i = 0; i < TRMP_FUNCS_COUNT; ++i) {
+		dbgPrint(DBGLVL_DEBUG, "Attaching %s 0x%x\\n", trmp_FuncsNames[i], trmp_OrigFuncs[i]);
+		/* _dbg_Verify(trmp_FuncsNames[i], (PBYTE)trmp_OrigFuncs[i]); */
+		if (!Mhook_SetHook(trmp_OrigFuncs[i], trmp_HookedFuncs[i])) {
+			dbgPrint(DBGLVL_DEBUG, "Mhook_SetHook(%s) failed.\\n", trmp_FuncsNames[i]);
+			return 0;
+		}
+	}
     return 1;
 }
-|, join("\n", @attach);
 
-        printf qq|
 int detachTrampolines() {
-    LONG retval = 0;
-    if ((retval = DetourTransactionBegin()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionBegin failed: %%u\\n", retval);
-    }
-    if ((retval = DetourUpdateThread(GetCurrentThread())) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourUpdateThread failed: %%u\\n", retval);
-    }
-%s
-    if ((retval = DetourTransactionCommit()) != NO_ERROR) {
-        dbgPrint(DBGLVL_ERROR, "DetourTransactionCommit failed: %%u\\n", retval);
-    }
+	int i;
+	for (i = 0; i < TRMP_FUNCS_COUNT; ++i) {
+		if (!Mhook_Unhook(&((PVOID)trmp_OrigFuncs[i]))) {
+			dbgPrint(DBGLVL_DEBUG, "Mhook_Unhook(%s) failed.\\n", trmp_FuncsNames[i]);
+			return 0;
+		}
+	}
     return 1;
 }
-|, join("\n", @detach);
+
+|;
     } elsif ($mode eq "decl") {
         print "void initExtensionTrampolines();
 int attachTrampolines();
@@ -199,12 +206,12 @@ sub createTrampoline
 
     my @arguments = buildArgumentList($argString);
     my $argList = join(", ", @arguments);
-    my $ret = "    Orig$fname";    
+    my $ret = "    Orig$fname";
     $trampoline_generated{$fname} = 1;
 
     if ($mode eq "def") {
         $ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
-/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Detoured$fname($argList);";
+/* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Hooked$fname($argList);";
 
         if (!$isExtension){
             push @initializer, "    Orig$fname = $fname;
@@ -212,19 +219,7 @@ sub createTrampoline
         } else {
             push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) wglGetProcAddress(\"$fname\");";
         }
-
-        push @attach, "    dbgPrint(DBGLVL_DEBUG, \"Attaching $fname 0x%x\\n\", (Orig$fname));
-    /* _dbg_Verify(\"$fname\", (PBYTE)Orig$fname); */
-    retval = DetourAttach(&((PVOID)Orig$fname), Detoured$fname);
-    if (retval != NO_ERROR) {
-        dbgPrint(DBGLVL_DEBUG, \"DetourAttach($fname) failed: %u\\n\", retval);
-        return 0;
-    }";
-        push @detach, "    retval = DetourDetach(&((PVOID)Orig$fname), Detoured$fname);
-    if (retval != NO_ERROR) {
-        dbgPrint(DBGLVL_DEBUG, \"DetourDetach($fname) failed: %u\\n\", retval);
-        return 0;
-    }";
+		push @functions, $fname;
     } elsif ($mode eq "decl") {
         $ret = sprintf "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
     }
@@ -248,7 +243,7 @@ sub gl_trampoline
     print createTrampoline($isExtension, $mode, @_) . "\n";
 }
 
-my $gl_actions = {    
+my $gl_actions = {
     $regexps{"glapi"} => \&gl_trampoline
 };
 
@@ -267,8 +262,8 @@ defines($mode);
 
 # This windows-specific call is everywhere
 gl_trampoline(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers", "HDC");
-foreach my $entry (@params) {    
-    my $filenames = shift @$entry;	
+foreach my $entry (@params) {
+    my $filenames = shift @$entry;
     foreach my $filename (@$filenames) {
         parse_output($filename, @$entry);
     }
