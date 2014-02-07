@@ -63,12 +63,12 @@ Jutta Degener, 1995
 
 #define EMIT_VERTEX_SIG   "EmitVertex("
 
-/*#ifdef _WIN32
-    #define YYPARSE_PARAM parseContext
-    #define YYPARSE_PARAM_DECL TParseContext&
-    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
-    #define YYLEX_PARAM parseContext
-#else */
+//#ifdef _WIN32
+//    #define YYPARSE_PARAM parseContext
+//    #define YYPARSE_PARAM_DECL TParseContext&
+//    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
+//    #define YYLEX_PARAM parseContext
+//#else
     #define YYPARSE_PARAM parseContextLocal
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)

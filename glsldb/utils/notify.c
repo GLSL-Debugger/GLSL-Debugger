@@ -7,6 +7,7 @@
 #include <string.h>
 
 #ifdef _WIN32
+	#include <windows.h>
     /* TODO: Windows have some complex on it. It must be reviewed. */
 	#define snprintf _snprintf
 #else
@@ -108,14 +109,19 @@ void utils_notify_va(const severity_t sev, const char* path, const char* func,
 		break;
 	}
 
+// FIXME: this is ugly hack
+#ifdef GLSLDB_WIN
+	filename = strrchr(path, '\\');
+#else
 	filename = strrchr(path, '/');
+#endif
 	snprintf(prefix, 128, "%s%s%s:%s()::%d: ", t, p, filename + 1, func, line);
 
 	va_start(list, fmt);
 	vsnprintf(msg, MAX_NOTIFY_SIZE, fmt, list);
 	va_end(list);
 
-#if defined GLSLDB_WINDOWS
+#if defined GLSLDB_WIN
 	OutputDebugStringA(prefix);
 	OutputDebugStringA(msg);
 #else

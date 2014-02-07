@@ -66,3 +66,7 @@ target_link_libraries(glsldb
     ${X11_LIBRARIES}
     ${GLEW_LIBRARIES}
 )
+
+if(GLSLDB_WIN)
+	install(TARGETS glsldb RUNTIME DESTINATION ${DISTRIBUTION_DIRECTORY})
+endif()

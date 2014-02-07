@@ -116,6 +116,7 @@ execute_process(COMMAND ${PERL_EXECUTABLE} FunctionHooks.pl -p ${GENERATOR_OUTPU
 )
 
 if(GLSLDB_WIN)
+	# Generate windows trampolines
 	message(STATUS "Generate trampolines")
 	execute_process(COMMAND ${PERL_EXECUTABLE} Trampolines.pl decl
 		WORKING_DIRECTORY ${GENERATOR_DIR}
@@ -153,4 +154,9 @@ target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})
 if(GLSLDB_LINUX OR GLSLDB_OSX)
 	add_library(dlsym SHARED ${DLSYM_SRC})
 	target_link_libraries(dlsym ${DL_LIBRARIES})
+endif()
+
+if(GLSLDB_WIN)
+	install(TARGETS beginEndFunctionTest glsldebug 
+		RUNTIME DESTINATION ${DISTRIBUTION_DIRECTORY} LIBRARY DESTINATION ${DISTRIBUTION_DIRECTORY})
 endif()

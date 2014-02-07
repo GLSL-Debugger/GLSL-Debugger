@@ -29,3 +29,7 @@ target_link_libraries(glEnd
 	${DL_LIBRARIES}
 	${OPENGL_LIBRARIES}
 )
+
+if(GLSLDB_WIN)
+	install(TARGETS glEnd LIBRARY DESTINATION ${DISTRIBUTION_DIRECTORY}/plugins)
+endif()

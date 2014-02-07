@@ -81,14 +81,14 @@ TSourceLoc yylinenum;
 int yycursor;
 int yytokenpos[2];
 
-#ifdef _WIN32
-    extern int yyparse(TParseContext&);
-    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)    
-#else
+//#ifdef _WIN32
+//    extern int yyparse(TParseContext&);
+//    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)    
+//#else
     extern int yyparse(void*);
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define parseContext (*((TParseContext*)(parseContextLocal)))		
-#endif
+//#endif
  
 #define YY_INPUT(buf,result,max_size) (result = yy_input(buf, max_size))
 
@@ -450,11 +450,11 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
    
     if (*cpp->PaStrLen >= 0) {    
         int ret;
-        #ifdef _WIN32
-            ret = yyparse(parseContextLocal);            
-        #else
+        //#ifdef _WIN32
+        //    ret = yyparse(parseContextLocal);            
+        //#else
             ret = yyparse((void*)(&parseContextLocal));
-        #endif
+        //#endif
         if (cpp->CompileError == 1 || parseContextLocal.recoveredFromError || parseContextLocal.numErrors > 0) {
             return 1;
         } else {

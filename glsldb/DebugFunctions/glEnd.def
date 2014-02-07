@@ -1,4 +1,4 @@
-LIBRARY	"glEnd"
+LIBRARY	glEnd
 
 EXPORTS
     provides

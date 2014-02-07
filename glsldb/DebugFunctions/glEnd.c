@@ -33,19 +33,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _WIN32
 /* Make gl.h believe we are Windows. This is required for correct linkage. */
-#define _GDI32_
+//#define _GDI32_
+#define BUILD_GL32
 #endif /* _WIN32 */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define DBGLIB_EXTERNAL
+#include "../DebugLib/debuglib.h"
+#include "../DebugLib/debuglibInternal.h"
 #include "GL/gl.h"
 #include "GL/glext.h"
 //typedef GLint GLfixed;
-#include "../DebugLib/debuglib.h"
-#include "../DebugLib/debuglibInternal.h"
-#include "../utils/dbgprint.h"
+//#include "../utils/dbgprint.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef _WIN32
 #include "GL/wglext.h"
@@ -62,7 +63,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char provides[] = "glEnd";
 
-void APIENTRY glEnd(void)
+GLAPI void GLAPIENTRY glEnd(void)
 {
 #if 0
 	/* HAZARD maximally dangerous. this relies upon the fact that the debuglib is already loaded
@@ -82,5 +83,6 @@ void APIENTRY glEnd(void)
 }
 
 #ifdef _WIN32
-#undef _GDI32_
+//#undef _GDI32_
+#undef BUILD_GL32
 #endif /* _WIN32 */
