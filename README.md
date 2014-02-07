@@ -7,11 +7,11 @@ This is the Open Source public release of the project originally known
 as glslDevil ( http://www.vis.uni-stuttgart.de/glsldevil/ ), by
 Thomas Klein, Magnus Strengert and Thomas Ertl.
 
+
 Building
 ------
 
-General building avaliable using cmake build system. It automatically checks
-for any dependences. Example build steps:
+The only avaliable build system is cmake. Example build steps:
 
 ```
 mkdir Build && cd build
@@ -19,18 +19,20 @@ cmake ..\
 make
 ```
 
-On windows VS project files may be used for bilding with MSVC. Cmake also support
-generation of VS projects, but it may have errors in generated steps and provided
-VS projects is recommended.
+Cmake may generate files for big number of make utilities, please check the cmake 
+documentation for further information.
 
-Windows building requires additional depencencies installed:
+It is recommended to do out-of-source build.
+
+
+Windows building requires additional dependencies installed:
 
 - flex & bison (winflexbison is recommended: http://sourceforge.net/projects/winflexbison/ 
   gnu flex and bison might work too)
 - Qt library
-- glut for windows ( http://user.xmission.com/~nate/glut.html 
-	Instalation instructions: http://web.eecs.umich.edu/~sugih/courses/eecs487/glut-howto/#win)
-  or freeglut ( http://www.transmissionzero.co.uk/software/freeglut-devel/ )
+- glut for windows ( not tested, http://user.xmission.com/~nate/glut.html 
+	Installation instructions: http://web.eecs.umich.edu/~sugih/courses/eecs487/glut-howto/#win)
+  or freeglut ( tested, http://www.transmissionzero.co.uk/software/freeglut-devel/ )
 - The Microsoft Detours ( http://research.microsoft.com/en-us/projects/detours/ ).
   The 32-bit version of Detours is available for download under a license whose
   suitability for glslDevil is somewhat indeterminate to us. The 64-bit version
@@ -46,19 +48,21 @@ Short-term goals
 We need to test the build system and the source code more thoroughly. Hence, bugfixing and
 testing should be a top priority for now.
 
+
 Long-term goals
 ---------------
 
 Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
 glIntercept ( https://code.google.com/p/glintercept/ ) or EasyHook ( http://easyhook.codeplex.com/ ).
 
-Check cmake-to-VS generation and fix it if needed.
+- [x] Check cmake-to-VS generation and fix it if needed.-
 
-Support OSX.
+- [ ] Support OSX.
 
-Improve GLSL language grammar support to incorporate newer dialects including switch/case.
+- [ ] Improve GLSL language grammar support to incorporate newer dialects including switch/case. (In progress)
 
-Support OpenGL contexts for newer versions of OpenGL.
+- [ ] Support OpenGL contexts for newer versions of OpenGL.
+
 
 Contribute
 ----------
@@ -69,3 +73,4 @@ and push some changes!
 
 Discussion is at glsl-debugger-development@googlegroups.com
 https://groups.google.com/forum/?fromgroups#!forum/glsl-debugger-development
+
