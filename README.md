@@ -52,9 +52,8 @@ testing should be a top priority for now.
 Long-term goals
 ---------------
 
-Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
+- [x] Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
 glIntercept ( https://code.google.com/p/glintercept/ ) or EasyHook ( http://easyhook.codeplex.com/ ).
-
 - [x] Check cmake-to-VS generation and fix it if needed.
 - [ ] Support OSX.
 - [ ] Improve GLSL language grammar support to incorporate newer dialects including switch/case. (In progress)
