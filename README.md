@@ -52,7 +52,7 @@ testing should be a top priority for now.
 Long-term goals
 ---------------
 
-- [x] Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
+- [ ] Replace Windows Detours dependency with apiTrace ( https://github.com/apitrace/apitrace ),
 glIntercept ( https://code.google.com/p/glintercept/ ) or EasyHook ( http://easyhook.codeplex.com/ ).
 - [x] Check cmake-to-VS generation and fix it if needed.
 - [ ] Support OSX.
