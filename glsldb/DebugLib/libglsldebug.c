@@ -496,6 +496,9 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 		case DLL_PROCESS_DETACH:
 		dbgPrint(DBGLVL_INFO, "DLL_PROCESS_DETACH\n");
+        // Not sure how it works in windows, but do we really can
+        // enter it two times, here and in the next function?
+        // TODO: check if it is originally create* call or so.
 		EnterCriticalSection(&G.lock);
 		retval = uninitialiseDll();
 		DeleteCriticalSection(&G.lock);

@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -34,7 +34,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #include <windows.h>	// MUST BE FIRST!!!
 #include "asprintf.h"
-#include "detours.h"
 #endif /* _WIN32 */
 
 #include <QtGui/QApplication>
@@ -107,7 +106,6 @@ ProgramControl::ProgramControl(const char *pname) :
 	_hEvtDebuggee = NULL;
 	_hEvtDebugger = NULL;
 	_hDebuggedProgram = NULL;
-	_ai.hDetours = NULL;
 	_ai.hLibrary = NULL;
 	_ai.hProcess = NULL;
 #endif /* _WIN32 */
@@ -1389,11 +1387,12 @@ pcErrorCode ProgramControl::dbgCommandShaderStepVertex(void *shaders[3],
 	return error;
 }
 
-pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
-		char *workDir)
+// Windows stuff moved
+#ifndef _WIN32
+pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir)
 {
 	pcErrorCode error;
-#ifndef _WIN32
+
 	clearShmem();
 
 	_debuggeePID = vfork();
@@ -1458,135 +1457,16 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
 	printCall();
 #endif
 	return PCE_NONE;
-#else /* _WIN32 */
-// This is not supported also. We need to replace detours.
-	error = PCE_EXEC;
-#if 0
-	STARTUPINFOA startupInfo;
-	PROCESS_INFORMATION processInfo;
-	char dllPath[_MAX_PATH];			// Path to debugger preload DLL.
-	char detouredDllPath[_MAX_PATH];// Path to marker DLL.
-	char *cmdLine = NULL;// Command line to execute.
-	size_t cntCmdLine = 0;// Size of command line.
 
-	/* Only size must be initialised. */
-	::ZeroMemory(&startupInfo, sizeof(STARTUPINFOA));
-	startupInfo.cb = sizeof(STARTUPINFOA);
 
-	/* Get path to detours marker DLL. */
-	HMODULE hDetouredDll = ::DetourGetDetouredMarker();
-	::GetModuleFileNameA(hDetouredDll, detouredDllPath, _MAX_PATH);
-	// Note: Do not close handle. See MSDN: "The GetModuleHandle function
-	// returns a handle to a mapped module without incrementing its
-	// reference count."
-
-	/* Concatenate the command line. */
-	for (int i = 0; debuggedProgramArgs[i] != 0; i++) {
-		cntCmdLine += ::strlen(debuggedProgramArgs[i]) + 1;
-	}
-	cmdLine = new char[cntCmdLine + 1];
-	*cmdLine = 0;
-	for (int i = 0; debuggedProgramArgs[i] != 0; i++) {
-		::strcat(cmdLine, debuggedProgramArgs[i]);
-		::strcat(cmdLine, " ");
-	}
-
-	this->setDebugEnvVars();	// TODO dirty hack.
-	LPVOID newEnv = ::GetEnvironmentStrings();
-
-	HMODULE hThis = GetModuleHandleW(NULL);
-	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
-	char *insPos = strrchr(dllPath, '\\');
-	if (insPos != NULL) {
-		strcpy(insPos + 1, DEBUGLIB);
-	} else {
-		strcpy(dllPath, DEBUGLIB);
-	}
-
-	if (::DetourCreateProcessWithDllA(NULL, cmdLine, NULL, NULL, TRUE,
-					CREATE_SUSPENDED | CREATE_DEFAULT_ERROR_MODE
-					/*| CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS*/, NULL,
-					workDir, &startupInfo, &processInfo, detouredDllPath, dllPath,
-					NULL)) {
-		this->createEvents(processInfo.dwProcessId);
-		_hDebuggedProgram = processInfo.hProcess;
-		_debuggeePID = processInfo.dwProcessId;
-		//::DebugActiveProcess(processInfo.dwProcessId);
-		//::DebugBreakProcess(processInfo.hProcess);
-		::ResumeThread(processInfo.hThread);
-		::CloseHandle(processInfo.hThread);
-		error = PCE_NONE;
-	} else {
-		error = PCE_EXEC;
-	}
-
-	delete[] cmdLine;
-	//return error;
-
-	dbgPrint(DBGLVL_INFO, "wait for debuggee\n");
-	error = checkChildStatus();
-	if (error != PCE_NONE) {
-		killProgram(0);
-		//_debuggeePID = 0;
-		return error;
-	}
-
-	dbgPrint(DBGLVL_INFO, "send continue\n");
-	error = executeDbgCommand();
-	//error = dbgCommandCallOrig();
-	if (error != PCE_NONE) {
-		this->killProgram(0);
-		//_debuggeePID = 0;
-		return error;
-	}
-#ifdef DEBUG
-	printCall();
-#endif
-#endif /* 0 */
-	return error;
-
-#endif /* _WIN32 */
 }
 
-#ifdef _WIN32
-pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
-	pcErrorCode retval = PCE_NONE;      // Method return value.
-	char dllPath[_MAX_PATH];// Path to debugger preload DLL.
-	char smName[_MAX_PATH];// Name of shared memory.
-
-	HMODULE hThis = GetModuleHandleW(NULL);
-	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
-	char *insPos = strrchr(dllPath, '\\');
-	if (insPos != NULL) {
-		strcpy(insPos + 1, DEBUGLIB);
-	} else {
-		strcpy(dllPath, DEBUGLIB);
-	}
-
-	this->createEvents(pid);
-	::SetEvent(_hEvtDebuggee);
-
-	this->setDebugEnvVars();	// TODO dirty hack.
-	::GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", smName, _MAX_PATH);
-	if (!::AttachToProcess(_ai, pid, PROCESS_ALL_ACCESS, dllPath, smName,
-					_path_dbgfuncs.c_str())) {
-		return PCE_UNKNOWN_ERROR;   // TODO
-	}
-
-	_hDebuggedProgram = _ai.hProcess;
-	_debuggeePID = pid;  // TODO: Do we need this information?
-
-	retval = this->checkChildStatus();
-
-	return retval;
-}
-#else /* _WIN32 */
 pcErrorCode ProgramControl::attachToProgram(const pid_t pid)
 {
 	UNUSED_ARG(pid)
 	return PCE_UNKNOWN_ERROR;
 }
-#endif /* _WIN32 */
+#endif /* !_WIN32 */
 
 FunctionCall* ProgramControl::getCurrentCall(void)
 {

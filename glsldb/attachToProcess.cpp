@@ -8,15 +8,15 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-    list of conditions and the following disclaimer in the documentation and/or
-    other materials provided with the distribution.
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-    of its contributors may be used to endorse or promote products derived from
-    this software without specific prior written permission.
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -1062,7 +1062,7 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		const char *dbgFuncPath) {
 // It seems DetourGetDetouredMarker() not in detourus now. You know how to fix it?
 // I don't, and know what? I don't even want to know. If you like to dig in this shit, well, go on
-// Detours must be dropped and replaced by new api. If you read this, then you are good windows developer, 
+// Detours must be dropped and replaced by new api. If you read this, then you are good windows developer,
 // and it's your job. I'm just make it builds there and don't want to interact with this platform any more.
 	dbgPrint(DBGLVL_ERROR, "Attach to process is broken. Please fix me: attachToProcess.cpp:%s\n", __LINE__);
 	return false;
@@ -1153,14 +1153,7 @@ bool DetachFromProcess(ATTACHMENT_INFORMATION& inOutAi) {
 	}
 	retval = (inOutAi.hLibrary == NULL) && retval;
 
-	/* Free detours marker DLL. */
-	if (::RemoteFreeLibrary(inOutAi.hProcess, inOutAi.hDetours)) {
-		inOutAi.hDetours = NULL;
-	}
-	retval = (inOutAi.hDetours == NULL) && retval;
-
 	// TODO: Clean the environment!
-
 	/* Close process handle, if all libraries have been freed. */
 	if (retval) {
 		::CloseHandle(inOutAi.hProcess);
