@@ -1,21 +1,21 @@
 //Copyright (c) 2007-2008, Marton Anka
 //
-//Permission is hereby granted, free of charge, to any person obtaining a 
-//copy of this software and associated documentation files (the "Software"), 
-//to deal in the Software without restriction, including without limitation 
-//the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-//and/or sell copies of the Software, and to permit persons to whom the 
+//Permission is hereby granted, free of charge, to any person obtaining a
+//copy of this software and associated documentation files (the "Software"),
+//to deal in the Software without restriction, including without limitation
+//the rights to use, copy, modify, merge, publish, distribute, sublicense,
+//and/or sell copies of the Software, and to permit persons to whom the
 //Software is furnished to do so, subject to the following conditions:
 //
-//The above copyright notice and this permission notice shall be included 
+//The above copyright notice and this permission notice shall be included
 //in all copies or substantial portions of the Software.
 //
-//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-//OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+//THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 //IN THE SOFTWARE.
 
 #include <windows.h>
@@ -143,17 +143,17 @@ static DWORD g_nThreadHandles = 0;
 //=========================================================================
 // Toolhelp defintions so the functions can be dynamically bound to
 typedef HANDLE (WINAPI * _CreateToolhelp32Snapshot)(
-	DWORD dwFlags,       
-	DWORD th32ProcessID  
+	DWORD dwFlags,
+	DWORD th32ProcessID
 	);
 
 typedef BOOL (WINAPI * _Thread32First)(
-									   HANDLE hSnapshot,     
+									   HANDLE hSnapshot,
 									   LPTHREADENTRY32 lpte
 									   );
 
 typedef BOOL (WINAPI * _Thread32Next)(
-									  HANDLE hSnapshot,     
+									  HANDLE hSnapshot,
 									  LPTHREADENTRY32 lpte
 									  );
 
@@ -180,7 +180,7 @@ static VOID LeaveCritSec() {
 
 //=========================================================================
 // Internal function:
-// 
+//
 // Skip over jumps that lead to the real function. Gets around import
 // jump tables, etc.
 //=========================================================================
@@ -244,7 +244,7 @@ static PBYTE EmitJump(PBYTE pbCode, PBYTE pbJumpTo) {
 		*((PDWORD_PTR)pbCode) = (DWORD_PTR)(pbJumpTo);
 		pbCode += sizeof(DWORD_PTR);
 	}
-#else 
+#else
 #error unsupported platform
 #endif
 	return pbCode;
@@ -254,7 +254,7 @@ static PBYTE EmitJump(PBYTE pbCode, PBYTE pbJumpTo) {
 // Internal function:
 //
 // Will try to allocate the trampoline structure within 2 gigabytes of
-// the target function. 
+// the target function.
 //=========================================================================
 static MHOOKS_TRAMPOLINE* TrampolineAlloc(PBYTE pSystemFunction, S64 nLimitUp, S64 nLimitDown) {
 
@@ -267,10 +267,10 @@ static MHOOKS_TRAMPOLINE* TrampolineAlloc(PBYTE pSystemFunction, S64 nLimitUp, S
 		// in the basic scenario this is +/- 2GB but IP-relative instructions
 		// found in the original code may require a smaller window.
 		PBYTE pLower = pSystemFunction + nLimitUp;
-		pLower = pLower < (PBYTE)(DWORD_PTR)0x0000000080000000 ? 
+		pLower = pLower < (PBYTE)(DWORD_PTR)0x0000000080000000 ?
 							(PBYTE)(0x1) : (PBYTE)(pLower - (PBYTE)0x7fff0000);
 		PBYTE pUpper = pSystemFunction + nLimitDown;
-		pUpper = pUpper < (PBYTE)(DWORD_PTR)0xffffffff80000000 ? 
+		pUpper = pUpper < (PBYTE)(DWORD_PTR)0xffffffff80000000 ?
 			(PBYTE)(pUpper + (DWORD_PTR)0x7ff80000) : (PBYTE)(DWORD_PTR)0xfffffffffff80000;
 		ODPRINTF((L"mhooks: TrampolineAlloc: Allocating for %p between %p and %p", pSystemFunction, pLower, pUpper));
 
@@ -310,6 +310,8 @@ static MHOOKS_TRAMPOLINE* TrampolineAlloc(PBYTE pSystemFunction, S64 nLimitUp, S
 				}
 			}
 		}
+	} else {
+		ODPRINTF((L"mhooks: TrampolineAlloc: maximum hooks number exceeded"));
 	}
 
 	return pTrampoline;
@@ -339,10 +341,10 @@ static VOID TrampolineFree(MHOOKS_TRAMPOLINE* pTrampoline, BOOL bNeverUsed) {
 	for (DWORD i=0; i<MHOOKS_MAX_SUPPORTED_HOOKS; i++) {
 		if (g_pHooks[i] == pTrampoline) {
 			g_pHooks[i] = NULL;
-			// It might be OK to call VirtualFree, but quite possibly it isn't: 
+			// It might be OK to call VirtualFree, but quite possibly it isn't:
 			// If a thread has some of our trampoline code on its stack
 			// and we yank the region from underneath it then it will
-			// surely crash upon returning. So instead of freeing the 
+			// surely crash upon returning. So instead of freeing the
 			// memory we just let it leak. Ugly, but safe.
 			if (bNeverUsed)
 				VirtualFree(pTrampoline, 0, MEM_RELEASE);
@@ -377,15 +379,15 @@ static HANDLE SuspendOneThread(DWORD dwThreadId, PBYTE pbCode, DWORD cbBytes) {
 #endif
 				if (pIp >= pbCode && pIp < (pbCode + cbBytes)) {
 					if (nTries < 3) {
-						// oops - we should try to get the instruction pointer out of here. 
+						// oops - we should try to get the instruction pointer out of here.
 						ODPRINTF((L"mhooks: SuspendOneThread: suspended thread %d - IP is at %p - IS COLLIDING WITH CODE", dwThreadId, pIp));
 						ResumeThread(hThread);
 						Sleep(100);
 						SuspendThread(hThread);
 						nTries++;
 					} else {
-						// we gave it all we could. (this will probably never 
-						// happen - unless the thread has already been suspended 
+						// we gave it all we could. (this will probably never
+						// happen - unless the thread has already been suspended
 						// to begin with)
 						ODPRINTF((L"mhooks: SuspendOneThread: suspended thread %d - IP is at %p - IS COLLIDING WITH CODE - CAN'T FIX", dwThreadId, pIp));
 						ResumeThread(hThread);
@@ -433,7 +435,7 @@ static VOID ResumeOtherThreads() {
 //=========================================================================
 // Internal function:
 //
-// Suspend all threads in this process while trying to make sure that their 
+// Suspend all threads in this process while trying to make sure that their
 // instruction pointer is not in the given range.
 //=========================================================================
 static BOOL SuspendOtherThreads(PBYTE pbCode, DWORD cbBytes) {
@@ -499,7 +501,7 @@ static BOOL SuspendOtherThreads(PBYTE pbCode, DWORD cbBytes) {
 		CloseHandle(hSnap);
 		//TODO: we might want to have another pass to make sure all threads
 		// in the current process (including those that might have been
-		// created since we took the original snapshot) have been 
+		// created since we took the original snapshot) have been
 		// suspended.
 	} else {
 		ODPRINTF((L"mhooks: SuspendOtherThreads: can't CreateToolhelp32Snapshot: %d", gle()));
@@ -522,9 +524,9 @@ static void FixupIPRelativeAddressing(PBYTE pbNew, PBYTE pbOriginal, MHOOKS_PATC
 	for (DWORD i = 0; i < pdata->nRipCnt; i++) {
 		DWORD dwNewDisplacement = (DWORD)(pdata->rips[i].nDisplacement - diff);
 		ODPRINTF((L"mhooks: fixing up RIP instruction operand for code at 0x%p: "
-			L"old displacement: 0x%8.8x, new displacement: 0x%8.8x", 
-			pbNew + pdata->rips[i].dwOffset, 
-			(DWORD)pdata->rips[i].nDisplacement, 
+			L"old displacement: 0x%8.8x, new displacement: 0x%8.8x",
+			pbNew + pdata->rips[i].dwOffset,
+			(DWORD)pdata->rips[i].nDisplacement,
 			dwNewDisplacement));
 		*(PDWORD)(pbNew + pdata->rips[i].dwOffset) = dwNewDisplacement;
 	}
@@ -568,7 +570,7 @@ static DWORD DisassembleAndSkip(PVOID pFunction, DWORD dwMinLen, MHOOKS_PATCHDAT
 			#if defined _M_X64
 				BOOL bProcessRip = FALSE;
 				// mov or lea to register from rip+imm32
-				if ((pins->Type == ITYPE_MOV || pins->Type == ITYPE_LEA) && (pins->X86.Relative) && 
+				if ((pins->Type == ITYPE_MOV || pins->Type == ITYPE_LEA) && (pins->X86.Relative) &&
 					(pins->X86.OperandSize == 8) && (pins->OperandCount == 2) &&
 					(pins->Operands[1].Flags & OP_IPREL) && (pins->Operands[1].Register == AMD64_REG_RIP))
 				{
@@ -577,7 +579,7 @@ static DWORD DisassembleAndSkip(PVOID pFunction, DWORD dwMinLen, MHOOKS_PATCHDAT
 					bProcessRip = TRUE;
 				}
 				// mov or lea to rip+imm32 from register
-				else if ((pins->Type == ITYPE_MOV || pins->Type == ITYPE_LEA) && (pins->X86.Relative) && 
+				else if ((pins->Type == ITYPE_MOV || pins->Type == ITYPE_LEA) && (pins->X86.Relative) &&
 					(pins->X86.OperandSize == 8) && (pins->OperandCount == 2) &&
 					(pins->Operands[0].Flags & OP_IPREL) && (pins->Operands[0].Register == AMD64_REG_RIP))
 				{
@@ -662,7 +664,7 @@ BOOL Mhook_SetHook(PVOID *ppSystemFunction, PVOID pHookFunction) {
 	DWORD dwInstructionLength = DisassembleAndSkip(pSystemFunction, MHOOK_JMPSIZE, &patchdata);
 	if (dwInstructionLength >= MHOOK_JMPSIZE) {
 		ODPRINTF((L"mhooks: Mhook_SetHook: disassembly signals %d bytes", dwInstructionLength));
-		// suspend every other thread in this process, and make sure their IP 
+		// suspend every other thread in this process, and make sure their IP
 		// is not in the code we're about to overwrite.
 		SuspendOtherThreads((PBYTE)pSystemFunction, dwInstructionLength);
 		// allocate a trampoline structure (TODO: it is pretty wasteful to get
@@ -695,22 +697,22 @@ BOOL Mhook_SetHook(PVOID *ppSystemFunction, PVOID pHookFunction) {
 					// fix up any IP-relative addressing in the code
 					FixupIPRelativeAddressing(pTrampoline->codeTrampoline, (PBYTE)pSystemFunction, &patchdata);
 
-					DWORD_PTR dwDistance = (PBYTE)pHookFunction < (PBYTE)pSystemFunction ? 
+					DWORD_PTR dwDistance = (PBYTE)pHookFunction < (PBYTE)pSystemFunction ?
 						(PBYTE)pSystemFunction - (PBYTE)pHookFunction : (PBYTE)pHookFunction - (PBYTE)pSystemFunction;
 					if (dwDistance > 0x7fff0000) {
 						// create a stub that jumps to the replacement function.
-						// we need this because jumping from the API to the hook directly 
-						// will be a long jump, which is 14 bytes on x64, and we want to 
-						// avoid that - the API may or may not have room for such stuff. 
+						// we need this because jumping from the API to the hook directly
+						// will be a long jump, which is 14 bytes on x64, and we want to
+						// avoid that - the API may or may not have room for such stuff.
 						// (remember, we only have 5 bytes guaranteed in the API.)
 						// on the other hand we do have room, and the trampoline will always be
-						// within +/- 2GB of the API, so we do the long jump in there. 
+						// within +/- 2GB of the API, so we do the long jump in there.
 						// the API will jump to the "reverse trampoline" which
 						// will jump to the user's hook code.
 						pbCode = pTrampoline->codeJumpToHookFunction;
 						pbCode = EmitJump(pbCode, (PBYTE)pHookFunction);
 						ODPRINTF((L"mhooks: Mhook_SetHook: created reverse trampoline"));
-						FlushInstructionCache(hProc, pTrampoline->codeJumpToHookFunction, 
+						FlushInstructionCache(hProc, pTrampoline->codeJumpToHookFunction,
 							pbCode - pTrampoline->codeJumpToHookFunction);
 
 						// update the API itself
