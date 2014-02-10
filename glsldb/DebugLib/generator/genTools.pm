@@ -27,12 +27,13 @@ require genSettings;
 our %extname_matches;
 our %files;
 our @skip_defines;
+our @force_extensions;
 
 
 our %regexps = (
-    "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
-    "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)(?:WINAPI|APIENTRY)\s+(wgl.*?)\s*\((.*?)\)/,
-    "winapifunc" => qr/^\s*(?!WINGDIAPI)(.*?)WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
+    "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)\s*(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
+    "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)\s*(?:WINAPI|APIENTRY)\s+(wgl.*?)\s*\((.*?)\)/,
+    "winapifunc" => qr/^\s*(?!WINGDIAPI)(.*?)\s*WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
     "glxfunc" => qr/^\s*(?:GLAPI\b|extern\b)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/,
     "typegl" => qr/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/,
     "typewgl" => qr/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/,
@@ -54,6 +55,7 @@ sub parse_output {
     my $proto = $extname;
     my $api_re = qr/^#ifndef\s+($api\S+)/;
     my $api_defined = qr/^#ifn?def\s+(\S+)/;
+	my $isNative = grep { $$_[0] eq $filename } values %files;
     my @skip = 0;
     my $indef = 0;
     my @ifdir;
@@ -99,9 +101,10 @@ sub parse_output {
 
         # Run each supplied regexp here
         if ($indef == $ifdir[$#ifdir]) {
+			my $isExtension = (grep(/^$extname$/, @force_extensions) or !$isNative);
             while (my ($regexp, $func) = each(%$actions) ) {
                 if (my @matches = /$regexp/){
-                    $func->($_, $proto, @matches);
+                    $func->($isExtension, $proto, @matches);
                 }
             }
         }

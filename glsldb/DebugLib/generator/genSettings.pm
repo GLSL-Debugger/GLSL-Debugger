@@ -33,7 +33,7 @@ our %extname_matches = (
 
 # defines #ifdef for which must be ignored
 # This defines does not prevent the parsing of block they surround
-our @skip_defines = (    
+our @skip_defines = (
     "GL_GLEXT_PROTOTYPES",
     "NOGDI",
     "WGL_WGLEXT_PROTOTYPES",
@@ -48,8 +48,21 @@ our %extnames_defines = (
     "GLX_VERSION_1_0" => 0
 );
 
-# This defines caused some problems and must be #ifdef'ed
-# TODO: find what caused it
+# This defines not supported by some `opengl32.lib` lib and must be
+# marked as glext defines
+our @force_extensions = (
+	"GL_VERSION_1_2",
+	"GL_VERSION_1_3",
+	"GL_ARB_imaging",
+	"GL_ARB_multitexture",	
+	"GL_EXT_texture_array",
+	"GL_OES_EGL_image",
+	"GL_ATI_blend_equation_separate",
+	"GL_MESA_texture_array",
+);
+
+
+# This defines caused build errors with some drivers and must be #ifdef'ed
 our @problem_defines = (
     "GL_VERTEX_ATTRIB_ARRAY_INTEGER_EXT",
     "GL_MIN_PROGRAM_TEXEL_OFFSET_EXT",

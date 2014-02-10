@@ -95,7 +95,7 @@ sub createFPlowercaseType
 
 sub add_definition
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     my $fname = shift;
     $defined_upper{uc($fname)} = 1;
@@ -113,7 +113,7 @@ sub add_definition_check
 
 sub create_func
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     createFPType(@_);
     createFPlowercaseType(@_);
@@ -121,7 +121,7 @@ sub create_func
 
 sub create_func_glx
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     if ($extname eq "GLX_VERSION_1_1" || $extname eq "GLX_VERSION_1_0") {
         createFPType(@_);

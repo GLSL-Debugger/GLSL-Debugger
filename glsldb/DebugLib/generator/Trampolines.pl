@@ -37,9 +37,6 @@ require genTools;
 our %files;
 our %regexps;
 
-
-# TODO: possibly bullshit, need to check for WINGDIAPI/extern stuff
-
 my @initializer = ();
 my @extinitializer = ();
 my @functions = ();
@@ -164,7 +161,6 @@ void initExtensionTrampolines() {
 int attachTrampolines() {
 	int i;
 	initTrampolines();
-	initExtensionTrampolines();
 	for (i = 0; i < TRMP_FUNCS_COUNT; ++i) {
 		dbgPrint(DBGLVL_DEBUG, "Attaching %s 0x%x\\n", trmp_FuncsNames[i], trmp_OrigFuncs[i]);
 		/* _dbg_Verify(trmp_FuncsNames[i], (PBYTE)trmp_OrigFuncs[i]); */
@@ -199,11 +195,23 @@ int detachTrampolines();
 	print "\n";
 }
 
+sub addFunction 
+{
+	my ($isExtension, $retval, $fname, $argList) = @_;
+	
+	if ($isExtension){
+		push @extinitializer, "	Orig$fname = ($retval (APIENTRYP)($argList)) OrigwglGetProcAddress(\"$fname\");";
+	} else {
+		push @initializer, "	Orig$fname = $fname;
+	dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
+		push(@functions, $fname) if $fname ne "wglGetProcAddress";
+	}
+}
 
 sub createTrampoline
 {
-	my ($isExtension, $mode, $extname, $retval, $fname, $argString) = @_;
-	return "" if $trampoline_generated{$fname} or $fname eq "wglGetProcAddress";
+	my ($mode, $isExtension, $extname, $retval, $fname, $argString) = @_;
+	return "" if $trampoline_generated{$fname};
 
 	my @arguments = buildArgumentList($argString);
 	my $argList = join(", ", @arguments);
@@ -213,16 +221,9 @@ sub createTrampoline
 	if ($mode eq "def") {
 		$ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
 /* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Hooked$fname($argList);";
-
-		if (!$isExtension){
-			push @initializer, "    Orig$fname = $fname;
-	dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
-		} else {
-			push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) wglGetProcAddress(\"$fname\");";
-		}
-		push @functions, $fname;
+		addFunction($isExtension, $retval, $fname, $argList);
 	} elsif ($mode eq "decl") {
-		$ret = sprintf "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
+		$ret = "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
 	}
 
 	return $ret;
@@ -239,9 +240,7 @@ if (not grep(/^$mode$/, @modes)) {
 # Setup parser
 sub gl_trampoline
 {
-	my $line = shift;
-	my $isExtension = $line !~ /WINGDIAPI/;
-	print createTrampoline($isExtension, $mode, @_) . "\n";
+	print createTrampoline($mode, @_) . "\n";
 }
 
 my $gl_actions = {

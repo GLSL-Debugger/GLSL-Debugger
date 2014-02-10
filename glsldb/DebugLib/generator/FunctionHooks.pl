@@ -160,11 +160,13 @@ sub thread_statement
 
 
 # TODO: check position of unlock statements!!!
-@defined_funcs = ();
+@defined_funcs = (
+	"wglGetProcAddress"	# Hooked
+);
 
 sub createBody
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     my $retval = shift;
     my $fname = shift;
@@ -172,9 +174,8 @@ sub createBody
     my $checkError = shift;
     $fname =~ s/^\s+|\s+$//g;
     $retval =~ s/^\s+|\s+$//g;
-    # No mesa functions
-    return if grep(/^$fname$/i, @defined_types) or $fname eq "wglGetProcAddress";
-    push(@defined_types, $fname);
+    return if grep(/^$fname$/i, @defined_funcs);
+    push(@defined_funcs, $fname);
 
     my @arguments = buildArgumentList($argString);
     my $pfname = join("","PFN",uc($fname),"PROC");

@@ -74,7 +74,7 @@ sub createBodyFooter
 
 sub createFunctionHook
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     my $retval = shift;
     my $fname = shift;

@@ -123,8 +123,7 @@ DBGLIBLOCAL void (*glXGetProcAddressHook(const GLubyte *arg0))(void)
 
 sub createFunctionHook
 {
-    my ($line, $extname, $retval, $fname, $argString) = @_;
-    return if $fname eq "wglGetProcAddress";
+    my ($isExtension, $extname, $retval, $fname, $argString) = @_;
 	push @functions, $fname;
 }
 

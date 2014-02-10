@@ -162,19 +162,19 @@ sub createListEntry
 
 sub gl_entry
 {
-    my ($line, $extname, $retval, $funcname) = @_;
+    my ($isExtension, $extname, $retval, $funcname) = @_;
     createListEntry("GL", $extname, $funcname);
 }
 
 sub wgl_entry
 {
-    my ($line, $extname, $retval, $funcname) = @_;
+    my ($isExtension, $extname, $retval, $funcname) = @_;
     createListEntry("WGL", $extname, $funcname);
 }
 
 sub glx_entry
 {
-    my ($line, $extname, $retval, $funcname) = @_;
+    my ($isExtension, $extname, $retval, $funcname) = @_;
     createListEntry("GLX", $extname, $funcname);
 }
 

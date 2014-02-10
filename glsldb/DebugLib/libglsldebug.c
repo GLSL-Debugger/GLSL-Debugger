@@ -8,15 +8,15 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-    list of conditions and the following disclaimer in the documentation and/or
-    other materials provided with the distribution.
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-    of its contributors may be used to endorse or promote products derived from
-    this software without specific prior written permission.
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -179,7 +179,7 @@ static void setLogging(void)
 			setLogDir(s);
 		} else {
 #endif /* !_WIN32 */
-		setLogDir(NULL);
+		setLogDir(".");
 	}
 
 	startLogging(NULL);
@@ -415,43 +415,36 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 	switch (reason_for_call) {
 		case DLL_PROCESS_ATTACH:
-
 		setLogging();
 
 #ifdef DEBUG
-		//AllocConsole();     /* Force availability of console in debug mode. */
+//		AllocConsole();     /* Force availability of console in debug mode. */
 		dbgPrint(DBGLVL_DEBUG, "I am in Debug mode.\n");
 
-		//_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
-		//      if (_CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, "", "This is the "
-		//              "breakpoint crowbar in DllMain. You should attach to the "
-		//              "debugged process before continuing.")) {
-		//          _CrtDbgBreak();
-		//      }
+//		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
+//		if (_CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, "", "This is the "
+//			  "breakpoint crowbar in DllMain. You should attach to the "
+//			  "debugged process before continuing.")) {
+//			_CrtDbgBreak();
+//		}
 #endif /* DEBUG */
 
 		/* Open synchronisation events. */
-		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger)) {
+		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
 			return FALSE;
-		}
+		dbgPrint(DBGLVL_DEBUG, "Events opened.\n");
+
 
 		/* Create global crit section. */
 		InitializeCriticalSection(&G.lock);
 
-		/* Attach detours */
-		//if (!createGlInitContext(&initCtx)) {
-		//	return FALSE;
-		//}
-		if (!attachTrampolines()) {
+		if (!attachTrampolines())
 			return FALSE;
-		} else {
-			dbgPrint(DBGLVL_INFO, "attaching has worked!\n");
-		}
+		dbgPrint(DBGLVL_INFO, "Trampolines attached.\n");
 
 		/* Attach to shared mem segment */
-		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE)) {
+		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
 			return FALSE;
-		}
 
 		// TODO: This is part of the extension detours initialisation
 		// (replacing) current lazy initialisation. However, I think this
@@ -496,10 +489,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 		case DLL_PROCESS_DETACH:
 		dbgPrint(DBGLVL_INFO, "DLL_PROCESS_DETACH\n");
-        // Not sure how it works in windows, but do we really can
-        // enter it two times, here and in the next function?
-        // TODO: check if it is originally create* call or so.
-		EnterCriticalSection(&G.lock);
+		InitializeCriticalSection(&G.lock);
 		retval = uninitialiseDll();
 		DeleteCriticalSection(&G.lock);
 		break;
@@ -1154,7 +1144,7 @@ void (*getDbgFunction(void))(void)
 __declspec(dllexport) PROC APIENTRY HookedwglGetProcAddress(LPCSTR arg0);
 void (*getOrigFunc(const char *fname))(void)
 {
-    return (void (*)(void)) HookedwglGetProcAddress(fname);
+	return (void (*)(void)) HookedwglGetProcAddress(fname);
 }
 #else /* _WIN32 */
 void (*getOrigFunc(const char *fname))(void)
@@ -1163,7 +1153,7 @@ void (*getOrigFunc(const char *fname))(void)
 	 * call our version not the original ones
 	 */
 	if (!strcmp(fname, "glXGetProcAddress") ||
-	    !strcmp(fname, "glXGetProcAddressARB")) {
+		!strcmp(fname, "glXGetProcAddressARB")) {
 		return (void (*)(void))glXGetProcAddressHook;
 	} else {
 		void *result = hash_find(&g.origFunctions, (void*)fname);
@@ -1259,7 +1249,7 @@ int checkGLVersionSupported(int majorVersion, int minorVersion)
 		dbgPrint(DBGLVL_INFO, "GL SHADING LANGUAGE: %s\n", shadingString);
 	}
 	if (majorVersion < major ||
-	    (majorVersion == major && minorVersion <= minor)) {
+		(majorVersion == major && minorVersion <= minor)) {
 		return 1;
 	}
 	dbgPrint(DBGLVL_INFO, "required GL version supported: NO\n");
@@ -1293,10 +1283,10 @@ void *dlsym(void *handle, const char *symbol)
 			exit(1);
 		}
 
-	    if (! (origDlsymHandle = dlopen(s, RTLD_LAZY | RTLD_DEEPBIND))) {
-    	    dbgPrint(DBGLVL_ERROR, "getting origDlsymHandle failed %s: %s\n",
-			         s, dlerror());
-    	}
+		if (! (origDlsymHandle = dlopen(s, RTLD_LAZY | RTLD_DEEPBIND))) {
+			dbgPrint(DBGLVL_ERROR, "getting origDlsymHandle failed %s: %s\n",
+					 s, dlerror());
+		}
 		dlclose(origDlsymHandle);
 		s = getenv("GLSL_DEBUGGER_DLSYM");
 		if (s) {
