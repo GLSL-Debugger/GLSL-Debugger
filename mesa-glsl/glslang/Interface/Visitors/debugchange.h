@@ -10,7 +10,22 @@
 #include "traverse.h"
 #include <set>
 
-class ir_debugchange_traverser_visitor : public ir_traverse_visitor {
+class ast_debugchange_traverser_visitor: public ast_traverse_visitor {
+public:
+	ast_debugchange_traverser_visitor() :
+			flags(traverse_debugvisit)
+	{
+	}
+
+	virtual ~ast_debugchange_traverser_visitor()
+	{
+	}
+
+private:
+	bool active;
+};
+
+class ir_debugchange_traverser_visitor: public ir_traverse_visitor {
 public:
 	ir_debugchange_traverser_visitor()
 	{
@@ -42,16 +57,24 @@ public:
 	virtual bool visitIr(ir_loop_jump *ir);
 	virtual bool visitIr(ir_dummy *ir);
 
-    bool isActive(void) { return active; }
-    // active:  all coming symbols are being changed
-    void activate(void) { active = true; }
-    // passive: coming symbols act as input and are not changed
-    void deactivate(void) { active = false; }
+	bool isActive(void)
+	{
+		return active;
+	}
+	// active:  all coming symbols are being changed
+	void activate(void)
+	{
+		active = true;
+	}
+	// passive: coming symbols act as input and are not changed
+	void deactivate(void)
+	{
+		active = false;
+	}
 
 private:
-    std::set<ir_function_signature*> parsed_signatures;
-    bool active;
+	std::set<ir_function_signature*> parsed_signatures;
+	bool active;
 };
-
 
 #endif /* DEBUGCHANGE_H_ */

@@ -318,21 +318,27 @@ typedef enum {
 
 bool ShIsSampler(variableType v);
 
+/* This is crazy, but I want to save compatability */
 typedef enum {
-    SH_UNSET,
-    SH_TEMPORARY,
-    SH_GLOBAL,
-    SH_CONST,
-    SH_ATTRIBUTE,
-    SH_VARYING_IN,
-    SH_VARYING_OUT,
-    SH_UNIFORM,
-    SH_PARAM_IN,
-    SH_PARAM_OUT,
-    SH_PARAM_INOUT,
-    SH_PARAM_CONST,
-    SH_BUILTIN_READ,
-    SH_BUILTIN_WRITE
+    SH_UNSET		= 0x0,
+    SH_CONST		= 0x1,
+    SH_TEMPORARY	= 0x2,
+    SH_GLOBAL		= 0x4,
+    SH_BUILTIN		= 0x8,
+    SH_IN			= 0x10,
+    SH_OUT			= 0x20,
+    SH_UNIFORM		= 0x40,
+    SH_ATTRIBUTE	= 0x80,
+    SH_VARYING		= 0x100,
+    SH_VARYING_IN	= 0x110,
+    SH_VARYING_OUT	= 0x120,
+    SH_PARAM		= 0x200,
+    SH_PARAM_CONST	= 0x201,
+    SH_PARAM_IN		= 0x210,
+    SH_PARAM_OUT	= 0x220,
+    SH_PARAM_INOUT	= 0x230,
+    SH_BUILTIN_READ	= 0x408,
+    SH_BUILTIN_WRITE = 0x808,
 } variableQualifier;
 
 typedef enum {
@@ -381,11 +387,9 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 //
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
-int addShVariableIr( ShVariableList *vl, ir_instruction* ir );
-int addShVariableList( ShVariableList *vl, exec_list* list, bool globals_only = false );
-ShVariable* irToShVariable( ir_variable* variable );
+int addShVariables(ShVariableList* vl, ast_declarator_list* list, const struct glsl_type* decl_type);
+ShVariable* findShVariableFromSource(ast_declaration* variable);
 ShVariable* findShVariableFromId(ShVariableList *vl, int id);
-ShVariable* findShVariableFromSource(ir_variable* variable);
 ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
 ShVariable* copyShVariable(ShVariable *src);
 void freeShVariable(ShVariable **var);

@@ -69,31 +69,73 @@ static void initialize_context(struct gl_context *ctx, const TBuiltInResource* r
 	ctx->Extensions.ARB_geometry_shader4 = (GLboolean)resources->geoShaderSupported;
 }
 
-
-void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug)
+int addShVariableList(ShVariableList *vl, exec_list* list,
+		struct _mesa_glsl_parse_state *state)
 {
-	/* TODO: debug options
-	 * 	EDebugOpIntermediate       = 0x001,
-	 * 	EDebugOpAssembly           = 0x002,
-	 * 	EDebugOpObjectCode         = 0x004,
-	 * 	EDebugOpLinkMaps           = 0x008
-	 */
+	int count = 0;
+	foreach_list(node, list) {
+		ast_node *ast = exec_node_data(ast_node, node, link);
+		ast_declarator_list* dlist = reinterpret_cast<ast_declarator_list*>(ast);
+		if (!dlist)
+			continue;
+
+		const char *type_name = NULL;
+		const struct glsl_type *type = dlist->type->specifier->glsl_type(
+				&type_name, state);
+		count += addShVariables(vl, dlist, type);
+	}
+
+	return count;
+}
+
+void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
+		int debug, ShVariableList *vl)
+{
 	int dump_ast = debug & EDebugOpAssembly;
 	int dump_hir = debug & EDebugOpIntermediate;
 	int dump_lir = debug & EDebugOpObjectCode;
 	struct _mesa_glsl_parse_state *state = new (shader) _mesa_glsl_parse_state(
-			ctx, shader->Stage, shader);
+			ctx, shader->stage, shader);
+	const char *source = shader->source;
+	state->error = glcpp_preprocess(state, &source, &state->info_log, &ctx->Extensions, ctx);
 
-	_mesa_glsl_compile_shader(ctx, shader, dump_ast, dump_hir);
+	if (!state->error) {
+		_mesa_glsl_lexer_ctor(state, source);
+		_mesa_glsl_parse(state);
+		_mesa_glsl_lexer_dtor(state);
+	}
 
-	/* Print out the resulting IR */
-	if (!state->error && dump_lir)
-		_mesa_print_ir(shader->ir, state);
+
+	shader->head = &state->translation_unit;
+
+//	if (dump_ast) {
+//		foreach_list_const(n, &state->translation_unit) {
+//			ast_node *ast = exec_node_data(ast_node, n, link);
+//			ast->print();
+//		}
+//		printf("\n\n");
+//	}
+
+	// TODO: locations print
+	//printShaderIr(shader);
+	//   foreach_list_typed (ast_node, ast, link, & state->translation_unit)
+	//         ast->hir(instructions, state);
+
+	shader->compile_status = !state->error;
+	shader->info_log = state->info_log;
+	shader->version = state->language_version;
+	shader->is_es = state->es_shader;
+
+	// Add global variables from ast tree
+	if (!state->error)
+		addShVariableList(vl, shader->head, state);
+
+	// TODO: steal memory
+	//ralloc_free(state);
 
 	/* Check side effects, discards, vertex emits */
-	ir_sideeffects_traverser_visitor sideeffects;
-	sideeffects.visit(shader->ir);
-
+	//ast_sideeffects_traverser_visitor sideeffects;
+	//sideeffects.visit(shader->head);
 	return;
 }
 
@@ -114,8 +156,7 @@ ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
 {
 	ShaderHolder* holder = new ShaderHolder;
 	holder->language = language;
-	holder->debugOptions = debugOptions;
-	holder->program = NULL;
+	holder->debug_options = debugOptions;
 	holder->ctx = new struct gl_context;
 	initialize_context_to_defaults( holder->ctx,
 					( glsl_es ) ? API_OPENGLES2 : API_OPENGL_COMPAT );
@@ -143,13 +184,13 @@ void ShDestruct(ShHandle handle)
 		return;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
-
-	if( holder->program ){
-		for( unsigned i = 0; i < MESA_SHADER_STAGES; i++ )
-			ralloc_free( holder->program->_LinkedShaders[i] );
-		ralloc_free( holder->program );
-		holder->program = NULL;
-	}
+//
+//	if( holder->program ){
+//		for( unsigned i = 0; i < MESA_SHADER_STAGES; i++ )
+//			ralloc_free( holder->program->_LinkedShaders[i] );
+//		ralloc_free( holder->program );
+//		holder->program = NULL;
+//	}
 
 	if( holder->ctx )
 		delete holder->ctx, holder->ctx = NULL;
@@ -169,56 +210,6 @@ int __fastcall ShFinalize( )
 }
 
 
-int addShVariableList( ShVariableList *vl, exec_list* list, bool globals_only )
-{
-	int count = 0;
-	foreach_list( node, list ){
-		ir_instruction* ir = (ir_instruction *)node;
-		if( globals_only && ir->ir_type != ir_type_variable )
-			continue;
-		count += addShVariableIr( vl, ir );
-	}
-
-	return count;
-}
-
-
-int addShVariableIr( ShVariableList *vl, ir_instruction* ir )
-{
-	switch( ir->ir_type ){
-		case ir_type_variable:
-		{
-			ShVariable* sh = irToShVariable( ir->as_variable() );
-			if( sh && sh->qualifier != SH_TEMPORARY ){
-				addShVariable( vl, sh, strncmp( sh->name, "gl_", 3 ) == 0 );
-				return 1;
-			}
-			break;
-		}
-		case ir_type_function:
-		{
-			ir_function* f = ir->as_function();
-			return addShVariableList( vl, &f->signatures );
-			break;
-		}
-		case ir_type_function_signature:
-		{
-			ir_function_signature* fs = ir->as_function_signature();
-			int count = 0;
-			foreach_list( node, &fs->parameters ) {
-				ir_instruction* ir = (ir_instruction *)node;
-				count += addShVariableIr( vl, ir );
-			}
-			return count + addShVariableList( vl, &fs->body );
-			break;
-		}
-		default:
-			break;
-	}
-	return 0;
-}
-
-
 //
 // Do an actual compile on the given strings.  The result is left
 // in the given compile object.
@@ -233,7 +224,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 	// TODO: Can we use something like in mesa?
 	UNUSED_ARG(optLevel)
 
-	if( handle == NULL )
+	if (handle == NULL)
 		return 0;
 
 	clearTraverseDebugJump();
@@ -241,63 +232,45 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 	vl->numVariables = 0;
 	vl->variables = NULL;
 
-	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
+	ShaderHolder* holder = reinterpret_cast<ShaderHolder*>(handle);
 	initialize_context(holder->ctx, resources);
 
-	holder->program = rzalloc(NULL, struct gl_shader_program);
-	assert( holder->program != NULL );
-	holder->program->InfoLog = ralloc_strdup( holder->program, "" );
-
 	bool success = true;
+	for (int shnum = 0; numStrings > shnum; shnum++) {
+		holder->shaders = reralloc(holder->ctx, holder->shaders,
+						struct AstShader, holder->num_shaders + 1);
+		AstShader* shader = &holder->shaders[holder->num_shaders++];
+		shader->source = shaderStrings[shnum];
 
-	for( int shnum = 0; numStrings > shnum; shnum++ ){
-		holder->program->Shaders = reralloc(holder->program, holder->program->Shaders,
-				struct gl_shader *, holder->program->NumShaders + 1);
-		assert( holder->program->Shaders != NULL );
-
-		struct gl_shader *shader = rzalloc(holder->program, gl_shader);
-
-		holder->program->Shaders[holder->program->NumShaders] = shader;
-		holder->program->NumShaders++;
-
-		//const unsigned len = strlen( shaderStrings[shnum] );
-		shader->Source = shaderStrings[shnum];
-
-		switch( holder->language ){
-			case EShLangFragment:
-				shader->Type = GL_FRAGMENT_SHADER;
-				break;
-			case EShLangGeometry:
-				shader->Type = GL_GEOMETRY_SHADER;
-				break;
-			case EShLangVertex:
-			default:
-				shader->Type = GL_VERTEX_SHADER;
-				break;
+		switch (holder->language) {
+		case EShLangFragment:
+			shader->stage = MESA_SHADER_FRAGMENT;
+			break;
+		case EShLangGeometry:
+			shader->stage = MESA_SHADER_GEOMETRY;
+			break;
+		case EShLangVertex:
+		default:
+			shader->stage = MESA_SHADER_VERTEX;
+			break;
 		}
 
 		char* old_locale = setlocale(LC_NUMERIC, NULL);
 		setlocale(LC_NUMERIC, "POSIX");
-		compile_shader( holder->ctx, shader, debugOptions );
+		compile_shader_to_ast(holder->ctx, shader, debugOptions, vl);
 		setlocale(LC_NUMERIC, old_locale);
 
 		// TODO: informative names
-		if( !shader->CompileStatus ){
-			UT_NOTIFY_VA( LV_ERROR,
-					"Info log for %d:\n%s\n", shader->Name, shader->InfoLog );
-			success = shader->CompileStatus;
+		if (!shader->compile_status) {
+			UT_NOTIFY_VA( LV_ERROR, "Compilation failed, info log:\n%s\n", shader->info_log);
+			success = shader->compile_status;
 			break;
 		}
-
-		printShaderIr(shader);
-
-		// Recursively add global variables from ir tree
-		addShVariableList( vl, shader->ir, true );
 
 		// Traverse tree for scope and variable processing
 		// Each node gets data holding list of variables changes with this
 		// operation and about scope information
-		ShaderVarTraverse( shader, vl );
+		ShaderVarTraverse(shader, vl);
 	}
 
 	return success ? 1 : 0;

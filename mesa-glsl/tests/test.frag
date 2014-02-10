@@ -24,7 +24,7 @@ void main(void) {
     discard; // ir_discard
   int count = int(f_color_adv.x * 10);
   // ir_assign ir_call
-  deref_record.val = test_func(count);
+  deref_record.val = test_func(int count);
   // ir_call
   test_func(count);
   // ir_deref_array

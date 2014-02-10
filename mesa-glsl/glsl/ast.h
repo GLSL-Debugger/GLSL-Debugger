@@ -31,6 +31,52 @@
 
 struct _mesa_glsl_parse_state;
 
+#ifdef AST_DEBUG_STATE
+enum ast_dbg_state {
+   ast_dbg_state_unset,
+   ast_dbg_state_path, /* path of trace */
+   ast_dbg_state_target, /* leaf of trace */
+   ast_dbg_state_end
+};
+
+enum ast_dbg_state_internal_if {
+	ast_dbg_if_unset,             // not debugged so far
+	ast_dbg_if_init,              // already visited once
+	ast_dbg_if_condition,         // condition in process
+	ast_dbg_if_condition_passed,  // condition processed
+	ast_dbg_if_then,              // descided to debug true branch
+	ast_dbg_if_else,              // descided to debug false branch
+	ast_dbg_if_passed             // debugging is past selection
+};
+
+enum ast_dbg_state_internal_loop {
+	ast_dbg_loop_unset,
+	ast_dbg_loop_qyr_init,
+	ast_dbg_loop_qyr_test,
+	ast_dbg_loop_qyr_terminal,
+	ast_dbg_loop_wrk_init,
+	ast_dbg_loop_wrk_test,
+	ast_dbg_loop_wrk_body,
+	ast_dbg_loop_wrk_terminal,
+	ast_dbg_loop_select_flow,
+	ast_dbg_loop_passed
+};
+
+enum ast_dbg_overwrite {
+	ast_dbg_ow_unset,
+	ast_dbg_ow_original,
+	ast_dbg_ow_debug,
+	ast_dbg_ow_end
+};
+
+enum ast_dbg_sideefects {
+	ast_dbg_se_unset = 0,
+	ast_dbg_se_general = 1,
+	ast_dbg_se_discard = 2,
+	ast_dbg_se_emit_vertex = 4
+};
+#endif
+
 struct YYLTYPE;
 
 /**
@@ -100,7 +146,7 @@ public:
    /**
     * Set the source location range of an AST node using two location nodes
     *
-    * \sa ast_node::get_location
+    * \sa ast_node::set_location
     */
    void set_location_range(const struct YYLTYPE &begin, const struct YYLTYPE &end)
    {
@@ -115,11 +161,11 @@ public:
     * Source location of the AST node.
     */
    struct {
-      unsigned source;    /**< GLSL source number. */
+      unsigned source;          /**< GLSL source number. */
       unsigned first_line;      /**< Line number within the source string. */
       unsigned first_column;    /**< Column in the line. */
-      unsigned last_line;      /**< Line number within the source string. */
-      unsigned last_column;    /**< Column in the line. */
+      unsigned last_line;       /**< Line number within the source string. */
+      unsigned last_column;     /**< Column in the line. */
    } location;
 
    exec_node link;
@@ -130,6 +176,13 @@ protected:
     * be created.
     */
    ast_node(void);
+
+#ifdef IR_DEBUG_STATE
+   enum ast_dbg_state debug_state;
+   enum ast_dbg_overwrite debug_overwrite;
+   bool debug_target;
+   int debug_sideeffects;
+#endif
 };
 
 
@@ -615,7 +668,7 @@ public:
    }
 
    /** Construct a type specifier from a type name */
-   ast_type_specifier(const char *name) 
+   ast_type_specifier(const char *name)
       : type_name(name), structure(NULL), array_specifier(NULL),
 	default_precision(ast_precision_none)
    {
@@ -865,6 +918,10 @@ public:
    ast_expression *condition;
    ast_node *then_statement;
    ast_node *else_statement;
+
+#ifdef IR_DEBUG_STATE
+   enum ast_dbg_state_internal_if debug_state_internal;
+#endif
 };
 
 
@@ -898,7 +955,7 @@ public:
       ast_while,
       ast_do_while
    } mode;
-   
+
 
    ast_node *init_statement;
    ast_node *condition;

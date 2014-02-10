@@ -807,7 +807,7 @@ void
 ast_compound_statement::print(void) const
 {
    printf("{\n");
-   
+
    foreach_list_const(n, &this->statements) {
       ast_node *ast = exec_node_data(ast_node, n, link);
       ast->print();
@@ -1132,7 +1132,7 @@ ast_selection_statement::print(void) const
       printf("else ");
       else_statement->print();
    }
-   
+
 }
 
 
@@ -1143,6 +1143,10 @@ ast_selection_statement::ast_selection_statement(ast_expression *condition,
    this->condition = condition;
    this->then_statement = then_statement;
    this->else_statement = else_statement;
+
+#ifdef AST_DEBUG_STATE
+   debug_state_internal = ast_dbg_if_unset;
+#endif
 }
 
 

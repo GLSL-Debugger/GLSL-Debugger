@@ -11,6 +11,28 @@
 #include "ShaderLang.h"
 #include "glslang/Interface/IRScope.h"
 
+class ast_debugvar_traverser_visitor : public ast_traverse_visitor {
+public:
+	ast_debugvar_traverser_visitor(ShVariableList *_vl) : vl(_vl)
+	{
+	}
+
+	virtual ~ast_debugvar_traverser_visitor()
+	{
+	}
+
+	ShVariableList *getVariableList() { return vl; }
+	void addToScope(int id);
+	void dumpScope(void);
+	scopeList& getScope(void) { return scope; }
+	scopeList* getCopyOfScope(void);
+
+private:
+	bool nameIsAlreadyInList(scopeList *l, const char *name);
+	ShVariableList *vl;
+	scopeList scope;
+};
+
 
 class ir_debugvar_traverser_visitor : public ir_traverse_visitor {
 public:
