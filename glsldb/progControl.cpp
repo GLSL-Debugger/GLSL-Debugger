@@ -88,9 +88,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "progControl.qt.h"
 
 #ifdef _WIN32
-#define DEBUGLIB "\\debuglib.dll"
+#define DEBUGLIB "\\glsldebug.dll"
 #define LIBDLSYM ""
-#define DBG_FUNCTIONS_PATH "plugins"
+#define DBG_FUNCTIONS_PATH "\\plugins"
 #else /* _WIN32 */
 #define DEBUGLIB "/../lib/libglsldebug.so"
 #define LIBDLSYM "/../lib/libdlsym.so"

@@ -46,9 +46,9 @@ my @functions = ();
 my %trampoline_generated = ();
 
 sub defines {
-    my $mode = shift;
-    if ($mode eq "decl") {
-        print "#ifndef __TRAMPOLINES_H
+	my $mode = shift;
+	if ($mode eq "decl") {
+		print "#ifndef __TRAMPOLINES_H
 #define __TRAMPOLINES_H
 #pragma once
 
@@ -60,78 +60,78 @@ sub defines {
 #endif /* glsldebug_EXPORTS */
 
 ";
-    } elsif ($mode eq "exp") {
-        print "LIBRARY \"glsldebug\"
+	} elsif ($mode eq "exp") {
+		print "LIBRARY \"glsldebug\"
 EXPORTS
 ";
-    }
+	}
 }
 
 sub createUtils {
-    print qq|
+	print qq|
 static VOID _dbg_Dump(PBYTE pbBytes, LONG nBytes, PBYTE pbTarget)
 {
-    LONG n, m;
-    for (n = 0; n < nBytes; n += 16) {
-        dbgPrintNoPrefix(DBGLVL_DEBUG, "    %p: ", pbBytes + n);
-        for (m = n; m < n + 16; m++) {
-            if (m >= nBytes) {
-                dbgPrintNoPrefix(DBGLVL_DEBUG, "  ");
-            }
-            else {
-                dbgPrintNoPrefix(DBGLVL_DEBUG, "%02x", pbBytes[m]);
-            }
-            if (m % 4 == 3) {
-                dbgPrintNoPrefix(DBGLVL_DEBUG, " ");
-            }
-        }
-        if (n == 0 && pbTarget != DETOUR_INSTRUCTION_TARGET_NONE) {
-            dbgPrintNoPrefix(DBGLVL_DEBUG, " [%p]", pbTarget);
-        }
-        dbgPrintNoPrefix(DBGLVL_DEBUG, "\\n");
-    }
+	LONG n, m;
+	for (n = 0; n < nBytes; n += 16) {
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "    %p: ", pbBytes + n);
+		for (m = n; m < n + 16; m++) {
+			if (m >= nBytes) {
+				dbgPrintNoPrefix(DBGLVL_DEBUG, "  ");
+			}
+			else {
+				dbgPrintNoPrefix(DBGLVL_DEBUG, "%02x", pbBytes[m]);
+			}
+			if (m % 4 == 3) {
+				dbgPrintNoPrefix(DBGLVL_DEBUG, " ");
+			}
+		}
+		if (n == 0 && pbTarget != DETOUR_INSTRUCTION_TARGET_NONE) {
+			dbgPrintNoPrefix(DBGLVL_DEBUG, " [%p]", pbTarget);
+		}
+		dbgPrintNoPrefix(DBGLVL_DEBUG, "\\n");
+	}
 }
 
 static VOID _dbg_Decode(PCSTR pszDesc, PBYTE pbCode, PBYTE pbOther, PBYTE pbPointer, LONG nInst)
 {
-    PBYTE pbSrc;
-    PBYTE pbEnd;
-    PVOID pbTarget;
-    LONG n;
+	PBYTE pbSrc;
+	PBYTE pbEnd;
+	PVOID pbTarget;
+	LONG n;
 
-    if (pbCode != pbPointer) {
-        dbgPrint(DBGLVL_DEBUG, "  %s = %p [%p]\\n", pszDesc, pbCode, pbPointer);
-    }
-    else {
-        dbgPrint(DBGLVL_DEBUG, "  %s = %p\\n", pszDesc, pbCode);
-    }
+	if (pbCode != pbPointer) {
+		dbgPrint(DBGLVL_DEBUG, "  %s = %p [%p]\\n", pszDesc, pbCode, pbPointer);
+	}
+	else {
+		dbgPrint(DBGLVL_DEBUG, "  %s = %p\\n", pszDesc, pbCode);
+	}
 
-    if (pbCode == pbOther) {
-        dbgPrint(DBGLVL_DEBUG, "    ... unchanged ...\\n");
-        return;
-    }
+	if (pbCode == pbOther) {
+		dbgPrint(DBGLVL_DEBUG, "    ... unchanged ...\\n");
+		return;
+	}
 
-    pbSrc = pbCode;
-    for (n = 0; n < nInst; n++) {
-        pbEnd = (PBYTE)DetourCopyInstruction(NULL, NULL, (PVOID)pbSrc, (PVOID*)(&pbTarget), NULL);
-        _dbg_Dump(pbSrc, (int)(pbEnd - pbSrc), (PBYTE)pbTarget);
-        pbSrc = pbEnd;
-    }
+	pbSrc = pbCode;
+	for (n = 0; n < nInst; n++) {
+		pbEnd = (PBYTE)DetourCopyInstruction(NULL, NULL, (PVOID)pbSrc, (PVOID*)(&pbTarget), NULL);
+		_dbg_Dump(pbSrc, (int)(pbEnd - pbSrc), (PBYTE)pbTarget);
+		pbSrc = pbEnd;
+	}
 }
 
 
 VOID WINAPI _dbg_Verify(PCHAR pszFunc, PVOID pvPointer)
 {
-    PVOID pvCode = DetourCodeFromPointer(pvPointer, NULL);
+	PVOID pvCode = DetourCodeFromPointer(pvPointer, NULL);
 
-    _dbg_Decode(pszFunc, (PBYTE)pvCode, NULL, (PBYTE)pvPointer, 3);
+	_dbg_Decode(pszFunc, (PBYTE)pvCode, NULL, (PBYTE)pvPointer, 3);
 }
 |;
 }
 
 sub footer {
-    my $mode = shift;
-    if ($mode eq "def") {
+	my $mode = shift;
+	if ($mode eq "def") {
 		my $count = scalar @functions;
 		my $orig, $hooked, $names;
 		my $iter = 0;
@@ -160,10 +160,11 @@ void initExtensionTrampolines() {
 }
 ", join("\n", @initializer), join("\n", @extinitializer);
 
-        print qq|
+		print qq|
 int attachTrampolines() {
 	int i;
 	initTrampolines();
+	initExtensionTrampolines();
 	for (i = 0; i < TRMP_FUNCS_COUNT; ++i) {
 		dbgPrint(DBGLVL_DEBUG, "Attaching %s 0x%x\\n", trmp_FuncsNames[i], trmp_OrigFuncs[i]);
 		/* _dbg_Verify(trmp_FuncsNames[i], (PBYTE)trmp_OrigFuncs[i]); */
@@ -172,7 +173,7 @@ int attachTrampolines() {
 			return 0;
 		}
 	}
-    return 1;
+	return 1;
 }
 
 int detachTrampolines() {
@@ -183,77 +184,77 @@ int detachTrampolines() {
 			return 0;
 		}
 	}
-    return 1;
+	return 1;
 }
 
 |;
-    } elsif ($mode eq "decl") {
-        print "void initExtensionTrampolines();
+	} elsif ($mode eq "decl") {
+		print "void initExtensionTrampolines();
 int attachTrampolines();
 int detachTrampolines();
 #endif /* __TRAMPOLINES_H */
 ";
-    }
+	}
 
-    print "\n";
+	print "\n";
 }
 
 
 sub createTrampoline
 {
-    my ($isExtension, $mode, $extname, $retval, $fname, $argString) = @_;
-    return "" if $trampoline_generated{$fname} or $fname eq "wglGetProcAddress";
+	my ($isExtension, $mode, $extname, $retval, $fname, $argString) = @_;
+	return "" if $trampoline_generated{$fname} or $fname eq "wglGetProcAddress";
 
-    my @arguments = buildArgumentList($argString);
-    my $argList = join(", ", @arguments);
-    my $ret = "    Orig$fname";
-    $trampoline_generated{$fname} = 1;
+	my @arguments = buildArgumentList($argString);
+	my $argList = join(", ", @arguments);
+	my $ret = "    Orig$fname";
+	$trampoline_generated{$fname} = 1;
 
-    if ($mode eq "def") {
-        $ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
+	if ($mode eq "def") {
+		$ret = "$retval (APIENTRYP Orig$fname)($argList) = NULL;
 /* Forward declaration: */ __declspec(dllexport) $retval APIENTRY Hooked$fname($argList);";
 
-        if (!$isExtension){
-            push @initializer, "    Orig$fname = $fname;
-    dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
-        } else {
-            push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) wglGetProcAddress(\"$fname\");";
-        }
+		if (!$isExtension){
+			push @initializer, "    Orig$fname = $fname;
+	dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
+		} else {
+			push @extinitializer, "    Orig$fname = ($retval (APIENTRYP)($argList)) wglGetProcAddress(\"$fname\");";
+		}
 		push @functions, $fname;
-    } elsif ($mode eq "decl") {
-        $ret = sprintf "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
-    }
+	} elsif ($mode eq "decl") {
+		$ret = sprintf "extern DEBUGLIBAPI $retval (APIENTRYP Orig$fname)($argList);";
+	}
 
-    return $ret;
+	return $ret;
 }
 
 
 my @modes = ("decl", "def", "exp");
 $mode = $ARGV[0];
 if (not grep(/^$mode$/, @modes)) {
-    die "Argument must be one of " . join(", ", @modes) . "\n";
+	die "Argument must be one of " . join(", ", @modes) . "\n";
 }
 
 
 # Setup parser
 sub gl_trampoline
 {
-    my $line = shift;
+	my $line = shift;
 	my $isExtension = $line !~ /WINGDIAPI/;
-    print createTrampoline($isExtension, $mode, @_) . "\n";
+	print createTrampoline($isExtension, $mode, @_) . "\n";
 }
 
 my $gl_actions = {
-    $regexps{"glapi"} => \&gl_trampoline
+	$regexps{"glapi"} => \&gl_trampoline
 };
 
 my $win_actions = {
-    $regexps{"wingdi"} => \&gl_trampoline,
-    $regexps{"winapifunc"} => \&gl_trampoline,
+	$regexps{"wingdi"} => \&gl_trampoline,
+	$regexps{"winapifunc"} => \&gl_trampoline,
 };
 
 my @params = ([$files{"gl"}, "GL_VERSION_1_0", "GL_", $gl_actions],
-              [$files{"wgl"}, "WGL_VERSION_1_0", "WGL_", $win_actions]);
+			  [$files{"wgl"}, "WGL_VERSION_1_0", "WGL_", $win_actions]);
 
 
 # Begin output
@@ -263,10 +264,10 @@ defines($mode);
 # This windows-specific call is everywhere
 gl_trampoline(0, "WGL_VERSION_1_0", "BOOL", "SwapBuffers", "HDC");
 foreach my $entry (@params) {
-    my $filenames = shift @$entry;
-    foreach my $filename (@$filenames) {
-        parse_output($filename, @$entry);
-    }
+	my $filenames = shift @$entry;
+	foreach my $filename (@$filenames) {
+		parse_output($filename, @$entry);
+	}
 }
 
 footer($mode);

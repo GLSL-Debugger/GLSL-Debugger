@@ -5,11 +5,11 @@ find_package(GLUT REQUIRED)
 
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
-    find_package(DL REQUIRED)
-    find_package(X11 REQUIRED)
+	find_package(DL REQUIRED)
+	find_package(X11 REQUIRED)
 	set(DLSYM_SRC libdlsym.c)
 endif()
-if(GLSLDB_WIN)	
+if(GLSLDB_WIN)
 	set(DL_LIBRARIES mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	include_directories(
 		${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib
@@ -25,39 +25,39 @@ set(ENUMERANTS_SRC glenumerants.c)
 set(BEGINENDTEST_SRC ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c)
 
 set(GLSLDEBUG_GEN_SRC
-    ${GENERATOR_OUTPUT_DIR}/replayFunction.c
-    ${GENERATOR_OUTPUT_DIR}/functionList.c
+	${GENERATOR_OUTPUT_DIR}/replayFunction.c
+	${GENERATOR_OUTPUT_DIR}/functionList.c
 )
 set(GLSLDEBUG_OS_SRC "")
 
 if(GLSLDB_WIN)
-	set(GLSLDEBUG_OS_SRC initLib.c)	
+	set(GLSLDEBUG_OS_SRC initLib.c)
 	set(GLSLDEBUG_GEN_SRC ${GLSLDEBUG_GEN_SRC} ${GENERATOR_OUTPUT_DIR}/glsldebug.def)
 endif()
 
 set(GLSLDEBUG_SRC
-    libglsldebug.c
-    streamRecorder.c
-    streamRecording.c
-    glstate.c
-    readback.c
-    shader.c
-    error.c
-    memory.c
-    hooks.c
-    queries.c
-    preExecution.c
-    postExecution.c
+	libglsldebug.c
+	streamRecorder.c
+	streamRecording.c
+	glstate.c
+	readback.c
+	shader.c
+	error.c
+	memory.c
+	hooks.c
+	queries.c
+	preExecution.c
+	postExecution.c
 	${GLSLDEBUG_OS_SRC}
-    ${GLSLDEBUG_GEN_SRC}
+	${GLSLDEBUG_GEN_SRC}
 )
 
 
 # Generate enumerants
 message(STATUS "Generate enumerants")
 execute_process(COMMAND ${PERL_EXECUTABLE} Enumerants.pl
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glenumerants.h
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/glenumerants.h
 )
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
@@ -77,41 +77,41 @@ endif()
 # Generate generator for list of allowed functions between begin/end
 message(STATUS "Generate allowed function list generator.")
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE BeginEndFunctionTest.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE BeginEndFunctionTest.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c
 )
 
 # Generate debug library
 message(STATUS "Generate debug library")
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE GetProcAddressHook.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE GetProcAddressHook.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc
 )
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE FunctionPointerTypes.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE FunctionPointerTypes.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc
 )
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE ReplayFunc.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/replayFunction.c
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE ReplayFunc.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/replayFunction.c
 )
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE FunctionList.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionList.c
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE FunctionList.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionList.c
 )
 execute_process(COMMAND ${PERL_EXECUTABLE}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    INPUT_FILE mergeAllowedInBeginEndList.pl
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	INPUT_FILE mergeAllowedInBeginEndList.pl
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm
 )
 execute_process(COMMAND ${PERL_EXECUTABLE} FunctionHooks.pl -p ${GENERATOR_OUTPUT_DIR}
-    WORKING_DIRECTORY ${GENERATOR_DIR}
-    OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
+	WORKING_DIRECTORY ${GENERATOR_DIR}
+	OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/functionHooks.inc
 )
 
 if(GLSLDB_WIN)
@@ -132,18 +132,18 @@ if(GLSLDB_WIN)
 endif()
 
 include_directories(
-    ${PROJECT_SOURCE_DIR}/glsldb
-    ${PROJECT_SOURCE_DIR}/glsldb/DebugLib
-    ${PROJECT_SOURCE_DIR}/glsldb/utils
+	${PROJECT_SOURCE_DIR}/glsldb
+	${PROJECT_SOURCE_DIR}/glsldb/DebugLib
+	${PROJECT_SOURCE_DIR}/glsldb/utils
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${X11_INCLUDE_DIR}
+	${X11_INCLUDE_DIR}
 )
 
 
 add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 
-add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
-target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+#add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
+#target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 add_library(functionList STATIC ${GENERATOR_OUTPUT_DIR}/functionList.c)
 
@@ -156,6 +156,6 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 endif()
 
 if(GLSLDB_WIN)
-	install(TARGETS beginEndFunctionTest glsldebug 
+	install(TARGETS glsldebug #beginEndFunctionTest
 		RUNTIME DESTINATION ${DISTRIBUTION_DIRECTORY} LIBRARY DESTINATION ${DISTRIBUTION_DIRECTORY})
 endif()

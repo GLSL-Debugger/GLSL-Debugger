@@ -7,11 +7,19 @@
 #include "progControl.qt.h"
 #include "utils/dbgprint.h"
 #include <cstdlib>
-#define DEBUGLIB "\\debuglib.dll"
+#define DEBUGLIB "\\glsldebug.dll"
 
-BOOL injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
+#ifdef UNICODE
+	#define LOAD_LIB_NAME  "LoadLibraryW"
+#else
+	#define LOAD_LIB_NAME  "LoadLibraryA"
+#endif // !UNICODE
+
+
+DWORD injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
 {
 	HANDLE hThread;
+	DWORD error;
 	char dllPath[_MAX_PATH];		// Path to debugger preload DLL.
 	void* debuggeeLib;   // The address (in the remote process) where
 						  // dllPath will be copied to;
@@ -22,34 +30,40 @@ BOOL injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
 	HMODULE hThis = GetModuleHandleW(NULL);
 	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
 	char *insPos = strrchr(dllPath, '\\');
-	strcpy(insPos ? (insPos + 1) : dllPath, DEBUGLIB);
+	strcpy(insPos ? insPos : dllPath, DEBUGLIB);
 
 	// 1. Allocate memory in the remote process for szLibPath
 	// 2. Write szLibPath to the allocated memory
 	debuggeeLib = VirtualAllocEx(hProcess, NULL, sizeof(dllPath),
-								 MEM_COMMIT, PAGE_READWRITE);
+								 MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 	WriteProcessMemory(hProcess, debuggeeLib, (void*)dllPath,
 					   sizeof(dllPath), NULL);
 
 	// Load library into the remote process via CreateRemoteThread & LoadLibrary
-	// FIXME: Why we use non-unicode loader. It is important?
 	LPTHREAD_START_ROUTINE loadLib = (LPTHREAD_START_ROUTINE)GetProcAddress(
-									hKernel32, "LoadLibraryA");
-	hThread = CreateRemoteThread(hProcess, NULL, 0, loadLib, debuggeeLib, 0, NULL);
-	WaitForSingleObject(hThread, INFINITE);
+									hKernel32, LOAD_LIB_NAME);
+	hThread = CreateRemoteThread(hProcess, NULL, 0, loadLib, debuggeeLib,
+								 CREATE_SUSPENDED, NULL);
+	error = GetLastError();
+	if (!error) {
+		ResumeThread(hThread);
+		WaitForSingleObject(hThread, INFINITE);
 
-	// Get attachment information of the loaded module
-	ai.hProcess = hProcess;
-	GetExitCodeThread(hThread, &debuggeeAddr);
-	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-						GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-						reinterpret_cast<LPCTSTR>(&debuggeeAddr), &ai.hLibrary);
+		// Get attachment information of the loaded module
+		ai.hProcess = hProcess;
+		GetExitCodeThread(hThread, &debuggeeAddr);
+		//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+		//					GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		//					reinterpret_cast<LPCTSTR>(&debuggeeAddr), &ai.hLibrary);
 
-	// Clean up
-	CloseHandle(hThread);
+		// Clean up
+		CloseHandle(hThread);
+	} else {
+		dbgPrint(DBGLVL_ERROR, "Injection failed, error code %i", error);
+	}
+
 	VirtualFreeEx(hProcess, debuggeeLib, sizeof(dllPath), MEM_RELEASE);
-
-	return true;
+	return error;
 }
 
 pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir)
@@ -81,7 +95,7 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
 		_debuggeePID = processInfo.dwProcessId;
 		//::DebugActiveProcess(processInfo.dwProcessId);
 		//::DebugBreakProcess(processInfo.hProcess);
-		if(injectLib(processInfo.hProcess, _ai)){
+		if(!injectLib(processInfo.hProcess, _ai)){
 			ResumeThread(processInfo.hThread);
 			CloseHandle(processInfo.hThread);
 			error = PCE_NONE;
@@ -121,7 +135,7 @@ pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
 	HMODULE hThis = GetModuleHandleW(NULL);
 	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
 	char *insPos = strrchr(dllPath, '\\');
-	strcpy(insPos ? (insPos + 1) : dllPath, DEBUGLIB);
+	strcpy(insPos ? insPos : dllPath, DEBUGLIB);
 
 	this->createEvents(pid);
 	::SetEvent(_hEvtDebuggee);

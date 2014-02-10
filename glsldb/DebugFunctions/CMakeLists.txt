@@ -13,7 +13,7 @@ if(GLSLDB_WIN)
 	set(SRC	${SRC} glEnd.def)
 endif()
 
-set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib/plugins")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DIR}/plugins")
 
 include_directories(${X11_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/glsldb
