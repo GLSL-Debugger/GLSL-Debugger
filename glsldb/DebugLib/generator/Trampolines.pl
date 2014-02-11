@@ -162,7 +162,7 @@ int attachTrampolines() {
 	int i;
 	initTrampolines();
 	for (i = 0; i < TRMP_FUNCS_COUNT; ++i) {
-		dbgPrint(DBGLVL_DEBUG, "Attaching %s 0x%x\\n", trmp_FuncsNames[i], trmp_OrigFuncs[i]);
+		dbgPrint(DBGLVL_DEBUG, "Attaching %s 0x%x\\n", trmp_FuncsNames[i], *trmp_OrigFuncs[i]);
 		/* _dbg_Verify(trmp_FuncsNames[i], (PBYTE)trmp_OrigFuncs[i]); */
 		if (!Mhook_SetHook(trmp_OrigFuncs[i], trmp_HookedFuncs[i])) {
 			dbgPrint(DBGLVL_DEBUG, "Mhook_SetHook(%s) failed.\\n", trmp_FuncsNames[i]);

@@ -3,8 +3,12 @@
   can be generated. There is ArgSizeFuncs.pl in generator/ which is
   probably template for this action. It must be checked and extended
   for full autogeneration.
+- DBG_STREAM_HINT must be rewritten without this #define thing. It generates a lot
+  of work for preprocessor. We can define it using compiler as const array of 
+  functions and enum states.
 
-- Optimisation. Debug lib takes too long to generate
+- Optimisation. Debug lib takes too long to generate. It reading file each time
+  new script called. We must parse files and build database first, then use it directly.
 
 - beginEndFunctionsTest is a tool to get functions allowed in begin-end blocks
   its output for some old videocards in generator/functions directory.
@@ -13,3 +17,6 @@
   compilation scripts. But this is not good variant for distro maintainers, so 
   other way is implement some scripting interface to pass this thing during the
   executing phase.
+  
+- pre- and postExecute. There a few functions and a lot of code in generator for this.
+  It will be great to move this things to lambdas and control this with init scripts.

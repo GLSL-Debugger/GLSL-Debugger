@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -32,18 +32,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "initLib.h"
-
 #include <stdio.h>
-
 #include "../GL/gl.h"
 #include "../GL/glext.h"
-#include "utils/notify.h"
-#ifdef _WIN32
 #include "../GL/wglext.h"
 #include "generated/trampolines.h"
-#endif /* _WIN32 */
+#include "utils/notify.h"
 
-#ifdef _WIN32
 
 /*
  * ::openEvents
@@ -293,5 +288,3 @@ BOOL releaseGlInitContext(GlInitContext *ctx) {
 
 	return retval;
 }
-
-#endif /* _WIN32 */

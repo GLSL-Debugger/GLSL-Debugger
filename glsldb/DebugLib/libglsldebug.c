@@ -86,21 +86,24 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #  define LIBGL "opengl32.dll"
 #  define SO_EXTENSION ".dll"
-#define SHMEM_NAME_LEN 64
+#	define SHMEM_NAME_LEN 64
 #else
 #  define LIBGL "libGL.so"
 #  define SO_EXTENSION ".so"
 #endif
 
+
 #define USE_DLSYM_HARDCODED_LIB
 
 extern GLFunctionList glFunctions[];
+
 
 typedef struct {
 	LibraryHandle handle;
 	const char *fname;
 	void (*function)(void);
 } DbgFunction;
+
 
 /* TODO: threads! Should be local to each thread, isn't it? */
 #ifndef _WIN32
@@ -138,11 +141,21 @@ static struct {
 	DbgRec *fcalls;
 	DbgFunction *dbgFunctions;
 	int numDbgFunctions;
-}g = {NULL, NULL, NULL, NULL, NULL, 0};
+} g = {NULL, NULL, NULL, NULL, NULL, 0};
 #endif /* _WIN32 */
+
+
+#ifdef _WIN32
+#	define GET_MODULE(h, s) (char *)GetProcAddress(h, s)
+#else /* _WIN32 */
+#	define GET_MODULE(h, s) g.origdlsym(h, s)
+#endif /* _WIN32 */
+
+
 
 /* global data */
 DBGLIBLOCAL Globals G;
+
 
 #ifndef _WIN32
 static int getShmid()
@@ -211,22 +224,14 @@ static void addDbgFunction(const char *soFile)
 		dbgPrint(DBGLVL_WARNING, "Opening dbgPlugin \"%s\" failed\n", soFile);
 		return;
 	}
-#ifdef _WIN32
-	if ((provides = (char *) GetProcAddress(handle, "provides")) == NULL) {
-#else /* _WIN32 */
-	if (!(provides = g.origdlsym(handle, "provides"))) {
-#endif /* _WIN32 */
+	if (!(provides = GET_MODULE(handle, "provides"))) {
 		dbgPrint(DBGLVL_WARNING, "Could not determine what \"%s\" provides!\n"
 		"Export the " "\"provides\"-string!\n", soFile);
 		closeLibrary(handle);
 		return;
 	}
 
-#ifdef _WIN32
-	if ((dbgFunc = (void (*)(void)) GetProcAddress(handle, provides)) == NULL) {
-#else /* _WIN32 */
-	if (!(dbgFunc = (void (*)(void)) g.origdlsym(handle, provides))) {
-#endif /* _WIN32 */
+	if (!(dbgFunc = (void (*)(void)) GET_MODULE(handle, provides))) {
 		closeLibrary(handle);
 		return;
 	}
@@ -410,9 +415,6 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		LPVOID lpReserved)
 {
 	BOOL retval = TRUE;
-	//GlInitContext initCtx;
-	//   DbgRec *rec = NULL;
-
 	switch (reason_for_call) {
 		case DLL_PROCESS_ATTACH:
 		setLogging();
@@ -428,10 +430,9 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 //			_CrtDbgBreak();
 //		}
 #endif /* DEBUG */
-
 		/* Open synchronisation events. */
-		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
-			return FALSE;
+		//if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
+		//	return FALSE;
 		dbgPrint(DBGLVL_DEBUG, "Events opened.\n");
 
 
@@ -443,8 +444,8 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		dbgPrint(DBGLVL_INFO, "Trampolines attached.\n");
 
 		/* Attach to shared mem segment */
-		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
-			return FALSE;
+		//if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
+		//	return FALSE;
 
 		// TODO: This is part of the extension detours initialisation
 		// (replacing) current lazy initialisation. However, I think this
@@ -470,7 +471,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		 * LoadLibraryEx function (or a function that calls  these functions),
 		 * ..."
 		 */
-		loadDbgFunctions();
+		//loadDbgFunctions();
 
 		//g.initialized = 1;
 

@@ -154,3 +154,121 @@ pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
 
 	return retval;
 }
+
+pcErrorCode ProgramControl::killProgram(int hard)
+{
+	dbgPrint(DBGLVL_INFO, "killing debuggee: %s",
+			 (hard ? "forced" : "termination requested"));
+	if (_ai.hProcess != NULL) {
+		return this->detachFromProgram();
+	} else if (_hDebuggedProgram != NULL) {
+		pcErrorCode retval = ::TerminateProcess(_hDebuggedProgram, 42)
+		? PCE_NONE : PCE_EXIT;
+		_hDebuggedProgram = NULL;
+		_debuggeePID = 0;
+		return retval;
+	}
+	return PCE_NONE;
+}
+
+pcErrorCode ProgramControl::detachFromProgram(void)
+{
+	pcErrorCode retval = PCE_UNKNOWN_ERROR;
+	if (_ai.hProcess != NULL) {
+		// TODO: This won't work ... at least not properly.
+		this->execute(false);
+
+		if (::DetachFromProcess(_ai)) {
+			_hDebuggedProgram = NULL;
+			_debuggeePID = 0;
+		} else {
+			retval = PCE_EXIT;
+		}
+
+		//::SetEvent(_hEvtDebuggee);
+		//this->closeEvents();
+		this->stop();// Ensure consistent state.
+		this->checkChildStatus();
+	} else {
+		/* Nothing to detach from. */
+		retval = PCE_NONE;
+	}
+	return retval;
+}
+
+void ProgramControl::initShmem(void)
+{
+#define SHMEM_NAME_LEN 64
+	char shmemName[SHMEM_NAME_LEN];
+
+	_snprintf(shmemName, SHMEM_NAME_LEN, "%uSHM", GetCurrentProcessId());
+	/* this creates a non-inheritable shared memory mapping! */
+	_hShMem = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, SHM_SIZE, shmemName);
+	if (_hShMem == NULL || _hShMem == INVALID_HANDLE_VALUE) {
+		dbgPrint(DBGLVL_ERROR, "Creation of shared mem segment %s failed: %u\n", shmemName, GetLastError());
+		exit(1);
+	}
+	/* FILE_MAP_WRITE implies read */
+	_fcalls = (DbgRec*)MapViewOfFile(_hShMem, FILE_MAP_WRITE, 0, 0, SHM_SIZE);
+	if (_fcalls == NULL) {
+		dbgPrint(DBGLVL_ERROR, "View mapping of shared mem segment %s failed: %u\n", shmemName, GetLastError());
+		exit(1);
+	}
+#undef SHMEM_NAME_LEN
+}
+
+void ProgramControl::freeShmem(void)
+{
+	if (_fcalls != NULL) {
+		if (!UnmapViewOfFile(_fcalls)) {
+			dbgPrint(DBGLVL_ERROR, "View unmapping of shared mem segment failed: %u\n", GetLastError());
+			exit(1);
+		}
+		_fcalls = NULL;
+	}
+	if (_hShMem != INVALID_HANDLE_VALUE && _hShMem != NULL) {
+		if (CloseHandle(_hShMem) == 0) {
+			dbgPrint(DBGLVL_ERROR, "Closing handle of shared mem segment failed: %u\n", GetLastError());
+			exit(1);
+		}
+		_hShMem = INVALID_HANDLE_VALUE;
+	}
+}
+
+void ProgramControl::createEvents(const DWORD processId)
+{
+#define EVENT_NAME_LEN (32)
+	wchar_t eventName[EVENT_NAME_LEN];
+
+	this->closeEvents();
+
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
+	_hEvtDebuggee = ::CreateEventW(NULL, FALSE, FALSE, eventName);
+	if (_hEvtDebuggee == NULL) {
+		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
+		::exit(1);
+	}
+
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
+	_hEvtDebugger = ::CreateEventW(NULL, FALSE, FALSE, eventName);
+	if (_hEvtDebugger == NULL) {
+		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
+		::exit(1);
+	}
+}
+
+void ProgramControl::closeEvents(void) {
+	dbgPrint(DBGLVL_INFO, "Closing events ...\n");
+
+	if (_hEvtDebugger != NULL) {
+		::CloseHandle(_hEvtDebugger);
+		_hEvtDebugger = NULL;
+	}
+
+	if (_hEvtDebuggee != NULL) {
+		::CloseHandle(_hEvtDebuggee);
+		_hEvtDebuggee = NULL;
+	}
+
+	dbgPrint(DBGLVL_INFO, "Events closed.\n");
+}
