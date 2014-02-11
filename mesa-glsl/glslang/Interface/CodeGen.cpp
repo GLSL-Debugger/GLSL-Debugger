@@ -393,14 +393,17 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 
         int lastInParameter = getFunctionDebugParameter(funcDec);
         if (lastInParameter >=0) {
-        	ir_instruction* t = getSideEffectsDebugParameter( cir, lastInParameter );
-        	ir_variable* var = t ? t->as_variable() : NULL;
-        	if( var )
-        		cgInit(CG_TYPE_PARAMETER, findShVariableFromSource(var), vl, language);
-        	else {
-                dbgPrint(DBGLVL_ERROR, "CodeGen - side effects returned type is invalid\n");
-                exit(1);
-        	}
+        	// FIXME
+//        	ir_instruction* t = getSideEffectsDebugParameter( cir, lastInParameter );
+//        	ir_variable* var = t ? t->as_variable() : NULL;
+//			if (var)
+//				cgInit(CG_TYPE_PARAMETER, findShVariableFromSource(var), vl,
+//						language);
+//			else {
+				dbgPrint(DBGLVL_ERROR,
+						"CodeGen - side effects returned type is invalid\n");
+				exit(1);
+//			}
         }
     }
 

@@ -9,12 +9,13 @@
 
 #include "traverse.h"
 #include <set>
+#include "ast.h"
 
 class ast_debugchange_traverser_visitor: public ast_traverse_visitor {
 public:
-	ast_debugchange_traverser_visitor() :
-			flags(traverse_debugvisit)
+	ast_debugchange_traverser_visitor()
 	{
+		flags = traverse_debugvisit;
 	}
 
 	virtual ~ast_debugchange_traverser_visitor()

@@ -52,8 +52,7 @@ set(SRC ${SRC_C} ${SRC_CPP}
 add_library(glsl_lib ${SRC})
 target_link_libraries(glsl_lib glsl_glcpp_lib mesa_lib)
 
-add_executable(glsl_compiler main.cpp)
-target_link_libraries(glsl_compiler glsl_lib)
-
-add_executable(glsl_glcpp glcpp/glcpp.c)
-target_link_libraries(glsl_glcpp glsl_lib)
+#add_executable(glsl_compiler main.cpp)
+#target_link_libraries(glsl_compiler glsl_lib)
+#add_executable(glsl_glcpp glcpp/glcpp.c)
+#target_link_libraries(glsl_glcpp glsl_lib)

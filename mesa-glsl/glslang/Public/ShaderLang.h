@@ -59,6 +59,8 @@
 class exec_list;
 class ir_instruction;
 class ir_variable;
+class ast_declarator_list;
+class ast_declaration;
 
 #ifdef __cplusplus
     extern "C" {

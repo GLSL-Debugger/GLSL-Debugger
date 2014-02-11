@@ -71,10 +71,10 @@ struct global_print_tracker {
 		 * debug code, so we replace original ids with our. It is slower.
 		 */
 		//int id = ++var_counter;
-		ShVariable* var = findShVariableFromSource(v);
-		int id = var->uniqueId;
-		hash_table_insert (var_hash, (void*)id, v);
-		return id;
+//		ShVariable* var = findShVariableFromSource(v);
+//		int id = var->uniqueId;
+//		hash_table_insert (var_hash, (void*)id, v);
+//		return id;
 	}
 
 	unsigned	var_counter;

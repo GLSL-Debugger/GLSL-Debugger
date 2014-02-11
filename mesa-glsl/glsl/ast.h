@@ -32,6 +32,7 @@
 struct _mesa_glsl_parse_state;
 
 #ifdef AST_DEBUG_STATE
+#include "ast_visitor.h"
 enum ast_dbg_state {
    ast_dbg_state_unset,
    ast_dbg_state_path, /* path of trace */
@@ -78,6 +79,7 @@ enum ast_dbg_sideefects {
 #endif
 
 struct YYLTYPE;
+struct ast_declarator_list;
 
 /**
  * \defgroup AST Abstract syntax tree node definitions
@@ -170,6 +172,13 @@ public:
 
    exec_node link;
 
+   ast_declarator_list* as_declarator_list() { return NULL; }
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
+
 protected:
    /**
     * The only constructor is protected so that only derived class objects can
@@ -177,7 +186,7 @@ protected:
     */
    ast_node(void);
 
-#ifdef IR_DEBUG_STATE
+#ifdef AST_DEBUG_STATE
    enum ast_dbg_state debug_state;
    enum ast_dbg_overwrite debug_overwrite;
    bool debug_target;
@@ -267,6 +276,10 @@ public:
 
    static const char *operator_string(enum ast_operators op);
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -308,6 +321,10 @@ class ast_expression_bin : public ast_expression {
 public:
    ast_expression_bin(int oper, ast_expression *, ast_expression *);
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual void print(void) const;
 };
 
@@ -336,6 +353,10 @@ public:
    {
       return cons;
    }
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -371,6 +392,10 @@ public:
    }
 
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    /* Count including sized and unsized dimensions */
    unsigned dimension_count;
@@ -414,6 +439,10 @@ public:
     */
    const glsl_type *constructor_type;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
                           struct _mesa_glsl_parse_state *state);
 };
@@ -433,6 +462,10 @@ public:
    ast_compound_statement(int new_scope, ast_node *statements);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -446,6 +479,10 @@ public:
                    ast_array_specifier *array_specifier,
                    ast_expression *initializer);
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    const char *identifier;
 
@@ -638,6 +675,10 @@ public:
 			ast_declarator_list *declarator_list);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -689,6 +730,10 @@ public:
 
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    ir_rvalue *hir(exec_list *, struct _mesa_glsl_parse_state *);
 
    const char *type_name;
@@ -703,6 +748,11 @@ public:
 
 class ast_fully_specified_type : public ast_node {
 public:
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual void print(void) const;
    bool has_qualifiers() const;
 
@@ -724,8 +774,14 @@ public:
    ast_declarator_list(ast_fully_specified_type *);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
+
+   ast_declarator_list* as_declarator_list() { return this; }
 
    ast_fully_specified_type *type;
    /** List of 'ast_declaration *' */
@@ -756,6 +812,10 @@ public:
 
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -785,6 +845,10 @@ public:
    ast_function(void);
 
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -824,6 +888,10 @@ public:
    ast_expression_statement(ast_expression *);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -835,6 +903,10 @@ class ast_case_label : public ast_node {
 public:
    ast_case_label(ast_expression *test_value);
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -851,6 +923,10 @@ public:
    ast_case_label_list(void);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -865,6 +941,10 @@ class ast_case_statement : public ast_node {
 public:
    ast_case_statement(ast_case_label_list *labels);
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -883,6 +963,10 @@ public:
    ast_case_statement_list(void);
    virtual void print(void) const;
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
@@ -897,6 +981,10 @@ class ast_switch_body : public ast_node {
 public:
    ast_switch_body(ast_case_statement_list *stmts);
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -915,13 +1003,15 @@ public:
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   enum ast_dbg_state_internal_if debug_state_internal;
+#endif
+
    ast_expression *condition;
    ast_node *then_statement;
    ast_node *else_statement;
 
-#ifdef IR_DEBUG_STATE
-   enum ast_dbg_state_internal_if debug_state_internal;
-#endif
 };
 
 
@@ -933,6 +1023,11 @@ public:
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   enum ast_dbg_state_internal_if debug_state_internal;
+#endif
 
    ast_expression *test_expression;
    ast_node *body;
@@ -963,6 +1058,24 @@ public:
 
    ast_node *body;
 
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+
+   bool need_dbgiter()
+   {
+      if (this->debug_state_internal != ast_dbg_loop_unset &&
+            this->debug_state_internal != ast_dbg_loop_qyr_init &&
+            this->debug_state_internal != ast_dbg_loop_wrk_init)
+        return true;
+      return false;
+   }
+
+   enum ast_dbg_state_internal_loop debug_state_internal;
+   int debug_iter;
+   char* debug_iter_name;
+#endif
+
 private:
    /**
     * Generate IR from the condition of a loop
@@ -978,6 +1091,10 @@ class ast_jump_statement : public ast_node {
 public:
    ast_jump_statement(int mode, ast_expression *return_value);
    virtual void print(void) const;
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -999,6 +1116,10 @@ public:
    {
    }
 
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
+
    virtual void print(void) const;
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1017,6 +1138,10 @@ public:
      array_specifier(array_specifier)
    {
    }
+
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
@@ -1060,6 +1185,9 @@ public:
 
    virtual ir_rvalue *hir(exec_list *instructions,
                           struct _mesa_glsl_parse_state *state);
+#ifdef AST_DEBUG_STATE
+   virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+#endif
 
 private:
    const GLenum prim_type;

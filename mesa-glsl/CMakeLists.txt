@@ -8,7 +8,7 @@ file(GLOB SRC_MESA mesa/program/*.c mesa/main/*.c)
 add_library(mesa_lib ${SRC_MESA})
 
 
-add_definitions(-DIR_AST_LOCATION -DIR_DEBUG_STATE -DHAVE_PTHREAD)
+add_definitions(-DIR_AST_LOCATION -DAST_DEBUG_STATE -DIR_DEBUG_STATE -DHAVE_PTHREAD)
 
 file(GLOB SRC_INTERFACE glslang/Interface/*.cpp)
 file(GLOB SRC_VISITORS glslang/Interface/Visitors/*.cpp)

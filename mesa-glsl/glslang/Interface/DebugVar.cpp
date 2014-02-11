@@ -1,7 +1,9 @@
+
 #include "glsl/list.h"
 #include "Visitors/debugvar.h"
 #include "Visitors/debugchange.h"
 #include "glsldb/utils/dbgprint.h"
+#include "ShaderHolder.h"
 
 //
 //  Generate code from the given parse tree

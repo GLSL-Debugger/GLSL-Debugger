@@ -117,7 +117,7 @@ static void process_initializer(ir_constant* ir, ir_debugvar_traverser_visitor* 
 
 bool ir_debugvar_traverser_visitor::visitIr(ir_variable* ir)
 {
-	ShVariable* var = irToShVariable( ir );
+	ShVariable* var = NULL; // irToShVariable( ir );
 
 	VPRINT(3, "%c%sdeclaration of %s <%i>%c%s\n", ESC_CHAR, ESC_BOLD,
 				ir->name, var->uniqueId, ESC_CHAR, ESC_RESET);
@@ -145,7 +145,7 @@ static void traverse_func_param( ir_variable* ir, ir_debugvar_traverser_visitor*
 	if( !ir )
 		return;
 
-	ShVariable* v = irToShVariable(ir);
+	ShVariable* v = NULL;// irToShVariable(ir);
 
 	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
 					ir->name, v->uniqueId, ESC_CHAR, ESC_RESET);

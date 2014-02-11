@@ -1,24 +1,15 @@
 /*
- * locations.cpp
+ * misc.cpp
  *
- *  Created on: 05.01.2014
+ *  Created on: 11.02.2014
  */
-
-#include "ShaderLang.h"
-#include "glslang/Interface/Program.h"
+#include <stdio.h>
 #include "glsl/ralloc.h"
-#include "glsl/standalone_scaffolding.h"
-#include "glsl/glsl_types.h"
-#include "glsl/ir.h"
 #include "mesa/main/mtypes.h"
-#include "glsldb/utils/dbgprint.h"
-#include <getopt.h>
-#include <stdlib.h>
-#include <locale.h>
+#include "glsl/standalone_scaffolding.h"
 
-extern int _mesa_glsl_debug;
 
-static void initialize_context(struct gl_context *ctx, gl_api api)
+void test_initialize_context(struct gl_context *ctx, gl_api api)
 {
 	initialize_context_to_defaults(ctx, api);
 
@@ -177,9 +168,16 @@ static void initialize_context(struct gl_context *ctx, gl_api api)
 	ctx->Driver.NewShader = _mesa_new_shader;
 }
 
-/* Returned string will have 'ctx' as its ralloc owner. */
-static char *
-load_text_file(void *ctx, const char *file_name)
+void test_usage_fail(const char *name)
+{
+
+	const char *header = "%s - run tests for certain shader\n"
+			"usage: %s <file.vert | file.geom | file.frag>\n";
+	printf(header, name, name);
+	exit(EXIT_FAILURE);
+}
+
+char* test_load_text_file(void *ctx, const char *file_name)
 {
 	char *text = NULL;
 	size_t size;
@@ -217,160 +215,4 @@ load_text_file(void *ctx, const char *file_name)
 	fclose(fp);
 
 	return text;
-}
-
-int dump_ast = 0;
-int dump_hir = 0;
-int dump_lir = 0;
-int do_link = 0;
-
-const struct option compiler_opts[] = {
-	{
-		"dump-ast",
-		no_argument,
-		&dump_ast,
-		1 },
-	{
-		"dump-hir",
-		no_argument,
-		&dump_hir,
-		1 },
-	{
-		"dump-lir",
-		no_argument,
-		&dump_lir,
-		1 },
-	{
-		"version",
-		required_argument,
-		NULL,
-		'v' },
-	{
-		NULL,
-		0,
-		NULL,
-		0 } };
-
-/**
- * \brief Print proper usage and exit with failure.
- */
-void usage_fail(const char *name)
-{
-
-	const char *header =
-			"usage: %s [options] <file.vert | file.geom | file.frag>\n"
-					"\n"
-					"Possible options are:\n";
-	printf(header, name, name);
-	for (const struct option *o = compiler_opts; o->name != 0; ++o) {
-		printf("    --%s\n", o->name);
-	}
-	exit(EXIT_FAILURE);
-}
-
-int main(int argc, char **argv)
-{
-	//_mesa_glsl_debug = 1;
-	int status = EXIT_SUCCESS;
-	struct gl_context local_ctx;
-	struct gl_context *ctx = &local_ctx;
-	bool glsl_es = false;
-	int glsl_version = 150;
-
-	setMaxDebugOutputLevel(DBGLVL_ALL);
-
-	int c;
-	int idx = 0;
-	while ((c = getopt_long(argc, argv, "", compiler_opts, &idx)) != -1) {
-		switch (c) {
-		case 'v':
-			glsl_version = strtol(optarg, NULL, 10);
-			switch (glsl_version) {
-			case 100:
-			case 300:
-				glsl_es = true;
-				break;
-			case 110:
-			case 120:
-			case 130:
-			case 140:
-			case 150:
-			case 330:
-				glsl_es = false;
-				break;
-			default:
-				fprintf(stderr, "Unrecognized GLSL version `%s'\n", optarg);
-				usage_fail(argv[0]);
-				break;
-			}
-			break;
-		default:
-			break;
-		}
-	}
-
-	if (argc <= optind)
-		usage_fail(argv[0]);
-
-	initialize_context(ctx, (glsl_es) ? API_OPENGLES2 : API_OPENGL_COMPAT);
-
-	struct gl_shader_program *whole_program;
-
-	whole_program = rzalloc (NULL, struct gl_shader_program);
-	assert(whole_program != NULL);
-	whole_program->InfoLog = ralloc_strdup(whole_program, "");
-
-	for (/* empty */; argc > optind; optind++) {
-		whole_program->Shaders = reralloc(whole_program, whole_program->Shaders,
-				struct gl_shader *, whole_program->NumShaders + 1);
-		assert(whole_program->Shaders != NULL);
-
-		struct gl_shader *shader = rzalloc(whole_program, gl_shader);
-
-		whole_program->Shaders[whole_program->NumShaders] = shader;
-		whole_program->NumShaders++;
-
-		const unsigned len = strlen(argv[optind]);
-		if (len < 6)
-			usage_fail(argv[0]);
-
-		const char * const ext = &argv[optind][len - 5];
-		if (strncmp(".vert", ext, 5) == 0 || strncmp(".glsl", ext, 5) == 0)
-			shader->Type = GL_VERTEX_SHADER;
-		else if (strncmp(".geom", ext, 5) == 0)
-			shader->Type = GL_GEOMETRY_SHADER;
-		else if (strncmp(".frag", ext, 5) == 0)
-			shader->Type = GL_FRAGMENT_SHADER;
-		else
-			usage_fail(argv[0]);
-
-		shader->Source = load_text_file(whole_program, argv[optind]);
-		if (shader->Source == NULL) {
-			printf("File \"%s\" does not exist.\n", argv[optind]);
-			exit(EXIT_FAILURE);
-		}
-
-		char* old_locale = setlocale(LC_NUMERIC, NULL);
-		setlocale(LC_NUMERIC, "POSIX");
-		compile_shader(ctx, shader, 0);
-		setlocale(LC_NUMERIC, old_locale);
-
-		printf("\n");
-		printShaderIr(shader);
-
-		if (strlen(shader->InfoLog) > 0)
-			printf("Info log for %s:\n%s\n", argv[optind], shader->InfoLog);
-
-		if (!shader->CompileStatus) {
-			status = EXIT_FAILURE;
-			break;
-		}
-
-	}
-
-	ralloc_free(whole_program);
-	_mesa_glsl_release_types();
-	_mesa_glsl_release_builtin_functions();
-
-	return status;
 }

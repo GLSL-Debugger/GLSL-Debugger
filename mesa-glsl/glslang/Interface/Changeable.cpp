@@ -9,6 +9,7 @@
 #include <string.h>
 #include <map>
 #include "ir.h"
+#include "ast.h"
 
 typedef std::map<ast_declaration*, ShVariable*> VariableMap;
 
@@ -100,7 +101,7 @@ static const char* getShTypeString(ShVariable *v)
 
 variableQualifier qualifierToNative(ast_type_qualifier* qualifier, bool is_parameter)
 {
-	variableQualifier qual = SH_NONE;
+	int qual = SH_UNSET;
 	qual |= qualifier->flags.q.uniform * SH_UNIFORM;
 	qual |= qualifier->flags.q.in * SH_IN;
 	qual |= qualifier->flags.q.out * SH_OUT;
@@ -111,7 +112,7 @@ variableQualifier qualifierToNative(ast_type_qualifier* qualifier, bool is_param
 	if (!qual)
 		qual = SH_GLOBAL;
 
-	return qual;
+	return (variableQualifier)qual;
 	/* TODO: not sure about origin
 		SH_BUILTIN_READ
 		SH_BUILTIN_WRITE

@@ -1302,6 +1302,9 @@ ast_iteration_statement::ast_iteration_statement(int mode,
    this->condition = condition;
    this->rest_expression = rest_expression;
    this->body = body;
+#ifdef AST_DEBUG_STATE
+   debug_state_internal = ast_dbg_loop_unset;
+#endif
 }
 
 

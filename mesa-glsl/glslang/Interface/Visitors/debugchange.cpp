@@ -87,7 +87,7 @@ static void traverse_func_param( ir_variable* ir )
 		return;
 
 	ShChangeableList* node_cgbl = get_changeable_list(ir);
-	ShVariable* var = irToShVariable(ir);
+	ShVariable* var = NULL; // irToShVariable(ir);
 	if( node_cgbl->numChangeables == 0 ){
 		VPRINT( 2, "(%s) change FuncParam -> created %i %s\n",
 				FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, ir->name );
@@ -228,7 +228,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_variable* ir)
     if (this->isActive()) {
     	ir_variable* node = ir->variable_referenced();
     	ShChangeableList* node_cgbl = get_changeable_list(node);
-    	ShVariable* var = findShVariableFromSource(node);
+    	ShVariable* var = NULL; // findShVariableFromSource(node);
     	if (node_cgbl->numChangeables == 0) {
             VPRINT(2, "(%s) changeSymbol -> created %i %s\n",
                     FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, node->name);

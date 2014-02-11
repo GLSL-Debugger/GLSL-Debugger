@@ -10,6 +10,7 @@
 #include "traverse.h"
 #include "ShaderLang.h"
 #include "glslang/Interface/IRScope.h"
+#include "ast.h"
 
 class ast_debugvar_traverser_visitor : public ast_traverse_visitor {
 public:

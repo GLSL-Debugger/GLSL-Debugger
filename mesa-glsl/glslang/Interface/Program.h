@@ -9,7 +9,8 @@
 
 #include "ShaderLang.h"
 
-struct gl_shader;
+struct AstShader;
+struct gl_context;
 
 void clearTraverseDebugJump(void);
 DbgResult* ShaderTraverse(struct gl_shader* shader, int debugOptions, int dbgBh);
@@ -18,6 +19,10 @@ void printShaderIr(struct gl_shader* shader);
 bool compileShaderCode(struct gl_shader* shader);
 bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
 		ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code);
+
+
+void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
+						  int debug, ShVariableList *vl);
 
 
 #endif /* PROGRAM_INTERFACE_TO_MESA */

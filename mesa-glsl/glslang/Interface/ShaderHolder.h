@@ -7,6 +7,9 @@
 #ifndef SHADERHOLDER_H_
 #define SHADERHOLDER_H_
 
+#include "mesa/main/mtypes.h"
+struct exec_list;
+
 struct AstShader {
 	exec_list* head;
 	unsigned version;
@@ -20,7 +23,7 @@ struct AstShader {
 struct ShaderHolder {
 	int debug_options;
 	EShLanguage language;
-	AstShader* shaders;
+	AstShader** shaders;
 	unsigned num_shaders;
 	struct gl_context* ctx;
 };

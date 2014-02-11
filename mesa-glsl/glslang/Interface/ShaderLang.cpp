@@ -15,6 +15,7 @@
 #include "glsl/glsl_symbol_table.cpp"
 #include "glsl/program.h"
 #include "glsl/ralloc.h"
+#include "glsl/ast.h"
 #include "mesa/main/mtypes.h"
 
 #include "glsldb/utils/notify.h"
@@ -75,7 +76,7 @@ int addShVariableList(ShVariableList *vl, exec_list* list,
 	int count = 0;
 	foreach_list(node, list) {
 		ast_node *ast = exec_node_data(ast_node, node, link);
-		ast_declarator_list* dlist = reinterpret_cast<ast_declarator_list*>(ast);
+		ast_declarator_list* dlist = ast->as_declarator_list();
 		if (!dlist)
 			continue;
 
@@ -154,10 +155,10 @@ int ShInitialize( )
 //
 ShHandle ShConstructCompiler(const EShLanguage language, int debugOptions)
 {
-	ShaderHolder* holder = new ShaderHolder;
+	ShaderHolder* holder = rzalloc(NULL, struct ShaderHolder);
 	holder->language = language;
 	holder->debug_options = debugOptions;
-	holder->ctx = new struct gl_context;
+	holder->ctx = rzalloc(holder, struct gl_context);
 	initialize_context_to_defaults( holder->ctx,
 					( glsl_es ) ? API_OPENGLES2 : API_OPENGL_COMPAT );
 	return reinterpret_cast< void* >( holder );
@@ -237,9 +238,12 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 
 	bool success = true;
 	for (int shnum = 0; numStrings > shnum; shnum++) {
-		holder->shaders = reralloc(holder->ctx, holder->shaders,
-						struct AstShader, holder->num_shaders + 1);
-		AstShader* shader = &holder->shaders[holder->num_shaders++];
+		holder->shaders = reralloc(holder, holder->shaders,
+						struct AstShader*, holder->num_shaders + 1);
+		AstShader* shader = rzalloc(holder, struct AstShader);
+		holder->shaders[holder->num_shaders] = shader;
+		holder->num_shaders++;
+
 		shader->source = shaderStrings[shnum];
 
 		switch (holder->language) {
@@ -284,8 +288,7 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 		return 0;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
-	struct gl_shader* shader = holder->program->Shaders[0];
-
+	AstShader* shader = holder->shaders[0];
 
 //	switch( holder->language ){
 //		case EShLangVertex:
@@ -299,7 +302,7 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 //			break;
 //	}
 
-	result = ShaderTraverse( shader, debugOptions, dbgBh );
+//	result = ShaderTraverse( shader, debugOptions, dbgBh );
 	return result;
 
 }
@@ -314,11 +317,11 @@ char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableLi
 		return 0;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
-	struct gl_shader* shader = holder->program->Shaders[0];
+	AstShader* shader = holder->shaders[0];
 	char* prog = NULL;
 
 	// Generate code
-	compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
+//	compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
 	return prog;
 }
 
@@ -343,16 +346,16 @@ int ShLink(const ShHandle linkHandle, const ShHandle compHandles[], const int nu
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( linkHandle );
 
-	if( holder->program == 0 )
-		return 0;
+//	if( holder->program == 0 )
+//		return 0;
+//
+//	link_shaders( holder->ctx, holder->program );
+//	int status = ( holder->program->LinkStatus ) ? EXIT_SUCCESS : EXIT_FAILURE;
+//
+//	if( strlen( holder->program->InfoLog ) > 0 )
+//		printf( "Info log for linking:\n%s\n", holder->program->InfoLog );
 
-	link_shaders( holder->ctx, holder->program );
-	int status = ( holder->program->LinkStatus ) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-	if( strlen( holder->program->InfoLog ) > 0 )
-		printf( "Info log for linking:\n%s\n", holder->program->InfoLog );
-
-	return status;
+	return 0; //status;
 }
 
 //
@@ -365,8 +368,9 @@ const char* ShGetInfoLog(const ShHandle handle)
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 
-	if( holder->program == 0 )
-		return 0;
-
-	return holder->program->InfoLog;
+//	if( holder->program == 0 )
+//		return 0;
+//
+//	return holder->program->InfoLog;
+	return NULL;
 }

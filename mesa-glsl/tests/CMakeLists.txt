@@ -1,4 +1,4 @@
 
 
-add_executable(glsl_locations_test locations.cpp)
-target_link_libraries(glsl_locations_test glsl_mesa_interface utils)
+add_executable(glsl_tests runner.cpp misc.cpp)
+target_link_libraries(glsl_tests glsl_mesa_interface utils)
