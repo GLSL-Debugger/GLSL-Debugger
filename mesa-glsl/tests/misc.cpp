@@ -168,15 +168,6 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 	ctx->Driver.NewShader = _mesa_new_shader;
 }
 
-void test_usage_fail(const char *name)
-{
-
-	const char *header = "%s - run tests for certain shader\n"
-			"usage: %s <file.vert | file.geom | file.frag>\n";
-	printf(header, name, name);
-	exit(EXIT_FAILURE);
-}
-
 char* test_load_text_file(void *ctx, const char *file_name)
 {
 	char *text = NULL;
