@@ -5,23 +5,19 @@
  */
 
 #include "ir.h"
-#include "IRScope.h"
+#include "ASTScope.h"
 #include <map>
 #include "glsldb/utils/dbgprint.h"
 
 namespace {
-	typedef std::map< ir_instruction*, scopeList* > ScopeMap;
-	typedef std::map< ir_instruction*, ShChangeableList* > ChangeableListMap;
-	typedef std::map< exec_list*, ShChangeableList* > ChangeableExecListMap;
+	typedef std::map< ast_node*, scopeList* > ScopeMap;
+	typedef std::map< ast_node*, ShChangeableList* > ChangeableListMap;
 	ScopeMap scopes;
-	ChangeableExecListMap changeable_exec_lists;
 	ChangeableListMap changeable_lists;
 	ChangeableListMap changeable_param_lists;
 }
 
-
-
-scopeList* get_scope( ir_instruction* ir )
+scopeList* get_scope( ast_node* ir )
 {
 	ScopeMap::iterator it = scopes.find(ir);
 	if( it != scopes.end() )
@@ -29,29 +25,15 @@ scopeList* get_scope( ir_instruction* ir )
 	return NULL;
 }
 
-void set_scope( ir_instruction* ir, scopeList* list )
+void set_scope( ast_node* ir, scopeList* list )
 {
 	if (!ir)
 		return;
 	scopes[ir] = list;
 }
 
-ShChangeableList* get_changeable_list( exec_list* list )
-{
-	ChangeableExecListMap::iterator it = changeable_exec_lists.find(list);
-	if( it != changeable_exec_lists.end() )
-		return it->second;
-
-	// Create new
-	ShChangeableList* l = new ShChangeableList();
-	l->changeables = NULL;
-	l->numChangeables = 0;
-	changeable_exec_lists[list] = l;
-	return l;
-}
-
 // TODO: There a leak
-ShChangeableList* get_changeable_list( ir_instruction* ir )
+ShChangeableList* get_changeable_list( ast_node* ir )
 {
 	ChangeableListMap::iterator it = changeable_lists.find(ir);
 	if( it != changeable_lists.end() )
@@ -65,7 +47,7 @@ ShChangeableList* get_changeable_list( ir_instruction* ir )
 	return l;
 }
 
-ShChangeableList* get_changeable_paramerers_list( ir_instruction* ir )
+ShChangeableList* get_changeable_paramerers_list( ast_node* ir )
 {
 	ChangeableListMap::iterator it = changeable_param_lists.find(ir);
 	if( it != changeable_param_lists.end() )

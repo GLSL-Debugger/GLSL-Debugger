@@ -70,20 +70,19 @@ static void initialize_context(struct gl_context *ctx, const TBuiltInResource* r
 	ctx->Extensions.ARB_geometry_shader4 = (GLboolean)resources->geoShaderSupported;
 }
 
-int addShVariableList(ShVariableList *vl, exec_list* list,
-		struct _mesa_glsl_parse_state *state)
+int addShVariableList(ShVariableList *vl, AstShader* shader)
 {
 	int count = 0;
-	foreach_list(node, list) {
+	foreach_list(node, shader->head) {
 		ast_node *ast = exec_node_data(ast_node, node, link);
 		ast_declarator_list* dlist = ast->as_declarator_list();
 		if (!dlist)
 			continue;
-
-		const char *type_name = NULL;
-		const struct glsl_type *type = dlist->type->specifier->glsl_type(
-				&type_name, state);
-		count += addShVariables(vl, dlist, type);
+		foreach_list_typed (ast_declaration, decl, link, &dlist->declarations){
+			ShVariable* var = findShVariableFromSource(decl);
+			addShVariable(vl, var, strncmp(decl->identifier, "gl_", 3 ) == 0);
+			count++;
+		}
 	}
 
 	return count;
@@ -109,14 +108,6 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 
 	shader->head = &state->translation_unit;
 
-//	if (dump_ast) {
-//		foreach_list_const(n, &state->translation_unit) {
-//			ast_node *ast = exec_node_data(ast_node, n, link);
-//			ast->print();
-//		}
-//		printf("\n\n");
-//	}
-
 	// TODO: locations print
 	//printShaderIr(shader);
 	//   foreach_list_typed (ast_node, ast, link, & state->translation_unit)
@@ -127,16 +118,13 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 	shader->version = state->language_version;
 	shader->is_es = state->es_shader;
 
-	// Add global variables from ast tree
-	if (!state->error)
-		addShVariableList(vl, shader->head, state);
+	/* Check side effects, discards, vertex emits */
+	ast_sideeffects_traverser_visitor sideeffects(state);
+	sideeffects.visit(shader->head);
 
 	// TODO: steal memory
 	//ralloc_free(state);
 
-	/* Check side effects, discards, vertex emits */
-	//ast_sideeffects_traverser_visitor sideeffects;
-	//sideeffects.visit(shader->head);
 	return;
 }
 
@@ -270,6 +258,9 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 			success = shader->compile_status;
 			break;
 		}
+
+		// Add global variables from ast tree
+		addShVariableList(vl, shader);
 
 		// Traverse tree for scope and variable processing
 		// Each node gets data holding list of variables changes with this

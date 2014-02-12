@@ -11,7 +11,7 @@
 #include "ir.h"
 #include "ast.h"
 
-typedef std::map<ast_declaration*, ShVariable*> VariableMap;
+typedef std::map<ast_node*, ShVariable*> VariableMap;
 
 namespace {
 std::map<int, ShVariable*> VariablesById;
@@ -613,8 +613,7 @@ void freeShVariableList(ShVariableList *vl)
 }
 
 ShVariable* glsltypeToShVariable(const struct glsl_type* vtype,
-		const char* name, variableQualifier qualifier, unsigned modifier =
-				SH_VM_NONE)
+		const char* name, ast_type_qualifier* qualifier)
 {
 	ShVariable *v = NULL;
 	v = (ShVariable*) malloc(sizeof(ShVariable));
@@ -646,10 +645,15 @@ ShVariable* glsltypeToShVariable(const struct glsl_type* vtype,
 #undef SET_TYPE
 
 	// Qualifier of variable
-	v->qualifier = qualifier;
+	v->qualifier = qualifierToNative(qualifier, false);
 
 	// Varying modifier
-	v->varyingModifier = modifier;
+	v->varyingModifier = SH_VM_NONE;
+	v->varyingModifier |= qualifier->flags.q.invariant * SH_VM_INVARIANT;
+	v->varyingModifier |= qualifier->flags.q.flat * SH_VM_FLAT;
+	v->varyingModifier |= qualifier->flags.q.smooth * SH_VM_SMOOTH;
+	v->varyingModifier |= qualifier->flags.q.noperspective * SH_VM_NOPERSPECTIVE;
+	v->varyingModifier |= qualifier->flags.q.centroid * SH_VM_CENTROID;
 
 	// Scalar/Vector size
 	v->size = vtype->components();
@@ -687,36 +691,33 @@ ShVariable* glsltypeToShVariable(const struct glsl_type* vtype,
 	return v;
 }
 
-
-
-int addShVariables(ShVariableList* vl, ast_declarator_list* list, const struct glsl_type * decl_type)
+ShVariable* astToShVariable(ast_node* decl, ast_type_qualifier* qualifier,
+							const struct glsl_type* decl_type)
 {
-	int count = 0;
+	if (!decl)
+		return NULL;
 
-	foreach_list_typed (ast_declaration, decl, link, &list->declarations) {
-		ShVariable *var = NULL;
-		VariableMap::iterator it = VariablesBySource.find(decl);
-		if (it != VariablesBySource.end()){
-			var = it->second;
-		} else {
-			variableQualifier qualifier = qualifierToNative(&list->type->qualifier, false);
-			unsigned modifier = 0;
-			modifier |= list->type->qualifier.flags.q.invariant * SH_VM_INVARIANT;
-			modifier |=	list->type->qualifier.flags.q.flat * SH_VM_FLAT;
-			modifier |= list->type->qualifier.flags.q.smooth * SH_VM_SMOOTH;
-			modifier |= list->type->qualifier.flags.q.noperspective * SH_VM_NOPERSPECTIVE;
-			modifier |= list->type->qualifier.flags.q.centroid * SH_VM_CENTROID;
-			var = glsltypeToShVariable(decl_type, decl->identifier, qualifier, modifier);
-			var->uniqueId = VariablesCount++;
-			VariablesById[var->uniqueId] = var;
-			VariablesBySource[decl] = var;
-		}
+	VariableMap::iterator it = VariablesBySource.find(decl);
+	if (it != VariablesBySource.end())
+		return it->second;
 
-		addShVariable(vl, var, strncmp(decl->identifier, "gl_", 3 ) == 0);
-		count++;
-	}
+	const char* identifier;
+	ast_declaration* as_decl = decl->as_declaration();
+	ast_parameter_declarator* as_param = decl->as_parameter_declarator();
 
-	return count;
+	if (as_decl)
+		identifier = as_decl->identifier;
+	else if(as_param)
+		identifier = as_param->identifier;
+	else
+		return NULL;
+
+	ShVariable *var = glsltypeToShVariable(decl_type, identifier, qualifier);
+	var->uniqueId = VariablesCount++;
+	VariablesById[var->uniqueId] = var;
+	VariablesBySource[decl] = var;
+
+	return var;
 }
 
 void ShDumpVariable(ShVariable *v, int depth)
@@ -788,10 +789,12 @@ ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name)
 	return NULL;
 }
 
-ShVariable* findShVariableFromSource(ast_declaration* variable)
+ShVariable* findShVariableFromSource(ast_node* node)
 {
-	VariableMap::iterator it = VariablesBySource.find(variable);
-	if (it != VariablesBySource.end())
-		return it->second;
+	if (node && (node->as_declaration() || node->as_parameter_declarator())){
+		VariableMap::iterator it = VariablesBySource.find(node);
+		if (it != VariablesBySource.end())
+			return it->second;
+	}
 	return NULL;
 }

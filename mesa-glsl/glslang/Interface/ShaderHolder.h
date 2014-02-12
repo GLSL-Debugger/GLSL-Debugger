@@ -7,8 +7,10 @@
 #ifndef SHADERHOLDER_H_
 #define SHADERHOLDER_H_
 
+#include "ShaderLang.h"
 #include "mesa/main/mtypes.h"
 struct exec_list;
+
 
 struct AstShader {
 	exec_list* head;

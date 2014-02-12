@@ -9,158 +9,157 @@
 #include "glsldb/utils/dbgprint.h"
 #include <algorithm>
 
-static void traverse_block( exec_list* list, ir_debugvar_traverser_visitor* it )
+bool ast_debugvar_traverser_visitor::traverse(class ast_expression* node)
 {
-	it->depth++;
-	if( !list->is_empty() ){
-		scopeList& scope = it->getScope();
-
-		// remember end of actual scope
-		scopeList::iterator end;
-		int restoreScope = scope.size();
-		if( restoreScope )
-			end = --( scope.end() );
-
-		it->visit( list );
-
-		// restore global scope list
-		if( restoreScope )
-			scope.erase( ++end, scope.end() );
-		else
-			scope.erase( scope.begin(), scope.end() );
-	}
-	it->depth--;
+	set_scope(node, getCopyOfScope());
+	return true;
 }
 
-
-void ir_debugvar_traverser_visitor::addToScope(int id)
+bool ast_debugvar_traverser_visitor::traverse(class ast_expression_bin* node)
 {
-    // Double ids can only occur with arrays of undeclared size.
-    // Scope is of outer bound, as those variables can be used right after
-    // their first definition.
-
-    // search for doubles
-    scopeList::iterator e = std::find(scope.begin(), scope.end(), id);
-
-    // only insert if not already in there
-    if (e == scope.end())
-        scope.push_back(id);
+	set_scope(node, getCopyOfScope());
+	return true;
 }
 
-void ir_debugvar_traverser_visitor::dumpScope(void)
+bool ast_debugvar_traverser_visitor::traverse(
+		class ast_aggregate_initializer* node)
 {
-	if( scope.empty() )
-		return;
-
-	for( scopeList::iterator li = scope.begin(), end = scope.end(); li != end; ++li ) {
-    	int uid = *li;
-        ShVariable* v = findShVariableFromId(vl, uid);
-        if ( !v ) {
-            dbgPrint(DBGLVL_ERROR, "DebugVar - <%i,?> ", uid);
-            exit(1);
-        }
-
-        VPRINT(4, "<%i,%s> ", uid, v->name);
-    }
-    VPRINT(4, "\n");
+	set_scope(node, getCopyOfScope());
+	return true;
 }
 
-scopeList* ir_debugvar_traverser_visitor::getCopyOfScope(void)
+bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
 {
-	// Hiding of variables in outer scope by local definitions is
-    // implemented here. Out of all variables named the same, only the last
-    // one is copied to the list!
-    scopeList *copiedList = new scopeList();
-    scopeList::reverse_iterator rit = scope.rbegin();
+	ShVariable* var = findShVariableFromSource(node);
 
-    // FIXME: It looks like some weird things happens here.
-	// first we iterate scope here and vl in findShVar..,
-	// next we iterate in nameIsAlreadyInList and then we
-	// iterate things again in calls there. It must be rewritten somehow.
-    while (rit != scope.rend()) {
-        // Check if variable with same name is already in copiedList
-        ShVariable *v = findShVariableFromId(vl, *rit);
-        if (!nameIsAlreadyInList(copiedList, v->name))
-            copiedList->push_front(*rit);
-        rit++;
-    }
-
-    return copiedList;
-}
-
-static void process_initializer(ir_constant* ir, ir_debugvar_traverser_visitor* it)
-{
-	if( !ir )
-		return;
-
-	ir->accept(it);
-	scopeList *sl = get_scope(ir);
-	if( sl ){
-		/*
-		 * Actually do not add declared variable to the list here, because
-		 * Code Generation would access the data before it is declared. This should
-		 * not be needed anyway, since the data would be uninitialized
-		 *
-		 // Dont forget to check for double ids
-		 scopeList::iterator e = find(sl->begin(), sl->end(), v->getUniqueId());
-
-		 // Finally at it to the list
-		 if (e == sl->end()) {
-		 sl->push_back(v->getUniqueId());
-		 }
-		 */
-	}else{
-		dbgPrint( DBGLVL_ERROR, "DebugVar - declaration with initialization failed\n" );
-		exit( 1 );
-	}
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_variable* ir)
-{
-	ShVariable* var = NULL; // irToShVariable( ir );
+	assert(var);
 
 	VPRINT(3, "%c%sdeclaration of %s <%i>%c%s\n", ESC_CHAR, ESC_BOLD,
-				ir->name, var->uniqueId, ESC_CHAR, ESC_RESET);
+			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
 
-    // Add variable to the global list of all seen variables
-    addShVariable(vl, var, 0);
+	// Add variable to the global list of all seen variables
+	addShVariable(vl, var, 0);
 
-    //TODO: initializer
-//    process_initializer(ir->constant_value, this);
-//    process_initializer(ir->constant_initializer, this);
+	if(node->initializer){
+		node->initializer->accept(this);
+		scopeList *sl = get_scope(node->initializer);
+		if (sl) {
+			/*
+			 * Actually do not add declared variable to the list here, because
+			 * Code Generation would access the data before it is declared. This should
+			 * not be needed anyway, since the data would be uninitialized
+			 *
+			 // Dont forget to check for double ids
+			 scopeList::iterator e = find(sl->begin(), sl->end(), v->getUniqueId());
+
+			 // Finally at it to the list
+			 if (e == sl->end()) {
+			 sl->push_back(v->getUniqueId());
+			 }
+			 */
+		} else {
+			dbgPrint( DBGLVL_ERROR,
+					"DebugVar - declaration with initialization failed\n");
+			exit(1);
+		}
+	}
 
 	// Now add the list to the actual scope and proceed
-    // Prevent temporary variables to get in scope
-    if( ir->data.mode != ir_var_temporary ){
-    	addToScope( var->uniqueId );
-    	dumpScope();
-    }else
-    	VPRINT(4, "Variable is temporary. Scope not affected.\n");
+	addToScope(var->uniqueId);
+	dumpScope();
+	return false;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(
+		class ast_parameter_declarator* node)
+{
+	assert(0);
+	ShVariable* v = findShVariableFromSource(node);
+	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
+			node->identifier, v->uniqueId, ESC_CHAR, ESC_RESET);
+	addShVariable(getVariableList(), v, 0);
+	addToScope(v->uniqueId);
+	dumpScope();
+	return false;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(class ast_case_statement* node)
+{
+	set_scope(node, getCopyOfScope());
+	return true;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(
+		class ast_selection_statement* node)
+{
+	// nothing can be declared here in first place
+	set_scope(node, getCopyOfScope());
+	return true;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(class ast_switch_statement* node)
+{
+	// nothing can be declared here in first place
+	set_scope(node, getCopyOfScope());
+	return true;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(
+		class ast_iteration_statement* node)
+{
+	// declarations made in the initialization are not in scope of the loop
+	set_scope(node, getCopyOfScope());
+
+	// remember end of actual scope, initialization only changes scope of body
+	scopeList::iterator end;
+	int restoreScope = scope.size();
+	if (restoreScope)
+		end = --(scope.end());
+
+	depth++;
+	// visit optional initialization
+	if (node->init_statement)
+		node->init_statement->accept(this);
+
+	// visit test, this cannot change scope anyway, so order is unimportant
+	if (node->condition)
+		node->condition->accept(this);
+
+	// visit optional terminal, this cannot change the scope either
+	if (node->rest_expression)
+		node->rest_expression->accept(this);
+
+	// visit body
+	if (node->body)
+		node->body->accept(this);
+
+	depth--;
+
+	// restore global scope list
+	if (restoreScope)
+		scope.erase(++end, scope.end());
+	else
+		scope.erase(scope.begin(), scope.end());
 
 	return false;
 }
 
-static void traverse_func_param( ir_variable* ir, ir_debugvar_traverser_visitor* it )
+bool ast_debugvar_traverser_visitor::traverse(class ast_jump_statement* node)
 {
-	if( !ir )
-		return;
-
-	ShVariable* v = NULL;// irToShVariable(ir);
-
-	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
-					ir->name, v->uniqueId, ESC_CHAR, ESC_RESET);
-
-	addShVariable( it->getVariableList(), v, 0 );
-	it->addToScope( v->uniqueId );
-	it->dumpScope();
+	set_scope(node, getCopyOfScope());
+	return true;
 }
 
-bool ir_debugvar_traverser_visitor::visitIr(ir_function_signature *ir)
+bool ast_debugvar_traverser_visitor::traverse(
+		class ast_function_definition* node)
 {
-	set_scope( ir, getCopyOfScope() );
-	VPRINT(3, "%c%sbegin function signature %s at %s %c%s\n", ESC_CHAR, ESC_BOLD,
-					ir->function_name(), FormatSourceRange(ir->yy_location).c_str(),
-					ESC_CHAR, ESC_RESET);
+	set_scope(node, getCopyOfScope());
+	const char* name = node->prototype->identifier;
+	const char* range = FormatSourceRange(node->get_location()).c_str();
+
+	// FIXME: function without prototype
+	VPRINT(3,
+			"%c%sbegin function signature %s at %s %c%s\n", ESC_CHAR, ESC_BOLD, name, range, ESC_CHAR, ESC_RESET);
 
 	int restoreScope = scope.size();
 	scopeList::iterator end;
@@ -168,126 +167,98 @@ bool ir_debugvar_traverser_visitor::visitIr(ir_function_signature *ir)
 		end = --(scope.end());
 
 	depth++;
-	foreach_list(node, &ir->parameters){
-		traverse_func_param(((ir_instruction*) node)->as_variable(), this);
+	this->visit(&node->prototype->parameters);
+
+	if (node->body)
+		node->body->accept(this);
+	depth--;
+
+	VPRINT(3,
+			"%c%send function signature %s at %s %c%s\n", ESC_CHAR, ESC_BOLD, name, range, ESC_CHAR, ESC_RESET);
+
+	// restore global scope list
+	if (restoreScope)
+		scope.erase(++end, scope.end());
+	else
+		scope.erase(scope.begin(), scope.end());
+
+	return false;
+}
+
+void ast_debugvar_traverser_visitor::addToScope(int id)
+{
+	// Double ids can only occur with arrays of undeclared size.
+	// Scope is of outer bound, as those variables can be used right after
+	// their first definition.
+
+	// search for doubles
+	scopeList::iterator e = std::find(scope.begin(), scope.end(), id);
+
+	// only insert if not already in there
+	if (e == scope.end())
+		scope.push_back(id);
+}
+
+void ast_debugvar_traverser_visitor::dumpScope(void)
+{
+	if (scope.empty())
+		return;
+
+	for (scopeList::iterator li = scope.begin(), end = scope.end(); li != end;
+			++li) {
+		int uid = *li;
+		ShVariable* v = findShVariableFromId(vl, uid);
+		if (!v) {
+			dbgPrint(DBGLVL_ERROR, "DebugVar - <%i,?> ", uid);
+			exit(1);
+		}
+
+		VPRINT(4, "<%i,%s> ", uid, v->name);
+	}
+	VPRINT(4, "\n");
+}
+
+scopeList* ast_debugvar_traverser_visitor::getCopyOfScope(void)
+{
+	// Hiding of variables in outer scope by local definitions is
+	// implemented here. Out of all variables named the same, only the last
+	// one is copied to the list!
+	scopeList *copiedList = new scopeList();
+	scopeList::reverse_iterator rit = scope.rbegin();
+
+	// FIXME: It looks like some weird things happens here.
+	// first we iterate scope here and vl in findShVar..,
+	// next we iterate in nameIsAlreadyInList and then we
+	// iterate things again in calls there. It must be rewritten somehow.
+	while (rit != scope.rend()) {
+		// Check if variable with same name is already in copiedList
+		ShVariable *v = findShVariableFromId(vl, *rit);
+		if (!nameIsAlreadyInList(copiedList, v->name))
+			copiedList->push_front(*rit);
+		rit++;
 	}
 
-	this->visit(&ir->body);
-	depth--;
+	return copiedList;
+}
 
-	VPRINT(3, "%c%send function signature %s at %s %c%s\n", ESC_CHAR, ESC_BOLD,
-					ir->function_name(), FormatSourceRange(ir->yy_location).c_str(),
-					ESC_CHAR, ESC_RESET);
+bool ast_debugvar_traverser_visitor::nameIsAlreadyInList(scopeList* l,
+		const char* name)
+{
+	scopeList::iterator it = l->begin();
 
-	// restore global scope list
-	if( restoreScope )
-		scope.erase( ++end, scope.end() );
-	else
-		scope.erase( scope.begin(), scope.end() );
+	while (it != l->end()) {
+		ShVariable *v = findShVariableFromId(vl, *it);
+		if (v) {
+			if (!strcmp(name, v->name))
+				return true;
+		} else {
+			dbgPrint(DBGLVL_ERROR,
+					"DebugVar - could not find id %i in scopeList\n", *it);
+			exit(1);
+		}
+		it++;
+	}
 
 	return false;
 }
 
-bool ir_debugvar_traverser_visitor::visitIr(ir_expression* ir)
-{
-	if( ir->operation > ir_last_unop )
-		set_scope( ir, getCopyOfScope() );
-    return true;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_assignment* ir)
-{
-	set_scope( ir, getCopyOfScope() );
-	return true;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_return* ir)
-{
-	set_scope( ir, getCopyOfScope() );
-	return true;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_discard* ir)
-{
-	set_scope( ir, getCopyOfScope() );
-	return true;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_if* ir)
-{
-	// nothing can be declared here in first place
-	set_scope( ir,  getCopyOfScope() );
-
-	ir->condition->accept(this);
-	traverse_block(&ir->then_instructions, this);
-	traverse_block(&ir->else_instructions, this);
-
-	return false;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_loop* ir)
-{
-	// declarations made in the initialization are not in scope of the loop
-	set_scope(ir, getCopyOfScope());
-
-	// remember end of actual scope, initialization only changes scope of body
-	scopeList::iterator end;
-	int restoreScope = scope.size();
-	if( restoreScope )
-		end = --( scope.end() );
-
-	depth++;
-	// visit optional initialization
-	this->visit_block(ir->debug_init);
-
-	// visit test, this cannot change scope anyway, so order is unimportant
-	ir_rvalue* check = ir->condition();
-	if (check)
-		check->accept(this);
-
-	// visit optional terminal, this cannot change the scope either
-	this->visit_block(ir->debug_terminal);
-
-	// visit body
-	this->visit(&ir->body_instructions);
-	depth--;
-
-	// restore global scope list
-	if( restoreScope )
-		scope.erase( ++end, scope.end() );
-	else
-		scope.erase( scope.begin(), scope.end() );
-
-	return false;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_loop_jump* ir)
-{
-	set_scope( ir, getCopyOfScope() );
-	return true;
-}
-
-bool ir_debugvar_traverser_visitor::nameIsAlreadyInList(scopeList* l, const char* name)
-{
-    scopeList::iterator it = l->begin();
-
-    while (it != l->end()) {
-        ShVariable *v = findShVariableFromId(vl, *it);
-        if (v) {
-            if (!strcmp(name, v->name))
-                return true;
-        } else {
-            dbgPrint(DBGLVL_ERROR, "DebugVar - could not find id %i in scopeList\n", *it);
-            exit(1);
-        }
-        it++;
-    }
-
-    return false;
-}
-
-bool ir_debugvar_traverser_visitor::visitIr(ir_dummy* ir)
-{
-	set_scope(ir, getCopyOfScope());
-	return false;
-}

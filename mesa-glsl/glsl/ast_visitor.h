@@ -7,20 +7,12 @@
 #ifndef AST_TRAVERSE_VISITOR_H_
 #define AST_TRAVERSE_VISITOR_H_
 
-enum ast_traverser_status {
-	traverse_continue,
-	traverse_continue_with_parent,
-	traverse_stop,
-};
-
 enum ast_traverse_flags {
 	traverse_previsit = 1,
 	traverse_postvisit = 2,
 	traverse_debugvisit = 4
 };
 
-
-typedef enum ast_traverser_status ATS;
 class exec_list;
 
 class ast_traverse_visitor {
@@ -63,33 +55,33 @@ public:
 	virtual void visit(class ast_interface_block *);
 	virtual void visit(class ast_gs_input_layout *);
 
-	virtual ATS traverse(class ast_node *) { return traverse_stop; }
-	virtual ATS traverse(class ast_expression *) { return traverse_continue; }
-	virtual ATS traverse(class ast_expression_bin *) { return traverse_continue; }
-	virtual ATS traverse(class ast_function_expression *) { return traverse_continue; }
-	virtual ATS traverse(class ast_array_specifier *) { return traverse_continue; }
-	virtual ATS traverse(class ast_aggregate_initializer *) { return traverse_continue; }
-	virtual ATS traverse(class ast_compound_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_declaration *) { return traverse_continue; }
-	virtual ATS traverse(class ast_struct_specifier *) { return traverse_continue; }
-	virtual ATS traverse(class ast_type_specifier *) { return traverse_continue; }
-	virtual ATS traverse(class ast_fully_specified_type *) { return traverse_continue; }
-	virtual ATS traverse(class ast_declarator_list *) { return traverse_continue; }
-	virtual ATS traverse(class ast_parameter_declarator *) { return traverse_continue; }
-	virtual ATS traverse(class ast_function *) { return traverse_continue; }
-	virtual ATS traverse(class ast_expression_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_case_label *) { return traverse_continue; }
-	virtual ATS traverse(class ast_case_label_list *) { return traverse_continue; }
-	virtual ATS traverse(class ast_case_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_case_statement_list *) { return traverse_continue; }
-	virtual ATS traverse(class ast_switch_body *) { return traverse_continue; }
-	virtual ATS traverse(class ast_selection_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_switch_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_iteration_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_jump_statement *) { return traverse_continue; }
-	virtual ATS traverse(class ast_function_definition *) { return traverse_continue; }
-	virtual ATS traverse(class ast_interface_block *) { return traverse_continue; }
-	virtual ATS traverse(class ast_gs_input_layout *) { return traverse_continue; }
+	virtual bool traverse(class ast_node *) { return false; }
+	virtual bool traverse(class ast_expression *) { return true; }
+	virtual bool traverse(class ast_expression_bin *) { return true; }
+	virtual bool traverse(class ast_function_expression *) { return true; }
+	virtual bool traverse(class ast_array_specifier *) { return true; }
+	virtual bool traverse(class ast_aggregate_initializer *) { return true; }
+	virtual bool traverse(class ast_compound_statement *) { return true; }
+	virtual bool traverse(class ast_declaration *) { return true; }
+	virtual bool traverse(class ast_struct_specifier *) { return true; }
+	virtual bool traverse(class ast_type_specifier *) { return true; }
+	virtual bool traverse(class ast_fully_specified_type *) { return true; }
+	virtual bool traverse(class ast_declarator_list *) { return true; }
+	virtual bool traverse(class ast_parameter_declarator *) { return true; }
+	virtual bool traverse(class ast_function *) { return true; }
+	virtual bool traverse(class ast_expression_statement *) { return true; }
+	virtual bool traverse(class ast_case_label *) { return true; }
+	virtual bool traverse(class ast_case_label_list *) { return true; }
+	virtual bool traverse(class ast_case_statement *) { return true; }
+	virtual bool traverse(class ast_case_statement_list *) { return true; }
+	virtual bool traverse(class ast_switch_body *) { return true; }
+	virtual bool traverse(class ast_selection_statement *) { return true; }
+	virtual bool traverse(class ast_switch_statement *) { return true; }
+	virtual bool traverse(class ast_iteration_statement *) { return true; }
+	virtual bool traverse(class ast_jump_statement *) { return true; }
+	virtual bool traverse(class ast_function_definition *) { return true; }
+	virtual bool traverse(class ast_interface_block *) { return true; }
+	virtual bool traverse(class ast_gs_input_layout *) { return true; }
 
 
 	int depth;
