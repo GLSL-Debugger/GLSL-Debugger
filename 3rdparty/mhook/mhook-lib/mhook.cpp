@@ -1,4 +1,5 @@
 //Copyright (c) 2007-2008, Marton Anka
+//Copyright (c) 2014, Sir Anthony
 //
 //Permission is hereby granted, free of charge, to any person obtaining a
 //copy of this software and associated documentation files (the "Software"),
@@ -97,6 +98,7 @@ inline void __cdecl odprintf(PCWSTR format, ...) {
 //=========================================================================
 #define MHOOKS_MAX_CODE_BYTES	32
 #define MHOOKS_MAX_RIPS			 4
+#define MHOOKS_MAX_TRAMPOLINES_PER_PAGE 512
 
 //=========================================================================
 // The trampoline structure - stores every bit of info about a hook
@@ -131,10 +133,22 @@ struct MHOOKS_PATCHDATA
 };
 
 //=========================================================================
+// Memory page info
+struct MHOOKS_PAGEINFO
+{
+	char Allocated[MHOOKS_MAX_TRAMPOLINES_PER_PAGE];
+	unsigned LastAllowed;
+	PBYTE FirstItem;
+	MHOOKS_PAGEINFO *Next;
+	MHOOKS_PAGEINFO *Perv;
+};
+
+//=========================================================================
 // Global vars
 static BOOL g_bVarsInitialized = FALSE;
 static CRITICAL_SECTION g_cs;
 static MHOOKS_TRAMPOLINE* g_pHooks[MHOOKS_MAX_SUPPORTED_HOOKS];
+static MHOOKS_PAGEINFO* g_pAllocatedBlocks = NULL;
 static DWORD g_nHooksInUse = 0;
 static HANDLE* g_hThreadHandles = NULL;
 static DWORD g_nThreadHandles = 0;
@@ -251,6 +265,92 @@ static PBYTE EmitJump(PBYTE pbCode, PBYTE pbJumpTo) {
 }
 
 //=========================================================================
+// Internal functions:
+//
+// Memory functions
+//=========================================================================
+static MHOOKS_TRAMPOLINE* TrampolineAllocInNewPage(PBYTE pbAlloc, SIZE_T size)
+{
+	MHOOKS_PAGEINFO* info = NULL;
+	MHOOKS_TRAMPOLINE* trampoline = NULL;
+	int offset = sizeof(MHOOKS_PAGEINFO);
+	int count = (size - offset) / sizeof(MHOOKS_TRAMPOLINE);
+	if (count < 1)
+		return NULL;
+
+	// Allocate new page
+	info = (MHOOKS_PAGEINFO*)VirtualAlloc(pbAlloc, size, MEM_COMMIT|MEM_RESERVE,
+										  PAGE_EXECUTE_READWRITE);
+	if (!info)
+		return NULL;
+
+	HANDLE hProc = GetCurrentProcess();
+	DWORD dwOldProtectMode = 0;
+	// Set real page size and
+	info->LastAllowed = (count > MHOOKS_MAX_TRAMPOLINES_PER_PAGE) ?
+							MHOOKS_MAX_TRAMPOLINES_PER_PAGE : count;
+	if (!g_pAllocatedBlocks) {
+		g_pAllocatedBlocks = info;
+	} else {
+		MHOOKS_PAGEINFO* last = g_pAllocatedBlocks;
+		while (last->Next)
+			last = last->Next;
+
+		// Write new vlock to the list
+		VirtualProtectEx(hProc, last, offset, PAGE_EXECUTE_READWRITE, &dwOldProtectMode);
+		last->Next = info;
+		VirtualProtectEx(hProc, last, offset, dwOldProtectMode, &dwOldProtectMode);
+
+		info->Perv = last;
+	}
+	info->Allocated[0] = 1;
+	info->FirstItem = pbAlloc + offset;
+
+	// Set memory read-only
+
+	VirtualProtectEx(hProc, pbAlloc, size, PAGE_EXECUTE_READ, &dwOldProtectMode);
+	return (MHOOKS_TRAMPOLINE*)info->FirstItem;
+}
+
+static MHOOKS_TRAMPOLINE* TrampolineAllocNum(MHOOKS_PAGEINFO* info, unsigned num)
+{
+	if (num > info->LastAllowed || info->Allocated[num])
+		return NULL;
+
+	SIZE_T info_size = sizeof(MHOOKS_PAGEINFO);
+	SIZE_T block_size = sizeof(MHOOKS_TRAMPOLINE);
+	DWORD dwOldProtectMode = 0;
+	HANDLE hProc = GetCurrentProcess();
+	VirtualProtectEx(hProc, info, info_size, PAGE_EXECUTE_READWRITE, &dwOldProtectMode);
+	info->Allocated[num] = 1;
+	VirtualProtectEx(hProc, info, info_size, dwOldProtectMode, &dwOldProtectMode);
+	return (MHOOKS_TRAMPOLINE*)(info->FirstItem + num * block_size);
+}
+
+static MHOOKS_TRAMPOLINE* TrampolineAllocInPages(PBYTE lower, PBYTE upper)
+{
+	MHOOKS_PAGEINFO* block = g_pAllocatedBlocks;
+	PBYTE pBlock = (PBYTE)block;
+
+	if (!block)
+		return NULL;
+
+	 do {
+		if (pBlock < lower || pBlock > upper)
+			continue;
+		for(unsigned i = 0; i < block->LastAllowed; ++i){
+			if(!block->Allocated[i])
+				return TrampolineAllocNum(block, i);
+		}
+	} while (block = block->Next);
+
+	return NULL;
+}
+
+// TODO: free functions
+
+
+//=========================================================================
 // Internal function:
 //
 // Will try to allocate the trampoline structure within 2 gigabytes of
@@ -274,29 +374,44 @@ static MHOOKS_TRAMPOLINE* TrampolineAlloc(PBYTE pSystemFunction, S64 nLimitUp, S
 			(PBYTE)(pUpper + (DWORD_PTR)0x7ff80000) : (PBYTE)(DWORD_PTR)0xfffffffffff80000;
 		ODPRINTF((L"mhooks: TrampolineAlloc: Allocating for %p between %p and %p", pSystemFunction, pLower, pUpper));
 
-		SYSTEM_INFO sSysInfo =  {0};
-		::GetSystemInfo(&sSysInfo);
+		ODPRINTF((L"mhooks: Find memory in allocated blocks"));
+		pTrampoline = TrampolineAllocInPages(pLower, pUpper);
+		if (!pTrampoline){
+			ODPRINTF((L"mhooks: Not found. Allocating new block"));
 
-		// go through the available memory blocks and try to allocate a chunk for us
-		for (PBYTE pbAlloc = pLower; pbAlloc < pUpper;) {
-			// determine current state
-			MEMORY_BASIC_INFORMATION mbi;
-			ODPRINTF((L"mhooks: TrampolineAlloc: Looking at address %p", pbAlloc));
-			if (!VirtualQuery(pbAlloc, &mbi, sizeof(mbi)))
-				break;
-			// free & large enough?
-			if (mbi.State == MEM_FREE && mbi.RegionSize >= sizeof(MHOOKS_TRAMPOLINE) && mbi.RegionSize >= sSysInfo.dwAllocationGranularity) {
-				// yes, align the pointer to the 64K boundary first
-				pbAlloc = (PBYTE)(ULONG_PTR((ULONG_PTR(pbAlloc) + (sSysInfo.dwAllocationGranularity-1)) / sSysInfo.dwAllocationGranularity) * sSysInfo.dwAllocationGranularity);
-				// and then try to allocate it
-				pTrampoline = (MHOOKS_TRAMPOLINE*)VirtualAlloc(pbAlloc, sizeof(MHOOKS_TRAMPOLINE), MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READ);
-				if (pTrampoline) {
-					ODPRINTF((L"mhooks: TrampolineAlloc: Allocated block at %p as the trampoline", pTrampoline));
+			SYSTEM_INFO sSysInfo =  {0};
+			::GetSystemInfo(&sSysInfo);
+			SIZE_T page_info_size = sizeof(MHOOKS_PAGEINFO);
+			SIZE_T trampoline_size = sizeof(MHOOKS_TRAMPOLINE);
+			SIZE_T min_size = page_info_size + trampoline_size;
+			if (sSysInfo.dwAllocationGranularity > min_size)
+				min_size = sSysInfo.dwAllocationGranularity;
+
+
+			// go through the available memory blocks and try to allocate a chunk for us
+			for (PBYTE pbAlloc = pLower; pbAlloc < pUpper;) {
+				// determine current state
+				MEMORY_BASIC_INFORMATION mbi;
+				ODPRINTF((L"mhooks: TrampolineAlloc: Looking at address %p", pbAlloc));
+				if (!VirtualQuery(pbAlloc, &mbi, sizeof(mbi)))
 					break;
+				// free & large enough?
+				if (mbi.State == MEM_FREE && mbi.RegionSize >= min_size) {
+					// yes, align the pointer to the 64K boundary first
+					pbAlloc = (PBYTE)(ULONG_PTR((ULONG_PTR(pbAlloc) +
+												 (sSysInfo.dwAllocationGranularity-1)
+												 ) / sSysInfo.dwAllocationGranularity
+												) * sSysInfo.dwAllocationGranularity);
+					// and then try to allocate it
+					pTrampoline = TrampolineAllocInNewPage(pbAlloc, min_size);
+					if (pTrampoline) {
+						ODPRINTF((L"mhooks: TrampolineAlloc: Allocated block at %p as the trampoline", pTrampoline));
+						break;
+					}
 				}
+				// continue the search
+				pbAlloc = (PBYTE)mbi.BaseAddress + mbi.RegionSize;
 			}
-			// continue the search
-			pbAlloc = (PBYTE)mbi.BaseAddress + mbi.RegionSize;
 		}
 
 		// found and allocated a trampoline?

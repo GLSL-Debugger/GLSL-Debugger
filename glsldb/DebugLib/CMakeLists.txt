@@ -10,6 +10,7 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	set(DLSYM_SRC libdlsym.c)
 endif()
 if(GLSLDB_WIN)
+	add_definitions(/DGLSLDEBUGLIB_HOST)
 	set(DL_LIBRARIES mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	include_directories(
 		${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib
@@ -51,6 +52,8 @@ set(GLSLDEBUG_SRC
 	${GLSLDEBUG_OS_SRC}
 	${GLSLDEBUG_GEN_SRC}
 )
+
+set(CLIENT_SRC debugClient.c)
 
 
 # Generate enumerants

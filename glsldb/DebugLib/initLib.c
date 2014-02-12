@@ -39,16 +39,73 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "generated/trampolines.h"
 #include "utils/notify.h"
 
+#define EVENT_NAME_LEN (32)
+#define SHMEM_NAME_LEN (64)
+
+
+static BOOL createEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
+{
+	wchar_t eventName[EVENT_NAME_LEN];
+	DWORD processId = 0;
+
+	processId = GetCurrentProcessId();
+
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
+	*outEvtDebugee = CreateEventW(NULL, FALSE, FALSE, eventName);
+	if (*outEvtDebugee == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "creating %s failed\n", eventName);
+		return FALSE;
+	}
+
+	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
+	*outEvtDebugger = CreateEventW(NULL, FALSE, FALSE, eventName);
+	if (*outEvtDebugger == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "creating %s failed\n", eventName);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/*
+ * ::closeEvents
+ */
+BOOL closeEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
+{
+	if (*outEvtDebugee != NULL) {
+		if (!CloseHandle(*outEvtDebugee)) {
+			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", *outEvtDebugee,
+					GetLastError());
+			return FALSE;
+		}
+		*outEvtDebugee = NULL;
+	}
+
+	if (*outEvtDebugger != NULL) {
+		if (!CloseHandle(*outEvtDebugger)){
+			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", *outEvtDebugger,
+					GetLastError());
+			return FALSE;
+		}
+		*outEvtDebugger = NULL;
+	}
+
+	return TRUE;
+}
+
 
 /*
  * ::openEvents
  */
-BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger) {
-#define EVENT_NAME_LEN (32)
-#define SHMEM_NAME_LEN (64)
-
+BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
+{
 	wchar_t eventName[EVENT_NAME_LEN];
 	DWORD processId = 0;
+
+#ifdef GLSLDEBUGLIB_HOST
+	closeEvents(outEvtDebugee, outEvtDebugger);
+	return createEvents(outEvtDebugee, outEvtDebugger);
+#endif
 
 	/* Sanity checks. */
 	if ((outEvtDebugee == NULL) || (outEvtDebugger == NULL)) {
@@ -75,16 +132,75 @@ BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger) {
 	}
 
 	return TRUE;
-#undef EVENT_NAME_LEN
 }
+
+
+/**** Shared memory funcs ****/
+
+/*
+ * Internal ::initSharedMemory
+ */
+static BOOL initSharedMemory(HANDLE *outShMem, void **outBaseAddr, int size)
+{
+	char shmemName[SHMEM_NAME_LEN];
+
+	_snprintf(shmemName, SHMEM_NAME_LEN, "%uSHM", GetCurrentProcessId());
+	/* this creates a non-inheritable shared memory mapping! */
+	*outShMem = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shmemName);
+	if (*outShMem == NULL || *outShMem == INVALID_HANDLE_VALUE) {
+		UT_NOTIFY_VA(LV_ERROR, "Creation of shared mem segment %s failed: %u\n", shmemName, GetLastError());
+		return FALSE;
+	}
+
+	/* FILE_MAP_WRITE implies read */
+	*outBaseAddr = MapViewOfFile(*outShMem, FILE_MAP_WRITE, 0, 0, size);
+	if (*outBaseAddr == NULL) {
+		UT_NOTIFY_VA(LV_ERROR, "View mapping of shared mem segment %s failed: %u\n", shmemName, GetLastError());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+/*
+ * ::closeSharedMemory
+ */
+BOOL closeSharedMemory(HANDLE* hShMem, void **baseAddr) {
+
+	if (*baseAddr != NULL) {
+		if (!UnmapViewOfFile(*baseAddr)) {
+			UT_NOTIFY_VA(LV_ERROR, "View unmapping of shared mem segment failed: %u",
+					GetLastError());
+			return FALSE;
+		}
+		*baseAddr = NULL;
+	}
+
+	if ((*hShMem != NULL) && (*hShMem != INVALID_HANDLE_VALUE)) {
+		if (!CloseHandle(*hShMem)) {
+			UT_NOTIFY_VA(LV_ERROR, "Closing handle of shared mem segment failed: %u",
+					GetLastError());
+			return FALSE;
+		}
+		*hShMem = INVALID_HANDLE_VALUE;
+	}
+
+	return TRUE;
+}
+
 
 /*
  * ::openSharedMemory
  */
-BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size) {
-#define SHMEM_NAME_LEN (64)
-
+BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size)
+{
 	char shMemName[SHMEM_NAME_LEN];
+
+#ifdef GLSLDEBUGLIB_HOST
+	closeSharedMemory(outShMem, outBaseAddr);
+	return initSharedMemory(outShMem, outBaseAddr, size);
+#endif
 
 	if (!GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", shMemName,
 					SHMEM_NAME_LEN)) {
@@ -110,62 +226,8 @@ BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size) {
 	}
 
 	return TRUE;
-#undef SHMEM_NAME_LEN
 }
 
-/*
- * ::closeEvents
- */
-BOOL closeEvents(HANDLE hEvtDebugee, HANDLE hEvtDebugger) {
-	BOOL retval = TRUE;
-
-	if (hEvtDebugee != NULL) {
-		if (!CloseHandle(hEvtDebugee)) {
-			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugee,
-					GetLastError());
-			retval = FALSE;
-		}
-		hEvtDebugee = NULL;
-	}
-
-	if (hEvtDebugger != NULL) {
-		if (!CloseHandle(hEvtDebugger)) {
-			UT_NOTIFY_VA(LV_ERROR, "CloseEvent(%u) failed: %u.", hEvtDebugger,
-					GetLastError());
-			retval = FALSE;
-		}
-		hEvtDebugger = NULL;
-	}
-
-	return retval;
-}
-
-/*
- * ::closeSharedMemory
- */
-BOOL closeSharedMemory(HANDLE hShMem, void *baseAddr) {
-	BOOL retval = TRUE;
-
-	if (baseAddr != NULL) {
-		if (!UnmapViewOfFile(baseAddr)) {
-			UT_NOTIFY_VA(LV_ERROR, "View unmapping of shared mem segment failed: %u",
-					GetLastError());
-			retval = FALSE;
-		}
-		baseAddr = NULL;
-	}
-
-	if ((hShMem != NULL) && (hShMem != INVALID_HANDLE_VALUE)) {
-		if (!CloseHandle(hShMem)) {
-			UT_NOTIFY_VA(LV_ERROR, "Closing handle of shared mem segment failed: %u",
-					GetLastError());
-			retval = FALSE;
-		}
-		hShMem = INVALID_HANDLE_VALUE;
-	}
-
-	return retval;
-}
 
 /** Window class for GL context window. */
 static const char *INITCTX_WNDCLASS_NAME = "GLSLDEVIL DEBUGLIB WINDOW";

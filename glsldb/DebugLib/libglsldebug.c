@@ -396,11 +396,11 @@ __declspec(dllexport) BOOL __cdecl uninitialiseDll(void) {
 		retval = FALSE;
 	}
 
-	if (!closeEvents(g.hEvtDebugee, g.hEvtDebugger)) {
+	if (!closeEvents(&g.hEvtDebugee, &g.hEvtDebugger)) {
 		retval = FALSE;
 	}
 
-	if (!closeSharedMemory(g.hShMem, g.fcalls)) {
+	if (!closeSharedMemory(&g.hShMem, &g.fcalls)) {
 		retval = FALSE;
 	}
 
@@ -431,8 +431,8 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 //		}
 #endif /* DEBUG */
 		/* Open synchronisation events. */
-		//if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
-		//	return FALSE;
+		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
+			return FALSE;
 		dbgPrint(DBGLVL_DEBUG, "Events opened.\n");
 
 
@@ -444,8 +444,8 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		dbgPrint(DBGLVL_INFO, "Trampolines attached.\n");
 
 		/* Attach to shared mem segment */
-		//if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
-		//	return FALSE;
+		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
+			return FALSE;
 
 		// TODO: This is part of the extension detours initialisation
 		// (replacing) current lazy initialisation. However, I think this
