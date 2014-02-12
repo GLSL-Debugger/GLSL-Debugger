@@ -172,9 +172,11 @@ public:
 
    exec_node link;
 
-   ast_declarator_list* as_declarator_list() { return NULL; }
-
 #ifdef AST_DEBUG_STATE
+   virtual class ast_declaration* as_declaration() { return NULL; }
+   virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
+   virtual class ast_declarator_list* as_declarator_list() { return NULL; }
+
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
 #endif
 
@@ -482,6 +484,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual ast_declaration* as_declaration() { return this; }
 #endif
 
    const char *identifier;
@@ -776,12 +779,11 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual ast_declarator_list* as_declarator_list() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
-
-   ast_declarator_list* as_declarator_list() { return this; }
 
    ast_fully_specified_type *type;
    /** List of 'ast_declaration *' */
@@ -814,6 +816,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual ast_parameter_declarator* as_parameter_declarator() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1076,14 +1079,13 @@ public:
    char* debug_iter_name;
 #endif
 
-private:
    /**
     * Generate IR from the condition of a loop
     *
     * This is factored out of ::hir because some loops have the condition
     * test at the top (for and while), and others have it at the end (do-while).
     */
-   void condition_to_hir(class ir_loop *, struct _mesa_glsl_parse_state *);
+   void condition_to_hir(exec_list *, struct _mesa_glsl_parse_state *);
 };
 
 

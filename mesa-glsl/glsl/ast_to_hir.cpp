@@ -1683,7 +1683,7 @@ ast_expression::hir(exec_list *instructions,
        * tree.  This particular use must be at location specified in the grammar
        * as 'variable_identifier'.
        */
-      ir_variable *var = 
+      ir_variable *var =
 	 state->symbols->get_variable(this->primary_expression.identifier);
 
       if (var != NULL) {
@@ -4093,17 +4093,22 @@ ast_jump_statement::hir(exec_list *instructions,
 	 _mesa_glsl_error(& loc, state,
 			  "break may only appear in a loop or a switch");
       } else {
-	 /* For a loop, inline the for loop expression again,
-	  * since we don't know where near the end of
-	  * the loop body the normal copy of it
-	  * is going to be placed.
+	 /* For a loop, inline the for loop expression again, since we don't
+	  * know where near the end of the loop body the normal copy of it is
+	  * going to be placed.  Same goes for the condition for a do-while
+	  * loop.
 	  */
 	 if (state->loop_nesting_ast != NULL &&
-	     mode == ast_continue &&
-	     state->loop_nesting_ast->rest_expression) {
-	    state->loop_nesting_ast->rest_expression->hir(instructions,
-							  state);
-	 }
+	     mode == ast_continue) {
+            if (state->loop_nesting_ast->rest_expression) {
+               state->loop_nesting_ast->rest_expression->hir(instructions,
+                                                             state);
+            }
+            if (state->loop_nesting_ast->mode ==
+                ast_iteration_statement::ast_do_while) {
+               state->loop_nesting_ast->condition_to_hir(instructions, state);
+            }
+         }
 
 	 if (state->switch_state.is_switch_innermost &&
 	     mode == ast_break) {
@@ -4116,11 +4121,11 @@ ast_jump_statement::hir(exec_list *instructions,
 	    COPY_YY_LOCATION_FROM_HERE(true_val->yy_location);
 	    ir_assignment *const set_break_var =
 	       new(ctx) ir_assignment(deref_is_break_var, true_val);
-	    
+
 	    instructions->push_tail(set_break_var);
 	 }
 	 else {
-	    ir_loop_jump *const jump = 
+	    ir_loop_jump *const jump =
 	       new(ctx) ir_loop_jump((mode == ast_break)
 				     ? ir_loop_jump::jump_break
 				     : ir_loop_jump::jump_continue);
@@ -4195,8 +4200,8 @@ ast_switch_statement::hir(exec_list *instructions,
 
    /* From page 66 (page 55 of the PDF) of the GLSL 1.50 spec:
     *
-    *    "The type of init-expression in a switch statement must be a 
-    *     scalar integer." 
+    *    "The type of init-expression in a switch statement must be a
+    *     scalar integer."
     */
    if (!test_expression->type->is_scalar() ||
        !test_expression->type->is_integer()) {
@@ -4446,7 +4451,7 @@ ast_case_label::hir(exec_list *instructions,
 }
 
 void
-ast_iteration_statement::condition_to_hir(ir_loop *stmt,
+ast_iteration_statement::condition_to_hir(exec_list *instructions,
 					  struct _mesa_glsl_parse_state *state)
 {
    void *ctx = state;
@@ -4456,12 +4461,12 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
 #ifdef IR_DEBUG_STATE
       ir_dummy* cond_start = new((void*)state) ir_dummy(ir_dummy_loop_condition);
       COPY_YY_LOCATION_FROM_HERE(cond_start->yy_location);
-      stmt->body_instructions.push_tail(cond_start);
-      stmt->debug_check = cond_start;
+      instructions->push_tail(cond_start);
+//      stmt->debug_check = cond_start;
 #endif
 
       ir_rvalue *const cond =
-	 condition->hir(& stmt->body_instructions, state);
+	 condition->hir(instructions, state);
 
       if ((cond == NULL)
 	  || !cond->type->is_boolean() || !cond->type->is_scalar()) {
@@ -4483,11 +4488,11 @@ ast_iteration_statement::condition_to_hir(ir_loop *stmt,
 	 COPY_YY_LOCATION_FROM_HERE(break_stmt->yy_location);
 
 	 if_stmt->then_instructions.push_tail(break_stmt);
-	 stmt->body_instructions.push_tail(if_stmt);
+	 instructions->push_tail(if_stmt);
       }
 
 #ifdef IR_DEBUG_STATE
-      stmt->body_instructions.push_tail(new(
+      instructions->push_tail(new(
 	 (void*)state) ir_dummy(ir_dummy_loop_condition_end));
 #endif
    }
@@ -4540,7 +4545,7 @@ ast_iteration_statement::hir(exec_list *instructions,
 #endif
 
    if (mode != ast_do_while)
-      condition_to_hir(stmt, state);
+      condition_to_hir(&stmt->body_instructions, state);
 
    if (body != NULL)
       body->hir(& stmt->body_instructions, state);
@@ -4561,7 +4566,7 @@ ast_iteration_statement::hir(exec_list *instructions,
    }
 
    if (mode == ast_do_while)
-      condition_to_hir(stmt, state);
+      condition_to_hir(&stmt->body_instructions, state);
 
    if (mode != ast_do_while)
       state->symbols->pop_scope();
