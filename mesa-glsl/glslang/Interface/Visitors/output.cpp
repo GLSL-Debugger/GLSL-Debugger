@@ -36,7 +36,7 @@
 #include "glsl/ir_unused_structs.h"
 #include "mesa/program/hash_table.h"
 #include "glslang/Interface/CodeTools.h"
-#include "glslang/Interface/IRScope.h"
+#include "glslang/Interface/ASTScope.h"
 
 
 static char* print_type(char* buffer, const glsl_type *t, bool arraySize);
@@ -1545,7 +1545,7 @@ ir_output_traverser_visitor::visit(ir_emit_vertex *ir)
 			case DBG_CG_GEOMETRY_CHANGEABLE:
 				/* Check if changeable in scope here */
 				if( cgbl && vl ){
-					scopeList *sl = get_scope(ir);
+					/*scopeList *sl = get_scope(ir);
 					scopeList::iterator sit;
 
 					int id;
@@ -1554,7 +1554,7 @@ ir_output_traverser_visitor::visit(ir_emit_vertex *ir)
 					for( id = 0; id < cgbl->numChangeables; id++ ){
 						bool inScope = false;
 
-						/* builtins are always valid */
+						 builtins are always valid
 						ShVariable *var = findShVariableFromId(vl, cgbl->changeables[id]->id );
 						if( !var ){
 							printf("CodeGen - unkown changeable, stop debugging\n");
@@ -1564,7 +1564,7 @@ ir_output_traverser_visitor::visit(ir_emit_vertex *ir)
 						if( var->builtin ){
 							inScope = true;
 						}else{
-							/* parse the actual scope */
+							 parse the actual scope
 							for( sit = sl->begin(); sit != sl->end(); sit++ ){
 								if( ( *sit ) == cgbl->changeables[id]->id ){
 									inScope = true;
@@ -1587,7 +1587,7 @@ ir_output_traverser_visitor::visit(ir_emit_vertex *ir)
 					}
 
 					ralloc_asprintf_append (&buffer, "\n");
-					indent();
+					indent();*/
 				}
 
 				/* Add original function call */

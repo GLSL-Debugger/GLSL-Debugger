@@ -6,7 +6,7 @@
 
 #include "scopestack.h"
 #include "glsldb/utils/dbgprint.h"
-#include "glslang/Interface/IRScope.h"
+#include "glslang/Interface/ASTScope.h"
 #include "glslang/Interface/CodeTools.h"
 
 
@@ -20,7 +20,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_variable* ir)
     if (this->passedTarget)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -42,7 +42,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_function_signature* ir)
 	if( this->passedTarget || ir->debug_state == ir_dbg_state_unset )
 		return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if( ir->debug_state == ir_dbg_state_target ){
         this->passedTarget = true;
@@ -61,7 +61,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_expression* ir)
     if (this->passedTarget)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -80,7 +80,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_swizzle* ir)
     if (this->passedTarget)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -99,7 +99,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_assignment* ir)
     if (this->passedTarget)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -121,7 +121,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_call* ir)
 	if( this->passedTarget || ir->debug_state == ir_dbg_state_unset )
 		return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if( ir->debug_state == ir_dbg_state_target ){
         this->passedTarget = true;
@@ -136,7 +136,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_return* ir)
 	if (this->passedTarget)
 		return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -151,7 +151,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_discard* ir)
 	if (this->passedTarget)
 		return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -170,7 +170,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_if* ir)
     if (this->passedTarget || ir->debug_state == ir_dbg_state_unset)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -213,7 +213,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop* ir)
     if (this->passedTarget || ir->debug_state == ir_dbg_state_unset)
         return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -261,7 +261,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_loop_jump* ir)
 	if (this->passedTarget)
 		return false;
 
-    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//    addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
     if (ir->debug_state == ir_dbg_state_target) {
         this->passedTarget = true;
@@ -276,7 +276,7 @@ bool ir_scopestack_traverse_visitor::visitIr(ir_dummy* ir)
 	if (this->passedTarget)
 		return false;
 
-	addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
+//	addScopeToScopeStack( this->result.scopeStack, get_scope(ir) );
 
 	if( ir->debug_state == ir_dbg_state_target )
 		this->passedTarget = true;

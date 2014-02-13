@@ -58,6 +58,7 @@
 
 class exec_list;
 class ast_node;
+class ast_type_qualifier;
 
 #ifdef __cplusplus
     extern "C" {
@@ -387,7 +388,7 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
 ShVariable* findShVariableFromSource(ast_node* variable);
-ShVariable* astToShVariable(ast_node* decl, ast_type_qualifier* type,
+ShVariable* astToShVariable(ast_node* decl, ast_type_qualifier* qualifier,
 							const struct glsl_type* decl_type);
 ShVariable* findShVariableFromId(ShVariableList *vl, int id);
 ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);

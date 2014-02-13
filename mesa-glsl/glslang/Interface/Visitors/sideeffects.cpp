@@ -5,6 +5,7 @@
  */
 
 #include "sideeffects.h"
+#include "glsl/ast.h"
 #include "glsl/ir.h"
 #include "glsl/list.h"
 #include "glslang/Interface/CodeTools.h"
@@ -117,7 +118,115 @@ bool ir_sideeffects_traverser_visitor::visitIr(ir_emit_vertex* ir)
 	return true;
 }
 
-bool ir_sideeffects_traverser_visitor::visitIr(ir_end_primitive* ir)
+
+void ast_sideeffects_traverser_visitor::visit(ast_declarator_list* node)
 {
+	const char* type_name;
+	const glsl_type * type = node->type->specifier->glsl_type(&type_name, this->state);
+	foreach_list_typed (ast_node, decl, link, &node->declarations){
+		decl->accept(this);
+		// Register variable
+		astToShVariable(decl, &node->type->qualifier, type);
+	}
+}
+
+void ast_sideeffects_traverser_visitor::visit(ast_compound_statement* node)
+{
+	if (node->new_scope)
+		depth++;
+
+	foreach_list_typed (ast_node, ast, link, &node->statements){
+		ast->accept(this);
+		node->debug_sideeffects |= ast->debug_sideeffects;
+	}
+
+	if (node->new_scope)
+		depth--;
+}
+
+void ast_sideeffects_traverser_visitor::visit(ast_expression_statement* node)
+{
+	if (node->expression){
+		node->expression->accept(this);
+		node->debug_sideeffects |= node->expression->debug_sideeffects;
+	}
+}
+
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_expression_bin* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_case_statement* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_case_statement_list* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_switch_body* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
+{
+	if (node->condition)
+		node->debug_sideeffects = node->condition->debug_sideeffects;
+	if (node->then_statement)
+		node->debug_sideeffects = node->then_statement->debug_sideeffects;
+	if (node->else_statement)
+		node->debug_sideeffects = node->else_statement->debug_sideeffects;
 	return true;
 }
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_switch_statement* node)
+{
+	assert(0);
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_iteration_statement* node)
+{
+	if (node->init_statement)
+		node->debug_sideeffects |= node->init_statement->debug_sideeffects;
+	if (node->condition)
+		node->debug_sideeffects |= node->condition->debug_sideeffects;
+	if (node->body)
+		node->debug_sideeffects |= node->body->debug_sideeffects;
+	if (node->rest_expression)
+		node->debug_sideeffects |= node->rest_expression->debug_sideeffects;
+	return true;
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_jump_statement* node)
+{
+	if (node->mode == ast_jump_statement::ast_discard)
+		node->debug_sideeffects |= ir_dbg_se_discard;
+	return true;
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_function_definition* node)
+{
+	node->debug_sideeffects |= ir_dbg_se_general;
+	return true;
+}
+
+bool ast_sideeffects_traverser_visitor::traverse(ast_gs_input_layout* node)
+{
+	assert(0);
+}
+

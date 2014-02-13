@@ -18,20 +18,27 @@ public:
 		flags = traverse_postvisit;
 	}
 
-	virtual ~ir_sideeffects_traverser_visitor()
+	virtual ~ast_sideeffects_traverser_visitor()
 	{
 	}
 
-	virtual bool traverse(ir_function_signature *ir);
-	virtual bool traverse(ir_function *ir);
-	virtual bool traverse(ir_expression *ir);
-	virtual bool traverse(ir_assignment *ir);
-	virtual bool traverse(ir_call *ir);
-	virtual bool traverse(ir_discard *ir);
-	virtual bool traverse(ir_if *ir);
-	virtual bool traverse(ir_loop *ir);
-	virtual bool traverse(ir_emit_vertex *ir);
-	virtual bool traverse(ir_end_primitive *ir);
+	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
+	virtual void visit(ast_declarator_list *);
+	virtual void visit(ast_compound_statement *);
+	virtual void visit(ast_expression_statement *);
+
+	virtual bool traverse(ast_expression *);
+	virtual bool traverse(ast_expression_bin *);
+	virtual bool traverse(ast_function_expression *);
+	virtual bool traverse(ast_case_statement *);
+	virtual bool traverse(ast_case_statement_list *);
+	virtual bool traverse(ast_switch_body *);
+	virtual bool traverse(ast_selection_statement *);
+	virtual bool traverse(ast_switch_statement *);
+	virtual bool traverse(ast_iteration_statement *);
+	virtual bool traverse(ast_jump_statement *);
+	virtual bool traverse(ast_function_definition *);
+	virtual bool traverse(ast_gs_input_layout *);
 
 protected:
 	struct _mesa_glsl_parse_state* state;
@@ -58,7 +65,6 @@ public:
 	virtual bool visitIr(ir_if *ir);
 	virtual bool visitIr(ir_loop *ir);
 	virtual bool visitIr(ir_emit_vertex *ir);
-	virtual bool visitIr(ir_end_primitive *ir);
 
 	int list_sideeffects(exec_list* instructions);
 	int block_sideeffects(ir_dummy* first);

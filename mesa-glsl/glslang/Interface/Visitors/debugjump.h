@@ -11,8 +11,6 @@
 #include "traverse.h"
 #include "ShaderLang.h"
 #include "glslang/Interface/IRStack.h"
-#include "glslang/Interface/IRScope.h"
-
 
 enum OTOperation {
     OTOpTargetUnset,         // Invalidate actual target
@@ -23,6 +21,8 @@ enum OTOperation {
     OTOpDone,                // Do no harm, i.e. don't change anything anymore
     OTOpFinished             // Reached end of program, stop debugging
 };
+
+class scopeList;
 
 
 class ir_debugjump_traverser_visitor : public ir_traverse_visitor {

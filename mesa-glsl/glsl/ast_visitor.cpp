@@ -209,7 +209,7 @@ void ast_traverse_visitor::visit(class ast_fully_specified_type* node)
 
 void ast_traverse_visitor::visit(class ast_declarator_list* node)
 {
-	foreach_list_typed (ast_declaration, decl, link, &node->declarations)
+	foreach_list_typed (ast_node, decl, link, &node->declarations)
 		decl->accept(this);
 }
 

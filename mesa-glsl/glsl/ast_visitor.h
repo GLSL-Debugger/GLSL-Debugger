@@ -61,19 +61,14 @@ public:
 	virtual bool traverse(class ast_function_expression *) { return true; }
 	virtual bool traverse(class ast_array_specifier *) { return true; }
 	virtual bool traverse(class ast_aggregate_initializer *) { return true; }
-	virtual bool traverse(class ast_compound_statement *) { return true; }
 	virtual bool traverse(class ast_declaration *) { return true; }
 	virtual bool traverse(class ast_struct_specifier *) { return true; }
 	virtual bool traverse(class ast_type_specifier *) { return true; }
 	virtual bool traverse(class ast_fully_specified_type *) { return true; }
-	virtual bool traverse(class ast_declarator_list *) { return true; }
 	virtual bool traverse(class ast_parameter_declarator *) { return true; }
 	virtual bool traverse(class ast_function *) { return true; }
-	virtual bool traverse(class ast_expression_statement *) { return true; }
 	virtual bool traverse(class ast_case_label *) { return true; }
-	virtual bool traverse(class ast_case_label_list *) { return true; }
 	virtual bool traverse(class ast_case_statement *) { return true; }
-	virtual bool traverse(class ast_case_statement_list *) { return true; }
 	virtual bool traverse(class ast_switch_body *) { return true; }
 	virtual bool traverse(class ast_selection_statement *) { return true; }
 	virtual bool traverse(class ast_switch_statement *) { return true; }

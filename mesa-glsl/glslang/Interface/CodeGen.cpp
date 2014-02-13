@@ -41,7 +41,7 @@
 
 #include "CodeInsertion.h"
 #include "CodeTools.h"
-#include "IRScope.h"
+#include "ASTScope.h"
 #include "Visitors/output.h"
 #include "Visitors/stacktraverser.h"
 #include "Visitors/position_output.h"
@@ -157,7 +157,7 @@ static void dumpDbgStack(IRGenStack *stack)
                 break;
         }
         dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
-        scopeList *sl = get_scope(ir);
+        /*scopeList *sl = get_scope(ir);
 
         if (sl) {
             scopeList::iterator sit;
@@ -167,7 +167,7 @@ static void dumpDbgStack(IRGenStack *stack)
             dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
         } else {
             dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "no scope\n");
-        }
+        }*/
     }
 
     dbgPrint(DBGLVL_COMPILERINFO, "###############################################\n");
@@ -218,17 +218,17 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 			for( rit = dbgStack->rbegin(); rit != dbgStack->rend(); rit++ ){
 
 				ir_instruction* rir = *rit;
-				scopeList *sl = get_scope( rir );
+/*				scopeList *sl = get_scope( rir );
 				scopeList::iterator sit;
 				bool user_call = (rir->ir_type == ir_type_call
 						&& !rir->as_call()->callee->is_builtin());
 
-				/* check if all changeables are in scope */bool allInScope = true;
+				 check if all changeables are in scope bool allInScope = true;
 
 				for( int id = 0; id < cgbl->numChangeables; id++ ){
 					bool inScope = false;
 
-					/* builtins are always valid */
+					 builtins are always valid
 					ShVariable *var = findShVariableFromId( vl,
 							cgbl->changeables[id]->id );
 					if( !var ){
@@ -240,7 +240,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 					if( var->builtin ){
 						inScope = true;
 					}else{
-						/* parse the actual scope */
+						 parse the actual scope
 						for( sit = sl->begin(); sit != sl->end(); sit++ ){
 							if( ( *sit ) == cgbl->changeables[id]->id ){
 								inScope = true;
@@ -250,20 +250,20 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 					}
 
 					if( !inScope ){
-						/* This is not the place to read out the target */
+						 This is not the place to read out the target
 						if( user_call )
 							change_DbgOverwrite( rir->as_call(), ir_dbg_ow_original );
 						else
 							dumpNodeInfo( rir );
 
-						/* pop stack since we cannot process all changeables here */
+						 pop stack since we cannot process all changeables here
 						allInScope = false;
 						break;
 					}
 				}
 
 				if( allInScope ){
-					/* we are finially finished */
+					 we are finially finished
 					target = rir;
 
 					if( user_call )
@@ -271,7 +271,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 					else
 						dumpNodeInfo( *rit );
 					break;
-				}
+				}*/
 			}
 
 			if( !target ){

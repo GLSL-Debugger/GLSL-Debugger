@@ -178,8 +178,13 @@ public:
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
-#endif
 
+
+   enum ast_dbg_state debug_state;
+   enum ast_dbg_overwrite debug_overwrite;
+   bool debug_target;
+   int debug_sideeffects;
+#endif
 
 protected:
    /**
@@ -187,13 +192,6 @@ protected:
     * be created.
     */
    ast_node(void);
-
-#ifdef AST_DEBUG_STATE
-   enum ast_dbg_state debug_state;
-   enum ast_dbg_overwrite debug_overwrite;
-   bool debug_target;
-   int debug_sideeffects;
-#endif
 };
 
 

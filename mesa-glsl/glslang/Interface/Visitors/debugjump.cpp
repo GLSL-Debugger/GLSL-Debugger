@@ -27,9 +27,9 @@ static void setDbgResultRange(DbgRsRange& r, const YYLTYPE& range)
 
 void ir_debugjump_traverser_visitor::setGobalScope(scopeList *s)
 {
-    setDbgScope(this->result.scope, s);
-    /* Add local scope to scope stack */
-    addScopeToScopeStack(this->result.scopeStack, s);
+    /*setDbgScope(this->result.scope, s);
+     Add local scope to scope stack
+    addScopeToScopeStack(this->result.scopeStack, s);*/
 }
 
 void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOperation *op)
@@ -62,13 +62,13 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     	case ir_type_assignment:
                     		result.position = DBG_RS_POSITION_ASSIGMENT;
                     		setDbgResultRange(result.range, node->yy_location);
-                    		setGobalScope( get_scope(node) );
+//                    		setGobalScope( get_scope(node) );
                     		break;
                     	case ir_type_expression:
                     	{
                     		ir_expression* exp = node->as_expression();
                     		setDbgResultRange(result.range, node->yy_location);
-                    		setGobalScope( get_scope(node) );
+//                    		setGobalScope( get_scope(node) );
                     		if( exp->operation < ir_last_unop ){
                     			result.position = DBG_RS_POSITION_UNARY;
                     		}else if( exp->operation < ir_last_binop ){
@@ -85,14 +85,14 @@ void ir_debugjump_traverser_visitor::processDebugable(ir_instruction *node, OTOp
                     	{
                     		result.position = DBG_RS_POSITION_BRANCH;
                     		setDbgResultRange(result.range, node->yy_location);
-                    		setGobalScope( get_scope(node) );
+//                    		setGobalScope( get_scope(node) );
                     		break;
                     	}
                     	case ir_type_dummy:
                     	{
                     		result.position = DBG_RS_POSITION_DUMMY;
                     		setDbgResultRange(result.range, node->yy_location);
-                    		setGobalScope( get_scope(node) );
+//                    		setGobalScope( get_scope(node) );
                     		break;
                     	}
                     	default:
@@ -310,7 +310,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 		if( !( this->dbgBehaviour & DBG_BH_JUMPINTO ) ){
 			// do not visit children
 			// add all changeables of this node to the list
-			copyShChangeableList( &result.cgbls, get_changeable_list( ir ) );
+//			copyShChangeableList( &result.cgbls, get_changeable_list( ir ) );
 			checkReturns( ir, this );
 		}else{
 			// visit children
@@ -327,7 +327,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 			// if no target was found so far
 			// all changeables need to be added to the list
 			if( this->operation == OTOpTargetSet ){
-				copyShChangeableList( &result.cgbls, get_changeable_list( ir ) );
+//				copyShChangeableList( &result.cgbls, get_changeable_list( ir ) );
 				checkReturns( ir, this );
 			}
 		}
@@ -349,7 +349,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 		// -> add only changed variables of this assigment, i.e.
 		//    changeables of the left branch
 		if( this->operation == OTOpTargetSet ){
-			copyShChangeableList( &result.cgbls, get_changeable_list( ir->lhs ) );
+//			copyShChangeableList( &result.cgbls, get_changeable_list( ir->lhs ) );
 			checkReturns( ir, this );
 		}
 		return false;
@@ -369,7 +369,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_constant* ir)
 bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 {
 	ir_function_signature* fs = ir->callee;
-	ShChangeableList* node_cgbl = get_changeable_list( ir );
+//	ShChangeableList* node_cgbl = get_changeable_list( ir );
 
 	VPRINT( 2, "process Call L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
 			FormatSourceRange(ir->yy_location).c_str(), ir->callee_name(),
@@ -390,15 +390,15 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 				this->operation = OTOpTargetSet;
 
 				// add local parameters of called function first
-				copyShChangeableList( &result.cgbls,
-						get_changeable_paramerers_list( fs ) );
+				/*copyShChangeableList( &result.cgbls,
+						get_changeable_paramerers_list( fs ) );*/
 				fs->accept( this );
 
 				// if parsing ends up here and a target is still beeing
 				// searched, a wierd function was called, but anyway,
 				// let's copy the appropriate changeables
-				if( this->operation == OTOpTargetSet )
-					copyShChangeableList( &result.cgbls, node_cgbl );
+				/*if( this->operation == OTOpTargetSet )
+					copyShChangeableList( &result.cgbls, node_cgbl );*/
 			}else{
 				ir->debug_state = ir_dbg_state_unset;
 				this->operation = OTOpTargetSet;
@@ -410,11 +410,11 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 				// else
 				// -> copy all, since user wants to jump over this func
 				if( this->finishedDbgFunction == true ){
-					copyShChangeableList( &result.cgbls,
-							get_changeable_paramerers_list( ir ) );
+/*					copyShChangeableList( &result.cgbls,
+							get_changeable_paramerers_list( ir ) );*/
 					this->finishedDbgFunction = false;
 				}else{
-					copyShChangeableList( &result.cgbls, node_cgbl );
+//					copyShChangeableList( &result.cgbls, node_cgbl );
 					checkReturns( fs, this );
 				}
 			}
@@ -431,7 +431,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_call* ir)
 					VPRINT( 3, "\t -------- set target ---------\n" );
 					result.position = DBG_RS_POSITION_FUNCTION_CALL;
 					setDbgResultRange( result.range, ir->yy_location );
-					setGobalScope( get_scope( ir ) );
+//					setGobalScope( get_scope( ir ) );
 					this->operation = OTOpDone;
 				}else
 					checkReturns( ir->callee, this );
@@ -468,7 +468,7 @@ static void addShChangeablesFromList(ir_debugjump_traverser_visitor* it,
 		ir_instruction * const inst = (ir_instruction *) node;
 		if (!list_iter_check(inst, skip_pair))
 			continue;
-		copyShChangeableList( &it->result.cgbls, get_changeable_list( inst ) );
+//		copyShChangeableList( &it->result.cgbls, get_changeable_list( inst ) );
 		checkReturns( inst, it );
 	}
 }
@@ -489,7 +489,7 @@ static void addShChangeablesFromBlock(ir_debugjump_traverser_visitor* it,
 		ir_dummy * const dm = inst->as_dummy();
 		if ( dm && end_token == dm->dummy_type )
 			return;
-		copyShChangeableList(&it->result.cgbls, get_changeable_list(inst));
+//		copyShChangeableList(&it->result.cgbls, get_changeable_list(inst));
 		checkReturns(inst, it);
 	}
 }
@@ -500,7 +500,7 @@ static inline void addShChangeables(ir_debugjump_traverser_visitor* it,
 	if (!ir)
 		return;
 
-	copyShChangeableList( &it->result.cgbls, get_changeable_list( ir ) );
+//	copyShChangeableList( &it->result.cgbls, get_changeable_list( ir ) );
 	checkReturns( ir, it );
 }
 
@@ -609,7 +609,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 						else
 							result.position = DBG_RS_POSITION_SELECTION_IF;
 						setDbgResultRange( result.range, ir->yy_location );
-						setGobalScope( get_scope( ir ) );
+//						setGobalScope( get_scope( ir ) );
 						return false;
 					case ir_dbg_if_condition:
 						VPRINT( 3, "\t -------- set target again ---------\n" );
@@ -621,7 +621,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_if* ir)
 						else
 							result.position = DBG_RS_POSITION_SELECTION_IF_CHOOSE;
 						setDbgResultRange( result.range, ir->yy_location );
-						setGobalScope( get_scope( ir ) );
+//						setGobalScope( get_scope( ir ) );
 						return false;
 					case ir_dbg_if_then:
 					case ir_dbg_if_else:
@@ -810,7 +810,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 								addShChangeablesFromList( this, &ir->body_instructions );
 								addShChangeablesFromBlock( this, ir->debug_terminal );
 
-								setGobalScope( get_scope( ir ) );
+//								setGobalScope( get_scope( ir ) );
 							} else {
 								ir->debug_state_internal = ir_dbg_loop_wrk_body;
 							}
@@ -929,7 +929,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_loop* ir)
 							break;
 					}
 					setDbgResultRange(result.range, ir->yy_location);
-					setGobalScope(get_scope(ir));
+//					setGobalScope(get_scope(ir));
 					return false;
 				}
 			}
