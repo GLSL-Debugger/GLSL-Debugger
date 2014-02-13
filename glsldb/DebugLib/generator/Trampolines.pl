@@ -204,7 +204,7 @@ sub addFunction
 	} else {
 		push @initializer, "	Orig$fname = $fname;
 	dbgPrint(DBGLVL_DEBUG, \"Orig$fname = 0x%x\\n\", $fname);";
-		push(@functions, $fname) if $fname ne "wglGetProcAddress";
+		push(@functions, $fname);
 	}
 }
 
