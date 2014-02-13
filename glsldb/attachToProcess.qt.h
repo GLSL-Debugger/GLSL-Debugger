@@ -174,6 +174,13 @@ typedef struct ATTACHMENT_INFORMATION_t {
 }ATTACHMENT_INFORMATION;
 
 /**
+ * @brief Inject debug library into process
+ * @param ai - srtuct with valid hProcess handle.
+ * @return Windows error code if error ocurred
+ */
+DWORD injectLib(ATTACHMENT_INFORMATION &ai);
+
+/**
  * Attach to the remote process with process ID 'pid' and inject the debug
  * library 'libPath'. In the target process, the environment variable
  * "GLSL_DEBUGGER_SHMID" is set to 'smName' and the variable

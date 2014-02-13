@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #include <cassert>
 #include <psapi.h>
-#include <detours.h>
 #include <tchar.h>
 #include "asprintf.h"
 #endif /* _WIN32 */
@@ -372,87 +371,6 @@ int ProcessSnapshotModel::rowCount(const QModelIndex& parent) const
 #ifdef _WIN32
 //typedef LONG ( NTAPI *_NtSuspendProcess )( IN HANDLE ProcessHandle );
 //typedef LONG ( NTAPI *_NtResumeProcess )( IN HANDLE ProcessHandle );
-
-/**
- * This function runs a remote thread in 'hProcess' to explicity load the
- * library specified by 'libPath'.
- */
-static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
-	DWORD exitCode = 0;             // Exit code of remote thread.
-	DWORD remoteMemSize = 0;// Size of allocated remote memory.
-	HANDLE hThread = NULL;// Handle to remote thread.
-	HMODULE hKernel32 = NULL;// Module handle of kernel32.dll.
-	HMODULE retval = NULL;// Handle to loaded remote library.
-	FARPROC loadLibrary = NULL;// Function pointer of LoadLibrary.
-	void *remoteLibPath = NULL;// Remote memory for path to library.
-
-	/* Sanity checks. */
-	if (hProcess == NULL) {
-		goto cleanup;
-	}
-	if (libPath == NULL) {
-		goto cleanup;
-	}
-
-	/* Get Function pointer to LoadLibrary. */
-	if ((hKernel32 = ::GetModuleHandleA("kernel32")) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "Module handle of \"kernel32\" could not be retrieved: "
-				"%u.\n", ::GetLastError());
-		goto cleanup;
-	}
-	if ((loadLibrary = ::GetProcAddress(hKernel32, "LoadLibraryA")) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "\"LoadLibrary\" could not be found: %u.\n",
-				::GetLastError());
-		goto cleanup;
-	}
-
-	/* Allocate memory for library path in remote process. */
-	remoteMemSize = ::strlen(libPath) + 1;
-	if ((remoteLibPath = ::VirtualAllocEx(hProcess, NULL, remoteMemSize,
-							MEM_COMMIT, PAGE_READWRITE)) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Copy library path to remote process. */
-	if (!::WriteProcessMemory(hProcess, remoteLibPath, libPath,
-					remoteMemSize, NULL)) {
-		dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Load the debug library into the remote process. */
-	if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
-							reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibrary),
-							remoteLibPath, 0, NULL)) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "CreateRemoteThread failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Wait for LoadLibrary to complete. */
-	if (::WaitForSingleObject(hThread, INFINITE) != WAIT_OBJECT_0) {
-		dbgPrint(DBGLVL_ERROR, "WaitForSingleObject failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Get exit code, which is the module handle of our remote debug library. */
-	// TODO: Das könnte unter 64 bit kriminell sein ...
-	if (!::GetExitCodeThread(hThread, &exitCode)) {
-		dbgPrint(DBGLVL_ERROR, "GetExitCodeThread failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-	retval = reinterpret_cast<HMODULE>(exitCode);
-
-	/* Clean up. */
-	cleanup:
-	if (hThread != NULL) {
-		::CloseHandle(hThread);
-	}
-	if (remoteLibPath != NULL) {
-		::VirtualFreeEx(hProcess, remoteLibPath, remoteMemSize, MEM_RELEASE);
-	}
-	return retval;
-}
 
 /**
  * Free the library designated by 'hRemoteModule' in process 'hProcess'.
@@ -1060,30 +978,9 @@ bool RemoteUpdateTopLevelWindows(HANDLE hProcess) {
 bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		DWORD desiredAccess, const char *libPath, const char *smName,
 		const char *dbgFuncPath) {
-// It seems DetourGetDetouredMarker() not in detourus now. You know how to fix it?
-// I don't, and know what? I don't even want to know. If you like to dig in this shit, well, go on
-// Detours must be dropped and replaced by new api. If you read this, then you are good windows developer,
-// and it's your job. I'm just make it builds there and don't want to interact with this platform any more.
-	dbgPrint(DBGLVL_ERROR, "Attach to process is broken. Please fix me: attachToProcess.cpp:%s\n", __LINE__);
-	return false;
-#if 0
-	HMODULE hDetouredDll = NULL;
-	char detouredDllPath[_MAX_PATH];
 
 	/* Reset out variable. */
-	outAi.hDetours = NULL;
 	outAi.hLibrary = NULL;
-	outAi.hProcess = NULL;
-
-	/* Get detours marker name for injection. */
-	if ((hDetouredDll = ::DetourGetDetouredMarker()) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "DetourGetDetouredMarker failed: %u.\n", ::GetLastError());
-		return false;
-	}
-	if (!::GetModuleFileNameA(hDetouredDll, detouredDllPath, _MAX_PATH)) {
-		dbgPrint(DBGLVL_ERROR, "GetModuleFileName failed: %u.\n", ::GetLastError());
-		return false;
-	}
 
 	/* Open process for attachment. */
 	outAi.hProcess = ::OpenProcess(desiredAccess | PROCESS_CREATE_THREAD
@@ -1101,21 +998,10 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		return false;
 	}
 
-	/* Load detours marker first. */
-	outAi.hDetours = ::RemoteLoadLibrary(outAi.hProcess, detouredDllPath);
-	if (outAi.hDetours == NULL) {
-		dbgPrint(DBGLVL_ERROR, "Attaching detours marker failed.\n");
-		::CloseHandle(outAi.hProcess);
-		outAi.hProcess = NULL;
-		return false;
-	}
-
 	/* Load the debug library into the process. */
-	outAi.hLibrary = ::RemoteLoadLibrary(outAi.hProcess, libPath);
-	if (outAi.hLibrary == NULL) {
+	if (injectLib(outAi)) {
 		dbgPrint(DBGLVL_ERROR, "Attaching debug library failed.\n");
-		::RemoteFreeLibrary(outAi.hProcess, outAi.hDetours);
-		outAi.hDetours = NULL;
+		::RemoteFreeLibrary(outAi.hProcess, outAi.hLibrary);
 		::CloseHandle(outAi.hProcess);
 		outAi.hProcess = NULL;
 		return false;
@@ -1125,7 +1011,6 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 	//::RemoteUpdateTopLevelWindows(outAi.hProcess);
 
 	return true;
-#endif
 }
 
 /*

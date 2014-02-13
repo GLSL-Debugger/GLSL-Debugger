@@ -431,8 +431,16 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 //		}
 #endif /* DEBUG */
 		/* Open synchronisation events. */
+
+#ifdef GLSLDEBUGLIB_HOST
+		closeEvents(&g.hEvtDebugee, &g.hEvtDebugger);
+		if (!createEvents(&g.hEvtDebugee, &g.hEvtDebugger))
+			return FALSE;
+#else
 		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
 			return FALSE;
+#endif
+
 		dbgPrint(DBGLVL_DEBUG, "Events opened.\n");
 
 
@@ -444,8 +452,15 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		dbgPrint(DBGLVL_INFO, "Trampolines attached.\n");
 
 		/* Attach to shared mem segment */
+#ifdef GLSLDEBUGLIB_HOST
+		closeSharedMemory(&g.hShMem, &g.fcalls);
+		if (!initSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
+			return FALSE;
+#else
 		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
 			return FALSE;
+#endif
+
 
 		// TODO: This is part of the extension detours initialisation
 		// (replacing) current lazy initialisation. However, I think this
@@ -490,7 +505,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 		case DLL_PROCESS_DETACH:
 		dbgPrint(DBGLVL_INFO, "DLL_PROCESS_DETACH\n");
-		InitializeCriticalSection(&G.lock);
+		EnterCriticalSection(&G.lock);
 		retval = uninitialiseDll();
 		DeleteCriticalSection(&G.lock);
 		break;

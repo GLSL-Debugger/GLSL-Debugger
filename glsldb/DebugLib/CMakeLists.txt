@@ -10,7 +10,7 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	set(DLSYM_SRC libdlsym.c)
 endif()
 if(GLSLDB_WIN)
-	add_definitions(/DGLSLDEBUGLIB_HOST)
+	#add_definitions(/DGLSLDEBUGLIB_HOST)
 	set(DL_LIBRARIES mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	include_directories(
 		${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib
@@ -152,6 +152,9 @@ add_library(functionList STATIC ${GENERATOR_OUTPUT_DIR}/functionList.c)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
 target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})
+
+add_executable(debugclient ${CLIENT_SRC})
+target_link_libraries(debugclient glsldebug utils)
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
 	add_library(dlsym SHARED ${DLSYM_SRC})

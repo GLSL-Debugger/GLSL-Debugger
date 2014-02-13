@@ -42,8 +42,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EVENT_NAME_LEN (32)
 #define SHMEM_NAME_LEN (64)
 
-
-static BOOL createEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
+/*
+ * ::createEvents
+ */
+BOOL createEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
 {
 	wchar_t eventName[EVENT_NAME_LEN];
 	DWORD processId = 0;
@@ -99,21 +101,21 @@ BOOL closeEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
  */
 BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
 {
-	wchar_t eventName[EVENT_NAME_LEN];
 	DWORD processId = 0;
 
-#ifdef GLSLDEBUGLIB_HOST
-	closeEvents(outEvtDebugee, outEvtDebugger);
-	return createEvents(outEvtDebugee, outEvtDebugger);
-#endif
+	/* TODO: Possible hazard when using multiple instances simultanously. */
+	processId = GetCurrentProcessId();
+	return openEventsProc(outEvtDebugee, outEvtDebugger, processId);
+}
+
+BOOL openEventsProc(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger, DWORD processId)
+{
+	wchar_t eventName[EVENT_NAME_LEN];
 
 	/* Sanity checks. */
 	if ((outEvtDebugee == NULL) || (outEvtDebugger == NULL)) {
 		return TRUE;
 	}
-
-	/* TODO: Possible hazard when using multiple instances simultanously. */
-	processId = GetCurrentProcessId();
 
 	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
 	if ((*outEvtDebugee = OpenEventW(EVENT_ALL_ACCESS, FALSE, eventName))
@@ -138,9 +140,9 @@ BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger)
 /**** Shared memory funcs ****/
 
 /*
- * Internal ::initSharedMemory
+ * ::initSharedMemory
  */
-static BOOL initSharedMemory(HANDLE *outShMem, void **outBaseAddr, int size)
+BOOL initSharedMemory(HANDLE *outShMem, void **outBaseAddr, int size)
 {
 	char shmemName[SHMEM_NAME_LEN];
 
@@ -189,18 +191,12 @@ BOOL closeSharedMemory(HANDLE* hShMem, void **baseAddr) {
 	return TRUE;
 }
 
-
 /*
  * ::openSharedMemory
  */
 BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size)
 {
 	char shMemName[SHMEM_NAME_LEN];
-
-#ifdef GLSLDEBUGLIB_HOST
-	closeSharedMemory(outShMem, outBaseAddr);
-	return initSharedMemory(outShMem, outBaseAddr, size);
-#endif
 
 	if (!GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", shMemName,
 					SHMEM_NAME_LEN)) {

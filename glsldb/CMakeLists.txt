@@ -48,9 +48,7 @@ if(GLSLDB_LINUX)
 	list(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp)
 endif()
 if(GLSLDB_WIN)
-	find_package(DETOURS REQUIRED)
 	include_directories(
-		${DETOURS_INCLUDE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows
 	)
 endif()

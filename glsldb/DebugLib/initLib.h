@@ -38,15 +38,28 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 
 /**
+ * Create the synchronisation events
+ */
+BOOL createEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger);
+
+/**
+ * Init shared memory objects
+ */
+BOOL initSharedMemory(HANDLE *outShMem, void **outBaseAddr, int size);
+
+/**
  * Open the two synchronisation events signaling the debugger and the
  * debugee.
  */
 BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger);
+__declspec(dllexport)
+BOOL openEventsProc(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger, DWORD pid);
 
 /**
  * Open the shared memory segment specified by the GLSL_DEBUGGER_SHMID
  * environment variable.
  */
+__declspec(dllexport)
 BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size);
 
 /**

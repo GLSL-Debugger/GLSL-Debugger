@@ -16,7 +16,7 @@
 #endif // !UNICODE
 
 
-DWORD injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
+DWORD injectLib(ATTACHMENT_INFORMATION &ai)
 {
 	HANDLE hThread;
 	DWORD error;
@@ -27,22 +27,22 @@ DWORD injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
 	DWORD debuggeeAddr;
 
 	// Get dll path
-	HMODULE hThis = GetModuleHandleW(NULL);
+	HMODULE hThis = GetModuleHandle(NULL);
 	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
 	char *insPos = strrchr(dllPath, '\\');
 	strcpy(insPos ? insPos : dllPath, DEBUGLIB);
 
 	// 1. Allocate memory in the remote process for szLibPath
 	// 2. Write szLibPath to the allocated memory
-	debuggeeLib = VirtualAllocEx(hProcess, NULL, sizeof(dllPath),
+	debuggeeLib = VirtualAllocEx(ai.hProcess, NULL, sizeof(dllPath),
 								 MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	WriteProcessMemory(hProcess, debuggeeLib, (void*)dllPath,
+	WriteProcessMemory(ai.hProcess, debuggeeLib, (void*)dllPath,
 					   sizeof(dllPath), NULL);
 
 	// Load library into the remote process via CreateRemoteThread & LoadLibrary
 	LPTHREAD_START_ROUTINE loadLib = (LPTHREAD_START_ROUTINE)GetProcAddress(
 									hKernel32, LOAD_LIB_NAME);
-	hThread = CreateRemoteThread(hProcess, NULL, 0, loadLib, debuggeeLib,
+	hThread = CreateRemoteThread(ai.hProcess, NULL, 0, loadLib, debuggeeLib,
 								 CREATE_SUSPENDED, NULL);
 	error = GetLastError();
 	if (!error) {
@@ -50,11 +50,8 @@ DWORD injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
 		WaitForSingleObject(hThread, INFINITE);
 
 		// Get attachment information of the loaded module
-		ai.hProcess = hProcess;
 		GetExitCodeThread(hThread, &debuggeeAddr);
-		//GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-		//					GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-		//					reinterpret_cast<LPCTSTR>(&debuggeeAddr), &ai.hLibrary);
+		ai.hLibrary = reinterpret_cast<HMODULE>(debuggeeAddr);
 
 		// Clean up
 		CloseHandle(hThread);
@@ -62,7 +59,7 @@ DWORD injectLib(HANDLE hProcess, ATTACHMENT_INFORMATION &ai)
 		dbgPrint(DBGLVL_ERROR, "Injection failed, error code %i", error);
 	}
 
-	VirtualFreeEx(hProcess, debuggeeLib, sizeof(dllPath), MEM_RELEASE);
+	VirtualFreeEx(ai.hProcess, debuggeeLib, sizeof(dllPath), MEM_RELEASE);
 	return error;
 }
 
@@ -91,11 +88,11 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir
 					  CREATE_SUSPENDED | CREATE_DEFAULT_ERROR_MODE,
 					  newEnv, workDir, &startupInfo, &processInfo)) {
 		this->createEvents(processInfo.dwProcessId);
-		_hDebuggedProgram = processInfo.hProcess;
+		_ai.hProcess = _hDebuggedProgram = processInfo.hProcess;
 		_debuggeePID = processInfo.dwProcessId;
 		//::DebugActiveProcess(processInfo.dwProcessId);
 		//::DebugBreakProcess(processInfo.hProcess);
-		if(!injectLib(processInfo.hProcess, _ai)){
+		if(!injectLib(_ai)){
 			ResumeThread(processInfo.hThread);
 			CloseHandle(processInfo.hThread);
 			error = PCE_NONE;
