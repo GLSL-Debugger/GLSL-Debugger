@@ -19,19 +19,22 @@ cmake ..\
 make
 ```
 
-Cmake may generate files for big number of make utilities, please check the cmake 
+Cmake may generate files for big number of make utilities, please check the cmake
 documentation for further information.
 
 It is recommended to do out-of-source build.
 
 Windows building requires additional dependencies installed:
 
-- flex & bison (winflexbison is recommended: http://sourceforge.net/projects/winflexbison/ 
+- flex & bison (winflexbison is recommended: http://sourceforge.net/projects/winflexbison/
   gnu flex and bison might work too)
 - Qt library
-- glut for windows ( not tested, http://user.xmission.com/~nate/glut.html 
+- glut for windows ( not tested, http://user.xmission.com/~nate/glut.html
 	Installation instructions: http://web.eecs.umich.edu/~sugih/courses/eecs487/glut-howto/#win)
   or freeglut ( tested, http://www.transmissionzero.co.uk/software/freeglut-devel/ )
+- mhook required for windows build. It is added as submodule, use
+  `git submodule update --init --recursive` if it was not checked with the tree.
+
 
 On osx build was not tested, but cmake files may be used.
 
@@ -62,4 +65,6 @@ and push some changes!
 
 Discussion is at glsl-debugger-development@googlegroups.com
 https://groups.google.com/forum/?fromgroups#!forum/glsl-debugger-development
+
+IRC channel at freenode: #glsl-debugger
 
