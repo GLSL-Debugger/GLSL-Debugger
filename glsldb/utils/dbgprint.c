@@ -44,6 +44,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tlhelp32.h>
 #else
 #include <unistd.h>
+#include <sys/types.h>
 #endif /* _WIN32 */
 
 #include "dbgprint.h"

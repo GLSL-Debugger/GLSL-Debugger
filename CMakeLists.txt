@@ -14,8 +14,9 @@ set(MNT_SHRD_FLAGS "")
 
 # Messages with level lower than OUTPUT_LEVEL will be printed
 # Levels:  DBGLVL_ERROR = 0,	DBGLVL_WARNING,
-#		   DBGLVL_INFO,			DBGLVL_INTERNAL_WARNING,
-#		   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,				DBGLVL_ALL = 6
+#	   DBGLVL_INFO,		DBGLVL_INTERNAL_WARNING,
+#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,		
+#	   DBGLVL_ALL = 6
 add_definitions(-DOUTPUT_LEVEL=6)
 set(BINARY_DIR "${PROJECT_BINARY_DIR}/bin")
 set(LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
@@ -24,7 +25,7 @@ set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/lib")
 # platform checks
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(GLSLDB_LINUX 1)
-	add_definitions(-DGLSLDB_LINUX)
+	add_definitions(-DGLSLDB_LINUX -D_GNU_SOURCE)
 	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
 		include(CheckCXXCompilerFlag)
 		check_cxx_compiler_flag("-fPIC" WITH_FPIC)
@@ -32,16 +33,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 			add_definitions(-fPIC)
 		endif()
 	endif()
-	list(APPEND MNT_C_FLAGS "-g -O0 -Wall -Wfatal-errors -pedantic -std=gnu99")
-	list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++11")
-	list(APPEND MNT_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
-	list(APPEND MNT_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
+	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -Wfatal-errors -pedantic -std=c99")
+	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++11")
+	list(APPEND CMAKE_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
+	list(APPEND CMAKE_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(GLSLDB_OSX 1)
 	add_definitions(-DGLSLDB_OSX)
-	list(APPEND MNT_C_FLAGS "-g -O0 -Wall -pedantic -std=gnu99")
-	list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
+	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -pedantic -std=gnu99")
+	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(GLSLDB_WIN 1)
