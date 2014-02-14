@@ -1,6 +1,10 @@
 #ifndef UT_NOTIFY_H
 #define UT_NOTIFY_H
 
+#ifdef _WIN32
+	#define __func__ __FUNCTION__
+#endif
+
 #include <stdio.h>
 
 typedef enum {

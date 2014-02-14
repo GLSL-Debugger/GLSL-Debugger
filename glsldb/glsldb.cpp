@@ -39,13 +39,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <signal.h>
 #include <execinfo.h>
-#endif /* _WIN32 */
-#include <string.h>
-#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
-#endif /* _WIN32 */
+#else /* !_WIN32 */
+#include "getopt_win.h"
+#endif /* !_WIN32 */
 
 #include <QtGui/QApplication>
 #include <QtCore/QStringList>
@@ -284,7 +283,7 @@ void printResult(void)
 }
 #endif
 
-#ifndef GLSLDB_WINDOWS
+#ifndef GLSLDB_WIN
 void handler(int UNUSED sig)
 {
 	void *buf[MAX_BACKTRACE_DEPTH];
@@ -354,7 +353,7 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(OUTPUT_LEVEL);
 	QStringList al = parseArguments(argc, argv);
 
-#ifndef GLSLDB_WINDOWS
+#ifndef GLSLDB_WIN
 	// activate backtracing if log level is high enough
 	if (UTILS_NOTIFY_LEVEL(0) > LV_INFO)
 		signal(SIGSEGV, handler);

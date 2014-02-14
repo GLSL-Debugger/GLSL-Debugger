@@ -8,4 +8,9 @@ set(SRC
 	notify.c
 )
 
+if(GLSLDB_WIN)
+	set(SRC ${SRC} getopt.c)
+endif()
+
+
 add_library(utils STATIC ${SRC})

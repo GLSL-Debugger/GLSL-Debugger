@@ -52,6 +52,12 @@ extern "C" {
 #include "utils/p2pcopy.h"
 }
 
+#ifdef _WIN32
+typedef DWORD PID_T;
+#else /* _WIN32 */
+typedef pid_t PID_T;
+#endif /* _WIN32 */
+
 class ProgramControl {
 
 public:
@@ -60,11 +66,11 @@ public:
 
 	/* remote program control */
 	pcErrorCode runProgram(char **debuggedProgramArgs, char *workDir = NULL);
+    pcErrorCode attachToProgram(const PID_T pid);
 #ifdef _WIN32
-	pcErrorCode attachToProgram(const DWORD pid);
-#else /* _WIN32 */
-	pcErrorCode attachToProgram(const pid_t pid);
-#endif /* _WIN32 */
+    // We need inherited class, not that
+    pcErrorCode runProgramWin(char **debuggedProgramArgs, char *workDir = NULL);
+#endif
 	pcErrorCode killProgram(int hard = 0);
 	pcErrorCode detachFromProgram(void);
 	bool childAlive(void);
@@ -127,11 +133,7 @@ private:
 	void setDebugEnvVars(void);
 
 	/* remote program control */
-#ifndef _WIN32
-	pid_t _debuggeePID;
-#else /* _WIN32 */
-	DWORD _debuggeePID;
-#endif /* _WIN32 */
+    PID_T _debuggeePID;
 	pcErrorCode dbgCommandExecute(void);
 	pcErrorCode dbgCommandExecuteToDrawCall(void);
 	pcErrorCode dbgCommandExecuteToShaderSwitch(void);
@@ -184,13 +186,9 @@ private:
 	void initShmem(void);
 	void clearShmem(void);
 	void freeShmem(void);
-#ifndef _WIN32
-	DbgRec* getThreadRecord(pid_t pid);
-#else /* _WIN32 */
-	DbgRec* getThreadRecord(DWORD pid);
-#endif /* _WIN32 */
+    DbgRec* getThreadRecord(PID_T pid);
 
-	int shmid;
+    int shmid;
 	DbgRec *_fcalls;
 	std::string _path_dbglib;
 	std::string _path_dbgfuncs;

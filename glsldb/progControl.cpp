@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -32,10 +32,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #ifdef _WIN32
-#define _WIN32_WINNT 0x0400
 #include <windows.h>	// MUST BE FIRST!!!
 #include "asprintf.h"
-#include "detours.h"
 #endif /* _WIN32 */
 
 #include <QtGui/QApplication>
@@ -90,9 +88,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "progControl.qt.h"
 
 #ifdef _WIN32
-#define DEBUGLIB "\\debuglib.dll"
+#define DEBUGLIB "\\glsldebug.dll"
 #define LIBDLSYM ""
-#define DBG_FUNCTIONS_PATH "plugins"
+#define DBG_FUNCTIONS_PATH "\\plugins"
 #else /* _WIN32 */
 #define DEBUGLIB "/../lib/libglsldebug.so"
 #define LIBDLSYM "/../lib/libdlsym.so"
@@ -108,7 +106,6 @@ ProgramControl::ProgramControl(const char *pname) :
 	_hEvtDebuggee = NULL;
 	_hEvtDebugger = NULL;
 	_hDebuggedProgram = NULL;
-	_ai.hDetours = NULL;
 	_ai.hLibrary = NULL;
 	_ai.hProcess = NULL;
 #endif /* _WIN32 */
@@ -422,25 +419,25 @@ void ProgramControl::setDebugEnvVars(void)
 
 #else /* !_WIN32 */
 	{
-		std::string s = std::to_string(GetCurrentProcessId()) + std::string("SHM");
+		std::string s = QString::number(GetCurrentProcessId()).toStdString() + std::string("SHM");
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", s.c_str()))
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_SHMID failed: %u\n", ::GetLastError());
 		dbgPrint(DBGLVL_DEBUG, "env shmid: \"%s\"\n", s.c_str());
 	}
 
-	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs)) {
+	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_DBGFCTNS_PATH", _path_dbgfuncs.c_str())) {
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_DBGFCTNS_PATH failed: %u\n", ::GetLastError());
 	}
 	dbgPrint(DBGLVL_INFO, "env dbgfctns: \"%s\"\n", _path_dbgfuncs.c_str());
 
 	{
-		std::string s = std::to_string(getMaxDebugOutputLevel());
+		std::string s = QString::number(getMaxDebugOutputLevel()).toStdString();
 		if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGLEVEL", s.c_str()))
 		dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGLEVEL failed: %u\n", ::GetLastError());
 		dbgPrint(DBGLVL_INFO, "env dbglvl: \"%s\"\n", s.c_str());
 	}
 
-	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGDIR", _path_log))
+	if (!::SetEnvironmentVariableA("GLSL_DEBUGGER_LOGDIR", _path_log.c_str()))
 	dbgPrint(DBGLVL_ERROR, "setenv GLSL_DEBUGGER_LOGDIR failed: %u\n", ::GetLastError());
 	dbgPrint(DBGLVL_INFO, "env dbglogdir: \"%s\"\n", _path_log.c_str());
 #endif /* !_WIN32 */
@@ -1390,11 +1387,12 @@ pcErrorCode ProgramControl::dbgCommandShaderStepVertex(void *shaders[3],
 	return error;
 }
 
-pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
-		char *workDir)
+// Windows stuff moved
+#ifndef _WIN32
+pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs, char *workDir)
 {
 	pcErrorCode error;
-#ifndef _WIN32
+
 	clearShmem();
 
 	_debuggeePID = vfork();
@@ -1459,130 +1457,16 @@ pcErrorCode ProgramControl::runProgram(char **debuggedProgramArgs,
 	printCall();
 #endif
 	return PCE_NONE;
-#else /* _WIN32 */
-	STARTUPINFOA startupInfo;
-	PROCESS_INFORMATION processInfo;
-	char dllPath[_MAX_PATH];			// Path to debugger preload DLL.
-	char detouredDllPath[_MAX_PATH];// Path to marker DLL.
-	char *cmdLine = NULL;// Command line to execute.
-	size_t cntCmdLine = 0;// Size of command line.
 
-	/* Only size must be initialised. */
-	::ZeroMemory(&startupInfo, sizeof(STARTUPINFOA));
-	startupInfo.cb = sizeof(STARTUPINFOA);
 
-	/* Get path to detours marker DLL. */
-	HMODULE hDetouredDll = ::DetourGetDetouredMarker();
-	::GetModuleFileNameA(hDetouredDll, detouredDllPath, _MAX_PATH);
-	// Note: Do not close handle. See MSDN: "The GetModuleHandle function
-	// returns a handle to a mapped module without incrementing its
-	// reference count."
-
-	/* Concatenate the command line. */
-	for (int i = 0; debuggedProgramArgs[i] != 0; i++) {
-		cntCmdLine += ::strlen(debuggedProgramArgs[i]) + 1;
-	}
-	cmdLine = new char[cntCmdLine + 1];
-	*cmdLine = 0;
-	for (int i = 0; debuggedProgramArgs[i] != 0; i++) {
-		::strcat(cmdLine, debuggedProgramArgs[i]);
-		::strcat(cmdLine, " ");
-	}
-
-	this->setDebugEnvVars();	// TODO dirty hack.
-	LPVOID newEnv = ::GetEnvironmentStrings();
-
-	HMODULE hThis = GetModuleHandleW(NULL);
-	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
-	char *insPos = strrchr(dllPath, '\\');
-	if (insPos != NULL) {
-		strcpy(insPos + 1, DEBUGLIB);
-	} else {
-		strcpy(dllPath, DEBUGLIB);
-	}
-
-	if (::DetourCreateProcessWithDllA(NULL, cmdLine, NULL, NULL, TRUE,
-					CREATE_SUSPENDED | CREATE_DEFAULT_ERROR_MODE
-					/*| CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS*/, NULL,
-					workDir, &startupInfo, &processInfo, detouredDllPath, dllPath,
-					NULL)) {
-		this->createEvents(processInfo.dwProcessId);
-		_hDebuggedProgram = processInfo.hProcess;
-		_debuggeePID = processInfo.dwProcessId;
-		//::DebugActiveProcess(processInfo.dwProcessId);
-		//::DebugBreakProcess(processInfo.hProcess);
-		::ResumeThread(processInfo.hThread);
-		::CloseHandle(processInfo.hThread);
-		error = PCE_NONE;
-	} else {
-		error = PCE_EXEC;
-	}
-
-	delete[] cmdLine;
-	//return error;
-
-	dbgPrint(DBGLVL_INFO, "wait for debuggee\n");
-	error = checkChildStatus();
-	if (error != PCE_NONE) {
-		killProgram(0);
-		//_debuggeePID = 0;
-		return error;
-	}
-
-	dbgPrint(DBGLVL_INFO, "send continue\n");
-	error = executeDbgCommand();
-	//error = dbgCommandCallOrig();
-	if (error != PCE_NONE) {
-		this->killProgram(0);
-		//_debuggeePID = 0;
-		return error;
-	}
-#ifdef DEBUG
-	printCall();
-#endif
-	return error;
-#endif /* _WIN32 */
 }
 
-#ifdef _WIN32
-pcErrorCode ProgramControl::attachToProgram(const DWORD pid) {
-	pcErrorCode retval = PCE_NONE;      // Method return value.
-	char dllPath[_MAX_PATH];// Path to debugger preload DLL.
-	char smName[_MAX_PATH];// Name of shared memory.
-
-	HMODULE hThis = GetModuleHandleW(NULL);
-	GetModuleFileNameA(hThis, dllPath, _MAX_PATH);
-	char *insPos = strrchr(dllPath, '\\');
-	if (insPos != NULL) {
-		strcpy(insPos + 1, DEBUGLIB);
-	} else {
-		strcpy(dllPath, DEBUGLIB);
-	}
-
-	this->createEvents(pid);
-	::SetEvent(_hEvtDebuggee);
-
-	this->setDebugEnvVars();	// TODO dirty hack.
-	::GetEnvironmentVariableA("GLSL_DEBUGGER_SHMID", smName, _MAX_PATH);
-	if (!::AttachToProcess(_ai, pid, PROCESS_ALL_ACCESS, dllPath, smName,
-					_path_dbgfuncs)) {
-		return PCE_UNKNOWN_ERROR;   // TODO
-	}
-
-	_hDebuggedProgram = _ai.hProcess;
-	_debuggeePID = pid;  // TODO: Do we need this information?
-
-	retval = this->checkChildStatus();
-
-	return retval;
-}
-#else /* _WIN32 */
 pcErrorCode ProgramControl::attachToProgram(const pid_t pid)
 {
 	UNUSED_ARG(pid)
 	return PCE_UNKNOWN_ERROR;
 }
-#endif /* _WIN32 */
+#endif /* !_WIN32 */
 
 FunctionCall* ProgramControl::getCurrentCall(void)
 {
@@ -2190,22 +2074,11 @@ pcErrorCode ProgramControl::executeContinueOnError(void)
 	return PCE_NONE;
 }
 
+#ifndef _WIN32
 pcErrorCode ProgramControl::killProgram(int hard)
 {
-	dbgPrint(DBGLVL_INFO,
-			"killing debuggee: %s", (hard ? "forced" : "termination requested"));
-#ifdef _WIN32
-	if (_ai.hProcess != NULL) {
-		return this->detachFromProgram();
-	} else if (_hDebuggedProgram != NULL) {
-		pcErrorCode retval = ::TerminateProcess(_hDebuggedProgram, 42)
-		? PCE_NONE : PCE_EXIT;
-		_hDebuggedProgram = NULL;
-		_debuggeePID = 0;
-		return retval;
-	}
-	return PCE_NONE;
-#else /* _WIN32 */
+	dbgPrint(DBGLVL_INFO, "killing debuggee: %s",
+			 (hard ? "forced" : "termination requested"));
 	if (_debuggeePID) {
 		if (hard) {
 			kill(_debuggeePID, SIGKILL);
@@ -2216,61 +2089,18 @@ pcErrorCode ProgramControl::killProgram(int hard)
 		return checkChildStatus();
 	}
 	return PCE_NONE;
-#endif /* _WIN32 */
 }
 
 pcErrorCode ProgramControl::detachFromProgram(void)
 {
 	pcErrorCode retval = PCE_UNKNOWN_ERROR;
-
-#ifdef _WIN32
-	if (_ai.hProcess != NULL) {
-		// TODO: This won't work ... at least not properly.
-		this->execute(false);
-
-		if (::DetachFromProcess(_ai)) {
-			_hDebuggedProgram = NULL;
-			_debuggeePID = 0;
-		} else {
-			retval = PCE_EXIT;
-		}
-
-		//::SetEvent(_hEvtDebuggee);
-		//this->closeEvents();
-		this->stop();// Ensure consistent state.
-		this->checkChildStatus();
-	} else {
-		/* Nothing to detach from. */
-		retval = PCE_NONE;
-	}
-#else /* _WIN32 */
 	// TODO
-#endif /* _WIN32 */
-
 	return retval;
 }
 
+
 void ProgramControl::initShmem(void)
 {
-#ifdef _WIN32
-#define SHMEM_NAME_LEN 64
-	char shmemName[SHMEM_NAME_LEN];
-
-	_snprintf(shmemName, SHMEM_NAME_LEN, "%uSHM", GetCurrentProcessId());
-	/* this creates a non-inheritable shared memory mapping! */
-	_hShMem = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, SHM_SIZE, shmemName);
-	if (_hShMem == NULL || _hShMem == INVALID_HANDLE_VALUE) {
-		dbgPrint(DBGLVL_ERROR, "Creation of shared mem segment %s failed: %u\n", shmemName, GetLastError());
-		exit(1);
-	}
-	/* FILE_MAP_WRITE implies read */
-	_fcalls = (DbgRec*)MapViewOfFile(_hShMem, FILE_MAP_WRITE, 0, 0, SHM_SIZE);
-	if (_fcalls == NULL) {
-		dbgPrint(DBGLVL_ERROR, "View mapping of shared mem segment %s failed: %u\n", shmemName, GetLastError());
-		exit(1);
-	}
-#undef SHMEM_NAME_LEN
-#else /* _WIN32 */
 	shmid = shmget(IPC_PRIVATE, SHM_SIZE, SHM_R | SHM_W);
 
 	if (shmid == -1) {
@@ -2286,77 +2116,24 @@ void ProgramControl::initShmem(void)
 				"Attaching to shared mem segment failed: %s\n", strerror(errno));
 		exit(1);
 	}
-#endif /* _WIN32 */
-}
-
-void ProgramControl::clearShmem(void)
-{
-	memset(_fcalls, 0, SHM_SIZE);
 }
 
 void ProgramControl::freeShmem(void)
 {
-#ifdef _WIN32
-	if (_fcalls != NULL) {
-		if (!UnmapViewOfFile(_fcalls)) {
-			dbgPrint(DBGLVL_ERROR, "View unmapping of shared mem segment failed: %u\n", GetLastError());
-			exit(1);
-		}
-		fcalls = NULL;
-	}
-	if (_hShMem != INVALID_HANDLE_VALUE && _hShMem != NULL) {
-		if (CloseHandle(_hShMem) == 0) {
-			dbgPrint(DBGLVL_ERROR, "Closing handle of shared mem segment failed: %u\n", GetLastError());
-			exit(1);
-		}
-		_hShMem = INVALID_HANDLE_VALUE;
-	}
-#else /* _WIN32 */
 	shmctl(shmid, IPC_RMID, 0);
 
 	if (shmdt(_fcalls) == -1) {
 		dbgPrint(DBGLVL_ERROR,
 				"Deleting shared mem segment failed: %s\n", strerror(errno));
 	}
-#endif /* _WIN32 */
+}
+#endif /* !_WIN32 */
+
+void ProgramControl::clearShmem(void)
+{
+	memset(_fcalls, 0, SHM_SIZE);
 }
 
-#ifdef _WIN32
-void ProgramControl::createEvents(const DWORD processId) {
-#define EVENT_NAME_LEN (32)
-	wchar_t eventName[EVENT_NAME_LEN];
 
-	this->closeEvents();
 
-	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgee", processId);
-	_hEvtDebuggee = ::CreateEventW(NULL, FALSE, FALSE, eventName);
-	if (_hEvtDebuggee == NULL) {
-		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
-		::exit(1);
-	}
 
-	_snwprintf(eventName, EVENT_NAME_LEN, L"%udbgr", processId);
-	_hEvtDebugger = ::CreateEventW(NULL, FALSE, FALSE, eventName);
-	if (_hEvtDebugger == NULL) {
-		dbgPrint(DBGLVL_ERROR, "creating %s failed\n", eventName);
-		::exit(1);
-	}
-}
-
-void ProgramControl::closeEvents(void) {
-	dbgPrint(DBGLVL_INFO, "Closing events ...\n");
-
-	if (_hEvtDebugger != NULL) {
-		::CloseHandle(_hEvtDebugger);
-		_hEvtDebugger = NULL;
-	}
-
-	if (_hEvtDebuggee != NULL) {
-		::CloseHandle(_hEvtDebuggee);
-		_hEvtDebuggee = NULL;
-	}
-
-	dbgPrint(DBGLVL_INFO, "Events closed.\n");
-}
-
-#endif /* _WIN32 */

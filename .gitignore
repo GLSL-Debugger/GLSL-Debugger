@@ -18,7 +18,17 @@ CMakeFiles
 cmake_install.cmake
 Makefile
 
+# VS stuff
+*.vcxproj.*
+*.suo
+*.sdf
+*.opensdf
+
+# It required for windows build and have ugly distribution model.
+detours/
+
 # output & generated stuff
+Build/
 bin
 lib
 glsldb/DebugLib/generated/
@@ -29,6 +39,7 @@ GLSLCompiler/glslang/MachineIndependent/generated_glsl_parser.hpp
 
 # QT stuff
 moc_*.cxx
+moc_*.cxx_parameters
 ui_*.h
 qrc_*.cxx
 glsldb/glslDevil.qrc.depends
@@ -38,3 +49,4 @@ glsldb/glslDevil.qrc.depends
 glsldb/.DS_Store
 
 .DS_Store
+*.user
