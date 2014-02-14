@@ -233,6 +233,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -254,6 +255,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -275,6 +277,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -293,6 +296,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -311,6 +315,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -329,6 +334,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -347,6 +353,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -365,6 +372,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -383,6 +391,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -398,6 +407,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;
@@ -413,6 +423,7 @@ public:
 			break;
 		default:
 			assert(false && "Default missing");
+			break;
 		}
 
 		return returnValue;

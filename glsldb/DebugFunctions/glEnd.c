@@ -33,22 +33,25 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _WIN32
 /* Make gl.h believe we are Windows. This is required for correct linkage. */
-#define _GDI32_
+//#define _GDI32_
+#define BUILD_GL32
 #endif /* _WIN32 */
+
+#define DBGLIB_EXTERNAL
+#include "../DebugLib/debuglib.h"
+#include "../DebugLib/debuglibInternal.h"
+#include "GL/gl.h"
+#include "GL/glext.h"
+//typedef GLint GLfixed;
+//#include "../utils/dbgprint.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DBGLIB_EXTERNAL
-#include "GL/gl.h"
-#include "GL/glext.h"
-//typedef GLint GLfixed;
-#include "../DebugLib/debuglib.h"
-#include "../DebugLib/debuglibInternal.h"
-#include "../utils/dbgprint.h"
-
 #ifdef _WIN32
-#include "../DebugLib/trampolines.h"
+#include "GL/wglext.h"
+#include "GL/WinGDI.h"
+#include "../DebugLib/generated/trampolines.h"
 #endif /* _WIN32 */
 
 /*
@@ -60,7 +63,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char provides[] = "glEnd";
 
-void APIENTRY glEnd(void)
+GLAPI void GLAPIENTRY glEnd(void)
 {
 #if 0
 	/* HAZARD maximally dangerous. this relies upon the fact that the debuglib is already loaded
@@ -68,7 +71,7 @@ void APIENTRY glEnd(void)
 	 glEnd. We do this because the contents of OrigglEnd are, as a matter of fact, fucked
 	 in the head and we end up in a totally wrong memory segment. This might have to do
 	 something with improper relocation of all the library goo, but we do not know. yet. */
-	HANDLE lib = LoadLibraryA("debuglib.dll");
+	HANDLE lib = LoadLibraryA("glsldebug.dll");
 	dbgPrint(DBGLVL_DEBUG, "using special glEnd: 0x%x\n", OrigglEnd);
 	dbgPrint(DBGLVL_DEBUG, "origglend = 0x%x\n", *((GetProcAddress(lib, "OrigglEnd"))));
 	(*((GetProcAddress(lib, "OrigglEnd"))))();
@@ -80,5 +83,6 @@ void APIENTRY glEnd(void)
 }
 
 #ifdef _WIN32
-#undef _GDI32_
+//#undef _GDI32_
+#undef BUILD_GL32
 #endif /* _WIN32 */

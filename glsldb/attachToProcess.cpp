@@ -8,15 +8,15 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-    list of conditions and the following disclaimer in the documentation and/or
-    other materials provided with the distribution.
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-    of its contributors may be used to endorse or promote products derived from
-    this software without specific prior written permission.
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #include <cassert>
 #include <psapi.h>
-#include <detours.h>
 #include <tchar.h>
 #include "asprintf.h"
 #endif /* _WIN32 */
@@ -84,7 +83,7 @@ ProcessSnapshotModel::Item::Item(const char *exe, const char *owner, PID pid,
  * ProcessSnapshotModel::Item::Item
  */
 ProcessSnapshotModel::Item::Item(PROCESSENTRY32& pe, Item *parent)
-: child(NULL), exe(toQString(pe.szExeFile)), parent(parent),
+: child(NULL), exe(QString(pe.szExeFile)), parent(parent),
 isAttachable(false), pid(pe.th32ProcessID) {
 	HANDLE hProcess = NULL;     // Process handle.
 	HANDLE hToken = NULL;// Process security token.
@@ -155,7 +154,7 @@ isAttachable(false), pid(pe.th32ProcessID) {
 
 			if (::Module32First(hSnapshot, &me)) {
 				do {
-					QString name = toQString(me.szModule);
+					QString name(me.szModule);
 					if (name.contains("opengl", Qt::CaseInsensitive)) {
 						this->isAttachable = true;
 						break;
@@ -372,87 +371,6 @@ int ProcessSnapshotModel::rowCount(const QModelIndex& parent) const
 #ifdef _WIN32
 //typedef LONG ( NTAPI *_NtSuspendProcess )( IN HANDLE ProcessHandle );
 //typedef LONG ( NTAPI *_NtResumeProcess )( IN HANDLE ProcessHandle );
-
-/**
- * This function runs a remote thread in 'hProcess' to explicity load the
- * library specified by 'libPath'.
- */
-static HMODULE RemoteLoadLibrary(HANDLE hProcess, const char *libPath) {
-	DWORD exitCode = 0;             // Exit code of remote thread.
-	DWORD remoteMemSize = 0;// Size of allocated remote memory.
-	HANDLE hThread = NULL;// Handle to remote thread.
-	HMODULE hKernel32 = NULL;// Module handle of kernel32.dll.
-	HMODULE retval = NULL;// Handle to loaded remote library.
-	FARPROC loadLibrary = NULL;// Function pointer of LoadLibrary.
-	void *remoteLibPath = NULL;// Remote memory for path to library.
-
-	/* Sanity checks. */
-	if (hProcess == NULL) {
-		goto cleanup;
-	}
-	if (libPath == NULL) {
-		goto cleanup;
-	}
-
-	/* Get Function pointer to LoadLibrary. */
-	if ((hKernel32 = ::GetModuleHandleA("kernel32")) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "Module handle of \"kernel32\" could not be retrieved: "
-				"%u.\n", ::GetLastError());
-		goto cleanup;
-	}
-	if ((loadLibrary = ::GetProcAddress(hKernel32, "LoadLibraryA")) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "\"LoadLibrary\" could not be found: %u.\n",
-				::GetLastError());
-		goto cleanup;
-	}
-
-	/* Allocate memory for library path in remote process. */
-	remoteMemSize = ::strlen(libPath) + 1;
-	if ((remoteLibPath = ::VirtualAllocEx(hProcess, NULL, remoteMemSize,
-							MEM_COMMIT, PAGE_READWRITE)) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "VirtualAllocEx failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Copy library path to remote process. */
-	if (!::WriteProcessMemory(hProcess, remoteLibPath, libPath,
-					remoteMemSize, NULL)) {
-		dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Load the debug library into the remote process. */
-	if ((hThread = ::CreateRemoteThread(hProcess, NULL, 0,
-							reinterpret_cast<LPTHREAD_START_ROUTINE>(loadLibrary),
-							remoteLibPath, 0, NULL)) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "CreateRemoteThread failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Wait for LoadLibrary to complete. */
-	if (::WaitForSingleObject(hThread, INFINITE) != WAIT_OBJECT_0) {
-		dbgPrint(DBGLVL_ERROR, "WaitForSingleObject failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-
-	/* Get exit code, which is the module handle of our remote debug library. */
-	// TODO: Das könnte unter 64 bit kriminell sein ...
-	if (!::GetExitCodeThread(hThread, &exitCode)) {
-		dbgPrint(DBGLVL_ERROR, "GetExitCodeThread failed: %u.\n", ::GetLastError());
-		goto cleanup;
-	}
-	retval = reinterpret_cast<HMODULE>(exitCode);
-
-	/* Clean up. */
-	cleanup:
-	if (hThread != NULL) {
-		::CloseHandle(hThread);
-	}
-	if (remoteLibPath != NULL) {
-		::VirtualFreeEx(hProcess, remoteLibPath, remoteMemSize, MEM_RELEASE);
-	}
-	return retval;
-}
 
 /**
  * Free the library designated by 'hRemoteModule' in process 'hProcess'.
@@ -1060,23 +978,9 @@ bool RemoteUpdateTopLevelWindows(HANDLE hProcess) {
 bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		DWORD desiredAccess, const char *libPath, const char *smName,
 		const char *dbgFuncPath) {
-	HMODULE hDetouredDll = NULL;
-	char detouredDllPath[_MAX_PATH];
 
 	/* Reset out variable. */
-	outAi.hDetours = NULL;
 	outAi.hLibrary = NULL;
-	outAi.hProcess = NULL;
-
-	/* Get detours marker name for injection. */
-	if ((hDetouredDll = ::DetourGetDetouredMarker()) == NULL) {
-		dbgPrint(DBGLVL_ERROR, "DetourGetDetouredMarker failed: %u.\n", ::GetLastError());
-		return false;
-	}
-	if (!::GetModuleFileNameA(hDetouredDll, detouredDllPath, _MAX_PATH)) {
-		dbgPrint(DBGLVL_ERROR, "GetModuleFileName failed: %u.\n", ::GetLastError());
-		return false;
-	}
 
 	/* Open process for attachment. */
 	outAi.hProcess = ::OpenProcess(desiredAccess | PROCESS_CREATE_THREAD
@@ -1094,21 +998,10 @@ bool AttachToProcess(ATTACHMENT_INFORMATION& outAi, DWORD pid,
 		return false;
 	}
 
-	/* Load detours marker first. */
-	outAi.hDetours = ::RemoteLoadLibrary(outAi.hProcess, detouredDllPath);
-	if (outAi.hDetours == NULL) {
-		dbgPrint(DBGLVL_ERROR, "Attaching detours marker failed.\n");
-		::CloseHandle(outAi.hProcess);
-		outAi.hProcess = NULL;
-		return false;
-	}
-
 	/* Load the debug library into the process. */
-	outAi.hLibrary = ::RemoteLoadLibrary(outAi.hProcess, libPath);
-	if (outAi.hLibrary == NULL) {
+	if (injectLib(outAi)) {
 		dbgPrint(DBGLVL_ERROR, "Attaching debug library failed.\n");
-		::RemoteFreeLibrary(outAi.hProcess, outAi.hDetours);
-		outAi.hDetours = NULL;
+		::RemoteFreeLibrary(outAi.hProcess, outAi.hLibrary);
 		::CloseHandle(outAi.hProcess);
 		outAi.hProcess = NULL;
 		return false;
@@ -1145,14 +1038,7 @@ bool DetachFromProcess(ATTACHMENT_INFORMATION& inOutAi) {
 	}
 	retval = (inOutAi.hLibrary == NULL) && retval;
 
-	/* Free detours marker DLL. */
-	if (::RemoteFreeLibrary(inOutAi.hProcess, inOutAi.hDetours)) {
-		inOutAi.hDetours = NULL;
-	}
-	retval = (inOutAi.hDetours == NULL) && retval;
-
 	// TODO: Clean the environment!
-
 	/* Close process handle, if all libraries have been freed. */
 	if (retval) {
 		::CloseHandle(inOutAi.hProcess);

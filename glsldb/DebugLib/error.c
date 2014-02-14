@@ -41,7 +41,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "utils/notify.h"
 
 #ifdef _WIN32
-#include "trampolines.h"
+#include "../GL/wglext.h"
+#include "generated/trampolines.h"
 #endif /* _WIN32 */
 
 void setErrorCode(int error)

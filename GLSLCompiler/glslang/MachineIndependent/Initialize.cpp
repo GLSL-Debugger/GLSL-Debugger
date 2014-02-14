@@ -2490,6 +2490,7 @@ void IdentifyBuiltIns(EShLanguage language, TSymbolTable& symbolTable)
 		break;
 	default:
 		assert(false && "Language not supported");
+		break;
 	}
 }
 

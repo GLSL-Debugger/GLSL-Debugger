@@ -40,6 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "osx_ptrace_defs.h"
 #endif /* __APPLE __ */
 #include <sys/ptrace.h>
+#include <stdint.h>
 #else /* _WIN32 */
 #include <windows.h>
 #endif /* _WIN32 */

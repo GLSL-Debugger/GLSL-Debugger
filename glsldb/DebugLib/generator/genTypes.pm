@@ -103,6 +103,7 @@ our %typeMap = (
     "LPGLYPHMETRICSFLOAT" => "void *",
     "LPLAYERPLANEDESCRIPTOR" => "void *",
     "HVIDEOOUTPUTDEVICENV" => "void *",
+    "HVIDEOINPUTDEVICENV" => "void *",
     "HPVIDEODEV" => "void *",
     "GLhandleARB" => "unsigned int",
 );

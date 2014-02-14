@@ -1,0 +1,3 @@
+[submodule "3rdparty/mhook"]
+	path = 3rdparty/mhook
+	url = https://github.com/SirAnthony/mhook.git

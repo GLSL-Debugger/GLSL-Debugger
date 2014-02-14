@@ -49,7 +49,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pfm.h"
 
 #ifdef _WIN32
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* _WIN32 */
 
 typedef struct {
@@ -569,6 +569,7 @@ DMARK
 	default:
 		dbgPrint(DBGLVL_ERROR, "Unhandled TFB version!\n");
 		error = GL_INVALID_OPERATION;
+		break;
 	}
 
 	return error;

@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -171,8 +171,14 @@ private:
 typedef struct ATTACHMENT_INFORMATION_t {
 	HANDLE hProcess;    // Process handle of the process we attached to.
 	HMODULE hLibrary;// Handle to injected debug library.
-	HMODULE hDetours;// Handle to injected detours marker.
 }ATTACHMENT_INFORMATION;
+
+/**
+ * @brief Inject debug library into process
+ * @param ai - srtuct with valid hProcess handle.
+ * @return Windows error code if error ocurred
+ */
+DWORD injectLib(ATTACHMENT_INFORMATION &ai);
 
 /**
  * Attach to the remote process with process ID 'pid' and inject the debug
