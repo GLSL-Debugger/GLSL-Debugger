@@ -49,3 +49,4 @@ glsldb/glslDevil.qrc.depends
 glsldb/.DS_Store
 
 .DS_Store
+*.user
