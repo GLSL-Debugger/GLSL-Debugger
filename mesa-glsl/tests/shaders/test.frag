@@ -1,39 +1,42 @@
 #version 140
-// ir_variable definition
+// variable definition
 varying vec3 f_color;
-int deref_array[1];
+// array definition & initializer
+int deref_array[1] = {1};
 
 // struct definition
 struct test_struct {
   int val;
 };
 
-// ir_function ir_function_signature
+// function declaration & parameter declarator
 int test_func(int param) {
-  // ir_return
+  // return & binary expression
   return param * param;
 }
 
 void main(void) {
-  // ir_deref_record
+  // record declaration
   test_struct deref_record;
-  // ir_assignment ir_deref_value
+  // assignment & deref value
   vec3 f_color_adv = f_color;
-  // ir_if (ir_deref_record ir_expression ir_constant)
+  // selection (expression swizle to constant)
   if (f_color_adv.x < 0.3)
-    discard; // ir_discard
+    discard; // discard
+  // constructor call
   int count = int(f_color_adv.x * 10);
-  // ir_assign ir_call
+  // assign to record & call with parameter
   deref_record.val = test_func(count);
-  // ir_call
+  // call with parameter
   test_func(count);
-  // ir_deref_array
+  // array + index & record field
   deref_array[0] = deref_record.val;
 
-  // ir_loop
+  // loop && unary increment
   for (int i=0; i < count; ++i) {
+    // increment assignment
     f_color_adv.x += 0.6;
-    // ir_loop_break
+    // loop break
   }
 
   // switch
@@ -47,5 +50,6 @@ void main(void) {
         break;
   }
 
+  // built-in variable & assign & constructor with different stuff
   gl_FragColor = vec4(f_color_adv.x, f_color.y * deref_array[0], f_color.z * deref_record.val, 1.0);
 }

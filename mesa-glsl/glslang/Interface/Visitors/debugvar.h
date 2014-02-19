@@ -21,7 +21,6 @@ public:
 
 	virtual bool traverse(class ast_expression *);
 	virtual bool traverse(class ast_expression_bin *);
-	virtual bool traverse(class ast_function_expression *);
 	virtual bool traverse(class ast_aggregate_initializer *);
 	virtual bool traverse(class ast_declaration *);
 	virtual bool traverse(class ast_parameter_declarator *);

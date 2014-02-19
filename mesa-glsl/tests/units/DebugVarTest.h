@@ -24,7 +24,7 @@ public:
 	{
 		ShaderHolder* holder = input.getShader("shaders/test");
 		ast_debugvar_traverser_visitor it(vl);
-		for (int i = 0; i < holder->num_shaders; ++i) {
+		for (unsigned i = 0; i < holder->num_shaders; ++i) {
 			it.visit(holder->shaders[i]->head);
 		}
 	}

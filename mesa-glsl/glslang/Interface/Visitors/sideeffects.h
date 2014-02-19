@@ -24,6 +24,7 @@ public:
 
 	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
 	virtual void visit(ast_declarator_list *);
+	virtual void visit(ast_struct_specifier *);
 	virtual void visit(ast_compound_statement *);
 	virtual void visit(ast_expression_statement *);
 
@@ -42,33 +43,6 @@ public:
 
 protected:
 	struct _mesa_glsl_parse_state* state;
-};
-
-class ir_sideeffects_traverser_visitor : public ir_traverse_visitor {
-public:
-	ir_sideeffects_traverser_visitor()
-	{
-		preVisit = false;
-		postVisit = true;
-	}
-
-	virtual ~ir_sideeffects_traverser_visitor()
-	{
-	}
-
-	virtual bool visitIr(ir_function_signature *ir);
-	virtual bool visitIr(ir_function *ir);
-	virtual bool visitIr(ir_expression *ir);
-	virtual bool visitIr(ir_assignment *ir);
-	virtual bool visitIr(ir_call *ir);
-	virtual bool visitIr(ir_discard *ir);
-	virtual bool visitIr(ir_if *ir);
-	virtual bool visitIr(ir_loop *ir);
-	virtual bool visitIr(ir_emit_vertex *ir);
-
-	int list_sideeffects(exec_list* instructions);
-	int block_sideeffects(ir_dummy* first);
-
 };
 
 

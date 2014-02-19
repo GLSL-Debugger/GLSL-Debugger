@@ -5,6 +5,7 @@
  */
 
 #include "units/DebugVarTest.h"
+#include "units/Compiler.h"
 #include "glsldb/utils/dbgprint.h"
 #include <cppunit/TestResult.h>
 
@@ -18,8 +19,8 @@ int main(int argc, char **argv)
 		ShaderInput::setPath(std::string(argv[1]));
 	setMaxDebugOutputLevel(DBGLVL_ALL);
 	CppUnit::TestResult result;
-	CppUnit::TestSuite* suite = DebugVarTest::suite();
-	suite->run(&result);
+	CompileShaderTest::suite()->run(&result);
+	DebugVarTest::suite()->run(&result);
 
 	return 0;
 }

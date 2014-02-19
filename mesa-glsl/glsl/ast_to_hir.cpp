@@ -1883,7 +1883,7 @@ process_array_size(exec_node *node,
    return size->value.u[0];
 }
 
-static const glsl_type *
+const glsl_type *
 process_array_type(YYLTYPE *loc, const glsl_type *base,
                    ast_array_specifier *array_specifier,
                    struct _mesa_glsl_parse_state *state)
@@ -1994,7 +1994,7 @@ is_varying_var(ir_variable *var, gl_shader_stage target)
 /**
  * Matrix layout qualifiers are only allowed on certain types
  */
-static void
+void
 validate_matrix_layout_for_type(struct _mesa_glsl_parse_state *state,
 				YYLTYPE *loc,
                                 const glsl_type *type,
@@ -2109,7 +2109,7 @@ validate_binding_qualifier(struct _mesa_glsl_parse_state *state,
 }
 
 
-static glsl_interp_qualifier
+glsl_interp_qualifier
 interpret_interpolation_qualifier(const struct ast_type_qualifier *qual,
                                   ir_variable_mode mode,
                                   struct _mesa_glsl_parse_state *state,

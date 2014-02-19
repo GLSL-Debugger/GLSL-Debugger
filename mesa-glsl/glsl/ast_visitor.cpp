@@ -137,9 +137,11 @@ void ast_traverse_visitor::visit(class ast_array_specifier* node)
 		this->traverse(node);
 }
 
-void ast_traverse_visitor::visit(class ast_aggregate_initializer* node)
+void ast_traverse_visitor::visit(class ast_aggregate_initializer*)
 {
-	assert(!"not implemented");
+	// Nothing to do here
+	// TODO: Or not? If you have problems with some kind
+	//       of calls in initializer, it is here
 }
 
 void ast_traverse_visitor::visit(class ast_compound_statement* node)
@@ -204,23 +206,42 @@ void ast_traverse_visitor::visit(class ast_type_specifier* node)
 
 void ast_traverse_visitor::visit(class ast_fully_specified_type* node)
 {
-	assert(!"not implemented");
+	if (node->specifier)
+		node->specifier->accept(this);
 }
 
 void ast_traverse_visitor::visit(class ast_declarator_list* node)
 {
+	if (node->type)
+		node->type->accept(this);
 	foreach_list_typed (ast_node, decl, link, &node->declarations)
 		decl->accept(this);
 }
 
 void ast_traverse_visitor::visit(class ast_parameter_declarator* node)
 {
-	assert(!"not implemented");
+	if (flags & (traverse_previsit | traverse_debugvisit))
+		if (!this->traverse(node))
+			return;
+
+	if (node->array_specifier)
+		node->array_specifier->accept(this);
+
+	if (flags & traverse_postvisit)
+		this->traverse(node);
 }
 
 void ast_traverse_visitor::visit(class ast_function* node)
 {
-	assert(!"not implemented");
+	if (flags & (traverse_previsit | traverse_debugvisit))
+		if (!this->traverse(node))
+			return;
+
+	foreach_list_typed (ast_node, decl, link, &node->parameters)
+		decl->accept(this);
+
+	if (flags & traverse_postvisit)
+		this->traverse(node);
 }
 
 void ast_traverse_visitor::visit(class ast_expression_statement* node)
