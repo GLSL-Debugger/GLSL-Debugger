@@ -32,7 +32,6 @@ public:
 	virtual bool traverse(ast_expression_bin *);
 	virtual bool traverse(ast_function_expression *);
 	virtual bool traverse(ast_case_statement *);
-	virtual bool traverse(ast_case_statement_list *);
 	virtual bool traverse(ast_switch_body *);
 	virtual bool traverse(ast_selection_statement *);
 	virtual bool traverse(ast_switch_statement *);

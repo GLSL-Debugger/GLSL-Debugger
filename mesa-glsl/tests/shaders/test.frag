@@ -41,13 +41,17 @@ void main(void) {
 
   // switch
   switch (count % 10) {
-      // case
-      case 1:
-        break; // switch break
-      case 10:
-        count += 1;
-      default:
-        break;
+    // case list
+    case 1:
+    case 3:
+      break; // switch break
+    // single case
+    case 10:
+      count += 1;
+      // fallthrough
+    // default
+    default:
+      break;
   }
 
   // built-in variable & assign & constructor with different stuff

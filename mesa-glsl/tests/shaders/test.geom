@@ -1,7 +1,7 @@
 #version 140
-#extension GL_ARB_geometry_shader4 : enable
 // Test geometry shader features
 // Now EmitVertex & EndPrimitive only
+
 
 void main() {
   int i;

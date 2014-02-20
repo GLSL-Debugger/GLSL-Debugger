@@ -6,6 +6,8 @@
 #include "ir.h"
 
 #define MAIN_FUNC_SIGNATURE "main"
+#define EMIT_VERTEX_SIGNATURE "EmitVertex"
+#define END_PRIMITIVE_SIGNATURE "EndPrimitive"
 
 struct exec_list;
 

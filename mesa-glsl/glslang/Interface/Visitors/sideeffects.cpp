@@ -167,43 +167,75 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
 
 	switch (node->oper) {
 	case ast_assign:
+	case ast_mul_assign:
+	case ast_div_assign:
+	case ast_mod_assign:
+	case ast_add_assign:
+	case ast_sub_assign:
+	case ast_ls_assign:
+	case ast_rs_assign:
+	case ast_and_assign:
+	case ast_xor_assign:
+	case ast_or_assign:
+	case ast_pre_inc:
+	case ast_pre_dec:
+	case ast_post_inc:
+	case ast_post_dec:
 		node->debug_sideeffects |= ast_dbg_se_general;
 		break;
-	default:
+
+	case ast_identifier:
+		if (!strcmp(node->primary_expression.identifier,
+				EMIT_VERTEX_SIGNATURE))
+			node->debug_sideeffects |= ast_dbg_se_emit_vertex;
+		break;
+
+	case ast_conditional:
+	case ast_sequence:
+	case ast_function_call:
+	case ast_aggregate:
 		assert(!"not implemented");
+		break;
+	default:
+		break;
 	}
+
 	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_expression_bin* node)
 {
-	assert(!"not implemented");
+	node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
+	node->debug_sideeffects |= node->subexpressions[1]->debug_sideeffects;
+	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
 {
-	assert(!"not implemented");
-//	node->
-//	ir->debug_sideeffects = ir->callee->debug_sideeffects;
-//	ir->debug_sideeffects |= list_sideeffects(&ir->actual_parameters);
-//	return true;
+	if (node->subexpressions[0])
+		node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
 
-//ir->debug_sideeffects |= ir_dbg_se_emit_vertex;
+	// Not sure about it
+	foreach_list_const(n, &node->expressions) {
+		ast_node *ast = exec_node_data(ast_node, n, link);
+		node->debug_sideeffects |= ast->debug_sideeffects;
+	}
+	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_case_statement* node)
 {
-	assert(!"not implemented");
-}
-
-bool ast_sideeffects_traverser_visitor::traverse(ast_case_statement_list* node)
-{
-	assert(!"not implemented");
+	foreach_list_typed (ast_node, ast, link, &node->stmts)
+		node->debug_sideeffects |= ast->debug_sideeffects;
+	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_switch_body* node)
 {
-	assert(!"not implemented");
+	if (node->stmts)
+		foreach_list_typed (ast_node, ast, link, &node->stmts->cases)
+			node->debug_sideeffects |= ast->debug_sideeffects;
+	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
@@ -219,7 +251,11 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_switch_statement* node)
 {
-	assert(!"not implemented");
+	if (node->test_expression)
+		node->debug_sideeffects |= node->test_expression->debug_sideeffects;
+	if (node->body)
+		node->debug_sideeffects |= node->body->debug_sideeffects;
+	return true;
 }
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_iteration_statement* node)
