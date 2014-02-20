@@ -342,7 +342,7 @@ public:
       v->visit( this );
    }
 
-   virtual ir_visitor_status accept(ir_hierarchical_visitor *);
+   virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; }
    virtual ir_dummy *clone(void *mem_ctx, struct hash_table *ht) const;
 
    virtual ~ir_dummy( ) {}
@@ -2489,7 +2489,7 @@ public:
 		v->visit(this);
 	}
 
-	virtual ir_visitor_status accept(ir_hierarchical_visitor *);
+	virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; }
 
 	const glsl_type* type_decl;
 };
