@@ -41,6 +41,8 @@ public:
 	void setUp()
 	{
 		vl = new ShVariableList;
+		vl->numVariables = 0;
+		vl->variables = NULL;
 	}
 
 	void tearDown()
