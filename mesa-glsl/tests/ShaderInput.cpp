@@ -17,16 +17,13 @@ static const std::string shExtensions[SHADERS_PER_PROGRAM] = {
 	".geom",
 	".frag" };
 
-
 static gl_shader_stage shTypes[SHADERS_PER_PROGRAM] = {
 	MESA_SHADER_VERTEX,
 	MESA_SHADER_GEOMETRY,
 	MESA_SHADER_FRAGMENT };
 
-
 std::string ShaderInput::path = "./";
 ShadersList ShaderInput::shaders;
-
 
 ShaderHolder* ShaderInput::load(std::string name)
 {
@@ -40,8 +37,7 @@ ShaderHolder* ShaderInput::load(std::string name)
 		std::string fname = path + name + shExtensions[shnum];
 		char* source = test_load_text_file(holder, fname.c_str());
 		if (!source) {
-			dbgPrint(DBGLVL_INFO,
-					"Test shader %s not found. Skipping.\n", fname.c_str());
+			dbgPrint(DBGLVL_INFO, "Test shader %s not found. Skipping.\n", fname.c_str());
 			continue;
 		}
 
@@ -61,7 +57,7 @@ ShaderHolder* ShaderInput::load(std::string name)
 
 		if (!shader->compile_status) {
 			dbgPrint(DBGLVL_ERROR,
-					"Compilation failed, info log:\n%s\n", shader->info_log);
+					"%s: Compilation failed, info log:\n%s\n", fname.c_str(), shader->info_log);
 			break;
 		}
 	}

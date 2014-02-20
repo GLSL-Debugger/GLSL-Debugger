@@ -23,6 +23,8 @@ void main(void) {
   // selection (expression swizle to constant)
   if (f_color_adv.x < 0.3)
     discard; // discard
+  else // else
+    f_color_adv.x -= 0.01;
   // constructor call
   int count = int(f_color_adv.x * 10);
   // assign to record & call with parameter

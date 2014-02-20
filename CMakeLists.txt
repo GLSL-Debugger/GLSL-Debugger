@@ -3,6 +3,7 @@ project(glsldb)
 
 # DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Debug")
+option(USE_MESA "Use mesa glsl compiler" ON)
 
 # path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -15,7 +16,7 @@ set(MNT_SHRD_FLAGS "")
 # Messages with level lower than OUTPUT_LEVEL will be printed
 # Levels:  DBGLVL_ERROR = 0,	DBGLVL_WARNING,
 #	   DBGLVL_INFO,		DBGLVL_INTERNAL_WARNING,
-#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,		
+#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,
 #	   DBGLVL_ALL = 6
 add_definitions(-DOUTPUT_LEVEL=6)
 set(BINARY_DIR "${PROJECT_BINARY_DIR}/bin")
@@ -85,13 +86,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${ARCHIVE_DIR})
 
-# For mesa glsl compiller
-set(USE_MESA true)
-
-if(DEFINED USE_MESA)
+if(USE_MESA)
+	message(STATUS "GLSL compiler: mesa")
     add_definitions(-DUSE_MESA)
     add_subdirectory(mesa-glsl)
 else()
+    message(STATUS "GLSL compiler: native")
     add_subdirectory(GLSLCompiler)
 endif()
 

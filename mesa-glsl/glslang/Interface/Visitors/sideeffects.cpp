@@ -212,8 +212,10 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression_bin* node)
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
 {
-	if (node->subexpressions[0])
+	if (node->subexpressions[0]){
+		node->subexpressions[0]->accept(this);
 		node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
+	}
 
 	// Not sure about it
 	foreach_list_const(n, &node->expressions) {
