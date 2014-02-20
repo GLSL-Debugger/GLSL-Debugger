@@ -43,10 +43,7 @@
 #include "dbgprint.h"
 
 #define MAIN_FUNC_SIGNATURE "main("
-#define VERBOSE 4
 
-#define VPRINT(level, ...) { if (level < VERBOSE) \
-                                dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__); }
 
 enum OTOperation {
 	OTOpTargetUnset,    // Invalidate actual target

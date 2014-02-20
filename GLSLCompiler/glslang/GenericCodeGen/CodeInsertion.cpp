@@ -1,3 +1,7 @@
+#ifndef SH_EXPORTING
+	#define SH_EXPORTING 1
+#endif
+
 #include "CodeInsertion.h"
 #include <stdio.h>
 #include <stdlib.h>

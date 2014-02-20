@@ -96,7 +96,7 @@
         <file>shaders/pointbased_spheres.vp</file>
     </qresource>
     <qresource prefix="/doc" >
-        <file>doc/license.txt</file>
-        <file>doc/credits.txt</file>
+        <file>../doc/license.txt</file>
+        <file>../doc/credits.txt</file>
     </qresource>
 </RCC>

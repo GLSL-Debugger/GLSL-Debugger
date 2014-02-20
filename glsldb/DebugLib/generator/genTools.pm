@@ -27,12 +27,13 @@ require genSettings;
 our %extname_matches;
 our %files;
 our @skip_defines;
+our @force_extensions;
 
 
 our %regexps = (
-    "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
-    "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
-    "winapifunc" => qr/^\s*(?:WINGDIAPI\b|extern\b)\s+(\S.*\S)\s+WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
+    "glapi" => qr/^\s*(?:GLAPI\b)\s+(.*?)\s*(?:GL)?APIENTRY\s+(.*?)\s*\((.*?)\)/,
+    "wingdi" => qr/^\s*(?:WINGDIAPI\b)\s+(.*?)\s*(?:WINAPI|APIENTRY)\s+(wgl.*?)\s*\((.*?)\)/,
+    "winapifunc" => qr/^\s*(?!WINGDIAPI)(.*?)\s*WINAPI\s+(wgl\S+)\s*\((.*)\)\s*;/,
     "glxfunc" => qr/^\s*(?:GLAPI\b|extern\b)\s+(\S.*\S)\s*(glX\S+)\s*\((.*)\)\s*;/,
     "typegl" => qr/^\s*typedef\s+(.*?)\s*(GL\w+)\s*;/,
     "typewgl" => qr/^\s*typedef\s+(.*?)\s*(WGL\w+)\s*;/,
@@ -49,13 +50,15 @@ my $func_match = qr/^\s*(?:GLAPI\b|WINGDIAPI\b|extern\b)\s+\S.*\S\s*\([^)]*?$/;
 # Well, shit...
 sub parse_output {
     my ($filename, $bextname, $api, $actions) = (@_);
-    my ($ifdir, $indef) = (0, 1);
     my $extname = $bextname;
     my @definitions = ($extname);
     my $proto = $extname;
     my $api_re = qr/^#ifndef\s+($api\S+)/;
-    my $api_defined = qr/^#ifdef\s+(\S+)/;
-    my $skip = 0;
+    my $api_defined = qr/^#ifn?def\s+(\S+)/;
+	my $isNative = grep { $$_[0] eq $filename } values %files;
+    my @skip = 0;
+    my $indef = 0;
+    my @ifdir;
 
     my $ifh;
     my $is_stdin = 0;
@@ -88,7 +91,7 @@ sub parse_output {
         # Prototype name in #define or in comment
         my $reg_match = $extname_matches{$_};
         my $extreg = qr/^#define\s+$extname\s+1/;
-        if ($reg_match || ($indef == $ifdir && /$extreg/)) {
+        if ($reg_match || ($indef == $ifdir[$#ifdir] && /$extreg/)) {
             if ($reg_match){
                 push @definitions, $extname;
                 $extname = $reg_match;
@@ -97,39 +100,35 @@ sub parse_output {
         }
 
         # Run each supplied regexp here
-        if ($indef == $ifdir) {
+        if ($indef == $ifdir[$#ifdir]) {
+			my $isExtension = (grep(/^$extname$/, @force_extensions) or !$isNative);
             while (my ($regexp, $func) = each(%$actions) ) {
                 if (my @matches = /$regexp/){
-                    $func->($_, $proto, @matches);
+                    $func->($isExtension, $proto, @matches);
                 }
             }
         }
 
-        if (/^#endif/ and $ifdir) {
-            if ($skip > 0){
-                $skip--;
-                next;
-            }
+        if (/^#endif/ and (scalar @ifdir)) {
+            my $ifdef = pop @ifdir;
+            next if $ifdef and grep { /^$1$/ } @skip_defines;
 
-            if ($ifdir == $indef){
-                $indef--;
+            if ($ifdef =~ /$api/ and $ifdir[$#ifdir] == $indef){
+                $indef = $ifdir[$#ifdir];
                 $extname = pop @definitions;
                 $proto = $bextname;
             }
-            $ifdir--;
         }
 
         if (/^#if/) {
-            if (/$api_defined/ and grep { /^$1$/ } @skip_defines){
-                $skip++;
-                next;
-            }
-
-            $ifdir++;
+            my $ifdef = /$api_defined/;
+            push @ifdir, $1;
+            $indef = $1 if !$indef;
+            next if $ifdef and grep { /^$1$/ } @skip_defines;
             if (/$api_re/) {
                 push @definitions, $extname;
                 $extname = $1;
-                $indef = $ifdir;
+                $indef = $ifdir[$#ifdir];
             }
         }
     }
@@ -138,9 +137,10 @@ sub parse_output {
 
 
 sub header_generated {
+    my $style = shift;
     my $t = localtime;
     my $year = $t->year + 1900;
-    printf "////////////////////////////////////////////////////////
+    my $header = sprintf "////////////////////////////////////////////////////////
 //
 //   THIS FILE IS GENERATED AUTOMATICALLY %02d.%02d.%04d %02d:%02d:%02d
 //
@@ -166,6 +166,8 @@ sub header_generated {
 ////////////////////////////////////////////////////////
 
 ", $t->mday, $t->mon + 1, $year, $t->hour, $t->min, $t->sec, $year;
+    $header =~ s|^//|$style|mg if $style;
+    print $header;
 }
 
 

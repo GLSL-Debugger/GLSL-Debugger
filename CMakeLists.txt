@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(glsldb)
 
 # DEBUG/Maintainer mode for now
-set(CMAKE_BUILD_TYPE "Maintainer")
+set(CMAKE_BUILD_TYPE "Debug")
 
 # path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -14,64 +14,76 @@ set(MNT_SHRD_FLAGS "")
 
 # Messages with level lower than OUTPUT_LEVEL will be printed
 # Levels:  DBGLVL_ERROR = 0,	DBGLVL_WARNING,
-#		   DBGLVL_INFO,			DBGLVL_INTERNAL_WARNING,
-#		   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,				DBGLVL_ALL = 6
+#	   DBGLVL_INFO,		DBGLVL_INTERNAL_WARNING,
+#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,		
+#	   DBGLVL_ALL = 6
 add_definitions(-DOUTPUT_LEVEL=6)
+set(BINARY_DIR "${PROJECT_BINARY_DIR}/bin")
+set(LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
+set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/lib")
 
 # platform checks
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(GLSLDB_LINUX 1)
-    add_definitions(-DGLSLDB_LINUX)
-    if(CMAKE_SIZEOF_VOID_P MATCHES "8")
-        include(CheckCXXCompilerFlag)
-        check_cxx_compiler_flag("-fPIC" WITH_FPIC)
-        if(WITH_FPIC)
-            add_definitions(-fPIC)
-        endif()
-    endif()
-    list(APPEND MNT_C_FLAGS "-g -O0 -Wall -Wfatal-errors -pedantic -std=gnu99 -fprofile-arcs -ftest-coverage")
-    list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++11 -fprofile-arcs -ftest-coverage")
-    list(APPEND MNT_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
-    list(APPEND MNT_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
+	set(GLSLDB_LINUX 1)
+	add_definitions(-DGLSLDB_LINUX -D_GNU_SOURCE)
+	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
+		include(CheckCXXCompilerFlag)
+		check_cxx_compiler_flag("-fPIC" WITH_FPIC)
+		if(WITH_FPIC)
+			add_definitions(-fPIC)
+		endif()
+	endif()
+	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -Wfatal-errors -std=c99 -fprofile-arcs -ftest-coverage")
+	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++11 -fprofile-arcs -ftest-coverage")
+	list(APPEND CMAKE_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
+	list(APPEND CMAKE_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(GLSLDB_OSX 1)
-    add_definitions(-DGLSLDB_OSX)
-    list(APPEND MNT_C_FLAGS "-g -O0 -Wall -pedantic -std=gnu99")
-    list(APPEND MNT_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
+	set(GLSLDB_OSX 1)
+	add_definitions(-DGLSLDB_OSX)
+	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -pedantic -std=gnu99")
+	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++11")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(GLSLDB_WIN32 1)
-    add_definitions(-DGLSLDB_WIN32)
+	set(GLSLDB_WIN 1)
+	set(LIBRARY_DIR "${PROJECT_BINARY_DIR}/bin")
+	set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/bin")
+	# Add windows target & disable warnings
+	add_definitions(/DDEBUG=1)
+	add_definitions(/DGLSLDB_WIN /W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo)
 endif()
 
 # maintainer mode
 set( CMAKE_CXX_FLAGS_MAINTAINER ${MNT_CXX_FLAGS} CACHE STRING
-    "Flags used by the C++ compiler during maintainer builds."
-    FORCE )
+	"Flags used by the C++ compiler during maintainer builds."
+	FORCE )
 set( CMAKE_C_FLAGS_MAINTAINER ${MNT_C_FLAGS} CACHE STRING
-    "Flags used by the C compiler during maintainer builds."
-    FORCE )
+	"Flags used by the C compiler during maintainer builds."
+	FORCE )
 set( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-    ${MNT_EXE_FLAGS} CACHE STRING
-    "Flags used for linking binaries during maintainer builds."
-    FORCE )
+	${MNT_EXE_FLAGS} CACHE STRING
+	"Flags used for linking binaries during maintainer builds."
+	FORCE )
 set( CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-    ${MNT_SHRD_FLAGS} CACHE STRING
-    "Flags used by the shared libraries linker during maintainer builds."
-    FORCE )
+	${MNT_SHRD_FLAGS} CACHE STRING
+	"Flags used by the shared libraries linker during maintainer builds."
+	FORCE )
 mark_as_advanced(
-    CMAKE_CXX_FLAGS_MAINTAINER
-    CMAKE_C_FLAGS_MAINTAINER
-    CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-    CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
+	CMAKE_CXX_FLAGS_MAINTAINER
+	CMAKE_C_FLAGS_MAINTAINER
+	CMAKE_EXE_LINKER_FLAGS_MAINTAINER
+	CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
+
 # Update the documentation string of CMAKE_BUILD_TYPE for GUIs
 set( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer."
-    FORCE )
+	"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer."
+	FORCE )
 
-set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
-set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
+
+set(DISTRIBUTION_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Dist)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${ARCHIVE_DIR})
 
 # For mesa glsl compiller
 set(USE_MESA true)
@@ -84,3 +96,8 @@ else()
 endif()
 
 add_subdirectory(glsldb)
+
+
+if(GLSLDB_WIN)
+	add_subdirectory(3rdparty/mhook)
+endif()

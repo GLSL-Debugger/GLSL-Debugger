@@ -8,7 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
 	list of conditions and the following disclaimer in the documentation and/or
@@ -38,26 +38,39 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 
 /**
+ * Create the synchronisation events
+ */
+BOOL createEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger);
+
+/**
+ * Init shared memory objects
+ */
+BOOL initSharedMemory(HANDLE *outShMem, void **outBaseAddr, int size);
+
+/**
  * Open the two synchronisation events signaling the debugger and the
  * debugee.
  */
 BOOL openEvents(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger);
+__declspec(dllexport)
+BOOL openEventsProc(HANDLE *outEvtDebugee, HANDLE *outEvtDebugger, DWORD pid);
 
 /**
  * Open the shared memory segment specified by the GLSL_DEBUGGER_SHMID
  * environment variable.
  */
+__declspec(dllexport)
 BOOL openSharedMemory(HANDLE *outShMem, void **outBaseAddr, const int size);
 
 /**
  * Close the synchronisation events.
  */
-BOOL closeEvents(HANDLE hEvtDebugee, HANDLE hEvtDebugger);
+BOOL closeEvents(HANDLE *hEvtDebugee, HANDLE *hEvtDebugger);
 
 /**
  * Unmap the shared memory segment and close it.
  */
-BOOL closeSharedMemory(HANDLE hShMem, void *baseAddr);
+BOOL closeSharedMemory(HANDLE *hShMem, void **baseAddr);
 
 typedef struct GlInitContext_t {
 	HWND hWnd;

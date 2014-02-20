@@ -3185,7 +3185,7 @@ void MainWindow::setRunLevel(int rl)
 {
 	QString title = QString(MAIN_WINDOW_TITLE);
 	UT_NOTIFY(LV_INFO,
-			"new level: " << rl << " " << (m_pCurrentCall ? m_pCurrentCall->getName() : NULL));
+			"new level: " << rl << " " << (m_pCurrentCall ? m_pCurrentCall->getName() : ""));
 
 	switch (rl) {
 	case RL_INIT:  // Program start

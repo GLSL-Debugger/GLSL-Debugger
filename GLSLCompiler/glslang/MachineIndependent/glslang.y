@@ -54,24 +54,27 @@ possible; please let me know if you discover discrepancies.
 Jutta Degener, 1995
 */
 
+#include "utils/dbgprint.h"
 #include "SymbolTable.h"
 #include "ParseHelper.h"
 #include "../Public/ShaderLang.h"
 
+#define YYPRINTF(stderr, ...)   dbgPrint(DBGLVL_COMPILERINFO, __VA_ARGS__)
+
 #define EMIT_VERTEX_SIG   "EmitVertex("
 
-#ifdef _WIN32
-    #define YYPARSE_PARAM parseContext
-    #define YYPARSE_PARAM_DECL TParseContext&
-    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
-    #define YYLEX_PARAM parseContext
-#else
+//#ifdef _WIN32
+//    #define YYPARSE_PARAM parseContext
+//    #define YYPARSE_PARAM_DECL TParseContext&
+//    #define YY_DECL int yylex(YYSTYPE* pyylval, TParseContext& parseContext)
+//    #define YYLEX_PARAM parseContext
+//#else
     #define YYPARSE_PARAM parseContextLocal
     #define parseContext (*((TParseContext*)(parseContextLocal)))
     #define YY_DECL int yylex(YYSTYPE* pyylval, void* parseContextLocal)
     #define YYLEX_PARAM (void*)(parseContextLocal)
     extern void yyerror(void*, const char*);
-#endif
+//#endif
 
 #define FRAG_VERT_GEOM_ONLY(S, L) {                                      \
     if (parseContext.language != EShLangFragment &&                      \
@@ -188,9 +191,9 @@ Jutta Degener, 1995
 }
 
 %{
-#ifndef _WIN32
+//#ifndef _WIN32
     extern int yylex(YYSTYPE*, void*);
-#endif
+//#endif
 
 void addStructInstance(TIntermSpecification* specificationNode,
                        TIntermNode* intermNode,
@@ -388,7 +391,7 @@ primary_expression
         // INT_TYPE is only 16-bit plus sign bit for vertex/fragment shaders,
         // check for overflow for constants
         //
-        fprintf(stderr, "I:%d\n", $1.i);
+        dbgPrint(DBGLVL_COMPILERINFO, "I:%d\n", $1.i);
         if (abs($1.i) >= (1 << 16)) {
             if (parseContext.extensionErrorCheck($1.range, "GL_EXT_gpu_shader4")) {
                 parseContext.error($1.range, " integer constant overflow", "", "");
@@ -418,7 +421,7 @@ primary_expression
         */
 
         constUnion *unionArray = new constUnion[1];
-        fprintf(stderr, "UI:%u\n", $1.ui);
+        dbgPrint(DBGLVL_COMPILERINFO, "UI:%u\n", $1.ui);
         unionArray->setUIConst($1.ui);
         $$ = parseContext.intermediate.addConstantUnion(unionArray, TType(EbtUInt, EvqConst), $1.range, parseContext.extensionChanged);
         if ($$) $$->setRange($1.range);

@@ -136,25 +136,6 @@ sub arguments_types_array
     return join(", ", map _get_arg, (0..$#arguments));
 }
 
-sub error_postexec
-{
-    my ($fname, $postexec, $win_recursing, $return_name, $indent, $need_stop) = (@_);
-    my $stop = $need_stop ? "stop();" : "";
-    my $ret = "";
-    $indent = "    " x $indent;
-    if (scalar grep {$fname eq $_} @postExecutionList) {
-        $ret = "error = GL_NO_ERROR;
-${postexec}if (error != GL_NO_ERROR) {
-    setErrorCode(error);
-} else {
-    ${win_recursing}return $return_name;
-}";
-    } else {
-        $ret = "${win_recursing}return $return_name;";
-    }
-    $ret =~ s/^/$indent/;
-    return $ret;
-}
 
 sub pre_execute {
     my ($fname, @arguments) = @_;

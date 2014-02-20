@@ -8,15 +8,15 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice, this
-    list of conditions and the following disclaimer.
+	list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice, this
-    list of conditions and the following disclaimer in the documentation and/or
-    other materials provided with the distribution.
+	list of conditions and the following disclaimer in the documentation and/or
+	other materials provided with the distribution.
 
   * Neither the name of the name of VIS, Universität Stuttgart nor the names
-    of its contributors may be used to endorse or promote products derived from
-    this software without specific prior written permission.
+	of its contributors may be used to endorse or promote products derived from
+	this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -45,8 +45,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdarg.h>
 #include <signal.h>
+
 #ifdef _WIN32
-#define _WIN32_WINNT 0x0400
+//#define _WIN32_WINNT 0x0400
 #include <windows.h>
 #include <crtdbg.h>
 #include <io.h>
@@ -56,13 +57,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else /* _WIN32 */
 #include <dirent.h>
 #endif /* _WIN32 */
+
 #include "../GL/gl.h"
 //#include "../GL/glext.h"
 #ifndef _WIN32
 //#include "../GL/glx.h"
 #else /* _WIN32 */
+#include "../GL/WinGDI.h"
 #include "../GL/wglext.h"
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* !_WIN32 */
 
 #include "../utils/dbgprint.h"
@@ -83,21 +86,24 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #  define LIBGL "opengl32.dll"
 #  define SO_EXTENSION ".dll"
-#define SHMEM_NAME_LEN 64
+#	define SHMEM_NAME_LEN 64
 #else
 #  define LIBGL "libGL.so"
 #  define SO_EXTENSION ".so"
 #endif
 
+
 #define USE_DLSYM_HARDCODED_LIB
 
 extern GLFunctionList glFunctions[];
+
 
 typedef struct {
 	LibraryHandle handle;
 	const char *fname;
 	void (*function)(void);
 } DbgFunction;
+
 
 /* TODO: threads! Should be local to each thread, isn't it? */
 #ifndef _WIN32
@@ -135,11 +141,21 @@ static struct {
 	DbgRec *fcalls;
 	DbgFunction *dbgFunctions;
 	int numDbgFunctions;
-}g = {NULL, NULL, NULL, NULL, NULL, 0};
+} g = {NULL, NULL, NULL, NULL, NULL, 0};
 #endif /* _WIN32 */
+
+
+#ifdef _WIN32
+#	define GET_MODULE(h, s) (char *)GetProcAddress(h, s)
+#else /* _WIN32 */
+#	define GET_MODULE(h, s) g.origdlsym(h, s)
+#endif /* _WIN32 */
+
+
 
 /* global data */
 DBGLIBLOCAL Globals G;
+
 
 #ifndef _WIN32
 static int getShmid()
@@ -176,7 +192,7 @@ static void setLogging(void)
 			setLogDir(s);
 		} else {
 #endif /* !_WIN32 */
-		setLogDir(NULL);
+		setLogDir(".");
 	}
 
 	startLogging(NULL);
@@ -193,7 +209,7 @@ static void setLogging(void)
 		setMaxDebugOutputLevel(level);
 		dbgPrint(DBGLVL_INFO, "Log level set to %i\n", level);
 	} else {
-		setMaxDebugOutputLevel(DBGLVL_ERROR);
+		setMaxDebugOutputLevel(DBGLVL_DEBUG);
 		dbgPrint(DBGLVL_WARNING, "Log level not set!\n");
 	}
 }
@@ -208,22 +224,14 @@ static void addDbgFunction(const char *soFile)
 		dbgPrint(DBGLVL_WARNING, "Opening dbgPlugin \"%s\" failed\n", soFile);
 		return;
 	}
-#ifdef _WIN32
-	if ((provides = (char *) GetProcAddress(handle, "provides")) == NULL) {
-#else /* _WIN32 */
-	if (!(provides = g.origdlsym(handle, "provides"))) {
-#endif /* _WIN32 */
+	if (!(provides = GET_MODULE(handle, "provides"))) {
 		dbgPrint(DBGLVL_WARNING, "Could not determine what \"%s\" provides!\n"
 		"Export the " "\"provides\"-string!\n", soFile);
 		closeLibrary(handle);
 		return;
 	}
 
-#ifdef _WIN32
-	if ((dbgFunc = (void (*)(void)) GetProcAddress(handle, provides)) == NULL) {
-#else /* _WIN32 */
-	if (!(dbgFunc = (void (*)(void)) g.origdlsym(handle, provides))) {
-#endif /* _WIN32 */
+	if (!(dbgFunc = (void (*)(void)) GET_MODULE(handle, provides))) {
 		closeLibrary(handle);
 		return;
 	}
@@ -388,11 +396,11 @@ __declspec(dllexport) BOOL __cdecl uninitialiseDll(void) {
 		retval = FALSE;
 	}
 
-	if (!closeEvents(g.hEvtDebugee, g.hEvtDebugger)) {
+	if (!closeEvents(&g.hEvtDebugee, &g.hEvtDebugger)) {
 		retval = FALSE;
 	}
 
-	if (!closeSharedMemory(g.hShMem, g.fcalls)) {
+	if (!closeSharedMemory(&g.hShMem, &g.fcalls)) {
 		retval = FALSE;
 	}
 
@@ -407,48 +415,52 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		LPVOID lpReserved)
 {
 	BOOL retval = TRUE;
-	//GlInitContext initCtx;
-	//   DbgRec *rec = NULL;
-
 	switch (reason_for_call) {
 		case DLL_PROCESS_ATTACH:
-
 		setLogging();
 
 #ifdef DEBUG
-		//AllocConsole();     /* Force availability of console in debug mode. */
+//		AllocConsole();     /* Force availability of console in debug mode. */
 		dbgPrint(DBGLVL_DEBUG, "I am in Debug mode.\n");
 
-		//_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
-		//      if (_CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, "", "This is the "
-		//              "breakpoint crowbar in DllMain. You should attach to the "
-		//              "debugged process before continuing.")) {
-		//          _CrtDbgBreak();
-		//      }
+//		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
+//		if (_CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, "", "This is the "
+//			  "breakpoint crowbar in DllMain. You should attach to the "
+//			  "debugged process before continuing.")) {
+//			_CrtDbgBreak();
+//		}
 #endif /* DEBUG */
-
 		/* Open synchronisation events. */
-		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger)) {
+
+#ifdef GLSLDEBUGLIB_HOST
+		closeEvents(&g.hEvtDebugee, &g.hEvtDebugger);
+		if (!createEvents(&g.hEvtDebugee, &g.hEvtDebugger))
 			return FALSE;
-		}
+#else
+		if (!openEvents(&g.hEvtDebugee, &g.hEvtDebugger))
+			return FALSE;
+#endif
+
+		dbgPrint(DBGLVL_DEBUG, "Events opened.\n");
+
 
 		/* Create global crit section. */
 		InitializeCriticalSection(&G.lock);
 
-		/* Attach detours */
-		//if (!createGlInitContext(&initCtx)) {
-		//	return FALSE;
-		//}
-		if (!attachTrampolines()) {
+		if (!attachTrampolines())
 			return FALSE;
-		} else {
-			dbgPrint(DBGLVL_INFO, "attaching has worked!\n");
-		}
+		dbgPrint(DBGLVL_INFO, "Trampolines attached.\n");
 
 		/* Attach to shared mem segment */
-		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE)) {
+#ifdef GLSLDEBUGLIB_HOST
+		closeSharedMemory(&g.hShMem, &g.fcalls);
+		if (!initSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
 			return FALSE;
-		}
+#else
+		if (!openSharedMemory(&g.hShMem, &g.fcalls, SHM_SIZE))
+			return FALSE;
+#endif
+
 
 		// TODO: This is part of the extension detours initialisation
 		// (replacing) current lazy initialisation. However, I think this
@@ -474,7 +486,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 		 * LoadLibraryEx function (or a function that calls  these functions),
 		 * ..."
 		 */
-		loadDbgFunctions();
+		//loadDbgFunctions();
 
 		//g.initialized = 1;
 
@@ -1144,10 +1156,10 @@ void (*getDbgFunction(void))(void)
 
 /* HAZARD: Windows will never set G.errorCheckAllowed for Begin/End as below!!! */
 #ifdef _WIN32
-__declspec(dllexport) PROC APIENTRY DetouredwglGetProcAddress(LPCSTR arg0);
+__declspec(dllexport) PROC APIENTRY HookedwglGetProcAddress(LPCSTR arg0);
 void (*getOrigFunc(const char *fname))(void)
 {
-    return (void (*)(void)) DetouredwglGetProcAddress(fname);
+	return (void (*)(void)) HookedwglGetProcAddress(fname);
 }
 #else /* _WIN32 */
 void (*getOrigFunc(const char *fname))(void)
@@ -1156,7 +1168,7 @@ void (*getOrigFunc(const char *fname))(void)
 	 * call our version not the original ones
 	 */
 	if (!strcmp(fname, "glXGetProcAddress") ||
-	    !strcmp(fname, "glXGetProcAddressARB")) {
+		!strcmp(fname, "glXGetProcAddressARB")) {
 		return (void (*)(void))glXGetProcAddressHook;
 	} else {
 		void *result = hash_find(&g.origFunctions, (void*)fname);
@@ -1216,7 +1228,10 @@ int checkGLExtensionSupported(const char *extension)
 			const GLubyte *name = ORIG_GL(glGetStringi)(GL_EXTENSIONS, i);
 			// we don't need to store any relevant data. we just want a quick
 			// string lookup.
-			hash_insert(&extensions, name, &dummy);
+			if(hash_insert(&extensions, name, &dummy) == 1) {
+				dbgPrint(DBGLVL_ERROR, "Collision occured while hashing extensions\n");
+				exit(1);
+			}
 		}
 	}
 
@@ -1249,7 +1264,7 @@ int checkGLVersionSupported(int majorVersion, int minorVersion)
 		dbgPrint(DBGLVL_INFO, "GL SHADING LANGUAGE: %s\n", shadingString);
 	}
 	if (majorVersion < major ||
-	    (majorVersion == major && minorVersion <= minor)) {
+		(majorVersion == major && minorVersion <= minor)) {
 		return 1;
 	}
 	dbgPrint(DBGLVL_INFO, "required GL version supported: NO\n");
@@ -1283,10 +1298,10 @@ void *dlsym(void *handle, const char *symbol)
 			exit(1);
 		}
 
-	    if (! (origDlsymHandle = dlopen(s, RTLD_LAZY | RTLD_DEEPBIND))) {
-    	    dbgPrint(DBGLVL_ERROR, "getting origDlsymHandle failed %s: %s\n",
-			         s, dlerror());
-    	}
+		if (! (origDlsymHandle = dlopen(s, RTLD_LAZY | RTLD_DEEPBIND))) {
+			dbgPrint(DBGLVL_ERROR, "getting origDlsymHandle failed %s: %s\n",
+					 s, dlerror());
+		}
 		dlclose(origDlsymHandle);
 		s = getenv("GLSL_DEBUGGER_DLSYM");
 		if (s) {

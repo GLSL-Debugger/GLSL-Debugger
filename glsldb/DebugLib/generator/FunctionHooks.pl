@@ -1,6 +1,6 @@
-################################################################################
+﻿################################################################################
 #
-# Copyright (c) 2013 SirAnthony <anthony at adsorbtion.org>
+# Copyright (c) 2013, 2014 SirAnthony <anthony at adsorbtion.org>
 # Copyright (C) 2006-2009 Institute for Visualization and Interactive Systems
 # (VIS), Universität Stuttgart.
 # All rights reserved.
@@ -32,43 +32,69 @@
 #
 ################################################################################
 
-require '../generated/functionsAllowedInBeginEnd.pm';
+use Getopt::Std;
 require prePostExecuteList;
 require genTools;
 require genTypes;
+
+# Use path provided by generator
+getopt('p');
+require "$opt_p/functionsAllowedInBeginEnd.pm";
+
 our %regexps;
 our %typeMap;
+my %beginEnd = map {$_ => 1} @allowedInBeginEnd;
 
 
 if ($^O =~ /Win32/) {
     $WIN32 = 1;
 }
 
+sub print_defines
+{
+	if (defined $WIN32)	{
+		print "#define ENTER_CS EnterCriticalSection
+#define EXIT_CS LeaveCriticalSection
+#define RECURSING(n) rec->isRecursing = n;
+"
+	} else {
+		print "#define ENTER_CS pthread_mutex_lock
+#define EXIT_CS pthread_mutex_unlock
+#define RECURSING(n)
+"
+	}
+
+	print "
+int check_error(int check_allowed, int dummy)
+{
+	if (!dummy && (!check_allowed || G.errorCheckAllowed))
+		return ORIG_GL(glGetError)();
+	return GL_NO_ERROR;
+}
+
+int check_error_code(int error, int do_stop)
+{
+	if (error != GL_NO_ERROR) {
+		setErrorCode(error);
+		if (do_stop)
+			stop();
+	} else {
+		return 1;
+	}
+	return 0;
+}
+"
+}
 
 sub check_error_string
 {
-    my ($check, $void, $fname, $indent) = (@_);
-    my $ret = "";
-    $indent = "    " x $indent;
-
-    if ($check and (not $void or $fname ne "glBegin")) {
-        if (not scalar grep {$fname eq $_} @allowedInBeginEnd) {
-                $ret = "error = ORIG_GL(glGetError)();";
-        } else {
-            $ret = "if (G.errorCheckAllowed) {
-    error = ORIG_GL(glGetError)();
-} else {
-    error = GL_NO_ERROR;
-}";
-        }
-    } else {
-        # never check error after glBegin
-        $ret = "error = GL_NO_ERROR;";
-    }
-    $ret =~ s/^/$indent/g;
-    $ret =~ s/\n/\n$indent/g;
-    return $ret;
+    my ($check, $void, $fname) = @_;
+	# never check error after glBegin
+    return sprintf "check_error(%i, %i)",
+		int($beginEnd{$fname}),
+		($check and (not $void or $fname ne "glBegin")) ? 0 : 1;
 }
+
 
 
 #==============================================
@@ -117,11 +143,10 @@ setErrorCode(error);" if $void;
     return $ret;
 }
 
-
 sub thread_statement
 {
     my ($fname, $retval, $retval_assign, $return_name, @arguments) = (@_);
-    my ($lockStatement, $unlockStatement);
+    my $statement;
     if (defined $WIN32) {
         my $preexec = pre_execute($fname, @arguments);
         my $postexec = post_execute($fname, $retval, @arguments);
@@ -130,8 +155,8 @@ sub thread_statement
         my $check_allowed = "";
         $check_allowed = "G.errorCheckAllowed = 1;\n" if $fname eq "glEnd";
         $check_allowed = "G.errorCheckAllowed = 0;\n" if $fname eq "glBegin";
-
-        $lockStatement = "DbgRec *rec;
+        $statement = "
+	DbgRec *rec;
     dbgPrint(DBGLVL_DEBUG, \"entering $fname\\n\");
     rec = getThreadRecord(GetCurrentProcessId());
     ${check_allowed}if(rec->isRecursing) {
@@ -141,25 +166,20 @@ sub thread_statement
         error = GL_NO_ERROR;
         ${postexec}return $return_name;
     }
-    rec->isRecursing = 1;
-    EnterCriticalSection(&G.lock);
-";
-        $unlockStatement = "LeaveCriticalSection(&G.lock);";
-    } else {
-        $lockStatement = "pthread_mutex_lock(&G.lock);";
-        $unlockStatement = "pthread_mutex_unlock(&G.lock);";
+    rec->isRecursing = 1;";
     }
-
-    return $lockStatement, $unlockStatement;
+    return $statement;
 }
 
 
 # TODO: check position of unlock statements!!!
-@defined_funcs = ();
+@defined_funcs = (
+	"wglGetProcAddress"	# Hooked
+);
 
 sub createBody
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     my $retval = shift;
     my $fname = shift;
@@ -167,11 +187,8 @@ sub createBody
     my $checkError = shift;
     $fname =~ s/^\s+|\s+$//g;
     $retval =~ s/^\s+|\s+$//g;
-    # No mesa functions
-    if (grep(/^$fname$/i, @defined_types)) {
-        return;
-    }
-    push(@defined_types, $fname);
+    return if grep(/^$fname$/i, @defined_funcs);
+    push(@defined_funcs, $fname);
 
     my @arguments = buildArgumentList($argString);
     my $pfname = join("","PFN",uc($fname),"PROC");
@@ -201,19 +218,16 @@ sub createBody
     my $preexec = pre_execute($fname, @arguments);
     my $postexec = post_execute($fname, $retval, @arguments);
 
-    my ($lockStatement, $unlockStatement) = thread_statement($fname,
+    my $thread_statement = thread_statement($fname,
                     $retval, $retval_assign, $return_name, @arguments);
-
-    my $errstr3 = check_error_string($checkError, $return_void, $fname, 3);
-    my $errpostexec3 = error_postexec($fname, $postexec, $win_recursing,
-                        $return_name, 3, 1);
+    my $errstr = check_error_string($checkError, $return_void, $fname);
 
     my $output = "";
     ###########################################################################
     # create function head
     ###########################################################################
     if (defined $WIN32) {
-        $output .= "__declspec(dllexport) $retval APIENTRY Detoured$fname (";
+        $output .= "__declspec(dllexport) $retval APIENTRY Hooked$fname (";
     } else {
         $output .= "$retval $fname (";
     }
@@ -233,22 +247,18 @@ sub createBody
     # for the debugger to handle the actual debugging
     $output .= ")
 {
-    ${retval_init}int op, error;
-    $lockStatement
+    ${retval_init}int op, error;${thread_statement}
+	ENTER_CS(&G.lock);
     if (keepExecuting(\"$fname\")) {
-        $unlockStatement
+        EXIT_CS(&G.lock);
         ${preexec}${retval_assign}ORIG_GL($fname)($argstring);
-        if (checkGLErrorInExecution()) {
-$errstr3
-            ${postexec}if (error != GL_NO_ERROR) {
-                setErrorCode(error);
-                stop();
-            } else {
-                ${win_recursing}return $return_name;
-            }
-        } else {
-$errpostexec3
-        }
+		error = GL_NO_ERROR;
+        if (checkGLErrorInExecution())
+			error = ${errstr};
+		${postexec}if (check_error_code(error, 1)){
+			RECURSING(0)
+			return  $return_name;
+		}
     }
     //fprintf(stderr, \"ThreadID: %li\\n\", (unsigned long)pthread_self());
     storeFunctionCall(\"$fname\", ${argcount}${argtypes});
@@ -282,18 +292,15 @@ $errpostexec3
         case DBG_EXECUTE:
             setExecuting();
             stop();
-            $unlockStatement
+            EXIT_CS(&G.lock);
             ${preexec}${win_recursing}${retval_assign}ORIG_GL($fname)($argstring);
-            if (checkGLErrorInExecution()) {
-%s${postexec}
-                if (error != GL_NO_ERROR) {
-                    setErrorCode(error);
-                } else {
-                    ${win_recursing}return $return_name;
-                }
-            } else {
-%s
-            }
+			error = GL_NO_ERROR;
+            if (checkGLErrorInExecution())
+				error = ${errstr};
+			${postexec}if (check_error_code(error, 0)){
+				RECURSING(0)
+				return  $return_name;
+			}
         default:
             executeDefaultDbgOperation(op);
         }
@@ -301,13 +308,11 @@ $errpostexec3
         op = getDbgOperation();
     }
     setErrorCode(DBG_NO_ERROR);
-    $unlockStatement
+    EXIT_CS(&G.lock);
     ${win_recursing}return $return_name;
 }
 
-", check_error_store($checkError, $return_void, $fname, $postexec, $return_type, 3),
-    check_error_string($checkError, $return_void, $fname, 4),
-    error_postexec($fname, $postexec, $win_recursing, $return_name, 4);
+", check_error_store($checkError, $return_void, $fname, $postexec, $return_type, 3);
 
     $output =~ s/    /\t/g;
     $output =~ s/return ;/return;/g;
@@ -322,18 +327,15 @@ sub createBodyError {
 
 my $gl_actions = {
     $regexps{"typegl"} => \&addTypeMapping,
-    $regexps{"wingdi"} => \&createBodyError,
     $regexps{"glapi"} => \&createBodyError,
 };
 
 my $add_actions;
 if (defined $WIN32) {
     $add_actions = {
+        $regexps{"wingdi"} => \&createBodyError,
         $regexps{"typewgl"} => \&addTypeMapping,
-        $regexps{"winapifunc"} => sub {
-            my $fname = $_[3];
-            createBody(@_, 0) if $fname ne "wglGetProcAddress";
-        },
+        $regexps{"winapifunc"} => \&createBody,
     }
 } else {
     $add_actions = {
@@ -356,4 +358,5 @@ if (defined $WIN32) {
 }
 
 header_generated();
+print_defines();
 parse_gl_files($gl_actions, $add_actions, defined $WIN32, \&createBody);

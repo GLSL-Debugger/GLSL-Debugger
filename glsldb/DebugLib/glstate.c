@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glstate.h"
 #include "readback.h"
 #ifdef _WIN32
-#include "trampolines.h"
+#include "generated/trampolines.h"
 #endif /* _WIN32 */
 
 int saveGLState(void)

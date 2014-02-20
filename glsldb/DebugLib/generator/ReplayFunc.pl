@@ -74,7 +74,7 @@ sub createBodyFooter
 
 sub createFunctionHook
 {
-    my $line = shift;
+    my $isExtension = shift;
     my $extname = shift;
     my $retval = shift;
     my $fname = shift;
@@ -101,11 +101,5 @@ sub createFunctionHook
 
 header_generated();
 createBodyHeader();
-
-my $gl_actions = {
-    $regexps{"wingdi"} => \&createFunctionHook,
-    $regexps{"glapi"} => \&createFunctionHook
-};
-parse_gl_files($gl_actions);
-
+parse_gl_files({ $regexps{"glapi"} => \&createFunctionHook });
 createBodyFooter();

@@ -37,38 +37,41 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WIN32
 #include <sys/types.h>
 #include <pthread.h>
+#include "GL/glx.h"
 #else /* _WIN32 */
 #include <windows.h>
+#include "GL/gl.h"
+#include "GL/wglext.h"
+#include "GL/WinGDI.h"
 #endif /* _WIN32 */
 #include "debuglibExport.h"
 #include "debuglib.h"
 #include "streamRecorder.h"
 #include "queries.h"
 #include "../utils/hash.h"
-#include "GL/glx.h"
 
 #include "generated/functionPointerTypes.inc"
 
 #define TRANSFORM_FEEDBACK_BUFFER_SIZE (1<<24)
 
 typedef struct {
-	void (*(*origGlXGetProcAddress)(const GLubyte *))(void);StreamRecorder recordedStream;
-	int errorCheckAllowed;
+    void (*(*origGlXGetProcAddress)(const GLubyte *))(void);StreamRecorder recordedStream;
+    int errorCheckAllowed;
 #ifndef _WIN32
-	pthread_mutex_t lock;
+    pthread_mutex_t lock;
 #else /* _WIN32 */
-	CRITICAL_SECTION lock;
+    CRITICAL_SECTION lock;
 #endif /* _WIN32 */
-	Hash queries;
+    Hash queries;
 } Globals;
 
 DBGLIBLOCAL int checkGLVersionSupported(int majorVersion, int minorVersion);
 DBGLIBLOCAL int checkGLExtensionSupported(const char *extension);
 
 typedef enum {
-	TFBVersion_None,
-	TFBVersion_NV,
-	TFBVersion_EXT
+    TFBVersion_None,
+    TFBVersion_NV,
+    TFBVersion_EXT
 } TFBVersion;
 DBGLIBLOCAL TFBVersion getTFBVersion();
 
@@ -102,7 +105,7 @@ DBGLIBLOCAL DbgRec *getThreadRecord(pid_t pid);
 /* check GL error code */DBGLIBLOCAL int glError(void);
 
 /* set shm with result == DBG_ERROR_CODE and error */DBGLIBLOCAL void setErrorCode(
-		int error);
+        int error);
 
 /* check GL error code and
  set shm with result == DBG_ERROR_CODE and gl error if an error has

@@ -1297,7 +1297,7 @@ TIntermTyped* TIntermediate::addSelection(TIntermTyped* cond,
 TIntermNode* TIntermediate::addSwitch(TIntermTyped* cond,
 		TIntermAggregate* nodeList, TSourceRange range, TExtensionList &extMap)
 {
-	int i;
+	unsigned int i;
 
 	// TODO: only if GLSL 1.30 or higher
 
