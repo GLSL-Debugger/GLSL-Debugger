@@ -16,6 +16,7 @@ struct AstShader {
 	exec_list* head;
 	unsigned version;
 	const char* source;
+	char* name;
 	gl_shader_stage stage;
 	bool compile_status;
 	char* info_log;

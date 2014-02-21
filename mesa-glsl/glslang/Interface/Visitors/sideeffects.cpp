@@ -243,11 +243,11 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_switch_body* node)
 bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
 {
 	if (node->condition)
-		node->debug_sideeffects = node->condition->debug_sideeffects;
+		node->debug_sideeffects |= node->condition->debug_sideeffects;
 	if (node->then_statement)
-		node->debug_sideeffects = node->then_statement->debug_sideeffects;
+		node->debug_sideeffects |= node->then_statement->debug_sideeffects;
 	if (node->else_statement)
-		node->debug_sideeffects = node->else_statement->debug_sideeffects;
+		node->debug_sideeffects |= node->else_statement->debug_sideeffects;
 	return true;
 }
 

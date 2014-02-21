@@ -10,11 +10,11 @@
 #include "ShaderInput.h"
 #include "ShaderLang.h"
 #include "glslang/Interface/Visitors/debugvar.h"
-#include <cppunit/TestFixture.h>
+#include "Base.h"
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
 
-class DebugVarTest: public CppUnit::TestFixture {
+class DebugVarTest: public BaseUnitTest {
 public:
 	DebugVarTest()
 	{
@@ -25,7 +25,8 @@ public:
 		ShaderHolder* holder = input.getShader("shaders/test");
 		ast_debugvar_traverser_visitor it(vl);
 		for (unsigned i = 0; i < holder->num_shaders; ++i) {
-			it.visit(holder->shaders[i]->head);
+			if (holder->shaders[i])
+				it.visit(holder->shaders[i]->head);
 		}
 	}
 
@@ -51,7 +52,6 @@ public:
 	}
 
 protected:
-	ShaderInput input;
 	ShVariableList* vl;
 	exec_list* list;
 };

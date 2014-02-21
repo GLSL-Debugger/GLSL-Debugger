@@ -233,6 +233,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 		holder->num_shaders++;
 
 		shader->source = shaderStrings[shnum];
+		shader->name = NULL;
 
 		switch (holder->language) {
 		case EShLangFragment:

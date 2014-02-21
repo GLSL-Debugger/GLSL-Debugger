@@ -50,10 +50,10 @@ void ast_traverse_visitor::visit(class ast_expression* node)
 	case ast_field_selection:
 	case ast_array_index:
 	case ast_conditional:  // TODO: ast_selection_statement
-		for (int i = 0; i < 2; ++i) {
-			if (!node->subexpressions[0])
+		for (int i = 0; i < 3; ++i) {
+			if (!node->subexpressions[i])
 				break;
-			node->subexpressions[0]->accept(this);
+			node->subexpressions[i]->accept(this);
 		}
 		break;
 
@@ -328,12 +328,14 @@ void ast_traverse_visitor::visit(class ast_selection_statement* node)
 			visit = this->traverse(node);
 
 		if (visit) {
+			++depth;
 			if (node->debug_state_internal == ast_dbg_if_then
 					&& node->then_statement)
 				node->then_statement->accept(this);
 			if (node->debug_state_internal == ast_dbg_if_else
 					&& node->else_statement)
 				node->else_statement->accept(this);
+			--depth;
 		}
 
 		/* Visit node again for preparation of pass */
@@ -348,10 +350,12 @@ void ast_traverse_visitor::visit(class ast_selection_statement* node)
 
 		if (node->condition)
 			node->condition->accept(this);
+		++depth;
 		if (node->then_statement)
 			node->then_statement->accept(this);
 		if (node->else_statement)
 			node->else_statement->accept(this);
+		--depth;
 
 		if (flags & traverse_postvisit)
 			this->traverse(node);
@@ -427,10 +431,12 @@ void ast_traverse_visitor::visit(class ast_iteration_statement* node)
 				|| node->debug_state_internal == ast_dbg_loop_select_flow)
 			visit = this->traverse(node);
 
+		++depth;
 		if (visit
 				&& node->debug_state_internal == ast_dbg_loop_wrk_body
 				&& node->body)
 			node->body->accept(this);
+		--depth;
 
 		/* Visit node again for terminal */
 		if (node->debug_state_internal == ast_dbg_loop_wrk_body
@@ -451,12 +457,14 @@ void ast_traverse_visitor::visit(class ast_iteration_statement* node)
 			if (!this->traverse(node))
 				return;
 
-		if (node->condition)
-			node->condition->accept(this);
-		if (node->body)
-			node->body->accept(this);
 		if (node->init_statement)
 			node->init_statement->accept(this);
+		if (node->condition)
+			node->condition->accept(this);
+		++depth;
+		if (node->body)
+			node->body->accept(this);
+		--depth;
 		if (node->rest_expression)
 			node->rest_expression->accept(this);
 
@@ -494,12 +502,12 @@ void ast_traverse_visitor::visit(class ast_function_definition* node)
 		this->traverse(node);
 }
 
-void ast_traverse_visitor::visit(class ast_interface_block* node)
+void ast_traverse_visitor::visit(class ast_interface_block*)
 {
 	assert(!"not implemented");
 }
 
-void ast_traverse_visitor::visit(class ast_gs_input_layout* node)
+void ast_traverse_visitor::visit(class ast_gs_input_layout*)
 {
 	assert(!"not implemented");
 }

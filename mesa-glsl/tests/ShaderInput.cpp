@@ -11,7 +11,6 @@
 #include "glsldb/utils/dbgprint.h"
 #include <locale.h>
 
-#define SHADERS_PER_PROGRAM 3
 static const std::string shExtensions[SHADERS_PER_PROGRAM] = {
 	".vert",
 	".geom",
@@ -22,8 +21,10 @@ static gl_shader_stage shTypes[SHADERS_PER_PROGRAM] = {
 	MESA_SHADER_GEOMETRY,
 	MESA_SHADER_FRAGMENT };
 
-std::string ShaderInput::path = "./";
+std::string Resource::path = "./";
 ShadersList ShaderInput::shaders;
+std::map<std::string, ResultsListMap> ResultComparator::results;
+
 
 ShaderHolder* ShaderInput::load(std::string name)
 {
@@ -36,17 +37,22 @@ ShaderHolder* ShaderInput::load(std::string name)
 	for (int shnum = 0; shnum < SHADERS_PER_PROGRAM; ++shnum) {
 		std::string fname = path + name + shExtensions[shnum];
 		char* source = test_load_text_file(holder, fname.c_str());
+		holder->shaders = reralloc(holder, holder->shaders,
+				struct AstShader*, holder->num_shaders + 1);
+		holder->shaders[shnum] = NULL;
+		holder->num_shaders++;
+
 		if (!source) {
 			dbgPrint(DBGLVL_INFO, "Test shader %s not found. Skipping.\n", fname.c_str());
 			continue;
 		}
 
-		holder->shaders = reralloc(holder, holder->shaders,
-				struct AstShader*, holder->num_shaders + 1);
 		AstShader* shader = rzalloc(holder, struct AstShader);
-		holder->shaders[holder->num_shaders++] = shader;
+		holder->shaders[shnum] = shader;
 		shader->stage = shTypes[shnum];
 		shader->source = source;
+		shader->name = (char*) rzalloc_array(holder, char, fname.length());
+		strcpy(shader->name, fname.c_str());
 
 		ShVariableList *vl = new ShVariableList;
 		char* old_locale = setlocale(LC_NUMERIC, NULL);
@@ -57,10 +63,35 @@ ShaderHolder* ShaderInput::load(std::string name)
 
 		if (!shader->compile_status) {
 			dbgPrint(DBGLVL_ERROR,
-					"%s: Compilation failed, info log:\n%s\n", fname.c_str(), shader->info_log);
+					"%s: Compilation failed, info log:\n%s\n", shader->name, shader->info_log);
 			break;
 		}
 	}
 
 	return holder;
+}
+
+void ResultComparator::loadResults(std::string name, std::string unit)
+{
+	for (int shnum = 0; shnum < SHADERS_PER_PROGRAM; ++shnum) {
+		std::string shname = path + name + shExtensions[shnum];
+		std::string fname = shname + "." + unit;
+		if (getResults(shname, unit))
+			continue;
+
+		ResultsList& r = results[shname][unit];
+		char* source = test_load_text_file(NULL, fname.c_str());
+		if (!source) {
+			dbgPrint(DBGLVL_INFO, "Test output %s not found. Skipping.\n", fname.c_str());
+			continue;
+		}
+
+		char * pch;
+		pch = strtok(source, "\n");
+		while (pch != NULL) {
+			r.push_back(std::string(pch));
+			pch = strtok(NULL, "\n");
+		}
+	}
+
 }

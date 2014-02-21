@@ -176,6 +176,7 @@ public:
    virtual class ast_declaration* as_declaration() { return NULL; }
    virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
+   virtual class ast_expression* as_expression() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
 
@@ -278,6 +279,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual ast_expression* as_expression() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
