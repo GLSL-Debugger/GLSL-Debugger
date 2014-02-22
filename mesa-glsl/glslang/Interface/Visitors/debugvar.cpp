@@ -48,6 +48,12 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_expression_bin* node)
 	return true;
 }
 
+bool ast_debugvar_traverser_visitor::traverse(class ast_function_expression* node)
+{
+	copyScopeTo(node);
+	return true;
+}
+
 bool ast_debugvar_traverser_visitor::traverse(class ast_aggregate_initializer* node)
 {
 	copyScopeTo(node);
@@ -104,6 +110,13 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_parameter_declarator* no
 	addShVariable(vl, var, 0);
 	addToScope(var);
 	dumpScope();
+	return false;
+}
+
+bool ast_debugvar_traverser_visitor::traverse(class ast_struct_specifier *)
+{
+	// Struct specification is not declaration
+	// Do not add fields as variables
 	return false;
 }
 

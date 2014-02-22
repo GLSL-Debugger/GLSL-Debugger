@@ -76,7 +76,7 @@ public:
 		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
 		std::string orig_line = current->at(++line);
 		std::stringstream ss;
-		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: " << line;
+		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: " << (line + 1);
 		CPPUNIT_ASSERT_MESSAGE(ss.str().c_str(), !orig_line.compare(cmpline));
 	}
 

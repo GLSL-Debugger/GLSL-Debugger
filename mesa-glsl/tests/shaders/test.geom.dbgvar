@@ -16,7 +16,7 @@ AST_EXPRESSION (identifier)                      <0,i> <1,vertex>
 AST_EXPRESSION (array_index)                     <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                          <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                          <0,i> <1,vertex>
-AST_FUNCTION_EXPRESSION (function_call)
+AST_FUNCTION_EXPRESSION (function_call)      <0,i> <1,vertex>
 AST_EXPRESSION (++)                      <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                  <0,i> <1,vertex>
-AST_FUNCTION_EXPRESSION (function_call)
+AST_FUNCTION_EXPRESSION (function_call)  <0,i> <1,vertex>

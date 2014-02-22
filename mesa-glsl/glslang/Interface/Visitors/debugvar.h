@@ -22,9 +22,11 @@ public:
 
 	virtual bool traverse(class ast_expression *);
 	virtual bool traverse(class ast_expression_bin *);
+	virtual bool traverse(class ast_function_expression *);
 	virtual bool traverse(class ast_aggregate_initializer *);
 	virtual bool traverse(class ast_declaration *);
 	virtual bool traverse(class ast_parameter_declarator *);
+	virtual bool traverse(class ast_struct_specifier *);
 	virtual bool traverse(class ast_case_statement *);
 	virtual bool traverse(class ast_selection_statement *);
 	virtual bool traverse(class ast_switch_statement *);

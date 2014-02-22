@@ -20,6 +20,9 @@ public:
 	DebugVarTest()
 	{
 		unit_name = "dbgvar";
+		std::string test_files = "shaders/test";
+		holder = input.getShader(test_files);
+		comparator.loadResults(test_files, unit_name);
 	}
 
 	void setUp()
@@ -27,10 +30,6 @@ public:
 		vl = new ShVariableList;
 		vl->numVariables = 0;
 		vl->variables = NULL;
-
-		std::string test_files = "shaders/test";
-		holder = input.getShader(test_files);
-		comparator.loadResults(test_files, unit_name);
 	}
 
 	virtual void testShader(int num)
@@ -41,8 +40,6 @@ public:
 		ast_debugvar_traverser_visitor it(sh, vl);
 		it.visit(sh->head);
 		doComparison(sh);
-		//printf("results\n");
-		//std::cout << results.str();
 	}
 
 	static CppUnit::TestSuite *suite()
