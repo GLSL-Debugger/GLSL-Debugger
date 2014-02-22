@@ -372,7 +372,7 @@ inline void exec_node::insert_before(exec_list *before)
 
 /**
  * This version is safe even if the current node is removed.
- */ 
+ */
 #define foreach_list_safe(__node, __list)			     \
    for (exec_node * __node = (__list)->head, * __next = __node->next \
 	; __next != NULL					     \
@@ -387,6 +387,11 @@ inline void exec_node::insert_before(exec_list *before)
    for (exec_node * __node = (__list)->head		\
 	; (__node)->next != NULL 			\
 	; (__node) = (__node)->next)
+
+#define foreach_list_reverse(__node, __list)	\
+   for (exec_node * __node = (__list)->tail_pred \
+		; (__node)->prev != NULL 			\
+		; (__node) = (__node)->prev)
 
 /**
  * Iterate through two lists at once.  Stops at the end of the shorter list.

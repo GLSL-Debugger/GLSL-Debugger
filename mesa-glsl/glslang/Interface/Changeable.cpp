@@ -99,7 +99,7 @@ static const char* getShTypeString(ShVariable *v)
 	}
 }
 
-variableQualifier qualifierToNative(ast_type_qualifier* qualifier, bool is_parameter)
+variableQualifier qualifierToNative(const ast_type_qualifier* qualifier, bool is_parameter)
 {
 	int qual = SH_UNSET;
 	qual |= qualifier->flags.q.uniform * SH_UNIFORM;
@@ -389,16 +389,13 @@ ShVariable* findShVariableFromId(ShVariableList *vl, int id)
 	ShVariable **vp = NULL;
 	int i;
 
-	if (!vl) {
+	if (!vl)
 		return NULL;
-	}
 
 	vp = vl->variables;
-
 	for (i = 0; i < vl->numVariables; i++) {
-		if (vp[i]->uniqueId == id) {
+		if (vp[i]->uniqueId == id)
 			return vp[i];
-		}
 	}
 
 	return NULL;
@@ -592,9 +589,8 @@ void freeShVariable(ShVariable **var)
 
 		int i;
 		free((*var)->name);
-		for (i = 0; i < (*var)->structSize; i++) {
+		for (i = 0; i < (*var)->structSize; i++)
 			freeShVariable(&(*var)->structSpec[i]);
-		}
 		free((*var)->structSpec);
 		free((*var)->structName);
 		free(*var);
@@ -605,19 +601,15 @@ void freeShVariable(ShVariable **var)
 void freeShVariableList(ShVariableList *vl)
 {
 	int i;
-	for (i = 0; i < vl->numVariables; i++) {
+	for (i = 0; i < vl->numVariables; i++)
 		freeShVariable(&vl->variables[i]);
-	}
 	free(vl->variables);
 	vl->numVariables = 0;
 }
 
-ShVariable* glsltypeToShVariable(const struct glsl_type* vtype,
-		const char* name, ast_type_qualifier* qualifier)
+void glsltypeToShVariable(ShVariable* v, const struct glsl_type* vtype,
+		const char* name, const ast_type_qualifier* qualifier)
 {
-	ShVariable *v = NULL;
-	v = (ShVariable*) malloc(sizeof(ShVariable));
-
 	// Type has no identifier! To be filled in later by TVariable
 	v->uniqueId = -1;
 	v->builtin = false;
@@ -670,55 +662,66 @@ ShVariable* glsltypeToShVariable(const struct glsl_type* vtype,
 	}
 
 	if (vtype->base_type == GLSL_TYPE_STRUCT) {
-		//
-		// Append structure to ShVariable
-		//
+		// Add variables recursive
 		v->structSize = vtype->length;
-		v->structSpec = (ShVariable**) malloc(
-				v->structSize * sizeof(ShVariable*));
+		v->structSpec = (ShVariable**) malloc(v->structSize * sizeof(ShVariable*));
 		v->structName = strdup(vtype->name);
 		for (int i = 0; i < v->structSize; ++i) {
 			struct glsl_struct_field* field = &vtype->fields.structure[i];
-			v->structSpec[i] = glsltypeToShVariable(field->type, field->name,
-					qualifier);
+			v->structSpec[i] = (ShVariable*) malloc(sizeof(ShVariable));
+			glsltypeToShVariable(v->structSpec[i], field->type, field->name, qualifier);
 		}
 	} else {
 		v->structName = NULL;
 		v->structSize = 0;
 		v->structSpec = NULL;
 	}
-
-	return v;
 }
 
-ShVariable* astToShVariable(ast_node* decl, ast_type_qualifier* qualifier,
+const char* identifierFromNode(ast_node* decl)
+{
+	ast_declaration* as_decl = decl->as_declaration();
+	ast_parameter_declarator* as_param = decl->as_parameter_declarator();
+	ast_struct_specifier* as_struct = decl->as_struct_specifier();
+
+	if (as_decl)
+		return as_decl->identifier;
+	else if (as_param)
+		return as_param->identifier;
+	else if (as_struct)
+		return as_struct->name;
+	else
+		return NULL;
+}
+
+void addAstShVariable(ast_node*decl, ShVariable* var)
+{
+	var->uniqueId = VariablesCount++;
+	VariablesById[var->uniqueId] = var;
+	VariablesBySource[decl] = var;
+}
+
+
+ShVariable* astToShVariable(ast_node* decl, const ast_type_qualifier* qualifier,
 							const struct glsl_type* decl_type)
 {
 	if (!decl)
+		return NULL;
+
+	const char* identifier = identifierFromNode(decl);
+	if (!identifier)
 		return NULL;
 
 	VariableMap::iterator it = VariablesBySource.find(decl);
 	if (it != VariablesBySource.end())
 		return it->second;
 
-	const char* identifier;
-	ast_declaration* as_decl = decl->as_declaration();
-	ast_parameter_declarator* as_param = decl->as_parameter_declarator();
-
-	if (as_decl)
-		identifier = as_decl->identifier;
-	else if(as_param)
-		identifier = as_param->identifier;
-	else
-		return NULL;
-
-	ShVariable *var = glsltypeToShVariable(decl_type, identifier, qualifier);
-	var->uniqueId = VariablesCount++;
-	VariablesById[var->uniqueId] = var;
-	VariablesBySource[decl] = var;
-
+	ShVariable* var = (ShVariable*) malloc(sizeof(ShVariable));
+	glsltypeToShVariable(var, decl_type, identifier, qualifier);
+	addAstShVariable(decl, var);
 	return var;
 }
+
 
 void ShDumpVariable(ShVariable *v, int depth)
 {
@@ -727,13 +730,11 @@ void ShDumpVariable(ShVariable *v, int depth)
 	for (i = 0; i < depth; i++)
 		dbgPrint(DBGLVL_COMPILERINFO, "    ");
 
-	if (0 <= v->uniqueId) {
+	if (0 <= v->uniqueId)
 		dbgPrint(DBGLVL_COMPILERINFO, "<%i> ", v->uniqueId);
-	}
 
-	if (v->builtin) {
+	if (v->builtin)
 		dbgPrint(DBGLVL_COMPILERINFO, "builtin ");
-	}
 
 	dbgPrint(DBGLVL_COMPILERINFO,
 			"%s %s", getShQualifierString(v->qualifier), getShTypeString(v));
@@ -741,20 +742,17 @@ void ShDumpVariable(ShVariable *v, int depth)
 	if (v->isMatrix) {
 		dbgPrint(DBGLVL_COMPILERINFO, "%ix%i", v->size, v->size);
 	} else {
-		if (1 < v->size) {
+		if (1 < v->size)
 			dbgPrint(DBGLVL_COMPILERINFO, "%i", v->size);
-		}
 	}
 
 	dbgPrint(DBGLVL_COMPILERINFO, " %s", v->name);
 
 	if (v->isArray) {
 		for (i = 0; i < MAX_ARRAYS; i++) {
-			if (v->arraySize[i] != -1) {
-				dbgPrint(DBGLVL_COMPILERINFO, "[%i]", v->arraySize[i]);
-			} else {
+			if (v->arraySize[i] < 0)
 				break;
-			}
+			dbgPrint(DBGLVL_COMPILERINFO, "[%i]", v->arraySize[i]);
 		}
 		dbgPrint(DBGLVL_COMPILERINFO, "\n");
 	} else {
@@ -763,9 +761,8 @@ void ShDumpVariable(ShVariable *v, int depth)
 
 	if (v->structSize != 0) {
 		depth++;
-		for (i = 0; i < v->structSize; i++) {
+		for (i = 0; i < v->structSize; i++)
 			ShDumpVariable(v->structSpec[i], depth);
-		}
 	}
 
 }
@@ -775,17 +772,15 @@ ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name)
 	ShVariable **vp = NULL;
 	int i;
 
-	if (!vl) {
+	if (!vl)
 		return NULL;
-	}
 
 	vp = vl->variables;
-
 	for (i = 0; i < vl->numVariables; i++) {
-		if (!(strcmp(vp[i]->name, name))) {
+		if (!(strcmp(vp[i]->name, name)))
 			return vp[i];
-		}
 	}
+
 	return NULL;
 }
 

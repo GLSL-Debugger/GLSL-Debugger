@@ -119,6 +119,16 @@ void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
 
 	validate_identifier(node->name, loc, state);
 	const glsl_type *t = glsl_type::get_record_instance(fields, decl_count, node->name);
+	foreach_list_typed (ast_declarator_list, decl_list, link, &node->declarations) {
+		const struct ast_type_qualifier * const qual = &decl_list->type->qualifier;
+		ShVariable* var = astToShVariable(node, qual, t);
+		int i = 0;
+		// assume we have same count of fields and declarations
+		foreach_list_typed (ast_declaration, decl, link, &decl_list->declarations) {
+			ShVariable* field = var->structSpec[i++];
+			addAstShVariable(decl, field);
+		}
+	}
 
 	if (!state->symbols->add_type(node->name, t)) {
 		_mesa_glsl_error(&loc, state, "struct `%s' previously defined", node->name);
@@ -286,7 +296,7 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_function_definition* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_gs_input_layout* node)
+bool ast_sideeffects_traverser_visitor::traverse(ast_gs_input_layout*)
 {
 	assert(!"not implemented");
 }

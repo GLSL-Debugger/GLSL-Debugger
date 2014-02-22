@@ -7,11 +7,9 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#include "ShaderInput.h"
 #include "ShaderLang.h"
 #include "glslang/Interface/Visitors/debugvar.h"
 #include "Base.h"
-#include "call_visitor.h"
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
 
@@ -30,35 +28,9 @@ public:
 		comparator.loadResults(test_files, unit_name);
 	}
 
-	void testVertex()
-	{
-		testShader(MESA_SHADER_VERTEX);
-	}
-
-	void testGeom()
-	{
-		testShader(MESA_SHADER_GEOMETRY);
-	}
-
-	void testFrag()
-	{
-		testShader(MESA_SHADER_FRAGMENT);
-	}
-
 	void testShader(int num)
 	{
-		if (!holder->shaders[num])
-			return;
-
-		ast_call_visitor v(this);
-		v.visit(holder->shaders[num]->head);
-
-		// I'm afraid of this code.
-		// Wrong architecture chosen for this.
-		std::string s;
-		comparator.setCurrent(holder->shaders[num]->name, unit_name);
-		while (std::getline(results, s))
-			comparator.compareNext(s);
+		doComparison(holder->shaders[num]);
 	}
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
@@ -95,7 +67,6 @@ public:
 	}
 
 private:
-	std::string unit_name;
 	ShaderHolder* holder;
 
 };

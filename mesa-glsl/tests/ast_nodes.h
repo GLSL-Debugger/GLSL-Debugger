@@ -33,7 +33,7 @@ enum ast_node_type {
 	AST_LAST
 };
 
-const char* ast_node_names[AST_LAST] = {
+static const char* ast_node_names[AST_LAST] = {
 	"AST_NODE",	"AST_EXPRESSION", "AST_EXPRESSION_BIN", "AST_FUNCTION_EXPRESSION",
 	"AST_ARRAY_SPECIFIER", "AST_AGGREGATE_INITIALIZER", "AST_DECLARATION",
 	"AST_STRUCT_SPECIFIER", "AST_TYPE_SPECIFIER", "AST_FULLY_SPECIFIED_TYPE",
@@ -43,7 +43,7 @@ const char* ast_node_names[AST_LAST] = {
 	"AST_FUNCTION_DEFINITION", "AST_INTERFACE_BLOCK", "AST_GS_INPUT_LAYOUT",
 };
 
-const char* ast_expr_string_ext[ast_aggregate - ast_array_index + 1] = {
+static const char* ast_expr_string_ext[ast_aggregate - ast_array_index + 1] = {
 	"array_index", "function_call", "identifier", "int_constant",
 	"uint_constant", "float_constant", "bool_constant", "sequence",
 	"aggregate"

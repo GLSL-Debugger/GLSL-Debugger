@@ -5,6 +5,7 @@ set(TESTS_SRC
 	runner.cpp
 	misc.cpp
 	ShaderInput.cpp
+	call_visitor.cpp
 )
 
 add_executable(glsl_tests ${TESTS_SRC})

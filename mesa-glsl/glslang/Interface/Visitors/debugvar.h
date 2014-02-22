@@ -8,15 +8,16 @@
 #define DEBUGVAR_H_
 
 #include "ShaderLang.h"
+#include "glslang/Interface/ShaderHolder.h"
 #include "glslang/Interface/ASTScope.h"
 #include "ast.h"
 
 
 class ast_debugvar_traverser_visitor : public ast_traverse_visitor {
 public:
-	ast_debugvar_traverser_visitor(ShVariableList *_vl) : vl(_vl)
+	ast_debugvar_traverser_visitor(AstShader* _sh, ShVariableList* _vl) :
+			vl(_vl), shader(_sh)
 	{
-		reset();
 	}
 
 	virtual bool traverse(class ast_expression *);
@@ -31,17 +32,15 @@ public:
 	virtual bool traverse(class ast_jump_statement *);
 	virtual bool traverse(class ast_function_definition *);
 
-	ShVariableList *getVariableList() { return vl; }
-	void addToScope(int id);
-	void dumpScope(void);
-	scopeList& getScope(void) { return scope; }
-	scopeList* getCopyOfScope(void);
-	void reset() { scope.clear(); }
+	void addToScope(ShVariable*);
+	void dumpScope() { dumpScope(&scope); }
+	void copyScopeTo(ast_node*);
 
+	static void dumpScope(exec_list*);
 private:
-	bool nameIsAlreadyInList(scopeList *l, const char *name);
 	ShVariableList *vl;
-	scopeList scope;
+	exec_list scope;
+	AstShader* shader;
 };
 
 #endif /* DEBUGVAR_H_ */

@@ -10,26 +10,15 @@
 #include "glsldb/utils/dbgprint.h"
 
 namespace {
-	typedef std::map< ast_node*, scopeList* > ScopeMap;
 	typedef std::map< ast_node*, ShChangeableList* > ChangeableListMap;
-	ScopeMap scopes;
 	ChangeableListMap changeable_lists;
 	ChangeableListMap changeable_param_lists;
 }
 
-scopeList* get_scope( ast_node* ir )
-{
-	ScopeMap::iterator it = scopes.find(ir);
-	if( it != scopes.end() )
-		return it->second;
-	return NULL;
-}
 
-void set_scope( ast_node* ir, scopeList* list )
+scope_item* scope_item::clone(void *mem_ctx)
 {
-	if (!ir)
-		return;
-	scopes[ir] = list;
+	return new(mem_ctx) scope_item(id, name);
 }
 
 // TODO: There a leak

@@ -20,7 +20,7 @@ bool ShaderVarTraverse(AstShader* shader, ShVariableList *vl)
 	// Fill exernal variable list and determine scope
 	//
 	VPRINT(2, "==Processing=Variables======================================\n");
-	ast_debugvar_traverser_visitor it(vl);
+	ast_debugvar_traverser_visitor it(shader, vl);
 	it.visit(list);
 	VPRINT(2, "==Processing=Variables===done===============================\n");
 

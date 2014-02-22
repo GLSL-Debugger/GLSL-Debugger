@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(DBGLVL_ERROR);
 	CppUnit::TextTestRunner runner;
 	runner.addTest(CompileShaderTest::suite());
-	//runner.addTest(DebugVarTest::suite());
+	runner.addTest(DebugVarTest::suite());
 	runner.run();
 	return 0;
 }
