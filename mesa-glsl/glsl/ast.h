@@ -187,6 +187,7 @@ public:
    enum ast_dbg_overwrite debug_overwrite;
    bool debug_target;
    int debug_sideeffects;
+   int debug_id;
 #endif
 
 protected:
@@ -833,7 +834,7 @@ public:
 				 bool formal, exec_list *ir_parameters,
 				 struct _mesa_glsl_parse_state *state);
 
-private:
+/*private: */
    /** Is this parameter declaration part of a formal parameter list? */
    bool formal_parameter;
 

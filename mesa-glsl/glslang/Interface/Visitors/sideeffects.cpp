@@ -2,6 +2,13 @@
  * sideeffects.cpp
  *
  *  Created on: 27.12.2013
+ *
+ * There a lot of functions as in ast_to_hir.
+ * Primary purpose of it to obtain glsl type for ShVariable
+ * Error messages was removed because it is driver work to compile
+ * and check for errors, i.e. errors in shader -> no shader for debugging.
+ * If you have some problems with this behavior, please report it,
+ * it probably some errors in shader receiving phase, not here.
  */
 
 #include "sideeffects.h"
@@ -143,6 +150,37 @@ void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
 	}
 
 	state->struct_specifier_depth--;
+}
+
+// As in ast_to_hir
+void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
+{
+	const struct glsl_type *type;
+	const char *name = NULL;
+	YYLTYPE loc = node->get_location();
+
+	type = node->type->glsl_type(&name, state);
+
+	if (type == NULL)
+		type = glsl_type::error_type;
+
+	if (node->formal_parameter && (node->identifier == NULL))
+		return;
+
+	node->is_void = false;
+	if (type->is_void()) {
+		node->is_void = true;
+		return;
+	}
+
+	type = process_array_type(&loc, type, node->array_specifier, state);
+	if (!type->is_error() && type->is_unsized_array())
+		type = glsl_type::error_type;
+
+	if (type == glsl_type::error_type)
+		_mesa_glsl_error(&loc, state, "Error while processing parameter.");
+
+	astToShVariable(node, &node->type->qualifier, type);
 }
 
 void ast_sideeffects_traverser_visitor::visit(ast_compound_statement* node)

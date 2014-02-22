@@ -11,12 +11,9 @@
 #include "ir.h"
 #include "ast.h"
 
-typedef std::map<ast_node*, ShVariable*> VariableMap;
-
 namespace {
-std::map<int, ShVariable*> VariablesById;
-VariableMap VariablesBySource;
-unsigned int VariablesCount = 0;
+	std::map<int, ShVariable*> VariablesById;
+	unsigned int VariablesCount = 0;
 }
 
 static const char* getShTypeString(ShVariable *v)
@@ -384,6 +381,14 @@ void addShVariable(ShVariableList *vl, ShVariable *v, int builtin)
 	vl->variables[vl->numVariables - 1] = v;
 }
 
+ShVariable* findShVariable(int id)
+{
+	std::map<int, ShVariable*>::iterator it = VariablesById.find(id);
+	if (it != VariablesById.end())
+		return it->second;
+	return NULL;
+}
+
 ShVariable* findShVariableFromId(ShVariableList *vl, int id)
 {
 	ShVariable **vp = NULL;
@@ -579,14 +584,6 @@ void freeShVariable(ShVariable **var)
 		if (iit != VariablesById.end())
 			VariablesById.erase(iit);
 
-		for (VariableMap::iterator it = VariablesBySource.begin(), end = VariablesBySource.end();
-				it != end; ++it) {
-			if (it->second != *var)
-				continue;
-			it = VariablesBySource.erase(it);
-			break;
-		}
-
 		int i;
 		free((*var)->name);
 		for (i = 0; i < (*var)->structSize; i++)
@@ -694,11 +691,11 @@ const char* identifierFromNode(ast_node* decl)
 		return NULL;
 }
 
-void addAstShVariable(ast_node*decl, ShVariable* var)
+void addAstShVariable(ast_node* decl, ShVariable* var)
 {
 	var->uniqueId = VariablesCount++;
 	VariablesById[var->uniqueId] = var;
-	VariablesBySource[decl] = var;
+	decl->debug_id = var->uniqueId;
 }
 
 
@@ -712,13 +709,13 @@ ShVariable* astToShVariable(ast_node* decl, const ast_type_qualifier* qualifier,
 	if (!identifier)
 		return NULL;
 
-	VariableMap::iterator it = VariablesBySource.find(decl);
-	if (it != VariablesBySource.end())
-		return it->second;
+	ShVariable* var = findShVariable(decl->debug_id);
+	if (!var) {
+		var = (ShVariable*) malloc(sizeof(ShVariable));
+		glsltypeToShVariable(var, decl_type, identifier, qualifier);
+		addAstShVariable(decl, var);
+	}
 
-	ShVariable* var = (ShVariable*) malloc(sizeof(ShVariable));
-	glsltypeToShVariable(var, decl_type, identifier, qualifier);
-	addAstShVariable(decl, var);
 	return var;
 }
 
@@ -781,15 +778,5 @@ ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name)
 			return vp[i];
 	}
 
-	return NULL;
-}
-
-ShVariable* findShVariableFromSource(ast_node* node)
-{
-	if (node && (node->as_declaration() || node->as_parameter_declarator())){
-		VariableMap::iterator it = VariablesBySource.find(node);
-		if (it != VariablesBySource.end())
-			return it->second;
-	}
 	return NULL;
 }

@@ -387,10 +387,10 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 //
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
-ShVariable* findShVariableFromSource(ast_node* variable);
 void addAstShVariable(ast_node*, ShVariable*);
 ShVariable* astToShVariable(ast_node* decl, const ast_type_qualifier* qualifier,
 							const struct glsl_type* decl_type);
+ShVariable* findShVariable(int id);
 ShVariable* findShVariableFromId(ShVariableList *vl, int id);
 ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
 ShVariable* copyShVariable(ShVariable *src);

@@ -13,6 +13,7 @@
 #include "Base.h"
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
+#include <iomanip>
 
 class DebugVarTest: public BaseUnitTest {
 public:
@@ -40,8 +41,8 @@ public:
 		ast_debugvar_traverser_visitor it(sh, vl);
 		it.visit(sh->head);
 		doComparison(sh);
-		printf("results\n");
-		std::cout << results;
+		//printf("results\n");
+		//std::cout << results.str();
 	}
 
 	static CppUnit::TestSuite *suite()
@@ -61,6 +62,7 @@ public:
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
 	{
+		int length = strlen(ast_node_names[type]);
 		results << ast_node_names[type];
 
 		ast_expression* expr = node->as_expression();
@@ -71,14 +73,18 @@ public:
 			else
 				expr_type = ast_expr_string_ext[expr->oper - ast_array_index];
 			results << " (" << expr_type << ")";
+			length += strlen(expr_type) + 3;
 		}
 
-		for (int i = 0; i < depth; ++i)
-			results << "    ";
+		if (!node->scope.is_empty()) {
+			results << std::setfill(' ') << std::setw(40-length) << " ";
+			for (int i = 0; i < depth; ++i)
+				results << "    ";
 
-		foreach_list(scope_node, &node->scope) {
-			scope_item* sc = (scope_item*)scope_node;
-			results << " <" << sc->id << "," << sc->name << ">";
+			foreach_list(scope_node, &node->scope) {
+				scope_item* sc = (scope_item*)scope_node;
+				results << " <" << sc->id << "," << sc->name << ">";
+			}
 		}
 
 		results << "\n";

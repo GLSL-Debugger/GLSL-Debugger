@@ -25,6 +25,7 @@ public:
 	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
 	virtual void visit(ast_declarator_list *);
 	virtual void visit(ast_struct_specifier *);
+	virtual void visit(ast_parameter_declarator *);
 	virtual void visit(ast_compound_statement *);
 	virtual void visit(ast_expression_statement *);
 

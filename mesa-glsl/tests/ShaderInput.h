@@ -73,7 +73,7 @@ public:
 
 	void compareNext(std::string cmpline)
 	{
-		CPPUNIT_ASSERT(current);
+		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
 		std::string orig_line = current->at(++line);
 		std::stringstream ss;
 		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: " << line;

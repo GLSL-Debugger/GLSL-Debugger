@@ -56,7 +56,7 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_aggregate_initializer* n
 
 bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
 {
-	ShVariable* var = findShVariableFromSource(node);
+	ShVariable* var = findShVariable(node->debug_id);
 	assert(var);
 
 	VPRINT(3, "%c%sdeclaration of %s <%i>%c%s\n", ESC_CHAR, ESC_BOLD,
@@ -92,11 +92,17 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
 
 bool ast_debugvar_traverser_visitor::traverse(class ast_parameter_declarator* node)
 {
-	ShVariable* v = findShVariableFromSource(node);
+	// No variable when void
+	if (node->is_void)
+		return false;
+
+	ShVariable* var = findShVariable(node->debug_id);
+	assert(var);
+
 	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
-			node->identifier, v->uniqueId, ESC_CHAR, ESC_RESET);
-	addShVariable(vl, v, 0);
-	addToScope(v);
+			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
+	addShVariable(vl, var, 0);
+	addToScope(var);
 	dumpScope();
 	return false;
 }

@@ -48,13 +48,16 @@ public:
 
 	virtual void testShader(int) {}
 
-	virtual void doComparison(AstShader* sh)
+	virtual void doComparison(AstShader* sh, bool do_actual_cmp=true)
 	{
 		if (!sh)
 			return;
 
 		ast_call_visitor v(this);
 		v.visit(sh->head);
+
+		if (!do_actual_cmp)
+			return;
 
 		// I'm afraid of this code.
 		// Wrong architecture chosen for this.

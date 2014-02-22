@@ -79,7 +79,7 @@ int addShVariableList(ShVariableList *vl, AstShader* shader)
 		if (!dlist)
 			continue;
 		foreach_list_typed (ast_declaration, decl, link, &dlist->declarations){
-			ShVariable* var = findShVariableFromSource(decl);
+			ShVariable* var = findShVariable(decl->debug_id);
 			addShVariable(vl, var, strncmp(decl->identifier, "gl_", 3 ) == 0);
 			count++;
 		}
