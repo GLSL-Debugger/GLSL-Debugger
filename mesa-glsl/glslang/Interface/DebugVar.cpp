@@ -28,7 +28,7 @@ bool ShaderVarTraverse(AstShader* shader, ShVariableList *vl)
 	// insert this information at end of sequences to be able to keep track
 	// all changes made in functions and branches
 	VPRINT(2, "==Processing=Changes========================================\n");
-	ir_debugchange_traverser_visitor itChange;
+	ast_debugchange_traverser_visitor itChange(shader);
 	itChange.visit(list);
 	VPRINT(2, "==Processing=Changes===done=================================\n");
 	return true;

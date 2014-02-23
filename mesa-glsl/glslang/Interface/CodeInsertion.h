@@ -2,8 +2,10 @@
 #define _CODE_INSERTION_
 
 #include "../Public/ShaderLang.h"
-#include "../Include/Common.h"
+//#include "../Include/Common.h"
 #include "../Include/BaseTypes.h"
+#include <vector>
+#include <string>
 
 enum cgTypes {
 	CG_TYPE_NONE,

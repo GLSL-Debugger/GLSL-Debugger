@@ -16,6 +16,7 @@
 #include "glsl/ir.h"
 #include "glsl/list.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Include/ShaderLang.h"
 #undef NDEBUG
 #include <assert.h>
 
@@ -28,6 +29,9 @@ extern glsl_interp_qualifier interpret_interpolation_qualifier(
 		YYLTYPE*);
 extern void validate_matrix_layout_for_type(struct _mesa_glsl_parse_state *, YYLTYPE *,
 		const glsl_type *, ir_variable *);
+extern unsigned process_parameters(exec_list *instructions, exec_list *actual_parameters,
+		exec_list *parameters, struct _mesa_glsl_parse_state *state);
+
 
 
 // As in ast_to_hir
@@ -71,7 +75,6 @@ unsigned ast_process_structure_or_interface_block(ast_sideeffects_traverser_visi
 					validate_matrix_layout_for_type(state, &loc, field_type, NULL);
 			}
 
-
 			if (field_type->is_matrix()
 					|| (field_type->is_array() && field_type->fields.array->is_matrix())) {
 				fields[i].row_major = block_row_major;
@@ -107,7 +110,9 @@ void ast_sideeffects_traverser_visitor::visit(ast_declarator_list* node)
 
 		decl->accept(this);
 		// Register variable
-		astToShVariable(decl, &node->type->qualifier, type);
+		variableQualifier qual = qualifierFromAst(&node->type->qualifier, false);
+		variableVaryingModifier modifier = modifierFromAst(&node->type->qualifier);
+		astToShVariable(decl, qual, modifier, type, shader);
 	}
 }
 
@@ -128,7 +133,9 @@ void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
 	const glsl_type *t = glsl_type::get_record_instance(fields, decl_count, node->name);
 	foreach_list_typed (ast_declarator_list, decl_list, link, &node->declarations) {
 		const struct ast_type_qualifier * const qual = &decl_list->type->qualifier;
-		ShVariable* var = astToShVariable(node, qual, t);
+		variableQualifier qualifier = qualifierFromAst(qual, false);
+		variableVaryingModifier modifier = modifierFromAst(qual);
+		ShVariable* var = astToShVariable(node, qualifier, modifier, t, shader);
 		int i = 0;
 		// assume we have same count of fields and declarations
 		foreach_list_typed (ast_declaration, decl, link, &decl_list->declarations) {
@@ -180,21 +187,27 @@ void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
 	if (type == glsl_type::error_type)
 		_mesa_glsl_error(&loc, state, "Error while processing parameter.");
 
-	astToShVariable(node, &node->type->qualifier, type);
+	variableQualifier qual = qualifierFromAst(&node->type->qualifier, true);
+	variableVaryingModifier modifier = modifierFromAst(&node->type->qualifier);
+	astToShVariable(node, qual, modifier, type, shader);
 }
 
 void ast_sideeffects_traverser_visitor::visit(ast_compound_statement* node)
 {
-	if (node->new_scope)
+	if (node->new_scope){
+		state->symbols->push_scope();
 		depth++;
+	}
 
 	foreach_list_typed (ast_node, ast, link, &node->statements) {
 		ast->accept(this);
 		node->debug_sideeffects |= ast->debug_sideeffects;
 	}
 
-	if (node->new_scope)
+	if (node->new_scope){
+		state->symbols->pop_scope();
 		depth--;
+	}
 }
 
 void ast_sideeffects_traverser_visitor::visit(ast_expression_statement* node)
@@ -232,18 +245,42 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
 		node->debug_sideeffects |= ast_dbg_se_general;
 		break;
 
-	case ast_identifier:
-		if (!strcmp(node->primary_expression.identifier,
-				EMIT_VERTEX_SIGNATURE))
-			node->debug_sideeffects |= ast_dbg_se_emit_vertex;
-		break;
-
-	case ast_conditional:
 	case ast_sequence:
 	case ast_function_call:
 	case ast_aggregate:
 		assert(!"not implemented");
 		break;
+
+	case ast_identifier:
+		// Check if it is global variable
+		if (!node->debug_id){
+			ir_variable* var = state->symbols->get_variable(
+					node->primary_expression.identifier);
+			assert(var || !"Undeclared identifier");
+			const glsl_type* type = var->type;
+			variableQualifier qual = qualifierFromIr(var);
+			variableVaryingModifier modifier = modifierFromIr(var);
+			astToShVariable(node, qual, modifier, type, shader);
+		}
+		break;
+	case ast_field_selection: {
+		// We need to know is it struct or swizzle
+		// In mesa it obtained in some wierd way.
+		exec_list instructions;
+		ir_rvalue* op = node->subexpressions[0]->hir(&instructions, state);
+		if (op->type->base_type == GLSL_TYPE_STRUCT
+		              || op->type->base_type == GLSL_TYPE_INTERFACE)
+			node->debug_selection_type = ast_fst_struct;
+		else if (node->subexpressions[1] != NULL)
+			node->debug_selection_type = ast_fst_method;
+		else if (op->type->is_vector() ||
+	              (state->ARB_shading_language_420pack_enable &&
+	               op->type->is_scalar()))
+			node->debug_selection_type = ast_fst_swizzle;
+		else
+			assert(!"wrong type for field selection");
+		break;
+	}
 	default:
 		break;
 	}
@@ -260,16 +297,34 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression_bin* node)
 
 bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
 {
-	if (node->subexpressions[0]){
-		node->subexpressions[0]->accept(this);
-		node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
-	}
+	ast_expression* id = node->subexpressions[0];
+
+	if (id->primary_expression.identifier &&
+			!strcmp(id->primary_expression.identifier, EMIT_VERTEX_SIGNATURE))
+		node->debug_sideeffects |= ast_dbg_se_emit_vertex;
 
 	// Not sure about it
 	foreach_list_const(n, &node->expressions) {
 		ast_node *ast = exec_node_data(ast_node, n, link);
 		node->debug_sideeffects |= ast->debug_sideeffects;
 	}
+
+	node->debug_builtin = false;
+	if (node->is_constructor()) {
+		node->debug_builtin = true;
+	} else {
+		const char *func_name = id->primary_expression.identifier;
+		// Probably leak
+		exec_list actual_parameters;
+		exec_list instructions;
+		process_parameters(&instructions, &actual_parameters, &node->expressions, state);
+
+		/* Local shader has no exact candidates; check the built-ins. */
+		_mesa_glsl_initialize_builtin_functions();
+		if (_mesa_glsl_find_builtin_function(state, func_name, &actual_parameters))
+			node->debug_builtin = true;
+	}
+
 	return true;
 }
 
@@ -331,6 +386,7 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_jump_statement* node)
 bool ast_sideeffects_traverser_visitor::traverse(ast_function_definition* node)
 {
 	node->debug_sideeffects |= ir_dbg_se_general;
+	saveFunction(node->prototype);
 	return true;
 }
 

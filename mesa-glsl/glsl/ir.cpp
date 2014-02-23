@@ -461,8 +461,8 @@ ir_expression::ir_expression(int op, ir_rvalue *op0, ir_rvalue *op1,
                              ir_rvalue *op2)
 {
    this->ir_type = ir_type_expression;
-   COPY_IR_LOCATION_BEGIN( this, first(this->operands) )
-   COPY_IR_LOCATION_END( this, last(this->operands) )
+   //COPY_IR_LOCATION_BEGIN( this, first(this->operands) )
+   //COPY_IR_LOCATION_END( this, last(this->operands) )
 
    this->operation = ir_expression_operation(op);
    this->operands[0] = op0;

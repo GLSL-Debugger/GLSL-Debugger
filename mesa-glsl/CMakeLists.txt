@@ -17,7 +17,6 @@ include_directories(
 		${PROJECT_SOURCE_DIR}/mesa-glsl
 		${PROJECT_SOURCE_DIR}/mesa-glsl/mesa
     	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Public
-    	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Include
     )
 
 add_library(glsl_mesa_interface ${SRC_INTERFACE} ${SRC_VISITORS})

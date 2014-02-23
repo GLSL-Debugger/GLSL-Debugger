@@ -9,8 +9,7 @@
 
 #include "ShaderLang.h"
 #include "mesa/main/mtypes.h"
-struct exec_list;
-
+#include "glsl/list.h"
 
 struct AstShader {
 	exec_list* head;

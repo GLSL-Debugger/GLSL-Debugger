@@ -4,7 +4,12 @@
 #include "glsl/glsl_symbol_table.h"
 #include "Visitors/sideeffects.h"
 #include "glsldb/utils/dbgprint.h"
+#include <map>
 
+namespace {
+	// TODO: tie it with current context
+	std::map<std::string, ast_function*> shaderFunctions;
+}
 
 static void makeMangledName( const struct glsl_type* type, std::string& mangledName )
 {
@@ -127,6 +132,19 @@ char* getFunctionName(const char* manglName)
     strncpy(name, manglName, namelength);
     name[namelength] = '\0';
     return name;
+}
+
+void saveFunction(ast_function* node)
+{
+	shaderFunctions[std::string(node->identifier)] = node;
+}
+
+ast_function* getFunctionByName(const char *name)
+{
+	std::map<std::string, ast_function*>::iterator it = shaderFunctions.find(std::string(name));
+	if (it != shaderFunctions.end())
+		return it->second;
+	return NULL;
 }
 
 ir_function* getFunctionBySignature(const char *sig, struct gl_shader* shader)

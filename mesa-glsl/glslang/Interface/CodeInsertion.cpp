@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include "CodeTools.h"
-
 #include "glsldb/utils/dbgprint.h"
+#include <map>
+#include <list>
 
 
 #define CG_RESULT_PREFIX    "dbgResult"

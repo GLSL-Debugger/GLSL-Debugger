@@ -5,164 +5,31 @@
  */
 
 #include "debugchange.h"
-#include "ShaderLang.h"
+#include "glslang/Include/ShaderLang.h"
 #include "glsl/list.h"
-#include "glslang/Interface/ASTScope.h"
+#include "glslang/Interface/AstScope.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
+#undef NDEBUG
+#include <assert.h>
 
-
-static void get_block_cgbls(ShChangeableList* node_cgbl, exec_list* list,
-							ir_debugchange_traverser_visitor* it)
+static void dumpAstChangeableList(exec_list *cl)
 {
-	if ( !list->is_empty() ) {
-//    	ShChangeableList* list_cgbl = get_changeable_list( list );
-
-//    	int skip_pair = -1;
-//    	foreach_list( node, list ) {
-//			ir_instruction* const inst = (ir_instruction *)node;
-//			if (!list_iter_check(inst, skip_pair))
-//				continue;
-//			inst->accept( it );
-//			// copy changeables
-//			copyShChangeableList( list_cgbl, get_changeable_list( inst ) );
-//		}
-//
-//    	copyShChangeableList(node_cgbl, list_cgbl);
-    }
-}
-
-
-static void get_tokenized_block_cgbls(ShChangeableList* node_cgbl, ir_dummy* ir,
-							ir_debugchange_traverser_visitor* it)
-{
-	if (!ir || !ir->next)
+	if (!cl)
 		return;
-
-	int end_token = ir_dummy::pair_type(ir->dummy_type);
-	if (end_token >= 0) {
-//		ShChangeableList* ir_cgbl = get_changeable_list(ir);
-//		foreach_node_safe(node, ir->next) {
-//			ir_instruction * const inst = (ir_instruction *)node;
-//			ir_dummy * const dm = inst->as_dummy();
-//			if (dm && end_token == dm->dummy_type)
-//				return;
-//			inst->accept(it);
-//			copyShChangeableList(ir_cgbl, get_changeable_list(inst));
-//		}
-//		copyShChangeableList(node_cgbl, ir_cgbl);
+	dbgPrint(DBGLVL_INFO, "===> ");
+	if (cl->is_empty())
+		dbgPrint(DBGLVL_INFO, "empty");
+	foreach_list(node, cl){
+		changeable_item* item = (changeable_item*)node;
+		dumpShChangeable(item->changeable);
 	}
-}
-
-
-bool ir_debugchange_traverser_visitor::visitIr(ir_variable* ir)
-{
-//	ShChangeableList* node_cgbl = get_changeable_list(ir);
-	//dumpShChangeableList(node_cgbl);
-
-//	if( ir->constant_value ){
-//		VPRINT(2, "(%s) changeDeclaration -> begin\n", FormatSourceRange(ir->yy_location).c_str());
-//		ir->constant_value->accept(this);
-//		copyShChangeableList(node_cgbl, get_changeable_list(ir->constant_value));
-//		//dumpShChangeableList(node_cgbl);
-//		VPRINT(2, "(%s) changeDeclaration -> end\n", FormatSourceRange(ir->yy_location).c_str());
-//	}else if(ir->constant_initializer) {
-//		VPRINT(2, "(%s) changeDeclaration -> begin\n", FormatSourceRange(ir->yy_location).c_str());
-//		ir->constant_initializer->accept(this);
-//        // copy the changeables of initialization
-//        copyShChangeableList(node_cgbl, get_changeable_list(ir->constant_initializer));
-//        //dumpShChangeableList(node_cgbl);
-//        VPRINT(2, "(%s) changeDeclaration -> end\n", FormatSourceRange(ir->yy_location).c_str());
-//    }else
-//    	return true;
-
-    return false;
-}
-
-static void traverse_func_param( ir_variable* ir )
-{
-	if( !ir || (ir->data.mode != ir_var_function_in &&
-			ir->data.mode != ir_var_const_in &&	/* check back with Magnus */
-			ir->data.mode != ir_var_function_inout ) )
-		return;
-
-//	ShChangeableList* node_cgbl = get_changeable_list(ir);
-//	ShVariable* var = NULL; // irToShVariable(ir);
-//	if( node_cgbl->numChangeables == 0 ){
-//		VPRINT( 2, "(%s) change FuncParam -> created %i %s\n",
-//				FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, ir->name );
-//		addShChangeable( node_cgbl, createShChangeable( var->uniqueId ) );
-//	}else{
-//		VPRINT( 2, "(%s) changeFuncParam -> kept %i %s\n",
-//				FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, ir->name );
-//	}
-}
-
-bool ir_debugchange_traverser_visitor::visitIr(ir_function_signature* ir)
-{
-	VPRINT( 2, "(%s) change function signature array\n", FormatSourceRange(ir->yy_location).c_str() );
-
-    // do not parse an function if this was already done before
-    // again this is due to the (*^@*$ function prototypes
-	std::set<ir_function_signature*>::iterator iter = parsed_signatures.find(ir);
-	if( iter != parsed_signatures.end() )
-		return false;
-	else
-		parsed_signatures.insert(ir);
-
-//	ShChangeableList* node_cgbl = get_changeable_list( ir );
-//	ShChangeableList* node_param_cgbl = get_changeable_list( &ir->parameters );
-//
-//	// TODO: Not sure, parameters must be processed
-//	foreach_list( node, &ir->parameters ){
-//		ir_instruction* inst = (ir_instruction *)node;
-//		traverse_func_param(inst->as_variable());
-//		// copy changeables
-//		ShChangeableList* inst_list = get_changeable_list( inst );
-//		copyShChangeableList( node_cgbl, inst_list );
-//		copyShChangeableList( node_param_cgbl, inst_list );
-//	}
-//
-//	get_block_cgbls(node_cgbl, &ir->body, this);
-
-    // copy parameters to local parameter list
-    // Assumption: first child is responsible for parameters,
-    //             check with similar comment above
-//    copyShChangeableList(get_changeable_paramerers_list(ir), node_param_cgbl);
-
-	return false;
-}
-
-bool ir_debugchange_traverser_visitor::visitIr(ir_expression* ir)
-{
-    VPRINT(2, "(%s) change Expression\n", FormatSourceRange(ir->yy_location).c_str());
-    //dumpShChangeableList(node->getCgbList());
-    this->deactivate();
-//    ShChangeableList* nlist = get_changeable_list(ir);
-//    int opc = ir->get_num_operands();
-//    this->depth++;
-//    for( int i = 0; i < opc; ++i ){
-//    	ir_instruction* op = ir->operands[i];
-//    	op->accept(this);
-//    	// copy the changeables of this operand
-//    	copyShChangeableList(nlist, get_changeable_list(op));
-//    	//dumpShChangeableList(nlist);
-//    }
-    this->depth--;
-
-    // It makes no sense to traverse operators again
-    return false;
-}
-
-bool ir_debugchange_traverser_visitor::visitIr(ir_texture* ir)
-{
-	// TODO: texture
-	return ir;
+	dbgPrint(DBGLVL_INFO, "\n");
 }
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_swizzle* ir)
 {
-	VPRINT( 2, "(%s) vector swizzle\n", FormatSourceRange(ir->yy_location).c_str() );
+	//VPRINT( 2, "(%s) vector swizzle\n", FormatSourceRange(ir->yy_location).c_str() );
 /*	ShChangeableList* node_cgbl = get_changeable_list(ir);
 
 	// process left branch first
@@ -223,28 +90,9 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_swizzle* ir)
 	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_variable* ir)
-{
-    if (this->isActive()) {
-    	/*ir_variable* node = ir->variable_referenced();
-    	ShChangeableList* node_cgbl = get_changeable_list(node);
-    	ShVariable* var = NULL; // findShVariableFromSource(node);
-    	if (node_cgbl->numChangeables == 0) {
-            VPRINT(2, "(%s) changeSymbol -> created %i %s\n",
-                    FormatSourceRange(ir->yy_location).c_str(), var->uniqueId, node->name);
-            addShChangeable(node_cgbl, createShChangeable(var->uniqueId));
-        } else {
-            VPRINT(2, "(%s) changeSymbol -> kept %i %s\n",
-                    FormatSourceRange(node->yy_location).c_str(), var->uniqueId, node->name);
-        }*/
-    }
-
-    return false;
-}
-
 bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_array* ir)
 {
-	VPRINT( 2, "(%s) change Array ref\n", FormatSourceRange(ir->yy_location).c_str() );
+	//VPRINT( 2, "(%s) change Array ref\n", FormatSourceRange(ir->yy_location).c_str() );
 	/*ShChangeableList* node_cgbls = get_changeable_list(ir);
 
 	// process array branch first
@@ -279,7 +127,7 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_array* ir)
 
 bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_record* ir)
 {
-	VPRINT( 2, "(%s) change Record ref\n", FormatSourceRange(ir->yy_location).c_str() );
+	//VPRINT( 2, "(%s) change Record ref\n", FormatSourceRange(ir->yy_location).c_str() );
 	/*ShChangeableList* node_cgbls = get_changeable_list(ir);
 
 	// process array branch first
@@ -302,183 +150,449 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_record* ir)
 }
 
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_assignment* ir)
+static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx)
 {
-	VPRINT(2, "(%s) change Assigment\n", FormatSourceRange(ir->yy_location).c_str());
-	/*ShChangeableList* nlist = get_changeable_list(ir);
+	ShChangeableType type;
+	int index = -1;
 
-    // process left branch actively
-    if (ir->lhs) {
-        VPRINT(2, "===== left ============================\n");
+	if (node->oper == ast_array_index){
+		ast_expression* index = node->subexpressions[1];
+		if (index->oper == ast_identifier){
+			type = SH_CGB_ARRAY_INDIRECT;
+		} else if(false) {
+			type = SH_CGB_ARRAY_DIRECT;
+		} else {
+			assert(0);
+		}
+	} else if (node->oper == ast_field_selection){
+		switch (node->debug_selection_type) {
+		case ast_fst_swizzle:
+			type = SH_CGB_SWIZZLE;
+			break;
+		case ast_fst_struct:
+			type = SH_CGB_STRUCT;
+			break;
+		default:
+			assert(!"not implemented");
+			break;
+		}
+		assert(!"not implemented");
+	} else {
+		assert(!"Wrong type for indexing");
+	}
 
-        this->activate();
-        ir->lhs->accept(this);
-        this->deactivate();
 
-        // copy the changeables of left branch
-        copyShChangeableList(nlist, get_changeable_list(ir->lhs));
-        //dumpShChangeableList(nlist);
-        VPRINT(2, "=======================================\n");
-    }
-
-    // process right branch passively
-    if (ir->rhs) {
-        VPRINT(2, "===== right ===========================\n");
-
-        this->deactivate();
-        ir->rhs->accept(this);
-
-        // copy the changeables of right branch
-        copyShChangeableList(nlist, get_changeable_list(ir->rhs));
-        //dumpShChangeableList(nlist);
-        VPRINT(2, "=======================================\n");
-    }*/
-
-    return false;
+//	swizzle
+//	TIntermAggregate* agg = NULL;
+//	if (node->getRight() && node->getRight()->getAsAggregate()
+//			&& node->getRight()->getAsAggregate()->getOp() == EOpSwizzles) {
+//		agg = node->getRight()->getAsAggregate();
+//	}
+//	if (!agg) {
+//		dbgPrint(DBGLVL_ERROR, "DebugVar - could not get swizzle aggregate\n");
+//		exit(1);
+//	}
+//
+//	int index = 0;
+//	int i = 0;
+//
+//	TIntermSequence sequence;
+//	TIntermSequence::reverse_iterator rit;
+//	sequence = agg->getSequence();
+//
+//	for (rit = sequence.rbegin(); rit != sequence.rend(); rit++) {
+//		/*
+//		 index += ((int)pow(10, i)) *
+//		 (1+(*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
+//		 */
+//		index += 1 << ((*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
+//		i++;
+//	}
+//
+//	cgbIdx = createShChangeableIndex(SH_CGB_SWIZZLE, index);
+//
+//	ShChangeableIndex *cgbIdx;
+//	ShChangeableType type;
+//
+//	switch (node->getOp()) {
+//	case EOpIndexDirect:
+//		type = SH_CGB_ARRAY_DIRECT;
+//		break;
+//	case EOpIndexDirectStruct:
+//		type = SH_CGB_STRUCT;
+//		break;
+//	case EOpIndexIndirect:
+//		type = SH_CGB_ARRAY_INDIRECT;
+//		break;
+//	default:
+//		dbgPrint(DBGLVL_ERROR, "DebugVar - invalid node op\n");
+//		exit(1);
+//	}
+//
+//	int index;
+//	if (node->getRight() && node->getRight()->getAsConstantUnion()
+//			&& node->getRight()->getAsConstantUnion()->getUnionArrayPointer()
+//			&& node->getRight()->getAsConstantUnion()->getType().getObjectSize() == 1
+//			&& (node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
+//					== EbtInt
+//					|| node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
+//							== EbtUInt
+//					|| node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
+//							== EbtSwizzle)) {
+//
+//		index = node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst();
+//	} else {
+//		index = -1;
+//	}
+	return createShChangeableIndexCtx(type, index, mem_ctx);
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_constant* ir)
+void ast_debugchange_traverser_visitor::copyChangeables(ast_node* dst, ast_node* src)
 {
-	// TODO: constant
-	return ir;
+	if (!dst || !src)
+		return;
+	src->accept(this);
+	copyAstChangeableList(&dst->changeables, &src->changeables, shader);
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_call* ir)
+bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
 {
-	VPRINT( 2, "(%s) change Call\n", FormatSourceRange(ir->yy_location).c_str() );
+	switch (node->oper) {
+	case ast_assign:
+	case ast_mul_assign:
+	case ast_div_assign:
+	case ast_mod_assign:
+	case ast_add_assign:
+	case ast_sub_assign:
+	case ast_ls_assign:
+	case ast_rs_assign:
+	case ast_and_assign:
+	case ast_xor_assign:
+	case ast_or_assign: {
+		VPRINT(2, "(%s) changeAssigment\n", FormatSourceRange(node->get_location()).c_str());
+		// process left branch actively
+		if (node->subexpressions[0]) {
+			VPRINT(2, "===== left ============================\n");
+			this->activate();
+			node->subexpressions[0]->accept(this);
+			this->deactivate();
+			// copy the changeables of left branch
+			copyAstChangeableList(&node->changeables, &node->subexpressions[0]->changeables, shader);
+			//dumpShChangeableList(&node->changeables);
+		}
+
+		// process right branch passively
+		if (node->subexpressions[1]) {
+			VPRINT(2, "===== right ===========================\n");
+			this->deactivate();
+			node->subexpressions[1]->accept(this);
+			// copy the changeables of right branch
+			copyAstChangeableList(&node->changeables, &node->subexpressions[1]->changeables, shader);
+			//dumpShChangeableList(&node->changeables);
+		}
+		return false;
+		break;
+	}
+
+	case ast_plus:
+	case ast_neg:
+	case ast_bit_not:
+	case ast_logic_not:
+	case ast_pre_inc:
+	case ast_pre_dec:
+	case ast_post_inc:
+	case ast_post_dec: {
+		VPRINT(2, "(%s) changeExpression\n", FormatSourceRange(node->get_location()).c_str());
+		//dumpShChangeableList(node->getCgbList());
+		this->deactivate();
+		copyChangeables(node, node->subexpressions[0]);
+		copyChangeables(node, node->subexpressions[1]);
+		break;
+	}
+
+	case ast_field_selection:
+	case ast_array_index: {
+		VPRINT(2, "(%s) field_selection or index\n", FormatSourceRange(node->get_location()).c_str());
+
+		// process left branch first
+		if (node->subexpressions[0])
+			node->subexpressions[0]->accept(this);
+
+		// then copy changeables
+		// should be one or zero, otherwise we have a problem
+		copyAstChangeableList(&node->changeables, &node->subexpressions[0]->changeables, shader);
+
+		int count = 0;
+		foreach_list(c, &node->changeables)
+			count++;
+
+		assert(count <= 1 || !"DebugVar - field_selection or index to more than one changeable?");
+		if (node->changeables.is_empty())
+			return false;
+
+		ShChangeableIndex *cgbIdx = getChangeableIndex(node, shader);
+		ShChangeable* cgb = ((changeable_item*)node->changeables.get_head())->changeable;
+		addShIndexToChangeable(cgb, cgbIdx);
+
+		return false;
+		break;
+	}
+
+	case ast_conditional: {
+		this->deactivate();
+		copyChangeables(node, node->subexpressions[0]);
+		copyChangeables(node, node->subexpressions[1]);
+		copyChangeables(node, node->subexpressions[2]);
+		return false;
+		break;
+	}
+
+	case ast_identifier:
+	    if (this->isActive()) {
+	    	if (node->changeables.is_empty()){
+	    		VPRINT(2, "(%s) changeSymbol -> created %i %s\n",
+	    				FormatSourceRange(node->get_location()).c_str(),
+	    				node->debug_id, node->primary_expression.identifier);
+	    		ShChangeable* cgb =  createShChangeableCtx(node->debug_id, shader);
+	    		changeable_item* cgbi = new(shader) changeable_item(cgb);
+	    		node->changeables.push_tail(cgbi);
+	    	} else {
+	            VPRINT(2, "(%s) changeSymbol -> kept %i %s\n",
+	                    FormatSourceRange(node->get_location()).c_str(),
+	                    node->debug_id, node->primary_expression.identifier);
+	        }
+	    }
+	    return false;
+		break;
+
+	case ast_int_constant:
+	case ast_uint_constant:
+	case ast_float_constant:
+	case ast_bool_constant:
+		break;
+
+	case ast_sequence: {
+		this->deactivate();
+		foreach_list_typed (ast_node, ast, link, &node->expressions) {
+			VPRINT(2, "(%s) changeChild \n", FormatSourceRange(node->get_location()).c_str());
+			ast->accept(this);
+			copyAstChangeableList(&node->changeables, &ast->changeables, shader);
+		}
+		break;
+	}
+
+	case ast_function_call:
+	case ast_aggregate:
+	default:
+		assert(0);
+		break;
+	}
+
+	return true;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_expression_bin* node)
+{
+	VPRINT(2, "(%s) changeBinExpression\n", FormatSourceRange(node->get_location()).c_str());
+	//dumpShChangeableList(&node->changeables);
+	this->deactivate();
+	copyChangeables(node, node->subexpressions[0]);
+	copyChangeables(node, node->subexpressions[1]);
+	return true;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_function_expression* node)
+{
+	VPRINT(2, "(%s) change call\n", FormatSourceRange(node->get_location()).c_str());
 
 	// only user defined functions can have out/inout parameters
-	if( ir->callee->is_builtin() )
+	if (node->debug_builtin || node->is_constructor())
+		return false;
+
+	// This will not work with functions in another file
+	// Actually, nothing will work
+	ast_function* f = getFunctionByName(
+			node->subexpressions[0]->primary_expression.identifier);
+	if (!f)
 		return false;
 
 	// changed variables are all out/inout parameters and
 	// all changes made in the body of this function
 
-	ir_function_signature* funcDec = ir->callee;
-
 	// if function is not already parsed, do it now
-	// this is neccessary due to $*&T# function prototypes
-	funcDec->accept(this);
+	f->accept(this);
 
 	// now the function should be aware of it's changeables
-//	copyShChangeableList( get_changeable_list( ir ), get_changeable_list( funcDec ) );
+	copyAstChangeableList(&node->changeables, &f->changeables, shader);
 
-	// for parameters we need more care
-	// iterate over all parameters simultaneously in the function call
-	// and the function declaration
-	// Assumption: 1. We assume that there is a parameter sequence in the
-	//                function declaration
-	//             2. Further more it's assumed that both sequences have
-	//                the same amount of parameters.
-	//             Both should hold pretty easy, as we searched for a
-	//             function with the same parameters. So we trust ourselves,
-	//             even if we know we should not (:
-
-	/*ShChangeableList* node_cgbl = get_changeable_list( ir );
-	ShChangeableList* node_cgbl_param = get_changeable_paramerers_list( ir );
-
-	foreach_two_lists(pC, &ir->actual_parameters, pD, &funcDec->parameters){
+	// for parameters we need more care iterate over all parameters
+	// simultaneously in the function call and the function declaration
+	// It's assumed that both sequences have the same amount of parameters.
+	foreach_two_lists(pC, &node->expressions, pD, &f->parameters){
 		// check if parameter is of interest
-		ir_variable* dir = ((ir_instruction*)pD)->as_variable();
-		if( !dir )
+		ast_node* dast = exec_node_data(ast_node, pD, link);
+		if( dast->debug_id < 0 )
 			continue;
-
-		ir_instruction* cir = (ir_instruction*)pC;
-		ShChangeableList* cir_cgbl = get_changeable_list( cir );
-		if( dir->data.mode == ir_var_function_out || dir->data.mode == ir_var_function_inout
-				|| dir->data.mode == ir_var_shader_out ){ // FIXME: Not sure about shader_out
+		ShVariable* dvar = findShVariable(dast->debug_id);
+		ast_node* cast = exec_node_data(ast_node, pC, link);
+		if( dvar->qualifier & SH_OUT )
 			this->activate();
-			cir->accept(this);
-			this->deactivate();
 
-			// add these parameters to parameter-list
-			copyShChangeableList( node_cgbl_param, cir_cgbl );
-		}else{
-			this->deactivate();
-			cir->accept(this);
+		cast->accept(this);
+		this->deactivate();
 
-			// these can be added direcly to the changeables
-			copyShChangeableList( node_cgbl, cir_cgbl );
-		}
+		copyAstChangeableList(&node->changeables, &cast->changeables, shader);
+		// add these parameters to parameter-list
+		if( dvar->qualifier & SH_OUT )
+			copyAstChangeableList(&node->changeable_params, &cast->changeables, shader);
 	}
 
-	// Add parameter to changeables, since they need to be passed to parents
-	copyShChangeableList( node_cgbl, node_cgbl_param );*/
 	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_return* ir)
+bool ast_debugchange_traverser_visitor::traverse(class ast_declaration* node)
 {
-	if( ir->value ) {
-        // simply traverse and copy result
-        this->deactivate();
-        ir->value->accept(this);
-        /*copyShChangeableList(get_changeable_list( ir ),
-        					 get_changeable_list( ir->value ));*/
-    }
-    return false;
+	dumpAstChangeableList(&node->changeables);
+
+	if (node->initializer){
+		VPRINT(2, "(%s) changeDeclaration -> begin\n",
+				FormatSourceRange(node->get_location()).c_str());
+		//dumpShChangeableList(&node->changeables);
+		node->initializer->accept(this);
+
+		// copy the changeables of initialization
+		copyAstChangeableList(&node->changeables, &node->initializer->changeables, shader);
+
+		VPRINT(2, "(%s) changeDeclaration -> end\n",
+				FormatSourceRange(node->get_location()).c_str());
+
+		//dumpShChangeableList(&node->changeables);
+		return false;
+	}
+
+	return true;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_discard* ir)
+bool ast_debugchange_traverser_visitor::traverse(class ast_parameter_declarator* node)
 {
-	if( ir->condition ) {
-        // simply traverse and copy result
-        this->deactivate();
-        ir->condition->accept(this);
-/*        copyShChangeableList(get_changeable_list( ir ),
-        					 get_changeable_list( ir->condition ));*/
-    }
-    return false;
+	if (node->type->qualifier.flags.q.in) {
+		if (node->changeables.is_empty()) {
+			VPRINT(2, "(%s) changeFuncParam -> created %i %s\n",
+					FormatSourceRange(node->get_location()).c_str(),
+					node->debug_id, node->identifier);
+			ShChangeable* cgb =  createShChangeableCtx(node->debug_id, shader);
+			changeable_item* item = new(shader) changeable_item(cgb);
+			node->changeables.push_tail(item);
+		} else {
+			VPRINT(2, "(%s) changeFuncParam -> kept %i %s\n",
+					FormatSourceRange(node->get_location()).c_str(),
+					node->debug_id, node->identifier);
+		}
+	}
+	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_if* ir)
+bool ast_debugchange_traverser_visitor::traverse(class ast_function* node)
 {
-/*
-	ShChangeableList* node_cgbl = get_changeable_list(ir);
+	// do not parse an function if this was already done before
+	// again this is due to the (*^@*$ function prototypes
+	std::set<ast_node*>::iterator iter = parsed_functions.find(node);
+	if( iter != parsed_functions.end() )
+		return false;
+	parsed_functions.insert(node);
 
+	VPRINT(2, "(%s) changeProto %s \n", FormatSourceRange(
+			node->get_location()).c_str(), node->identifier);
+	foreach_list_typed (ast_node, ast, link, &node->parameters) {
+		ast->accept(this);
+		copyAstChangeableList(&node->changeables, &ast->changeables, shader);
+	}
+
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_case_statement* node)
+{
 	// just traverse and copy changeables all together
-    this->deactivate();
-    ir->condition->accept(this);
-    copyShChangeableList(node_cgbl, get_changeable_list(ir->condition));
-
-    get_block_cgbls(node_cgbl, &ir->then_instructions, this);
-    get_block_cgbls(node_cgbl, &ir->else_instructions, this);
-*/
-
-    return false;
+	this->deactivate();
+	foreach_list_typed (ast_node, ast, link, &node->stmts){
+		ast->accept(this);
+		copyAstChangeableList(&node->changeables, &ast->changeables, shader);
+	}
+	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_loop* ir)
+bool ast_debugchange_traverser_visitor::traverse(class ast_switch_body* node)
 {
-	/*ShChangeableList* node_cgbl = get_changeable_list( ir );
+	this->deactivate();
+	copyChangeables(node, node->stmts);
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_selection_statement* node)
+{
+	// just traverse and copy changeables all together
+	this->deactivate();
+	copyChangeables(node, node->condition);
+	copyChangeables(node, node->then_statement);
+	copyChangeables(node, node->else_statement);
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_switch_statement* node)
+{
+	this->deactivate();
+	copyChangeables(node, node->test_expression);
+	copyChangeables(node, node->body);
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::traverse(class ast_iteration_statement* node)
+{
 	// just traverse and copy changeables all together
 	this->deactivate();
 
 	// visit optional initialization
-	get_tokenized_block_cgbls(node_cgbl, ir->debug_init, this);
+	copyChangeables(node, node->init_statement);
 
 	// visit test, this should not change the changeables, but to be sure
-	ir_rvalue* check = ir->condition();
-	if (check){
-		check->accept(this);
-		copyShChangeableList(node_cgbl, get_changeable_list(check));
-	}
+	copyChangeables(node, node->condition);
 
 	// visit optional terminal, this cannot change the changeables either
-	get_tokenized_block_cgbls(node_cgbl, ir->debug_terminal, this);
+	copyChangeables(node, node->rest_expression);
 
 	// visit body
-	get_block_cgbls( node_cgbl, &ir->body_instructions, this );*/
+	copyChangeables(node, node->body);
 
 	return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_loop_jump*)
+bool ast_debugchange_traverser_visitor::traverse(class ast_jump_statement* node)
 {
+	if (node->opt_return_value){
+		// simply traverse and copy result
+		this->deactivate();
+		node->opt_return_value->accept(this);
+		copyAstChangeableList(&node->changeables,
+				&node->opt_return_value->changeables, shader);
+	}
     return false;
 }
 
-bool ir_debugchange_traverser_visitor::visitIr(ir_dummy *)
+bool ast_debugchange_traverser_visitor::traverse(class ast_function_definition* node)
 {
+	// do not parse an function if this was already done before
+	// again this is due to the (*^@*$ function prototypes
+	std::set<ast_node*>::iterator iter = parsed_functions.find(node);
+	if( iter != parsed_functions.end() )
+		return false;
+	parsed_functions.insert(node);
+
+	VPRINT(2, "(%s) changeFunction \n", FormatSourceRange(node->get_location()).c_str());
+	copyChangeables(node, node->prototype);
+	copyChangeables(node, node->body);
+
+	// parameters changeables in prototype if needed
 	return false;
 }
+

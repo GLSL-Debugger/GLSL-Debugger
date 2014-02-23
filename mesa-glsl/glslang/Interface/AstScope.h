@@ -1,5 +1,5 @@
 /*
- * IRScope.h
+ * AstScope.h
  *
  *  Created on: 03.10.2013
  */
@@ -9,9 +9,7 @@
 
 #include "ShaderLang.h"
 #include "glsl/list.h"
-#include <list>
 
-typedef std::list<int> scopeList;
 
 class scope_item: public exec_node {
 public:
@@ -22,10 +20,17 @@ public:
 	const char* name;
 };
 
-ShChangeableList* get_changeable_list(ast_node*);
-ShChangeableList* get_changeable_paramerers_list(ast_node*);
+class changeable_item: public exec_node {
+public:
+	changeable_item(ShChangeable* _c) : id(_c->id), changeable(_c) {}
+	changeable_item* clone(void * mem_ctx);
 
-void addScopeToScopeStack(DbgRsScope& stack, scopeList *s);
-void setDbgScope(DbgRsScope& target, scopeList *s);
+	int id;
+	ShChangeable* changeable;
+};
+
+
+void addScopeToScopeStack(DbgRsScope& stack, exec_list *s);
+void setDbgScope(DbgRsScope& target, exec_list *s);
 
 #endif /* __ASTSCOPE_H_ */

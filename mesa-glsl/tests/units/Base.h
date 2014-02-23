@@ -14,11 +14,39 @@
 #include "ShaderInput.h"
 #include <string>
 #include <sstream>
+#include <iomanip>
+
 
 class BaseUnitTest: public CppUnit::TestFixture {
 public:
 	BaseUnitTest()
 	{
+	}
+
+	virtual int printType(ast_node* node, enum ast_node_type type)
+	{
+		int length = strlen(ast_node_names[type]);
+		results << ast_node_names[type];
+
+		ast_expression* expr = node->as_expression();
+		if (expr) {
+			const char* expr_type;
+			if (expr->oper < ast_array_index)
+				expr_type = expr->operator_string(expr->oper);
+			else
+				expr_type = ast_expr_string_ext[expr->oper - ast_array_index];
+			results << " (" << expr_type << ")";
+			length += strlen(expr_type) + 3;
+		}
+
+		return length;
+	}
+
+	virtual void printIndent(int length, int depth)
+	{
+		results << std::setfill(' ') << std::setw(40-length) << " ";
+		for (int i = 0; i < depth; ++i)
+			results << "    ";
 	}
 
 	virtual bool accept(int, ast_node*, enum ast_node_type)

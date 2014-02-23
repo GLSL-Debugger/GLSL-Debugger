@@ -10,7 +10,8 @@
 enum ast_traverse_flags {
 	traverse_previsit = 1,
 	traverse_postvisit = 2,
-	traverse_debugvisit = 4
+	traverse_debugvisit = 4,
+	traverse_flag_last = 8
 };
 
 class exec_list;
@@ -80,7 +81,7 @@ public:
 
 
 	int depth;
-	ast_traverse_flags flags;
+	int flags;
 	bool skipInternal;
 };
 

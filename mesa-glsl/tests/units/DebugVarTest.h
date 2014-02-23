@@ -10,10 +10,10 @@
 #include "ShaderInput.h"
 #include "ShaderLang.h"
 #include "glslang/Interface/Visitors/debugvar.h"
+#include "glslang/Interface/AstScope.h"
 #include "Base.h"
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
-#include <iomanip>
 
 class DebugVarTest: public BaseUnitTest {
 public:
@@ -59,25 +59,9 @@ public:
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
 	{
-		int length = strlen(ast_node_names[type]);
-		results << ast_node_names[type];
-
-		ast_expression* expr = node->as_expression();
-		if (expr) {
-			const char* expr_type;
-			if (expr->oper < ast_array_index)
-				expr_type = expr->operator_string(expr->oper);
-			else
-				expr_type = ast_expr_string_ext[expr->oper - ast_array_index];
-			results << " (" << expr_type << ")";
-			length += strlen(expr_type) + 3;
-		}
-
+		int length = printType(node, type);
 		if (!node->scope.is_empty()) {
-			results << std::setfill(' ') << std::setw(40-length) << " ";
-			for (int i = 0; i < depth; ++i)
-				results << "    ";
-
+			printIndent(length, depth);
 			foreach_list(scope_node, &node->scope) {
 				scope_item* sc = (scope_item*)scope_node;
 				results << " <" << sc->id << "," << sc->name << ">";

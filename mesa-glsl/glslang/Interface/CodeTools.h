@@ -1,16 +1,17 @@
 #ifndef _CODE_TOOLS_
 #define _CODE_TOOLS_
 
-#include "../Public/ShaderLang.h"
-#include "../Include/Common.h"
+#include "ast.h"
+#include "ShaderHolder.h"
 #include "ir.h"
+#include <string>
+
 
 #define MAIN_FUNC_SIGNATURE "main"
 #define EMIT_VERTEX_SIGNATURE "EmitVertex"
 #define END_PRIMITIVE_SIGNATURE "EndPrimitive"
 
 struct exec_list;
-
 
 __inline std::string FormatSourceRange(const YYLTYPE& range)
 {
@@ -23,6 +24,8 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
 
 std::string getMangledName(ir_function_signature* func);
 char* getFunctionName(const char* in);
+void saveFunction(ast_function*);
+ast_function* getFunctionByName(const char *name);
 ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader );
 int getFunctionDebugParameter(ir_function_signature *node);
 ir_instruction* getIRDebugParameter(exec_list *list, int pnum);

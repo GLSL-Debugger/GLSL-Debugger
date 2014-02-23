@@ -9,7 +9,6 @@
 
 #include "ShaderLang.h"
 #include "glslang/Interface/ShaderHolder.h"
-#include "glslang/Interface/ASTScope.h"
 #include "ast.h"
 
 

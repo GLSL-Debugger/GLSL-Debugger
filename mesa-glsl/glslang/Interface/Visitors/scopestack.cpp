@@ -6,7 +6,7 @@
 
 #include "scopestack.h"
 #include "glsldb/utils/dbgprint.h"
-#include "glslang/Interface/ASTScope.h"
+#include "glslang/Interface/AstScope.h"
 #include "glslang/Interface/CodeTools.h"
 
 

@@ -31,7 +31,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#define _GNU_SOURCE
 #include <stdlib.h>
 #ifndef _WIN32
 #include <dlfcn.h>

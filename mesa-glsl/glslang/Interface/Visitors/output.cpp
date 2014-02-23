@@ -36,7 +36,7 @@
 #include "glsl/ir_unused_structs.h"
 #include "mesa/program/hash_table.h"
 #include "glslang/Interface/CodeTools.h"
-#include "glslang/Interface/ASTScope.h"
+#include "glslang/Interface/AstScope.h"
 
 
 static char* print_type(char* buffer, const glsl_type *t, bool arraySize);
@@ -198,10 +198,8 @@ void ir_output_traverser_visitor::print_var_name (ir_variable* v)
 	}
 }
 
-void ir_output_traverser_visitor::print_precision (ir_instruction* ir, const glsl_type* type)
+void ir_output_traverser_visitor::print_precision (ir_instruction*, const glsl_type*)
 {
-	UNUSED_ARG(ir)
-	UNUSED_ARG(type)
 	return;
 }
 

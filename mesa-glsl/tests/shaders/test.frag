@@ -18,6 +18,7 @@ int test_func(int param) {
 void main(void) {
   // record declaration
   test_struct deref_record;
+  deref_record.val = 2;
   // assignment & deref value
   vec3 f_color_adv = f_color;
   // selection (expression swizle to constant)

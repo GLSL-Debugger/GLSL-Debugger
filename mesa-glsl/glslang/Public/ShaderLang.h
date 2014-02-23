@@ -56,10 +56,6 @@
 // and the shading language compiler/linker.
 //
 
-class exec_list;
-class ast_node;
-class ast_type_qualifier;
-
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -268,14 +264,12 @@ SH_IMPORT_EXPORT ShHandle ShConstructLinker(const EShExecutable, int debugOption
 SH_IMPORT_EXPORT ShHandle ShConstructUniformMap();                 // one per uniform namespace (currently entire program object)
 SH_IMPORT_EXPORT void ShDestruct(ShHandle);
 
-void compile_shader(struct gl_context *ctx, struct gl_shader *shader, int debug);
-
 
 //
 // Typedefs for struct, variable, and builtin handling
 //
 
-typedef enum {
+typedef enum VariableTypes {
     SH_FLOAT,
     SH_INT,
     SH_UINT,
@@ -319,7 +313,7 @@ typedef enum {
 bool ShIsSampler(variableType v);
 
 /* This is crazy, but I want to save compatability */
-typedef enum {
+typedef enum VariableQualifiers {
     SH_UNSET		= 0x0,
     SH_CONST		= 0x1,
     SH_TEMPORARY	= 0x2,
@@ -387,10 +381,6 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 //
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
 void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
-void addAstShVariable(ast_node*, ShVariable*);
-ShVariable* astToShVariable(ast_node* decl, const ast_type_qualifier* qualifier,
-							const struct glsl_type* decl_type);
-ShVariable* findShVariable(int id);
 ShVariable* findShVariableFromId(ShVariableList *vl, int id);
 ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
 ShVariable* copyShVariable(ShVariable *src);

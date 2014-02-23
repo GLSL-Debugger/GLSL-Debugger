@@ -1,0 +1,107 @@
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_ARRAY_SPECIFIER
+AST_EXPRESSION (int_constant)
+AST_TYPE_SPECIFIER
+AST_STRUCT_SPECIFIER
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_FUNCTION_DEFINITION
+AST_FUNCTION
+AST_PARAMETER_DECLARATOR
+AST_JUMP_STATEMENT
+AST_EXPRESSION_BIN (*)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (identifier)
+AST_FUNCTION_DEFINITION
+AST_FUNCTION
+AST_PARAMETER_DECLARATOR
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_EXPRESSION (identifier)
+AST_SELECTION_STATEMENT
+AST_EXPRESSION_BIN (<)
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (float_constant)
+AST_JUMP_STATEMENT
+AST_EXPRESSION (-=)                          <8,f_color_adv>
+AST_EXPRESSION (.)                               <8,f_color_adv>
+AST_EXPRESSION (identifier)                          <8,f_color_adv>
+AST_EXPRESSION (float_constant)
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_FUNCTION_EXPRESSION (function_call)
+AST_TYPE_SPECIFIER
+AST_EXPRESSION_BIN (*)
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (int_constant)
+AST_EXPRESSION (=)                       <7,deref_record> <9,count>
+AST_EXPRESSION (.)                           <7,deref_record>
+AST_EXPRESSION (identifier)                      <7,deref_record>
+AST_FUNCTION_EXPRESSION (function_call)      <9,count>
+AST_EXPRESSION (identifier)                      <9,count>
+AST_FUNCTION_EXPRESSION (function_call)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (=)                       <3,deref_array> <7,deref_record>
+AST_EXPRESSION (array_index)                 <3,deref_array>
+AST_EXPRESSION (identifier)                      <3,deref_array>
+AST_EXPRESSION (int_constant)
+AST_EXPRESSION (.)                           <7,deref_record>
+AST_EXPRESSION (identifier)                      <7,deref_record>
+AST_ITERATION_STATEMENT                  <10,i> <9,count>
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_EXPRESSION (int_constant)
+AST_EXPRESSION_BIN (<)                   <10,i> <9,count>
+AST_EXPRESSION (identifier)                  <10,i>
+AST_EXPRESSION (identifier)                  <9,count>
+AST_EXPRESSION (+=)                          <8,f_color_adv>
+AST_EXPRESSION (.)                               <8,f_color_adv>
+AST_EXPRESSION (identifier)                          <8,f_color_adv>
+AST_EXPRESSION (float_constant)
+AST_EXPRESSION (++)
+AST_EXPRESSION (identifier)
+AST_SWITCH_STATEMENT                     <9,count>
+AST_EXPRESSION_BIN (%)                   <9,count>
+AST_EXPRESSION (identifier)                  <9,count>
+AST_EXPRESSION (int_constant)
+AST_SWITCH_BODY
+AST_CASE_STATEMENT
+AST_CASE_LABEL
+AST_EXPRESSION (int_constant)
+AST_CASE_LABEL
+AST_EXPRESSION (int_constant)
+AST_JUMP_STATEMENT
+AST_CASE_STATEMENT
+AST_CASE_LABEL
+AST_EXPRESSION (int_constant)
+AST_EXPRESSION (+=)                                  <9,count>
+AST_EXPRESSION (identifier)                              <9,count>
+AST_EXPRESSION (int_constant)
+AST_CASE_STATEMENT
+AST_CASE_LABEL
+AST_JUMP_STATEMENT
+AST_EXPRESSION (=)                       <-1,undefined>
+AST_EXPRESSION (identifier)                  <-1,undefined>
+AST_FUNCTION_EXPRESSION (function_call)
+AST_TYPE_SPECIFIER
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION_BIN (*)
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (array_index)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (int_constant)
+AST_EXPRESSION_BIN (*)
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (.)
+AST_EXPRESSION (identifier)
+AST_EXPRESSION (float_constant)

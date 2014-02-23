@@ -4,7 +4,7 @@
  *  Created on: 04.09.2013
  */
 
-#include "ShaderLang.h"
+#include "glslang/Include/ShaderLang.h"
 #include "ShaderHolder.h"
 #include "Program.h"
 #include "Visitors/sideeffects.h"
@@ -105,6 +105,9 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 		_mesa_glsl_lexer_dtor(state);
 	}
 
+	exec_list instructions;
+	// We need global variables later
+	_mesa_glsl_initialize_variables(&instructions, state);
 
 	shader->head = &state->translation_unit;
 
@@ -119,7 +122,7 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 	shader->is_es = state->es_shader;
 
 	/* Check side effects, discards, vertex emits */
-	ast_sideeffects_traverser_visitor sideeffects(state);
+	ast_sideeffects_traverser_visitor sideeffects(shader, state);
 	sideeffects.visit(shader->head);
 
 	// TODO: steal memory

@@ -5,8 +5,11 @@
  */
 
 #include "debugvar.h"
+#include "glslang/Include/ShaderLang.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/AstScope.h"
 #include "glsldb/utils/dbgprint.h"
+#include <set>
 #include <algorithm>
 #undef NDEBUG
 #include <assert.h>
@@ -39,6 +42,20 @@ private:
 bool ast_debugvar_traverser_visitor::traverse(class ast_expression* node)
 {
 	copyScopeTo(node);
+
+	// Resolve deref from scope if not already
+	// TODO: move it to shader compilation phase somehow
+	if (node->oper == ast_identifier && node->debug_id < 0) {
+		const char* name = node->primary_expression.identifier;
+		foreach_list_reverse(item, &scope){
+			scope_item* si = (scope_item*)item;
+			if (strcmp(name, si->name) != 0)
+				continue;
+			node->debug_id = si->id;
+			break;
+		}
+	}
+
 	return true;
 }
 

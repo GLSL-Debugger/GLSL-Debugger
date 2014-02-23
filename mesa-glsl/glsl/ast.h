@@ -76,6 +76,13 @@ enum ast_dbg_sideefects {
 	ast_dbg_se_discard = 2,
 	ast_dbg_se_emit_vertex = 4
 };
+
+enum ast_field_selection_type {
+	ast_fst_unset,
+	ast_fst_struct,
+	ast_fst_method,
+	ast_fst_swizzle
+};
 #endif
 
 struct YYLTYPE;
@@ -183,6 +190,7 @@ public:
 
 
    exec_list scope;
+   exec_list changeables;
    enum ast_dbg_state debug_state;
    enum ast_dbg_overwrite debug_overwrite;
    bool debug_target;
@@ -283,6 +291,7 @@ public:
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
    virtual ast_expression* as_expression() { return this; }
+   enum ast_field_selection_type debug_selection_type;
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -361,6 +370,8 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   exec_list changeable_params;
+   bool debug_builtin;
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,

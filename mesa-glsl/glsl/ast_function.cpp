@@ -34,7 +34,7 @@ bool
 apply_implicit_conversion(const glsl_type *to, ir_rvalue * &from,
                           struct _mesa_glsl_parse_state *state);
 
-static unsigned
+unsigned
 process_parameters(exec_list *instructions, exec_list *actual_parameters,
 		   exec_list *parameters,
 		   struct _mesa_glsl_parse_state *state)

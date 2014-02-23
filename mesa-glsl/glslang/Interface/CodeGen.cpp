@@ -41,7 +41,7 @@
 
 #include "CodeInsertion.h"
 #include "CodeTools.h"
-#include "ASTScope.h"
+#include "AstScope.h"
 #include "Visitors/output.h"
 #include "Visitors/stacktraverser.h"
 #include "Visitors/position_output.h"
@@ -217,7 +217,7 @@ bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgC
 			/* iterate backwards thru stack */
 			for( rit = dbgStack->rbegin(); rit != dbgStack->rend(); rit++ ){
 
-				ir_instruction* rir = *rit;
+//				ir_instruction* rir = *rit;
 /*				scopeList *sl = get_scope( rir );
 				scopeList::iterator sit;
 				bool user_call = (rir->ir_type == ir_type_call

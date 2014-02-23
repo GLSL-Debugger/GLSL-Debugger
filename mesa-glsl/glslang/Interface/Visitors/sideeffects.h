@@ -8,12 +8,13 @@
 #define SIDEEFFECTS_H_
 
 #include "ast_visitor.h"
+#include "../ShaderHolder.h"
 #include "traverse.h"
 
 class ast_sideeffects_traverser_visitor : public ast_traverse_visitor {
 public:
-	ast_sideeffects_traverser_visitor(struct _mesa_glsl_parse_state* _st) :
-			state(_st)
+	ast_sideeffects_traverser_visitor(AstShader* _sh, struct _mesa_glsl_parse_state* _st) :
+			shader(_sh), state(_st)
 	{
 		flags = traverse_postvisit;
 	}
@@ -42,6 +43,7 @@ public:
 	virtual bool traverse(ast_gs_input_layout *);
 
 protected:
+	AstShader* shader;
 	struct _mesa_glsl_parse_state* state;
 };
 

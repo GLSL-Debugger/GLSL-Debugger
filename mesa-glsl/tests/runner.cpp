@@ -4,8 +4,9 @@
  *  Created on: 05.01.2014
  */
 
-#include "units/DebugVarTest.h"
 #include "units/Compiler.h"
+#include "units/DebugVarTest.h"
+#include "units/DebugChangeTest.h"
 #include "glsldb/utils/dbgprint.h"
 #include <cppunit/TextTestRunner.h>
 
@@ -20,6 +21,7 @@ int main(int argc, char **argv)
 	CppUnit::TextTestRunner runner;
 	runner.addTest(CompileShaderTest::suite());
 	runner.addTest(DebugVarTest::suite());
+	runner.addTest(DebugChangeTest::suite());
 	runner.run();
 	return 0;
 }
