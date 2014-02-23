@@ -14,7 +14,7 @@ Building
 The only available build system is cmake. Example build steps:
 
 ```
-mkdir Build && cd build
+mkdir Build && cd Build
 cmake ..\
 make
 ```
