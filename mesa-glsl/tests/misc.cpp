@@ -8,6 +8,7 @@
 #include "mesa/main/mtypes.h"
 #include "glsl/standalone_scaffolding.h"
 
+static int glsl_version = 330;
 
 void test_initialize_context(struct gl_context *ctx, gl_api api)
 {
@@ -16,7 +17,7 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 	/* The standalone compiler needs to claim support for almost
 	 * everything in order to compile the built-in functions.
 	 */
-	ctx->Const.GLSLVersion = 150;
+	ctx->Const.GLSLVersion = glsl_version;
 	ctx->Extensions.ARB_ES3_compatibility = true;
 
 	switch (ctx->Const.GLSLVersion) {
@@ -43,8 +44,7 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents
-				/ 4;
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents / 4;
 		break;
 	case 110:
 	case 120:
@@ -70,8 +70,7 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents
-				/ 4;
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents / 4;
 		break;
 	case 130:
 	case 140:
@@ -96,8 +95,7 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 				ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents;
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents
-				/ 4;
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_VERTEX].MaxOutputComponents / 4;
 		break;
 	case 150:
 	case 330:
@@ -128,9 +126,9 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
 		ctx->Const.MaxCombinedTextureImageUnits =
-				ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits
-						+ ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits
-						+ ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits;
+			ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits
+			+ ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits
+			+ ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits;
 
 		ctx->Const.MaxGeometryOutputVertices = 256;
 		ctx->Const.MaxGeometryTotalOutputComponents = 1024;
@@ -160,8 +158,7 @@ void test_initialize_context(struct gl_context *ctx, gl_api api)
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents = 15 * 4;
 		ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxOutputComponents = 0; /* not used */
 
-		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents
-				/ 4;
+		ctx->Const.MaxVarying = ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxInputComponents / 4;
 		break;
 	}
 
@@ -193,9 +190,8 @@ char* test_load_text_file(void *ctx, const char *file_name)
 				break;
 			}
 
-			if (bytes == 0) {
+			if (bytes == 0)
 				break;
-			}
 
 			total_read += bytes;
 		} while (total_read < size);
