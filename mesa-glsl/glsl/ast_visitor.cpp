@@ -507,7 +507,8 @@ void ast_traverse_visitor::visit(class ast_interface_block*)
 	assert(!"not implemented");
 }
 
-void ast_traverse_visitor::visit(class ast_gs_input_layout*)
+void ast_traverse_visitor::visit(class ast_gs_input_layout* node)
 {
-	assert(!"not implemented");
+	// It can be used to setup variable size for inputs preceded this declaration
+	this->traverse(node);
 }

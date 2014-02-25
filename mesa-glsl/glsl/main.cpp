@@ -40,7 +40,7 @@
 
 static int glsl_version = 330;
 
-static void
+void
 initialize_context(struct gl_context *ctx, gl_api api)
 {
    initialize_context_to_defaults(ctx, api);

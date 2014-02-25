@@ -26,11 +26,13 @@
 
 // Variables
 int glsl_es = 0;
-int glsl_version = 150;
+int glsl_version = 330;
 
 
 static void initialize_context(struct gl_context *ctx, const TBuiltInResource* resources)
 {
+	// FIXME: right api
+	initialize_context_to_defaults(ctx, API_OPENGL_COMPAT);
 	/* The standalone compiler needs to claim support for almost
 	 * everything in order to compile the built-in functions.
 	 */
@@ -105,11 +107,13 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 		_mesa_glsl_lexer_dtor(state);
 	}
 
-	exec_list instructions;
-	// We need global variables later
-	_mesa_glsl_initialize_variables(&instructions, state);
-
-	shader->head = &state->translation_unit;
+	if (!state->error) {
+		exec_list instructions;
+		// We need global variables later
+		_mesa_glsl_initialize_variables(&instructions, state);
+		state->symbols->push_scope();
+		shader->head = &state->translation_unit;
+	}
 
 	// TODO: locations print
 	//printShaderIr(shader);
@@ -122,8 +126,10 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 	shader->is_es = state->es_shader;
 
 	/* Check side effects, discards, vertex emits */
-	ast_sideeffects_traverser_visitor sideeffects(shader, state);
-	sideeffects.visit(shader->head);
+	if (!state->error) {
+		ast_sideeffects_traverser_visitor sideeffects(shader, state);
+		sideeffects.visit(shader->head);
+	}
 
 	// TODO: steal memory
 	//ralloc_free(state);

@@ -18,6 +18,7 @@ namespace {
 		ast_declaration* as_decl = decl->as_declaration();
 		ast_parameter_declarator* as_param = decl->as_parameter_declarator();
 		ast_struct_specifier* as_struct = decl->as_struct_specifier();
+		ast_expression* as_expr = decl->as_expression();
 
 		if (as_decl)
 			return as_decl->identifier;
@@ -25,6 +26,8 @@ namespace {
 			return as_param->identifier;
 		else if (as_struct)
 			return as_struct->name;
+		else if (as_expr && as_expr->oper == ast_identifier)
+			return as_expr->primary_expression.identifier;
 		else
 			return NULL;
 	}
@@ -524,13 +527,13 @@ void glsltypeToShVariable(ShVariable* v, const struct glsl_type* vtype,
 
 	// Type of variable (SH_FLOAT/SH_INT/SH_BOOL/SH_STRUCT)
 	switch (vtype->base_type) {
-	SET_TYPE( GLSL_TYPE_UINT, SH_UINT)
-	SET_TYPE( GLSL_TYPE_INT, SH_INT)
-	SET_TYPE( GLSL_TYPE_FLOAT, SH_FLOAT)
-	SET_TYPE( GLSL_TYPE_BOOL, SH_BOOL)
-	SET_TYPE( GLSL_TYPE_SAMPLER, SH_SAMPLER_GUARD_BEGIN)
-	SET_TYPE( GLSL_TYPE_STRUCT, SH_STRUCT)
-	SET_TYPE( GLSL_TYPE_ARRAY, SH_ARRAY)
+	SET_TYPE(GLSL_TYPE_UINT, SH_UINT)
+	SET_TYPE(GLSL_TYPE_INT, SH_INT)
+	SET_TYPE(GLSL_TYPE_FLOAT, SH_FLOAT)
+	SET_TYPE(GLSL_TYPE_BOOL, SH_BOOL)
+	SET_TYPE(GLSL_TYPE_SAMPLER, SH_SAMPLER_GUARD_BEGIN)
+	SET_TYPE(GLSL_TYPE_STRUCT, SH_STRUCT)
+	SET_TYPE(GLSL_TYPE_ARRAY, SH_ARRAY)
 	default:
 		dbgPrint( DBGLVL_ERROR, "Type does not defined %x", vtype->gl_type);
 		break;

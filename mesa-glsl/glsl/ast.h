@@ -1206,7 +1206,6 @@ public:
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
 #endif
 
-private:
    const GLenum prim_type;
 };
 

@@ -176,7 +176,6 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 			assert(!"not implemented");
 			break;
 		}
-		assert(!"not implemented");
 	} else {
 		assert(!"Wrong type for indexing");
 	}

@@ -29,6 +29,9 @@ public:
 	virtual void visit(ast_parameter_declarator *);
 	virtual void visit(ast_compound_statement *);
 	virtual void visit(ast_expression_statement *);
+	virtual void visit(ast_function_definition *);
+	virtual void visit(ast_selection_statement *);
+	virtual void visit(ast_iteration_statement *);
 
 	virtual bool traverse(ast_expression *);
 	virtual bool traverse(ast_expression_bin *);
@@ -44,6 +47,7 @@ public:
 
 protected:
 	AstShader* shader;
+	exec_list input_variables;
 	struct _mesa_glsl_parse_state* state;
 };
 

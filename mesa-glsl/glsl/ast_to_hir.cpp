@@ -2237,7 +2237,7 @@ validate_explicit_location(const struct ast_type_qualifier *qual,
    return;
 }
 
-static void
+void
 apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
 				 ir_variable *var,
 				 struct _mesa_glsl_parse_state *state,
@@ -2530,7 +2530,7 @@ apply_type_qualifier_to_variable(const struct ast_type_qualifier *qual,
  * A pointer to an existing variable in the current scope if the declaration
  * is a redeclaration, \c NULL otherwise.
  */
-static ir_variable *
+ir_variable *
 get_variable_being_redeclared(ir_variable *var, YYLTYPE loc,
                               struct _mesa_glsl_parse_state *state,
                               bool allow_all_redeclarations)
@@ -2798,7 +2798,7 @@ process_initializer(ir_variable *var, ast_declaration *decl,
  * Do additional processing necessary for geometry shader input declarations
  * (this covers both interface blocks arrays and bare input variables).
  */
-static void
+void
 handle_geometry_shader_input_decl(struct _mesa_glsl_parse_state *state,
                                   YYLTYPE loc, ir_variable *var)
 {
