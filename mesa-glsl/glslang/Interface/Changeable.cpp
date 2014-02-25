@@ -78,7 +78,7 @@ ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
 	return createShChangeableIndexCtx(type, index, NULL);
 }
 
-ShChangeableIndex* createShChangeableIndexCtx(ShChangeableType type, int index, void* mem_ctx)
+ShChangeableIndex* createShChangeableIndexCtx(ShChangeableType type, long index, void* mem_ctx)
 {
 	ShChangeableIndex *idx = (ShChangeableIndex*)rzalloc(mem_ctx, ShChangeableIndex);
 	idx->type = type;

@@ -47,7 +47,7 @@ public:
 	// active:  all coming symbols are being changed
 	void activate(void) { flags |= ext_flag_active; }
 	// passive: coming symbols act as input and are not changed
-	void deactivate(void) { flags ^= ext_flag_active; }
+	void deactivate(void) { flags &= ~ext_flag_active; }
 
 	void copyChangeables(ast_node* dst, ast_node* src);
 protected:

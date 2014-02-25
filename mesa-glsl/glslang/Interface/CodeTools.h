@@ -22,6 +22,7 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
     return std::string(locText);
 }
 
+long strToSwizzleIdx(const char*);
 std::string getMangledName(ir_function_signature* func);
 char* getFunctionName(const char* in);
 void saveFunction(ast_function*);

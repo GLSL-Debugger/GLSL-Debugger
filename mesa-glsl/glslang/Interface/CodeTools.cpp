@@ -11,6 +11,72 @@ namespace {
 	std::map<std::string, ast_function*> shaderFunctions;
 }
 
+#define X 1
+#define R 5
+#define S 9
+#define I 13
+
+long strToSwizzleIdx(const char* str)
+{
+	/* See ir.cpp ir_swizzle::create */
+
+	/* For each possible swizzle character, this table encodes the value in
+	 * \c idx_map that represents the 0th element of the vector.  For invalid
+	 * swizzle characters (e.g., 'k'), a special value is used that will allow
+	 * detection of errors.
+	 */
+	static const unsigned char base_idx[26] = {
+	/* a  b  c  d  e  f  g  h  i  j  k  l  m */
+	   R, R, I, I, I, I, R, I, I, I, I, I, I,
+	/* n  o  p  q  r  s  t  u  v  w  x  y  z */
+	   I, I, S, S, R, S, S, I, I, X, X, X, X
+	};
+
+	/* Each valid swizzle character has an entry in the previous table.  This
+	 * table encodes the base index encoded in the previous table plus the actual
+	 * index of the swizzle character.  When processing swizzles, the first
+	 * character in the string is indexed in the previous table.  Each character
+	 * in the string is indexed in this table, and the value found there has the
+	 * value form the first table subtracted.  The result must be on the range
+	 * [0,3].
+	 *
+	 * For example, the string "wzyx" will get X from the first table.  Each of
+	 * the charcaters will get X+3, X+2, X+1, and X+0 from this table.  After
+	 * subtraction, the swizzle values are { 3, 2, 1, 0 }.
+	 *
+	 * The string "wzrg" will get X from the first table.  Each of the characters
+	 * will get X+3, X+2, R+0, and R+1 from this table.  After subtraction, the
+	 * swizzle values are { 3, 2, 4, 5 }.  Since 4 and 5 are outside the range
+	 * [0,3], the error is detected.
+	 */
+	static const unsigned char idx_map[26] = {
+	/* a    b    c    d    e    f    g    h    i    j    k    l    m */
+	  R+3, R+2, 0,   0,   0,   0,   R+1, 0,   0,   0,   0,   0,   0,
+	/* n    o    p    q    r    s    t    u    v    w    x    y    z */
+	   0,   0,   S+2, S+3, R+0, S+0, S+1, 0,   0,   X+3, X+0, X+1, X+2
+	};
+
+	/* Validate the first character in the swizzle string and look up the base
+	 * index value as described above.
+	 */
+	if ((str[0] < 'a') || (str[0] > 'z'))
+		return 0;
+
+	long swiz_idx = 0;
+	const unsigned base = base_idx[str[0] - 'a'];
+	for (unsigned i = 0; (i < 4) && (str[i] != '\0'); i++) {
+		if ((str[i] < 'a') || (str[i] > 'z'))
+			return 0;
+		int val = (idx_map[str[i] - 'a'] - base);
+		// Driver must care about it, not debugger.
+		if (val < 0)
+			return 0;
+		// shift it to next power of two for number of table elements
+		swiz_idx += val  << (5*i);
+	}
+	return swiz_idx;
+}
+
 static void makeMangledName( const struct glsl_type* type, std::string& mangledName )
 {
 	if( !type )

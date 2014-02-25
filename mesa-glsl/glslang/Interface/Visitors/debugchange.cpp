@@ -153,21 +153,31 @@ bool ir_debugchange_traverser_visitor::visitIr(ir_dereference_record* ir)
 static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx)
 {
 	ShChangeableType type;
-	int index = -1;
+	long index = -1;
 
 	if (node->oper == ast_array_index){
-		ast_expression* index = node->subexpressions[1];
-		if (index->oper == ast_identifier){
+		ast_expression* exp_index = node->subexpressions[1];
+		switch (exp_index->oper){
+		case ast_identifier:
 			type = SH_CGB_ARRAY_INDIRECT;
-		} else if(false) {
+			break;
+		case ast_int_constant:
+		case ast_uint_constant:
 			type = SH_CGB_ARRAY_DIRECT;
-		} else {
-			assert(0);
+			index = exp_index->oper == ast_int_constant ?
+					exp_index->primary_expression.int_constant :
+					exp_index->primary_expression.uint_constant;
+			break;
+		default:
+			assert(!"not implemented");
+			break;
+
 		}
 	} else if (node->oper == ast_field_selection){
 		switch (node->debug_selection_type) {
 		case ast_fst_swizzle:
 			type = SH_CGB_SWIZZLE;
+			index = strToSwizzleIdx(node->primary_expression.identifier);
 			break;
 		case ast_fst_struct:
 			type = SH_CGB_STRUCT;
@@ -180,69 +190,6 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 		assert(!"Wrong type for indexing");
 	}
 
-
-//	swizzle
-//	TIntermAggregate* agg = NULL;
-//	if (node->getRight() && node->getRight()->getAsAggregate()
-//			&& node->getRight()->getAsAggregate()->getOp() == EOpSwizzles) {
-//		agg = node->getRight()->getAsAggregate();
-//	}
-//	if (!agg) {
-//		dbgPrint(DBGLVL_ERROR, "DebugVar - could not get swizzle aggregate\n");
-//		exit(1);
-//	}
-//
-//	int index = 0;
-//	int i = 0;
-//
-//	TIntermSequence sequence;
-//	TIntermSequence::reverse_iterator rit;
-//	sequence = agg->getSequence();
-//
-//	for (rit = sequence.rbegin(); rit != sequence.rend(); rit++) {
-//		/*
-//		 index += ((int)pow(10, i)) *
-//		 (1+(*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
-//		 */
-//		index += 1 << ((*rit)->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst());
-//		i++;
-//	}
-//
-//	cgbIdx = createShChangeableIndex(SH_CGB_SWIZZLE, index);
-//
-//	ShChangeableIndex *cgbIdx;
-//	ShChangeableType type;
-//
-//	switch (node->getOp()) {
-//	case EOpIndexDirect:
-//		type = SH_CGB_ARRAY_DIRECT;
-//		break;
-//	case EOpIndexDirectStruct:
-//		type = SH_CGB_STRUCT;
-//		break;
-//	case EOpIndexIndirect:
-//		type = SH_CGB_ARRAY_INDIRECT;
-//		break;
-//	default:
-//		dbgPrint(DBGLVL_ERROR, "DebugVar - invalid node op\n");
-//		exit(1);
-//	}
-//
-//	int index;
-//	if (node->getRight() && node->getRight()->getAsConstantUnion()
-//			&& node->getRight()->getAsConstantUnion()->getUnionArrayPointer()
-//			&& node->getRight()->getAsConstantUnion()->getType().getObjectSize() == 1
-//			&& (node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
-//					== EbtInt
-//					|| node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
-//							== EbtUInt
-//					|| node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getType()
-//							== EbtSwizzle)) {
-//
-//		index = node->getRight()->getAsConstantUnion()->getUnionArrayPointer()[0].getIConst();
-//	} else {
-//		index = -1;
-//	}
 	return createShChangeableIndexCtx(type, index, mem_ctx);
 }
 

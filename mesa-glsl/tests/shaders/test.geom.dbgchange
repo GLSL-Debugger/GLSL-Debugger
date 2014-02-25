@@ -1,15 +1,17 @@
+AST_GS_INPUT_LAYOUT
 AST_FUNCTION_DEFINITION
 AST_FUNCTION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_ITERATION_STATEMENT                  <0,i>
-AST_EXPRESSION (=)                       <0,i>
-AST_EXPRESSION (identifier)                  <0,i>
+AST_ITERATION_STATEMENT                  <2,i>
+AST_EXPRESSION (=)                       <2,i>
+AST_EXPRESSION (identifier)                  <2,i>
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION_BIN (<)
 AST_EXPRESSION (identifier)
+AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (=)                           <-1,undefined> <-1,undefined>
 AST_EXPRESSION (identifier)                      <-1,undefined>

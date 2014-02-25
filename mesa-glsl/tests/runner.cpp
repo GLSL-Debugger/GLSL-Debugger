@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	//_mesa_glsl_debug = 1;
 	if (argc > 1)
 		ShaderInput::setPath(std::string(argv[1]));
-	setMaxDebugOutputLevel(DBGLVL_ALL);
+	setMaxDebugOutputLevel(DBGLVL_ERROR);
 	CppUnit::TextTestRunner runner;
 	runner.addTest(CompileShaderTest::suite());
 	runner.addTest(DebugVarTest::suite());
