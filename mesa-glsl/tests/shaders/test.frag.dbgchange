@@ -71,18 +71,18 @@ AST_EXPRESSION (identifier)                          <8,f_color_adv>
 AST_EXPRESSION (float_constant)
 AST_EXPRESSION (++)
 AST_EXPRESSION (identifier)
-AST_SWITCH_STATEMENT
+AST_SWITCH_STATEMENT                     <9,count>
 AST_EXPRESSION_BIN (%)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
-AST_SWITCH_BODY
+AST_SWITCH_BODY                              <9,count>
 AST_CASE_STATEMENT
 AST_CASE_LABEL
 AST_EXPRESSION (int_constant)
 AST_CASE_LABEL
 AST_EXPRESSION (int_constant)
 AST_JUMP_STATEMENT
-AST_CASE_STATEMENT
+AST_CASE_STATEMENT                               <9,count>
 AST_CASE_LABEL
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION (+=)                                  <9,count>
