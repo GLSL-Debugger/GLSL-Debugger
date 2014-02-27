@@ -7,7 +7,7 @@
 #include "glslang/Include/ShaderLang.h"
 #include "ShaderHolder.h"
 #include "Program.h"
-#include "Visitors/sideeffects.h"
+#include "Visitors/postprocess.h"
 
 // Mesa includes
 #include "glsl/standalone_scaffolding.h"
@@ -127,8 +127,8 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 
 	/* Check side effects, discards, vertex emits */
 	if (!state->error) {
-		ast_sideeffects_traverser_visitor sideeffects(shader, state);
-		sideeffects.visit(shader->head);
+		ast_postprocess_traverser_visitor ppt(shader, state);
+		ppt.visit(shader->head);
 	}
 
 	// TODO: steal memory

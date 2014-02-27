@@ -7,7 +7,7 @@
 #include "AstScope.h"
 #include "glsldb/utils/dbgprint.h"
 
-extern ShChangeable * copyShChangeable(ShChangeable *c);
+extern ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx);
 
 
 scope_item* scope_item::clone(void *mem_ctx)
@@ -17,7 +17,7 @@ scope_item* scope_item::clone(void *mem_ctx)
 
 changeable_item* changeable_item::clone(void * mem_ctx)
 {
-	ShChangeable* ch_copy = copyShChangeable(changeable);
+	ShChangeable* ch_copy = copyShChangeableCtx(changeable, mem_ctx);
 	return new(mem_ctx) changeable_item(ch_copy);
 }
 

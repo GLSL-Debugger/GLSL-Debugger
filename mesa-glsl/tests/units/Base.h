@@ -11,11 +11,12 @@
 #include "call_visitor.h"
 #include "glslang/Interface/ShaderHolder.h"
 #include <cppunit/TestFixture.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestCaller.h>
 #include "ShaderInput.h"
 #include <string>
 #include <sstream>
 #include <iomanip>
-
 
 class BaseUnitTest: public CppUnit::TestFixture {
 public:
@@ -101,5 +102,34 @@ protected:
 	static ShaderInput input;
 	ResultComparator comparator;
 };
+
+
+template<typename T>
+class SuitedUnitTest: public BaseUnitTest
+{
+public:
+	static CppUnit::TestSuite *suite()
+	{
+		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite;
+		test_files = "shaders/test";
+		holder = input.getShader(test_files);
+		if (holder->shaders[0])
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
+		if (holder->shaders[1])
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
+		if (holder->shaders[2])
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
+		return suiteOfTests;
+	}
+
+protected:
+	static std::string test_files;
+	static ShaderHolder* holder;
+};
+
+template<typename T>
+std::string SuitedUnitTest<T>::test_files;
+template<typename T>
+ShaderHolder* SuitedUnitTest<T>::holder;
 
 #endif /* TEST_UNIT_BASE_H_ */

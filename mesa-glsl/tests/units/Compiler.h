@@ -10,11 +10,9 @@
 #include "ShaderLang.h"
 #include "glslang/Interface/Visitors/debugvar.h"
 #include "Base.h"
-#include <cppunit/TestSuite.h>
-#include <cppunit/TestCaller.h>
 
 
-class CompileShaderTest: public BaseUnitTest {
+class CompileShaderTest: public SuitedUnitTest<CompileShaderTest> {
 public:
 	CompileShaderTest()
 	{
@@ -23,8 +21,6 @@ public:
 
 	void setUp()
 	{
-		std::string test_files = "shaders/test";
-		holder = input.getShader(test_files);
 		comparator.loadResults(test_files, unit_name);
 	}
 
@@ -50,25 +46,6 @@ public:
 		results << ast_node_names[type] << "\n";
 		return true;
 	}
-
-	static CppUnit::TestSuite *suite()
-	{
-		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite;
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<CompileShaderTest>("testVertex",
-						&CompileShaderTest::testVertex));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<CompileShaderTest>("testGeom",
-						&CompileShaderTest::testGeom));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<CompileShaderTest>("testFrag",
-						&CompileShaderTest::testFrag));
-		return suiteOfTests;
-	}
-
-private:
-	ShaderHolder* holder;
-
 };
 
 #endif /* COMPILER_H_ */

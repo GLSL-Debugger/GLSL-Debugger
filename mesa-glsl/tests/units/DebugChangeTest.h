@@ -15,14 +15,11 @@
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
 
-
-class DebugChangeTest: public BaseUnitTest {
+class DebugChangeTest: public SuitedUnitTest<DebugChangeTest> {
 public:
 	DebugChangeTest()
 	{
 		unit_name = "dbgchange";
-		std::string test_files = "shaders/test";
-		holder = input.getShader(test_files);
 		comparator.loadResults(test_files, unit_name);
 	}
 
@@ -35,21 +32,6 @@ public:
 		it.visit(sh->head);
 		doComparison(sh, false);
 		std::cout << results.str();
-	}
-
-	static CppUnit::TestSuite *suite()
-	{
-		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite;
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugChangeTest>("testVertex",
-						&DebugChangeTest::testVertex));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugChangeTest>("testGeom",
-						&DebugChangeTest::testGeom));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugChangeTest>("testFrag",
-						&DebugChangeTest::testFrag));
-		return suiteOfTests;
 	}
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
@@ -69,8 +51,6 @@ public:
 		return true;
 	}
 
-private:
-	ShaderHolder* holder;
 };
 
 

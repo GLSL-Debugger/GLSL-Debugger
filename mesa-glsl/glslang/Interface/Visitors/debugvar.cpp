@@ -199,11 +199,11 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_function_definition* nod
 {
 	copyScopeTo(node);
 	const char* name = node->prototype->identifier;
-	const char* range = FormatSourceRange(node->get_location()).c_str();
+	std::string range =	FormatSourceRange(node->get_location());
 
 	// FIXME: function without prototype
 	VPRINT(3, "%c%sbegin function signature %s at %s %c%s\n",
-			ESC_CHAR, ESC_BOLD, name, range, ESC_CHAR, ESC_RESET);
+			ESC_CHAR, ESC_BOLD, name, range.c_str(), ESC_CHAR, ESC_RESET);
 
 	// Save & restore global scope
 	ScopeSaver ss(&scope);
@@ -216,7 +216,7 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_function_definition* nod
 	depth--;
 
 	VPRINT(3, "%c%send function signature %s at %s %c%s\n",
-			ESC_CHAR, ESC_BOLD, name, range, ESC_CHAR, ESC_RESET);
+			ESC_CHAR, ESC_BOLD, name, range.c_str(), ESC_CHAR, ESC_RESET);
 
 	return false;
 }

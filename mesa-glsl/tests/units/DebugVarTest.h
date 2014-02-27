@@ -12,16 +12,13 @@
 #include "glslang/Interface/Visitors/debugvar.h"
 #include "glslang/Interface/AstScope.h"
 #include "Base.h"
-#include <cppunit/TestSuite.h>
-#include <cppunit/TestCaller.h>
 
-class DebugVarTest: public BaseUnitTest {
+
+class DebugVarTest: public SuitedUnitTest<DebugVarTest> {
 public:
 	DebugVarTest()
 	{
 		unit_name = "dbgvar";
-		std::string test_files = "shaders/test";
-		holder = input.getShader(test_files);
 		comparator.loadResults(test_files, unit_name);
 	}
 
@@ -40,21 +37,6 @@ public:
 		ast_debugvar_traverser_visitor it(sh, vl);
 		it.visit(sh->head);
 		doComparison(sh);
-	}
-
-	static CppUnit::TestSuite *suite()
-	{
-		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite;
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugVarTest>("testVertex",
-						&DebugVarTest::testVertex));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugVarTest>("testGeom",
-						&DebugVarTest::testGeom));
-		suiteOfTests->addTest(
-				new CppUnit::TestCaller<DebugVarTest>("testFrag",
-						&DebugVarTest::testFrag));
-		return suiteOfTests;
 	}
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
@@ -78,7 +60,6 @@ public:
 	}
 
 private:
-	ShaderHolder* holder;
 	ShVariableList* vl;
 };
 

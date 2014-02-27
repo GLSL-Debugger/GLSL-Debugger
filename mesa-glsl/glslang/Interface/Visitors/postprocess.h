@@ -10,16 +10,20 @@
 #include "ast_visitor.h"
 #include "../ShaderHolder.h"
 #include "traverse.h"
+#include <map>
 
-class ast_sideeffects_traverser_visitor : public ast_traverse_visitor {
+class ir_variable;
+
+
+class ast_postprocess_traverser_visitor : public ast_traverse_visitor {
 public:
-	ast_sideeffects_traverser_visitor(AstShader* _sh, struct _mesa_glsl_parse_state* _st) :
+	ast_postprocess_traverser_visitor(AstShader* _sh, struct _mesa_glsl_parse_state* _st) :
 			shader(_sh), state(_st)
 	{
 		flags = traverse_postvisit;
 	}
 
-	virtual ~ast_sideeffects_traverser_visitor()
+	virtual ~ast_postprocess_traverser_visitor()
 	{
 	}
 
@@ -49,6 +53,7 @@ protected:
 	AstShader* shader;
 	exec_list input_variables;
 	struct _mesa_glsl_parse_state* state;
+	std::map<ir_variable*,int> variables_id;
 };
 
 

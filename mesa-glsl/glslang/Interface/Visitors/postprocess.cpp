@@ -11,7 +11,7 @@
  * it probably some errors in shader receiving phase, not here.
  */
 
-#include "sideeffects.h"
+#include "postprocess.h"
 #include "glsl/ast.h"
 #include "glsl/ir.h"
 #include "glsl/list.h"
@@ -41,7 +41,7 @@ extern ir_variable * get_variable_being_redeclared(ir_variable *var, YYLTYPE loc
 
 
 // As in ast_to_hir
-unsigned ast_process_structure_or_interface_block(ast_sideeffects_traverser_visitor* visitor,
+unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visitor* visitor,
 		struct _mesa_glsl_parse_state *state, exec_list *declarations, YYLTYPE &loc,
 		glsl_struct_field **fields_ret, bool block_row_major)
 {
@@ -100,7 +100,7 @@ unsigned ast_process_structure_or_interface_block(ast_sideeffects_traverser_visi
 	return decl_count;
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_declarator_list* node)
+void ast_postprocess_traverser_visitor::visit(ast_declarator_list* node)
 {
 	assert(node->type);
 	node->type->accept(this);
@@ -112,23 +112,24 @@ void ast_sideeffects_traverser_visitor::visit(ast_declarator_list* node)
 	foreach_list_typed (ast_declaration, decl, link, &node->declarations) {
 		if (decl->initializer && decl->initializer->oper == ast_aggregate)
 			_mesa_ast_set_aggregate_type(decl_type, decl->initializer);
+		if ((decl_type == NULL) || decl_type->is_void())
+			continue;
+
+		YYLTYPE loc = decl->get_location();
+		const struct glsl_type *var_type;
+		ir_variable *var;
+		ShVariable *shvar;
 
 		decl->accept(this);
 		// Register variable
 		variableQualifier qual = qualifierFromAst(&node->type->qualifier, false);
 		variableVaryingModifier modifier = modifierFromAst(&node->type->qualifier);
-		astToShVariable(decl, qual, modifier, decl_type, shader);
-
-		YYLTYPE loc = decl->get_location();
-		const struct glsl_type *var_type;
-		ir_variable *var;
-
-		if ((decl_type == NULL) || decl_type->is_void())
-			continue;
-
+		shvar = astToShVariable(decl, qual, modifier, decl_type, shader);
 		var_type = process_array_type(&loc, decl_type, decl->array_specifier, state);
 		var = new(shader) ir_variable(var_type, decl->identifier, ir_var_auto);
 		apply_type_qualifier_to_variable(&node->type->qualifier, var, state, &loc, false);
+
+		variables_id[var] = shvar->uniqueId;
 		if (var->data.mode == ir_var_shader_in) {
 			var->data.read_only = true;
 			if (state->stage == MESA_SHADER_GEOMETRY)
@@ -146,7 +147,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_declarator_list* node)
 }
 
 // As in ast_to_hir
-void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
+void ast_postprocess_traverser_visitor::visit(ast_struct_specifier* node)
 {
 	YYLTYPE loc = node->get_location();
 	if (state->language_version != 110 && state->struct_specifier_depth != 0)
@@ -160,18 +161,21 @@ void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
 
 	validate_identifier(node->name, loc, state);
 	const glsl_type *t = glsl_type::get_record_instance(fields, decl_count, node->name);
+	/* Not sure we need this
 	foreach_list_typed (ast_declarator_list, decl_list, link, &node->declarations) {
 		const struct ast_type_qualifier * const qual = &decl_list->type->qualifier;
 		variableQualifier qualifier = qualifierFromAst(qual, false);
 		variableVaryingModifier modifier = modifierFromAst(qual);
-		ShVariable* var = astToShVariable(node, qualifier, modifier, t, shader);
+		ShVariable* shvar = astToShVariable(node, qualifier, modifier, t, shader);
+
 		int i = 0;
 		// assume we have same count of fields and declarations
 		foreach_list_typed (ast_declaration, decl, link, &decl_list->declarations) {
-			ShVariable* field = var->structSpec[i++];
+			ShVariable* field = shvar->structSpec[i++];
 			addAstShVariable(decl, field);
 		}
 	}
+	*/
 
 	if (!state->symbols->add_type(node->name, t)) {
 		_mesa_glsl_error(&loc, state, "struct `%s' previously defined", node->name);
@@ -189,7 +193,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_struct_specifier* node)
 }
 
 // As in ast_to_hir
-void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
+void ast_postprocess_traverser_visitor::visit(ast_parameter_declarator *node)
 {
 	const struct glsl_type *type;
 	const char *name = NULL;
@@ -218,7 +222,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
 
 	variableQualifier qual = qualifierFromAst(&node->type->qualifier, true);
 	variableVaryingModifier modifier = modifierFromAst(&node->type->qualifier);
-	astToShVariable(node, qual, modifier, type, shader);
+	ShVariable* shvar = astToShVariable(node, qual, modifier, type, shader);
 
 	if (!type->is_error() && type->is_unsized_array()) {
 		_mesa_glsl_error(&loc, state, "arrays passed as parameters must have "
@@ -227,6 +231,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
 	}
 
 	ir_variable *var = new(shader) ir_variable(type, node->identifier, ir_var_function_in);
+	variables_id[var] = shvar->uniqueId;
 	apply_type_qualifier_to_variable(&node->type->qualifier, var, state, &loc, true);
 	if (!get_variable_being_redeclared(var, loc, state, false)) {
 		validate_identifier(node->identifier, loc, state);
@@ -236,7 +241,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_parameter_declarator *node)
 	}
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_compound_statement* node)
+void ast_postprocess_traverser_visitor::visit(ast_compound_statement* node)
 {
 	if (node->new_scope){
 		state->symbols->push_scope();
@@ -254,7 +259,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_compound_statement* node)
 	}
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_expression_statement* node)
+void ast_postprocess_traverser_visitor::visit(ast_expression_statement* node)
 {
 	if (node->expression) {
 		node->expression->accept(this);
@@ -262,14 +267,14 @@ void ast_sideeffects_traverser_visitor::visit(ast_expression_statement* node)
 	}
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_function_definition * node)
+void ast_postprocess_traverser_visitor::visit(ast_function_definition * node)
 {
 	state->symbols->push_scope();
 	ast_traverse_visitor::visit(node);
 	state->symbols->pop_scope();
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_selection_statement *node)
+void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
 {
 	if (flags & traverse_previsit)
 		if (!this->traverse(node))
@@ -294,7 +299,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_selection_statement *node)
 		this->traverse(node);
 }
 
-void ast_sideeffects_traverser_visitor::visit(ast_iteration_statement *node)
+void ast_postprocess_traverser_visitor::visit(ast_iteration_statement *node)
 {
 	if (flags & traverse_previsit)
 		if (!this->traverse(node))
@@ -321,7 +326,7 @@ void ast_sideeffects_traverser_visitor::visit(ast_iteration_statement *node)
 		this->traverse(node);
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
 {
 	for (int i = 0; i < 3; ++i) {
 		if (!node->subexpressions[i])
@@ -360,10 +365,15 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
 			ir_variable* var = state->symbols->get_variable(
 					node->primary_expression.identifier);
 			assert(var || !"Undeclared identifier");
-			const glsl_type* type = var->type;
-			variableQualifier qual = qualifierFromIr(var);
-			variableVaryingModifier modifier = modifierFromIr(var);
-			astToShVariable(node, qual, modifier, type, shader);
+			std::map<ir_variable*,int>::iterator it = variables_id.find(var);
+			// If found - it is deref, unregistered global otherwise
+			if (it == variables_id.end()){
+				const glsl_type* type = var->type;
+				variableQualifier qual = qualifierFromIr(var);
+				variableVaryingModifier modifier = modifierFromIr(var);
+				ShVariable *shvar = astToShVariable(node, qual, modifier, type, shader);
+				variables_id[var] = shvar->uniqueId;
+			}
 		}
 		break;
 	case ast_field_selection: {
@@ -391,14 +401,14 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_expression* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_expression_bin* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_expression_bin* node)
 {
 	node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
 	node->debug_sideeffects |= node->subexpressions[1]->debug_sideeffects;
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_function_expression* node)
 {
 	// Not sure about it
 	foreach_list_const(n, &node->expressions) {
@@ -429,14 +439,14 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_function_expression* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_case_statement* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_case_statement* node)
 {
 	foreach_list_typed (ast_node, ast, link, &node->stmts)
 		node->debug_sideeffects |= ast->debug_sideeffects;
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_switch_body* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_switch_body* node)
 {
 	if (node->stmts)
 		foreach_list_typed (ast_node, ast, link, &node->stmts->cases)
@@ -444,7 +454,7 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_switch_body* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_selection_statement* node)
 {
 	if (node->condition)
 		node->debug_sideeffects |= node->condition->debug_sideeffects;
@@ -455,7 +465,7 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_selection_statement* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_switch_statement* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_switch_statement* node)
 {
 	if (node->test_expression)
 		node->debug_sideeffects |= node->test_expression->debug_sideeffects;
@@ -464,7 +474,7 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_switch_statement* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_iteration_statement* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_iteration_statement* node)
 {
 	if (node->init_statement)
 		node->debug_sideeffects |= node->init_statement->debug_sideeffects;
@@ -477,21 +487,21 @@ bool ast_sideeffects_traverser_visitor::traverse(ast_iteration_statement* node)
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_jump_statement* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_jump_statement* node)
 {
 	if (node->mode == ast_jump_statement::ast_discard)
 		node->debug_sideeffects |= ir_dbg_se_discard;
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_function_definition* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_function_definition* node)
 {
 	node->debug_sideeffects |= ir_dbg_se_general;
 	saveFunction(node->prototype);
 	return true;
 }
 
-bool ast_sideeffects_traverser_visitor::traverse(ast_gs_input_layout* node)
+bool ast_postprocess_traverser_visitor::traverse(ast_gs_input_layout* node)
 {
 	YYLTYPE loc = node->get_location();
 	state->gs_input_prim_type_specified = true;

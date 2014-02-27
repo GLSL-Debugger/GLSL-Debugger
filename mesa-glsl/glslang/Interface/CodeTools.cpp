@@ -2,7 +2,7 @@
 
 #include "glsl/list.h"
 #include "glsl/glsl_symbol_table.h"
-#include "Visitors/sideeffects.h"
+#include "Visitors/postprocess.h"
 #include "glsldb/utils/dbgprint.h"
 #include <map>
 

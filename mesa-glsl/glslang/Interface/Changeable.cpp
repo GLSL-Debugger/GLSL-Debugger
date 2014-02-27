@@ -97,8 +97,15 @@ void addShChangeable(ShChangeableList *cl, ShChangeable *c)
 	cl->changeables[cl->numChangeables - 1] = c;
 }
 
+
 // FIXME: is this reasonable
 ShChangeable * copyShChangeable(ShChangeable *c)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Copy of changeable out of shader mem.\n");
+	return copyShChangeableCtx(c, NULL);
+}
+
+ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx)
 {
 	int i;
 	ShChangeable *copy;
@@ -106,20 +113,16 @@ ShChangeable * copyShChangeable(ShChangeable *c)
 	if (!c)
 		return NULL;
 
-	// FIXME: memory
-	copy = createShChangeable(c->id);
+	copy = createShChangeableCtx(c->id, mem_ctx);
 
 	// add all indices
 	for (i = 0; i < c->numIndices; i++) {
 		copy->numIndices++;
-		copy->indices = (ShChangeableIndex**) realloc(copy->indices,
-				copy->numIndices * sizeof(ShChangeableIndex*));
+		copy->indices = (ShChangeableIndex**)reralloc_array_size(mem_ctx, copy->indices,
+				sizeof(ShChangeableIndex*), copy->numIndices);
 
-		copy->indices[copy->numIndices - 1] = (ShChangeableIndex*) malloc(
-				sizeof(ShChangeableIndex));
-
-		copy->indices[copy->numIndices - 1]->type = c->indices[i]->type;
-		copy->indices[copy->numIndices - 1]->index = c->indices[i]->index;
+		copy->indices[copy->numIndices - 1] = createShChangeableIndexCtx(
+						c->indices[i]->type,	c->indices[i]->index, mem_ctx);
 	}
 
 	return copy;

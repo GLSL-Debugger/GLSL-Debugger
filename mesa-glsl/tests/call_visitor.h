@@ -12,6 +12,7 @@
 
 class BaseUnitTest;
 
+
 class ast_call_visitor : public ast_traverse_visitor {
 public:
 	ast_call_visitor(BaseUnitTest* _u) :
