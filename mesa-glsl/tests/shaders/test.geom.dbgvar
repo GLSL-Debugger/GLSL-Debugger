@@ -13,16 +13,16 @@ AST_EXPRESSION_BIN (<)                   <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                  <0,i> <1,vertex>
 AST_EXPRESSION (.)                           <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                      <0,i> <1,vertex>
-AST_FUNCTION_EXPRESSION (function_call)          <0,i> <1,vertex>
-AST_EXPRESSION (=)                           <0,i> <1,vertex>
-AST_EXPRESSION (identifier)                      <0,i> <1,vertex>
-AST_EXPRESSION (.)                               <0,i> <1,vertex>
-AST_EXPRESSION (array_index)                         <0,i> <1,vertex>
-AST_EXPRESSION (identifier)                              <0,i> <1,vertex>
-AST_EXPRESSION (identifier)                              <0,i> <1,vertex>
-AST_FUNCTION_EXPRESSION (function_call)      <0,i> <1,vertex>
-AST_EXPRESSION (++)                      <0,i> <1,vertex>
-AST_EXPRESSION (identifier)                  <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)          <0,i> <1,vertex> <2,gl_in>
+AST_EXPRESSION (=)                           <0,i> <1,vertex> <2,gl_in>
+AST_EXPRESSION (identifier)                      <0,i> <1,vertex> <2,gl_in>
+AST_EXPRESSION (.)                               <0,i> <1,vertex> <2,gl_in> <3,gl_Position>
+AST_EXPRESSION (array_index)                         <0,i> <1,vertex> <2,gl_in> <3,gl_Position>
+AST_EXPRESSION (identifier)                              <0,i> <1,vertex> <2,gl_in> <3,gl_Position>
+AST_EXPRESSION (identifier)                              <0,i> <1,vertex> <2,gl_in> <3,gl_Position>
+AST_FUNCTION_EXPRESSION (function_call)      <0,i> <1,vertex> <2,gl_in> <3,gl_Position>
+AST_EXPRESSION (++)                      <0,i> <1,vertex> <2,gl_in>
+AST_EXPRESSION (identifier)                  <0,i> <1,vertex> <2,gl_in>
 AST_FUNCTION_EXPRESSION (function_call)  <0,i> <1,vertex>
 AST_EXPRESSION (array_index)                     <0,i> <1,vertex>
 AST_EXPRESSION (identifier)                          <0,i> <1,vertex>

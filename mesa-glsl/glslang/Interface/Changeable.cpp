@@ -8,6 +8,7 @@
 #include "AstScope.h"
 #include "glsldb/utils/dbgprint.h"
 #include <string.h>
+#include <unordered_set>
 
 void dumpShChangeable(ShChangeable *cgb)
 {
@@ -92,8 +93,9 @@ void addShChangeable(ShChangeableList *cl, ShChangeable *c)
 		return;
 
 	cl->numChangeables++;
-	cl->changeables = (ShChangeable**) realloc(cl->changeables,
-			cl->numChangeables * sizeof(ShChangeable*));
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Realloc of changeables out of shader mem.\n");
+	cl->changeables = (ShChangeable**) reralloc_array_size(NULL, cl->changeables,
+			sizeof(ShChangeable*), cl->numChangeables);
 	cl->changeables[cl->numChangeables - 1] = c;
 }
 
@@ -181,14 +183,22 @@ void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
 	}
 }
 
-void copyAstChangeableList(exec_list *clout, exec_list *clin, void* mem_ctx)
+void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, void* mem_ctx)
 {
 	if (!clout || !clin)
 		return;
 
+	std::unordered_set<int> permits;
+	if (only)
+		foreach_list(node, only)
+			permits.emplace(((scope_item*)node)->id);
+
+
 	// TODO: this algorithm is bad.
 	foreach_list(node, clin){
 		changeable_item* ch_item = (changeable_item*)node;
+		if (only && permits.find(ch_item->id) == permits.end())
+			continue;
 		bool alreadyInList = false;
 		foreach_list(onode, clout) {
 			changeable_item* cho_item = (changeable_item*)onode;
@@ -200,8 +210,6 @@ void copyAstChangeableList(exec_list *clout, exec_list *clin, void* mem_ctx)
 		if (!alreadyInList)
 			clout->push_tail(ch_item->clone(mem_ctx));
 	}
-
-
 }
 
 void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
@@ -228,11 +236,10 @@ void freeShChangeable(ShChangeable **c)
 {
 	if (c && *c) {
 		int i;
-		for (i = 0; i < (*c)->numIndices; i++) {
-			free((*c)->indices[i]);
-		}
-		free((*c)->indices);
-		free(*c);
+		for (i = 0; i < (*c)->numIndices; i++)
+			ralloc_free((*c)->indices[i]);
+		ralloc_free((*c)->indices);
+		ralloc_free(*c);
 		*c = NULL;
 	}
 }

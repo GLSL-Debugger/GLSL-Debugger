@@ -7,10 +7,10 @@
 #ifndef DEBUGCHANGE_H_
 #define DEBUGCHANGE_H_
 
-#include "traverse.h"
 #include "../ShaderHolder.h"
 #include <set>
 #include "ast.h"
+
 
 class ast_debugchange_traverser_visitor: public ast_traverse_visitor {
 public:
@@ -27,6 +27,10 @@ public:
 	enum debugchange_ext_flags {
 		ext_flag_active = traverse_flag_last
 	};
+
+	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
+	virtual void visit(class ast_compound_statement *);
+	virtual void visit(class ast_expression_statement *);
 
 	virtual bool traverse(class ast_expression *);
 	virtual bool traverse(class ast_expression_bin *);
@@ -53,26 +57,6 @@ public:
 protected:
 	AstShader* shader;
 	std::set<ast_node*> parsed_functions;
-};
-
-class ir_debugchange_traverser_visitor: public ir_traverse_visitor {
-public:
-	ir_debugchange_traverser_visitor()
-	{
-		preVisit = false;
-		postVisit = false;
-		debugVisit = true;
-	}
-
-	virtual ~ir_debugchange_traverser_visitor()
-	{
-	}
-
-	// Subclasses must implement this
-	virtual bool visitIr(ir_swizzle *ir);
-	virtual bool visitIr(ir_dereference_array *ir);
-	virtual bool visitIr(ir_dereference_record *ir);
-
 };
 
 #endif /* DEBUGCHANGE_H_ */

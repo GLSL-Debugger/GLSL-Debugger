@@ -365,13 +365,17 @@ bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
 			ir_variable* var = state->symbols->get_variable(
 					node->primary_expression.identifier);
 			assert(var || !"Undeclared identifier");
-			std::map<ir_variable*,int>::iterator it = variables_id.find(var);
+			std::map<ir_variable*, int>::iterator it = variables_id.find(var);
 			// If found - it is deref, unregistered global otherwise
-			if (it == variables_id.end()){
+			if (it != variables_id.end()){
+				node->debug_id = it->second;
+			} else {
 				const glsl_type* type = var->type;
-				variableQualifier qual = qualifierFromIr(var);
+				int qual = qualifierFromIr(var);
+				qual |= SH_BUILTIN;
 				variableVaryingModifier modifier = modifierFromIr(var);
-				ShVariable *shvar = astToShVariable(node, qual, modifier, type, shader);
+				ShVariable *shvar = astToShVariable(node, (variableQualifier) qual,
+														modifier, type, shader);
 				variables_id[var] = shvar->uniqueId;
 			}
 		}

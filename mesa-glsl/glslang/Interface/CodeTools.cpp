@@ -72,7 +72,9 @@ long strToSwizzleIdx(const char* str)
 		if (val < 0)
 			return 0;
 		// shift it to next power of two for number of table elements
-		swiz_idx += val  << (5*i);
+		//swiz_idx += val << (5*i);
+		// It something like this in original. I think, order will be lost here.
+		swiz_idx += 1 << val;
 	}
 	return swiz_idx;
 }

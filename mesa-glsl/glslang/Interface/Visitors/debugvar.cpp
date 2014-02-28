@@ -25,6 +25,9 @@ public:
 
 	~ScopeSaver()
 	{
+		// Move global variables to the beginning of the scope
+		// TODO:
+
 		// restore scope list
 		while (!scope->is_empty() && scope->get_tail() != last){
 			exec_node *n = scope->get_tail();
@@ -44,17 +47,17 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_expression* node)
 	copyScopeTo(node);
 
 	// Resolve deref from scope if not already
-	// TODO: move it to shader compilation phase somehow
-	if (node->oper == ast_identifier && node->debug_id < 0) {
-		const char* name = node->primary_expression.identifier;
-		foreach_list_reverse(item, &scope){
-			scope_item* si = (scope_item*)item;
-			if (strcmp(name, si->name) != 0)
-				continue;
-			node->debug_id = si->id;
-			break;
+	if (node->oper == ast_identifier){
+		if (node->debug_id < 0)
+			assert(!"Must not be here");
+		ShVariable* var = findShVariable(node->debug_id);
+		// Add global variables at first sight
+		if (var->builtin) {
+			addShVariable(vl, var, 0);
+			addToScope(var);
 		}
 	}
+
 
 	return true;
 }
@@ -165,7 +168,6 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_iteration_statement* nod
 	// remember end of actual scope, initialization only changes scope of body
 	// it will be restored on object destruction
 	ScopeSaver ss(&scope);
-
 
 	depth++;
 	// visit optional initialization

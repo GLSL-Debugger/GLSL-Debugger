@@ -30,8 +30,9 @@ public:
 			return;
 		ast_debugchange_traverser_visitor it(sh);
 		it.visit(sh->head);
-		doComparison(sh, false);
-		std::cout << results.str();
+		doComparison(sh);
+		//doComparison(sh, false);
+		//std::cout << results.str();
 	}
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)

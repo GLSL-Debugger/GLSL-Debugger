@@ -1,11 +1,11 @@
 AST_GS_INPUT_LAYOUT
-AST_FUNCTION_DEFINITION
+AST_FUNCTION_DEFINITION                  <3,gl_Position>
 AST_FUNCTION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_ITERATION_STATEMENT              <0,i> <3,gl_Position>
+AST_ITERATION_STATEMENT                  <0,i> <3,gl_Position>
 AST_EXPRESSION (=)                       <0,i>
 AST_EXPRESSION (identifier)                  <0,i>
 AST_EXPRESSION (int_constant)
