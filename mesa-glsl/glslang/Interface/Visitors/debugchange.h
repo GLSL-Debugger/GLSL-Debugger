@@ -17,7 +17,6 @@ public:
 	ast_debugchange_traverser_visitor(AstShader* _sh) :
 			shader(_sh)
 	{
-		flags = traverse_previsit;
 	}
 
 	virtual ~ast_debugchange_traverser_visitor()
@@ -25,26 +24,27 @@ public:
 	}
 
 	enum debugchange_ext_flags {
-		ext_flag_active = traverse_flag_last
+		ext_flag_active = 8
 	};
 
-	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
-	virtual void visit(class ast_compound_statement *);
-	virtual void visit(class ast_expression_statement *);
+	virtual bool enter(class ast_expression *);
+	virtual bool enter(class ast_expression_bin *);
+	virtual bool enter(class ast_function_expression *);
+	virtual bool enter(class ast_expression_statement *);
+	virtual bool enter(class ast_compound_statement *);
+	virtual bool enter(class ast_declaration *);
+	virtual bool enter(class ast_declarator_list *);
+	virtual bool enter(class ast_parameter_declarator *);
+	virtual bool enter(class ast_function *);
+	virtual bool enter(class ast_case_statement *);
+	virtual bool enter(class ast_case_statement_list *);
+	virtual bool enter(class ast_switch_body *);
+	virtual bool enter(class ast_selection_statement *);
+	virtual bool enter(class ast_switch_statement *);
+	virtual bool enter(class ast_iteration_statement *);
+	virtual bool enter(class ast_jump_statement *);
+	virtual bool enter(class ast_function_definition *);
 
-	virtual bool traverse(class ast_expression *);
-	virtual bool traverse(class ast_expression_bin *);
-	virtual bool traverse(class ast_function_expression *);
-	virtual bool traverse(class ast_declaration *);
-	virtual bool traverse(class ast_parameter_declarator *);
-	virtual bool traverse(class ast_function *);
-	virtual bool traverse(class ast_case_statement *);
-	virtual bool traverse(class ast_switch_body *);
-	virtual bool traverse(class ast_selection_statement *);
-	virtual bool traverse(class ast_switch_statement *);
-	virtual bool traverse(class ast_iteration_statement *);
-	virtual bool traverse(class ast_jump_statement *);
-	virtual bool traverse(class ast_function_definition *);
 
 
 	bool isActive(void) { return flags & ext_flag_active; }

@@ -19,6 +19,7 @@ ShChangeable* createShChangeableCtx(int id, void* mem_ctx);
 ShChangeableIndex* createShChangeableIndexCtx(ShChangeableType type, long index, void* mem_ctx);
 void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, void* mem_ctx);
 ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx);
+void addShIndexToChangeableCtx(ShChangeable *c, ShChangeableIndex *idx, void* mem_ctx);
 
 // Variables
 void addAstShVariable(ast_node*, ShVariable*);

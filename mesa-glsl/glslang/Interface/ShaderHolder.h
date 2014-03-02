@@ -20,6 +20,7 @@ struct AstShader {
 	bool compile_status;
 	char* info_log;
 	bool is_es;
+	ShVariableList globals;
 };
 
 struct ShaderHolder {

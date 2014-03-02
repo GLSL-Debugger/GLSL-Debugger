@@ -100,7 +100,31 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 	return decl_count;
 }
 
-void ast_postprocess_traverser_visitor::visit(ast_declarator_list* node)
+
+void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
+{
+	if (!this->enter(node))
+		return;
+
+	if (node->condition)
+		node->condition->accept(this);
+	++depth;
+	if (node->then_statement){
+		state->symbols->push_scope();
+		node->then_statement->accept(this);
+		state->symbols->pop_scope();
+	}
+	if (node->else_statement){
+		state->symbols->push_scope();
+		node->else_statement->accept(this);
+		state->symbols->pop_scope();
+	}
+	--depth;
+
+	this->leave(node);
+}
+
+bool ast_postprocess_traverser_visitor::enter(ast_declarator_list* node)
 {
 	assert(node->type);
 	node->type->accept(this);
@@ -144,10 +168,12 @@ void ast_postprocess_traverser_visitor::visit(ast_declarator_list* node)
 						"current scope", decl->identifier);
 		}
 	}
+
+	return false;
 }
 
 // As in ast_to_hir
-void ast_postprocess_traverser_visitor::visit(ast_struct_specifier* node)
+bool ast_postprocess_traverser_visitor::enter(ast_struct_specifier* node)
 {
 	YYLTYPE loc = node->get_location();
 	if (state->language_version != 110 && state->struct_specifier_depth != 0)
@@ -161,21 +187,6 @@ void ast_postprocess_traverser_visitor::visit(ast_struct_specifier* node)
 
 	validate_identifier(node->name, loc, state);
 	const glsl_type *t = glsl_type::get_record_instance(fields, decl_count, node->name);
-	/* Not sure we need this
-	foreach_list_typed (ast_declarator_list, decl_list, link, &node->declarations) {
-		const struct ast_type_qualifier * const qual = &decl_list->type->qualifier;
-		variableQualifier qualifier = qualifierFromAst(qual, false);
-		variableVaryingModifier modifier = modifierFromAst(qual);
-		ShVariable* shvar = astToShVariable(node, qualifier, modifier, t, shader);
-
-		int i = 0;
-		// assume we have same count of fields and declarations
-		foreach_list_typed (ast_declaration, decl, link, &decl_list->declarations) {
-			ShVariable* field = shvar->structSpec[i++];
-			addAstShVariable(decl, field);
-		}
-	}
-	*/
 
 	if (!state->symbols->add_type(node->name, t)) {
 		_mesa_glsl_error(&loc, state, "struct `%s' previously defined", node->name);
@@ -190,10 +201,12 @@ void ast_postprocess_traverser_visitor::visit(ast_struct_specifier* node)
 	}
 
 	state->struct_specifier_depth--;
+
+	return false;
 }
 
 // As in ast_to_hir
-void ast_postprocess_traverser_visitor::visit(ast_parameter_declarator *node)
+bool ast_postprocess_traverser_visitor::enter(ast_parameter_declarator *node)
 {
 	const struct glsl_type *type;
 	const char *name = NULL;
@@ -205,12 +218,12 @@ void ast_postprocess_traverser_visitor::visit(ast_parameter_declarator *node)
 		type = glsl_type::error_type;
 
 	if (node->formal_parameter && (node->identifier == NULL))
-		return;
+		return false;
 
 	node->is_void = false;
 	if (type->is_void()) {
 		node->is_void = true;
-		return;
+		return false;
 	}
 
 	type = process_array_type(&loc, type, node->array_specifier, state);
@@ -239,9 +252,11 @@ void ast_postprocess_traverser_visitor::visit(ast_parameter_declarator *node)
 			_mesa_glsl_error(&loc, state, "name `%s' already taken in the "
 							"current scope", node->identifier);
 	}
+
+	return false;
 }
 
-void ast_postprocess_traverser_visitor::visit(ast_compound_statement* node)
+bool ast_postprocess_traverser_visitor::enter(ast_compound_statement* node)
 {
 	if (node->new_scope){
 		state->symbols->push_scope();
@@ -257,76 +272,35 @@ void ast_postprocess_traverser_visitor::visit(ast_compound_statement* node)
 		state->symbols->pop_scope();
 		depth--;
 	}
+
+	return false;
 }
 
-void ast_postprocess_traverser_visitor::visit(ast_expression_statement* node)
+bool ast_postprocess_traverser_visitor::enter(ast_expression_statement* node)
 {
 	if (node->expression) {
 		node->expression->accept(this);
 		node->debug_sideeffects |= node->expression->debug_sideeffects;
 	}
+
+	return false;
 }
 
-void ast_postprocess_traverser_visitor::visit(ast_function_definition * node)
+bool ast_postprocess_traverser_visitor::enter(ast_function_definition *)
 {
 	state->symbols->push_scope();
-	ast_traverse_visitor::visit(node);
-	state->symbols->pop_scope();
+	return true;
 }
 
-void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
+bool ast_postprocess_traverser_visitor::enter(ast_iteration_statement *node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
-
-	if (node->condition)
-		node->condition->accept(this);
-	++depth;
-	if (node->then_statement){
-		state->symbols->push_scope();
-		node->then_statement->accept(this);
-		state->symbols->pop_scope();
-	}
-	if (node->else_statement){
-		state->symbols->push_scope();
-		node->else_statement->accept(this);
-		state->symbols->pop_scope();
-	}
-	--depth;
-
-	if (flags & traverse_postvisit)
-		this->traverse(node);
-}
-
-void ast_postprocess_traverser_visitor::visit(ast_iteration_statement *node)
-{
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
-
+	// Push scope for loop
 	if (node->mode != ast_iteration_statement::ast_do_while)
 		state->symbols->push_scope();
-
-	if (node->init_statement)
-		node->init_statement->accept(this);
-	if (node->condition)
-		node->condition->accept(this);
-	++depth;
-	if (node->body)
-		node->body->accept(this);
-	--depth;
-	if (node->rest_expression)
-		node->rest_expression->accept(this);
-
-	if (node->mode != ast_iteration_statement::ast_do_while)
-			state->symbols->pop_scope();
-
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
+void ast_postprocess_traverser_visitor::leave(ast_expression* node)
 {
 	for (int i = 0; i < 3; ++i) {
 		if (!node->subexpressions[i])
@@ -370,6 +344,7 @@ bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
 			if (it != variables_id.end()){
 				node->debug_id = it->second;
 			} else {
+				// Maybe I need to convert it to the ast_declaration and prepend the list?
 				const glsl_type* type = var->type;
 				int qual = qualifierFromIr(var);
 				qual |= SH_BUILTIN;
@@ -377,6 +352,7 @@ bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
 				ShVariable *shvar = astToShVariable(node, (variableQualifier) qual,
 														modifier, type, shader);
 				variables_id[var] = shvar->uniqueId;
+				addShVariable(&shader->globals, shvar, shvar->builtin);
 			}
 		}
 		break;
@@ -402,17 +378,15 @@ bool ast_postprocess_traverser_visitor::traverse(ast_expression* node)
 		break;
 	}
 
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_expression_bin* node)
+void ast_postprocess_traverser_visitor::leave(ast_expression_bin* node)
 {
 	node->debug_sideeffects |= node->subexpressions[0]->debug_sideeffects;
 	node->debug_sideeffects |= node->subexpressions[1]->debug_sideeffects;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_function_expression* node)
+void ast_postprocess_traverser_visitor::leave(ast_function_expression* node)
 {
 	// Not sure about it
 	foreach_list_const(n, &node->expressions) {
@@ -439,26 +413,22 @@ bool ast_postprocess_traverser_visitor::traverse(ast_function_expression* node)
 		if (_mesa_glsl_find_builtin_function(state, func_name, &actual_parameters))
 			node->debug_builtin = true;
 	}
-
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_case_statement* node)
+void ast_postprocess_traverser_visitor::leave(ast_case_statement* node)
 {
 	foreach_list_typed (ast_node, ast, link, &node->stmts)
 		node->debug_sideeffects |= ast->debug_sideeffects;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_switch_body* node)
+void ast_postprocess_traverser_visitor::leave(ast_switch_body* node)
 {
 	if (node->stmts)
 		foreach_list_typed (ast_node, ast, link, &node->stmts->cases)
 			node->debug_sideeffects |= ast->debug_sideeffects;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_selection_statement* node)
+void ast_postprocess_traverser_visitor::leave(ast_selection_statement* node)
 {
 	if (node->condition)
 		node->debug_sideeffects |= node->condition->debug_sideeffects;
@@ -466,19 +436,17 @@ bool ast_postprocess_traverser_visitor::traverse(ast_selection_statement* node)
 		node->debug_sideeffects |= node->then_statement->debug_sideeffects;
 	if (node->else_statement)
 		node->debug_sideeffects |= node->else_statement->debug_sideeffects;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_switch_statement* node)
+void ast_postprocess_traverser_visitor::leave(ast_switch_statement* node)
 {
 	if (node->test_expression)
 		node->debug_sideeffects |= node->test_expression->debug_sideeffects;
 	if (node->body)
 		node->debug_sideeffects |= node->body->debug_sideeffects;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_iteration_statement* node)
+void ast_postprocess_traverser_visitor::leave(ast_iteration_statement* node)
 {
 	if (node->init_statement)
 		node->debug_sideeffects |= node->init_statement->debug_sideeffects;
@@ -488,24 +456,26 @@ bool ast_postprocess_traverser_visitor::traverse(ast_iteration_statement* node)
 		node->debug_sideeffects |= node->body->debug_sideeffects;
 	if (node->rest_expression)
 		node->debug_sideeffects |= node->rest_expression->debug_sideeffects;
-	return true;
+
+	// We pushed scope in enter()
+	if (node->mode != ast_iteration_statement::ast_do_while)
+		state->symbols->pop_scope();
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_jump_statement* node)
+void ast_postprocess_traverser_visitor::leave(ast_jump_statement* node)
 {
 	if (node->mode == ast_jump_statement::ast_discard)
 		node->debug_sideeffects |= ir_dbg_se_discard;
-	return true;
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_function_definition* node)
+void ast_postprocess_traverser_visitor::leave(ast_function_definition* node)
 {
 	node->debug_sideeffects |= ir_dbg_se_general;
 	saveFunction(node->prototype);
-	return true;
+	state->symbols->pop_scope();
 }
 
-bool ast_postprocess_traverser_visitor::traverse(ast_gs_input_layout* node)
+void ast_postprocess_traverser_visitor::leave(ast_gs_input_layout* node)
 {
 	YYLTYPE loc = node->get_location();
 	state->gs_input_prim_type_specified = true;
@@ -530,6 +500,5 @@ bool ast_postprocess_traverser_visitor::traverse(ast_gs_input_layout* node)
 						num_vertices);
 		}
 	}
-	return true;
 }
 

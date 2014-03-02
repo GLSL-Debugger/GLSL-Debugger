@@ -131,7 +131,7 @@ typedef enum {
 
 typedef struct {
     ShChangeableType type;
-    long index;
+    int index;
 } ShChangeableIndex;
 
 typedef struct {

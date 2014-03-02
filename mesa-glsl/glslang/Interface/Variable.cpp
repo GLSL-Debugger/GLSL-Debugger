@@ -480,9 +480,8 @@ ShVariable* copyShVariable(ShVariable *src)
 				"not enough memory to copy structSpec of ShVariable\n");
 		exit(1);
 	}
-	for (i = 0; i < ret->structSize; i++) {
+	for (i = 0; i < ret->structSize; i++)
 		ret->structSpec[i] = copyShVariable(src->structSpec[i]);
-	}
 
 	return ret;
 }
@@ -500,9 +499,9 @@ void freeShVariable(ShVariable **var)
 		free((*var)->name);
 		for (i = 0; i < (*var)->structSize; i++)
 			freeShVariable(&(*var)->structSpec[i]);
-		free((*var)->structSpec);
+		ralloc_free((*var)->structSpec);
 		free((*var)->structName);
-		free(*var);
+		ralloc_free(*var);
 		*var = NULL;
 	}
 }

@@ -25,9 +25,6 @@ public:
 
 	~ScopeSaver()
 	{
-		// Move global variables to the beginning of the scope
-		// TODO:
-
 		// restore scope list
 		while (!scope->is_empty() && scope->get_tail() != last){
 			exec_node *n = scope->get_tail();
@@ -41,46 +38,52 @@ private:
 	exec_list* scope;
 };
 
-
-bool ast_debugvar_traverser_visitor::traverse(class ast_expression* node)
+ast_debugvar_traverser_visitor::ast_debugvar_traverser_visitor(AstShader* _sh,
+		ShVariableList* _vl) :
+		vl(_vl), shader(_sh)
 {
-	copyScopeTo(node);
-
-	// Resolve deref from scope if not already
-	if (node->oper == ast_identifier){
-		if (node->debug_id < 0)
-			assert(!"Must not be here");
-		ShVariable* var = findShVariable(node->debug_id);
-		// Add global variables at first sight
-		if (var->builtin) {
-			addShVariable(vl, var, 0);
-			addToScope(var);
-		}
+	for(int i = 0; i < _sh->globals.numVariables; ++i) {
+		ShVariable* var = _sh->globals.variables[i];
+		addShVariable(vl, var, var->builtin);
+		addToScope(var);
 	}
+}
 
+bool ast_debugvar_traverser_visitor::enter(class ast_expression* node)
+{
+	copyScopeTo(node);
+
+	if (node->oper == ast_identifier)
+		assert(node->debug_id >= 0 || !"Must not be here");
 
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_expression_bin* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_expression_bin* node)
 {
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_function_expression* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_function_expression* node)
 {
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_aggregate_initializer* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_aggregate_initializer* node)
 {
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_compound_statement* node)
+{
+	copyScopeTo(node);
+	return true;
+}
+
+bool ast_debugvar_traverser_visitor::enter(class ast_declaration* node)
 {
 	ShVariable* var = findShVariable(node->debug_id);
 	assert(var);
@@ -89,7 +92,7 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
 			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
 
 	// Add variable to the global list of all seen variables
-	addShVariable(vl, var, 0);
+	addShVariable(vl, var, var->builtin);
 
 	if (node->initializer) {
 		node->initializer->accept(this);
@@ -116,7 +119,7 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_declaration* node)
 	return false;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_parameter_declarator* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_parameter_declarator* node)
 {
 	// No variable when void
 	if (node->is_void)
@@ -127,40 +130,53 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_parameter_declarator* no
 
 	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
 			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
-	addShVariable(vl, var, 0);
+	addShVariable(vl, var, var->builtin);
 	addToScope(var);
 	dumpScope();
 	return false;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_struct_specifier *)
+bool ast_debugvar_traverser_visitor::enter(class ast_struct_specifier *)
 {
 	// Struct specification is not declaration
 	// Do not add fields as variables
 	return false;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_case_statement* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_case_statement* node)
 {
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_selection_statement* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_case_statement_list* node)
+{
+	copyScopeTo(node);
+	return true;
+}
+
+bool ast_debugvar_traverser_visitor::enter(class ast_switch_body* node)
+{
+	copyScopeTo(node);
+	return true;
+}
+
+
+bool ast_debugvar_traverser_visitor::enter(class ast_selection_statement* node)
 {
 	// nothing can be declared here in first place
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_switch_statement* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_switch_statement* node)
 {
 	// nothing can be declared here in first place
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_iteration_statement* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_iteration_statement* node)
 {
 	// declarations made in the initialization are not in scope of the loop
 	copyScopeTo(node);
@@ -191,13 +207,13 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_iteration_statement* nod
 	return false;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_jump_statement* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_jump_statement* node)
 {
 	copyScopeTo(node);
 	return true;
 }
 
-bool ast_debugvar_traverser_visitor::traverse(class ast_function_definition* node)
+bool ast_debugvar_traverser_visitor::enter(class ast_function_definition* node)
 {
 	copyScopeTo(node);
 	const char* name = node->prototype->identifier;
@@ -222,6 +238,12 @@ bool ast_debugvar_traverser_visitor::traverse(class ast_function_definition* nod
 
 	return false;
 }
+
+void ast_debugvar_traverser_visitor::leave(class ast_expression_statement* node)
+{
+	copyScopeTo(node);
+}
+
 
 void ast_debugvar_traverser_visitor::addToScope(ShVariable* var)
 {

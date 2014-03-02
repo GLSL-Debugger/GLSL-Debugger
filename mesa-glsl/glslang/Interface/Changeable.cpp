@@ -124,7 +124,7 @@ ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx)
 				sizeof(ShChangeableIndex*), copy->numIndices);
 
 		copy->indices[copy->numIndices - 1] = createShChangeableIndexCtx(
-						c->indices[i]->type,	c->indices[i]->index, mem_ctx);
+						c->indices[i]->type, c->indices[i]->index, mem_ctx);
 	}
 
 	return copy;
@@ -185,7 +185,7 @@ void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
 
 void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, void* mem_ctx)
 {
-	if (!clout || !clin)
+	if (!clout || !clin || clin->is_empty())
 		return;
 
 	std::unordered_set<int> permits;
@@ -212,15 +212,21 @@ void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, v
 	}
 }
 
-void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
+void addShIndexToChangeableCtx(ShChangeable *c, ShChangeableIndex *idx, void* mem_ctx)
 {
 	if (!c)
 		return;
 
 	c->numIndices++;
-	c->indices = (ShChangeableIndex**) realloc(c->indices,
-			c->numIndices * sizeof(ShChangeableIndex*));
+	c->indices = (ShChangeableIndex**) reralloc_array_size(mem_ctx, c->indices,
+			sizeof(ShChangeableIndex*), c->numIndices);
 	c->indices[c->numIndices - 1] = idx;
+}
+
+void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Adding of ChangeableIndex out of shader mem.\n");
+	addShIndexToChangeableCtx(c, idx, NULL);
 }
 
 void addShIndexToChangeableList(ShChangeableList *cl, int s,

@@ -70,18 +70,21 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 	return createShChangeableIndexCtx(type, index, mem_ctx);
 }
 
-void ast_debugchange_traverser_visitor::visit(class ast_compound_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_compound_statement* node)
 {
 	// Copy all changeables from
-	foreach_list_typed (ast_node, ast, link, &node->statements) {
-		ast->accept(this);
-		copyAstChangeableList(&node->changeables, &ast->changeables, &node->scope, shader);
-	}
+	foreach_list_typed (ast_node, ast, link, &node->statements)
+		copyChangeables(node, ast);
+	return false;
 }
 
-void ast_debugchange_traverser_visitor::visit(class ast_expression_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_declarator_list* node)
 {
-	copyChangeables(node, node->expression);
+	if (node->type)
+		node->type->accept(this);
+	foreach_list_typed (ast_node, decl, link, &node->declarations)
+		copyChangeables(node, decl);
+	return false;
 }
 
 void ast_debugchange_traverser_visitor::copyChangeables(ast_node* dst, ast_node* src)
@@ -90,9 +93,10 @@ void ast_debugchange_traverser_visitor::copyChangeables(ast_node* dst, ast_node*
 		return;
 	src->accept(this);
 	copyAstChangeableList(&dst->changeables, &src->changeables, &dst->scope, shader);
+	dumpAstChangeableList(&dst->changeables);
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_expression* node)
 {
 	switch (node->oper) {
 	case ast_assign:
@@ -123,10 +127,8 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
 		if (node->subexpressions[1]) {
 			VPRINT(2, "===== right ===========================\n");
 			this->deactivate();
-			node->subexpressions[1]->accept(this);
 			// copy the changeables of right branch
-			copyAstChangeableList(&node->changeables, &node->subexpressions[1]->changeables,
-					&node->scope, shader);
+			copyChangeables(node, node->subexpressions[1]);
 			//dumpShChangeableList(&node->changeables);
 		}
 		return false;
@@ -151,30 +153,25 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
 
 	case ast_field_selection:
 	case ast_array_index: {
-		VPRINT(2,
-				"(%s) field_selection or index\n", FormatSourceRange(node->get_location()).c_str());
+		VPRINT(2, "(%s) field_selection or index\n",
+				FormatSourceRange(node->get_location()).c_str());
+		ast_expression* subnode = node->subexpressions[0];
 
-		// process left branch first
-		if (node->subexpressions[0])
-			node->subexpressions[0]->accept(this);
-
-		// then copy changeables
+		// process left branch first then copy changeables
 		// should be one or zero, otherwise we have a problem
-		copyAstChangeableList(&node->changeables, &node->subexpressions[0]->changeables,
-				&node->scope, shader);
+		copyChangeables(node, subnode);
 
 		int count = 0;
 		foreach_list(c, &node->changeables)
 			count++;
 
-		assert(
-				count <= 1 || !"DebugVar - field_selection or index to more than one changeable?");
+		assert(count <= 1 || !"DebugVar - field_selection or index to more than one changeable?");
 		if (node->changeables.is_empty())
 			return false;
 
 		ShChangeableIndex *cgbIdx = getChangeableIndex(node, shader);
 		ShChangeable* cgb = ((changeable_item*) node->changeables.get_head())->changeable;
-		addShIndexToChangeable(cgb, cgbIdx);
+		addShIndexToChangeableCtx(cgb, cgbIdx, shader);
 
 		return false;
 		break;
@@ -193,13 +190,16 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
 		if (this->isActive()) {
 			if (node->changeables.is_empty()) {
 				VPRINT(2,
-						"(%s) changeSymbol -> created %i %s\n", FormatSourceRange(node->get_location()).c_str(), node->debug_id, node->primary_expression.identifier);
+						"(%s) changeSymbol -> created %i %s\n", FormatSourceRange(
+								node->get_location()).c_str(), node->debug_id,
+								node->primary_expression.identifier);
 				ShChangeable* cgb = createShChangeableCtx(node->debug_id, shader);
 				changeable_item* cgbi = new (shader) changeable_item(cgb);
 				node->changeables.push_tail(cgbi);
 			} else {
-				VPRINT(2,
-						"(%s) changeSymbol -> kept %i %s\n", FormatSourceRange(node->get_location()).c_str(), node->debug_id, node->primary_expression.identifier);
+				VPRINT(2, "(%s) changeSymbol -> kept %i %s\n", FormatSourceRange(
+						node->get_location()).c_str(), node->debug_id,
+						node->primary_expression.identifier);
 			}
 		}
 		return false;
@@ -230,7 +230,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_expression* node)
 	return true;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_expression_bin* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_expression_bin* node)
 {
 	VPRINT(2, "(%s) changeBinExpression\n", FormatSourceRange(node->get_location()).c_str());
 	//dumpShChangeableList(&node->changeables);
@@ -240,7 +240,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_expression_bin* node)
 	return true;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_function_expression* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_function_expression* node)
 {
 	VPRINT(2, "(%s) change call\n", FormatSourceRange(node->get_location()).c_str());
 
@@ -287,7 +287,13 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_function_expression* 
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_declaration* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_expression_statement* node)
+{
+	copyChangeables(node, node->expression);
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::enter(class ast_declaration* node)
 {
 	dumpAstChangeableList(&node->changeables);
 
@@ -305,7 +311,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_declaration* node)
 	return true;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_parameter_declarator* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_parameter_declarator* node)
 {
 	if (node->type->qualifier.flags.q.in) {
 		if (node->changeables.is_empty()) {
@@ -322,7 +328,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_parameter_declarator*
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_function* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_function* node)
 {
 	// do not parse an function if this was already done before
 	// again this is due to the (*^@*$ function prototypes
@@ -339,7 +345,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_function* node)
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_case_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_case_statement* node)
 {
 	// just traverse and copy changeables all together
 	this->deactivate();
@@ -348,14 +354,23 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_case_statement* node)
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_switch_body* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_case_statement_list* node)
+{
+	++this->depth;
+	foreach_list_typed (ast_node, ast, link, &node->cases)
+		copyChangeables(node, ast);
+	--this->depth;
+	return false;
+}
+
+bool ast_debugchange_traverser_visitor::enter(class ast_switch_body* node)
 {
 	this->deactivate();
 	copyChangeables(node, node->stmts);
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_selection_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_selection_statement* node)
 {
 	// just traverse and copy changeables all together
 	this->deactivate();
@@ -365,7 +380,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_selection_statement* 
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_switch_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_switch_statement* node)
 {
 	this->deactivate();
 	copyChangeables(node, node->test_expression);
@@ -373,7 +388,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_switch_statement* nod
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_iteration_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_iteration_statement* node)
 {
 	// just traverse and copy changeables all together
 	this->deactivate();
@@ -393,7 +408,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_iteration_statement* 
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_jump_statement* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_jump_statement* node)
 {
 	if (node->opt_return_value) {
 		// simply traverse and copy result
@@ -403,7 +418,7 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_jump_statement* node)
 	return false;
 }
 
-bool ast_debugchange_traverser_visitor::traverse(class ast_function_definition* node)
+bool ast_debugchange_traverser_visitor::enter(class ast_function_definition* node)
 {
 	// do not parse an function if this was already done before
 	// again this is due to the (*^@*$ function prototypes
@@ -419,4 +434,3 @@ bool ast_debugchange_traverser_visitor::traverse(class ast_function_definition* 
 	// parameters changeables in prototype if needed
 	return false;
 }
-

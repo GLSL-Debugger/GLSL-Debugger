@@ -14,24 +14,26 @@
 
 class ast_debugvar_traverser_visitor : public ast_traverse_visitor {
 public:
-	ast_debugvar_traverser_visitor(AstShader* _sh, ShVariableList* _vl) :
-			vl(_vl), shader(_sh)
-	{
-	}
+	ast_debugvar_traverser_visitor(AstShader* _sh, ShVariableList* _vl);
 
-	virtual bool traverse(class ast_expression *);
-	virtual bool traverse(class ast_expression_bin *);
-	virtual bool traverse(class ast_function_expression *);
-	virtual bool traverse(class ast_aggregate_initializer *);
-	virtual bool traverse(class ast_declaration *);
-	virtual bool traverse(class ast_parameter_declarator *);
-	virtual bool traverse(class ast_struct_specifier *);
-	virtual bool traverse(class ast_case_statement *);
-	virtual bool traverse(class ast_selection_statement *);
-	virtual bool traverse(class ast_switch_statement *);
-	virtual bool traverse(class ast_iteration_statement *);
-	virtual bool traverse(class ast_jump_statement *);
-	virtual bool traverse(class ast_function_definition *);
+	virtual bool enter(class ast_expression *);
+	virtual bool enter(class ast_expression_bin *);
+	virtual bool enter(class ast_function_expression *);
+	virtual bool enter(class ast_aggregate_initializer *);
+	virtual bool enter(class ast_compound_statement *);
+	virtual bool enter(class ast_declaration *);
+	virtual bool enter(class ast_parameter_declarator *);
+	virtual bool enter(class ast_struct_specifier *);
+	virtual bool enter(class ast_case_statement *);
+	virtual bool enter(class ast_case_statement_list *);
+	virtual bool enter(class ast_switch_body *);
+	virtual bool enter(class ast_selection_statement *);
+	virtual bool enter(class ast_switch_statement *);
+	virtual bool enter(class ast_iteration_statement *);
+	virtual bool enter(class ast_jump_statement *);
+	virtual bool enter(class ast_function_definition *);
+
+	virtual void leave(class ast_expression_statement *);
 
 	void addToScope(ShVariable*);
 	void dumpScope() { dumpScope(&scope); }

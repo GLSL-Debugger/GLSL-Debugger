@@ -77,13 +77,16 @@ public:
 
 	virtual void testShader(int) {}
 
-	virtual void doComparison(AstShader* sh, bool do_actual_cmp=true)
+	virtual void doComparison(AstShader* sh, bool do_actual_cmp=true, bool print=false)
 	{
 		if (!sh)
 			return;
 
 		ast_call_visitor v(this);
 		v.visit(sh->head);
+
+		if (print)
+			std::cout << results.str();
 
 		if (!do_actual_cmp)
 			return;

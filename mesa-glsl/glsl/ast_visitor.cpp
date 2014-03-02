@@ -21,9 +21,8 @@ void ast_traverse_visitor::visit(class ast_node *)
 
 void ast_traverse_visitor::visit(class ast_expression* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	++this->depth;
 
@@ -80,30 +79,26 @@ void ast_traverse_visitor::visit(class ast_expression* node)
 	}
 
 	--this->depth;
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_expression_bin* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	++this->depth;
 	node->subexpressions[0]->accept(this);
 	node->subexpressions[1]->accept(this);
 	--this->depth;
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_function_expression* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	// Type
 	if (node->is_constructor())
@@ -116,15 +111,13 @@ void ast_traverse_visitor::visit(class ast_function_expression* node)
 	}
 	--this->depth;
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_array_specifier* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	this->depth++;
 	foreach_list_const(n, &node->array_dimensions) {
@@ -133,8 +126,7 @@ void ast_traverse_visitor::visit(class ast_array_specifier* node)
 	}
 	this->depth--;
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_aggregate_initializer*)
@@ -146,6 +138,9 @@ void ast_traverse_visitor::visit(class ast_aggregate_initializer*)
 
 void ast_traverse_visitor::visit(class ast_compound_statement* node)
 {
+	if (!this->enter(node))
+		return;
+
 	if (node->new_scope)
 		depth++;
 
@@ -154,13 +149,14 @@ void ast_traverse_visitor::visit(class ast_compound_statement* node)
 
 	if (node->new_scope)
 		depth--;
+
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_declaration* node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	++this->depth;
 	if (node->array_specifier)
@@ -170,15 +166,13 @@ void ast_traverse_visitor::visit(class ast_declaration* node)
 
 	--this->depth;
 
-	if (flags & (traverse_postvisit | traverse_debugvisit))
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_struct_specifier* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	++this->depth;
 
@@ -187,21 +181,18 @@ void ast_traverse_visitor::visit(class ast_struct_specifier* node)
 
 	--this->depth;
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_type_specifier* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->structure != NULL && node->structure->is_declaration)
 		node->structure->accept(this);
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_fully_specified_type* node)
@@ -212,55 +203,59 @@ void ast_traverse_visitor::visit(class ast_fully_specified_type* node)
 
 void ast_traverse_visitor::visit(class ast_declarator_list* node)
 {
+	if (!this->enter(node))
+		return;
+
 	if (node->type)
 		node->type->accept(this);
 	foreach_list_typed (ast_node, decl, link, &node->declarations)
 		decl->accept(this);
+
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_parameter_declarator* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->array_specifier)
 		node->array_specifier->accept(this);
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_function* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	foreach_list_typed (ast_node, decl, link, &node->parameters)
 		decl->accept(this);
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_expression_statement* node)
 {
+	if (!this->enter(node))
+		return;
+
 	if (node->expression)
 		node->expression->accept(this);
+
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_case_label* node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->test_value)
 		node->test_value->accept(this);
 
-	if (flags & (traverse_postvisit | traverse_debugvisit))
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_case_label_list* node)
@@ -271,9 +266,8 @@ void ast_traverse_visitor::visit(class ast_case_label_list* node)
 
 void ast_traverse_visitor::visit(class ast_case_statement* node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->labels)
 		node->labels->accept(this);
@@ -283,214 +277,207 @@ void ast_traverse_visitor::visit(class ast_case_statement* node)
 		ast->accept(this);
 	--this->depth;
 
-	if (flags & (traverse_postvisit | traverse_debugvisit))
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_case_statement_list* node)
 {
+	if (!this->enter(node))
+		return;
+
 	++this->depth;
 	foreach_list_typed (ast_node, ast, link, &node->cases)
 		ast->accept(this);
 	--this->depth;
+
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_switch_body* node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->stmts)
 		node->stmts->accept(this);
 
-	if (flags & (traverse_postvisit | traverse_debugvisit))
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_selection_statement* node)
 {
-	if (flags & traverse_debugvisit) {
-		bool visit;
-		/* Visit node for optional check of condition */
-		if (node->debug_state_internal == ast_dbg_if_unset
-				|| node->debug_state_internal == ast_dbg_if_init
-				|| node->debug_state_internal == ast_dbg_if_condition_passed)
-			visit = this->traverse(node);
+//	if (flags & traverse_debugvisit) {
+//		bool visit;
+//		/* Visit node for optional check of condition */
+//		if (node->debug_state_internal == ast_dbg_if_unset
+//				|| node->debug_state_internal == ast_dbg_if_init
+//				|| node->debug_state_internal == ast_dbg_if_condition_passed)
+//			visit = this->traverse(node);
+//
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_if_condition
+//				&& node->condition)
+//			node->condition->accept(this);
+//
+//		/* Visit node again for choosing debugged branch */
+//		if (node->debug_state_internal == ast_dbg_if_condition)
+//			visit = this->traverse(node);
+//
+//		if (visit) {
+//			++depth;
+//			if (node->debug_state_internal == ast_dbg_if_then
+//					&& node->then_statement)
+//				node->then_statement->accept(this);
+//			if (node->debug_state_internal == ast_dbg_if_else
+//					&& node->else_statement)
+//				node->else_statement->accept(this);
+//			--depth;
+//		}
+//
+//		/* Visit node again for preparation of pass */
+//		if (node->debug_state_internal == ast_dbg_if_then
+//				|| node->debug_state_internal == ast_dbg_if_else)
+//			visit = this->traverse(node);
+//
+//	} else {
+	if (!this->enter(node))
+		return;
 
-		if (visit
-				&& node->debug_state_internal == ast_dbg_if_condition
-				&& node->condition)
-			node->condition->accept(this);
+	if (node->condition)
+		node->condition->accept(this);
+	++depth;
+	if (node->then_statement)
+		node->then_statement->accept(this);
+	if (node->else_statement)
+		node->else_statement->accept(this);
+	--depth;
 
-		/* Visit node again for choosing debugged branch */
-		if (node->debug_state_internal == ast_dbg_if_condition)
-			visit = this->traverse(node);
-
-		if (visit) {
-			++depth;
-			if (node->debug_state_internal == ast_dbg_if_then
-					&& node->then_statement)
-				node->then_statement->accept(this);
-			if (node->debug_state_internal == ast_dbg_if_else
-					&& node->else_statement)
-				node->else_statement->accept(this);
-			--depth;
-		}
-
-		/* Visit node again for preparation of pass */
-		if (node->debug_state_internal == ast_dbg_if_then
-				|| node->debug_state_internal == ast_dbg_if_else)
-			visit = this->traverse(node);
-
-	} else {
-		if (flags & traverse_previsit)
-			if (!this->traverse(node))
-				return;
-
-		if (node->condition)
-			node->condition->accept(this);
-		++depth;
-		if (node->then_statement)
-			node->then_statement->accept(this);
-		if (node->else_statement)
-			node->else_statement->accept(this);
-		--depth;
-
-		if (flags & traverse_postvisit)
-			this->traverse(node);
-	}
+	this->leave(node);
+//	}
 }
 
 void ast_traverse_visitor::visit(class ast_switch_statement* node)
 {
-	if (flags & traverse_debugvisit) {
-		bool visit;
-		/* Visit node for optional check of condition */
-		if (node->debug_state_internal == ast_dbg_if_unset
-				|| node->debug_state_internal == ast_dbg_if_init
-				|| node->debug_state_internal == ast_dbg_if_condition_passed)
-			visit = this->traverse(node);
+//	if (flags & traverse_debugvisit) {
+//		bool visit;
+//		/* Visit node for optional check of condition */
+//		if (node->debug_state_internal == ast_dbg_if_unset
+//				|| node->debug_state_internal == ast_dbg_if_init
+//				|| node->debug_state_internal == ast_dbg_if_condition_passed)
+//			visit = this->traverse(node);
+//
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_if_condition
+//				&& node->test_expression)
+//			node->test_expression->accept(this);
+//
+//		/* Visit node again for choosing debugged branch */
+//		if (node->debug_state_internal == ast_dbg_if_condition)
+//			visit = this->traverse(node);
+//
+//		// TODO: ?
+//	} else {
+	if (!this->enter(node))
+		return;
 
-		if (visit
-				&& node->debug_state_internal == ast_dbg_if_condition
-				&& node->test_expression)
-			node->test_expression->accept(this);
+	if (node->test_expression)
+		node->test_expression->accept(this);
 
-		/* Visit node again for choosing debugged branch */
-		if (node->debug_state_internal == ast_dbg_if_condition)
-			visit = this->traverse(node);
+	++this->depth;
+	if (node->body)
+		node->body->accept(this);
+	--this->depth;
 
-		// TODO: ?
-	} else {
-		if (flags & traverse_previsit)
-			if (!this->traverse(node))
-				return;
-
-		if (node->test_expression)
-			node->test_expression->accept(this);
-
-		++this->depth;
-		if (node->body)
-			node->body->accept(this);
-		--this->depth;
-
-		if (flags & traverse_postvisit)
-			this->traverse(node);
-	}
+	this->leave(node);
+//	}
 }
 
 void ast_traverse_visitor::visit(class ast_iteration_statement* node)
 {
-	if (flags & traverse_debugvisit) {
-		bool visit = true;
+//	if (flags & traverse_debugvisit) {
+//		bool visit = true;
+//
+//		/* Visit node first */
+//		if (node->debug_state_internal == ast_dbg_loop_unset
+//				|| node->debug_state_internal == ast_dbg_loop_qyr_init)
+//			visit = this->traverse(node);
+//
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_loop_wrk_init
+//				&& node->init_statement)
+//			node->init_statement->accept(this);
+//
+//		/* Visit node again for test */
+//		if (node->debug_state_internal == ast_dbg_loop_wrk_init
+//				|| node->debug_state_internal == ast_dbg_loop_qyr_test)
+//			visit = this->traverse(node);
+//
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_loop_wrk_test
+//				&& node->condition)
+//			node->condition->accept(this);
+//
+//
+//		/* Visit node again for flow selection */
+//		if (node->debug_state_internal == ast_dbg_loop_wrk_test
+//				|| node->debug_state_internal == ast_dbg_loop_select_flow)
+//			visit = this->traverse(node);
+//
+//		++depth;
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_loop_wrk_body
+//				&& node->body)
+//			node->body->accept(this);
+//		--depth;
+//
+//		/* Visit node again for terminal */
+//		if (node->debug_state_internal == ast_dbg_loop_wrk_body
+//				|| node->debug_state_internal == ast_dbg_loop_qyr_terminal)
+//			visit = this->traverse(node);
+//
+//		if (visit
+//				&& node->debug_state_internal == ast_dbg_loop_wrk_terminal
+//				&& node->rest_expression)
+//			node->rest_expression->accept(this);
+//
+//		/* Visit node again for terminal */
+//		if (node->debug_state_internal == ast_dbg_loop_wrk_terminal)
+//			visit = this->traverse(node);
+//
+//	} else {
+	if (!this->enter(node))
+		return;
 
-		/* Visit node first */
-		if (node->debug_state_internal == ast_dbg_loop_unset
-				|| node->debug_state_internal == ast_dbg_loop_qyr_init)
-			visit = this->traverse(node);
+	if (node->init_statement)
+		node->init_statement->accept(this);
+	if (node->condition)
+		node->condition->accept(this);
+	++depth;
+	if (node->body)
+		node->body->accept(this);
+	--depth;
+	if (node->rest_expression)
+		node->rest_expression->accept(this);
 
-		if (visit
-				&& node->debug_state_internal == ast_dbg_loop_wrk_init
-				&& node->init_statement)
-			node->init_statement->accept(this);
-
-		/* Visit node again for test */
-		if (node->debug_state_internal == ast_dbg_loop_wrk_init
-				|| node->debug_state_internal == ast_dbg_loop_qyr_test)
-			visit = this->traverse(node);
-
-		if (visit
-				&& node->debug_state_internal == ast_dbg_loop_wrk_test
-				&& node->condition)
-			node->condition->accept(this);
-
-
-		/* Visit node again for flow selection */
-		if (node->debug_state_internal == ast_dbg_loop_wrk_test
-				|| node->debug_state_internal == ast_dbg_loop_select_flow)
-			visit = this->traverse(node);
-
-		++depth;
-		if (visit
-				&& node->debug_state_internal == ast_dbg_loop_wrk_body
-				&& node->body)
-			node->body->accept(this);
-		--depth;
-
-		/* Visit node again for terminal */
-		if (node->debug_state_internal == ast_dbg_loop_wrk_body
-				|| node->debug_state_internal == ast_dbg_loop_qyr_terminal)
-			visit = this->traverse(node);
-
-		if (visit
-				&& node->debug_state_internal == ast_dbg_loop_wrk_terminal
-				&& node->rest_expression)
-			node->rest_expression->accept(this);
-
-		/* Visit node again for terminal */
-		if (node->debug_state_internal == ast_dbg_loop_wrk_terminal)
-			visit = this->traverse(node);
-
-	} else {
-		if (flags & traverse_previsit)
-			if (!this->traverse(node))
-				return;
-
-		if (node->init_statement)
-			node->init_statement->accept(this);
-		if (node->condition)
-			node->condition->accept(this);
-		++depth;
-		if (node->body)
-			node->body->accept(this);
-		--depth;
-		if (node->rest_expression)
-			node->rest_expression->accept(this);
-
-		if (flags & traverse_postvisit)
-			this->traverse(node);
-	}
+	this->leave(node);
+//	}
 }
 
 void ast_traverse_visitor::visit(class ast_jump_statement* node)
 {
-	if (flags & traverse_previsit)
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->opt_return_value)
 		node->opt_return_value->accept(this);
 
-	if (flags & (traverse_postvisit | traverse_debugvisit))
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_function_definition* node)
 {
-	if (flags & (traverse_previsit | traverse_debugvisit))
-		if (!this->traverse(node))
-			return;
+	if (!this->enter(node))
+		return;
 
 	if (node->prototype)
 		node->prototype->accept(this);
@@ -498,8 +485,7 @@ void ast_traverse_visitor::visit(class ast_function_definition* node)
 	if (node->body)
 		node->body->accept(this);
 
-	if (flags & traverse_postvisit)
-		this->traverse(node);
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_interface_block*)
@@ -510,5 +496,7 @@ void ast_traverse_visitor::visit(class ast_interface_block*)
 void ast_traverse_visitor::visit(class ast_gs_input_layout* node)
 {
 	// It can be used to setup variable size for inputs preceded this declaration
-	this->traverse(node);
+	if (!this->enter(node))
+		return;
+	this->leave(node);
 }
