@@ -165,7 +165,6 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 	/* Check for empty parse tree */
 	if (!shader) {
 		g.result.status = DBG_RS_STATUS_ERROR;
-		g.result.position = DBG_RS_POSITION_UNSET;
 		return &g.result;
 	}
 
@@ -180,11 +179,6 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 	exec_list* list = shader->head;
 	ast_node* root = exec_node_data(ast_node, shader->head, link);
 
-	g.it->preVisit = false;
-	g.it->postVisit = false;
-	g.it->debugVisit = true;
-
-
 	/* Check for finished parsing */
 	if (dbgBehaviour != DBG_BH_RESET && root->debug_state == ast_dbg_state_end) {
 		VPRINT(1, "!!! debugging already finished !!!\n");
@@ -192,25 +186,22 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 		return &g.result;
 	}
 
+	ast_debugpath_traverser_visitor dbgpath;
+
 	/* In case of a reset clear DbgStates and empty stack */
 	if (dbgBehaviour == DBG_BH_RESET) {
-		g.it->operation = OTOpReset;
-		while (!(g.it->parseStack.empty()))
-			g.it->parseStack.pop();
-		VPRINT(1, "********* reset traverse **********\n");
-		g.it->visit(list);
+		g.it->parseStack.clear();
+		dbgpath.run(list, DPOpReset);
 		return NULL;
 	}
 
 	/* Clear debug path, i.e remove all DbgStPath */
-	g.it->operation = OTOpPathClear;
-	VPRINT(1, "********* clear path traverse **********\n");
-	g.it->visit(list);
+	dbgpath.run(list, DPOpPathClear);
 
 	/* Initialize parse tree for debugging if necessary */
 	g.it->operation = OTOpTargetUnset;
 	if (g.it->parseStack.empty()) {
-		ast_function* main = getFunctionByName(MAIN_FUNC_SIGNATURE);
+		ast_function_definition* main = getFunctionByName(MAIN_FUNC_SIGNATURE);
 		if (!main) {
 			g.result.status = DBG_RS_STATUS_ERROR;
 			return &g.result;
@@ -230,12 +221,7 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 		return &g.result;
 	} else {
 		/* Build up new debug path; all DbgStPath */
-		g.it->operation = OTOpPathBuild;
-		g.it->preVisit = false;
-		g.it->postVisit = true;
-		g.it->debugVisit = false;
-		VPRINT(1, "********* create path traverse **********\n");
-		g.it->visit(list);
+		dbgpath.run(list, DPOpPathBuild);
 	}
 
 	VPRINT(1, "********* traverse scope **********\n");

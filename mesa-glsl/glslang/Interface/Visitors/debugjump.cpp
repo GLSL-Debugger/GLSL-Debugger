@@ -10,15 +10,10 @@
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
 
-#define NOT_DEBUGGABLE_RETURN \
-	if( this->operation != OTOpPathClear && \
-    	this->operation != OTOpPathBuild && \
-    	this->operation != OTOpReset ) return
-
-#define DEFAULT_DEBUGABLE(ir)  \
+#define DEFAULT_DEBUGABLE(node)  \
 	if( this->operation == OTOpPathClear || \
     	this->operation == OTOpPathBuild || \
-    	this->operation == OTOpReset ) processDebugable(ir, &this->operation);
+    	this->operation == OTOpReset ) processDebugable(node, &this->operation);
 
 static void setDbgResultRange(DbgRsRange& r, const YYLTYPE& range)
 {
@@ -35,8 +30,8 @@ void ast_debugjump_traverser_visitor::setGobalScope(exec_list *s)
 	addScopeToScopeStack(this->result.scopeStack, s, shader);
 }
 
-void ast_debugjump_traverser_visitor::processDebugable(ast_node *node, OTOperation *op)
 // Default handling of a node that can be debugged
+void ast_debugjump_traverser_visitor::processDebugable(ast_node *node, OTOperation *op)
 {
 	VPRINT(3, "process Debugable L:%s Op:%i DbgSt:%i\n",
 			FormatSourceRange(node->get_location()).c_str(), *op, node->debug_state);
@@ -93,45 +88,7 @@ void ast_debugjump_traverser_visitor::processDebugable(ast_node *node, OTOperati
 			break;
 		}
 		break;
-	case OTOpPathClear:
-		if (node->debug_state == ast_dbg_state_path)
-			node->debug_state = ast_dbg_state_unset;
-		break;
-	case OTOpPathBuild:
-		switch (node->debug_state) {
-		case ast_dbg_state_unset: {
-//			/* Check children for DebugState */
-//			newState = ast_dbg_state_unset;
-//			switch (node->ast_type) {
-//			case ast_type_assignment: {
-//				ast_assignment* as = node->as_assignment();
-//				if (as->rhs->debug_target != ast_dbg_state_unset
-//						|| as->lhs->debug_target != ast_dbg_state_unset)
-//					newState = ast_dbg_state_path;
-//				break;
-//			}
-//			case ast_type_expression: {
-//				ast_expression* exp = node->as_expression();
-//				unsigned ops = exp->get_num_operands();
-//				for (unsigned i = 0; i < ops; ++i) {
-//					if (exp->operands[i] && exp->operands[i]->debug_state != ast_dbg_state_unset)
-//						newState = ast_dbg_state_path;
-//				}
-//				break;
-//			}
-//			default:
-//				break;
-//			}
-//			node->debug_state = newState;
-			break;
-		}
-		default:
-			break;
-		}
-		break;
-	case OTOpReset:
-		node->debug_state = ast_dbg_state_unset;
-		break;
+
 	default:
 		break;
 	}
@@ -169,8 +126,7 @@ bool ir_debugjump_traverser_visitor::visitIr(ir_swizzle* ir)
 
 bool ir_debugjump_traverser_visitor::visitIr(ir_assignment* ir)
 {
-	VPRINT( 2,
-			"process Assignment L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
+	VPRINT(2, "process Assignment L:%s DbgSt:%i\n", FormatSourceRange(ir->yy_location).c_str(), ir->debug_state);
 
 	processDebugable(ir, &this->operation);
 
@@ -454,19 +410,11 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_definition* node)
 			VPRINT( 2, "\t ---- stack empty, finished ----\n");
 			this->operation = OTOpFinished;
 		}
-	} else if (this->operation != OTOpTargetUnset){
-		processDebugable(node, &this->operation);
-		if (this->operation == OTOpPathBuild && node->body) {
-			VPRINT(6, "getDebugState: %i\n", node->body->debug_state);
-			if (node->body->debug_state != ast_dbg_state_unset)
-				node->debug_state = ast_dbg_state_path;
-		}
 	}
 }
 
 void ast_debugjump_traverser_visitor::leave(ast_jump_statement* node)
 {
-	NOT_DEBUGGABLE_RETURN;
 	OTOperation old_oper = this->operation;
 	processDebugable(node, &this->operation);
 	if (node->debug_state != ast_dbg_state_unset)
@@ -475,10 +423,6 @@ void ast_debugjump_traverser_visitor::leave(ast_jump_statement* node)
 		result.position = DBG_RS_POSITION_BRANCH;
 		setDbgResultRange(result.range, node->get_location());
 		setGobalScope(&node->scope);
-	} else if (old_oper == OTOpPathBuild) {
-		if (node->opt_return_value
-				&& node->opt_return_value->debug_state != ast_dbg_state_unset)
-			node->debug_state = ast_dbg_state_path;
 	}
 }
 
@@ -633,32 +577,6 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 			}
 		}
 		break;
-	case OTOpPathClear:
-		/* Conditional is intentionally not visited by post-traverser */
-		node->condition->accept(this);
-		if (node->debug_state == ast_dbg_state_path)
-			node->debug_state = ast_dbg_state_unset;
-		return true;
-	case OTOpPathBuild:
-		if (node->debug_state == ast_dbg_state_unset) {
-			/* Check conditional and branches */
-			if (dbg_state_not_match(node->then_statement, ast_dbg_state_unset)
-					|| dbg_state_not_match(node->else_statement, ast_dbg_state_unset)
-					|| node->condition->debug_state != ast_dbg_state_unset)
-				node->debug_state = ast_dbg_state_path;
-		}
-		return false;
-	case OTOpReset:
-		/* Conditional is intentionally not visited by post-traverser */
-		if (node->condition)
-			node->condition->accept(this);
-		if (node->then_statement)
-			node->then_statement->accept(this);
-		if (node->else_statement)
-			node->else_statement->accept(this);
-		node->debug_state = ast_dbg_state_unset;
-		node->debug_state_internal = ast_dbg_if_unset;
-		return false;
 	default:
 		break;
 	}
@@ -910,34 +828,6 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 			}
 		}
 		break;
-	case OTOpPathClear:
-		if (node->debug_state == ast_dbg_state_path)
-			node->debug_state = ast_dbg_state_unset;
-		return true;
-	case OTOpPathBuild:
-		if (node->debug_state == ast_dbg_state_unset) {
-			/* Check init, test, terminal, and body */
-			if (dbg_state_not_match(node->init_statement, ast_dbg_state_unset)
-					|| dbg_state_not_match(node->condition, ast_dbg_state_unset)
-					|| dbg_state_not_match(node->rest_expression, ast_dbg_state_unset)
-					|| dbg_state_not_match(node->body, ast_dbg_state_unset))
-				node->debug_state = ir_dbg_state_path;
-		}
-		return false;
-	case OTOpReset:
-		if (node->init_statement)
-			node->init_statement->accept(this);
-		if (node->condition)
-			node->condition->accept(this);
-		if (node->rest_expression)
-			node->rest_expression->accept(this);
-		if (node->body)
-			node->body->accept(this);
-		node->debug_state = ast_dbg_state_unset;
-		node->debug_state_internal = ast_dbg_loop_unset;
-		/* Reset loop counter */
-		node->debug_iter = 0;
-		return false;
 	default:
 		break;
 	}

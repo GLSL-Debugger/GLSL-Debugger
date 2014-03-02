@@ -50,6 +50,16 @@ enum ast_dbg_state_internal_if {
 	ast_dbg_if_passed             // debugging is past selection
 };
 
+enum ast_dbg_state_internal_switch {
+	ast_dbg_switch_unset,             // not debugged so far
+	ast_dbg_switch_init,              // already visited once
+	ast_dbg_switch_condition,         // condition in process
+	ast_dbg_switch_condition_passed,  // condition processed
+	ast_dbg_switch_select_flow,       // select branch to debug
+	ast_dbg_switch_passed                 // debugging is past selection
+};
+
+
 enum ast_dbg_state_internal_loop {
 	ast_dbg_loop_unset,
 	ast_dbg_loop_qyr_init,
@@ -1044,7 +1054,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
-   enum ast_dbg_state_internal_if debug_state_internal;
+   enum ast_dbg_state_internal_switch debug_state_internal;
 #endif
 
    ast_expression *test_expression;

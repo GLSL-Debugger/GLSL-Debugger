@@ -29,6 +29,9 @@ void AstStack::push(ast_node* node)
 
 void AstStack::pop(void)
 {
+	if (empty())
+		return;
+
 	n--;
 	s = (ast_node**) realloc(s, n * sizeof(ast_node*));
 }
@@ -45,4 +48,10 @@ ast_node* AstStack::top(void)
 int AstStack::empty(void)
 {
 	return (n == 0);
+}
+
+void AstStack::clear()
+{
+	while (!empty())
+		pop();
 }

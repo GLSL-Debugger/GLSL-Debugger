@@ -16,9 +16,6 @@
 enum OTOperation {
     OTOpTargetUnset,         // Invalidate actual target
     OTOpTargetSet,           // Look for new target
-    OTOpPathClear,           // Clear all path nodes, but not targets
-    OTOpPathBuild,           // Construct path from root to targets
-    OTOpReset,               // Reconstruct initial debug state
     OTOpDone,                // Do no harm, i.e. don't change anything anymore
     OTOpFinished             // Reached end of program, stop debugging
 };
@@ -65,9 +62,6 @@ public:
 	virtual bool enter(class ast_selection_statement *);
 	virtual bool enter(class ast_iteration_statement *);
 
-
-
-
 	OTOperation operation;
     AstStack parseStack;
     int dbgBehaviour;
@@ -77,7 +71,6 @@ public:
     AstShader* shader;
     DbgResult& result;
 };
-
 
 class scopeList;
 

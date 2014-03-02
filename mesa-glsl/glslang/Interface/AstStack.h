@@ -19,6 +19,7 @@ public:
 	ast_node* top(void);
 
 	int empty(void);
+	void clear();
 
 private:
 	int n;
