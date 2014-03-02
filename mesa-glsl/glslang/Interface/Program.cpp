@@ -43,7 +43,7 @@
 
 
 static struct {
-	ir_debugjump_traverser_visitor* it;
+	ast_debugjump_traverser_visitor* it;
     DbgResult result;
 } g;
 
@@ -129,119 +129,120 @@ void clearTraverseDebugJump(void)
     g.it = NULL;
 }
 
+static void resetGlobals()
+{
+	/* Setup scope if neccessary */
+	initGlobalScope();
+	initGlobalScopeStack();
+	initGlobalChangeables();
+
+	g.result.range.left.line = 0;
+	g.result.range.left.colum = 0;
+	g.result.range.right.line = 0;
+	g.result.range.right.colum = 0;
+
+	clearGlobalScope();
+	clearGlobalScopeStack();
+	clearGlobalChangeables();
+
+	/* Check validity of debug request */
+	g.result.status = DBG_RS_STATUS_UNSET;
+	g.result.position = DBG_RS_POSITION_UNSET;
+	g.result.loopIteration = 0;
+	g.result.passedEmitVertex = false;
+	g.result.passedDiscard = false;
+}
 
 //
 //  Generate code from the given parse tree
 //
-DbgResult* ShaderTraverse( struct gl_shader* shader, int debugOptions, int dbgBehaviour )
+DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 {
 	UNUSED_ARG(debugOptions)
 
-    /* Setup scope if neccessary */
-    initGlobalScope();
-    initGlobalScopeStack();
-    initGlobalChangeables();
+	resetGlobals();
 
-    g.result.range.left.line = 0;
-    g.result.range.left.colum = 0;
-    g.result.range.right.line = 0;
-    g.result.range.right.colum = 0;
+	/* Check for empty parse tree */
+	if (!shader) {
+		g.result.status = DBG_RS_STATUS_ERROR;
+		g.result.position = DBG_RS_POSITION_UNSET;
+		return &g.result;
+	}
 
-    clearGlobalScope();
-    clearGlobalScopeStack();
-    clearGlobalChangeables();
+	if (!g.it)
+		g.it = new ast_debugjump_traverser_visitor(g.result);
 
-    /* Check for empty parse tree */
-    if (!shader) {
-        g.result.status = DBG_RS_STATUS_ERROR;
-        g.result.position = DBG_RS_POSITION_UNSET;
-        return &g.result;
-    }
+	g.it->shader = shader;
+	g.it->vertexEmited = false;
+	g.it->discardPassed = false;
+	g.it->dbgBehaviour = dbgBehaviour;
 
-    /* Check validity of debug request */
-    g.result.status = DBG_RS_STATUS_UNSET;
-    g.result.position = DBG_RS_POSITION_UNSET;
-    g.result.loopIteration = 0;
-    g.result.passedEmitVertex = false;
-    g.result.passedDiscard = false;
+	exec_list* list = shader->head;
+	ast_node* root = exec_node_data(ast_node, shader->head, link);
 
-    if (!g.it)
-        g.it = new ir_debugjump_traverser_visitor(g.result);
-
-    g.it->vertexEmited = false;
-    g.it->discardPassed = false;
-
-    exec_list* list = shader->ir;
-    ir_instruction* root = (ir_instruction*)list->head;
-    g.it->preVisit = false;
-    g.it->postVisit = false;
-    g.it->debugVisit = true;
-    g.it->dbgBehaviour = dbgBehaviour;
-
-    /* Check for finished parsing */
-    if (dbgBehaviour != DBG_BH_RESET  &&
-        root->debug_state == ir_dbg_state_end) {
-        VPRINT(1, "!!! debugging already finished !!!\n");
-        g.result.status = DBG_RS_STATUS_FINISHED;
-        return &g.result;
-    }
+	g.it->preVisit = false;
+	g.it->postVisit = false;
+	g.it->debugVisit = true;
 
 
-    /* In case of a reset clear DbgStates and empty stack */
-    if (dbgBehaviour == DBG_BH_RESET) {
-        g.it->operation = OTOpReset;
-        while (!(g.it->parseStack.empty())) {
-            g.it->parseStack.pop();
-        }
-        VPRINT(1, "********* reset traverse **********\n");
-        g.it->visit(list);
-        return NULL;
-    }
+	/* Check for finished parsing */
+	if (dbgBehaviour != DBG_BH_RESET && root->debug_state == ast_dbg_state_end) {
+		VPRINT(1, "!!! debugging already finished !!!\n");
+		g.result.status = DBG_RS_STATUS_FINISHED;
+		return &g.result;
+	}
 
+	/* In case of a reset clear DbgStates and empty stack */
+	if (dbgBehaviour == DBG_BH_RESET) {
+		g.it->operation = OTOpReset;
+		while (!(g.it->parseStack.empty()))
+			g.it->parseStack.pop();
+		VPRINT(1, "********* reset traverse **********\n");
+		g.it->visit(list);
+		return NULL;
+	}
 
-    /* Clear debug path, i.e remove all DbgStPath */
-    g.it->operation = OTOpPathClear;
-    VPRINT(1, "********* clear path traverse **********\n");
-    g.it->visit(list);
+	/* Clear debug path, i.e remove all DbgStPath */
+	g.it->operation = OTOpPathClear;
+	VPRINT(1, "********* clear path traverse **********\n");
+	g.it->visit(list);
 
-    /* Initialize parsetree for debugging if necessary */
-    g.it->operation = OTOpTargetUnset;
-    if (g.it->parseStack.empty()) {
-        ir_instruction* main = getFunctionBySignature(MAIN_FUNC_SIGNATURE, shader);
-        if (!main) {
-            g.result.status = DBG_RS_STATUS_ERROR;
-            return &g.result;
-        }
-        g.it->operation = OTOpTargetSet;
-        g.it->parseStack.push(main);
-    }
+	/* Initialize parse tree for debugging if necessary */
+	g.it->operation = OTOpTargetUnset;
+	if (g.it->parseStack.empty()) {
+		ast_function* main = getFunctionByName(MAIN_FUNC_SIGNATURE);
+		if (!main) {
+			g.result.status = DBG_RS_STATUS_ERROR;
+			return &g.result;
+		}
+		g.it->operation = OTOpTargetSet;
+		g.it->parseStack.push(main);
+	}
 
+	/* Advance the debug trace; move DbgStTarget */
+	VPRINT(1, "********* jump traverse **********\n");
+	g.it->parseStack.top()->accept(g.it);
 
-    /* Advance the debug trace; move DbgStTarget */
-    VPRINT(1, "********* jump traverse **********\n");
-    g.it->parseStack.top()->accept(g.it);
+	if (g.it->operation == OTOpFinished) {
+		/* Debugging finished at the end of the code */
+		root->debug_state = ir_dbg_state_end;
+		g.result.status = DBG_RS_STATUS_FINISHED;
+		return &g.result;
+	} else {
+		/* Build up new debug path; all DbgStPath */
+		g.it->operation = OTOpPathBuild;
+		g.it->preVisit = false;
+		g.it->postVisit = true;
+		g.it->debugVisit = false;
+		VPRINT(1, "********* create path traverse **********\n");
+		g.it->visit(list);
+	}
 
-    if (g.it->operation == OTOpFinished) {
-        /* Debugging finished at the end of the code */
-        root->debug_state = ir_dbg_state_end;
-        g.result.status = DBG_RS_STATUS_FINISHED;
-        return &g.result;
-    } else {
-        /* Build up new debug path; all DbgStPath */
-        g.it->operation = OTOpPathBuild;
-        g.it->preVisit = false;
-        g.it->postVisit = true;
-        g.it->debugVisit = false;
-        VPRINT(1, "********* create path traverse **********\n");
-        g.it->visit(list);
-    }
+	VPRINT(1, "********* traverse scope **********\n");
+	ir_scopestack_traverse_visitor itScopeStack(g.result);
+	itScopeStack.visit(list);
 
-
-    VPRINT(1, "********* traverse scope **********\n");
-    ir_scopestack_traverse_visitor itScopeStack(g.result);
-    itScopeStack.visit(list);
-
-    g.result.status = DBG_RS_STATUS_OK;
-    return &g.result;
+	g.result.status = DBG_RS_STATUS_OK;
+	return &g.result;
 }
 

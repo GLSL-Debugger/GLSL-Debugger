@@ -182,18 +182,12 @@ void ShDestruct(ShHandle handle)
 		return;
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
-//
-//	if( holder->program ){
-//		for( unsigned i = 0; i < MESA_SHADER_STAGES; i++ )
-//			ralloc_free( holder->program->_LinkedShaders[i] );
-//		ralloc_free( holder->program );
-//		holder->program = NULL;
-//	}
 
 	if( holder->ctx )
-		delete holder->ctx, holder->ctx = NULL;
+		ralloc_free(holder->ctx);
 
-	delete holder, holder = NULL;
+	ralloc_free(holder);
+	holder = NULL;
 }
 
 //
@@ -303,7 +297,7 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 //			break;
 //	}
 
-//	result = ShaderTraverse( shader, debugOptions, dbgBh );
+	result = ShaderTraverse(shader, debugOptions, dbgBh);
 	return result;
 
 }

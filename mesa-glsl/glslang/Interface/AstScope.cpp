@@ -29,32 +29,32 @@ static bool idInStack(DbgRsScope& stack, int id)
 	return false;
 }
 
-void addScopeToScopeStack(DbgRsScope& stack, exec_list *scope)
+static void addToScope(DbgRsScope& scope, scope_item* item, void* mem_ctx)
+{
+	if (idInStack(scope, item->id))
+	    return;
+
+    scope.numIds++;
+    scope.ids = (int*) reralloc_array_size(mem_ctx, scope.ids, sizeof(int), scope.numIds);
+    scope.ids[scope.numIds-1] = item->id;
+}
+
+void addScopeToScopeStack(DbgRsScope& stack, exec_list *scope, void* mem_ctx)
 {
     if (!scope)
         return;
-
-    foreach_list(node, scope){
-    	scope_item* item = (scope_item*)node;
-    	if (idInStack(stack, item->id))
-    		continue;
-
-		stack.numIds++;
-		stack.ids = (int*) realloc(stack.ids, stack.numIds*sizeof(int));
-		stack.ids[stack.numIds-1] = item->id;
-    }
+    foreach_list(node, scope)
+    	addToScope(stack, (scope_item*) node, mem_ctx);
 }
 
-void setDbgScope(DbgRsScope& scope, exec_list *s)
+void setDbgScope(DbgRsScope& scope, exec_list *s, void* mem_ctx)
 {
 	assert(s || !"no scopeList");
 	VPRINT(3, "SET GLOBAL SCOPE LIST: ");
 
 	foreach_list(node, s) {
 		scope_item* item = (scope_item*) node;
-        scope.numIds++;
-        scope.ids = (int*) realloc(scope.ids, scope.numIds*sizeof(int));
-        scope.ids[scope.numIds-1] = item->id;
+		addToScope(scope, item, mem_ctx);
         VPRINT(3, "<%i,%s> ", item->id, item->name);
 	}
 

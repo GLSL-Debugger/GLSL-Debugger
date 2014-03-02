@@ -129,11 +129,14 @@ void ast_traverse_visitor::visit(class ast_array_specifier* node)
 	this->leave(node);
 }
 
-void ast_traverse_visitor::visit(class ast_aggregate_initializer*)
+void ast_traverse_visitor::visit(class ast_aggregate_initializer* node)
 {
+	if (!this->enter(node))
+		return;
 	// Nothing to do here
 	// TODO: Or not? If you have problems with some kind
 	//       of calls in initializer, it is here
+	this->leave(node);
 }
 
 void ast_traverse_visitor::visit(class ast_compound_statement* node)
@@ -306,40 +309,6 @@ void ast_traverse_visitor::visit(class ast_switch_body* node)
 
 void ast_traverse_visitor::visit(class ast_selection_statement* node)
 {
-//	if (flags & traverse_debugvisit) {
-//		bool visit;
-//		/* Visit node for optional check of condition */
-//		if (node->debug_state_internal == ast_dbg_if_unset
-//				|| node->debug_state_internal == ast_dbg_if_init
-//				|| node->debug_state_internal == ast_dbg_if_condition_passed)
-//			visit = this->traverse(node);
-//
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_if_condition
-//				&& node->condition)
-//			node->condition->accept(this);
-//
-//		/* Visit node again for choosing debugged branch */
-//		if (node->debug_state_internal == ast_dbg_if_condition)
-//			visit = this->traverse(node);
-//
-//		if (visit) {
-//			++depth;
-//			if (node->debug_state_internal == ast_dbg_if_then
-//					&& node->then_statement)
-//				node->then_statement->accept(this);
-//			if (node->debug_state_internal == ast_dbg_if_else
-//					&& node->else_statement)
-//				node->else_statement->accept(this);
-//			--depth;
-//		}
-//
-//		/* Visit node again for preparation of pass */
-//		if (node->debug_state_internal == ast_dbg_if_then
-//				|| node->debug_state_internal == ast_dbg_if_else)
-//			visit = this->traverse(node);
-//
-//	} else {
 	if (!this->enter(node))
 		return;
 
@@ -389,62 +358,10 @@ void ast_traverse_visitor::visit(class ast_switch_statement* node)
 	--this->depth;
 
 	this->leave(node);
-//	}
 }
 
 void ast_traverse_visitor::visit(class ast_iteration_statement* node)
 {
-//	if (flags & traverse_debugvisit) {
-//		bool visit = true;
-//
-//		/* Visit node first */
-//		if (node->debug_state_internal == ast_dbg_loop_unset
-//				|| node->debug_state_internal == ast_dbg_loop_qyr_init)
-//			visit = this->traverse(node);
-//
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_loop_wrk_init
-//				&& node->init_statement)
-//			node->init_statement->accept(this);
-//
-//		/* Visit node again for test */
-//		if (node->debug_state_internal == ast_dbg_loop_wrk_init
-//				|| node->debug_state_internal == ast_dbg_loop_qyr_test)
-//			visit = this->traverse(node);
-//
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_loop_wrk_test
-//				&& node->condition)
-//			node->condition->accept(this);
-//
-//
-//		/* Visit node again for flow selection */
-//		if (node->debug_state_internal == ast_dbg_loop_wrk_test
-//				|| node->debug_state_internal == ast_dbg_loop_select_flow)
-//			visit = this->traverse(node);
-//
-//		++depth;
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_loop_wrk_body
-//				&& node->body)
-//			node->body->accept(this);
-//		--depth;
-//
-//		/* Visit node again for terminal */
-//		if (node->debug_state_internal == ast_dbg_loop_wrk_body
-//				|| node->debug_state_internal == ast_dbg_loop_qyr_terminal)
-//			visit = this->traverse(node);
-//
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_loop_wrk_terminal
-//				&& node->rest_expression)
-//			node->rest_expression->accept(this);
-//
-//		/* Visit node again for terminal */
-//		if (node->debug_state_internal == ast_dbg_loop_wrk_terminal)
-//			visit = this->traverse(node);
-//
-//	} else {
 	if (!this->enter(node))
 		return;
 
@@ -460,7 +377,6 @@ void ast_traverse_visitor::visit(class ast_iteration_statement* node)
 		node->rest_expression->accept(this);
 
 	this->leave(node);
-//	}
 }
 
 void ast_traverse_visitor::visit(class ast_jump_statement* node)

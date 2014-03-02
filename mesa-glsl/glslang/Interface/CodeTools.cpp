@@ -8,7 +8,8 @@
 
 namespace {
 	// TODO: tie it with current context
-	std::map<std::string, ast_function*> shaderFunctions;
+	typedef std::map<std::string, ast_function_definition*> FunctionsMap;
+	FunctionsMap shaderFunctions;
 }
 
 #define X 1
@@ -202,14 +203,14 @@ char* getFunctionName(const char* manglName)
     return name;
 }
 
-void saveFunction(ast_function* node)
+void saveFunction(ast_function_definition* node)
 {
-	shaderFunctions[std::string(node->identifier)] = node;
+	shaderFunctions[std::string(node->prototype->identifier)] = node;
 }
 
-ast_function* getFunctionByName(const char *name)
+ast_function_definition* getFunctionByName(const char *name)
 {
-	std::map<std::string, ast_function*>::iterator it = shaderFunctions.find(std::string(name));
+	FunctionsMap::iterator it = shaderFunctions.find(std::string(name));
 	if (it != shaderFunctions.end())
 		return it->second;
 	return NULL;
@@ -403,35 +404,9 @@ bool list_iter_check(ir_instruction* const inst, int& state)
 }
 
 
-bool dbg_state_not_match(exec_list* list, enum ir_dbg_state state)
+bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state)
 {
-	int skip_pair = -1;
-	foreach_list(node, list) {
-		ir_instruction * const inst = (ir_instruction *) node;
-		if (!list_iter_check(inst, skip_pair))
-			continue;
-		if (inst->debug_state != state)
-			return true;
-	}
-	return false;
-}
-
-bool dbg_state_not_match(ir_dummy* first, enum ir_dbg_state state)
-{
-	if (!first || !first->next)
-		return false;
-
-	int end_token = ir_dummy::pair_type(first->dummy_type);
-	if (end_token >= 0) {
-		foreach_node_safe(node, first->next) {
-			ir_instruction * const inst = (ir_instruction *) node;
-			ir_dummy * const dm = inst->as_dummy();
-			if (dm && end_token == dm->dummy_type)
-				break;
-			if (inst->debug_state != state)
-				return true;
-		}
-	}
-
+	if (node && node->debug_state != state)
+		return true;
 	return false;
 }

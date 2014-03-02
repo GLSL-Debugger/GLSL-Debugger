@@ -7,22 +7,22 @@
 #ifndef __IRSTACK_H_
 #define __IRSTACK_H_
 
-struct ir_instruction;
+class ast_node;
 
-class IRStack {
+class AstStack {
 public:
-	IRStack();
-	~IRStack();
+	AstStack();
+	~AstStack();
 
-	void push(ir_instruction* n);
+	void push(ast_node* n);
 	void pop(void);
-	ir_instruction* top(void);
+	ast_node* top(void);
 
 	int empty(void);
 
 private:
 	int n;
-	ir_instruction **s;
+	ast_node **s;
 };
 
 #endif /* __IRSTACK_H_ */

@@ -60,23 +60,110 @@ void dumpShChangeableList(ShChangeableList *cl)
 	dbgPrint(DBGLVL_INFO, "\n");
 }
 
+static bool isEqualShChangeable(ShChangeable *a, ShChangeable *b)
+{
+	int i;
+
+	if (a->id != b->id)
+		return false;
+	if (a->numIndices != b->numIndices)
+		return false;
+
+	for (i = 0; i < a->numIndices; i++) {
+		if (a->indices[i]->type != b->indices[i]->type)
+			return false;
+		if (a->indices[i]->index != b->indices[i]->index)
+			return false;
+	}
+
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Old functions
+//
+
 ShChangeable* createShChangeable(int id)
 {
 	dbgPrint(DBGLVL_INTERNAL_WARNING, "Creation of changeable out of shader mem.\n");
 	return createShChangeableCtx(id, NULL);
 }
 
+ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Creation of changeable index out of shader mem.\n");
+	return createShChangeableIndexCtx(type, index, NULL);
+}
+
+void addShChangeable(ShChangeableList *cl, ShChangeable *c)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Realloc of changeables out of shader mem.\n");
+	addShChangeableCtx(cl, c, NULL);
+}
+
+// FIXME: is this reasonable
+ShChangeable * copyShChangeable(ShChangeable *c)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Copy of changeable out of shader mem.\n");
+	return copyShChangeableCtx(c, NULL);
+}
+
+void copyShChangeableToList(ShChangeableList *cl, ShChangeable *c)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Copy changeable to list out of shader mem.\n");
+	copyShChangeableToListCtx(cl, c, NULL);
+}
+
+void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
+{
+	int i, j;
+
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Deprecated copyShChangeableList.\n");
+
+	if (!clout || !clin)
+		return;
+
+	for (i = 0; i < clin->numChangeables; i++) {
+		// copy only if not already in list
+		bool alreadyInList = false;
+		for (j = 0; j < clout->numChangeables; j++) {
+			if (isEqualShChangeable(clout->changeables[j],
+					clin->changeables[i])) {
+				alreadyInList = true;
+				break;
+			}
+		}
+		if (!alreadyInList)
+			copyShChangeableToList(clout, clin->changeables[i]);
+	}
+}
+
+void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Adding of ChangeableIndex out of shader mem.\n");
+	addShIndexToChangeableCtx(c, idx, NULL);
+}
+
+void addShIndexToChangeableList(ShChangeableList *cl, int s,
+		ShChangeableIndex *idx)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Adding of ChangeableIndex to list out of shader mem.\n");
+	if (!cl)
+		return;
+	if (s < cl->numChangeables)
+		addShIndexToChangeable(cl->changeables[s], idx);
+}
+
+
+////////////////////////////////////////////////////////////////////////
+// Mem-safe functions
+//
+
 ShChangeable* createShChangeableCtx(int id, void* mem_ctx)
 {
 	ShChangeable *cgb = (ShChangeable*)rzalloc(mem_ctx, ShChangeable);
 	cgb->id = id;
 	return cgb;
-}
-
-ShChangeableIndex* createShChangeableIndex(ShChangeableType type, int index)
-{
-	dbgPrint(DBGLVL_INTERNAL_WARNING, "Creation of changeable index out of shader mem.\n");
-	return createShChangeableIndexCtx(type, index, NULL);
 }
 
 ShChangeableIndex* createShChangeableIndexCtx(ShChangeableType type, long index, void* mem_ctx)
@@ -87,24 +174,15 @@ ShChangeableIndex* createShChangeableIndexCtx(ShChangeableType type, long index,
 	return idx;
 }
 
-void addShChangeable(ShChangeableList *cl, ShChangeable *c)
+void addShChangeableCtx(ShChangeableList *cl, ShChangeable *c, void* mem_ctx)
 {
 	if (!cl || !c)
 		return;
 
 	cl->numChangeables++;
-	dbgPrint(DBGLVL_INTERNAL_WARNING, "Realloc of changeables out of shader mem.\n");
-	cl->changeables = (ShChangeable**) reralloc_array_size(NULL, cl->changeables,
+	cl->changeables = (ShChangeable**) reralloc_array_size(mem_ctx, cl->changeables,
 			sizeof(ShChangeable*), cl->numChangeables);
 	cl->changeables[cl->numChangeables - 1] = c;
-}
-
-
-// FIXME: is this reasonable
-ShChangeable * copyShChangeable(ShChangeable *c)
-{
-	dbgPrint(DBGLVL_INTERNAL_WARNING, "Copy of changeable out of shader mem.\n");
-	return copyShChangeableCtx(c, NULL);
 }
 
 ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx)
@@ -130,57 +208,32 @@ ShChangeable * copyShChangeableCtx(ShChangeable *c, void* mem_ctx)
 	return copy;
 }
 
-
-void copyShChangeableToList(ShChangeableList *cl, ShChangeable *c)
+void copyShChangeableToListCtx(ShChangeableList *cl, ShChangeable *c, void* mem_ctx)
 {
 	ShChangeable *copy;
-
 	if (!cl || !c)
 		return;
 
-	copy = copyShChangeable(c);
-	addShChangeable(cl, copy);
+	copy = copyShChangeableCtx(c, mem_ctx);
+	addShChangeableCtx(cl, copy, mem_ctx);
 }
 
-static bool isEqualShChangeable(ShChangeable *a, ShChangeable *b)
+void copyShChangeableListCtx(ShChangeableList *clout, exec_list *clin, void* mem_ctx)
 {
-	int i;
-
-	if (a->id != b->id)
-		return false;
-	if (a->numIndices != b->numIndices)
-		return false;
-
-	for (i = 0; i < a->numIndices; i++) {
-		if (a->indices[i]->type != b->indices[i]->type)
-			return false;
-		if (a->indices[i]->index != b->indices[i]->index)
-			return false;
-	}
-
-	return true;
-}
-
-void copyShChangeableList(ShChangeableList *clout, ShChangeableList *clin)
-{
-	int i, j;
-
 	if (!clout || !clin)
 		return;
 
-	for (i = 0; i < clin->numChangeables; i++) {
-		// copy only if not already in list
+	foreach_list(node, clin) {
+		changeable_item* ch_item = (changeable_item*) node;
 		bool alreadyInList = false;
-		for (j = 0; j < clout->numChangeables; j++) {
-			if (isEqualShChangeable(clout->changeables[j],
-					clin->changeables[i])) {
+		for (int j = 0; j < clout->numChangeables; j++) {
+			if (isEqualShChangeable(clout->changeables[j], ch_item->changeable)) {
 				alreadyInList = true;
 				break;
 			}
 		}
 		if (!alreadyInList)
-			copyShChangeableToList(clout, clin->changeables[i]);
-	}
+			copyShChangeableToListCtx(clout, ch_item->changeable, mem_ctx);
 }
 
 void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, void* mem_ctx)
@@ -221,21 +274,6 @@ void addShIndexToChangeableCtx(ShChangeable *c, ShChangeableIndex *idx, void* me
 	c->indices = (ShChangeableIndex**) reralloc_array_size(mem_ctx, c->indices,
 			sizeof(ShChangeableIndex*), c->numIndices);
 	c->indices[c->numIndices - 1] = idx;
-}
-
-void addShIndexToChangeable(ShChangeable *c, ShChangeableIndex *idx)
-{
-	dbgPrint(DBGLVL_INTERNAL_WARNING, "Adding of ChangeableIndex out of shader mem.\n");
-	addShIndexToChangeableCtx(c, idx, NULL);
-}
-
-void addShIndexToChangeableList(ShChangeableList *cl, int s,
-		ShChangeableIndex *idx)
-{
-	if (!cl)
-		return;
-	if (s < cl->numChangeables)
-		addShIndexToChangeable(cl->changeables[s], idx);
 }
 
 void freeShChangeable(ShChangeable **c)
