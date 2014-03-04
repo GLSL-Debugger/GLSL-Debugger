@@ -250,7 +250,8 @@ bool ast_debugchange_traverser_visitor::enter(class ast_function_expression* nod
 
 	// This will not work with functions in another file
 	// Actually, nothing will work
-	ast_function* f = getFunctionByName(node->subexpressions[0]->primary_expression.identifier);
+	ast_function_definition* f = getFunctionByName(
+			node->subexpressions[0]->primary_expression.identifier);
 	if (!f)
 		return false;
 
@@ -264,7 +265,7 @@ bool ast_debugchange_traverser_visitor::enter(class ast_function_expression* nod
 	// for parameters we need more care iterate over all parameters
 	// simultaneously in the function call and the function declaration
 	// It's assumed that both sequences have the same amount of parameters.
-	foreach_two_lists(pC, &node->expressions, pD, &f->parameters) {
+	foreach_two_lists(pC, &node->expressions, pD, &f->prototype->parameters) {
 		// check if parameter is of interest
 		ast_node* dast = exec_node_data(ast_node, pD, link);
 		if (dast->debug_id < 0)

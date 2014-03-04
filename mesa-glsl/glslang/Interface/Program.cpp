@@ -38,6 +38,7 @@
 #include "glsl/ir.h"
 #include "glsl/list.h"
 #include "Visitors/debugjump.h"
+#include "Visitors/debugpath.h"
 #include "Visitors/scopestack.h"
 #include "glsldb/utils/dbgprint.h"
 
@@ -151,6 +152,15 @@ static void resetGlobals()
 	g.result.loopIteration = 0;
 	g.result.passedEmitVertex = false;
 	g.result.passedDiscard = false;
+
+	if (!g.it)
+		g.it = new ast_debugjump_traverser_visitor(g.result);
+}
+
+static DbgResult* endTraverse(DbgRsStatus status)
+{
+	g.result.status = status;
+	return &g.result;
 }
 
 //
@@ -163,27 +173,17 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 	resetGlobals();
 
 	/* Check for empty parse tree */
-	if (!shader) {
-		g.result.status = DBG_RS_STATUS_ERROR;
-		return &g.result;
-	}
+	if (!shader)
+		return endTraverse(DBG_RS_STATUS_ERROR);
 
-	if (!g.it)
-		g.it = new ast_debugjump_traverser_visitor(g.result);
-
-	g.it->shader = shader;
-	g.it->vertexEmited = false;
-	g.it->discardPassed = false;
-	g.it->dbgBehaviour = dbgBehaviour;
-
+	g.it->setUp(shader, dbgBehaviour);
 	exec_list* list = shader->head;
 	ast_node* root = exec_node_data(ast_node, shader->head, link);
 
 	/* Check for finished parsing */
 	if (dbgBehaviour != DBG_BH_RESET && root->debug_state == ast_dbg_state_end) {
 		VPRINT(1, "!!! debugging already finished !!!\n");
-		g.result.status = DBG_RS_STATUS_FINISHED;
-		return &g.result;
+		return endTraverse(DBG_RS_STATUS_FINISHED);
 	}
 
 	ast_debugpath_traverser_visitor dbgpath;
@@ -198,27 +198,13 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 	/* Clear debug path, i.e remove all DbgStPath */
 	dbgpath.run(list, DPOpPathClear);
 
-	/* Initialize parse tree for debugging if necessary */
-	g.it->operation = OTOpTargetUnset;
-	if (g.it->parseStack.empty()) {
-		ast_function_definition* main = getFunctionByName(MAIN_FUNC_SIGNATURE);
-		if (!main) {
-			g.result.status = DBG_RS_STATUS_ERROR;
-			return &g.result;
-		}
-		g.it->operation = OTOpTargetSet;
-		g.it->parseStack.push(main);
-	}
+	if (!g.it->step(MAIN_FUNC_SIGNATURE))
+		return endTraverse(DBG_RS_STATUS_ERROR);
 
-	/* Advance the debug trace; move DbgStTarget */
-	VPRINT(1, "********* jump traverse **********\n");
-	g.it->parseStack.top()->accept(g.it);
-
-	if (g.it->operation == OTOpFinished) {
+	if (g.it->finished()) {
 		/* Debugging finished at the end of the code */
-		root->debug_state = ir_dbg_state_end;
-		g.result.status = DBG_RS_STATUS_FINISHED;
-		return &g.result;
+		root->debug_state = ast_dbg_state_end;
+		return endTraverse(DBG_RS_STATUS_FINISHED);
 	} else {
 		/* Build up new debug path; all DbgStPath */
 		dbgpath.run(list, DPOpPathBuild);
@@ -228,7 +214,6 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 	ir_scopestack_traverse_visitor itScopeStack(g.result);
 	itScopeStack.visit(list);
 
-	g.result.status = DBG_RS_STATUS_OK;
-	return &g.result;
+	return endTraverse(DBG_RS_STATUS_OK);
 }
 

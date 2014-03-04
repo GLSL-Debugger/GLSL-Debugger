@@ -5,8 +5,11 @@
  */
 
 #include "debugpath.h"
+#include "glsl/ast.h"
 #include "glsl/list.h"
 #include "glsldb/utils/dbgprint.h"
+#include "glslang/Interface/CodeTools.h"
+
 
 void ast_debugpath_traverser_visitor::run(exec_list* node, enum DPOperation op)
 {
@@ -41,7 +44,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_expression* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		for (int i = 0; i < 3; ++i) {
 			if (!node->subexpressions[i])
 				continue;
@@ -54,7 +57,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_expression_bin* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		for (int i = 0; i < 2; ++i) {
 			if (!node->subexpressions[i])
 				continue;
@@ -72,7 +75,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_expression_statement* node
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		if (node->expression && node->expression->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;
 }
@@ -81,7 +84,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_compound_statement* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		foreach_list_typed(ast_node, ast, link, &node->statements)
 			if (ast->debug_state != ast_dbg_state_unset)
 				node->debug_state = ast_dbg_state_path;
@@ -91,7 +94,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_declaration* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		if (node->initializer && node->initializer->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;
 }
@@ -100,7 +103,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_declarator_list* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		foreach_list_typed(ast_node, ast, link, &node->declarations)
 			if (ast->debug_state != ast_dbg_state_unset)
 				node->debug_state = ast_dbg_state_path;
@@ -110,7 +113,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_case_statement* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild){
+	if (action == DPOpPathBuild){
 		if (node->labels->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;
 
@@ -124,7 +127,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_case_statement_list* node)
 {
 	processDebugable(node);
 
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		foreach_list_typed(ast_node, ast, link, &node->cases)
 			if (ast->debug_state != ast_dbg_state_unset)
 				node->debug_state = ast_dbg_state_path;
@@ -133,8 +136,8 @@ void ast_debugpath_traverser_visitor::leave(class ast_case_statement_list* node)
 void ast_debugpath_traverser_visitor::leave(class ast_switch_body* node)
 {
 	processDebugable(node);
-	if (action == OTOpPathBuild && node->stmts)
-		if (node->stmts != ast_dbg_state_unset)
+	if (action == DPOpPathBuild && node->stmts)
+		if (node->stmts->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;
 }
 
@@ -190,7 +193,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_iteration_statement* node)
 				|| dbg_state_not_match(node->condition, ast_dbg_state_unset)
 				|| dbg_state_not_match(node->rest_expression, ast_dbg_state_unset)
 				|| dbg_state_not_match(node->body, ast_dbg_state_unset))
-			node->debug_state = ir_dbg_state_path;
+			node->debug_state = ast_dbg_state_path;
 
 }
 
@@ -201,7 +204,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_function_definition* node)
 			node->prototype->identifier, action, node->debug_state);
 
 	processDebugable(node);
-	if (action == OTOpPathBuild && node->body) {
+	if (action == DPOpPathBuild && node->body) {
 		VPRINT(6, "getDebugState: %i\n", node->body->debug_state);
 		if (node->body->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;
@@ -211,7 +214,7 @@ void ast_debugpath_traverser_visitor::leave(class ast_function_definition* node)
 void ast_debugpath_traverser_visitor::leave(class ast_jump_statement* node)
 {
 	processDebugable(node);
-	if (action == OTOpPathBuild)
+	if (action == DPOpPathBuild)
 		if (node->opt_return_value
 				&& node->opt_return_value->debug_state != ast_dbg_state_unset)
 			node->debug_state = ast_dbg_state_path;

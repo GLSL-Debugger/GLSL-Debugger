@@ -7,11 +7,15 @@
 #ifndef DEBUGPATH_H_
 #define DEBUGPATH_H_
 
+#include "glsl/ast_visitor.h"
+
+
 enum DPOperation {
     DPOpPathClear,           // Clear all path nodes, but not targets
     DPOpPathBuild,           // Construct path from root to targets
     DPOpReset,               // Reconstruct initial debug state
 };
+
 
 class ast_debugpath_traverser_visitor : public ast_traverse_visitor {
 public:
@@ -20,7 +24,7 @@ public:
 		action = DPOpReset;
 	}
 
-	virtual ~ast_debugjump_traverser_visitor()
+	virtual ~ast_debugpath_traverser_visitor()
 	{
 	}
 

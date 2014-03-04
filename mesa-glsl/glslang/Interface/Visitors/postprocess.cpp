@@ -471,7 +471,9 @@ void ast_postprocess_traverser_visitor::leave(ast_jump_statement* node)
 void ast_postprocess_traverser_visitor::leave(ast_function_definition* node)
 {
 	node->debug_sideeffects |= ir_dbg_se_general;
-	saveFunction(node->prototype);
+	if (node->body)
+		node->debug_sideeffects |= node->body->debug_sideeffects;
+	saveFunction(node);
 	state->symbols->pop_scope();
 }
 

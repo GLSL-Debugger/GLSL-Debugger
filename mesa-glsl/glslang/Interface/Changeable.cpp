@@ -234,6 +234,7 @@ void copyShChangeableListCtx(ShChangeableList *clout, exec_list *clin, void* mem
 		}
 		if (!alreadyInList)
 			copyShChangeableToListCtx(clout, ch_item->changeable, mem_ctx);
+	}
 }
 
 void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, void* mem_ctx)

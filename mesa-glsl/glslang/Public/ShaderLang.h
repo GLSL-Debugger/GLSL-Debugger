@@ -190,7 +190,7 @@ typedef enum {
 //
 // Debug result information
 //
-typedef enum {
+typedef enum DbgRsStatuses {
     DBG_RS_STATUS_UNSET,
     DBG_RS_STATUS_ERROR,
     DBG_RS_STATUS_OK,
