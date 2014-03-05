@@ -18,6 +18,9 @@
 typedef std::map<std::string, ShaderHolder*> ShadersList;
 typedef std::vector<std::string> ResultsList;
 typedef std::map<std::string, ResultsList> ResultsListMap;
+typedef std::map<std::string, std::vector<ResultsList>> ResultsFilesMap;
+typedef std::vector<ResultsList>::iterator ResultsFilesIterator;
+
 
 class Resource {
 public:
@@ -52,14 +55,50 @@ public:
 	ResultComparator() :
 			current(NULL), line(-1)
 	{
+		file = file_end = dummy_files.end();
 	}
 
 	void setCurrent(std::string name, std::string unit)
 	{
 		line = -1;
+		file = file_end = dummy_files.end();
 		current = getResults(name, unit);
+		if (!current && getResultsFile(name, unit, file, file_end))
+			current = &(*file);
 	}
 
+	bool nextFile()
+	{
+		if (file == file_end)
+			return false;
+
+		current = NULL;
+		CPPUNIT_ASSERT_MESSAGE("No next file", file != file_end);
+		file++;
+
+		// Set new file if it exists or reset it
+		if (file == file_end) {
+			file = file_end = dummy_files.end();
+			return false;
+		}
+
+		current = &(*file);
+		return true;
+	}
+
+	void compareNext(std::string cmpline)
+	{
+		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
+		std::string orig_line = current->at(++line);
+		std::stringstream ss;
+		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: "
+				<< (line + 1);
+		CPPUNIT_ASSERT_MESSAGE(ss.str().c_str(), !orig_line.compare(cmpline));
+	}
+
+	static void loadResults(std::string name, std::string unit);
+
+protected:
 	static ResultsList* getResults(std::string name, std::string unit)
 	{
 		std::map<std::string, ResultsListMap>::iterator it = results.find(name);
@@ -71,20 +110,30 @@ public:
 		return NULL;
 	}
 
-	void compareNext(std::string cmpline)
+	bool getResultsFile(std::string name, std::string unit,
+			ResultsFilesIterator& f, ResultsFilesIterator& end)
 	{
-		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
-		std::string orig_line = current->at(++line);
-		std::stringstream ss;
-		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: " << (line + 1);
-		CPPUNIT_ASSERT_MESSAGE(ss.str().c_str(), !orig_line.compare(cmpline));
+		// Search if it was directory
+		std::map<std::string, ResultsFilesMap>::iterator fit = results_dirs.find(name);
+		if (fit != results_dirs.end()) {
+			ResultsFilesMap::iterator rit = fit->second.find(unit);
+			if (rit != fit->second.end()){
+				f = rit->second.begin();
+				end = rit->second.end();
+				return true;
+			}
+		}
+		return false;
 	}
 
-	static void loadResults(std::string name, std::string unit);
 
 private:
+	static std::map<std::string, ResultsFilesMap> results_dirs;
 	static std::map<std::string, ResultsListMap> results;
 	ResultsList* current;
+	ResultsFilesIterator file;
+	ResultsFilesIterator file_end;
+	static std::vector<ResultsList> dummy_files;
 	int line;
 };
 

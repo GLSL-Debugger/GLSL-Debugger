@@ -7,6 +7,7 @@
 #include "units/Compiler.h"
 #include "units/DebugVarTest.h"
 #include "units/DebugChangeTest.h"
+#include "units/DebugJumpTest.h"
 #include "glsldb/utils/dbgprint.h"
 #include <cppunit/TextTestRunner.h>
 
@@ -22,6 +23,7 @@ int main(int argc, char **argv)
 	runner.addTest(CompileShaderTest::suite());
 	runner.addTest(DebugVarTest::suite());
 	runner.addTest(DebugChangeTest::suite());
+	runner.addTest(DebugJumpTest::suite());
 	runner.run();
 	return 0;
 }

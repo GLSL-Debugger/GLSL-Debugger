@@ -12,8 +12,7 @@
 #include "glslang/Interface/Visitors/debugchange.h"
 #include "glslang/Interface/AstScope.h"
 #include "Base.h"
-#include <cppunit/TestSuite.h>
-#include <cppunit/TestCaller.h>
+
 
 class DebugChangeTest: public SuitedUnitTest<DebugChangeTest> {
 public:

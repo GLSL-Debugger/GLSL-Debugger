@@ -298,6 +298,10 @@ void ast_debugjump_traverser_visitor::leave(class ast_expression* node)
 
 void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 {
+	// TODO:
+	if (node->is_constructor())
+		return;
+
 	ast_expression* identifier = node->subexpressions[0];
 	assert(identifier);
 

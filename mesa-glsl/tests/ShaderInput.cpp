@@ -10,6 +10,7 @@
 #include "glslang/Interface/Program.h"
 #include "glsldb/utils/dbgprint.h"
 #include <locale.h>
+#include <sys/stat.h>
 
 static const std::string shExtensions[SHADERS_PER_PROGRAM] = {
 	".vert",
@@ -24,6 +25,8 @@ static gl_shader_stage shTypes[SHADERS_PER_PROGRAM] = {
 std::string Resource::path = "./";
 ShadersList ShaderInput::shaders;
 std::map<std::string, ResultsListMap> ResultComparator::results;
+std::map<std::string, ResultsFilesMap> ResultComparator::results_dirs;
+std::vector<ResultsList> ResultComparator::dummy_files;
 
 
 ShaderHolder* ShaderInput::load(std::string name)
@@ -71,26 +74,63 @@ ShaderHolder* ShaderInput::load(std::string name)
 	return holder;
 }
 
+static bool folderLoaded(std::map<std::string, ResultsFilesMap>& dirs, std::string name, std::string unit)
+{
+	std::map<std::string, ResultsFilesMap>::iterator fit = dirs.find(name);
+	if (fit != dirs.end()) {
+		ResultsFilesMap::iterator rit = fit->second.find(unit);
+		if (rit != fit->second.end())
+			return true;
+	}
+	return false;
+}
+
+static bool loadFile(ResultsList& r, const char* fname)
+{
+	char* source = test_load_text_file(NULL, fname);
+	if (!source)
+		return false;
+
+	char * pch;
+	pch = strtok(source, "\n");
+	while (pch != NULL) {
+		r.push_back(std::string(pch));
+		pch = strtok(NULL, "\n");
+	}
+	return true;
+}
+
 void ResultComparator::loadResults(std::string name, std::string unit)
 {
 	for (int shnum = 0; shnum < SHADERS_PER_PROGRAM; ++shnum) {
 		std::string shname = path + name + shExtensions[shnum];
 		std::string fname = shname + "." + unit;
-		if (getResults(shname, unit))
+		if (getResults(shname, unit) || folderLoaded(results_dirs, name, unit))
 			continue;
 
-		ResultsList& r = results[shname][unit];
-		char* source = test_load_text_file(NULL, fname.c_str());
-		if (!source) {
-			dbgPrint(DBGLVL_INFO, "Test output %s not found. Skipping.\n", fname.c_str());
-			continue;
-		}
-
-		char * pch;
-		pch = strtok(source, "\n");
-		while (pch != NULL) {
-			r.push_back(std::string(pch));
-			pch = strtok(NULL, "\n");
+		struct stat s;
+		if (!stat(fname.c_str(), &s)) {
+			if (s.st_mode & S_IFDIR) {
+				int iter = 1;
+				bool file_exists = true;
+				std::stringstream ss;
+				std::vector<ResultsList>& dir = results_dirs[shname][unit];
+				// Open files starting from name 1 until file not found
+				while (file_exists) {
+					ss.clear();
+					ss << fname << "/" << iter++;
+					ResultsList r;
+					file_exists = loadFile(r, ss.str().c_str());
+					if (file_exists)
+						dir.push_back(r);
+				}
+			} else if (s.st_mode & S_IFREG) {
+				ResultsList& r = results[shname][unit];
+				if (!loadFile(r, fname.c_str()))
+					dbgPrint(DBGLVL_INFO, "Test output %s not found. Skipping.\n", fname.c_str());
+			} else {
+				dbgPrint(DBGLVL_INFO, "%s is not regular file nor directory.\n", fname.c_str());
+			}
 		}
 	}
 

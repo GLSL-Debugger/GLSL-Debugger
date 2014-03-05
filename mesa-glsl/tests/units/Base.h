@@ -91,10 +91,10 @@ public:
 		if (!do_actual_cmp)
 			return;
 
-		// I'm afraid of this code.
-		// Wrong architecture chosen for this.
+		if (!comparator.nextFile())
+			comparator.setCurrent(sh->name, unit_name);
+
 		std::string s;
-		comparator.setCurrent(sh->name, unit_name);
 		while (std::getline(results, s))
 			comparator.compareNext(s);
 	}
@@ -107,7 +107,7 @@ protected:
 };
 
 
-template<typename T>
+template<typename T, int PV = 1, int PG = 1, int PF = 1>
 class SuitedUnitTest: public BaseUnitTest
 {
 public:
@@ -117,11 +117,17 @@ public:
 		test_files = "shaders/test";
 		holder = input.getShader(test_files);
 		if (holder->shaders[0])
-			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
+			for (int i = 0; i < PV; ++i)
+				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
+
 		if (holder->shaders[1])
-			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
+			for (int i = 0; i < PG; ++i)
+				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
+
 		if (holder->shaders[2])
-			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
+			for (int i = 0; i < PF; ++i)
+				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
+
 		return suiteOfTests;
 	}
 
@@ -130,9 +136,9 @@ protected:
 	static ShaderHolder* holder;
 };
 
-template<typename T>
-std::string SuitedUnitTest<T>::test_files;
-template<typename T>
-ShaderHolder* SuitedUnitTest<T>::holder;
+template<typename T, int P1, int P2, int P3>
+std::string SuitedUnitTest<T, P1, P2, P3>::test_files;
+template<typename T, int P1, int P2, int P3>
+ShaderHolder* SuitedUnitTest<T, P1, P2, P3>::holder;
 
 #endif /* TEST_UNIT_BASE_H_ */
