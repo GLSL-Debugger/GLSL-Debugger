@@ -203,7 +203,6 @@ public:
    exec_list changeables;
    enum ast_dbg_state debug_state;
    enum ast_dbg_overwrite debug_overwrite;
-   bool debug_target;
    int debug_sideeffects;
    int debug_id;
 #endif

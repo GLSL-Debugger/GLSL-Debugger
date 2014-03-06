@@ -9,6 +9,7 @@
 #include "glslang/Include/ShaderLang.h"
 #include "glslang/Interface/AstScope.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 
 #define DEFAULT_DEBUGABLE(node)  \
@@ -29,7 +30,7 @@ bool ast_debugjump_traverser_visitor::step(const char* name)
 	/* Initialize parse tree for debugging if necessary */
 	operation = OTOpTargetUnset;
 	if (parseStack.empty()) {
-		ast_function_definition* func = getFunctionByName(name);
+		ast_function_definition* func = shader->symbols->get_function(name);
 		if (!func)
 			return false;
 		operation = OTOpTargetSet;
@@ -306,7 +307,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 	assert(identifier);
 
 	const char* func_name = identifier->primary_expression.identifier;
-	ast_function_definition* f = getFunctionByName(func_name);
+	ast_function_definition* f = shader->symbols->get_function(func_name);
 	assert(f || !"Function not found");
 
 	VPRINT(2, "process Call L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",

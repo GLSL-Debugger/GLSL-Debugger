@@ -332,7 +332,7 @@ bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
      */
 	ir_stack_traverser_visitor it1pass(vl);
 
-    ir_function* main = getFunctionBySignature(MAIN_FUNC_SIGNATURE, shader);
+    ir_function* main = NULL; //getFunctionBySignature(MAIN_FUNC_SIGNATURE, shader);
     if (!main) {
         dbgPrint(DBGLVL_ERROR, "CodeGen - could not find main function!\n");
         exit(1);

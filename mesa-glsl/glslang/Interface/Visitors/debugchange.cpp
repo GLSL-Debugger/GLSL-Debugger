@@ -9,6 +9,7 @@
 #include "glsl/list.h"
 #include "glslang/Interface/AstScope.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 #undef NDEBUG
 #include <assert.h>
@@ -250,7 +251,7 @@ bool ast_debugchange_traverser_visitor::enter(class ast_function_expression* nod
 
 	// This will not work with functions in another file
 	// Actually, nothing will work
-	ast_function_definition* f = getFunctionByName(
+	ast_function_definition* f = shader->symbols->get_function(
 			node->subexpressions[0]->primary_expression.identifier);
 	if (!f)
 		return false;

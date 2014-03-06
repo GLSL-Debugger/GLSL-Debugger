@@ -6,12 +6,6 @@
 #include "glsldb/utils/dbgprint.h"
 #include <map>
 
-namespace {
-	// TODO: tie it with current context
-	typedef std::map<std::string, ast_function_definition*> FunctionsMap;
-	FunctionsMap shaderFunctions;
-}
-
 #define X 1
 #define R 5
 #define S 9
@@ -201,28 +195,6 @@ char* getFunctionName(const char* manglName)
     strncpy(name, manglName, namelength);
     name[namelength] = '\0';
     return name;
-}
-
-void saveFunction(ast_function_definition* node)
-{
-	shaderFunctions[std::string(node->prototype->identifier)] = node;
-}
-
-ast_function_definition* getFunctionByName(const char *name)
-{
-	FunctionsMap::iterator it = shaderFunctions.find(std::string(name));
-	if (it != shaderFunctions.end())
-		return it->second;
-	return NULL;
-}
-
-ir_function* getFunctionBySignature(const char *sig, struct gl_shader* shader)
-// Assumption: 1. roots hold all function definitions.
-//                for single file shaders this should hold.
-// Todo: Add solution for multiple files compiled in one shader.
-{
-	VPRINT(3, "Search for function [%s]\n", sig);
-	return shader->symbols->get_function(sig);
 }
 
 //bool isChildofMain(TIntermNode *node, TIntermNode *root)

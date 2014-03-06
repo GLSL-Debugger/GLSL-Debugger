@@ -11,6 +11,8 @@
 #include "mesa/main/mtypes.h"
 #include "glsl/list.h"
 
+struct sh_symbol_table;
+
 struct AstShader {
 	exec_list* head;
 	unsigned version;
@@ -20,6 +22,7 @@ struct AstShader {
 	bool compile_status;
 	char* info_log;
 	bool is_es;
+	sh_symbol_table* symbols;
 	ShVariableList globals;
 };
 

@@ -25,12 +25,9 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
 long strToSwizzleIdx(const char*);
 std::string getMangledName(ir_function_signature* func);
 char* getFunctionName(const char* in);
-void saveFunction(ast_function_definition*);
-ast_function_definition* getFunctionByName(const char *name);
-ir_function* getFunctionBySignature( const char *sig, struct gl_shader* shader );
-int getFunctionDebugParameter(ir_function_signature *node);
-ir_instruction* getIRDebugParameter(exec_list *list, int pnum);
-ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum);
+int getFunctionDebugParameter(ir_function_signature* node);
+ir_instruction* getIRDebugParameter(exec_list* list, int pnum);
+ir_instruction* getSideEffectsDebugParameter(ir_call* ir, int pnum);
 
 bool list_iter_check(ir_instruction* const ir, int& state);
 bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state);

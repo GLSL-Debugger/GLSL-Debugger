@@ -799,14 +799,14 @@ static const char* getNewUnusedFunctionName(const char *input, struct gl_shader*
     strcat(output, CG_FUNCTION_POSTFIX);
     baseLen = strlen(output);
 
-    while (getFunctionBySignature(output, shader)) {
-        output[baseLen] = '\0';
-
-        for (i=0; i<CG_RANDOMIZED_POSTFIX_SIZE; i++) {
-            output[baseLen+i] = (char)((rand()/(float)RAND_MAX)*('Z'-'A')+'A');
-        }
-        output[baseLen+i] = '\0';
-    }
+//    while (getFunctionBySignature(output, shader)) {
+//        output[baseLen] = '\0';
+//
+//        for (i=0; i<CG_RANDOMIZED_POSTFIX_SIZE; i++) {
+//            output[baseLen+i] = (char)((rand()/(float)RAND_MAX)*('Z'-'A')+'A');
+//        }
+//        output[baseLen+i] = '\0';
+//    }
 
     return output;
 }

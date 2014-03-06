@@ -16,6 +16,7 @@
 #include "glsl/ir.h"
 #include "glsl/list.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/SymbolTable.h"
 #include "glslang/Include/ShaderLang.h"
 #undef NDEBUG
 #include <assert.h>
@@ -473,7 +474,7 @@ void ast_postprocess_traverser_visitor::leave(ast_function_definition* node)
 	node->debug_sideeffects |= ir_dbg_se_general;
 	if (node->body)
 		node->debug_sideeffects |= node->body->debug_sideeffects;
-	saveFunction(node);
+	shader->symbols->add_function(node);
 	state->symbols->pop_scope();
 }
 

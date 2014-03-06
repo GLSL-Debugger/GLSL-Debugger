@@ -7,6 +7,7 @@
 #include "glslang/Include/ShaderLang.h"
 #include "ShaderHolder.h"
 #include "Program.h"
+#include "SymbolTable.h"
 #include "Visitors/postprocess.h"
 
 // Mesa includes
@@ -91,7 +92,7 @@ int addShVariableList(ShVariableList *vl, AstShader* shader)
 }
 
 void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
-		int debug, ShVariableList *vl)
+		int debug)
 {
 	int dump_ast = debug & EDebugOpAssembly;
 	int dump_hir = debug & EDebugOpIntermediate;
@@ -232,6 +233,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 		holder->shaders = reralloc(holder, holder->shaders,
 						struct AstShader*, holder->num_shaders + 1);
 		AstShader* shader = rzalloc(holder, struct AstShader);
+		shader->symbols = new(holder) sh_symbol_table;
 		holder->shaders[holder->num_shaders] = shader;
 		holder->num_shaders++;
 
@@ -253,7 +255,7 @@ int ShCompile(const ShHandle handle, const char* const shaderStrings[],
 
 		char* old_locale = setlocale(LC_NUMERIC, NULL);
 		setlocale(LC_NUMERIC, "POSIX");
-		compile_shader_to_ast(holder->ctx, shader, debugOptions, vl);
+		compile_shader_to_ast(holder->ctx, shader, debugOptions);
 		setlocale(LC_NUMERIC, old_locale);
 
 		// TODO: informative names

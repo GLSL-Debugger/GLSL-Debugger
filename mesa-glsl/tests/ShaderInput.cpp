@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "ShaderInput.h"
 #include "glslang/Interface/Program.h"
+#include "glslang/Interface/SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 #include <locale.h>
 #include <sys/stat.h>
@@ -51,18 +52,17 @@ ShaderHolder* ShaderInput::load(std::string name)
 		}
 
 		AstShader* shader = rzalloc(holder, struct AstShader);
+		shader->symbols = new(holder) sh_symbol_table;
 		holder->shaders[shnum] = shader;
 		shader->stage = shTypes[shnum];
 		shader->source = source;
 		shader->name = (char*) rzalloc_array(holder, char, fname.length());
 		strcpy(shader->name, fname.c_str());
 
-		ShVariableList *vl = new ShVariableList;
 		char* old_locale = setlocale(LC_NUMERIC, NULL);
 		setlocale(LC_NUMERIC, "POSIX");
-		compile_shader_to_ast(holder->ctx, shader, 0, vl);
+		compile_shader_to_ast(holder->ctx, shader, 0);
 		setlocale(LC_NUMERIC, old_locale);
-		delete vl;
 
 		if (!shader->compile_status) {
 			dbgPrint(DBGLVL_ERROR,

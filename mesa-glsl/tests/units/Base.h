@@ -104,10 +104,11 @@ protected:
 	std::stringstream results;
 	static ShaderInput input;
 	ResultComparator comparator;
+
 };
 
 
-template<typename T, int PV = 1, int PG = 1, int PF = 1>
+template<typename T>
 class SuitedUnitTest: public BaseUnitTest
 {
 public:
@@ -116,17 +117,17 @@ public:
 		CppUnit::TestSuite *suiteOfTests = new CppUnit::TestSuite;
 		test_files = "shaders/test";
 		holder = input.getShader(test_files);
+
+		// FIXME: This creates instance for each test
+
 		if (holder->shaders[0])
-			for (int i = 0; i < PV; ++i)
-				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
 
 		if (holder->shaders[1])
-			for (int i = 0; i < PG; ++i)
-				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
 
-		if (holder->shaders[2])
-			for (int i = 0; i < PF; ++i)
-				suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
+		if (holder->shaders[2] && false)
+			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
 
 		return suiteOfTests;
 	}
@@ -136,9 +137,9 @@ protected:
 	static ShaderHolder* holder;
 };
 
-template<typename T, int P1, int P2, int P3>
-std::string SuitedUnitTest<T, P1, P2, P3>::test_files;
-template<typename T, int P1, int P2, int P3>
-ShaderHolder* SuitedUnitTest<T, P1, P2, P3>::holder;
+template<typename T>
+std::string SuitedUnitTest<T>::test_files;
+template<typename T>
+ShaderHolder* SuitedUnitTest<T>::holder;
 
 #endif /* TEST_UNIT_BASE_H_ */
