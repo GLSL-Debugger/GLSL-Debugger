@@ -195,6 +195,7 @@ public:
    virtual class ast_struct_specifier* as_struct_specifier() { return NULL; }
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_expression* as_expression() { return NULL; }
+   virtual class ast_function_expression* as_function_expression() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
 
@@ -379,6 +380,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_function_expression* as_function_expression() { return this; }
    exec_list changeable_params;
    bool debug_builtin;
 #endif

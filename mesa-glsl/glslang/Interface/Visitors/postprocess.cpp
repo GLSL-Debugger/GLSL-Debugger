@@ -363,16 +363,21 @@ void ast_postprocess_traverser_visitor::leave(ast_expression* node)
 		exec_list instructions;
 		ir_rvalue* op = node->subexpressions[0]->hir(&instructions, state);
 		if (op->type->base_type == GLSL_TYPE_STRUCT
-		              || op->type->base_type == GLSL_TYPE_INTERFACE)
+		              || op->type->base_type == GLSL_TYPE_INTERFACE) {
 			node->debug_selection_type = ast_fst_struct;
-		else if (node->subexpressions[1] != NULL)
+		} else if (node->subexpressions[1] != NULL) {
 			node->debug_selection_type = ast_fst_method;
-		else if (op->type->is_vector() ||
+			// This is method. Make function_expression built-in
+			ast_function_expression* exp = node->subexpressions[1]->as_function_expression();
+			assert(exp || !"Unexpected method type");
+			exp->debug_builtin = true;
+		} else if (op->type->is_vector() ||
 	              (state->ARB_shading_language_420pack_enable &&
-	               op->type->is_scalar()))
+	               op->type->is_scalar())) {
 			node->debug_selection_type = ast_fst_swizzle;
-		else
+		} else {
 			assert(!"wrong type for field selection");
+		}
 		break;
 	}
 	default:
