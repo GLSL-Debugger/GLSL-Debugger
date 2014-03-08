@@ -135,7 +135,9 @@ public:
 	void compareNext(std::string cmpline)
 	{
 		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
-		std::string orig_line = current->at(++line);
+		std::string orig_line = "";
+		if (++line < (int)current->size())
+			orig_line = current->at(line);
 		std::stringstream ss;
 		ss << "File: " << current_file;
 		if (file_num)

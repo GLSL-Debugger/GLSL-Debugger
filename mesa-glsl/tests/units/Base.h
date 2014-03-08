@@ -10,6 +10,7 @@
 #include "ast_nodes.h"
 #include "call_visitor.h"
 #include "glslang/Interface/ShaderHolder.h"
+#include "Format.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/TestCaller.h>
@@ -81,6 +82,9 @@ public:
 		ast_call_visitor v(this);
 		v.visit(sh->head);
 
+		if (do_actual_cmp)
+			prepareCmp();
+
 		if (print)
 			std::cout << results.str();
 
@@ -95,6 +99,11 @@ public:
 		std::string s;
 		while (std::getline(results, s))
 			comparator.compareNext(s);
+	}
+
+	virtual void prepareCmp()
+	{
+
 	}
 
 	virtual void applyRules(AstShader* sh) {

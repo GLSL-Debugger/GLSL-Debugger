@@ -703,98 +703,99 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 			break;
 		}
 		break;
-	case OTOpTargetSet:
-		if (node->debug_state == ast_dbg_state_unset) {
+	case OTOpTargetSet: {
+		if (node->debug_state != ast_dbg_state_unset)
+			break;
 
-			if (node->debug_state_internal == ast_dbg_loop_unset &&
-					node->mode == ast_iteration_statement::ast_do_while) {
-				/* Process body imediately */
-				node->debug_state_internal = ast_dbg_loop_wrk_body;
-				return true;
+		if (node->debug_state_internal == ast_dbg_loop_unset
+				&& node->mode == ast_iteration_statement::ast_do_while) {
+			/* Process body imediately */
+			node->debug_state_internal = ast_dbg_loop_wrk_body;
+			return true;
+		}
+
+		if (node->debug_state_internal == ast_dbg_loop_unset
+				|| (node->debug_state_internal >= ast_dbg_loop_wrk_init
+						&& node->debug_state_internal <= ast_dbg_loop_wrk_terminal)) {
+			VPRINT(3, "\t -------- set target ---------\n");
+			node->debug_state = ast_dbg_state_target;
+			this->operation = OTOpDone;
+
+			switch (node->debug_state_internal) {
+			case ast_dbg_loop_unset: {
+				if (node->init_statement) {
+					node->debug_state_internal = ast_dbg_loop_qyr_init;
+					result.position = loop_position(node->mode);
+				} else if (node->condition) {
+					node->debug_state_internal = ast_dbg_loop_qyr_test;
+					result.position = loop_position(node->mode);
+				} else {
+					node->debug_state_internal = ast_dbg_loop_select_flow;
+					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+					result.loopIteration = node->debug_iter;
+				}
+				break;
 			}
-
-			if (node->debug_state_internal == ast_dbg_loop_unset
-					|| (node->debug_state_internal >= ast_dbg_loop_wrk_init
-							&& node->debug_state_internal <= ast_dbg_loop_wrk_terminal)) {
-				VPRINT( 3, "\t -------- set target ---------\n");
-				node->debug_state = ast_dbg_state_target;
-				this->operation = OTOpDone;
-
-				switch (node->debug_state_internal) {
-				case ast_dbg_loop_unset: {
-					if (node->init_statement) {
-						node->debug_state_internal = ast_dbg_loop_qyr_init;
-						result.position = loop_position(node->mode);
-					} else if (node->condition) {
-						node->debug_state_internal =ast_dbg_loop_qyr_test;
-						result.position = loop_position(node->mode);
-					} else {
-						node->debug_state_internal = ast_dbg_loop_select_flow;
-						result.position = DBG_RS_POSITION_LOOP_CHOOSE;
-						result.loopIteration = node->debug_iter;
-					}
-					break;
-				}
-				case ast_dbg_loop_wrk_init: {
-					if (node->condition)
-						node->debug_state_internal = ast_dbg_loop_qyr_test;
-					else
-						node->debug_state_internal = ast_dbg_loop_select_flow;
-					result.position = DBG_RS_POSITION_LOOP_FOR;
-					break;
-				}
-				case ast_dbg_loop_wrk_test: {
+			case ast_dbg_loop_wrk_init: {
+				if (node->condition)
+					node->debug_state_internal = ast_dbg_loop_qyr_test;
+				else
+					node->debug_state_internal = ast_dbg_loop_select_flow;
+				result.position = DBG_RS_POSITION_LOOP_FOR;
+				break;
+			}
+			case ast_dbg_loop_wrk_test: {
+				node->debug_state_internal = ast_dbg_loop_select_flow;
+				result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+				if (node->mode == ast_iteration_statement::ast_do_while)
+					result.loopIteration = node->debug_iter - 1;
+				else
+					result.loopIteration = node->debug_iter;
+				break;
+			}
+			case ast_dbg_loop_wrk_body: {
+				if (node->rest_expression) {
+					node->debug_state_internal = ast_dbg_loop_qyr_terminal;
+					result.position = loop_position(node->mode);
+				} else if (node->condition) {
+					node->debug_state_internal = ast_dbg_loop_qyr_test;
+					result.position = loop_position(node->mode);
+					/* Increase the loop counter */
+					node->debug_iter++;
+				} else {
 					node->debug_state_internal = ast_dbg_loop_select_flow;
 					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
 					if (node->mode == ast_iteration_statement::ast_do_while)
 						result.loopIteration = node->debug_iter - 1;
 					else
 						result.loopIteration = node->debug_iter;
-					break;
-				}
-				case ast_dbg_loop_wrk_body: {
-					if (node->rest_expression) {
-						node->debug_state_internal = ast_dbg_loop_qyr_terminal;
-						result.position = loop_position(node->mode);
-					} else if (node->condition) {
-						node->debug_state_internal = ast_dbg_loop_qyr_test;
-						result.position = loop_position(node->mode);
-						/* Increase the loop counter */
-						node->debug_iter++;
-					} else {
-						node->debug_state_internal = ast_dbg_loop_select_flow;
-						result.position = DBG_RS_POSITION_LOOP_CHOOSE;
-						if (node->mode == ast_iteration_statement::ast_do_while)
-							result.loopIteration = node->debug_iter - 1;
-						else
-							result.loopIteration = node->debug_iter;
-						/* Increase the loop counter */
-						node->debug_iter++;
-					}
-					break;
-				}
-				case ir_dbg_loop_wrk_terminal: {
-					if (node->condition) {
-						node->debug_state_internal = ast_dbg_loop_qyr_test;
-						result.position = loop_position(node->mode);
-					} else {
-						node->debug_state_internal = ast_dbg_loop_select_flow;
-						result.position = DBG_RS_POSITION_LOOP_CHOOSE;
-						result.loopIteration = node->debug_iter;
-					}
 					/* Increase the loop counter */
 					node->debug_iter++;
-					break;
 				}
-				default:
-					break;
-				}
-				setDbgResultRange(result.range, node->get_location());
-				setGobalScope(&node->scope);
-				return false;
+				break;
 			}
+			case ir_dbg_loop_wrk_terminal: {
+				if (node->condition) {
+					node->debug_state_internal = ast_dbg_loop_qyr_test;
+					result.position = loop_position(node->mode);
+				} else {
+					node->debug_state_internal = ast_dbg_loop_select_flow;
+					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+					result.loopIteration = node->debug_iter;
+				}
+				/* Increase the loop counter */
+				node->debug_iter++;
+				break;
+			}
+			default:
+				break;
+			}
+			setDbgResultRange(result.range, node->get_location());
+			setGobalScope(&node->scope);
+			return false;
 		}
 		break;
+	}
 	default:
 		break;
 	}

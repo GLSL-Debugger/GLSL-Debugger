@@ -19,7 +19,7 @@ const char* DBG_NAMES[ast_dbg_state_end] = {
 	"UnsetDbg", "PathDbg", "TargetDbg"
 };
 
-#define PRINT_ITER 5
+#define PRINT_ITER 8
 const int REPEATS_COUNT[3] = { 1, PRINT_ITER, 1 };
 
 
@@ -132,6 +132,34 @@ public:
 		}
 		results << "\n";
 		return true;
+	}
+
+	virtual void prepareCmp()
+	{
+		std::stringstream dr;
+		dr << "Status: " << DBG_STATUSES[dbg_result.status] << " "
+		   << "Pos: " << DBG_POSITIONS[dbg_result.position] << "\n"
+		   << "Range: (" << dbg_result.range.left.colum << ":"
+		                 << dbg_result.range.left.line << " - "
+		                 << dbg_result.range.right.colum << ":"
+		                 << dbg_result.range.right.line << ") "
+		   << "\nScope:\n";
+		for (int i = 0; i < dbg_result.scope.numIds; ++i) {
+			int id = dbg_result.scope.ids[i];
+			dr << " " << formatVariable(id);
+		}
+		dr << "\nChangeables:\n";
+		for (int i = 0; i < dbg_result.cgbls.numChangeables; ++i) {
+			ShChangeable* ch = dbg_result.cgbls.changeables[i];
+			dr << " " << formatChangeable(ch);
+		}
+		if (dbg_result.cgbls.numChangeables)
+			dr << "\n";
+		dr << "LoopIter: " << dbg_result.loopIteration << " "
+		   << "EmitVertex: " << dbg_result.passedEmitVertex << " "
+		   << "Discard: " << dbg_result.passedDiscard << "\n";
+
+		results << dr.str();
 	}
 
 	virtual void applyRules(AstShader* sh)

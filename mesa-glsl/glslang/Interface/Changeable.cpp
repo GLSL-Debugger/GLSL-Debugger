@@ -12,11 +12,9 @@
 
 void dumpShChangeable(ShChangeable *cgb)
 {
-	int j;
-
 	if (cgb) {
 		dbgPrint(DBGLVL_INFO, "%i", cgb->id);
-		for (j = 0; j < cgb->numIndices; j++) {
+		for (int j = 0; j < cgb->numIndices; j++) {
 			ShChangeableIndex *idx = cgb->indices[j];
 			if (idx) {
 				switch (idx->type) {
