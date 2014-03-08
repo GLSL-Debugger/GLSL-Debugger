@@ -19,10 +19,8 @@ const char* DBG_NAMES[ast_dbg_state_end] = {
 	"UnsetDbg", "PathDbg", "TargetDbg"
 };
 
-const int REPEATS_COUNT[3] = { 1, 2, 1 };
-
-#define PRINT_ITER 2
-
+#define PRINT_ITER 5
+const int REPEATS_COUNT[3] = { 1, PRINT_ITER, 1 };
 
 
 class DebugJumpTest: public SuitedUnitTest<DebugJumpTest> {
@@ -33,6 +31,7 @@ public:
 	{
 		test = NULL;
 		unit_name = "dbgjump";
+		behaviour = DBG_BH_JUMPINTO;
 		comparator.loadResults(test_files, unit_name);
 		djv = new ast_debugjump_traverser_visitor(dbg_result);
 	}
@@ -40,6 +39,12 @@ public:
 	~DebugJumpTest()
 	{
 		delete djv;
+
+		// Due to cppunit strange behavior it expected test runner
+		// to exist after test finished, so we just collect all test
+		// repeaters we creating in the test and store it to remove it here
+		for (auto ci = repeaters.cbegin(); ci != repeaters.cend(); ++ci)
+			delete *ci;
 	}
 
 	static void setResult(CPPUNIT_NS::TestResult* r)
@@ -50,7 +55,7 @@ public:
 
 	class DebugJump: public CPPUNIT_NS::TestCase {
 	public:
-		DebugJump(DebugJumpTest* b) :
+		DebugJump(DebugJumpTest* b) : CPPUNIT_NS::TestCase("DebugJump"),
 				base(b), current_iter(0), shader(NULL)
 		{
 		}
@@ -62,8 +67,7 @@ public:
 		void prepare(AstShader* sh)
 		{
 			shader = sh;
-			base->results.str(std::string());
-			base->results.clear();
+			base->reset();
 			base->results << "================== Reset path ==================\n";
 			base->djv->parseStack.clear();
 			ast_debugpath_traverser_visitor dbgpath;
@@ -74,15 +78,13 @@ public:
 		void runTest()
 		{
 			// Do not clear first time
-			if (current_iter){
-				base->results.str(std::string());
-				base->results.clear();
-			}
+			if (current_iter)
+				base->reset();
 
 			exec_list* list = shader->head;
 			ast_debugpath_traverser_visitor dbgpath;
 			current_iter++;
-			base->djv->setUp(shader, DBG_BH_JUMPINTO);
+			base->djv->setUp(shader, base->behaviour);
 			dbgpath.run(list, DPOpPathClear);
 			base->results << "================== Clear path ==================\n";
 			base->doComparison(shader, false);
@@ -96,6 +98,7 @@ public:
 
 			// Now where actual comparison happens
 			base->doComparison(shader, true, current_iter == PRINT_ITER);
+			base->applyRules(shader);
 		}
 
 	protected:
@@ -115,8 +118,9 @@ public:
 		if (!holder->shaders[num])
 			return;
 		test->prepare(holder->shaders[num]);
-		CPPUNIT_NS::RepeatedTest repeator(test, REPEATS_COUNT[num]);
-		repeator.run(result);
+		auto repeater = new CPPUNIT_NS::RepeatedTest(test, REPEATS_COUNT[num]);
+		repeater->run(result);
+		repeaters.push_back(repeater);
 	}
 
 	virtual bool accept(int depth, ast_node* node, enum ast_node_type type)
@@ -130,9 +134,16 @@ public:
 		return true;
 	}
 
+	virtual void applyRules(AstShader* sh)
+	{
+		comparator.applyRules(sh, behaviour);
+	}
+
 protected:
 	DbgResult dbg_result;
 	DebugJump* test;
+	int behaviour;
+	std::vector<CPPUNIT_NS::RepeatedTest*> repeaters;
 	static CPPUNIT_NS::TestResult* result;
 
 	// cppunit makes new instance for each test, lol.

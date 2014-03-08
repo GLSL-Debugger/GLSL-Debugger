@@ -8,6 +8,7 @@
 #define TEST_SHADERINPUT_H_
 
 #include "glslang/Interface/ShaderHolder.h"
+#include "Rules.h"
 #include <map>
 #include <vector>
 #include <string>
@@ -20,7 +21,8 @@ typedef std::vector<std::string> ResultsList;
 typedef std::map<std::string, ResultsList> ResultsListMap;
 typedef std::map<std::string, std::vector<ResultsList>> ResultsFilesMap;
 typedef std::vector<ResultsList>::iterator ResultsFilesIterator;
-
+typedef std::map<int, TestRule> RulesList;
+typedef std::map<std::string, RulesList> RulesMap;
 
 class Resource {
 public:
@@ -56,15 +58,26 @@ public:
 			current(NULL), line(-1)
 	{
 		file = file_end = dummy_files.end();
+		file_num = 0;
 	}
 
 	void setCurrent(std::string name, std::string unit)
 	{
 		line = -1;
+		file_num = 0;
+		current_file = name + "." + unit;
 		file = file_end = dummy_files.end();
-		current = getResults(name, unit);
-		if (!current && getResultsFile(name, unit, file, file_end))
+		states.clear();
+		current = getResults(current_file);
+		if (!current && getResultsFile(current_file, file, file_end)) {
 			current = &(*file);
+			file_num++;
+		}
+	}
+
+	bool nameMatch(std::string name, std::string unit)
+	{
+		return !current_file.compare(name + "." + unit);
 	}
 
 	bool nextFile()
@@ -73,12 +86,17 @@ public:
 			return false;
 
 		current = NULL;
-		CPPUNIT_ASSERT_MESSAGE("No next file", file != file_end);
 		file++;
+		file_num++;
+		line = -1;
 
 		// Set new file if it exists or reset it
 		if (file == file_end) {
 			file = file_end = dummy_files.end();
+			std::stringstream ss;
+			ss << "Request for new file while it is not exists.\n" << current_file << "/"
+					<< file_num;
+			CPPUNIT_FAIL(ss.str());
 			return false;
 		}
 
@@ -86,12 +104,43 @@ public:
 		return true;
 	}
 
+	void applyRules(AstShader* sh) {
+		int dummy;
+		applyRules(sh, dummy);
+	}
+
+	void applyRules(AstShader* sh, int& behaviour)
+	{
+		TestRule* rule = getRules(current_file, line);
+		if (!rule)
+			return;
+
+		if (rule->stateAction())
+			rule->apply(&states[line], sh);
+
+		if (rule->jumpAction()) {
+			int to = rule->getJump();
+			if (to < file_num)
+				while (to < file_num--)
+					file--;
+			else
+				while (to > file_num++)
+					file++;
+		}
+
+		if (rule->bhvAction())
+			behaviour = rule->getBehaviour();
+	}
+
 	void compareNext(std::string cmpline)
 	{
 		CPPUNIT_ASSERT_MESSAGE("No comparison results", current && !current->empty());
 		std::string orig_line = current->at(++line);
 		std::stringstream ss;
-		ss << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: "
+		ss << "File: " << current_file;
+		if (file_num)
+			ss << "/" << file_num;
+		ss << "\n" << "got line\n" << cmpline << "\nexcepted\n" << orig_line << "\nat line: "
 				<< (line + 1);
 		CPPUNIT_ASSERT_MESSAGE(ss.str().c_str(), !orig_line.compare(cmpline));
 	}
@@ -99,42 +148,51 @@ public:
 	static void loadResults(std::string name, std::string unit);
 
 protected:
-	static ResultsList* getResults(std::string name, std::string unit)
+	static ResultsList* getResults(std::string name)
 	{
-		std::map<std::string, ResultsListMap>::iterator it = results.find(name);
-		if (it != results.end()) {
-			ResultsListMap::iterator rit = it->second.find(unit);
-			if (rit != it->second.end())
-				 return &rit->second;
-		}
+		auto it = results.find(name);
+		if (it != results.end())
+			return &it->second;
 		return NULL;
 	}
 
-	bool getResultsFile(std::string name, std::string unit,
-			ResultsFilesIterator& f, ResultsFilesIterator& end)
+	bool getResultsFile(std::string name, ResultsFilesIterator& f, ResultsFilesIterator& end)
 	{
-		// Search if it was directory
-		std::map<std::string, ResultsFilesMap>::iterator fit = results_dirs.find(name);
+// Search if it was directory
+		auto fit = results_dirs.find(name);
 		if (fit != results_dirs.end()) {
-			ResultsFilesMap::iterator rit = fit->second.find(unit);
-			if (rit != fit->second.end()){
-				f = rit->second.begin();
-				end = rit->second.end();
-				return true;
-			}
+			f = fit->second.begin();
+			end = fit->second.end();
+			return true;
 		}
 		return false;
 	}
 
+	TestRule* getRules(std::string name, int rule_line)
+	{
+		auto rit = rules.find(name);
+		if (rit != rules.end()) {
+			RulesList& l = rit->second;
+			auto rlit = l.find(rule_line);
+			if (rlit != l.end())
+				return &rlit->second;
+		}
+		return NULL;
+	}
 
 private:
-	static std::map<std::string, ResultsFilesMap> results_dirs;
-	static std::map<std::string, ResultsListMap> results;
+	static ResultsFilesMap results_dirs;
+	static ResultsListMap results;
+	static RulesMap rules;
+	std::map<int, StatesMap> states;
 	ResultsList* current;
 	ResultsFilesIterator file;
 	ResultsFilesIterator file_end;
 	static std::vector<ResultsList> dummy_files;
+	std::string current_file;
+	int file_num;
 	int line;
-};
+}
+;
 
 #endif /* TEST_SHADERINPUT_H_ */

@@ -10,12 +10,21 @@
 #include "glsl/ast_visitor.h"
 #include "ast_nodes.h"
 
-class BaseUnitTest;
+class CallAcceptor
+{
+public:
+	CallAcceptor() { }
+	virtual ~CallAcceptor() { }
 
+	virtual bool accept(int, ast_node*, enum ast_node_type)
+	{
+		return true;
+	}
+};
 
 class ast_call_visitor : public ast_traverse_visitor {
 public:
-	ast_call_visitor(BaseUnitTest* _u) :
+	ast_call_visitor(CallAcceptor* _u) :
 			unit(_u)
 	{
 	}
@@ -47,7 +56,7 @@ public:
 	virtual bool enter(class ast_interface_block *node);
 	virtual bool enter(class ast_gs_input_layout *node);
 
-	BaseUnitTest* unit;
+	CallAcceptor* unit;
 };
 
 

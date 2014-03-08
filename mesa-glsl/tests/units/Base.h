@@ -18,7 +18,7 @@
 #include <sstream>
 #include <iomanip>
 
-class BaseUnitTest: public CppUnit::TestFixture {
+class BaseUnitTest: public CallAcceptor, public CppUnit::TestFixture {
 public:
 	BaseUnitTest()
 	{
@@ -50,13 +50,9 @@ public:
 			results << "    ";
 	}
 
-	virtual bool accept(int, ast_node*, enum ast_node_type)
-	{
-		return true;
-	}
-
 	virtual void reset()
 	{
+		results.str(std::string());
 		results.clear();
 	}
 
@@ -91,12 +87,18 @@ public:
 		if (!do_actual_cmp)
 			return;
 
-		if (!comparator.nextFile())
+		if (!comparator.nameMatch(sh->name, unit_name))
 			comparator.setCurrent(sh->name, unit_name);
+		else
+			comparator.nextFile();
 
 		std::string s;
 		while (std::getline(results, s))
 			comparator.compareNext(s);
+	}
+
+	virtual void applyRules(AstShader* sh) {
+		comparator.applyRules(sh);
 	}
 
 protected:

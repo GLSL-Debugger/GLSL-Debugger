@@ -25,8 +25,9 @@ static gl_shader_stage shTypes[SHADERS_PER_PROGRAM] = {
 
 std::string Resource::path = "./";
 ShadersList ShaderInput::shaders;
-std::map<std::string, ResultsListMap> ResultComparator::results;
-std::map<std::string, ResultsFilesMap> ResultComparator::results_dirs;
+ResultsListMap ResultComparator::results;
+ResultsFilesMap ResultComparator::results_dirs;
+RulesMap ResultComparator::rules;
 std::vector<ResultsList> ResultComparator::dummy_files;
 
 
@@ -74,15 +75,10 @@ ShaderHolder* ShaderInput::load(std::string name)
 	return holder;
 }
 
-static bool folderLoaded(std::map<std::string, ResultsFilesMap>& dirs, std::string name, std::string unit)
+static bool folderLoaded(ResultsFilesMap& dirs, std::string name)
 {
-	std::map<std::string, ResultsFilesMap>::iterator fit = dirs.find(name);
-	if (fit != dirs.end()) {
-		ResultsFilesMap::iterator rit = fit->second.find(unit);
-		if (rit != fit->second.end())
-			return true;
-	}
-	return false;
+	ResultsFilesMap::iterator fit = dirs.find(name);
+	return fit != dirs.end();
 }
 
 static bool loadFile(ResultsList& r, const char* fname)
@@ -100,12 +96,30 @@ static bool loadFile(ResultsList& r, const char* fname)
 	return true;
 }
 
+static void loadRules(RulesList& rules_map, std::string path)
+{
+	std::string filename = path + "/rules";
+	char* source = test_load_text_file(NULL, filename.c_str());
+	if (!source)
+		return;
+	dbgPrint(DBGLVL_INFO, "Found rules for %s.\n", path.c_str());
+	std::istringstream ss(source);
+	std::string line;
+	while (std::getline(ss, line, '\n')) {
+		size_t delim = line.find(" ");
+		CPPUNIT_ASSERT_MESSAGE("Bad rule found, rule: " + line,
+					delim != std::string::npos);
+		int id = std::stoi(line.substr(0, delim));
+		rules_map[id].load(id, line.substr(delim + 1));
+	}
+}
+
 void ResultComparator::loadResults(std::string name, std::string unit)
 {
 	for (int shnum = 0; shnum < SHADERS_PER_PROGRAM; ++shnum) {
 		std::string shname = path + name + shExtensions[shnum];
 		std::string fname = shname + "." + unit;
-		if (getResults(shname, unit) || folderLoaded(results_dirs, name, unit))
+		if (getResults(fname) || folderLoaded(results_dirs, fname))
 			continue;
 
 		struct stat s;
@@ -113,19 +127,20 @@ void ResultComparator::loadResults(std::string name, std::string unit)
 			if (s.st_mode & S_IFDIR) {
 				int iter = 1;
 				bool file_exists = true;
-				std::stringstream ss;
-				std::vector<ResultsList>& dir = results_dirs[shname][unit];
+				std::vector<ResultsList>& dir = results_dirs[fname];
 				// Open files starting from name 1 until file not found
 				while (file_exists) {
-					ss.clear();
+					std::stringstream ss;
 					ss << fname << "/" << iter++;
 					ResultsList r;
 					file_exists = loadFile(r, ss.str().c_str());
 					if (file_exists)
 						dir.push_back(r);
 				}
+				// Load rules for the dir
+				loadRules(rules[fname], fname);
 			} else if (s.st_mode & S_IFREG) {
-				ResultsList& r = results[shname][unit];
+				ResultsList& r = results[fname];
 				if (!loadFile(r, fname.c_str()))
 					dbgPrint(DBGLVL_INFO, "Test output %s not found. Skipping.\n", fname.c_str());
 			} else {
@@ -133,5 +148,36 @@ void ResultComparator::loadResults(std::string name, std::string unit)
 			}
 		}
 	}
+}
 
+
+void TestRule::load(int id, std::string str)
+{
+	line = id;
+	size_t pos;
+	if ((pos = str.find("save")) != std::string::npos) {
+		type = tr_save;
+	} else if ((pos = str.find("load ")) != std::string::npos) {
+		type = tr_load | tr_jump;
+		pos += 5;
+		size_t sp;
+		if ((sp = str.find(' ', pos)) != std::string::npos)
+			jump_to = std::stoi(str.substr(pos, sp - pos));
+	}
+
+	if ((pos = str.find("jump ")) != std::string::npos) {
+		type = tr_jump;
+		pos += 5;
+		size_t sp;
+		if ((sp = str.find(' ', pos)) != std::string::npos)
+			jump_to = std::stoi(str.substr(pos, sp - pos));
+	}
+
+	if ((pos = str.find("bhvr ")) != std::string::npos) {
+		type |= tr_bhvr;
+		pos += 5;
+		size_t sp;
+		if ((sp = str.find(' ', pos)) != std::string::npos)
+			behaviour = std::stoi(str.substr(pos, sp - pos));
+	}
 }
