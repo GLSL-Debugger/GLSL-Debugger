@@ -307,8 +307,8 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 	assert(identifier);
 
 	const char* func_name = identifier->primary_expression.identifier;
-	ast_function_definition* f = shader->symbols->get_function(func_name);
-	assert(f || !"Function not found");
+	ast_function_definition* funcDef = shader->symbols->get_function(func_name);
+	assert(!funcDef || node->debug_builtin || !"Function not found");
 
 	VPRINT(2, "process Call L:%s N:%s Blt:%i Op:%i DbgSt:%i\n",
 			FormatSourceRange(node->get_location()).c_str(),
@@ -318,17 +318,17 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 		if (node->debug_state != ast_dbg_state_target)
 			return;
 
-		if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
+		if (funcDef && (this->dbgBehaviour & DBG_BH_JUMPINTO)) {
 			// no changeable has to be copied in first place,
 			// as we jump into this function
 
-			VPRINT(2, "\t ---- push %p on stack ----\n", f);
-			this->parseStack.push(f);
+			VPRINT(2, "\t ---- push %p on stack ----\n", funcDef);
+			this->parseStack.push(funcDef);
 			this->operation = OTOpTargetSet;
 
 			// add local parameters of called function first
-			copyShChangeableListCtx(&result.cgbls, &f->prototype->changeables, shader);
-			f->accept(this);
+			copyShChangeableListCtx(&result.cgbls, &funcDef->prototype->changeables, shader);
+			funcDef->accept(this);
 
 			// if parsing ends up here and a target is still beeing
 			// searched, a wierd function was called, but anyway,
@@ -347,7 +347,8 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 				this->finishedDbgFunction = false;
 			} else {
 				copyShChangeableListCtx(&result.cgbls, &node->changeables, shader);
-				checkReturns(f);
+				if (funcDef)
+					checkReturns(funcDef);
 			}
 		}
 	} else if (operation == OTOpTargetSet) {
@@ -362,8 +363,6 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 				setDbgResultRange(result.range, node->get_location());
 				setGobalScope(&node->scope);
 				this->operation = OTOpDone;
-			} else {
-				checkReturns(f);
 			}
 		}
 	}
