@@ -12,7 +12,7 @@ class exec_list;
 class ast_traverse_visitor {
 public:
 	ast_traverse_visitor() :
-			depth(0), flags(0), skipInternal(true)
+			depth(0), flags(0)
 	{
 	}
 
@@ -103,10 +103,8 @@ public:
 	virtual void leave(class ast_interface_block *) {}
 	virtual void leave(class ast_gs_input_layout *) {}
 
-
 	int depth;
 	int flags;
-	bool skipInternal;
 };
 
 #endif /* AST_leave_VISITOR_H_ */

@@ -202,6 +202,7 @@ public:
    virtual class ast_jump_statement* as_jump_statement() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   inline bool debug_target() { return debug_state == ast_dbg_state_target; }
 
 
    exec_list scope;

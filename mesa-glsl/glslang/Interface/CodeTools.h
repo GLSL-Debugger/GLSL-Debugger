@@ -33,6 +33,5 @@ ast_node* getSideEffectsDebugParameter(ir_call* ir, int pnum);
 bool list_iter_check(ir_instruction* const ir, int& state);
 bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state);
 
-
 #endif
 

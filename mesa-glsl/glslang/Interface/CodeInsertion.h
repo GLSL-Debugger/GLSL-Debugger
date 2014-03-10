@@ -29,28 +29,30 @@ enum cgGeomChangeable {
 class CodeGen
 {
 public:
-	CodeGen(AstShader*);
+	CodeGen(AstShader*, ShVariableList*, ShChangeableList*);
 	~CodeGen();
 
-	void init(cgTypes type, ShVariable *v, ShVariableList *vl, EShLanguage l);
-	void allocateResult(ast_node*, EShLanguage, ShVariableList*, DbgCgOptions);
+	void init(cgTypes type, ShVariable *v, EShLanguage l);
+	void allocateResult(ast_node*, EShLanguage, DbgCgOptions);
 	/* code generation */
-	void getNewName(char **name, ShVariableList *vl, const char *prefix);
+	void getNewName(char **name, const char *prefix);
 	void addDeclaration(cgTypes type, char** prog, EShLanguage l);
 	void addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
-	                  ShChangeableList *src, ShVariableList *vl,
 	                  int option, int outPrimType = 0x0000);
 	void addOutput(cgTypes type, char** prog, EShLanguage l, TQualifier o = EvqTemporary);
 	void addInitialization(cgTypes type, cgInitialization init, char** prog, EShLanguage l);
 	//void addAssignment(cgTypes type, ShVariable *src);
 	void destruct(cgTypes type);
 
-	void setIterNames(ShVariableList *vl);
+	void setIterNames();
 	void resetLoopIterNames(void);
 
 	const char* getDebugName(const char *input);
+
 private:
 	AstShader* shader;
+	ShVariableList *vl;
+	ShChangeableList *cgbls;
 	ShVariable* result;
 	ShVariable* condition;
 	ShVariable* parameter;

@@ -37,9 +37,11 @@ static struct {
 } g;
 
 
-CodeGen::CodeGen(AstShader* sh)
+CodeGen::CodeGen(AstShader* _sh, ShVariableList* _vl, ShChangeableList* _cgbls)
 {
-	shader = sh;
+	shader = _sh;
+	vl = _vl;
+	cgbls = _cgbls;
 	result = condition = parameter = NULL;
 
 	g.nameMap.clear();
@@ -110,7 +112,7 @@ static char* getUnusedNameByPrefix(ShVariableList *vl, const char *prefix, void*
 	return new_name;
 }
 
-void CodeGen::getNewName(char **name, ShVariableList *vl, const char *prefix)
+void CodeGen::getNewName(char **name, const char *prefix)
 {
 	*name = getUnusedNameByPrefix(vl, prefix, shader);
 }
@@ -147,7 +149,7 @@ static char* getNewUnusedName(cgTypes type, ShVariableList *vl, EShLanguage l, v
 	return new_name;
 }
 
-void CodeGen::init(cgTypes type, ShVariable *src, ShVariableList *vl, EShLanguage l)
+void CodeGen::init(cgTypes type, ShVariable *src, EShLanguage l)
 {
 	ShVariable **var = NULL;
 
@@ -690,8 +692,7 @@ static void addLoopFooter(char** prog, AstStack* stack)
  *     DBG_CG_SELECTION_CONDITIONAL: branch (true or false)
  *     DBG_CG_GEOMETRY_MAP:          EmitVertex or EndPrimitive
  */
-void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, ShChangeableList *src,
-		ShVariableList *vl, int option, int outPrimType)
+void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, int option, int outPrimType)
 {
 	/* TODO: fill out other possibilities */
 	switch (type) {
@@ -717,7 +718,7 @@ void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, ShCh
 			break;
 		case DBG_CG_CHANGEABLE:
 			ralloc_asprintf_append(prog, "%s = %s(", result->name, type_code);
-			addVariableCodeFromList(prog, src, vl, getVariableSizeByArrayIndices(result, 0));
+			addVariableCodeFromList(prog, cgbls, vl, getVariableSizeByArrayIndices(result, 0));
 			ralloc_asprintf_append(prog, ")");
 			break;
 		case DBG_CG_GEOMETRY_MAP:
@@ -737,7 +738,7 @@ void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, ShCh
 				break;
 			case CG_GEOM_CHANGEABLE_IN_SCOPE:
 				ralloc_asprintf_append(prog, "%s = %s(", result->name, type_code);
-				addVariableCodeFromList(prog, src, vl, 0);
+				addVariableCodeFromList(prog, cgbls, vl, 0);
 				ralloc_asprintf_append(prog, ", abs(%s.y))", result->name);
 				break;
 			case CG_GEOM_CHANGEABLE_NO_SCOPE:

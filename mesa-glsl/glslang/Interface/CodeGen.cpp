@@ -50,10 +50,6 @@
 #define DBG_TEXT_BEGIN "\x1B[1;31mgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0)\x1B[0;31m"
 #define DBG_TEXT_END "\x1B[0m"
 
-#define EMIT_VERTEX_SIG   "EmitVertex("
-#define END_PRIMITIVE_SIG "EndPrimitive("
-
-
 void printShaderIr(struct gl_shader* shader)
 {
 	ir_position_output_visitor pov(DBGLVL_COMPILERINFO);
@@ -134,7 +130,7 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 		/* stack top is path beginning, base is target */
 		foreach_stack_reverse(node, stack) {
 			ast_function_expression* call = node->as_function_expression();
-			bool user_call = (call && !call->debug_builtin);
+			bool user_call = (call && !call->debug_builtin && !call->is_constructor());
 			bool allInScope = true;
 
 			foreach_list(ch_node, &node->changeables) {
@@ -143,10 +139,7 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 					continue;
 
 				ShVariable *var = findShVariableFromId(vl, ch_item->id);
-				if (!var) {
-					dbgPrint(DBGLVL_WARNING, "CodeGen - unknown changeable, stop debugging\n");
-					return NULL;
-				}
+				assert(var || !"CodeGen - unknown changeable, stop debugging");
 
 				if (var->builtin)
 					continue;
@@ -180,7 +173,8 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 			/* iterate trough the rest of the stack */
 			for (ast_node* node = stack->back(); node != NULL; node = stack->next()) {
 				ast_function_expression* call = node->as_function_expression();
-				if (call && !call->debug_builtin && call->debug_overwrite == ast_dbg_ow_unset)
+				if (call && !call->is_constructor() && !call->debug_builtin
+						&& call->debug_overwrite == ast_dbg_ow_unset)
 					change_DbgOverwrite(shader, call, ast_dbg_ow_debug);
 			}
 			/* DEBUG OUTPUT */
@@ -231,9 +225,9 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	else if (shader->stage == MESA_SHADER_GEOMETRY)
 		language = EShLangGeometry;
 
-	CodeGen cg(shader);
+	CodeGen cg(shader, vl, cgbl);
 	/* Set DbgIterName for loop */
-	cg.setIterNames(vl);
+	cg.setIterNames();
 
 	ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
 	assert(main || !"CodeGen - could not find main function!\n");
@@ -253,7 +247,7 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	/* Always allocate a result register */
 	cg.allocateResult(target, language, vl, dbgCgOptions);
 
-	ir_output_traverser_visitor it(shader, language, dbgCgOptions, vl, cgbl);
+	ast_output_traverser_visitor it(cg, shader, vl, cgbl, language, dbgCgOptions);
 	it.append_version();
 
 	/* I have some problems with locale-dependent %f interpretation in printf
@@ -271,7 +265,7 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	/* 2. Pass:
 	 * - do the actual code generation
 	 */
-	it.run(list);
+	it.visit(list);
 	/* restore locale */
 	setlocale(LC_NUMERIC, old_locale);
 
