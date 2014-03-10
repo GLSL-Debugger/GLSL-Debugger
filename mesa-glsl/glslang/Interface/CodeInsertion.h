@@ -1,11 +1,7 @@
 #ifndef _CODE_INSERTION_
 #define _CODE_INSERTION_
 
-#include "../Public/ShaderLang.h"
-//#include "../Include/Common.h"
-#include "../Include/BaseTypes.h"
-#include <vector>
-#include <string>
+#include "ShaderLang.h"
 
 enum cgTypes {
 	CG_TYPE_NONE,
@@ -29,30 +25,37 @@ enum cgGeomChangeable {
     CG_GEOM_CHANGEABLE_NO_SCOPE
 };
 
-/* Stack to hold complete dbgPath */
-typedef std::vector<ir_instruction*> IRGenStack;
 
-/* helper functions */
-char* itoSwizzle(int i);
+class CodeGen
+{
+public:
+	CodeGen(AstShader*);
+	~CodeGen();
 
-/* code generation */
-void cgGetNewName(char **name, ShVariableList *vl, const char *prefix);
-void cgInit(cgTypes type, ShVariable *v, ShVariableList *vl, EShLanguage l);
-void cgAddDeclaration(cgTypes type, char** prog, EShLanguage l);
-void cgAddDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
-                  ShChangeableList *src, ShVariableList *vl,
-                  IRGenStack *stack, int option, int outPrimType = 0x0000);
-void cgAddOutput(cgTypes type, std::string &prog, EShLanguage l, TQualifier o = EvqTemporary);
-void cgAddInitialization(cgTypes type, cgInitialization init,
-				  std::string &prog, EShLanguage l);
-void cgAddAssignment(cgTypes type, ShVariable *src);
-void cgDestruct(cgTypes type);
+	void init(cgTypes type, ShVariable *v, ShVariableList *vl, EShLanguage l);
+	void allocateResult(ast_node*, EShLanguage, ShVariableList*, DbgCgOptions);
+	/* code generation */
+	void getNewName(char **name, ShVariableList *vl, const char *prefix);
+	void addDeclaration(cgTypes type, char** prog, EShLanguage l);
+	void addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
+	                  ShChangeableList *src, ShVariableList *vl,
+	                  int option, int outPrimType = 0x0000);
+	void addOutput(cgTypes type, char** prog, EShLanguage l, TQualifier o = EvqTemporary);
+	void addInitialization(cgTypes type, cgInitialization init, char** prog, EShLanguage l);
+	//void addAssignment(cgTypes type, ShVariable *src);
+	void destruct(cgTypes type);
 
-void cgInitNameMap(void);
-void cgInitLoopIter(void);
-const char* cgGetDebugName(const char *input, struct gl_shader* shader);
+	void setIterNames(ShVariableList *vl);
+	void resetLoopIterNames(void);
 
-void cgSetLoopIterName(char **name, ShVariableList *vl);
-void cgResetLoopIterNames(void);
+	const char* getDebugName(const char *input);
+private:
+	AstShader* shader;
+	ShVariable* result;
+	ShVariable* condition;
+	ShVariable* parameter;
+};
+
+
 
 #endif

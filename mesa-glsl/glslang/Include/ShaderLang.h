@@ -25,6 +25,7 @@ void copyShChangeableToListCtx(ShChangeableList *cl, ShChangeable *c, void* mem_
 void copyShChangeableListCtx(ShChangeableList *clout, exec_list *clin, void* mem_ctx);
 
 // Variables
+ShVariable* copyShVariableCtx(ShVariable *src, void* mem_ctx);
 void addAstShVariable(ast_node*, ShVariable*);
 variableQualifier qualifierFromAst(const ast_type_qualifier* qualifier, bool is_parameter);
 variableQualifier qualifierFromIr(ir_variable* var);

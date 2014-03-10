@@ -77,6 +77,7 @@ public:
     */
    /*@{*/
    bool add_variable(ShVariable* v);
+   bool add_type(const char *name, const glsl_type *t);
    bool add_function(ast_function_definition *f);
    /*@}*/
 
@@ -90,6 +91,7 @@ public:
     */
    /*@{*/
    ShVariable *get_variable(const char *name);
+   const glsl_type *get_type(const char *name);
    ast_function_definition *get_function(const char *name);
    /*@}*/
 

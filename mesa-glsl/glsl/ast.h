@@ -196,6 +196,10 @@ public:
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_expression* as_expression() { return NULL; }
    virtual class ast_function_expression* as_function_expression() { return NULL; }
+   virtual class ast_function_definition* as_function_definition() { return NULL; }
+   virtual class ast_selection_statement* as_selection_statement() { return NULL; }
+   virtual class ast_iteration_statement* as_iteration_statement() { return NULL; }
+   virtual class ast_jump_statement* as_jump_statement() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
 
@@ -1034,6 +1038,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_selection_statement* as_selection_statement() { return this; }
    enum ast_dbg_state_internal_if debug_state_internal;
 #endif
 
@@ -1090,6 +1095,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_iteration_statement* as_iteration_statement() { return this; }
 
    bool need_dbgiter()
    {
@@ -1122,6 +1128,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_jump_statement* as_jump_statement() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1146,6 +1153,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_function_definition* as_function_definition() { return this; }
 #endif
 
    virtual void print(void) const;

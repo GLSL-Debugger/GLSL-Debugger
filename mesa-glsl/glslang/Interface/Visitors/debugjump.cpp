@@ -12,11 +12,6 @@
 #include "glslang/Interface/SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 
-#define DEFAULT_DEBUGABLE(node)  \
-	if( this->operation == OTOpPathClear || \
-    	this->operation == OTOpPathBuild || \
-    	this->operation == OTOpReset ) processDebugable(node, &this->operation);
-
 static void setDbgResultRange(DbgRsRange& r, const YYLTYPE& range)
 {
 	r.left.line = range.first_line;

@@ -133,6 +133,7 @@ bool ast_postprocess_traverser_visitor::enter(ast_declarator_list* node)
 	const char* type_name;
 	const glsl_type * decl_type = node->type->glsl_type(&type_name, this->state);
 	assert(decl_type || !"Using of non-declared type");
+	shader->symbols->add_type(type_name, decl_type);
 
 	foreach_list_typed (ast_declaration, decl, link, &node->declarations) {
 		if (decl->initializer && decl->initializer->oper == ast_aggregate)
@@ -214,6 +215,7 @@ bool ast_postprocess_traverser_visitor::enter(ast_parameter_declarator *node)
 	YYLTYPE loc = node->get_location();
 
 	type = node->type->glsl_type(&name, state);
+	shader->symbols->add_type(name, type);
 
 	if (type == NULL)
 		type = glsl_type::error_type;

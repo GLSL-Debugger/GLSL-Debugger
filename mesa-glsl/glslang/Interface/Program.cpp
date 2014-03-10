@@ -157,7 +157,7 @@ static void resetGlobals()
 		g.it = new ast_debugjump_traverser_visitor(g.result);
 }
 
-static DbgResult* endTraverse(DbgRsStatus status)
+static DbgResult* endTraverse(enum DbgRsStatuses status)
 {
 	g.result.status = status;
 	return &g.result;
@@ -205,14 +205,12 @@ DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBehaviour)
 		/* Debugging finished at the end of the code */
 		root->debug_state = ast_dbg_state_end;
 		return endTraverse(DBG_RS_STATUS_FINISHED);
-	} else {
-		/* Build up new debug path; all DbgStPath */
-		dbgpath.run(list, DPOpPathBuild);
 	}
 
-	VPRINT(1, "********* traverse scope **********\n");
-	ir_scopestack_traverse_visitor itScopeStack(g.result);
-	itScopeStack.visit(list);
+	/* Build up new debug path; all DbgStPath */
+	dbgpath.run(list, DPOpPathBuild);
+	VPRINT(1, "********* Copy scope **********\n");
+	dbgpath.getPath(g.result.scopeStack, shader);
 
 	return endTraverse(DBG_RS_STATUS_OK);
 }

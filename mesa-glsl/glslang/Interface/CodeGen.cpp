@@ -35,15 +35,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "glsl/ir.h"
 #include "glsl/list.h"
 #include "mesa-glsl/glslang/Public/ShaderLang.h"
 
 #include "CodeInsertion.h"
 #include "CodeTools.h"
 #include "AstScope.h"
+#include "AstStack.h"
 #include "Visitors/output.h"
-#include "Visitors/stacktraverser.h"
 #include "Visitors/position_output.h"
 
 #include "glsldb/utils/dbgprint.h"
@@ -53,6 +52,7 @@
 
 #define EMIT_VERTEX_SIG   "EmitVertex("
 #define END_PRIMITIVE_SIG "EndPrimitive("
+
 
 void printShaderIr(struct gl_shader* shader)
 {
@@ -66,427 +66,231 @@ void printShaderIr(struct gl_shader* shader)
 //
 //  Generate code from the given parse tree
 //
-bool compileShaderCode(struct gl_shader* shader)
+bool compileShaderCode(AstShader* shader)
 {
-	exec_list* list = shader->ir;
-//    bool haveValidObjectCode = true;
+	exec_list* list = shader->head;
 
-    EShLanguage language = EShLangVertex;
-    if( shader->Type == GL_FRAGMENT_SHADER )
-    	language = EShLangFragment;
-    else if( shader->Type == GL_GEOMETRY_SHADER )
+	EShLanguage language = EShLangVertex;
+	if (shader->stage == MESA_SHADER_FRAGMENT)
+		language = EShLangFragment;
+	else if (shader->stage == MESA_SHADER_GEOMETRY)
 		language = EShLangGeometry;
 
-    ir_output_traverser_visitor it(shader, language, DBG_CG_ORIGINAL_SRC, NULL, NULL, NULL);
-    it.append_version();
-    it.run(list);
-//    haveValidObjectCode = true;
+	ir_output_traverser_visitor it(shader, language, DBG_CG_ORIGINAL_SRC, NULL, NULL, NULL);
+	it.append_version();
+	it.run(list);
 
-    dbgPrint(DBGLVL_COMPILERINFO, "\n"
-                   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-                   "%s\n"
-                   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-                   it.buffer);
+	dbgPrint(DBGLVL_COMPILERINFO, "\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
+			"%s\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", it.buffer);
 
-//    return haveValidObjectCode;
-    return true;
+	return true;
 }
-
-
-static void dumpNodeInfo(ir_instruction* node)
-{
-    dbgPrint(DBGLVL_COMPILERINFO, "(%s) ", FormatSourceRange(node->yy_location).c_str());
-    switch( node->ir_type ){
-    	case ir_type_call:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION CALL %s",
-    		                node->as_call()->callee_name());
-    		break;
-    	case ir_type_function_signature:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION SIGNATURE %s",
-    				node->as_function_signature()->function_name());
-    		break;
-    	case ir_type_expression:
-    	{
-    		ir_expression* eir = node->as_expression();
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "EXPRESSION: %s",
-    				eir->operation < ir_last_unop ? "UNARY" :
-    				eir->operation < ir_last_binop ? "BINARY" :
-    				eir->operation < ir_last_triop ? "TERNARY" : "QUAD"	);
-    		break;
-    	}
-    	case ir_type_assignment:
-			dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "ASSIGNMENT");
-			break;
-    	case ir_type_if:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "IF");
-    		break;
-    	case ir_type_loop:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "LOOP");
-    		break;
-    	case ir_type_return:
-    		dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "RETURN");
-    		break;
-    	case ir_type_discard:
-    	    dbgPrintNoPrefix( DBGLVL_COMPILERINFO, "DISCARD");
-    	    break;
-    	default:
-    		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "unknown");
-    		break;
-    }
-	dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
-}
-
-static void dumpDbgStack(IRGenStack *stack)
-{
-	IRGenStack::iterator iter;
-
-    dbgPrint(DBGLVL_COMPILERINFO, "## STACK #####################################\n");
-
-    for(iter = stack->begin(); iter != stack->end(); iter++) {
-    	ir_instruction* ir = (*iter);
-        dumpNodeInfo(ir);
-        switch ( ir->debug_overwrite ) {
-            case ir_dbg_ow_debug:
-                dbgPrint(DBGLVL_COMPILERINFO, " <ir_dbg_ow_debug> ");
-                break;
-            case ir_dbg_ow_original:
-                dbgPrint(DBGLVL_COMPILERINFO, " <ir_dbg_ow_original> ");
-                break;
-            default:
-                dbgPrint(DBGLVL_COMPILERINFO, " <ir_dbg_ow_unset> ");
-                break;
-        }
-        dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
-        /*scopeList *sl = get_scope(ir);
-
-        if (sl) {
-            scopeList::iterator sit;
-            for (sit = sl->begin(); sit != sl->end(); sit++) {
-                dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "%i ", (*sit));
-            }
-            dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
-        } else {
-            dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "no scope\n");
-        }*/
-    }
-
-    dbgPrint(DBGLVL_COMPILERINFO, "###############################################\n");
-}
-
 
 /*
  * DEBUG INTERFACE
  */
 
-void change_DbgOverwrite(ir_call* cir, enum ir_dbg_overwrite status)
+void change_DbgOverwrite(AstShader* sh, ast_function_expression* cir, enum ast_dbg_overwrite status)
 {
-    dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL ir_dbg_ow_%s\n",
-    		status == ir_dbg_ow_original ? "original" :
-    		status == ir_dbg_ow_debug ? "debug" : "unset" );
-    dumpNodeInfo(cir);
-    dbgPrint(DBGLVL_COMPILERINFO, "---------------------------------------\n");
+	dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL ast_dbg_ow_%s\n",
+			status == ast_dbg_ow_original ? "original" :
+			status == ast_dbg_ow_debug ? "debug" : "unset");
+	dumpNodeInfo(cir);
+	dbgPrint(DBGLVL_COMPILERINFO, "---------------------------------------\n");
+	cir->debug_overwrite = status;
 
-    cir->debug_overwrite = status;
-
-    ir_function_signature* funcDec = cir->callee;
-    funcDec->debug_overwrite = status;
+	const char* name = cir->subexpressions[0]->primary_expression.identifier;
+	ast_function_definition* func = sh->symbols->get_function(name);
+	func->debug_overwrite = status;
 }
 
-bool prepareTarget(ir_instruction** out, IRGenStack* dbgStack, DbgCgOptions dbgCgOptions,
-					ShChangeableList *cgbl, ShVariableList *vl)
+ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
+		ShChangeableList *cgbl, ShVariableList *vl)
 {
-	ir_instruction* target = NULL;
-	switch( dbgCgOptions ){
-		case DBG_CG_GEOMETRY_MAP:
-		case DBG_CG_VERTEX_COUNT:
-			break;
-		case DBG_CG_COVERAGE:
-		case DBG_CG_SELECTION_CONDITIONAL:
-		case DBG_CG_LOOP_CONDITIONAL:
-		case DBG_CG_GEOMETRY_CHANGEABLE:
-			if( !dbgStack->empty() )
-				target = dbgStack->back();
-			break;
-		case DBG_CG_CHANGEABLE:
-		{
-			IRGenStack::reverse_iterator rit;
+	ast_node* target = NULL;
+	AstStack* stack = &shader->path;
 
-			if( !cgbl )
-				return false;
+	switch (dbgCgOptions) {
+	case DBG_CG_GEOMETRY_MAP:
+	case DBG_CG_VERTEX_COUNT:
+		break;
+	case DBG_CG_COVERAGE:
+	case DBG_CG_SELECTION_CONDITIONAL:
+	case DBG_CG_LOOP_CONDITIONAL:
+	case DBG_CG_GEOMETRY_CHANGEABLE:
+		if (!stack->empty())
+			target = stack->base();
+		break;
+	case DBG_CG_CHANGEABLE: {
+		if (!cgbl)
+			return NULL;
 
-			/* iterate backwards thru stack */
-			for( rit = dbgStack->rbegin(); rit != dbgStack->rend(); rit++ ){
+		std::unordered_set<int> changeables;
+		for (int id = 0; id < cgbl->numChangeables; id++)
+			changeables.emplace(cgbl->changeables[id]->id);
 
-//				ir_instruction* rir = *rit;
-/*				scopeList *sl = get_scope( rir );
-				scopeList::iterator sit;
-				bool user_call = (rir->ir_type == ir_type_call
-						&& !rir->as_call()->callee->is_builtin());
+		/* stack top is path beginning, base is target */
+		foreach_stack_reverse(node, stack) {
+			ast_function_expression* call = node->as_function_expression();
+			bool user_call = (call && !call->debug_builtin);
+			bool allInScope = true;
 
-				 check if all changeables are in scope bool allInScope = true;
+			foreach_list(ch_node, &node->changeables) {
+				changeable_item* ch_item = (changeable_item*)ch_node;
+				if (changeables.find(ch_item->id) != changeables.end())
+					continue;
 
-				for( int id = 0; id < cgbl->numChangeables; id++ ){
-					bool inScope = false;
-
-					 builtins are always valid
-					ShVariable *var = findShVariableFromId( vl,
-							cgbl->changeables[id]->id );
-					if( !var ){
-						dbgPrint( DBGLVL_WARNING,
-								"CodeGen - unknown changeable, stop debugging\n" );
-						return false;
-					}
-
-					if( var->builtin ){
-						inScope = true;
-					}else{
-						 parse the actual scope
-						for( sit = sl->begin(); sit != sl->end(); sit++ ){
-							if( ( *sit ) == cgbl->changeables[id]->id ){
-								inScope = true;
-								break;
-							}
-						}
-					}
-
-					if( !inScope ){
-						 This is not the place to read out the target
-						if( user_call )
-							change_DbgOverwrite( rir->as_call(), ir_dbg_ow_original );
-						else
-							dumpNodeInfo( rir );
-
-						 pop stack since we cannot process all changeables here
-						allInScope = false;
-						break;
-					}
+				ShVariable *var = findShVariableFromId(vl, ch_item->id);
+				if (!var) {
+					dbgPrint(DBGLVL_WARNING, "CodeGen - unknown changeable, stop debugging\n");
+					return NULL;
 				}
 
-				if( allInScope ){
-					 we are finially finished
-					target = rir;
+				if (var->builtin)
+					continue;
 
-					if( user_call )
-						change_DbgOverwrite( rir->as_call(), ir_dbg_ow_original );
-					else
-						dumpNodeInfo( *rit );
-					break;
-				}*/
+				//This is not the place to read out the target
+				if (user_call)
+					change_DbgOverwrite(shader, call, ast_dbg_ow_original);
+				else
+					dumpNodeInfo(node);
+
+				// pop stack since we cannot process all changeables here
+				allInScope = false;
+				break;
 			}
 
-			if( !target ){
-				dbgPrint( DBGLVL_WARNING,
-						"CodeGen - target not in stack, no debugging possible\n" );
-				dumpDbgStack( dbgStack );
-				return false;
-			}else{
-				/* iterate trough the rest of the stack */
-				for( rit = dbgStack->rbegin(); rit != dbgStack->rend();
-						rit++ ){
-					ir_instruction* rir = *rit;
-
-					if( rir->ir_type == ir_type_call
-							&& !rir->as_call()->callee->is_builtin()
-							&& rir->debug_overwrite == ir_dbg_ow_unset ){
-						change_DbgOverwrite( rir->as_call(), ir_dbg_ow_debug );
-					}
-				}
-				/* DEBUG OUTPUT */
-				dumpDbgStack( dbgStack );
+			if (allInScope) {
+				// we are finially finished
+				target = node;
+				if (user_call)
+					change_DbgOverwrite(shader, call, ast_dbg_ow_original);
+				else
+					dumpNodeInfo(node);
+				break;
 			}
 		}
-			break;
-		default:
-			break;
+
+		if (!target) {
+			dbgPrint(DBGLVL_WARNING, "CodeGen - target not in stack, no debugging possible\n");
+			dumpDbgStack(dbgStack);
+		} else {
+			/* iterate trough the rest of the stack */
+			for (ast_node* node = stack->back(); node != NULL; node = stack->next()) {
+				ast_function_expression* call = node->as_function_expression();
+				if (call && !call->debug_builtin && call->debug_overwrite == ast_dbg_ow_unset)
+					change_DbgOverwrite(shader, call, ast_dbg_ow_debug);
+			}
+			/* DEBUG OUTPUT */
+			dumpDbgStack(dbgStack);
+		}
+
+		break;
+	}
+	default:
+		break;
 	}
 
-	*out = target;
-	return true;
+	return target;
 }
 
-
-bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl,
-        ShVariableList *vl, DbgCgOptions dbgCgOptions, char** code)
+void clearTarget(ast_node* target, AstShader* shader)
 {
-    if (dbgCgOptions == DBG_CG_ORIGINAL_SRC) {
-        return compileShaderCode(shader);
-    }
+	/* Reset overwrite modes */
+	AstStack* stack = &shader->path;
+	for (ast_node* node = stack->back(); node != NULL; node = stack->next()) {
+		node->debug_overwrite = ast_dbg_ow_unset;
+		ast_function_expression* call = node->as_function_expression();
+		if (call && !call->debug_builtin) {
+			const char* name = call->subexpressions[0]->primary_expression.identifier;
+			ast_function_definition* func = shader->symbols->get_function(name);
+			func->debug_overwrite = ast_dbg_ow_unset;
+		}
+	}
+	stack->clear();
+}
 
-    exec_list* list = shader->ir;
+bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableList *vl,
+		DbgCgOptions dbgCgOptions, char** code)
+{
+	if (dbgCgOptions == DBG_CG_ORIGINAL_SRC) {
+		return compileShaderCode(shader);
+	}
 
-    /* Check for empty parse tree */
-    if ( list->head->next == NULL || list->tail_pred == NULL )
-        return false;
+	exec_list* list = shader->head;
 
-    EShLanguage language = EShLangVertex;
-    if( shader->Type == GL_FRAGMENT_SHADER )
-    	language = EShLangFragment;
-    else if( shader->Type == GL_GEOMETRY_SHADER )
-		language = EShLangGeometry;
-
-	cgInitLoopIter();
-
-    /* 1. Pass:
-     * - build up debug stack (list of all nodes on the dbgPath)
-     * - mark target node where code has to be inserted
-     */
-	ir_stack_traverser_visitor it1pass(vl);
-
-    ir_function* main = NULL; //getFunctionBySignature(MAIN_FUNC_SIGNATURE, shader);
-    if (!main) {
-        dbgPrint(DBGLVL_ERROR, "CodeGen - could not find main function!\n");
-        exit(1);
-    }
-    it1pass.visit(main);
-
-    //Traverse(main, &it1pass);
-
-    /* Find target, mark it and prepare neccessary dbgTemporaries */
-    ir_instruction* target = NULL;
-	if( !prepareTarget( &target, &(it1pass.dbgStack), dbgCgOptions, cgbl, vl ) )
+	/* Check for empty parse tree */
+	if (list->is_empty())
 		return false;
 
-    if (target) {
-        dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i %i:%i\n", target->yy_location.first_line,
-                                                     target->yy_location.first_column,
-                                                     target->yy_location.last_line,
-                                                     target->yy_location.last_column);
-        target->debug_target = true;
-    }
+	EShLanguage language = EShLangVertex;
+	if (shader->stage == MESA_SHADER_FRAGMENT)
+		language = EShLangFragment;
+	else if (shader->stage == MESA_SHADER_GEOMETRY)
+		language = EShLangGeometry;
 
-    /* Prepare debug temporary registers */
+	CodeGen cg(shader);
+	/* Set DbgIterName for loop */
+	cg.setIterNames(vl);
 
-    /* Always allocate a result register */
-    dbgPrint(DBGLVL_COMPILERINFO, "initialize CG_TYPE_RESULT for %i\n", language);
-    {
-    	int size = ( dbgCgOptions == DBG_CG_GEOMETRY_MAP ||
-    			     dbgCgOptions == DBG_CG_VERTEX_COUNT ) ? 3 :
-    			     (dbgCgOptions == DBG_CG_GEOMETRY_CHANGEABLE) ? 2 : 0;
-    	if( size ) {
-    		ShVariable ret;
-    		ret.uniqueId   = -1;
-    		ret.builtin    = 0;
-    		ret.name       = NULL;
-    		ret.size       = size;
-    		ret.isMatrix   = 0;
-    		ret.isArray    = 0;
-    		for (int i=0; i < MAX_ARRAYS; i++) {
-    			ret.arraySize[0]  = 0;
-    		}
-    		ret.structName = NULL;
-    		ret.structSize = 0;
-    		ret.structSpec = NULL;
-    		ret.type       = SH_FLOAT;
-    		ret.qualifier  = SH_VARYING_OUT;
-    		cgInit(CG_TYPE_RESULT, &ret, vl, language);
-    	}else{
-    		cgInit(CG_TYPE_RESULT, NULL, vl, language);
-    	}
-    }
+	ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
+	assert(main || !"CodeGen - could not find main function!\n");
 
-    /* Check if an optional parameter register is neccessary */
-    if (target && target->as_call() ) {
+	/* Find target, mark it and prepare neccessary dbgTemporaries */
+	ast_node* target = prepareTarget(shader, dbgCgOptions, cgbl, vl);
+	if (!target)
+		return false;
 
-        /* Now check if a parameter is used for code insertion */
-    	ir_call* cir = target->as_call();
-    	ir_function_signature* funcDec = cir->callee;
+	if (target) {
+		dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i %i:%i\n", target->location.first_line,
+				target->location.first_column, target->location.last_line, target->location.last_column);
+	}
 
-        int lastInParameter = getFunctionDebugParameter(funcDec);
-        if (lastInParameter >=0) {
-        	// FIXME
-//        	ir_instruction* t = getSideEffectsDebugParameter( cir, lastInParameter );
-//        	ir_variable* var = t ? t->as_variable() : NULL;
-//			if (var)
-//				cgInit(CG_TYPE_PARAMETER, findShVariableFromSource(var), vl,
-//						language);
-//			else {
-				dbgPrint(DBGLVL_ERROR,
-						"CodeGen - side effects returned type is invalid\n");
-				exit(1);
-//			}
-        }
-    }
+	/* Prepare debug temporary registers */
 
-    /* Check if a selection condition needs to be copied */
-    if (target && (dbgCgOptions == DBG_CG_COVERAGE ||
-    			   dbgCgOptions == DBG_CG_CHANGEABLE ||
-    			   dbgCgOptions == DBG_CG_GEOMETRY_CHANGEABLE) &&
-         target->ir_type == ir_type_if)
-    {
-        switch ( target->as_if()->debug_state_internal ) {
-            case ir_dbg_if_condition_passed:
-            case ir_dbg_if_then:
-            case ir_dbg_if_else:
-                cgInit(CG_TYPE_CONDITION, NULL, vl, language);
-                break;
-            default:
-                break;
-        }
-    }
+	/* Always allocate a result register */
+	cg.allocateResult(target, language, vl, dbgCgOptions);
 
-    ir_output_traverser_visitor it(shader, language,
-					dbgCgOptions, vl, cgbl, &(it1pass.dbgStack));
-    it.append_version();
+	ir_output_traverser_visitor it(shader, language, dbgCgOptions, vl, cgbl);
+	it.append_version();
 
-    /* I have some problems with locale-dependent %f interpretation in printf
-     * Not sure, whose fault it is, qt or some line of code in debugger initialization.
-     * I added this crutch to resolve it, but it must be eventually rewritten.
-     * Well... fuck you, something.
-     * P.S. You cannot have Gujarati comments in generated shaders now.
-     */
-    char* old_locale = setlocale(LC_NUMERIC, NULL);
-    setlocale(LC_NUMERIC, "POSIX");
+	/* I have some problems with locale-dependent %f interpretation in printf
+	 * Not sure, whose fault it is, qt or some line of code in debugger initialization.
+	 * I added this crutch to resolve it, but it must be eventually rewritten.
+	 * Well... fuck you, something.
+	 * P.S. You cannot have Gujarati comments in generated shaders now.
+	 */
+	char* old_locale = setlocale(LC_NUMERIC, NULL);
+	setlocale(LC_NUMERIC, "POSIX");
 
-    /* Add declaration of all neccessary types */
-    cgAddDeclaration(CG_TYPE_ALL, &it.buffer, language);
+	/* Add declaration of all neccessary types */
+	cg.addDeclaration(CG_TYPE_ALL, &it.buffer, language);
 
-    /* Clear the name map holding debugged names */
-    cgInitNameMap();
+	/* 2. Pass:
+	 * - do the actual code generation
+	 */
+	it.run(list);
+	/* restore locale */
+	setlocale(LC_NUMERIC, old_locale);
 
-    /* 2. Pass:
-     * - do the actual code generation
-     */
-    it.run(list);
 
-    /* restore locale */
-    setlocale(LC_NUMERIC, old_locale);
+	/* Cleanup */
+	dumpDbgStack(&shader->path);
+	clearTarget(target, shader);
 
-    /* Unset target again */
-    if (target)
-    	target->debug_target = false;
-
-    cgDestruct(CG_TYPE_ALL);
-
-    /* Cleanup */
-
-    /* Reset overwrite modes */
-    for (IRGenStack::iterator stit = it1pass.dbgStack.begin(), end = it1pass.dbgStack.end();
-    		 stit != end; stit++) {
-    	ir_instruction* stir = *stit;
-    	stir->debug_overwrite = ir_dbg_ow_unset;
-    	ir_call* cstir = stir->as_call();
-
-        if ( cstir && ! cstir->callee->is_builtin() ) {
-        	ir_function_signature* funcDec = cstir->callee;
-            funcDec->debug_overwrite = ir_dbg_ow_unset;
-        }
-    }
-    dumpDbgStack(&(it1pass.dbgStack));
-    it1pass.dbgStack.clear();
-
-    dbgPrint(DBGLVL_COMPILERINFO, "\n"
-                   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-                   "%s\n"
-                   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n",
-                   it.buffer);
+	dbgPrint(DBGLVL_COMPILERINFO, "\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
+			"%s\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", it.buffer);
 
 #ifdef _WIN32
-    *code = _strdup(it.buffer);
+	*code = _strdup(it.buffer);
 #else
 	*code = strdup(it.buffer);
 #endif
 
 	return true;
 }
-
 

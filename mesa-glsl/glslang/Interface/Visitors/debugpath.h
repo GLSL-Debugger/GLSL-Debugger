@@ -8,6 +8,7 @@
 #define DEBUGPATH_H_
 
 #include "glsl/ast_visitor.h"
+#include "glslang/Interface/AstStack.h"
 
 
 enum DPOperation {
@@ -21,6 +22,7 @@ class ast_debugpath_traverser_visitor : public ast_traverse_visitor {
 public:
 	ast_debugpath_traverser_visitor()
 	{
+		passedTarget = false;
 		action = DPOpReset;
 	}
 
@@ -28,6 +30,7 @@ public:
 	{
 	}
 
+	void getPath(DbgRsScope&, AstShader*);
 	void run(exec_list*, enum DPOperation);
 	void processDebugable(ast_node*);
 
@@ -48,6 +51,8 @@ public:
 	virtual void leave(class ast_jump_statement*);
 
 protected:
+	AstStack path;
+	bool passedTarget;
 	enum DPOperation action;
 };
 

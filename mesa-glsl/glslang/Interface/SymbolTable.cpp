@@ -11,20 +11,18 @@
 
 class sh_symbol_table_entry {
 public:
-DECLARE_RALLOC_CXX_OPERATORS(sh_symbol_table_entry)
-	;
+	DECLARE_RALLOC_CXX_OPERATORS(sh_symbol_table_entry);
 
 	sh_symbol_table_entry(ShVariable *v) :
-			v(v), f(0)
-	{
-	}
+			v(v), f(0), t(0) { }
 	sh_symbol_table_entry(ast_function_definition *f) :
-			v(0), f(f)
-	{
-	}
+			v(0), f(f), t(0) { }
+	sh_symbol_table_entry(const glsl_type *t) :
+			v(0), f(0), t(t) { }
 
 	ShVariable* v;
 	ast_function_definition *f;
+	const glsl_type *t;
 };
 
 sh_symbol_table::sh_symbol_table()
@@ -89,6 +87,12 @@ bool sh_symbol_table::add_variable(ShVariable* v)
 	return _mesa_symbol_table_add_symbol(table, -1, v->name, entry) == 0;
 }
 
+bool sh_symbol_table::add_type(const char* name, const glsl_type* t)
+{
+	sh_symbol_table_entry *entry = new (mem_ctx) sh_symbol_table_entry(t);
+	return _mesa_symbol_table_add_symbol(table, -1, name, entry) == 0;
+}
+
 bool sh_symbol_table::add_function(ast_function_definition *f)
 {
 	const char* name = f->prototype->identifier;
@@ -119,6 +123,12 @@ ShVariable *sh_symbol_table::get_variable(const char *name)
 	return entry != NULL ? entry->v : NULL;
 }
 
+const glsl_type* sh_symbol_table::get_type(const char* name)
+{
+	sh_symbol_table_entry *entry = get_entry(name);
+	return entry != NULL ? entry->t : NULL;
+}
+
 ast_function_definition *sh_symbol_table::get_function(const char *name)
 {
 	sh_symbol_table_entry *entry = get_entry(name);
@@ -129,4 +139,3 @@ sh_symbol_table_entry *sh_symbol_table::get_entry(const char *name)
 {
 	return (sh_symbol_table_entry *) _mesa_symbol_table_find_symbol(table, -1, name);
 }
-

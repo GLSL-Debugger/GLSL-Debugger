@@ -21,11 +21,10 @@ long strToSwizzleIdx(const char* str)
 	 * detection of errors.
 	 */
 	static const unsigned char base_idx[26] = {
-	/* a  b  c  d  e  f  g  h  i  j  k  l  m */
-	   R, R, I, I, I, I, R, I, I, I, I, I, I,
-	/* n  o  p  q  r  s  t  u  v  w  x  y  z */
-	   I, I, S, S, R, S, S, I, I, X, X, X, X
-	};
+		/* a  b  c  d  e  f  g  h  i  j  k  l  m */
+		   R, R, I, I, I, I, R, I, I, I, I, I, I,
+		/* n  o  p  q  r  s  t  u  v  w  x  y  z */
+		   I, I, S, S, R, S, S, I, I, X, X, X, X };
 
 	/* Each valid swizzle character has an entry in the previous table.  This
 	 * table encodes the base index encoded in the previous table plus the actual
@@ -45,11 +44,10 @@ long strToSwizzleIdx(const char* str)
 	 * [0,3], the error is detected.
 	 */
 	static const unsigned char idx_map[26] = {
-	/* a    b    c    d    e    f    g    h    i    j    k    l    m */
-	  R+3, R+2, 0,   0,   0,   0,   R+1, 0,   0,   0,   0,   0,   0,
-	/* n    o    p    q    r    s    t    u    v    w    x    y    z */
-	   0,   0,   S+2, S+3, R+0, S+0, S+1, 0,   0,   X+3, X+0, X+1, X+2
-	};
+		/* a    b    c    d    e    f    g    h    i    j    k    l    m */
+	      R+3, R+2,  0,   0,   0,   0,  R+1,  0,   0,   0,   0,   0,   0,
+		/* n    o    p    q    r    s    t    u    v    w    x    y    z */
+		   0, 	0,  S+2, S+3, R+0, S+0, S+1,  0,   0,  X+3, X+0, X+1, X+2 };
 
 	/* Validate the first character in the swizzle string and look up the base
 	 * index value as described above.
@@ -74,44 +72,154 @@ long strToSwizzleIdx(const char* str)
 	return swiz_idx;
 }
 
-static void makeMangledName( const struct glsl_type* type, std::string& mangledName )
+
+void dumpNodeInfo(ast_node* node)
 {
-	if( !type )
+	dbgPrint(DBGLVL_COMPILERINFO, "(%s) ", FormatSourceRange(node->get_location()).c_str());
+	ast_function_expression* call = node->as_function_expression();
+	ast_function_definition* func = node->as_function_definition();
+	ast_selection_statement* sels = node->as_selection_statement();
+	ast_iteration_statement* loop = node->as_iteration_statement();
+	ast_jump_statement* jump = node->as_jump_statement();
+	ast_expression* expr = node->as_expression();
+	if (call) {
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION CALL %s",
+				call->subexpressions[0]->primary_expression.identifier);
+	} else if (func) {
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "FUNCTION SIGNATURE %s",
+				func->prototype->identifier);
+	} else if (sels) {
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "IF");
+	} else if (loop) {
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "LOOP");
+	} else if (jump) {
+		switch (jump->mode) {
+		case ast_jump_statement::ast_jump_modes::ast_break:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "BREAK");
+			break;
+		case ast_jump_statement::ast_jump_modes::ast_continue:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "CONTINUE");
+			break;
+		case ast_jump_statement::ast_jump_modes::ast_discard:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "DISCARD");
+			break;
+		case ast_jump_statement::ast_jump_modes::ast_return:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "RETURN");
+			break;
+		}
+	} else if (expr) {
+		switch (expr->oper) {
+		case ast_assign:
+		case ast_mul_assign:
+		case ast_div_assign:
+		case ast_mod_assign:
+		case ast_add_assign:
+		case ast_sub_assign:
+		case ast_ls_assign:
+		case ast_rs_assign:
+		case ast_and_assign:
+		case ast_xor_assign:
+		case ast_or_assign:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "ASSIGNMENT");
+			break;
+		default:
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "EXPRESSION");
+			break;
+		}
+	} else {
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "unknown");
+	}
+	dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
+}
+
+void dumpDbgStack(AstStack *stack)
+{
+	dbgPrint(DBGLVL_COMPILERINFO, "## STACK #####################################\n");
+
+	for (ast_node* node = stack->head(); node != NULL; node = stack->perv()) {
+		dumpNodeInfo(node);
+		switch (node->debug_overwrite) {
+		case ast_dbg_ow_debug:
+			dbgPrint(DBGLVL_COMPILERINFO, " <OwDebug> ");
+			break;
+		case ast_dbg_ow_original:
+			dbgPrint(DBGLVL_COMPILERINFO, " <OwOriginal> ");
+			break;
+		default:
+			dbgPrint(DBGLVL_COMPILERINFO, " <OwUnset> ");
+			break;
+		}
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
+		foreach_list(item, &node->scope){
+			scope_item* sc = (scope_item*)item;
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "<%i,%s> ", sc->id, sc->name);
+		}
+		if (node->scope.is_empty())
+			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "no scope");
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
+	}
+
+	dbgPrint(DBGLVL_COMPILERINFO, "###############################################\n");
+}
+
+
+static void makeMangledName(const struct glsl_type* type, std::string& mangledName)
+{
+	if (!type)
 		return;
 
-    if ( type->is_matrix() ) {
-        mangledName += 'm';
-    } else if ( type->is_vector() ) {
-        mangledName += 'v';
-    }
+	if (type->is_matrix())
+		mangledName += 'm';
+	else if (type->is_vector())
+		mangledName += 'v';
 
-    switch (type->base_type) {
-    	case GLSL_TYPE_UINT:    mangledName += 'u';      break;
-    	case GLSL_TYPE_INT:		mangledName += 'i';      break;
-    	case GLSL_TYPE_FLOAT:	mangledName += 'f';      break;
-    	case GLSL_TYPE_BOOL:	mangledName += 'b';      break;
-    	case GLSL_TYPE_SAMPLER:
-    	{
-    		mangledName += 's';
-    		if( type->sampler_type == GLSL_TYPE_INT )
-    			mangledName += 'I';
-    		else if( type->sampler_type == GLSL_TYPE_UINT )
-    			mangledName += 'U';
+	switch (type->base_type) {
+	case GLSL_TYPE_UINT:
+		mangledName += 'u';
+		break;
+	case GLSL_TYPE_INT:
+		mangledName += 'i';
+		break;
+	case GLSL_TYPE_FLOAT:
+		mangledName += 'f';
+		break;
+	case GLSL_TYPE_BOOL:
+		mangledName += 'b';
+		break;
+	case GLSL_TYPE_SAMPLER: {
+		mangledName += 's';
+		if (type->sampler_type == GLSL_TYPE_INT)
+			mangledName += 'I';
+		else if (type->sampler_type == GLSL_TYPE_UINT)
+			mangledName += 'U';
 
-    		if( type->sampler_shadow )
-    			mangledName += 'S';
+		if (type->sampler_shadow)
+			mangledName += 'S';
 
-    		switch( type->sampler_dimensionality ){
-    			case GLSL_SAMPLER_DIM_1D:	mangledName += '1';	break;
-    			case GLSL_SAMPLER_DIM_2D: 	mangledName += '2';	break;
-    			case GLSL_SAMPLER_DIM_3D:	mangledName += '3';	break;
-    			case GLSL_SAMPLER_DIM_CUBE: mangledName += 'C';	break;
-    			case GLSL_SAMPLER_DIM_RECT: mangledName += 'R';	break;
-    			case GLSL_SAMPLER_DIM_BUF:	mangledName += 'B';	break;
-    			default:					mangledName += "Unknown";	break;
+		switch (type->sampler_dimensionality) {
+		case GLSL_SAMPLER_DIM_1D:
+			mangledName += '1';
+			break;
+		case GLSL_SAMPLER_DIM_2D:
+			mangledName += '2';
+			break;
+		case GLSL_SAMPLER_DIM_3D:
+			mangledName += '3';
+			break;
+		case GLSL_SAMPLER_DIM_CUBE:
+			mangledName += 'C';
+			break;
+		case GLSL_SAMPLER_DIM_RECT:
+			mangledName += 'R';
+			break;
+		case GLSL_SAMPLER_DIM_BUF:
+			mangledName += 'B';
+			break;
+		default:
+			mangledName += "Unknown";
+			break;
 
-
-    		}
+		}
 //    		   GLSL_SAMPLER_DIM_EXTERNAL,
 //    		   GLSL_SAMPLER_DIM_MS
 //    	    case EbtSampler1DArray:     mangledName += "sA1";    break;  // EXT_gpu_shader4
@@ -122,79 +230,75 @@ static void makeMangledName( const struct glsl_type* type, std::string& mangledN
 //    	    case EbtUSampler2DArray:    mangledName += "sUA2";   break;  // EXT_gpu_shader4
 //    	    case EbtSampler1DArrayShadow:     mangledName += "sAS1";    break;  // EXT_gpu_shader4
 //    	    case EbtSampler2DArrayShadow:     mangledName += "sAS2";    break;  // EXT_gpu_shader4
-    		break;
-    	}
-    	case GLSL_TYPE_STRUCT:
-    	{
-    		mangledName += "struct-" + std::string(type->name);
-    		for (unsigned int i = 0; i < type->length; ++i) {
-    			mangledName += '-';
-    			makeMangledName( type->fields.structure[i].type, mangledName );
-    		}
-    		break;
-    	}
-    	case GLSL_TYPE_VOID:	mangledName += "void"; break;
-    	/* GLSL_TYPE_INTERFACE, GLSL_TYPE_ARRAY, GLSL_TYPE_ERROR */
-    	default:	break;
-    }
+		break;
+	}
+	case GLSL_TYPE_STRUCT: {
+		mangledName += "struct-" + std::string(type->name);
+		for (unsigned int i = 0; i < type->length; ++i) {
+			mangledName += '-';
+			makeMangledName(type->fields.structure[i].type, mangledName);
+		}
+		break;
+	}
+	case GLSL_TYPE_VOID:
+		mangledName += "void";
+		break;
+		/* GLSL_TYPE_INTERFACE, GLSL_TYPE_ARRAY, GLSL_TYPE_ERROR */
+	default:
+		break;
+	}
 
-    if ( type->is_matrix() ) {
-        mangledName += static_cast<char>('0' + type->vector_elements);
-        mangledName += 'x';
-        mangledName += static_cast<char>('0' + type->matrix_columns);
-    } else {
-        mangledName += static_cast<char>('0' + type->length);
-    }
+	if (type->is_matrix()) {
+		mangledName += static_cast<char>('0' + type->vector_elements);
+		mangledName += 'x';
+		mangledName += static_cast<char>('0' + type->matrix_columns);
+	} else {
+		mangledName += static_cast<char>('0' + type->length);
+	}
 
-    if ( type->is_array() ) {
-        char buf[100];
-        sprintf(buf, "%d", type->length);
-        mangledName += '[';
-        mangledName += buf;
-        mangledName += ']';
-    }
+	if (type->is_array()) {
+		char buf[100];
+		sprintf(buf, "[%d]", type->length);
+		mangledName += buf;
+	}
 }
 
-
-std::string getMangledName(ir_function_signature* fs)
+std::string getMangledName(ast_function_definition* fs, AstShader* shader)
 {
 	std::string mname = "";
 
 	if (!fs)
 		return mname;
 
-	mname += std::string(fs->function_name()) + "(";
-
-	// Assume function has only one signature
-	foreach_list(node, &fs->parameters) {
-		ir_variable* v = ((ir_instruction*) node)->as_variable();
-		if (v)
-			makeMangledName(v->type, mname);
+	mname += std::string(fs->prototype->identifier) + "(";
+	foreach_list_typed(ast_parameter_declarator, param, link, &fs->prototype->parameters) {
+		const struct glsl_type* type = shader->symbols->get_type(param->type->specifier->type_name);
+		assert(type || !"Type was not saved");
+		makeMangledName(type, mname);
 	}
 
 	return mname;
 }
 
-
 char* getFunctionName(const char* manglName)
 {
-    size_t namelength;
-    char *name;
+	size_t namelength;
+	char *name;
 
-    if (strchr(manglName, '(')) {
-        namelength = strchr(manglName, '(') - manglName;
-    } else {
-        namelength = strlen(manglName);
-    }
+	if (strchr(manglName, '(')) {
+		namelength = strchr(manglName, '(') - manglName;
+	} else {
+		namelength = strlen(manglName);
+	}
 
-    if (!(name = (char*) malloc((namelength+1)*sizeof(char)))) {
-        dbgPrint(DBGLVL_ERROR, "CodeTools - Not enough memory for name in getFunctionName %s\n",
-        		manglName);
-        exit(1);
-    }
-    strncpy(name, manglName, namelength);
-    name[namelength] = '\0';
-    return name;
+	if (!(name = (char*) malloc((namelength + 1) * sizeof(char)))) {
+		dbgPrint(DBGLVL_ERROR, "CodeTools - Not enough memory for name in getFunctionName %s\n",
+				manglName);
+		exit(1);
+	}
+	strncpy(name, manglName, namelength);
+	name[namelength] = '\0';
+	return name;
 }
 
 //bool isChildofMain(TIntermNode *node, TIntermNode *root)
@@ -224,7 +328,6 @@ char* getFunctionName(const char* manglName)
 //
 //    return false;
 //}
-
 
 //bool isPartofNode(TIntermNode *target, TIntermNode *node)
 //{
@@ -287,94 +390,38 @@ char* getFunctionName(const char* manglName)
 //    return isPartofNode(target, main);
 //}
 
-int getFunctionDebugParameter(ir_function_signature *ir)
+int getFunctionDebugParameter(ast_function_definition* node)
 {
-    int result = -1;
+	int result = -1;
 
-    if (!ir)
-        return result;
-
-    int i = 0;
-    foreach_list( node, &ir->parameters ){
-    	ir_variable* ir = ((ir_instruction*)node)->as_variable();
-    	if( ir->data.mode == ir_var_function_in )
-    		result = i;
-    	++i;
-    }
-
-    return result;
-}
-
-
-ir_instruction* getIRDebugParameter(exec_list *list, int pnum)
-{
-	if (!list)
-		return NULL;
+	if (!node)
+		return result;
 
 	int i = 0;
-	ir_instruction* param = NULL;
-	foreach_list(node, list) {
-		if (i == pnum)
-			param = (ir_instruction*) node;
+	foreach_list_typed(ast_parameter_declarator, param, link, &node->prototype->parameters)	{
+		if (param->type->qualifier.flags.q.in)
+			result = i;
 		++i;
 	}
 
-	if (param) {
-		dbgPrint(DBGLVL_ERROR, "CodeTools -  function does not have this much parameter\n");
-		exit(1);
-	}
-
-	return param;
+	return result;
 }
 
-ir_instruction* getSideEffectsDebugParameter(ir_call *ir, int pnum)
+ast_node* getSideEffectsDebugParameter(ast_function_expression *node, int pnum)
 {
-	if (!ir)
+	if (!node)
 		return NULL;
 
 	int i = 0;
-	foreach_list(node, &ir->actual_parameters) {
-		ir_instruction* inst = (ir_instruction *) node;
+	foreach_list_typed(ast_node, param, link, &node->expressions) {
 		if (i == pnum)
-			return inst->debug_sideeffects & ir_dbg_se_general ? inst : NULL;
+			return param->debug_sideeffects & ast_dbg_se_general ? param : NULL;
 		++i;
 	}
 
-	dbgPrint(DBGLVL_ERROR, "CodeTools - function does not have this much parameter\n");
-	exit(1);
+	assert(!"CodeTools - function does not have this much parameter");
+	return NULL;
 }
-
-/**
- * Check node for spectial cases
- * Return iteration flow status.
- * False mean iteration must be skipped
- */
-bool list_iter_check(ir_instruction* const inst, int& state)
-{
-	switch(inst->ir_type){
-	case ir_type_variable: {
-		ir_variable *var = static_cast<ir_variable*>(inst);
-		if ((strstr(var->name, "gl_") == var->name) && !var->data.invariant)
-			return false;
-		break;
-	}
-	case ir_type_dummy: {
-		ir_dummy * const dm = (ir_dummy* const ) inst;
-		if (state < 0) {
-			state = ir_dummy::pair_type(dm->dummy_type);
-		} else if (state == dm->dummy_type) {
-			state = -1;
-			return false;
-		}
-		break;
-	}
-	default:
-		break;
-	}
-
-	return (state < 0);
-}
-
 
 bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state)
 {

@@ -423,7 +423,7 @@ const char* ShGetQualifierString(const ShVariable *v)
 	}
 }
 
-ShVariable* copyShVariable(ShVariable *src)
+ShVariable* copyShVariableCtx(ShVariable *src, void* mem_ctx)
 {
 	ShVariable *ret;
 	int i;
@@ -431,23 +431,15 @@ ShVariable* copyShVariable(ShVariable *src)
 	if (!src)
 		return NULL;
 
-	if (!(ret = (ShVariable*) malloc(sizeof(ShVariable)))) {
-		dbgPrint(DBGLVL_ERROR, "not enough memory to copy ShVariable\n");
-		exit(1);
-	}
+	ret = (ShVariable*) rzalloc(mem_ctx, ShVariable);
+	assert(ret || !"not enough memory to copy ShVariable");
 
 	ret->uniqueId = src->uniqueId;
 	ret->builtin = src->builtin;
-
 	if (src->name) {
-		if (!(ret->name = (char*) malloc(strlen(src->name) + 1))) {
-			dbgPrint(DBGLVL_ERROR,
-					"not enough memory to copy name of ShVariable\n");
-			exit(1);
-		}
+		ret->name = (char*) rzalloc_size(mem_ctx, strlen(src->name) + 1);
+		assert(ret->name || !"not enough memory to copy name of ShVariable");
 		strcpy(ret->name, src->name);
-	} else {
-		ret->name = NULL;
 	}
 
 	ret->type = src->type;
@@ -462,28 +454,28 @@ ShVariable* copyShVariable(ShVariable *src)
 	}
 
 	if (src->structName) {
-		if (!(ret->structName = (char*) malloc(strlen(src->structName) + 1))) {
-			dbgPrint(DBGLVL_ERROR,
-					"not enough memory to copy strctName of ShVariable\n");
-			exit(1);
-		}
+		ret->structName = (char*) rzalloc_size(mem_ctx, strlen(src->structName) + 1);
+		assert(ret->structName || !"not enough memory to copy strctName of ShVariable");
 		strcpy(ret->structName, src->structName);
-	} else {
-		ret->structName = NULL;
 	}
 
 	ret->structSize = src->structSize;
-
-	if (!(ret->structSpec = (ShVariable**) malloc(
-			sizeof(ShVariable*) * ret->structSize))) {
-		dbgPrint(DBGLVL_ERROR,
-				"not enough memory to copy structSpec of ShVariable\n");
-		exit(1);
+	if (ret->structSize) {
+		ret->structSpec = (ShVariable**) rzalloc_array(mem_ctx, ShVariable*, ret->structSize);
+		assert(ret->structSpec || !"not enough memory to copy structSpec of ShVariable");
+		for (i = 0; i < ret->structSize; i++)
+			ret->structSpec[i] = copyShVariableCtx(src->structSpec[i], mem_ctx);
 	}
-	for (i = 0; i < ret->structSize; i++)
-		ret->structSpec[i] = copyShVariable(src->structSpec[i]);
 
 	return ret;
+}
+
+
+
+ShVariable* copyShVariable(ShVariable *src)
+{
+	dbgPrint(DBGLVL_INTERNAL_WARNING, "Copy of ShVariable out of shader mem.\n");
+	return copyShVariableCtx(src, NULL);
 }
 
 void freeShVariable(ShVariable **var)

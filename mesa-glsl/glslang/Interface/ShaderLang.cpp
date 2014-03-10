@@ -286,19 +286,6 @@ DbgResult* ShDebugJumpToNext(const ShHandle handle, int debugOptions, int dbgBh)
 
 	ShaderHolder* holder = reinterpret_cast< ShaderHolder* >( handle );
 	AstShader* shader = holder->shaders[0];
-
-//	switch( holder->language ){
-//		case EShLangVertex:
-//			shader =  holder->program->_LinkedShaders[MESA_SHADER_VERTEX];
-//			break;
-//		case EShLangFragment:
-//			shader = holder->program->_LinkedShaders[MESA_SHADER_FRAGMENT];
-//			break;
-//		case EShLangGeometry:
-//			shader = holder->program->_LinkedShaders[MESA_SHADER_GEOMETRY];
-//			break;
-//	}
-
 	result = ShaderTraverse(shader, debugOptions, dbgBh);
 	return result;
 
@@ -318,7 +305,7 @@ char* ShDebugGetProg(const ShHandle handle, ShChangeableList *cgbl, ShVariableLi
 	char* prog = NULL;
 
 	// Generate code
-//	compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
+	compileDbgShaderCode(shader, cgbl, vl, dbgCgOptions, &prog);
 	return prog;
 }
 

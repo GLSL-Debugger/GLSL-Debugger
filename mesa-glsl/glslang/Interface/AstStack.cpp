@@ -36,22 +36,59 @@ void AstStack::pop(void)
 	s = (ast_node**) realloc(s, n * sizeof(ast_node*));
 }
 
-ast_node* AstStack::top(void)
+ast_node* AstStack::base(void)
 {
-	if (n == 0) {
+	if (empty())
 		return NULL;
-	} else {
-		return s[n - 1];
-	}
+	return s[0];
 }
 
-int AstStack::empty(void)
+ast_node* AstStack::top(void)
 {
-	return (n == 0);
+	if (empty())
+		return NULL;
+	return s[n - 1];
+}
+
+bool AstStack::empty(void)
+{
+	return !(n > 0);
 }
 
 void AstStack::clear()
 {
 	while (!empty())
 		pop();
+}
+
+void AstStack::copy(AstStack* to)
+{
+	for (int i = 0; i < n; ++i)
+		 to->push(s[i]);
+}
+
+ast_node* AstStack::next()
+{
+	if (iter >= n)
+		return NULL;
+	return s[iter++];
+}
+
+ast_node* AstStack::perv()
+{
+	if (iter < 0)
+		return NULL;
+	return s[iter--];
+}
+
+ast_node* AstStack::head()
+{
+	iter = n - 1;
+	return top();
+}
+
+ast_node* AstStack::back()
+{
+	iter = 0;
+	return base();
 }

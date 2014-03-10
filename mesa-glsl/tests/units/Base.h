@@ -83,7 +83,7 @@ public:
 		v.visit(sh->head);
 
 		if (do_actual_cmp)
-			prepareCmp();
+			prepareCmp(sh);
 
 		if (print)
 			std::cout << results.str();
@@ -101,7 +101,7 @@ public:
 			comparator.compareNext(s);
 	}
 
-	virtual void prepareCmp()
+	virtual void prepareCmp(AstShader*)
 	{
 
 	}

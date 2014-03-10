@@ -683,6 +683,7 @@ static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node,
 		default:
 			return true;
 		}
+		break;
 	default:
 		switch (oit->operation) {
 		case OTOpPathClear:

@@ -3,7 +3,6 @@
 
 #include "ast.h"
 #include "ShaderHolder.h"
-#include "ir.h"
 #include <string>
 
 
@@ -22,15 +21,18 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
     return std::string(locText);
 }
 
+void dumpNodeInfo(ast_node* node);
+void dumpDbgStack(AstStack *stack);
+
 long strToSwizzleIdx(const char*);
-std::string getMangledName(ir_function_signature* func);
+std::string getMangledName(ast_function_definition*  func);
 char* getFunctionName(const char* in);
-int getFunctionDebugParameter(ir_function_signature* node);
-ir_instruction* getIRDebugParameter(exec_list* list, int pnum);
-ir_instruction* getSideEffectsDebugParameter(ir_call* ir, int pnum);
+int getFunctionDebugParameter(ast_function_definition* node);
+ast_node* getSideEffectsDebugParameter(ir_call* ir, int pnum);
 
 bool list_iter_check(ir_instruction* const ir, int& state);
 bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state);
+
 
 #endif
 

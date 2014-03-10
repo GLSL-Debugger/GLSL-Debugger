@@ -16,8 +16,8 @@ void clearTraverseDebugJump(void);
 DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBh);
 bool ShaderVarTraverse(AstShader* shader, ShVariableList *vl);
 void printShaderIr(struct gl_shader* shader);
-bool compileShaderCode(struct gl_shader* shader);
-bool compileDbgShaderCode(struct gl_shader* shader, ShChangeableList *cgbl, ShVariableList *vl,
+bool compileShaderCode(AstShader* shader);
+bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableList *vl,
 		DbgCgOptions dbgCgOptions, char** code);
 
 void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader, int debug);

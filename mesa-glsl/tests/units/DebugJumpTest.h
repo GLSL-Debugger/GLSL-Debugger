@@ -93,6 +93,7 @@ public:
 			if (!base->djv->finished()) {
 				base->doComparison(shader, false);
 				dbgpath.run(list, DPOpPathBuild);
+				dbgpath.getPath(dbg_result.scopeStack, shader);
 				base->results << "================== Build path ==================\n";
 			}
 
@@ -134,7 +135,7 @@ public:
 		return true;
 	}
 
-	virtual void prepareCmp()
+	virtual void prepareCmp(AstShader*)
 	{
 		std::stringstream dr;
 		dr << "Status: " << DBG_STATUSES[dbg_result.status] << " "

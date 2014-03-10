@@ -24,6 +24,7 @@ struct AstShader {
 	bool is_es;
 	sh_symbol_table* symbols;
 	ShVariableList globals;
+	AstStack path;
 };
 
 struct ShaderHolder {
