@@ -190,16 +190,18 @@ public:
    exec_node link;
 
 #ifdef AST_DEBUG_STATE
-   virtual class ast_declaration* as_declaration() { return NULL; }
-   virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
-   virtual class ast_struct_specifier* as_struct_specifier() { return NULL; }
-   virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_expression* as_expression() { return NULL; }
    virtual class ast_function_expression* as_function_expression() { return NULL; }
-   virtual class ast_function_definition* as_function_definition() { return NULL; }
+   virtual class ast_compound_statement* as_compound_statement() { return NULL; }
+   virtual class ast_declaration* as_declaration() { return NULL; }
+   virtual class ast_struct_specifier* as_struct_specifier() { return NULL; }
+   virtual class ast_declarator_list* as_declarator_list() { return NULL; }
+   virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
    virtual class ast_selection_statement* as_selection_statement() { return NULL; }
+   virtual class ast_switch_statement* as_switch_statement() { return NULL; }
    virtual class ast_iteration_statement* as_iteration_statement() { return NULL; }
    virtual class ast_jump_statement* as_jump_statement() { return NULL; }
+   virtual class ast_function_definition* as_function_definition() { return NULL; }
 
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
    inline bool debug_target() { return debug_state == ast_dbg_state_target; }
@@ -496,6 +498,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_compound_statement* as_compound_statement() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1061,6 +1064,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_switch_statement* as_switch_statement() { return this; }
    enum ast_dbg_state_internal_switch debug_state_internal;
 #endif
 

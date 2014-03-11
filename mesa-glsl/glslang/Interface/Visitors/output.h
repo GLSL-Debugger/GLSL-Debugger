@@ -9,9 +9,9 @@
 
 struct global_print_tracker;
 
-#include "glsl/ir_visitor.h"
 #include "glsl/ast_visitor.h"
 #include "ShaderLang.h"
+#include "glslang/Interface/CodeInsertion.h"
 
 class ast_output_traverser_visitor: public ast_traverse_visitor
 {
@@ -28,6 +28,9 @@ public:
 	{
 	}
 
+	void dump();
+	void get_code(char **);
+	void append_version();
 	void indent(void);
 
 	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
@@ -44,6 +47,7 @@ public:
 	virtual void visit(class ast_fully_specified_type *);
 	virtual void visit(class ast_declarator_list *);
 	virtual void visit(class ast_parameter_declarator *);
+	virtual void visit(class ast_expression_statement *);
 	virtual void visit(class ast_case_label *);
 	virtual void visit(class ast_case_label_list *);
 	virtual void visit(class ast_case_statement *);
@@ -59,9 +63,10 @@ public:
 
 
 	virtual bool enter(class ast_function_expression *);
-	virtual void leave(class ast_expression_statement *);
+
 
 protected:
+	void output_qualifier(const struct ast_type_qualifier *);
 	void output_sequence(exec_list *, const char *, const char *,
 									  const char *, bool i = false);
 	bool geom_call(ast_function_expression *);
@@ -81,6 +86,7 @@ protected:
 	bool dbgTargetProcessed;
 };
 
+/*
 class ir_output_traverser_visitor : public ir_visitor {
 public:
 	ir_output_traverser_visitor(struct gl_shader* shader_, EShLanguage mode_,
@@ -147,7 +153,7 @@ public:
 	ShChangeableList *cgbl;
 	IRGenStack *dbgStack;
 	bool dbgTargetProcessed;
-};
+};*/
 
 
 #endif /* __OUTPUT_TRAVERSER_H_ */

@@ -93,7 +93,7 @@ public:
 			if (!base->djv->finished()) {
 				base->doComparison(shader, false);
 				dbgpath.run(list, DPOpPathBuild);
-				dbgpath.getPath(dbg_result.scopeStack, shader);
+				dbgpath.getPath(base->dbg_result.scopeStack, shader);
 				base->results << "================== Build path ==================\n";
 			}
 

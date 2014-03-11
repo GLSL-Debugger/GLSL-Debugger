@@ -39,7 +39,6 @@
 #include "glsl/list.h"
 #include "Visitors/debugjump.h"
 #include "Visitors/debugpath.h"
-#include "Visitors/scopestack.h"
 #include "glsldb/utils/dbgprint.h"
 
 

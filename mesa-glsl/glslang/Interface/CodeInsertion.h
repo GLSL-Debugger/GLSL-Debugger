@@ -2,6 +2,7 @@
 #define _CODE_INSERTION_
 
 #include "ShaderLang.h"
+#include "ShaderHolder.h"
 
 enum cgTypes {
 	CG_TYPE_NONE,
@@ -39,8 +40,8 @@ public:
 	void addDeclaration(cgTypes type, char** prog, EShLanguage l);
 	void addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
 	                  int option, int outPrimType = 0x0000);
-	void addOutput(cgTypes type, char** prog, EShLanguage l, TQualifier o = EvqTemporary);
-	void addInitialization(cgTypes type, cgInitialization init, char** prog, EShLanguage l);
+	void addOutput(cgTypes type, char** prog, EShLanguage l);
+	void addInitialization(cgTypes type, cgInitialization init, char** prog);
 	//void addAssignment(cgTypes type, ShVariable *src);
 	void destruct(cgTypes type);
 

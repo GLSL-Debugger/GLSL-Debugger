@@ -7,6 +7,8 @@
 #include "output.h"
 #include "glsl/ast.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/SymbolTable.h"
+#include "glsldb/utils/dbgprint.h"
 
 #include <assert.h>
 
@@ -22,19 +24,51 @@ static void print_variable(char **buffer, ast_node* node, const char* name, ShVa
 		ralloc_asprintf_append(buffer, "_%i", postfix);
 }
 
+void ast_output_traverser_visitor::dump()
+{
+	dbgPrint(DBGLVL_COMPILERINFO, "\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
+			"%s\n"
+			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", buffer);
+}
+
+
+void ast_output_traverser_visitor::get_code(char** dst)
+{
+	*dst = strdup(buffer);
+}
+
+void ast_output_traverser_visitor::append_version()
+{
+	if(shader && shader->version )
+		ralloc_asprintf_append (&buffer, "#version %i\n", shader->version);
+
+	/* Add declaration of all neccessary types */
+	if (cgOptions != DBG_CG_ORIGINAL_SRC)
+		cg.addDeclaration(CG_TYPE_ALL, &buffer, mode);
+}
+
+
 void ast_output_traverser_visitor::indent(void)
 {
    for (int i = 0; i < depth; i++)
       ralloc_asprintf_append (&buffer, "  ");
 }
 
-void ast_output_traverser_visitor::visit(class ast_node* node)
+void ast_output_traverser_visitor::visit(class ast_node*)
 {
 	ralloc_asprintf_append(&buffer, "unhandled node ");
 }
 
 void ast_output_traverser_visitor::visit(class ast_expression* node)
 {
+	if (node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC) {
+		dbgTargetProcessed = true;
+		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+		// FIXME: WAT?
+		ralloc_asprintf_append(&buffer, ", ");
+	}
+
 	switch (node->oper) {
 	case ast_assign:
 	case ast_mul_assign:
@@ -47,14 +81,14 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 	case ast_and_assign:
 	case ast_xor_assign:
 	case ast_or_assign:
-		node->subexpressions[0]->print();
-		printf("%s ", node->operator_string(node->oper));
-		node->subexpressions[1]->print();
+		node->subexpressions[0]->accept(this);
+		ralloc_asprintf_append(&buffer, " %s ", node->operator_string(node->oper));
+		node->subexpressions[1]->accept(this);
 		break;
 
 	case ast_field_selection:
-		node->subexpressions[0]->print();
-		printf(". %s ", node->primary_expression.identifier);
+		node->subexpressions[0]->accept(this);
+		ralloc_asprintf_append(&buffer, ".%s", node->primary_expression.identifier);
 		break;
 
 	case ast_plus:
@@ -63,57 +97,39 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 	case ast_logic_not:
 	case ast_pre_inc:
 	case ast_pre_dec:
-		printf("%s ", node->operator_string(node->oper));
-		node->subexpressions[0]->print();
+		ralloc_asprintf_append(&buffer, "%s ", node->operator_string(node->oper));
+		node->subexpressions[0]->accept(this);
 		break;
 
 	case ast_post_inc:
 	case ast_post_dec:
-		node->subexpressions[0]->print();
-		printf("%s ", node->operator_string(node->oper));
+		node->subexpressions[0]->accept(this);
+		ralloc_asprintf_append(&buffer, "%s ", node->operator_string(node->oper));
 		break;
 
 	case ast_conditional:
-		node->subexpressions[0]->print();
-		printf("? ");
-		node->subexpressions[1]->print();
-		printf(": ");
-		node->subexpressions[2]->print();
+		assert(!"Not implemented");
+//		node->subexpressions[0]->print();
+//		printf("? ");
+//		node->subexpressions[1]->print();
+//		printf(": ");
+//		node->subexpressions[2]->print();
 		break;
 
 	case ast_array_index:
-		node->subexpressions[0]->print();
-		printf("[ ");
-		node->subexpressions[1]->print();
-		printf("] ");
+		node->subexpressions[0]->accept(this);
+		ralloc_asprintf_append(&buffer, "[");
+		node->subexpressions[1]->accept(this);
+		ralloc_asprintf_append(&buffer, "]");
 		break;
 
-	case ast_function_call: {
-		node->subexpressions[0]->print();
-		printf("( ");
-
-		foreach_list_const(n, &node->expressions)
-		{
-			if (n != node->expressions.get_head())
-				printf(", ");
-
-			ast_node *ast = exec_node_data(ast_node, n, link);
-			ast->print();
-		}
-
-		printf(") ");
+	case ast_function_call:
+		assert(!"Must be ast_function_expression");
 		break;
-	}
 
 	case ast_identifier:
-		if (node->debug_selection_type == ast_fst_unset)
-			print_variable(&buffer, node, node->primary_expression.identifier, vl);
-		else if (node->debug_selection_type == ast_fst_swizzle)
-			;
-		else
-			ralloc_asprintf_append(&buffer, "%s", node->primary_expression.identifier);
+		print_variable(&buffer, node, node->primary_expression.identifier, vl);
 		break;
-
 
 	case ast_int_constant:
 		ralloc_asprintf_append(&buffer, "%d", node->primary_expression.int_constant);
@@ -144,7 +160,16 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 
 void ast_output_traverser_visitor::visit(class ast_expression_bin* node)
 {
+	if (node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC) {
+		dbgTargetProcessed = true;
+		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+		// FIXME: WAT?
+		ralloc_asprintf_append(&buffer, ", ");
+	}
 
+	node->subexpressions[0]->accept(this);
+	ralloc_asprintf_append(&buffer, " %s ", node->operator_string(node->oper));
+	node->subexpressions[1]->accept(this);
 }
 
 void ast_output_traverser_visitor::visit(class ast_function_expression* node)
@@ -168,12 +193,62 @@ void ast_output_traverser_visitor::visit(class ast_array_specifier* node)
 
 void ast_output_traverser_visitor::visit(class ast_aggregate_initializer* node)
 {
-
+	output_sequence(&node->expressions, "{", ", ", "}\n");
 }
 
 void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 {
-	output_sequence(&node->statements, "{\n", "\n", "}\n", true);
+	ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
+	bool main_child = (main->body == node);
+
+	ralloc_asprintf_append(&buffer, "{\n");
+
+	/* If in debug mode add initialization to main function */
+	if (cgOptions != DBG_CG_ORIGINAL_SRC && main_child) {
+		depth++;
+		indent();
+		switch (cgOptions) {
+		case DBG_CG_CHANGEABLE:
+		case DBG_CG_SELECTION_CONDITIONAL:
+		case DBG_CG_LOOP_CONDITIONAL:
+		case DBG_CG_COVERAGE:
+			cg.addInitialization(CG_TYPE_RESULT, CG_INIT_BLACK, &buffer);
+			break;
+		case DBG_CG_VERTEX_COUNT:
+		case DBG_CG_GEOMETRY_MAP:
+			cg.addInitialization(CG_TYPE_RESULT, CG_INIT_GEOMAP, &buffer);
+			break;
+		case DBG_CG_GEOMETRY_CHANGEABLE:
+			cg.addInitialization(CG_TYPE_RESULT, CG_INIT_WHITE, &buffer);
+			break;
+		default:
+			break;
+		}
+		ralloc_asprintf_append(&buffer, ";\n");
+		depth--;
+	}
+
+	output_sequence(&node->statements, "", "\n", "", true);
+
+	/* And also add debug output at the end */
+	if (cgOptions != DBG_CG_ORIGINAL_SRC && main_child) {
+		if (mode == EShLangGeometry) {
+			if (cgOptions == DBG_CG_CHANGEABLE
+					|| cgOptions == DBG_CG_COVERAGE
+					|| cgOptions == DBG_CG_SELECTION_CONDITIONAL
+					|| cgOptions == DBG_CG_LOOP_CONDITIONAL
+					|| cgOptions == DBG_CG_VERTEX_COUNT) {
+				indent();
+				cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
+			}
+		} else if (mode == EShLangFragment) {
+			indent();
+			cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
+					//oit->parseContext->fragmentShaderOutput);
+		}
+	}
+	ralloc_asprintf_append(&buffer, "}\n");
+
 }
 
 void ast_output_traverser_visitor::visit(class ast_declaration* node)
@@ -192,19 +267,40 @@ void ast_output_traverser_visitor::visit(class ast_declaration* node)
 
 void ast_output_traverser_visitor::visit(class ast_struct_specifier* node)
 {
+	ralloc_asprintf_append(&buffer, "struct %s ", node->name);
+	output_sequence(&node->declarations, "{\n", "\n", "} ", true);
 }
 
 void ast_output_traverser_visitor::visit(class ast_type_specifier* node)
 {
+	if (node->structure)
+		node->structure->accept(this);
+	else
+		ralloc_asprintf_append(&buffer, "%s ", node->type_name);
+
+	if (node->array_specifier)
+		node->array_specifier->accept(this);
 }
 
 void ast_output_traverser_visitor::visit(class ast_fully_specified_type* node)
 {
+	output_qualifier(&node->qualifier);
+	if (node->specifier)
+		node->specifier->accept(this);
 }
 
 void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 {
 	indent();
+	foreach_list_typed(ast_declaration, decl, link, &node->declarations) {
+		if (decl->initializer && decl->initializer->debug_target()) {
+			dbgTargetProcessed = true;
+			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+			ralloc_asprintf_append(&buffer, ";\n");
+			indent();
+		}
+	}
+
 	node->type->accept(this);
 	ralloc_asprintf_append(&buffer, " ");
 	depth++;
@@ -221,29 +317,48 @@ void ast_output_traverser_visitor::visit(class ast_parameter_declarator* node)
 		node->array_specifier->accept(this);
 }
 
-void ast_output_traverser_visitor::leave(class ast_expression_statement* node)
+void ast_output_traverser_visitor::visit(class ast_expression_statement* node)
 {
+	if (node->expression)
+		node->expression->accept(this);
 	ralloc_asprintf_append(&buffer, "; ");
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_label* node)
 {
+	indent();
+	if (node->test_value) {
+		ralloc_asprintf_append(&buffer, "case ");
+		node->test_value->accept(this);
+		ralloc_asprintf_append(&buffer, ": ");
+	} else {
+		ralloc_asprintf_append(&buffer, "default: ");
+	}
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_label_list* node)
 {
+	output_sequence(&node->labels, "", "\n", "", true);
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_statement* node)
 {
+	node->labels->accept(this);
+	output_sequence(&node->stmts, " {", "\n", "}", true);
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_statement_list* node)
 {
+	output_sequence(&node->cases, "", "", "");
 }
 
 void ast_output_traverser_visitor::visit(class ast_switch_body* node)
 {
+	ralloc_asprintf_append(&buffer, "{\n");
+	indent();
+	if (node->stmts)
+		node->stmts->accept(this);
+	ralloc_asprintf_append(&buffer, "}\n");
 }
 
 void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
@@ -316,6 +431,11 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 {
+	indent();
+	ralloc_asprintf_append(&buffer, "switch ( ");
+	node->test_expression->accept(this);
+	ralloc_asprintf_append(&buffer, ")");
+	node->body->accept(this);
 }
 
 void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
@@ -413,7 +533,9 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 				|| ((mode == EShLangVertex || mode == EShLangFragment)
 						&& cgOptions != DBG_CG_ORIGINAL_SRC)) {
 			/* Node must be direct/indirect child of main function call */
-			if (isPartofMain(node, oit->root)) {
+			ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
+			assert(main || !"CodeGen - Cannot find main function");
+			if (partof(node, main->body)) {
 				cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
 				indent();
 			}
@@ -435,14 +557,14 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 {
 	node->prototype->return_type->accept(this);
+	bool is_main = !strcmp(node->prototype->identifier, MAIN_FUNC_SIGNATURE);
 
 	const char* fname;
 	// Use debug name if we print debuged function's clone
-	if (this->cgOptions != DBG_CG_ORIGINAL_SRC
-			&& strcmp(node->prototype->identifier, MAIN_FUNC_SIGNATURE) != 0
-			&& node->debug_state == ir_dbg_state_path
-			&& node->debug_overwrite != ir_dbg_ow_original) {
-		std::string mangled = getMangledName(node);
+	if (this->cgOptions != DBG_CG_ORIGINAL_SRC && !is_main
+			&& node->debug_state == ast_dbg_state_path
+			&& node->debug_overwrite != ast_dbg_ow_original) {
+		std::string mangled = getMangledName(node, shader);
 		const char* mname = mangled.c_str();
 		fname = cg.getDebugName(mname);
 		/* Double function if this is on path.
@@ -470,8 +592,19 @@ void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 
 void ast_output_traverser_visitor::visit(class ast_interface_block* node)
 {
+	indent();
+	output_qualifier(&node->layout);
+	ralloc_asprintf_append(&buffer, "%s ", node->block_name);
+	output_sequence(&node->declarations, "{", "\n", "}", true);
+
+	if (node->instance_name)
+		ralloc_asprintf_append(&buffer, " %s", node->instance_name);
+	if (node->array_specifier)
+		node->array_specifier->accept(this);
+
+	ralloc_asprintf_append(&buffer, ";\n");
 }
 
-void ast_output_traverser_visitor::visit(class ast_gs_input_layout* node)
+void ast_output_traverser_visitor::visit(class ast_gs_input_layout*)
 {
 }

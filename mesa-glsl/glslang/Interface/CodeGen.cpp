@@ -32,20 +32,21 @@
 //POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include "glsl/list.h"
+#include "mesa-glsl/glslang/Public/ShaderLang.h"
+#include "CodeInsertion.h"
+#include "CodeTools.h"
+#include "AstStack.h"
+#include "AstScope.h"
+#include "SymbolTable.h"
+#include "Visitors/output.h"
+#include "Visitors/position_output.h"
+#include "glsldb/utils/dbgprint.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "glsl/list.h"
-#include "mesa-glsl/glslang/Public/ShaderLang.h"
-
-#include "CodeInsertion.h"
-#include "CodeTools.h"
-#include "AstScope.h"
-#include "AstStack.h"
-#include "Visitors/output.h"
-#include "Visitors/position_output.h"
-
-#include "glsldb/utils/dbgprint.h"
+#include <unordered_set>
 
 #define DBG_TEXT_BEGIN "\x1B[1;31mgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0)\x1B[0;31m"
 #define DBG_TEXT_END "\x1B[0m"
@@ -72,14 +73,11 @@ bool compileShaderCode(AstShader* shader)
 	else if (shader->stage == MESA_SHADER_GEOMETRY)
 		language = EShLangGeometry;
 
-	ir_output_traverser_visitor it(shader, language, DBG_CG_ORIGINAL_SRC, NULL, NULL, NULL);
+	CodeGen cg(shader, NULL, NULL);
+	ast_output_traverser_visitor it(cg, shader, NULL, NULL, language, DBG_CG_ORIGINAL_SRC);
 	it.append_version();
-	it.run(list);
-
-	dbgPrint(DBGLVL_COMPILERINFO, "\n"
-			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-			"%s\n"
-			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", it.buffer);
+	it.visit(list);
+	it.dump();
 
 	return true;
 }
@@ -88,7 +86,7 @@ bool compileShaderCode(AstShader* shader)
  * DEBUG INTERFACE
  */
 
-void change_DbgOverwrite(AstShader* sh, ast_function_expression* cir, enum ast_dbg_overwrite status)
+static void change_DbgOverwrite(AstShader* sh, ast_function_expression* cir, enum ast_dbg_overwrite status)
 {
 	dbgPrint(DBGLVL_COMPILERINFO, "---->>> FUNCTION CALL ast_dbg_ow_%s\n",
 			status == ast_dbg_ow_original ? "original" :
@@ -102,7 +100,7 @@ void change_DbgOverwrite(AstShader* sh, ast_function_expression* cir, enum ast_d
 	func->debug_overwrite = status;
 }
 
-ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
+static ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 		ShChangeableList *cgbl, ShVariableList *vl)
 {
 	ast_node* target = NULL;
@@ -168,7 +166,6 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 
 		if (!target) {
 			dbgPrint(DBGLVL_WARNING, "CodeGen - target not in stack, no debugging possible\n");
-			dumpDbgStack(dbgStack);
 		} else {
 			/* iterate trough the rest of the stack */
 			for (ast_node* node = stack->back(); node != NULL; node = stack->next()) {
@@ -177,10 +174,10 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 						&& call->debug_overwrite == ast_dbg_ow_unset)
 					change_DbgOverwrite(shader, call, ast_dbg_ow_debug);
 			}
-			/* DEBUG OUTPUT */
-			dumpDbgStack(dbgStack);
 		}
 
+		/* DEBUG OUTPUT */
+		dumpDbgStack(stack);
 		break;
 	}
 	default:
@@ -190,7 +187,7 @@ ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 	return target;
 }
 
-void clearTarget(ast_node* target, AstShader* shader)
+static void clearPath(AstShader* shader)
 {
 	/* Reset overwrite modes */
 	AstStack* stack = &shader->path;
@@ -229,23 +226,17 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	/* Set DbgIterName for loop */
 	cg.setIterNames();
 
-	ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
-	assert(main || !"CodeGen - could not find main function!\n");
-
 	/* Find target, mark it and prepare neccessary dbgTemporaries */
 	ast_node* target = prepareTarget(shader, dbgCgOptions, cgbl, vl);
 	if (!target)
 		return false;
-
-	if (target) {
-		dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i %i:%i\n", target->location.first_line,
-				target->location.first_column, target->location.last_line, target->location.last_column);
-	}
+	else
+		dbgPrint(DBGLVL_COMPILERINFO, "TARGET is %i:%i %i:%i\n",
+				target->location.first_line, target->location.first_column,
+				target->location.last_line, target->location.last_column);
 
 	/* Prepare debug temporary registers */
-
-	/* Always allocate a result register */
-	cg.allocateResult(target, language, vl, dbgCgOptions);
+	cg.allocateResult(target, language, dbgCgOptions);
 
 	ast_output_traverser_visitor it(cg, shader, vl, cgbl, language, dbgCgOptions);
 	it.append_version();
@@ -259,9 +250,6 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	char* old_locale = setlocale(LC_NUMERIC, NULL);
 	setlocale(LC_NUMERIC, "POSIX");
 
-	/* Add declaration of all neccessary types */
-	cg.addDeclaration(CG_TYPE_ALL, &it.buffer, language);
-
 	/* 2. Pass:
 	 * - do the actual code generation
 	 */
@@ -269,21 +257,12 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	/* restore locale */
 	setlocale(LC_NUMERIC, old_locale);
 
+	it.dump();
+	it.get_code(code);
 
 	/* Cleanup */
 	dumpDbgStack(&shader->path);
-	clearTarget(target, shader);
-
-	dbgPrint(DBGLVL_COMPILERINFO, "\n"
-			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
-			"%s\n"
-			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", it.buffer);
-
-#ifdef _WIN32
-	*code = _strdup(it.buffer);
-#else
-	*code = strdup(it.buffer);
-#endif
+	clearPath(shader);
 
 	return true;
 }

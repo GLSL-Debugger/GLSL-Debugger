@@ -11,6 +11,7 @@
 #define SH_SYMBOL_TABLE_H_
 
 #include "glsl/ralloc.h"
+#include "glsl/glsl_types.h"
 #include <new>
 #include <assert.h>
 

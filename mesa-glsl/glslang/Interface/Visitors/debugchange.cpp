@@ -37,11 +37,11 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 		ast_expression* exp_index = node->subexpressions[1];
 		switch (exp_index->oper) {
 		case ast_identifier:
-			type = SH_CGB_ARRAY_INDIRECT;
+			type = SH_CGB_ARRAY_DIRECT;
 			break;
 		case ast_int_constant:
 		case ast_uint_constant:
-			type = SH_CGB_ARRAY_DIRECT;
+			type = SH_CGB_ARRAY_INDIRECT;
 			index = exp_index->oper == ast_int_constant ?
 					exp_index->primary_expression.int_constant :
 					exp_index->primary_expression.uint_constant;

@@ -24,13 +24,13 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
 void dumpNodeInfo(ast_node* node);
 void dumpDbgStack(AstStack *stack);
 
-long strToSwizzleIdx(const char*);
-std::string getMangledName(ast_function_definition*  func);
-char* getFunctionName(const char* in);
-int getFunctionDebugParameter(ast_function_definition* node);
-ast_node* getSideEffectsDebugParameter(ir_call* ir, int pnum);
+long strToSwizzleIdx(const char *);
+bool partof(ast_node* target, ast_node* node);
+std::string getMangledName(ast_function_definition *, AstShader*);
+char* getFunctionName(const char *);
+int getFunctionDebugParameter(ast_function_definition *);
+ast_node* getSideEffectsDebugParameter(ast_function_expression *, int);
 
-bool list_iter_check(ir_instruction* const ir, int& state);
 bool dbg_state_not_match(ast_node* node, enum ast_dbg_state state);
 
 #endif

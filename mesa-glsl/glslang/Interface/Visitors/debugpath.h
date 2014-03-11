@@ -9,6 +9,8 @@
 
 #include "glsl/ast_visitor.h"
 #include "glslang/Interface/AstStack.h"
+#include "ShaderLang.h"
+#include "glslang/Interface/ShaderHolder.h"
 
 
 enum DPOperation {

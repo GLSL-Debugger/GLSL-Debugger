@@ -9,6 +9,7 @@
 #include "glsl/list.h"
 #include "glsldb/utils/dbgprint.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/AstScope.h"
 
 static inline void childPath(ast_node* node, ast_node* child)
 {

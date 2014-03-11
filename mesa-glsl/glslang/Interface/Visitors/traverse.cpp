@@ -400,11 +400,11 @@ void ir_traverse_visitor::visit(ir_dummy* ir)
 
 void ir_traverse_visitor::visit(exec_list* instructions)
 {
-	int skip_pair = -1;
+//	int skip_pair = -1;
 	foreach_list(node, instructions) {
 		ir_instruction * const inst = (ir_instruction *) node;
-		if (!list_iter_check(inst, skip_pair))
-			continue;
+//		if (!list_iter_check(inst, skip_pair))
+//			continue;
 		inst->accept( this );
 	}
 }

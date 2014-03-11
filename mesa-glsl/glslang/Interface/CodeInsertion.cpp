@@ -1,24 +1,26 @@
 
+#include "glslang/Include/ShaderLang.h"
 #include "CodeInsertion.h"
+#include "CodeTools.h"
+#include "AstStack.h"
+#include "ShaderHolder.h"
+#include "SymbolTable.h"
+#include "glsldb/utils/dbgprint.h"
+
+
+#include <map>
+#include <list>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "CodeTools.h"
-#include "glsldb/utils/dbgprint.h"
-#include "AstStack.h"
-#include "ShaderHolder.h"
-#include <map>
-#include <list>
 
 #define CG_RESULT_PREFIX    "dbgResult"
 #define CG_CONDITION_PREFIX "dbgCond"
 #define CG_PARAMETER_PREFIX "dbgParam"
 #define CG_LOOP_ITER_PREFIX "dbgIter"
 #define CG_FUNCTION_POSTFIX "DBG"
-
 #define CG_RANDOMIZED_POSTFIX_SIZE 3
 
-#define CG_FRAGMENT_RESULT  "gl_FragColor"
 
 struct ltstr {
 	bool operator()(const char* s1, const char* s2) const
@@ -184,7 +186,7 @@ void CodeGen::init(cgTypes type, ShVariable *src, EShLanguage l)
 	ShDumpVariable(*var, 1);
 }
 
-void CodeGen::allocateResult(ast_node* target, EShLanguage language, ShVariableList *vl, DbgCgOptions options)
+void CodeGen::allocateResult(ast_node* target, EShLanguage language, DbgCgOptions options)
 {
 	dbgPrint(DBGLVL_COMPILERINFO, "initialize CG_TYPE_RESULT for %i\n", language);
 	int size = (options == DBG_CG_GEOMETRY_MAP || options == DBG_CG_VERTEX_COUNT) ? 3 :
@@ -198,7 +200,7 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, ShVariableL
 		ret->qualifier = SH_VARYING_OUT;
 	}
 
-	init(CG_TYPE_RESULT, ret, vl, language);
+	init(CG_TYPE_RESULT, ret, language);
 
 	if (ret)
 		ralloc_free(ret);
@@ -221,7 +223,7 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, ShVariableL
 			assert((t && t->debug_id >= 0)
 					|| !"CodeGen - side effects returned type is invalid");
 			ShVariable* var = findShVariable(t->debug_id);
-			init(CG_TYPE_PARAMETER, var, vl, language);
+			init(CG_TYPE_PARAMETER, var, language);
 		}
 	}
 
@@ -232,7 +234,7 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, ShVariableL
 		case ir_dbg_if_condition_passed:
 		case ir_dbg_if_then:
 		case ir_dbg_if_else:
-			init(CG_TYPE_CONDITION, NULL, vl, language);
+			init(CG_TYPE_CONDITION, NULL, language);
 			break;
 		default:
 			break;
@@ -354,17 +356,17 @@ static const char* getInitializationCode(cgInitialization init)
 	return "";
 }
 
-void CodeGen::addInitialization(cgTypes type, cgInitialization init, char** prog, EShLanguage l)
+void CodeGen::addInitialization(cgTypes type, cgInitialization init, char** prog)
 {
 	switch (type) {
 	case CG_TYPE_RESULT:
-		ralloc_asprintf_append(prog, "%s = %s", result->name, getTypeCode(result));
+		ralloc_asprintf_append(prog, "%s = %s", result->name, getTypeCode(result).c_str());
 		break;
 	case CG_TYPE_CONDITION:
-		ralloc_asprintf_append(prog, "%s = %s", condition->name, getTypeCode(condition));
+		ralloc_asprintf_append(prog, "%s = %s", condition->name, getTypeCode(condition).c_str());
 		break;
 	case CG_TYPE_PARAMETER:
-		ralloc_asprintf_append(prog, "%s = %s", parameter->name, getTypeCode(parameter));
+		ralloc_asprintf_append(prog, "%s = %s", parameter->name, getTypeCode(parameter).c_str());
 		break;
 	default:
 		break;
@@ -372,10 +374,38 @@ void CodeGen::addInitialization(cgTypes type, cgInitialization init, char** prog
 	ralloc_asprintf_append(prog, "(%s)", getInitializationCode(init));
 }
 
-void CodeGen::addOutput(cgTypes type, char** prog, EShLanguage l, TQualifier o)
+static void put_fragment_output(char** prog, char* name, exec_list* instructions)
+{
+	const char* output_name = NULL;
+
+	foreach_list_typed(ast_node, node, link, instructions) {
+		ast_declarator_list* decl_list = node->as_declarator_list();
+		if (!decl_list || !decl_list->type->qualifier.flags.q.out)
+			continue;
+		foreach_list_typed(ast_declaration, decl, link, &decl_list->declarations) {
+			if (!strcmp(decl->identifier, "gl_FragColor")
+					|| !strcmp(decl->identifier, "gl_FragData")
+					|| strncmp(decl->identifier, "gl_", 3) != 0)
+				output_name = decl->identifier;
+		}
+		if (output_name)
+			break;
+	}
+
+	if (!output_name) {
+		dbgPrint(DBGLVL_WARNING, "CodeInsertion - no valid output method set for fragment program.\n");
+		dbgPrint(DBGLVL_WARNING, "CodeInsertion - assume gl_FragColor for further usage.\n");
+		output_name = "gl_FragColor";
+	} else if (!strcmp(output_name, "gl_FragData")) {
+		output_name = "gl_FragData[0]";
+	}
+
+	ralloc_asprintf_append(prog, "%s.x = %s;\n", output_name, name);
+}
+
+void CodeGen::addOutput(cgTypes type, char** prog, EShLanguage l)
 {
 	/* TODO: fill out other possibilities */
-
 	switch (l) {
 	case EShLangVertex:
 		break;
@@ -384,23 +414,8 @@ void CodeGen::addOutput(cgTypes type, char** prog, EShLanguage l, TQualifier o)
 			ralloc_asprintf_append(prog, "EmitVertex(); EndPrimitive();\n");
 		break;
 	case EShLangFragment:
-		if (type == CG_TYPE_RESULT) {
-			const char* fragType;
-			switch (o) {
-			case EvqFragColor:
-				fragType = "gl_FragColor.x";
-				break;
-			case EvqFragData:
-				fragType = "gl_FragData[0].x";
-				break;
-			default:
-				dbgPrint(DBGLVL_WARNING, "CodeInsertion - no valid output method set for fragment program.\n");
-				dbgPrint(DBGLVL_WARNING, "CodeInsertion - assume gl_FragColor for further usage.\n");
-				fragType = "gl_FragColor.x";
-				break;
-			}
-			ralloc_asprintf_append(prog, "%s = %s;\n", fragType, result->name);
-		}
+		if (type == CG_TYPE_RESULT)
+			put_fragment_output(prog, result->name, shader->head);
 		break;
 	default:
 		break;
@@ -868,7 +883,7 @@ static void setLoopIterName(char **name, ShVariableList *vl, void* mem_ctx)
 	g.numLoopIters++;
 }
 
-void CodeGen::setIterNames(ShVariableList *vl)
+void CodeGen::setIterNames()
 {
 	AstStack* stack = &shader->path;
 
@@ -888,7 +903,7 @@ void CodeGen::setIterNames(ShVariableList *vl)
 				setLoopIterName(&loop->debug_iter_name, vl, shader);
 			else
 				assert(!"CodeGen - loop target has invalid internal state");
-		} else if (loop->debug_state == ir_dbg_state_path) {
+		} else if (loop->debug_state == ast_dbg_state_path) {
 			if (loop->debug_state_internal == ast_dbg_loop_wrk_init
 					|| loop->debug_state_internal == ast_dbg_loop_wrk_test
 					|| loop->debug_state_internal == ast_dbg_loop_wrk_body

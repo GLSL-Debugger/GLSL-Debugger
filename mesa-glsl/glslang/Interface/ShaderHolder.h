@@ -10,6 +10,7 @@
 #include "ShaderLang.h"
 #include "mesa/main/mtypes.h"
 #include "glsl/list.h"
+#include "AstStack.h"
 
 struct sh_symbol_table;
 

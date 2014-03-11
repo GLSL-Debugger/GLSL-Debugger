@@ -29,12 +29,12 @@ static void print_type(const glsl_type *t, int lvl)
 
 void ir_position_output_visitor::run(exec_list* instructions)
 {
-	int skip_pair = -1;
+//	int skip_pair = -1;
 	bool first = true;
 	foreach_list(node, instructions) {
 		ir_instruction * const inst = (ir_instruction *) node;
-		if (!list_iter_check(inst, skip_pair))
-			continue;
+//		if (!list_iter_check(inst, skip_pair))
+//			continue;
 		if (!first)
 			dbgPrint(output_level, "\n");
 		inst->accept(this);

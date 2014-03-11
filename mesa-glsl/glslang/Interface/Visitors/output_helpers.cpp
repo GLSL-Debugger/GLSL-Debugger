@@ -7,7 +7,112 @@
 #include "output.h"
 #include "glsl/list.h"
 #include "glslang/Interface/CodeTools.h"
+#include "glslang/Interface/SymbolTable.h"
+#include "glslang/Interface/AstScope.h"
+#include "glsldb/GL/gl.h"
+#include <unordered_set>
 
+
+#define LAYOUTS_COUNT 16
+#define LAYOUTS_FIRST_EXPLICIT 11
+const char* layouts_names[LAYOUTS_COUNT] = {
+	"origin_upper_left", "pixel_center_integer", "depth_any", "depth_greater",
+	"depth_less", "depth_unchanged", "std140", "shared",
+	"column_major", "row_major", "packed", "location",
+	"index", "binding", "offset", "max_vertices"
+};
+const char* prim_types[7] = {
+	"points", "lines", "lines_adjacency", "line_strip",
+	"triangles", "triangles_adjacency", "triangle_strip"
+};
+
+void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualifier* q)
+{
+	const unsigned int layouts[LAYOUTS_COUNT] = {
+		q->flags.q.origin_upper_left, q->flags.q.pixel_center_integer,
+		q->flags.q.depth_any, q->flags.q.depth_greater,
+		q->flags.q.depth_less, q->flags.q.depth_unchanged,
+		q->flags.q.std140, q->flags.q.shared,
+		q->flags.q.column_major, q->flags.q.row_major,
+		q->flags.q.packed, q->flags.q.explicit_location,
+		q->flags.q.explicit_index, q->flags.q.explicit_binding,
+		q->flags.q.explicit_offset, q->flags.q.max_vertices
+	};
+
+	const int explicit_layouts[LAYOUTS_COUNT - LAYOUTS_FIRST_EXPLICIT] = {
+		q->location, q->index, q->binding, q->offset, q->max_vertices
+	};
+
+
+	if (q->has_layout()
+			|| q->flags.q.max_vertices
+			|| q->flags.q.prim_type) {
+		ralloc_asprintf_append(&buffer, "layout(");
+		bool defined = false;
+		for (int i = 0; i < LAYOUTS_COUNT; ++i) {
+			if (layouts[i]) {
+				if (defined)
+					ralloc_asprintf_append(&buffer, ", ");
+				ralloc_asprintf_append(&buffer, "%s", layouts_names[i]);
+				if (i > LAYOUTS_FIRST_EXPLICIT)
+					ralloc_asprintf_append(&buffer, " = %i",
+							explicit_layouts[i - LAYOUTS_FIRST_EXPLICIT]);
+			}
+		}
+		// GLSL 1.5 primitive
+		if (q->flags.q.prim_type) {
+			if (defined)
+				ralloc_asprintf_append(&buffer, ", ");
+			int ptype;
+			switch (q->prim_type) {
+			case GL_LINES: ptype = 1; break;
+			case GL_LINES_ADJACENCY: ptype = 2; break;
+			case GL_LINE_STRIP: ptype = 3; break;
+			case GL_TRIANGLES: ptype = 4; break;
+			case GL_TRIANGLES_ADJACENCY: ptype = 5; break;
+			case GL_TRIANGLE_STRIP: ptype = 6; break;
+			default: ptype = 0; break;
+			}
+			ralloc_asprintf_append(&buffer, "%s", prim_types[ptype]);
+		}
+		ralloc_asprintf_append(&buffer, ") ");
+	}
+
+	if (q->flags.q.constant)
+		ralloc_asprintf_append(&buffer, "const ");
+
+	if (q->flags.q.invariant)
+		ralloc_asprintf_append(&buffer, "invariant ");
+
+	if (q->flags.q.attribute)
+		ralloc_asprintf_append(&buffer, "attribute ");
+
+	if (q->flags.q.varying)
+		ralloc_asprintf_append(&buffer, "varying ");
+
+	if (q->flags.q.in && q->flags.q.out) {
+		ralloc_asprintf_append(&buffer, "inout ");
+	} else {
+		if (q->flags.q.in)
+			ralloc_asprintf_append(&buffer, "in ");
+
+		if (q->flags.q.out)
+			ralloc_asprintf_append(&buffer, "out ");
+	}
+
+	if (q->flags.q.centroid)
+		ralloc_asprintf_append(&buffer, "centroid ");
+	if (q->flags.q.sample)
+		ralloc_asprintf_append(&buffer, "sample ");
+	if (q->flags.q.uniform)
+		ralloc_asprintf_append(&buffer, "uniform ");
+	if (q->flags.q.smooth)
+		ralloc_asprintf_append(&buffer, "smooth ");
+	if (q->flags.q.flat)
+		ralloc_asprintf_append(&buffer, "flat ");
+	if (q->flags.q.noperspective)
+		ralloc_asprintf_append(&buffer, "noperspective ");
+}
 
 void ast_output_traverser_visitor::output_sequence(exec_list* list, const char* s,
 		const char* j, const char* e, bool do_indent)
@@ -54,7 +159,6 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 			ralloc_asprintf_append(&buffer, "(");
 
 			int iter = 0;
-			bool first = true;
 			foreach_list_typed(ast_node, param, link, &node->expressions) {
 				if (iter)
 					ralloc_asprintf_append(&buffer, ", ");
@@ -94,7 +198,7 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 		}
 		return false;
 	} else if (cgOptions != DBG_CG_ORIGINAL_SRC && node->debug_target() &&
-			node->debug_overwrite != ir_dbg_ow_original) {
+			node->debug_overwrite != ast_dbg_ow_original) {
 		/* This call leads to the actual prosition of debugging */
 		const char* name = node->subexpressions[0]->primary_expression.identifier;
 		ralloc_asprintf_append(&buffer, ", %s", cg.getDebugName(name));
@@ -188,7 +292,7 @@ void ast_output_traverser_visitor::selection_body(ast_selection_statement* node,
 		return;
 
    if (node->debug_target() && cgOptions == DBG_CG_SELECTION_CONDITIONAL
-		   && node->debug_state_internal == ir_dbg_if_condition_passed)	{
+		   && node->debug_state_internal == ast_dbg_if_condition_passed)	{
       depth++;
       /* Add code to colorize condition */
       indent();
@@ -309,7 +413,7 @@ void ast_output_traverser_visitor::loop_debug_end(ast_iteration_statement* node)
 
 	depth++;
 	if (node->need_dbgiter()) {
-		indent()
+		indent();
 		ralloc_asprintf_append(&buffer, "%s++;\n", node->debug_iter_name);
 	}
 

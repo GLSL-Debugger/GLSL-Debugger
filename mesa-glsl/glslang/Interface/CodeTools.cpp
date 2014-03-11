@@ -1,9 +1,10 @@
 #include "CodeTools.h"
 
 #include "glsl/list.h"
-#include "glsl/glsl_symbol_table.h"
 #include "Visitors/postprocess.h"
 #include "glsldb/utils/dbgprint.h"
+#include "AstScope.h"
+#include "SymbolTable.h"
 #include <map>
 
 #define X 1
@@ -72,6 +73,50 @@ long strToSwizzleIdx(const char* str)
 	return swiz_idx;
 }
 
+bool partof(ast_node* target, ast_node* node)
+{
+	if (!target || !node)
+		return false;
+
+    if (node == target)
+    	return true;
+
+    ast_iteration_statement* loop = node->as_iteration_statement();
+    ast_selection_statement* sels = node->as_selection_statement();
+    ast_compound_statement* cmpd = node->as_compound_statement();
+    ast_switch_statement* swtc =  node->as_switch_statement();
+    ast_expression* expr = node->as_expression();
+    // TODO: switch things
+
+    if (loop) {
+    	if (partof(target, loop->init_statement)
+    			|| partof(target, loop->condition)
+    			|| partof(target, loop->rest_expression)
+    			|| partof(target, loop->body))
+    		return true;
+    } else if (sels) {
+    	if (partof(target, sels->condition)
+    			|| partof(target, sels->then_statement)
+    			|| partof(target, sels->else_statement))
+    		return true;
+    } else if (cmpd) {
+    	foreach_list_typed(ast_node, stmt, link, &cmpd->statements)
+    		if (partof(target, stmt))
+    			return true;
+    } else if (swtc) {
+    	if (partof(target, swtc->test_expression) ||
+    			partof(target, swtc->body))
+    		return true;
+    } else if (expr) {
+    	for (int i = 0; i < 3; ++i)
+    		if (partof(target, expr->subexpressions[i]))
+    			return true;
+    	foreach_list_typed(ast_node, stmt, link, &expr->expressions)
+    		if (partof(target, stmt))
+    	    	return true;
+    }
+    return false;
+}
 
 void dumpNodeInfo(ast_node* node)
 {
@@ -272,7 +317,8 @@ std::string getMangledName(ast_function_definition* fs, AstShader* shader)
 
 	mname += std::string(fs->prototype->identifier) + "(";
 	foreach_list_typed(ast_parameter_declarator, param, link, &fs->prototype->parameters) {
-		const struct glsl_type* type = shader->symbols->get_type(param->type->specifier->type_name);
+		const struct glsl_type* type =
+				shader->symbols->get_type(param->type->specifier->type_name);
 		assert(type || !"Type was not saved");
 		makeMangledName(type, mname);
 	}
@@ -300,95 +346,6 @@ char* getFunctionName(const char* manglName)
 	name[namelength] = '\0';
 	return name;
 }
-
-//bool isChildofMain(TIntermNode *node, TIntermNode *root)
-//{
-//    TIntermNode *main = getFunctionBySignature(MAIN_FUNC_SIGNATURE, root);
-//
-//    if (!main) {
-//        dbgPrint(DBGLVL_ERROR, "CodeTools - could not find main function\n");
-//        exit(1);
-//    }
-//
-//    TIntermAggregate *aggregate;
-//
-//    if (!(aggregate = main->getAsAggregate())) {
-//        dbgPrint(DBGLVL_ERROR, "CodeTools - main is not Aggregate\n");
-//        exit(1);
-//    }
-//
-//    TIntermSequence sequence = aggregate->getSequence();
-//    TIntermSequence::iterator sit;
-//
-//    for(sit = sequence.begin(); sit != sequence.end(); sit++) {
-//        if (*sit == node) {
-//            return true;
-//        }
-//    }
-//
-//    return false;
-//}
-
-//bool isPartofNode(TIntermNode *target, TIntermNode *node)
-//{
-//    if (node == target) return true;
-//
-//    if (node->getAsLoopNode()) {
-//        if (node->getAsLoopNode()->getTest() && isPartofNode(target, node->getAsLoopNode()->getTest()))
-//            return true;
-//        if (node->getAsLoopNode()->getBody() && isPartofNode(target, node->getAsLoopNode()->getBody()))
-//            return true;
-//        if (node->getAsLoopNode()->getTerminal() && isPartofNode(target, node->getAsLoopNode()->getTerminal()))
-//            return true;
-//        if (node->getAsLoopNode()->getInit() && isPartofNode(target, node->getAsLoopNode()->getInit()))
-//            return true;
-//    } else if (node->getAsBinaryNode()) {
-//        if (node->getAsBinaryNode()->getLeft() && isPartofNode(target, node->getAsBinaryNode()->getLeft()))
-//            return true;
-//        if (node->getAsBinaryNode()->getRight() && isPartofNode(target, node->getAsBinaryNode()->getRight()))
-//            return true;
-//    } else if (node->getAsUnaryNode()) {
-//        if (node->getAsUnaryNode()->getOperand() && isPartofNode(target, node->getAsUnaryNode()->getOperand()))
-//            return true;
-//    } else if (node->getAsAggregate()) {
-//        TIntermSequence::iterator sit;
-//        for (sit = node->getAsAggregate()->getSequence().begin(); sit != node->getAsAggregate()->getSequence().end(); ++sit) {
-//            if ((*sit) && isPartofNode(target, *sit)) {
-//                return true;
-//            }
-//        }
-//    } else if (node->getAsSelectionNode()) {
-//        if (node->getAsSelectionNode()->getCondition() && isPartofNode(target, node->getAsSelectionNode()->getCondition()))
-//            return true;
-//        if (node->getAsSelectionNode()->getTrueBlock() && isPartofNode(target, node->getAsSelectionNode()->getTrueBlock()))
-//            return true;
-//        if (node->getAsSelectionNode()->getFalseBlock() && isPartofNode(target, node->getAsSelectionNode()->getFalseBlock()))
-//            return true;
-//    } else if (node->getAsDeclarationNode()) {
-//        if (node->getAsDeclarationNode()->getInitialization() && isPartofNode(target, node->getAsDeclarationNode()->getInitialization()))
-//            return false;
-//    } else if (node->getAsSpecificationNode()) {
-//        if (node->getAsSpecificationNode()->getParameter() && isPartofNode(target, node->getAsSpecificationNode()->getParameter()))
-//            return false;
-//        if (node->getAsSpecificationNode()->getInstances() && isPartofNode(target, node->getAsSpecificationNode()->getInstances()))
-//            return false;
-//    } else {
-//        return false;
-//    }
-//    return false;
-//}
-//
-//bool isPartofMain(TIntermNode *target, TIntermNode *root)
-//{
-//    TIntermNode *main = getFunctionBySignature(MAIN_FUNC_SIGNATURE, root);
-//
-//    if (!main) {
-//        dbgPrint(DBGLVL_ERROR, "CodeTools - could not find main function\n");
-//        exit(1);
-//    }
-//
-//    return isPartofNode(target, main);
-//}
 
 int getFunctionDebugParameter(ast_function_definition* node)
 {
