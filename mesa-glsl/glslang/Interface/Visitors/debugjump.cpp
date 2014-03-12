@@ -68,35 +68,79 @@ void ast_debugjump_traverser_visitor::checkReturns(ast_node* node)
 
 // Default handling of a node that can be debugged
 // Returns old operation
-OTOperation ast_debugjump_traverser_visitor::processDebugable(ast_node *node)
+void ast_debugjump_traverser_visitor::processDebugable(ast_node *node)
 {
 	VPRINT(3, "process Debugable L:%s Op:%i DbgSt:%i\n",
 			FormatSourceRange(node->get_location()).c_str(), operation, node->debug_state);
 
-	OTOperation oper = operation;
-	if (oper == OTOpTargetUnset) {
+	if (operation == OTOpTargetUnset) {
 		if (node->debug_state == ast_dbg_state_target) {
 			node->debug_state = ast_dbg_state_unset;
 			operation = OTOpTargetSet;
 			VPRINT( 3, "\t ------- unset target --------\n");
 			result.position = DBG_RS_POSITION_UNSET;
 		}
-	} else if (oper == OTOpTargetSet) {
+	} else if (operation == OTOpTargetSet) {
 		assert(node->debug_state != ast_dbg_state_target || !"ERROR! found target with DbgStTarget\n");
 		if (node->debug_state == ast_dbg_state_unset) {
 			node->debug_state = ast_dbg_state_target;
 			operation = OTOpDone;
 			VPRINT(3, "\t -------- set target ---------\n");
-//			case ir_type_dummy:
-//				result.position = DBG_RS_POSITION_DUMMY;
-//				setDbgResultRange(result.range, node->yy_location);
-//				setGobalScope(get_scope(node));
-//				break;
+			if (node->as_expression())
+				setTarget(node->as_expression());
+			else if (node->as_jump_statement())
+				setTarget(node->as_jump_statement());
 		}
 	}
-
-	return oper;
 }
+
+void ast_debugjump_traverser_visitor::setTarget(class ast_expression* node)
+{
+	switch (node->oper) {
+	/* binary */
+	case ast_assign:
+	case ast_mul_assign:
+	case ast_div_assign:
+	case ast_mod_assign:
+	case ast_add_assign:
+	case ast_sub_assign:
+	case ast_ls_assign:
+	case ast_rs_assign:
+	case ast_and_assign:
+	case ast_xor_assign:
+	case ast_or_assign: {
+		result.position = DBG_RS_POSITION_ASSIGMENT;
+		setDbgResultRange(result.range, node->get_location());
+		setGobalScope(&node->scope);
+		break;
+	}
+	case ast_pre_inc:
+	case ast_pre_dec:
+	case ast_post_inc:
+	case ast_post_dec: {
+		result.position = DBG_RS_POSITION_UNARY;
+		setDbgResultRange(result.range, node->get_location());
+		setGobalScope(&node->scope);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void ast_debugjump_traverser_visitor::setTarget(class ast_jump_statement* node)
+{
+	result.position = DBG_RS_POSITION_BRANCH;
+	setDbgResultRange(result.range, node->get_location());
+	setGobalScope(&node->scope);
+}
+
+//void ast_debugjump_traverser_visitor::setTarget(class ast_dummy* node)
+//{
+//	result.position = DBG_RS_POSITION_DUMMY;
+//	setDbgResultRange(result.range, node->get_location());
+//	setGobalScope(&node->scope);
+//}
 
 void ast_debugjump_traverser_visitor::visit(class ast_selection_statement* node)
 {
@@ -190,12 +234,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_expression* node)
 	case ast_and_assign:
 	case ast_xor_assign:
 	case ast_or_assign: {
-		if (processDebugable(node) == OTOpTargetUnset) {
-			result.position = DBG_RS_POSITION_ASSIGMENT;
-			setDbgResultRange(result.range, node->get_location());
-			setGobalScope(&node->scope);
-		}
-
+		processDebugable(node);
 		if (operation == OTOpTargetSet) {
 			if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
 				// do not visit children
@@ -251,12 +290,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_expression* node)
 	case ast_pre_dec:
 	case ast_post_inc:
 	case ast_post_dec:
-		if (processDebugable(node) == OTOpTargetUnset) {
-			result.position = DBG_RS_POSITION_UNARY;
-			setDbgResultRange(result.range, node->get_location());
-			setGobalScope(&node->scope);
-		}
-
+		processDebugable(node);
 		if (operation == OTOpTargetSet) {
 			if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
 				// user didn't want to debug further
@@ -351,14 +385,12 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 			assert(!"ERROR! found target with DbgStTarget\n");
 
 		if (node->debug_state == ast_dbg_state_unset) {
-			if (!node->debug_builtin) {
-				node->debug_state = ast_dbg_state_target;
-				VPRINT( 3, "\t -------- set target ---------\n");
-				result.position = DBG_RS_POSITION_FUNCTION_CALL;
-				setDbgResultRange(result.range, node->get_location());
-				setGobalScope(&node->scope);
-				this->operation = OTOpDone;
-			}
+			node->debug_state = ast_dbg_state_target;
+			VPRINT( 3, "\t -------- set target ---------\n");
+			result.position = DBG_RS_POSITION_FUNCTION_CALL;
+			setDbgResultRange(result.range, node->get_location());
+			setGobalScope(&node->scope);
+			this->operation = OTOpDone;
 		}
 	}
 }
@@ -408,14 +440,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_definition* node)
 
 void ast_debugjump_traverser_visitor::leave(ast_jump_statement* node)
 {
-	if (processDebugable(node) != OTOpTargetSet)
-		return;
-	if (node->debug_state != ast_dbg_state_unset)
-		return;
-
-	result.position = DBG_RS_POSITION_BRANCH;
-	setDbgResultRange(result.range, node->get_location());
-	setGobalScope(&node->scope);
+	processDebugable(node);
 }
 
 

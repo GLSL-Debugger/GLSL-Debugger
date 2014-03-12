@@ -143,7 +143,7 @@ public:
 		   << "Range: (" << dbg_result.range.left.colum << ":"
 		                 << dbg_result.range.left.line << " - "
 		                 << dbg_result.range.right.colum << ":"
-		                 << dbg_result.range.right.line << ") "
+		                 << dbg_result.range.right.line << ")"
 		   << "\nScope:\n";
 		for (int i = 0; i < dbg_result.scope.numIds; ++i) {
 			int id = dbg_result.scope.ids[i];

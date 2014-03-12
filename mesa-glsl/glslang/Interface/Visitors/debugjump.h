@@ -51,7 +51,10 @@ public:
 	void setGobalScope(exec_list*);
 	void addShChangeables(ast_node* node);
 	void checkReturns(ast_node*);
-	OTOperation processDebugable(ast_node*);
+	void processDebugable(ast_node*);
+
+	virtual void setTarget(class ast_expression*);
+	virtual void setTarget(class ast_jump_statement*);
 
 	virtual void visit(exec_list* list) { ast_traverse_visitor::visit(list); }
 	virtual void visit(class ast_selection_statement*);
@@ -68,6 +71,8 @@ public:
 
 	virtual bool enter(class ast_selection_statement *);
 	virtual bool enter(class ast_iteration_statement *);
+
+
 
 	OTOperation operation;
     AstStack parseStack;
