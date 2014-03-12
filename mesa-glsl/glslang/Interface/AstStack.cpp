@@ -13,6 +13,7 @@ AstStack::AstStack()
 {
 	n = 0;
 	s = NULL;
+	iter = 0;
 }
 
 AstStack::~AstStack()

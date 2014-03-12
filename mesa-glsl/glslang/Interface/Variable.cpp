@@ -487,12 +487,11 @@ void freeShVariable(ShVariable **var)
 		if (iit != VariablesById.end())
 			VariablesById.erase(iit);
 
-		int i;
-		free((*var)->name);
-		for (i = 0; i < (*var)->structSize; i++)
+		ralloc_free((*var)->name);
+		for (int i = 0; i < (*var)->structSize; i++)
 			freeShVariable(&(*var)->structSpec[i]);
 		ralloc_free((*var)->structSpec);
-		free((*var)->structName);
+		ralloc_free((*var)->structName);
 		ralloc_free(*var);
 		*var = NULL;
 	}

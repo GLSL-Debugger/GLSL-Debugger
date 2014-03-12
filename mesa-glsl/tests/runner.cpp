@@ -8,6 +8,7 @@
 #include "units/DebugVarTest.h"
 #include "units/DebugChangeTest.h"
 #include "units/DebugJumpTest.h"
+#include "units/DebugOutputTest.h"
 #include "glsldb/utils/dbgprint.h"
 #include <cppunit/TextTestRunner.h>
 
@@ -22,10 +23,12 @@ int main(int argc, char **argv)
 	setMaxDebugOutputLevel(DBGLVL_ERROR);
 	CppUnit::TextTestRunner runner;
 	DebugJumpTest::setResult(&runner.eventManager());
+	DebugOutputTest::setResult(&runner.eventManager());
 	runner.addTest(CompileShaderTest::suite());
 	runner.addTest(DebugVarTest::suite());
 	runner.addTest(DebugChangeTest::suite());
 	runner.addTest(DebugJumpTest::suite());
+	runner.addTest(DebugOutputTest::suite());
 	runner.run();
 	return 0;
 }
