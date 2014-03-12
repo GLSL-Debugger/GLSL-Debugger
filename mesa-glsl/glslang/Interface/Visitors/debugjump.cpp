@@ -56,12 +56,12 @@ void ast_debugjump_traverser_visitor::addShChangeables(ast_node* node)
 void ast_debugjump_traverser_visitor::checkReturns(ast_node* node)
 {
 	// Check if this operation would have emitted a vertex
-	if (node->debug_sideeffects & ir_dbg_se_emit_vertex) {
-		this->vertexEmited = true;
+	if (node->debug_sideeffects & ast_dbg_se_emit_vertex) {
+		this->result.passedEmitVertex = true;
 		VPRINT( 6, "passed Emit %i\n", __LINE__);
 	}
-	if (node->debug_sideeffects & ir_dbg_se_discard) {
-		this->discardPassed = true;
+	if (node->debug_sideeffects & ast_dbg_se_discard) {
+		this->result.passedDiscard = true;
 		VPRINT( 6, "passed Discard %i\n", __LINE__);
 	}
 }
@@ -378,6 +378,8 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 				copyShChangeableListCtx(&result.cgbls, &node->changeables, shader);
 				if (funcDef)
 					checkReturns(funcDef);
+				else
+					checkReturns(node);
 			}
 		}
 	} else if (operation == OTOpTargetSet) {
@@ -513,7 +515,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 					// check other branch for discards
 					assert(node->then_statement->debug_sideeffects);
 					if (node->then_statement->debug_sideeffects & ast_dbg_se_discard) {
-						this->discardPassed = true;
+						this->result.passedDiscard = true;
 						VPRINT(6, "passed Discard %i\n", __LINE__);
 					}
 				}
@@ -522,7 +524,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 				// check other branch for discards
 				if (node->else_statement &&
 						(node->else_statement->debug_sideeffects & ast_dbg_se_discard)) {
-					this->discardPassed = true;
+					this->result.passedDiscard = true;
 					VPRINT( 6, "passed Discard %i\n", __LINE__);
 				}
 			}
@@ -688,7 +690,6 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 
 					/* Build result struct */
 					this->result.position = DBG_RS_POSITION_LOOP_CHOOSE;
-					this->result.loopIteration = node->debug_iter;
 					if (node->mode == ast_iteration_statement::ast_do_while)
 						result.loopIteration = node->debug_iter - 1;
 					else

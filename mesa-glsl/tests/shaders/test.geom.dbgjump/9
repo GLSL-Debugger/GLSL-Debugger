@@ -34,7 +34,7 @@ AST_DECLARATION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_ITERATION_STATEMENT
-AST_EXPRESSION (=)                      TargetDbg
+AST_EXPRESSION (=)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION_BIN (<)
@@ -49,7 +49,7 @@ AST_EXPRESSION (array_index)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
-AST_EXPRESSION (++)
+AST_EXPRESSION (++)                     TargetDbg
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
 ================== Build path ==================
@@ -61,7 +61,7 @@ AST_DECLARATION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_ITERATION_STATEMENT                 PathDbg
-AST_EXPRESSION (=)                      TargetDbg
+AST_EXPRESSION (=)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION_BIN (<)
@@ -76,12 +76,13 @@ AST_EXPRESSION (array_index)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
-AST_EXPRESSION (++)
+AST_EXPRESSION (++)                     TargetDbg
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
-Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_ASSIGMENT
-Range: (8:11 - 13:11)
+Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_UNARY
+Range: (35:11 - 38:11)
 Scope:
  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
 Changeables:
+ 0{} 3{}
 LoopIter: 0 EmitVertex: 0 Discard: 0

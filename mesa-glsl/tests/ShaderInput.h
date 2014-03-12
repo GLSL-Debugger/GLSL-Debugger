@@ -111,7 +111,7 @@ public:
 
 	void applyRules(AstShader* sh, int& behaviour)
 	{
-		TestRule* rule = getRules(current_file, line);
+		TestRule* rule = getRules(current_file, file_num);
 		if (!rule)
 			return;
 

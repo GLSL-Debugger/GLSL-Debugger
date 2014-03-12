@@ -23,11 +23,10 @@ enum OTOperation {
 class ast_debugjump_traverser_visitor : public ast_traverse_visitor {
 public:
 	ast_debugjump_traverser_visitor(DbgResult& _result) :
-		finishedDbgFunction(false), discardPassed(false), vertexEmited(false),
-		shader(NULL), result(_result)
+		finishedDbgFunction(false), shader(NULL), result(_result)
 	{
-
-		dbgBehaviour = OTOpTargetUnset;
+		operation = OTOpTargetUnset;
+		dbgBehaviour = DBG_BH_JUMPINTO;
 	}
 
 	virtual ~ast_debugjump_traverser_visitor()
@@ -42,9 +41,9 @@ public:
 	void setUp(AstShader* sh, int behaviour)
 	{
 		shader = sh;
-		vertexEmited = false;
-		discardPassed = false;
 		dbgBehaviour = behaviour;
+		result.passedDiscard = false;
+		result.passedEmitVertex = false;
 	}
 
 	bool step(const char* name);
@@ -73,13 +72,10 @@ public:
 	virtual bool enter(class ast_iteration_statement *);
 
 
-
 	OTOperation operation;
     AstStack parseStack;
     int dbgBehaviour;
     bool finishedDbgFunction;
-    bool discardPassed;
-    bool vertexEmited;
     AstShader* shader;
     DbgResult& result;
 };

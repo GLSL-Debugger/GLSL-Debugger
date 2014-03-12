@@ -106,6 +106,8 @@ static void loadRules(RulesList& rules_map, std::string path)
 	std::istringstream ss(source);
 	std::string line;
 	while (std::getline(ss, line, '\n')) {
+		if (line.empty() || line[0] == '#')
+			continue;
 		size_t delim = line.find(" ");
 		CPPUNIT_ASSERT_MESSAGE("Bad rule found, rule: " + line,
 					delim != std::string::npos);
@@ -150,19 +152,14 @@ void ResultComparator::loadResults(std::string name, std::string unit)
 	}
 }
 
-
 void TestRule::load(int id, std::string str)
 {
 	line = id;
 	size_t pos;
 	if ((pos = str.find("save")) != std::string::npos) {
 		type = tr_save;
-	} else if ((pos = str.find("load ")) != std::string::npos) {
-		type = tr_load | tr_jump;
-		pos += 5;
-		size_t sp;
-		if ((sp = str.find(' ', pos)) != std::string::npos)
-			jump_to = std::stoi(str.substr(pos, sp - pos));
+	} else if ((pos = str.find("load")) != std::string::npos) {
+		type = tr_load;
 	}
 
 	if ((pos = str.find("jump ")) != std::string::npos) {
@@ -176,8 +173,21 @@ void TestRule::load(int id, std::string str)
 	if ((pos = str.find("bhvr ")) != std::string::npos) {
 		type |= tr_bhvr;
 		pos += 5;
-		size_t sp;
-		if ((sp = str.find(' ', pos)) != std::string::npos)
-			behaviour = std::stoi(str.substr(pos, sp - pos));
+		size_t sp = str.find(' ', pos);
+		if (sp == std::string::npos)
+			sp = str.length();
+		std::string rule = str.substr(pos, sp - pos);
+		if (!strcmp(rule.c_str(), "reset"))
+			behaviour = DBG_BH_RESET;
+		else if (!strcmp(rule.c_str(), "into"))
+			behaviour = DBG_BH_JUMPINTO;
+		else if (!strcmp(rule.c_str(), "else"))
+			behaviour = DBG_BH_FOLLOW_ELSE;
+		else if (!strcmp(rule.c_str(), "ifout"))
+			behaviour = DBG_BH_SELECTION_JUMP_OVER;
+		else if (!strcmp(rule.c_str(), "loopout"))
+			behaviour = DBG_BH_LOOP_CONTINUE;
+		else if (!strcmp(rule.c_str(), "next"))
+			behaviour = DBG_BH_LOOP_NEXT_ITER;
 	}
 }

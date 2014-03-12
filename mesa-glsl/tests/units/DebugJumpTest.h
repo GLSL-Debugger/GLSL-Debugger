@@ -19,8 +19,8 @@ const char* DBG_NAMES[ast_dbg_state_end] = {
 	"UnsetDbg", "PathDbg", "TargetDbg"
 };
 
-#define PRINT_ITER 8
-const int REPEATS_COUNT[3] = { 1, PRINT_ITER, 1 };
+#define PRINT_ITER 26
+const int REPEATS_COUNT[3] = { 1, 25, 1 };
 
 
 class DebugJumpTest: public SuitedUnitTest<DebugJumpTest> {
@@ -80,6 +80,8 @@ public:
 			// Do not clear first time
 			if (current_iter)
 				base->reset();
+
+			CPPUNIT_ASSERT_MESSAGE("Debug is finished", !base->djv->finished());
 
 			exec_list* list = shader->head;
 			ast_debugpath_traverser_visitor dbgpath;
