@@ -104,7 +104,6 @@ _mesa_ast_field_selection_to_hir(const ast_expression *expr,
 					    op->type->vector_elements);
       if (swiz != NULL) {
 	 result = swiz;
-	 COPY_YY_LOCATION(swiz->yy_location, loc)
       } else {
 	 /* FINISHME: Logging of error messages should be moved into
 	  * FINISHME: ir_swizzle::create.  This allows the generation of more

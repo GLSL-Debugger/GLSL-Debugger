@@ -605,6 +605,7 @@ void ast_output_traverser_visitor::visit(class ast_interface_block* node)
 	ralloc_asprintf_append(&buffer, ";\n");
 }
 
-void ast_output_traverser_visitor::visit(class ast_gs_input_layout*)
+void ast_output_traverser_visitor::visit(class ast_gs_input_layout* node)
 {
+
 }

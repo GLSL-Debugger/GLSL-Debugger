@@ -38,83 +38,6 @@
 
 #ifdef __cplusplus
 
-#ifdef IR_AST_LOCATION
-
-#ifndef YYSTYPE_IS_DECLARED
-typedef struct YYLTYPE {
-   int first_line;
-   int first_column;
-   int last_line;
-   int last_column;
-   unsigned source;
-} YYLTYPE;
-# define YYLTYPE_IS_DECLARED 1
-# define YYLTYPE_IS_TRIVIAL 1
-#endif
-
-#define LOCATION_PARAM(name) , name
-
-#define GET_YY_LOCATION_HERE YYLTYPE _loc = this->get_location();
-#define COPY_YY_LOCATION(tgt, src) memcpy(& tgt, & src, sizeof(YYLTYPE));
-#define COPY_YY_LOCATION_FROM_HERE(tgt) {\
-    GET_YY_LOCATION_HERE                \
-    COPY_YY_LOCATION( tgt, _loc ) }
-
-#define COPY_IR_LOCATION(tgt, src) \
-		COPY_YY_LOCATION(tgt->yy_location, src->yy_location)
-#define COPY_IR_LOCATION_BEGIN(tgt, src) \
-	tgt->yy_location.first_column = src->yy_location.first_column; \
-	tgt->yy_location.first_line = src->yy_location.first_line;
-#define COPY_IR_LOCATION_END(tgt, src) \
-	tgt->yy_location.last_column = src->yy_location.last_column; \
-	tgt->yy_location.last_line = src->yy_location.last_line;
-#define COPY_IR_LOCATION_HERE(src) \
-		COPY_YY_LOCATION(this->yy_location, src->yy_location)
-#define COPY_RETURN_IR_LOCATION(type, src, func) {\
-   type* c = func;                                   \
-   COPY_YY_LOCATION(c->yy_location, src)            \
-   return c; }
-#define IR_LOCATION_EXPAND_FRONT(tgt, size) tgt->yy_location.first_column -= size;
-#define IR_LOCATION_MOVE(tgt, size) \
-	tgt->yy_location.first_column += size; \
-	tgt->yy_location.last_column += size;
-
-#define COPY_AST_LOCATION_BEGIN(tgt, src) \
-	tgt->yy_location.first_column = src->location.first_column; \
-	tgt->yy_location.first_line = src->location.first_line;
-#define COPY_AST_LOCATION_END(tgt, src) \
-	tgt->yy_location.last_column = src->location.last_column; \
-	tgt->yy_location.last_line = src->location.last_line;
-#define COPY_AST_LOCATION(tgt, src) \
-		COPY_AST_LOCATION_BEGIN(tgt, src) \
-		COPY_AST_LOCATION_END(tgt, src)
-
-enum ir_iteration_modes {
-   ir_loop_for,
-   ir_loop_while,
-   ir_loop_do_while
-};
-
-#else
-#define LOCATION_PARAM(name)
-
-#define COPY_IR_LOCATION_BEGIN(tgt, src)
-#define COPY_IR_LOCATION_END(tgt, src)
-#define COPY_IR_LOCATION_HERE(src)
-#define COPY_RETURN_IR_LOCATION(type, src, func) return func;
-#define IR_LOCATION_EXPAND_FRONT(tgt, size)
-
-#define COPY_AST_LOCATION_BEGIN(tgt, src)
-#define COPY_AST_LOCATION_END(tgt, src)
-#define COPY_AST_LOCATION(tgt, src)
-
-#define GET_YY_LOCATION_HERE
-#define COPY_YY_LOCATION(tgt, src)
-#define COPY_AST_LOCATION_HERE(src)
-#define COPY_YY_LOCATION_FROM_HERE(tgt)
-#endif
-
-
 /**
  * \defgroup IR Intermediate representation nodes
  *
@@ -158,60 +81,11 @@ enum ir_node_type {
    ir_type_return,
    ir_type_swizzle,
    ir_type_texture,
-   ir_type_typedecl,
    ir_type_emit_vertex,
    ir_type_end_primitive,
-#ifdef IR_DEBUG_STATE
-   ir_type_dummy,
-#endif
    ir_type_max /**< maximum ir_type enum number, for validation */
 };
 
-#ifdef IR_DEBUG_STATE
-enum ir_dbg_state {
-   ir_dbg_state_unset,
-   ir_dbg_state_path, /* path of trace */
-   ir_dbg_state_target, /* leaf of trace */
-   ir_dbg_state_end
-};
-
-enum ir_dbg_state_internal_if {
-    ir_dbg_if_unset,             // not debugged so far
-    ir_dbg_if_init,              // already visited once
-    ir_dbg_if_condition,         // condition in process
-    ir_dbg_if_condition_passed,  // condition processed
-    ir_dbg_if_then,              // descided to debug true branch
-    ir_dbg_if_else,              // descided to debug false branch
-    ir_dbg_if_passed             // debugging is past selection
-};
-
-enum ir_dbg_state_internal_loop {
-    ir_dbg_loop_unset,
-    ir_dbg_loop_qyr_init,
-    ir_dbg_loop_qyr_test,
-    ir_dbg_loop_qyr_terminal,
-    ir_dbg_loop_wrk_init,
-    ir_dbg_loop_wrk_test,
-    ir_dbg_loop_wrk_body,
-    ir_dbg_loop_wrk_terminal,
-    ir_dbg_loop_select_flow,
-    ir_dbg_loop_passed
-};
-
-enum ir_dbg_overwrite {
-   ir_dbg_ow_unset,
-   ir_dbg_ow_original,
-   ir_dbg_ow_debug,
-   ir_dbg_ow_end
-};
-
-enum ir_dbg_sideefects {
-	ir_dbg_se_unset = 0,
-	ir_dbg_se_general = 1,
-	ir_dbg_se_discard = 2,
-	ir_dbg_se_emit_vertex = 4
-};
-#endif
 
 /**
  * Base class of all IR instructions
@@ -219,17 +93,6 @@ enum ir_dbg_sideefects {
 class ir_instruction : public exec_node {
 public:
    enum ir_node_type ir_type;
-
-#ifdef IR_AST_LOCATION
-   YYLTYPE yy_location;
-#endif
-
-#ifdef IR_DEBUG_STATE
-   enum ir_dbg_state debug_state;
-   enum ir_dbg_overwrite debug_overwrite;
-   bool debug_target;
-   int debug_sideeffects;
-#endif
 
    /**
     * GCC 4.7+ and clang warn when deleting an ir_instruction unless
@@ -243,6 +106,7 @@ public:
 
    /** ir_print_visitor helper for debugging. */
    void print(void) const;
+   void fprint(FILE *f) const;
 
    virtual void accept(ir_visitor *) = 0;
    virtual ir_visitor_status accept(ir_hierarchical_visitor *) = 0;
@@ -259,7 +123,6 @@ public:
    /*@{*/
    virtual class ir_variable *          as_variable()         { return NULL; }
    virtual class ir_function *          as_function()         { return NULL; }
-   virtual class ir_function_signature *as_function_signature() { return NULL; }
    virtual class ir_dereference *       as_dereference()      { return NULL; }
    virtual class ir_dereference_array *	as_dereference_array() { return NULL; }
    virtual class ir_dereference_variable *as_dereference_variable() { return NULL; }
@@ -277,9 +140,6 @@ public:
    virtual class ir_discard *           as_discard()          { return NULL; }
    virtual class ir_jump *              as_jump()             { return NULL; }
    /*@}*/
-#ifdef IR_DEBUG_STATE
-   virtual class ir_dummy *             as_dummy()             { return NULL; }
-#endif
 
    /**
     * IR equality method: Return true if the referenced instruction would
@@ -295,94 +155,8 @@ protected:
    ir_instruction()
    {
       ir_type = ir_type_unset;
-#ifdef IR_DEBUG_STATE
-      debug_state = ir_dbg_state_unset;
-      debug_sideeffects = ir_dbg_se_unset;
-#endif
    }
 };
-
-
-#ifdef IR_DEBUG_STATE
-/**
- * This class provides additional hooks for debugger.
- */
-
-enum ir_dummy_type {
-	ir_dummy_no_type,
-	ir_dummy_function_end,
-	ir_dummy_traversable_last,
-	/* Types below this is for internal use */
-	ir_dummy_loop_init,
-	ir_dummy_loop_initialized,
-	ir_dummy_loop_condition,
-	ir_dummy_loop_condition_end,
-	ir_dummy_loop_iter,
-	ir_dummy_loop_iterated,
-};
-
-class ir_dummy : public ir_instruction {
-public:
-   ir_dummy(enum ir_dummy_type type)
-   {
-      ir_type = ir_type_dummy;
-      debug_state = ir_dbg_state_unset;
-      debug_overwrite = ir_dbg_ow_unset;
-      debug_target = false;
-      dummy_type = type;
-   }
-
-   virtual ir_dummy* as_dummy()
-   {
-	   return this;
-   }
-
-   virtual void accept(ir_visitor *v)
-   {
-      v->visit( this );
-   }
-
-   virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; }
-   virtual ir_dummy *clone(void *mem_ctx, struct hash_table *ht) const;
-
-   virtual ~ir_dummy( ) {}
-
-   /**
-    * Everything is empty block except block with end token
-    * not next to the first token
-    */
-   bool block_empty( )
-   {
-	   int pair = pair_type(this->dummy_type);
-	   if (pair >= 0 && this->next){
-		   ir_dummy* next = ((ir_instruction*)this->next)->as_dummy();
-		   if (!next || next->dummy_type != pair)
-			   return false;
-	   }
-	   return true;
-   }
-
-   static int pair_type(enum ir_dummy_type t)
-   {
-	   switch (t) {
-	   	   case ir_dummy_loop_init:
-	   		   return ir_dummy_loop_initialized;
-	   		   break;
-	   	   case ir_dummy_loop_condition:
-	   		   return ir_dummy_loop_condition_end;
-	   		   break;
-	   	   case ir_dummy_loop_iter:
-	   		   return ir_dummy_loop_iterated;
-	   		   break;
-	   	   default:
-	   		   break;
-	   }
-	   return -1;
-   }
-
-   enum ir_dummy_type dummy_type;
-};
-#endif
 
 
 /**
@@ -918,6 +692,20 @@ public:
       } atomic;
 
       /**
+       * ARB_shader_image_load_store qualifiers.
+       */
+      struct {
+         bool read_only; /**< "readonly" qualifier. */
+         bool write_only; /**< "writeonly" qualifier. */
+         bool coherent;
+         bool _volatile;
+         bool restrict_flag;
+
+         /** Image internal format if specified explicitly, otherwise GL_NONE. */
+         GLenum format;
+      } image;
+
+      /**
        * Highest element accessed with a constant expression array index
        *
        * Not used for non-array variables.
@@ -995,11 +783,6 @@ public:
 					struct hash_table *ht) const;
    ir_function_signature *clone_prototype(void *mem_ctx,
 					  struct hash_table *ht) const;
-
-   virtual ir_function_signature *as_function_signature()
-   {
-      return this;
-   }
 
    virtual void accept(ir_visitor *v)
    {
@@ -1197,12 +980,6 @@ public:
       : condition(condition)
    {
       ir_type = ir_type_if;
-      COPY_IR_LOCATION_HERE(condition);
-
-#ifdef IR_DEBUG_STATE
-      debug_state_internal = ir_dbg_if_unset;
-      debug_sideeffects_then = debug_sideeffects_else = ir_dbg_se_unset;
-#endif
    }
 
    virtual ir_if *clone(void *mem_ctx, struct hash_table *ht) const;
@@ -1224,12 +1001,6 @@ public:
    exec_list  then_instructions;
    /** List of ir_instruction for the body of the else branch */
    exec_list  else_instructions;
-
-#ifdef IR_DEBUG_STATE
-   enum ir_dbg_state_internal_if debug_state_internal;
-   int debug_sideeffects_then;
-   int debug_sideeffects_else;
-#endif
 };
 
 
@@ -1256,38 +1027,6 @@ public:
 
    /** List of ir_instruction that make up the body of the loop. */
    exec_list body_instructions;
-
-#ifdef IR_AST_LOCATION
-   enum ir_iteration_modes mode;
-#endif
-
-#ifdef IR_DEBUG_STATE
-   ir_rvalue* condition()
-   {
-      if (this->debug_check) {
-         ir_if* sel = ((ir_instruction*)this->debug_check->next)->as_if();
-         if (sel)
-            return sel->condition;
-      }
-      return NULL;
-   }
-
-   bool need_dbgiter()
-   {
-      if (this->debug_state_internal != ir_dbg_loop_unset &&
-            this->debug_state_internal != ir_dbg_loop_qyr_init &&
-            this->debug_state_internal != ir_dbg_loop_wrk_init)
-        return true;
-      return false;
-   }
-
-   ir_dummy* debug_init;
-   ir_dummy* debug_check;
-   ir_dummy* debug_terminal;
-   enum ir_dbg_state_internal_loop debug_state_internal;
-   int debug_iter;
-   char* debug_iter_name;
-#endif
 };
 
 
@@ -1720,6 +1459,18 @@ public:
    }
 
    /**
+    * Return whether the expression operates on vectors horizontally.
+    */
+   bool is_horizontal() const
+   {
+      return operation == ir_binop_all_equal ||
+             operation == ir_binop_any_nequal ||
+             operation == ir_unop_any ||
+             operation == ir_binop_dot ||
+             operation == ir_quadop_vector;
+   }
+
+   /**
     * Return a string representing this expression's operator.
     */
    const char *operator_string();
@@ -1845,7 +1596,6 @@ public:
       : value(value)
    {
       this->ir_type = ir_type_return;
-      COPY_IR_LOCATION_HERE(value);
    }
 
    virtual ir_return *clone(void *mem_ctx, struct hash_table *) const;
@@ -2472,30 +2222,6 @@ private:
    ir_constant(void);
 };
 
-
-
-class ir_typedecl_statement : public ir_instruction {
-public:
-	ir_typedecl_statement(const glsl_type* type_decl)
-	{
-		this->ir_type = ir_type_typedecl;
-		this->type_decl = type_decl;
-	}
-
-	virtual ir_typedecl_statement *clone(void *mem_ctx, struct hash_table *) const;
-
-	virtual void accept(ir_visitor *v)
-	{
-		v->visit(this);
-	}
-
-	virtual ir_visitor_status accept(ir_hierarchical_visitor *) { return visit_continue; }
-
-	const glsl_type* type_decl;
-};
-
-
-
 /*@}*/
 
 /**
@@ -2640,7 +2366,7 @@ mode_string(const ir_variable *var);
 extern "C" {
 #endif /* __cplusplus */
 
-extern void _mesa_print_ir(struct exec_list *instructions,
+extern void _mesa_print_ir(FILE *f, struct exec_list *instructions,
                            struct _mesa_glsl_parse_state *state);
 
 #ifdef __cplusplus

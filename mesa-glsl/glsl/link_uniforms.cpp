@@ -240,7 +240,8 @@ class count_uniform_size : public program_resource_visitor {
 public:
    count_uniform_size(struct string_to_uint_map *map)
       : num_active_uniforms(0), num_values(0), num_shader_samplers(0),
-	num_shader_uniform_components(0), is_ubo_var(false), map(map)
+        num_shader_images(0), num_shader_uniform_components(0),
+        is_ubo_var(false), map(map)
    {
       /* empty */
    }
@@ -248,6 +249,7 @@ public:
    void start_shader()
    {
       this->num_shader_samplers = 0;
+      this->num_shader_images = 0;
       this->num_shader_uniform_components = 0;
    }
 
@@ -277,6 +279,11 @@ public:
    unsigned num_shader_samplers;
 
    /**
+    * Number of images used
+    */
+   unsigned num_shader_images;
+
+   /**
     * Number of uniforms used in the current shader
     */
    unsigned num_shader_uniform_components;
@@ -303,6 +310,15 @@ private:
       if (type->contains_sampler()) {
 	 this->num_shader_samplers +=
 	    type->is_array() ? type->array_size() : 1;
+      } else if (type->contains_image()) {
+         this->num_shader_images += values;
+
+         /* As drivers are likely to represent image uniforms as
+          * scalar indices, count them against the limit of uniform
+          * components in the default block.  The spec allows image
+          * uniforms to use up no more than one scalar slot.
+          */
+         this->num_shader_uniform_components += values;
       } else {
 	 /* Accumulate the total number of uniform slots used by this shader.
 	  * Note that samplers do not count against this limit because they
@@ -364,6 +380,7 @@ public:
       this->shader_samplers_used = 0;
       this->shader_shadow_samplers = 0;
       this->next_sampler = 0;
+      this->next_image = 0;
       memset(this->targets, 0, sizeof(this->targets));
    }
 
@@ -460,6 +477,24 @@ private:
       }
    }
 
+   void handle_images(const glsl_type *base_type,
+                      struct gl_uniform_storage *uniform)
+   {
+      if (base_type->is_image()) {
+         uniform->image[shader_type].index = this->next_image;
+         uniform->image[shader_type].active = true;
+
+         /* Increment the image index by 1 for non-arrays and by the
+          * number of array elements for arrays.
+          */
+         this->next_image += MAX2(1, uniform->array_elements);
+
+      } else {
+         uniform->image[shader_type].index = ~0;
+         uniform->image[shader_type].active = false;
+      }
+   }
+
    virtual void visit_field(const glsl_type *type, const char *name,
                             bool row_major)
    {
@@ -495,8 +530,9 @@ private:
 	 base_type = type;
       }
 
-      /* This assigns sampler uniforms to sampler units. */
+      /* This assigns uniform indices to sampler and image uniforms. */
       handle_samplers(base_type, &this->uniforms[id]);
+      handle_images(base_type, &this->uniforms[id]);
 
       /* If there is already storage associated with this uniform, it means
        * that it was set while processing an earlier shader stage.  For
@@ -554,6 +590,7 @@ private:
 
    struct gl_uniform_storage *uniforms;
    unsigned next_sampler;
+   unsigned next_image;
 
 public:
    union gl_constant_value *values;
@@ -720,12 +757,51 @@ link_assign_uniform_block_offsets(struct gl_shader *shader)
    }
 }
 
+/**
+ * Scan the program for image uniforms and store image unit access
+ * information into the gl_shader data structure.
+ */
+static void
+link_set_image_access_qualifiers(struct gl_shader_program *prog)
+{
+   for (unsigned i = 0; i < MESA_SHADER_STAGES; i++) {
+      gl_shader *sh = prog->_LinkedShaders[i];
+
+      if (sh == NULL)
+	 continue;
+
+      foreach_list(node, sh->ir) {
+	 ir_variable *var = ((ir_instruction *) node)->as_variable();
+
+         if (var && var->data.mode == ir_var_uniform &&
+             var->type->contains_image()) {
+            unsigned id = 0;
+            bool found = prog->UniformHash->get(id, var->name);
+            assert(found);
+            (void) found;
+            const gl_uniform_storage *storage = &prog->UniformStorage[id];
+            const unsigned index = storage->image[i].index;
+            const GLenum access = (var->data.image.read_only ? GL_READ_ONLY :
+                                   var->data.image.write_only ? GL_WRITE_ONLY :
+                                   GL_READ_WRITE);
+
+            for (unsigned j = 0; j < MAX2(1, storage->array_elements); ++j)
+               sh->ImageAccess[index + j] = access;
+         }
+      }
+   }
+}
+
 void
 link_assign_uniform_locations(struct gl_shader_program *prog)
 {
    ralloc_free(prog->UniformStorage);
    prog->UniformStorage = NULL;
    prog->NumUserUniformStorage = 0;
+
+   ralloc_free(prog->UniformRemapTable);
+   prog->UniformRemapTable = NULL;
+   prog->NumUniformRemapTable = 0;
 
    if (prog->UniformHash != NULL) {
       prog->UniformHash->clear();
@@ -757,6 +833,7 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
        *     types cannot have initializers."
        */
       memset(sh->SamplerUnits, 0, sizeof(sh->SamplerUnits));
+      memset(sh->ImageUnits, 0, sizeof(sh->ImageUnits));
 
       link_update_uniform_buffer_variables(sh);
 
@@ -782,6 +859,7 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
       }
 
       sh->num_samplers = uniform_size.num_shader_samplers;
+      sh->NumImages = uniform_size.num_shader_images;
       sh->num_uniform_components = uniform_size.num_shader_uniform_components;
 
       sh->num_combined_uniform_components = sh->num_uniform_components;
@@ -837,19 +915,28 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
              sizeof(prog->_LinkedShaders[i]->SamplerTargets));
    }
 
-   /* Determine the size of the largest uniform array queryable via
-    * glGetUniformLocation.  Using this as the location scale guarantees that
-    * there is enough "room" for the array index to be stored in the low order
-    * part of the uniform location.  It also makes the locations be more
-    * tightly packed.
-    */
-   unsigned max_array_size = 1;
+   /* Build the uniform remap table that is used to set/get uniform locations */
    for (unsigned i = 0; i < num_user_uniforms; i++) {
-      if (uniforms[i].array_elements > max_array_size)
-         max_array_size = uniforms[i].array_elements;
-   }
 
-   prog->UniformLocationBaseScale = max_array_size;
+      /* how many new entries for this uniform? */
+      const unsigned entries = MAX2(1, uniforms[i].array_elements);
+
+      /* resize remap table to fit new entries */
+      prog->UniformRemapTable =
+         reralloc(prog,
+                  prog->UniformRemapTable,
+                  gl_uniform_storage *,
+                  prog->NumUniformRemapTable + entries);
+
+      /* set pointers for this uniform */
+      for (unsigned j = 0; j < entries; j++)
+         prog->UniformRemapTable[prog->NumUniformRemapTable+j] = &uniforms[i];
+
+      /* set the base location in remap table for the uniform */
+      uniforms[i].remap_location = prog->NumUniformRemapTable;
+
+      prog->NumUniformRemapTable += entries;
+   }
 
 #ifndef NDEBUG
    for (unsigned i = 0; i < num_user_uniforms; i++) {
@@ -862,6 +949,7 @@ link_assign_uniform_locations(struct gl_shader_program *prog)
    prog->NumUserUniformStorage = num_user_uniforms;
    prog->UniformStorage = uniforms;
 
+   link_set_image_access_qualifiers(prog);
    link_set_uniform_initializers(prog);
 
    return;

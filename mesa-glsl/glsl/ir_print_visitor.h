@@ -38,7 +38,7 @@ extern "C" {
  */
 class ir_print_visitor : public ir_visitor {
 public:
-   ir_print_visitor();
+   ir_print_visitor(FILE *f);
    virtual ~ir_print_visitor();
 
    void indent(void);
@@ -69,15 +69,11 @@ public:
    virtual void visit(ir_if *);
    virtual void visit(ir_loop *);
    virtual void visit(ir_loop_jump *);
-   virtual void visit(ir_typedecl_statement *);
    virtual void visit(ir_emit_vertex *);
    virtual void visit(ir_end_primitive *);
-#ifdef IR_DEBUG_STATE
-   virtual void visit(class ir_dummy *);
-#endif
    /*@}*/
 
-protected:
+private:
    /**
     * Fetch/generate a unique name for ir_variable.
     *
@@ -90,14 +86,10 @@ protected:
    hash_table *printable_names;
    _mesa_symbol_table *symbols;
 
-   /**
-    * Is this a big secret to keep it private?
-    */
-   int indentation;
-
-private:
    void *mem_ctx;
+   FILE *f;
 
+   int indentation;
 };
 
 #endif /* IR_PRINT_VISITOR_H */

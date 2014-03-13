@@ -489,7 +489,6 @@ void ast_postprocess_traverser_visitor::leave(ast_gs_input_layout* node)
 {
 	YYLTYPE loc = node->get_location();
 	state->gs_input_prim_type_specified = true;
-	state->gs_input_prim_type = node->prim_type;
 	unsigned num_vertices = vertices_per_prim(node->prim_type);
 
 	/* If any shader inputs occurred before this declaration and did not

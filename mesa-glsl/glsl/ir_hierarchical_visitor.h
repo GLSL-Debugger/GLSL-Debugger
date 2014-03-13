@@ -87,12 +87,8 @@ public:
    virtual ir_visitor_status visit(class ir_variable *);
    virtual ir_visitor_status visit(class ir_constant *);
    virtual ir_visitor_status visit(class ir_loop_jump *);
-   virtual ir_visitor_status visit(class ir_typedecl_statement *);
    virtual ir_visitor_status visit(class ir_emit_vertex *);
    virtual ir_visitor_status visit(class ir_end_primitive *);
-#ifdef IR_DEBUG_STATE
-   virtual ir_visitor_status visit(class ir_dummy *);
-#endif
 
    /**
     * ir_dereference_variable isn't technically a leaf, but it is treated as a

@@ -159,8 +159,6 @@ ir_assignment::ir_assignment(ir_dereference *lhs, ir_rvalue *rhs,
    this->rhs = rhs;
    this->lhs = lhs;
    this->write_mask = write_mask;
-   COPY_IR_LOCATION_BEGIN( this, lhs )
-   COPY_IR_LOCATION_END( this, rhs )
 
    if (lhs->type->is_scalar() || lhs->type->is_vector()) {
       int lhs_components = 0;
@@ -179,8 +177,6 @@ ir_assignment::ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs,
    this->ir_type = ir_type_assignment;
    this->condition = condition;
    this->rhs = rhs;
-   COPY_IR_LOCATION_BEGIN( this, lhs )
-   COPY_IR_LOCATION_END( this, rhs )
 
    /* If the RHS is a vector type, assume that all components of the vector
     * type are being written to the LHS.  The write mask comes from the RHS
@@ -199,36 +195,6 @@ ir_assignment::ir_assignment(ir_rvalue *lhs, ir_rvalue *rhs,
    this->set_lhs(lhs);
 }
 
-#ifdef IR_AST_LOCATION
-static ir_rvalue* first(ir_rvalue* operands[4])
-{
-	ir_rvalue* result = NULL;
-	for (int i = 0; i < 4; ++i){
-		if (!operands[i])
-			continue;
-		if (!result ||
-				operands[i]->yy_location.first_line < result->yy_location.first_line ||
-				operands[i]->yy_location.first_column < result->yy_location.first_column )
-			result = operands[i];
-	}
-	return result;
-}
-
-static ir_rvalue* last(ir_rvalue* operands[4])
-{
-	ir_rvalue* result = NULL;
-	for (int i = 0; i < 4; ++i){
-		if (!operands[i])
-			continue;
-		if (!result ||
-				operands[i]->yy_location.last_line > result->yy_location.last_line ||
-				operands[i]->yy_location.last_column > result->yy_location.last_column )
-			result = operands[i];
-	}
-	return result;
-}
-#endif
-
 ir_expression::ir_expression(int op, const struct glsl_type *type,
 			     ir_rvalue *op0, ir_rvalue *op1,
 			     ir_rvalue *op2, ir_rvalue *op3)
@@ -246,8 +212,6 @@ ir_expression::ir_expression(int op, const struct glsl_type *type,
       assert(this->operands[i] == NULL);
    }
 #endif
-   COPY_IR_LOCATION_BEGIN( this, first(this->operands) )
-   COPY_IR_LOCATION_END( this, last(this->operands) )
 }
 
 ir_expression::ir_expression(int op, ir_rvalue *op0)
@@ -259,7 +223,6 @@ ir_expression::ir_expression(int op, ir_rvalue *op0)
    this->operands[1] = NULL;
    this->operands[2] = NULL;
    this->operands[3] = NULL;
-   COPY_IR_LOCATION_HERE(op0);
 
    assert(op <= ir_last_unop);
 
@@ -369,8 +332,6 @@ ir_expression::ir_expression(int op, ir_rvalue *op0, ir_rvalue *op1)
    this->operands[1] = op1;
    this->operands[2] = NULL;
    this->operands[3] = NULL;
-   COPY_IR_LOCATION_BEGIN( this, first(this->operands) )
-   COPY_IR_LOCATION_END( this, last(this->operands) )
 
    assert(op > ir_last_unop);
 
@@ -461,8 +422,6 @@ ir_expression::ir_expression(int op, ir_rvalue *op0, ir_rvalue *op1,
                              ir_rvalue *op2)
 {
    this->ir_type = ir_type_expression;
-   //COPY_IR_LOCATION_BEGIN( this, first(this->operands) )
-   //COPY_IR_LOCATION_END( this, last(this->operands) )
 
    this->operation = ir_expression_operation(op);
    this->operands[0] = op0;
@@ -722,7 +681,6 @@ ir_constant::ir_constant(const ir_constant *c, unsigned i)
 {
    this->ir_type = ir_type_constant;
    this->type = c->type->get_base_type();
-   COPY_IR_LOCATION_HERE(c);
 
    switch (this->type->base_type) {
    case GLSL_TYPE_UINT:  this->value.u[0] = c->value.u[i]; break;
@@ -1268,9 +1226,6 @@ ir_constant::is_basis() const
 ir_loop::ir_loop()
 {
    this->ir_type = ir_type_loop;
-#ifdef IR_DEBUG_STATE
-   debug_state_internal = ir_dbg_loop_unset;
-#endif
 }
 
 
@@ -1281,7 +1236,6 @@ ir_dereference_variable::ir_dereference_variable(ir_variable *var)
    this->ir_type = ir_type_dereference_variable;
    this->var = var;
    this->type = var->type;
-   COPY_IR_LOCATION_HERE(var);
 }
 
 
@@ -1291,7 +1245,6 @@ ir_dereference_array::ir_dereference_array(ir_rvalue *value,
    this->ir_type = ir_type_dereference_array;
    this->array_index = array_index;
    this->set_array(value);
-   COPY_IR_LOCATION_HERE(value);
 }
 
 
@@ -1303,7 +1256,6 @@ ir_dereference_array::ir_dereference_array(ir_variable *var,
    this->ir_type = ir_type_dereference_array;
    this->array_index = array_index;
    this->set_array(new(ctx) ir_dereference_variable(var));
-   COPY_IR_LOCATION_HERE(var);
 }
 
 
@@ -1335,7 +1287,6 @@ ir_dereference_record::ir_dereference_record(ir_rvalue *value,
    this->record = value;
    this->field = ralloc_strdup(this, field);
    this->type = this->record->type->field_type(field);
-   COPY_IR_LOCATION_HERE(value);
 }
 
 
@@ -1348,7 +1299,6 @@ ir_dereference_record::ir_dereference_record(ir_variable *var,
    this->record = new(ctx) ir_dereference_variable(var);
    this->field = ralloc_strdup(this, field);
    this->type = this->record->type->field_type(field);
-   COPY_IR_LOCATION_HERE(var);
 }
 
 bool
@@ -1361,13 +1311,13 @@ ir_dereference::is_lvalue() const
    if ((var == NULL) || var->data.read_only)
       return false;
 
-   /* From page 17 (page 23 of the PDF) of the GLSL 1.20 spec:
+   /* From section 4.1.7 of the GLSL 4.40 spec:
     *
-    *    "Samplers cannot be treated as l-values; hence cannot be used
-    *     as out or inout function parameters, nor can they be
-    *     assigned into."
+    *   "Opaque variables cannot be treated as l-values; hence cannot
+    *    be used as out or inout function parameters, nor can they be
+    *    assigned into."
     */
-   if (this->type->contains_sampler())
+   if (this->type->contains_opaque())
       return false;
 
    return true;
@@ -1467,8 +1417,6 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, unsigned x, unsigned y, unsigned z,
    const unsigned components[4] = { x, y, z, w };
    this->ir_type = ir_type_swizzle;
    this->init_mask(components, count);
-
-   COPY_IR_LOCATION_HERE(val);
 }
 
 ir_swizzle::ir_swizzle(ir_rvalue *val, const unsigned *comp,
@@ -1477,7 +1425,6 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, const unsigned *comp,
 {
    this->ir_type = ir_type_swizzle;
    this->init_mask(comp, count);
-   COPY_IR_LOCATION_HERE(val);
 }
 
 ir_swizzle::ir_swizzle(ir_rvalue *val, ir_swizzle_mask mask)
@@ -1487,7 +1434,6 @@ ir_swizzle::ir_swizzle(ir_rvalue *val, ir_swizzle_mask mask)
    this->mask = mask;
    this->type = glsl_type::get_instance(val->type->base_type,
 					mask.num_components, 1);
-   COPY_IR_LOCATION_HERE(val);
 }
 
 #define X 1
@@ -1608,6 +1554,11 @@ ir_variable::ir_variable(const struct glsl_type *type, const char *name,
    this->data.max_array_access = 0;
    this->data.atomic.buffer_index = 0;
    this->data.atomic.offset = 0;
+   this->data.image.read_only = false;
+   this->data.image.write_only = false;
+   this->data.image.coherent = false;
+   this->data.image._volatile = false;
+   this->data.image.restrict_flag = false;
 
    if (type != NULL) {
       if (type->base_type == GLSL_TYPE_SAMPLER)
@@ -1712,7 +1663,12 @@ ir_function_signature::qualifiers_match(exec_list *params)
 	  !modes_match(a->data.mode, b->data.mode) ||
 	  a->data.interpolation != b->data.interpolation ||
 	  a->data.centroid != b->data.centroid ||
-         a->data.sample != b->data.sample) {
+          a->data.sample != b->data.sample ||
+          a->data.image.read_only != b->data.image.read_only ||
+          a->data.image.write_only != b->data.image.write_only ||
+          a->data.image.coherent != b->data.image.coherent ||
+          a->data.image._volatile != b->data.image._volatile ||
+          a->data.image.restrict_flag != b->data.image.restrict_flag) {
 
 	 /* parameter a's qualifiers don't match */
 	 return a->name;
