@@ -13,6 +13,14 @@
 #include "AstStack.h"
 
 struct sh_symbol_table;
+struct ast_type_qualifier;
+
+typedef enum {
+	SQ_DEFAULT_UNIFORM,
+	SQ_GS_OUT,
+	SQ_GS_IN,
+	SQ_LAST
+} StateQualifiers;
 
 struct AstShader {
 	exec_list* head;
@@ -26,6 +34,8 @@ struct AstShader {
 	sh_symbol_table* symbols;
 	ShVariableList globals;
 	AstStack path;
+	bool gs_input_prim_type_specified;
+	ast_type_qualifier* qualifiers[SQ_LAST];
 };
 
 struct ShaderHolder {

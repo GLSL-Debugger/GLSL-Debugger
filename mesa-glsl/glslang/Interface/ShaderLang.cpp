@@ -126,11 +126,25 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 	shader->version = state->language_version;
 	shader->is_es = state->es_shader;
 
+	// Copy shader qualifiers from state
+	size_t qual_size = sizeof(ast_type_qualifier);
+	shader->qualifiers[SQ_DEFAULT_UNIFORM] = new(shader) ast_type_qualifier;
+	memcpy(shader->qualifiers[SQ_DEFAULT_UNIFORM], state->default_uniform_qualifier, qual_size);
+	shader->qualifiers[SQ_GS_OUT] = new(shader) ast_type_qualifier;
+	memcpy(shader->qualifiers[SQ_GS_OUT], state->out_qualifier, qual_size);
+	shader->qualifiers[SQ_GS_IN] = new(shader) ast_type_qualifier;
+	memcpy(shader->qualifiers[SQ_GS_IN], state->in_qualifier, qual_size);
+
 	/* Check side effects, discards, vertex emits */
 	if (!state->error) {
 		ast_postprocess_traverser_visitor ppt(shader, state);
 		ppt.visit(shader->head);
+
+		// Processed in postprocessor instead of ast_to_hir
+		shader->gs_input_prim_type_specified = state->gs_input_prim_type_specified;
 	}
+
+
 
 	// TODO: steal memory
 	//ralloc_free(state);

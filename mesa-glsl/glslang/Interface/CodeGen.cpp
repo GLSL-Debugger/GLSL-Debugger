@@ -75,7 +75,7 @@ bool compileShaderCode(AstShader* shader)
 
 	CodeGen cg(shader, NULL, NULL);
 	ast_output_traverser_visitor it(cg, shader, NULL, NULL, language, DBG_CG_ORIGINAL_SRC);
-	it.append_version();
+	it.append_header();
 	it.visit(list);
 	it.dump();
 
@@ -239,7 +239,7 @@ bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableL
 	cg.allocateResult(target, language, dbgCgOptions);
 
 	ast_output_traverser_visitor it(cg, shader, vl, cgbl, language, dbgCgOptions);
-	it.append_version();
+	it.append_header();
 
 	/* I have some problems with locale-dependent %f interpretation in printf
 	 * Not sure, whose fault it is, qt or some line of code in debugger initialization.

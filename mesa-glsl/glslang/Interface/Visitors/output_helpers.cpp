@@ -13,19 +13,27 @@
 #include <unordered_set>
 
 
-#define LAYOUTS_COUNT 16
-#define LAYOUTS_FIRST_EXPLICIT 11
+#define LAYOUTS_COUNT 18
+#define LAYOUTS_FIRST_EXPLICIT 12
 const char* layouts_names[LAYOUTS_COUNT] = {
 	"origin_upper_left", "pixel_center_integer", "depth_any", "depth_greater",
 	"depth_less", "depth_unchanged", "std140", "shared",
-	"column_major", "row_major", "packed", "location",
-	"index", "binding", "offset", "max_vertices"
+	"column_major", "row_major", "packed", "early_fragment_tests",
+	// Explicit qualifiers
+	"location", "index", "binding", "offset",
+	"max_vertices", "invocations"
 };
 const char* prim_types[7] = {
 	"points", "lines", "lines_adjacency", "line_strip",
 	"triangles", "triangles_adjacency", "triangle_strip"
 };
+
+static const char* local_size_qualifiers[3] = {
+	"local_size_x",	"local_size_y", "local_size_z",
+};
+
 /*
+ * TODO:
 if (!$$.flags.i) {
             static const struct {
                const char *name;
@@ -82,90 +90,46 @@ if (!$$.flags.i) {
                }
             }
          }
-
-         if (!$$.flags.i &&
-             match_layout_qualifier($1, "early_fragment_tests", state) == 0) {
-            $$.flags.q.early_fragment_tests = 1;
-
-
-            static const char *local_size_qualifiers[3] = {
-                     "local_size_x",
-                     "local_size_y",
-                     "local_size_z",
-                  };
-                  for (int i = 0; i < 3; i++) {
-                     if (match_layout_qualifier(local_size_qualifiers[i], $1,
-                                                state) == 0) {
-                        if ($3 <= 0) {
-                           _mesa_glsl_error(& @3, state,
-                                            "invalid %s of %d specified",
-                                            local_size_qualifiers[i], $3);
-                           YYERROR;
-                        } else if (!state->is_version(430, 0) &&
-                                   !state->ARB_compute_shader_enable) {
-                           _mesa_glsl_error(& @3, state,
-                                            "%s qualifier requires GLSL 4.30 or "
-                                            "ARB_compute_shader",
-                                            local_size_qualifiers[i]);
-                           YYERROR;
-                        } else {
-                           $$.flags.q.local_size |= (1 << i);
-                           $$.local_size[i] = $3;
-                        }
-                        break;
-                     }
-                  }
-
-                  if (match_layout_qualifier("invocations", $1, state) == 0) {
-                     $$.flags.q.invocations = 1;
-
-                     if ($3 <= 0) {
-                        _mesa_glsl_error(& @3, state,
-                                         "invalid invocations %d specified", $3);
-                        YYERROR;
-                     } else if ($3 > MAX_GEOMETRY_SHADER_INVOCATIONS) {
-                        _mesa_glsl_error(& @3, state,
-                                         "invocations (%d) exceeds "
-                                         "GL_MAX_GEOMETRY_SHADER_INVOCATIONS", $3);
-                        YYERROR;
-                     } else {
-                        $$.invocations = $3;
-                        if (!state->is_version(400, 0) &&
-                            !state->ARB_gpu_shader5_enable) {
-                           _mesa_glsl_error(& @3, state,
-                                            "GL_ARB_gpu_shader5 invocations "
-                                            "qualifier specified", $3);
-                        }
-                     }
-                  }*/
+*/
 
 void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualifier* q)
 {
+	if (!q)
+		return;
+
 	const unsigned int layouts[LAYOUTS_COUNT] = {
 		q->flags.q.origin_upper_left, q->flags.q.pixel_center_integer,
 		q->flags.q.depth_any, q->flags.q.depth_greater,
 		q->flags.q.depth_less, q->flags.q.depth_unchanged,
 		q->flags.q.std140, q->flags.q.shared,
 		q->flags.q.column_major, q->flags.q.row_major,
-		q->flags.q.packed, q->flags.q.explicit_location,
-		q->flags.q.explicit_index, q->flags.q.explicit_binding,
-		q->flags.q.explicit_offset, q->flags.q.max_vertices
+		q->flags.q.packed, q->flags.q.early_fragment_tests,
+		// Explicit
+		q->flags.q.explicit_location, q->flags.q.explicit_index,
+		q->flags.q.explicit_binding, q->flags.q.explicit_offset,
+		q->flags.q.max_vertices, q->flags.q.invocations
 	};
 
 	const int explicit_layouts[LAYOUTS_COUNT - LAYOUTS_FIRST_EXPLICIT] = {
-		q->location, q->index, q->binding, q->offset, q->max_vertices
+		q->location, q->index, q->binding, q->offset,
+		q->max_vertices, q->invocations
 	};
 
+	bool has_layout = false;
+	for (int i=0; i < LAYOUTS_COUNT; ++i)
+		if (layouts[i])
+			has_layout = true;
 
-	if (q->has_layout()
-			|| q->flags.q.max_vertices
-			|| q->flags.q.prim_type) {
+
+	if (has_layout || q->flags.q.prim_type
+			|| q->flags.q.local_size) {
 		ralloc_asprintf_append(&buffer, "layout(");
 		bool defined = false;
 		for (int i = 0; i < LAYOUTS_COUNT; ++i) {
 			if (layouts[i]) {
 				if (defined)
 					ralloc_asprintf_append(&buffer, ", ");
+				defined = true;
 				ralloc_asprintf_append(&buffer, "%s", layouts_names[i]);
 				if (i > LAYOUTS_FIRST_EXPLICIT)
 					ralloc_asprintf_append(&buffer, " = %i",
@@ -176,6 +140,7 @@ void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualif
 		if (q->flags.q.prim_type) {
 			if (defined)
 				ralloc_asprintf_append(&buffer, ", ");
+			defined = true;
 			int ptype;
 			switch (q->prim_type) {
 			case GL_LINES: ptype = 1; break;
@@ -188,6 +153,22 @@ void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualif
 			}
 			ralloc_asprintf_append(&buffer, "%s", prim_types[ptype]);
 		}
+
+		// Local size
+		if (q->flags.q.local_size) {
+			for (int i = 0; i < 3; ++i) {
+				if (!(q->flags.q.local_size & (1 << i)))
+					continue;
+
+				if (defined)
+					ralloc_asprintf_append(&buffer, ", ");
+				defined = true;
+				ralloc_asprintf_append(&buffer, "%s = %i",
+						local_size_qualifiers[i], q->local_size[i]);
+			}
+
+		}
+
 		ralloc_asprintf_append(&buffer, ") ");
 	}
 

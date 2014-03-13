@@ -38,14 +38,27 @@ void ast_output_traverser_visitor::get_code(char** dst)
 	*dst = strdup(buffer);
 }
 
-void ast_output_traverser_visitor::append_version()
+void ast_output_traverser_visitor::append_header()
 {
-	if(shader && shader->version )
-		ralloc_asprintf_append (&buffer, "#version %i\n", shader->version);
+	if(shader && shader->version)
+		ralloc_asprintf_append(&buffer, "#version %i\n", shader->version);
+
+	ralloc_asprintf_append(&buffer, "\n");
+
+	if (shader->stage == MESA_SHADER_GEOMETRY){
+		if (shader->gs_input_prim_type_specified) {
+			output_qualifier(shader->qualifiers[SQ_GS_IN]);
+			ralloc_asprintf_append(&buffer, "in;\n");
+		}
+		output_qualifier(shader->qualifiers[SQ_GS_OUT]);
+		ralloc_asprintf_append(&buffer, "out;\n\n");
+	}
 
 	/* Add declaration of all neccessary types */
 	if (cgOptions != DBG_CG_ORIGINAL_SRC)
 		cg.addDeclaration(CG_TYPE_ALL, &buffer, mode);
+
+	ralloc_asprintf_append(&buffer, "\n");
 }
 
 

@@ -30,7 +30,7 @@ public:
 
 	void dump();
 	void get_code(char **);
-	void append_version();
+	void append_header();
 	void indent(void);
 
 	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
