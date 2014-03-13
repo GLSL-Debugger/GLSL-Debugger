@@ -473,12 +473,12 @@ void ast_postprocess_traverser_visitor::leave(ast_iteration_statement* node)
 void ast_postprocess_traverser_visitor::leave(ast_jump_statement* node)
 {
 	if (node->mode == ast_jump_statement::ast_discard)
-		node->debug_sideeffects |= ir_dbg_se_discard;
+		node->debug_sideeffects |= ast_dbg_se_discard;
 }
 
 void ast_postprocess_traverser_visitor::leave(ast_function_definition* node)
 {
-	node->debug_sideeffects |= ir_dbg_se_general;
+	node->debug_sideeffects |= ast_dbg_se_general;
 	if (node->body)
 		node->debug_sideeffects |= node->body->debug_sideeffects;
 	shader->symbols->add_function(node);

@@ -51,12 +51,12 @@
 #define DBG_TEXT_BEGIN "\x1B[1;31mgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0)\x1B[0;31m"
 #define DBG_TEXT_END "\x1B[0m"
 
-void printShaderIr(struct gl_shader* shader)
+void printShaderIr(struct gl_shader* )
 {
-	ir_position_output_visitor pov(DBGLVL_COMPILERINFO);
+//	ir_position_output_visitor pov(DBGLVL_COMPILERINFO);
 
-	pov.print_header();
-	pov.run(shader->ir);
+//	pov.print_header();
+//	pov.run(shader->ir);
 	dbgPrint(DBGLVL_COMPILERINFO, "\n───────────────────────────────────────────────\n");
 }
 

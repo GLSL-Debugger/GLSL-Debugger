@@ -3,6 +3,7 @@
  *
  *  Created on: 26.12.2013
  */
+/*
 
 #include "position_output.h"
 #include "glslang/Interface/CodeTools.h"
@@ -327,7 +328,7 @@ void ir_position_output_visitor::visit(ir_constant* ir)
 				break;
 			case GLSL_TYPE_FLOAT:
 				if (ir->value.f[i] == 0.0f)
-					/* 0.0 == -0.0, so print with %f to get the proper sign. */
+					 0.0 == -0.0, so print with %f to get the proper sign.
 					dbgPrint(output_level, "%.1f", ir->value.f[i]);
 				else if (abs(ir->value.f[i]) < 0.000001f)
 					dbgPrint(output_level, "%a", ir->value.f[i]);
@@ -446,20 +447,6 @@ void ir_position_output_visitor::visit(ir_loop_jump* ir)
 	dbgPrint(output_level, "(loop %s)", ir->is_break() ? "break" : "continue");
 }
 
-void ir_position_output_visitor::visit(ir_typedecl_statement* ir)
-{
-	const glsl_type *const s = ir->type_decl;
-	print_range(ir);
-	dbgPrint(output_level, "(");
-	print_type(s, output_level);
-	for (unsigned j = 0; j < s->length; j++) {
-		dbgPrint(output_level, " (");
-		print_type(s->fields.structure[j].type, false);
-		dbgPrint(output_level, "%s)", s->fields.structure[j].name);
-	}
-	dbgPrint(output_level, ")");
-}
-
 void ir_position_output_visitor::visit(ir_emit_vertex* ir)
 {
 	print_range(ir);
@@ -472,11 +459,5 @@ void ir_position_output_visitor::visit(ir_end_primitive* ir)
 	dbgPrint(output_level, "(end-primitive)");
 }
 
-void ir_position_output_visitor::visit(ir_dummy* ir)
-{
-	print_range(ir);
-	dbgPrint(output_level, "(dummy)");
-}
-
-
+*/
 

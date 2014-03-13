@@ -795,7 +795,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				}
 				break;
 			}
-			case ir_dbg_loop_wrk_terminal: {
+			case ast_dbg_loop_wrk_terminal: {
 				if (node->condition) {
 					node->debug_state_internal = ast_dbg_loop_qyr_test;
 					result.position = loop_position(node->mode);

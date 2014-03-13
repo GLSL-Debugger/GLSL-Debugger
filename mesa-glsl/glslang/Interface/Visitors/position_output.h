@@ -6,6 +6,7 @@
 
 #ifndef POSITION_OUTPUT_H_
 #define POSITION_OUTPUT_H_
+/*
 
 #include "glsl/ir_print_visitor.h"
 
@@ -20,7 +21,6 @@ public:
 	}
 
 	void run(exec_list* instructions);
-	void run(ir_dummy* first);
 	void print_header();
 	void print_range(ir_instruction* ir);
 
@@ -41,14 +41,13 @@ public:
 	virtual void visit(ir_if *);
 	virtual void visit(ir_loop *);
 	virtual void visit(ir_loop_jump *);
-	virtual void visit(ir_typedecl_statement *);
 	virtual void visit(ir_emit_vertex *);
 	virtual void visit(ir_end_primitive *);
-	virtual void visit(ir_dummy *);
 
 private:
 	int output_level;
 };
+*/
 
 
 #endif /* POSITION_OUTPUT_H_ */

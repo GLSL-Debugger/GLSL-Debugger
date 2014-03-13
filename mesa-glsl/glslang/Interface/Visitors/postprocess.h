@@ -9,7 +9,6 @@
 
 #include "ast_visitor.h"
 #include "../ShaderHolder.h"
-#include "traverse.h"
 #include <map>
 
 class ir_variable;

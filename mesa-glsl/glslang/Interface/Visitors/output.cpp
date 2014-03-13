@@ -380,9 +380,9 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 				ralloc_asprintf_append(&buffer, ";\n");
 				indent();
 				break;
-			case ir_dbg_if_condition_passed:
-			case ir_dbg_if_then:
-			case ir_dbg_if_else:
+			case ast_dbg_if_condition_passed:
+			case ast_dbg_if_then:
+			case ast_dbg_if_else:
 				/* Add temporary register for condition */
 				/* Fix: trigraph initialized condition register
 				 *      even if trigraph is part of another
@@ -607,5 +607,5 @@ void ast_output_traverser_visitor::visit(class ast_interface_block* node)
 
 void ast_output_traverser_visitor::visit(class ast_gs_input_layout* node)
 {
-
+	(void)node;
 }

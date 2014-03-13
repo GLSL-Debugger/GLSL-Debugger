@@ -231,9 +231,9 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, DbgCgOption
 	if (sels && (options == DBG_CG_COVERAGE || options == DBG_CG_CHANGEABLE
 		|| options == DBG_CG_GEOMETRY_CHANGEABLE)) {
 		switch (sels->debug_state_internal) {
-		case ir_dbg_if_condition_passed:
-		case ir_dbg_if_then:
-		case ir_dbg_if_else:
+		case ast_dbg_if_condition_passed:
+		case ast_dbg_if_then:
+		case ast_dbg_if_else:
 			init(CG_TYPE_CONDITION, NULL, language);
 			break;
 		default:
