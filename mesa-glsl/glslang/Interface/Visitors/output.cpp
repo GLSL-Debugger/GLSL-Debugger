@@ -101,7 +101,11 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 
 	case ast_field_selection:
 		node->subexpressions[0]->accept(this);
-		ralloc_asprintf_append(&buffer, ".%s", node->primary_expression.identifier);
+		ralloc_asprintf_append(&buffer, ".");
+		if (node->debug_selection_type == ast_fst_method)
+			node->subexpressions[1]->accept(this);
+		else
+			ralloc_asprintf_append(&buffer, "%s", node->primary_expression.identifier);
 		break;
 
 	case ast_plus:
