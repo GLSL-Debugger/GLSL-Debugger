@@ -21,7 +21,7 @@ set(SRC
     InfoSink.cpp
 )
 
-find_package(BISON REQUIRED)
+find_package(BISON 2.7 REQUIRED)
 find_package(FLEX REQUIRED)
 
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
