@@ -45,6 +45,7 @@ CodeGen::CodeGen(AstShader* _sh, ShVariableList* _vl, ShChangeableList* _cgbls)
 	vl = _vl;
 	cgbls = _cgbls;
 	result = condition = parameter = NULL;
+	defined_constructions = 0;
 
 	g.nameMap.clear();
 	g.numLoopIters = 0;
@@ -242,15 +243,14 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, DbgCgOption
 	}
 }
 
-static const char* getQualifierCode(ShVariable *v, EShLanguage l)
+static const char* getQualifierCode(ShVariable *v, EShLanguage l, int version)
 {
 	switch (v->qualifier) {
 	case SH_VARYING_OUT:
-		if (l == EShLangGeometry) {
-			return "varying out ";
-		} else {
+		if (version > 120 || l == EShLangGeometry)
+			return "out ";
+		else
 			return "varying ";
-		}
 	case SH_UNIFORM:
 		return "uniform ";
 	default:
@@ -303,17 +303,17 @@ void CodeGen::addDeclaration(cgTypes type, char** prog, EShLanguage l)
 	switch (type) {
 	case CG_TYPE_RESULT:
 		if (result)
-			ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(result, l),
+			ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(result, l, shader->version),
 					getTypeCode(result).c_str(), result->name);
 		break;
 	case CG_TYPE_CONDITION:
 		if (condition)
-			ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(condition, l),
+			ralloc_asprintf_append(prog, "%s%s %s;\n", getQualifierCode(condition, l, shader->version),
 					getTypeCode(condition).c_str(), condition->name);
 		break;
 	case CG_TYPE_PARAMETER:
 		if (parameter) {
-			ralloc_asprintf_append(prog, "%s%s %s", getQualifierCode(parameter, l),
+			ralloc_asprintf_append(prog, "%s%s %s", getQualifierCode(parameter, l, shader->version),
 					getTypeCode(parameter).c_str(), parameter->name);
 			if (parameter->isArray)
 				ralloc_asprintf_append(prog, "[%i]", parameter->arraySize[0]);

@@ -4,7 +4,7 @@
 layout(triangles) in;
 layout(max_vertices = 3, triangle_strip) out;
 
-varying out float dbgResult;
+out float dbgResult;
 int dbgIter0;
 
 void  main()
