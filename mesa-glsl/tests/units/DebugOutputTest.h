@@ -40,13 +40,14 @@ public:
 
 		char* src = NULL;
 		compileDbgShaderCode(shader, NULL, NULL, DBG_CG_COVERAGE, &src);
-		CPPUNIT_ASSERT_MESSAGE("No code generated", src);
+		if (!base->djv->finished())
+			CPPUNIT_ASSERT_MESSAGE("No code generated", src);
 		base->results << "================== Source ==================\n";
-		base->results << std::string(src);
+		base->results << std::string(src ? src : "no code\n");
 		base->results << "============================================\n";
 
 		// Now where actual comparison happens
-		base->doComparison(shader, true, current_iter > 18);
+		base->doComparison(shader, true, current_iter > PRINT_ITER);
 		base->applyRules(shader);
 	}
 };
