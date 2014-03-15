@@ -1,0 +1,24 @@
+================== Source ==================
+#version 330
+
+layout(triangles) in;
+layout(max_vertices = 3, triangle_strip) out;
+
+varying out float dbgResult;
+int dbgIter0;
+
+void  main()
+{
+  dbgResult = float(0.0);
+  int i;
+  vec4 vertex;
+  dbgIter0 = 0;
+  bool dbgCond;
+  for (i = 0; dbgCond = ( i < gl_in.length()), (dbgIter0 == 0 && (dbgResult = float(1.0), true)), dbgCond; i++) {
+    gl_Position = gl_in[i].gl_Position;
+    EmitVertex();
+    dbgIter0++;
+  } 
+  EndPrimitive();
+}
+============================================
