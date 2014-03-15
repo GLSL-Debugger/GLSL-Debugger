@@ -13,6 +13,7 @@ struct AstShader;
 struct gl_context;
 
 void clearTraverseDebugJump(void);
+void resetDbgResult(DbgResult& r, bool initialized);
 DbgResult* ShaderTraverse(AstShader* shader, int debugOptions, int dbgBh);
 bool ShaderVarTraverse(AstShader* shader, ShVariableList *vl);
 void printShaderIr(struct gl_shader* shader);

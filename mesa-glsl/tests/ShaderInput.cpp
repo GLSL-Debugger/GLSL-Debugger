@@ -83,16 +83,15 @@ static bool folderLoaded(ResultsFilesMap& dirs, std::string name)
 
 static bool loadFile(ResultsList& r, const char* fname)
 {
-	char* source = test_load_text_file(NULL, fname);
-	if (!source)
+	std::ifstream file(fname);
+	if (!file.is_open())
 		return false;
 
-	char * pch;
-	pch = strtok(source, "\n");
-	while (pch != NULL) {
-		r.push_back(std::string(pch));
-		pch = strtok(NULL, "\n");
-	}
+	std::string line;
+	while(std::getline(file, line))
+		r.push_back(line);
+
+	file.close();
 	return true;
 }
 

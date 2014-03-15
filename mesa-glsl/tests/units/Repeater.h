@@ -7,6 +7,7 @@
 #define TEST_REPEATOR_H_
 
 #include "Base.h"
+#include "glslang/Interface/Program.h"
 #include "glslang/Interface/Visitors/debugpath.h"
 #include "glslang/Interface/Visitors/debugjump.h"
 #include <cppunit/extensions/RepeatedTest.h>
@@ -25,6 +26,7 @@ public:
 	{
 		test = NULL;
 		behaviour = DBG_BH_JUMPINTO;
+		resetDbgResult(dbg_result, false);
 		djv = new ast_debugjump_traverser_visitor(dbg_result);
 	}
 
@@ -55,6 +57,7 @@ public:
 			shader = sh;
 			base->reset();
 			base->djv->parseStack.clear();
+			resetDbgResult(base->dbg_result, true);
 			ast_debugpath_traverser_visitor dbgpath;
 			dbgpath.run(shader->head, DPOpReset);
 		}

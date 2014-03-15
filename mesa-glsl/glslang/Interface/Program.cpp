@@ -51,75 +51,26 @@ static struct {
 //
 // Some helper functions for easier scope handling
 //
-static void initGlobalScope(void)
+static void freeResult(DbgResult& r)
 {
-    static int initialized = 0;
+	if (r.scope.ids)
+		ralloc_free(r.scope.ids);
+	if (r.scopeStack.ids)
+		ralloc_free(r.scopeStack.ids);
 
-    if (!initialized) {
-        g.result.scope.numIds = 0;
-        g.result.scope.ids = NULL;
-        initialized = 1;
-    }
-}
+	if (!r.cgbls.changeables)
+		return;
 
-static void initGlobalScopeStack(void)
-{
-    static int initialized = 0;
-
-    if (!initialized) {
-        g.result.scopeStack.numIds = 0;
-        g.result.scopeStack.ids = NULL;
-        initialized = 1;
-    }
-}
-
-static void clearGlobalScope(void)
-{
-    g.result.scope.numIds = 0;
-    free(g.result.scope.ids);
-    g.result.scope.ids = NULL;
-}
-
-static void clearGlobalScopeStack(void)
-{
-    g.result.scopeStack.numIds = 0;
-    free(g.result.scopeStack.ids);
-    g.result.scopeStack.ids = NULL;
-}
-
-
-//
-// Functions for keeping track of changes variables
-//
-static void initGlobalChangeables(void)
-{
-    static int initialized = 0;
-
-    if (!initialized) {
-        g.result.cgbls.numChangeables = 0;
-        g.result.cgbls.changeables = NULL;
-        initialized = 1;
-    }
-}
-
-static void clearGlobalChangeables(void)
-{
-    int i, j;
-
-    for (i=0; i<g.result.cgbls.numChangeables; i++) {
+    for (int i=0; i < r.cgbls.numChangeables; i++) {
         ShChangeable *c;
-        if ((c = g.result.cgbls.changeables[i])) {
-            for(j=0; j<c->numIndices; j++) {
+        if ((c = r.cgbls.changeables[i])) {
+            for( int j=0; j<c->numIndices; j++)
                 free(c->indices[j]);
-            }
-            free(c->indices);
-            free(c);
+            ralloc_free(c->indices);
+            ralloc_free(c);
         }
     }
-    free(g.result.cgbls.changeables);
-
-    g.result.cgbls.numChangeables = 0;
-    g.result.cgbls.changeables = NULL;
+    ralloc_free(r.cgbls.changeables);
 }
 
 
@@ -129,28 +80,18 @@ void clearTraverseDebugJump(void)
     g.it = NULL;
 }
 
+void resetDbgResult(DbgResult& r, bool initialized)
+{
+	if (initialized)
+		freeResult(r);
+	memset(&r, '\0', sizeof(DbgResult));
+}
+
 static void resetGlobals()
 {
-	/* Setup scope if neccessary */
-	initGlobalScope();
-	initGlobalScopeStack();
-	initGlobalChangeables();
-
-	g.result.range.left.line = 0;
-	g.result.range.left.colum = 0;
-	g.result.range.right.line = 0;
-	g.result.range.right.colum = 0;
-
-	clearGlobalScope();
-	clearGlobalScopeStack();
-	clearGlobalChangeables();
-
-	/* Check validity of debug request */
-	g.result.status = DBG_RS_STATUS_UNSET;
-	g.result.position = DBG_RS_POSITION_UNSET;
-	g.result.loopIteration = 0;
-	g.result.passedEmitVertex = false;
-	g.result.passedDiscard = false;
+	static bool initialized = false;
+	resetDbgResult(g.result, initialized);
+	initialized = true;
 
 	if (!g.it)
 		g.it = new ast_debugjump_traverser_visitor(g.result);
