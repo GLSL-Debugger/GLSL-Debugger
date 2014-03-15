@@ -7,7 +7,7 @@
 #ifndef DEBUGJUMPTEST_H_
 #define DEBUGJUMPTEST_H_
 
-#include "Repeator.h"
+#include "Repeater.h"
 #include "glslang/Interface/CodeTools.h"
 
 
@@ -17,23 +17,23 @@ const char* DBG_NAMES[ast_dbg_state_end] = {
 
 class DebugJumpTest;
 
-class DebugJump: public TestRepeator<DebugJumpTest, DebugJump>::RepeatedTestCase {
+class DebugJump: public TestRepeater<DebugJumpTest, DebugJump>::RepeatedTestCase {
 public:
-	DebugJump(TestRepeator<DebugJumpTest, DebugJump>* b) :
-		TestRepeator<DebugJumpTest, DebugJump>::RepeatedTestCase::RepeatedTestCase(b, "DebugJump")
+	DebugJump(TestRepeater<DebugJumpTest, DebugJump>* b) :
+		TestRepeater<DebugJumpTest, DebugJump>::RepeatedTestCase::RepeatedTestCase(b, "DebugJump")
 	{
 	}
 
 	void prepare(AstShader* sh)
 	{
-		TestRepeator<DebugJumpTest, DebugJump>::RepeatedTestCase::prepare(sh);
+		TestRepeater<DebugJumpTest, DebugJump>::RepeatedTestCase::prepare(sh);
 		base->results << "================== Reset path ==================\n";
 		base->doComparison(shader, false);
 	}
 
 	void runTest()
 	{
-		TestRepeator<DebugJumpTest, DebugJump>::RepeatedTestCase::runTest();
+		TestRepeater<DebugJumpTest, DebugJump>::RepeatedTestCase::runTest();
 
 		exec_list* list = shader->head;
 		ast_debugpath_traverser_visitor dbgpath;
@@ -56,7 +56,7 @@ public:
 };
 
 
-class DebugJumpTest: public TestRepeator<DebugJumpTest, DebugJump> {
+class DebugJumpTest: public TestRepeater<DebugJumpTest, DebugJump> {
 public:
 	DebugJumpTest()
 	{

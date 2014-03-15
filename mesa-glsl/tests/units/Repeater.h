@@ -17,18 +17,18 @@
 static CPPUNIT_NS::TestResult* tests_eventManager = NULL;
 
 template<typename T, typename O>
-class TestRepeator: public SuitedUnitTest<T> {
+class TestRepeater: public SuitedUnitTest<T> {
 public:
 	friend O;
 
-	TestRepeator()
+	TestRepeater()
 	{
 		test = NULL;
 		behaviour = DBG_BH_JUMPINTO;
 		djv = new ast_debugjump_traverser_visitor(dbg_result);
 	}
 
-	virtual ~TestRepeator()
+	virtual ~TestRepeater()
 	{
 		delete djv;
 
@@ -41,7 +41,7 @@ public:
 
 	class RepeatedTestCase: public CPPUNIT_NS::TestCase {
 	public:
-		RepeatedTestCase(TestRepeator<T, O>* b, std::string name) :
+		RepeatedTestCase(TestRepeater<T, O>* b, std::string name) :
 				CPPUNIT_NS::TestCase(name), base(b), current_iter(0), shader(NULL)
 		{
 		}
@@ -72,7 +72,7 @@ public:
 		}
 
 	protected:
-		TestRepeator<T, O>* base;
+		TestRepeater<T, O>* base;
 		int current_iter;
 		AstShader* shader;
 	};
@@ -98,10 +98,7 @@ public:
 	}
 
 protected:
-	const int repeats_count[3] = {
-		1,
-		25,
-		1 };
+	const int repeats_count[3] = { 1, 25, 1 };
 	DbgResult dbg_result;
 	RepeatedTestCase* test;
 	int behaviour;

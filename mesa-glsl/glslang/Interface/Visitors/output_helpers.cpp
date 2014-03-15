@@ -310,6 +310,18 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 		change_type = 1;
 	else if (strcmp(name, EMIT_VERTEX_SIGNATURE))
 		return true;
+	/* Do not generate construction again
+	 * TODO: probably, there some sacred meaning of the original code
+	 *       like skip call, generate output and then define call again
+	 *       but for now, I have some issue with this, because it have no
+	 *       proper processing for loops, selections, etc, and just
+	 *       broke the logic of emiting in the loop and emit it after the loop
+	 *       done.
+	 *       If it really required to work that way (i.e. skip output, add
+	 *       definitions and then output again) than more specific behavior
+	 *       definition is required. I'm not quite sure we actually need this.
+	 */
+	cg.define(change_type ? CodeGen::GS_END_PRIMITIVE : CodeGen::GS_EMIT_VERTEX);
 
 	switch (this->cgOptions) {
 	case DBG_CG_GEOMETRY_MAP:
@@ -343,10 +355,8 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 				break;
 			}
 
-			if (allInScope)
-				cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, CG_GEOM_CHANGEABLE_IN_SCOPE);
-			else
-				cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, CG_GEOM_CHANGEABLE_NO_SCOPE);
+			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions,
+					allInScope ? CG_GEOM_CHANGEABLE_IN_SCOPE : CG_GEOM_CHANGEABLE_NO_SCOPE);
 
 			ralloc_asprintf_append(&buffer, "\n");
 			indent();
@@ -365,10 +375,11 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 	case DBG_CG_CHANGEABLE:
 	case DBG_CG_SELECTION_CONDITIONAL:
 	case DBG_CG_LOOP_CONDITIONAL:
-		break;
+		// TODO: Do not know, why we need to skip original function call.
+		// break;
 	default:
 		node->subexpressions[0]->accept(this);
-		output_sequence(&node->expressions, "(", ", ", ");\n");
+		output_sequence(&node->expressions, "(", ", ", ")");
 		break;
 	}
 

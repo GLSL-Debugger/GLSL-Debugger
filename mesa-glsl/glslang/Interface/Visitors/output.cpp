@@ -121,7 +121,7 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 	case ast_post_inc:
 	case ast_post_dec:
 		node->subexpressions[0]->accept(this);
-		ralloc_asprintf_append(&buffer, "%s ", node->operator_string(node->oper));
+		ralloc_asprintf_append(&buffer, "%s", node->operator_string(node->oper));
 		break;
 
 	case ast_conditional:
@@ -217,8 +217,11 @@ void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 {
 	ast_function_definition* main = shader->symbols->get_function(MAIN_FUNC_SIGNATURE);
 	bool main_child = (main->body == node);
+	bool skip_brakets = no_brakets;
+	no_brakets = false;
 
-	ralloc_asprintf_append(&buffer, "{\n");
+	if (!skip_brakets)
+		ralloc_asprintf_append(&buffer, "{\n");
 
 	/* If in debug mode add initialization to main function */
 	if (cgOptions != DBG_CG_ORIGINAL_SRC && main_child) {
@@ -245,7 +248,7 @@ void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 		depth--;
 	}
 
-	output_sequence(&node->statements, "", "\n", "", true);
+	output_sequence(&node->statements, "", "\n", "\n", true);
 
 	/* And also add debug output at the end */
 	if (cgOptions != DBG_CG_ORIGINAL_SRC && main_child) {
@@ -255,16 +258,19 @@ void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 					|| cgOptions == DBG_CG_SELECTION_CONDITIONAL
 					|| cgOptions == DBG_CG_LOOP_CONDITIONAL
 					|| cgOptions == DBG_CG_VERTEX_COUNT) {
-				indent();
-				cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
+				if (!cg.defined(CodeGen::GS_EMIT_VERTEX | CodeGen::GS_END_PRIMITIVE)) {
+					indent();
+					cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
+				}
 			}
 		} else if (mode == EShLangFragment) {
 			indent();
 			cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
-					//oit->parseContext->fragmentShaderOutput);
 		}
 	}
-	ralloc_asprintf_append(&buffer, "}\n");
+
+	if (!skip_brakets)
+		ralloc_asprintf_append(&buffer, "}\n");
 
 }
 
@@ -318,7 +324,6 @@ void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 	}
 
 	node->type->accept(this);
-	ralloc_asprintf_append(&buffer, " ");
 	depth++;
 	output_sequence(&node->declarations, "", ", ", ";");
 	depth--;
@@ -483,13 +488,11 @@ void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
 	// Add one more depth level to insert debug iteration
 	if (cgOptions != DBG_CG_ORIGINAL_SRC){
 		ralloc_asprintf_append(&buffer, "{\n");
-		depth++;
-		indent();
+		no_brakets = true;
 	}
 	node->body->accept(this);
 	loop_debug_end(node);
 	if (cgOptions != DBG_CG_ORIGINAL_SRC) {
-		depth--;
 		indent();
 		ralloc_asprintf_append(&buffer, "} ");
 	}

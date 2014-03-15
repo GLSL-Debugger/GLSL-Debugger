@@ -33,6 +33,26 @@ public:
 	CodeGen(AstShader*, ShVariableList*, ShChangeableList*);
 	~CodeGen();
 
+	enum Constructions {
+		GS_EMIT_VERTEX = 1,
+		GS_END_PRIMITIVE = 2,
+	};
+
+	inline void define(int construction)
+	{
+		defined_constructions |= construction;
+	}
+
+	inline void undef(int construction)
+	{
+		defined_constructions &= ~construction;
+	}
+
+	inline short defined(int construction)
+	{
+		return defined_constructions & construction;
+	}
+
 	void init(cgTypes type, ShVariable *v, EShLanguage l);
 	void allocateResult(ast_node*, EShLanguage, DbgCgOptions);
 	/* code generation */
@@ -51,6 +71,7 @@ public:
 	const char* getDebugName(const char *input);
 
 private:
+	int defined_constructions;
 	AstShader* shader;
 	ShVariableList *vl;
 	ShChangeableList *cgbls;

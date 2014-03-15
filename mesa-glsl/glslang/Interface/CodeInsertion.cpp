@@ -411,7 +411,13 @@ void CodeGen::addOutput(cgTypes type, char** prog, EShLanguage l)
 		break;
 	case EShLangGeometry:
 		if (type == CG_TYPE_RESULT)
-			ralloc_asprintf_append(prog, "EmitVertex(); EndPrimitive();\n");
+			if (!defined(GS_EMIT_VERTEX | GS_END_PRIMITIVE)) {
+				if (!defined(GS_EMIT_VERTEX))
+					ralloc_asprintf_append(prog, "EmitVertex();");
+				if (!defined(GS_END_PRIMITIVE))
+					ralloc_asprintf_append(prog, "EndPrimitive();");
+				ralloc_asprintf_append(prog, "\n");
+			}
 		break;
 	case EShLangFragment:
 		if (type == CG_TYPE_RESULT)

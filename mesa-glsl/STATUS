@@ -6,6 +6,7 @@ Not checked:
 
 Not implemented:
 	switch
+	conditional expression (bool ? a : b)
 
 TODO:
 	more tests on complex shaders

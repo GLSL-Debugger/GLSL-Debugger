@@ -6,7 +6,7 @@
 #ifndef DEBUGOUTPUTTEST_H_
 #define DEBUGOUTPUTTEST_H_
 
-#include "Repeator.h"
+#include "Repeater.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glslang/Interface/Program.h"
 
@@ -18,16 +18,16 @@ const char* DBG_OW_MODE[ast_dbg_ow_end] = {
 
 class DebugOutputTest;
 
-class DebugOutput: public TestRepeator<DebugOutputTest, DebugOutput>::RepeatedTestCase {
+class DebugOutput: public TestRepeater<DebugOutputTest, DebugOutput>::RepeatedTestCase {
 public:
-	DebugOutput(TestRepeator<DebugOutputTest, DebugOutput>* b) :
-		TestRepeator<DebugOutputTest, DebugOutput>::RepeatedTestCase::RepeatedTestCase(b, "DebugOutput")
+	DebugOutput(TestRepeater<DebugOutputTest, DebugOutput>* b) :
+		TestRepeater<DebugOutputTest, DebugOutput>::RepeatedTestCase::RepeatedTestCase(b, "DebugOutput")
 	{
 	}
 
 	void runTest()
 	{
-		TestRepeator<DebugOutputTest, DebugOutput>::RepeatedTestCase::runTest();
+		TestRepeater<DebugOutputTest, DebugOutput>::RepeatedTestCase::runTest();
 
 		exec_list* list = shader->head;
 		ast_debugpath_traverser_visitor dbgpath;
@@ -51,7 +51,7 @@ public:
 	}
 };
 
-class DebugOutputTest: public TestRepeator<DebugOutputTest, DebugOutput> {
+class DebugOutputTest: public TestRepeater<DebugOutputTest, DebugOutput> {
 public:
 	DebugOutputTest()
 	{
