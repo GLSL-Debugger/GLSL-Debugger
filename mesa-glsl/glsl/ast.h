@@ -197,6 +197,7 @@ public:
    virtual class ast_struct_specifier* as_struct_specifier() { return NULL; }
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
+   virtual class ast_expression_statement* as_expression_statement() { return NULL; }
    virtual class ast_selection_statement* as_selection_statement() { return NULL; }
    virtual class ast_switch_statement* as_switch_statement() { return NULL; }
    virtual class ast_iteration_statement* as_iteration_statement() { return NULL; }
@@ -799,7 +800,7 @@ public:
    }
 
    /** Construct a type specifier from a type name */
-   ast_type_specifier(const char *name) 
+   ast_type_specifier(const char *name)
       : type_name(name), structure(NULL), array_specifier(NULL),
 	default_precision(ast_precision_none)
    {
@@ -980,6 +981,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_expression_statement* as_expression_statement() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1141,7 +1143,7 @@ public:
       ast_while,
       ast_do_while
    } mode;
-   
+
 
    ast_node *init_statement;
    ast_node *condition;

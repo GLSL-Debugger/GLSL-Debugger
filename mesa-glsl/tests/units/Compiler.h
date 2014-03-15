@@ -17,10 +17,6 @@ public:
 	CompileShaderTest()
 	{
 		unit_name = "compile";
-	}
-
-	void setUp()
-	{
 		comparator.loadResults(test_files, unit_name);
 	}
 

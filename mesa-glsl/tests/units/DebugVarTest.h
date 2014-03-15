@@ -20,6 +20,7 @@ public:
 	{
 		unit_name = "dbgvar";
 		comparator.loadResults(test_files, unit_name);
+		vl = NULL;
 	}
 
 	void setUp()
