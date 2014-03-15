@@ -308,7 +308,6 @@ void ast_output_traverser_visitor::visit(class ast_fully_specified_type* node)
 
 void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 {
-	indent();
 	foreach_list_typed(ast_declaration, decl, link, &node->declarations) {
 		if (decl->initializer && decl->initializer->debug_target()) {
 			dbgTargetProcessed = true;
@@ -321,7 +320,7 @@ void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 	node->type->accept(this);
 	ralloc_asprintf_append(&buffer, " ");
 	depth++;
-	output_sequence(&node->declarations, "", ", ", ";\n");
+	output_sequence(&node->declarations, "", ", ", ";");
 	depth--;
 }
 
@@ -338,7 +337,7 @@ void ast_output_traverser_visitor::visit(class ast_expression_statement* node)
 {
 	if (node->expression)
 		node->expression->accept(this);
-	ralloc_asprintf_append(&buffer, "; ");
+	ralloc_asprintf_append(&buffer, ";");
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_label* node)
@@ -466,7 +465,9 @@ void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
 		ralloc_asprintf_append(&buffer, "for (");
 		if (node->init_statement)
 			node->init_statement->accept(this);
-		ralloc_asprintf_append(&buffer, "; ");
+		if (!node->init_statement || !node->init_statement->as_expression_statement())
+			ralloc_asprintf_append(&buffer, ";");
+		ralloc_asprintf_append(&buffer, " ");
 		loop_debug_condition(node);
 		ralloc_asprintf_append(&buffer, "; ");
 		loop_debug_terminal(node);
@@ -480,12 +481,18 @@ void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
 	}
 
 	// Add one more depth level to insert debug iteration
-	if (cgOptions != DBG_CG_ORIGINAL_SRC)
+	if (cgOptions != DBG_CG_ORIGINAL_SRC){
 		ralloc_asprintf_append(&buffer, "{\n");
+		depth++;
+		indent();
+	}
 	node->body->accept(this);
 	loop_debug_end(node);
-	if (cgOptions != DBG_CG_ORIGINAL_SRC)
+	if (cgOptions != DBG_CG_ORIGINAL_SRC) {
+		depth--;
+		indent();
 		ralloc_asprintf_append(&buffer, "} ");
+	}
 
 	if (node->mode == ast_iteration_statement::ast_do_while) {
 		ralloc_asprintf_append(&buffer, "while (");
@@ -603,7 +610,6 @@ void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 	}
 
 	ralloc_asprintf_append(&buffer, "\n");
-	indent();
 	node->body->accept(this);
 }
 

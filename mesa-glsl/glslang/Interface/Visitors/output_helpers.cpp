@@ -212,23 +212,19 @@ void ast_output_traverser_visitor::output_sequence(exec_list* list, const char* 
 		const char* j, const char* e, bool do_indent)
 {
 	ralloc_asprintf_append(&buffer, s);
-	if (do_indent){
+	if (do_indent)
 		depth++;
-		indent();
-	}
 	bool first = true;
 	foreach_list_typed(ast_node, node, link, list) {
-		if (do_indent)
-			indent();
 		if (!first)
 			ralloc_asprintf_append(&buffer, j);
+		if (do_indent)
+			indent();
 		node->accept(this);
 		first = false;
 	}
-	if (do_indent) {
+	if (do_indent)
 		depth--;
-		indent();
-	}
 	ralloc_asprintf_append(&buffer, e);
 }
 
@@ -404,8 +400,10 @@ void ast_output_traverser_visitor::selection_body(ast_selection_statement* node,
 void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *node)
 {
 	/* Add loop counter */
-	if (node->need_dbgiter())
+	if (node->need_dbgiter()){
 		ralloc_asprintf_append(&buffer, "%s = 0;\n", node->debug_iter_name);
+		indent();
+	}
 
 	/* Add debug temoprary register to copy condition */
 	if (node->debug_target() && node->debug_state_internal == ast_dbg_loop_select_flow) {
@@ -414,9 +412,9 @@ void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *n
 		case DBG_CG_LOOP_CONDITIONAL:
 		case DBG_CG_CHANGEABLE:
 		case DBG_CG_GEOMETRY_CHANGEABLE:
-			indent();
 			cg.init(CG_TYPE_CONDITION, NULL, mode);
 			cg.addDeclaration(CG_TYPE_CONDITION, &buffer, mode);
+			indent();
 			break;
 		default:
 			break;
@@ -433,6 +431,7 @@ void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *n
 				case DBG_CG_GEOMETRY_CHANGEABLE:
 					cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
 					ralloc_asprintf_append(&buffer, ";\n");
+					indent();
 					break;
 				default:
 					break;
@@ -442,6 +441,7 @@ void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *n
 			if (node->debug_state_internal == ast_dbg_loop_wrk_init) {
 				depth++;
 				ralloc_asprintf_append(&buffer, "{\n");
+				indent();
 			}
 		}
 	}
@@ -463,13 +463,10 @@ void ast_output_traverser_visitor::loop_debug_condition(ast_iteration_statement*
 	/* Add original condition without any modifications */
 	DbgCgOptions opts = cgOptions;
 	cgOptions = DBG_CG_ORIGINAL_SRC;
-	if (node->condition) {
-		// Condition here is not-inverted. Invert it again.
-		ralloc_asprintf_append(&buffer, "!");
+	if (node->condition)
 		node->condition->accept(this);
-	} else {
+	else
 		ralloc_asprintf_append(&buffer, "true");
-	}
 	cgOptions = opts;
 
 	if (cgOptions != DBG_CG_ORIGINAL_SRC && node->debug_target()
@@ -518,5 +515,4 @@ void ast_output_traverser_visitor::loop_debug_end(ast_iteration_statement* node)
 		ralloc_asprintf_append(&buffer, "}\n");
 	}
 	depth--;
-	indent();
 }
