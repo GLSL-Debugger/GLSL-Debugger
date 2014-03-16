@@ -50,7 +50,7 @@ public:
 		}
 
 		// Now where actual comparison happens
-		base->doComparison(shader, true, current_iter == PRINT_ITER);
+		base->doComparison(shader, true);
 		base->applyRules(shader);
 	}
 };
@@ -101,6 +101,19 @@ public:
 		   << "Discard: " << dbg_result.passedDiscard << "\n";
 
 		results << dr.str();
+
+		int iter = comparator.getFileNum();
+		iter++;
+		if (iter > 9){
+			std::stringstream ss;
+			ss << iter;
+			std::ofstream ofile("./mesa-glsl/tests/shaders/test.frag.dbgjump/" + ss.str());
+			if (!ofile.is_open())
+				return;
+			ofile << results.str();
+			ofile.close();
+		}
+
 	}
 };
 

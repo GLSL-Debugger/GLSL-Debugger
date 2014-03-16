@@ -101,7 +101,7 @@ public:
 	}
 
 protected:
-	const int repeats_count[3] = { 1, 25, 1 };
+	const int repeats_count[3] = { 1, 25, 30 };
 	DbgResult dbg_result;
 	RepeatedTestCase* test;
 	int behaviour;

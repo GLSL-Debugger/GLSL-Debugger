@@ -53,6 +53,7 @@ public:
 	void processDebugable(ast_node*);
 
 	virtual void setTarget(class ast_expression*);
+	virtual void setTarget(class ast_declaration*);
 	virtual void setTarget(class ast_jump_statement*);
 
 	virtual void visit(exec_list* list) { ast_traverse_visitor::visit(list); }
@@ -60,6 +61,7 @@ public:
 	virtual void visit(class ast_iteration_statement*);
 
 	virtual bool enter(class ast_expression *);
+	virtual bool enter(class ast_declaration *);
 	virtual void leave(class ast_expression *);
 	virtual void leave(class ast_function_expression *);
 	virtual void leave(class ast_case_statement *);

@@ -33,11 +33,12 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 	ShChangeableType type;
 	long index = -1;
 
+	// FIXME: I cannot understand what is SH_CGB_ARRAY_DIRECT
+
 	if (node->oper == ast_array_index) {
 		ast_expression* exp_index = node->subexpressions[1];
 		switch (exp_index->oper) {
 		case ast_identifier:
-			type = SH_CGB_ARRAY_DIRECT;
 			break;
 		case ast_int_constant:
 		case ast_uint_constant:
@@ -47,7 +48,7 @@ static ShChangeableIndex* getChangeableIndex(ast_expression* node, void* mem_ctx
 					exp_index->primary_expression.uint_constant;
 			break;
 		default:
-			assert(!"not implemented");
+			assert(!"Wrong index for array");
 			break;
 
 		}

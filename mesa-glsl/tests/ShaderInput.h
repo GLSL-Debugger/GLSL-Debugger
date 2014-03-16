@@ -61,6 +61,11 @@ public:
 		file_num = 0;
 	}
 
+	int getFileNum()
+	{
+		return file_num;
+	}
+
 	void setCurrent(std::string name, std::string unit)
 	{
 		line = -1;

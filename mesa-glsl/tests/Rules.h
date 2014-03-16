@@ -40,7 +40,7 @@ public:
 
 	bool jumpAction()
 	{
-		return type & (tr_jump | tr_load);
+		return type & tr_jump;
 	}
 
 	bool bhvAction()
@@ -73,7 +73,8 @@ public:
 	virtual bool accept(int, ast_node* node, enum ast_node_type node_type)
 	{
 		if (type & tr_save) {
-			saveState(node, node_type, states->at(node));
+
+			saveState(node, node_type, (*states)[node]);
 		} else if (type & tr_load) {
 			auto it = states->find(node);
 			if (it != states->end())
@@ -86,6 +87,12 @@ public:
 	{
 		state.state = node->debug_state;
 		state.overwrite = node->debug_overwrite;
+		state.state_internal = 0;
+		state.iter = 0;
+		if (state.iter_name)
+			free(state.iter_name);
+		state.iter_name = NULL;
+
 		switch (t) {
 		case AST_SELECTION_STATEMENT: {
 			ast_selection_statement* ss = (ast_selection_statement*) node;
@@ -101,9 +108,8 @@ public:
 			ast_iteration_statement* sl = (ast_iteration_statement*) node;
 			state.state_internal = sl->debug_state_internal;
 			state.iter = sl->debug_iter;
-			if (state.iter_name)
-				free(state.iter_name);
-			state.iter_name = strdup(sl->debug_iter_name);
+			if (sl->debug_iter_name)
+				state.iter_name = strdup(sl->debug_iter_name);
 			break;
 		}
 		default:
@@ -113,7 +119,7 @@ public:
 
 	void loadState(ast_node* node, enum ast_node_type t, DebugState& state)
 	{
-		state.state = node->debug_state;
+		node->debug_state = state.state;
 		node->debug_overwrite = state.overwrite;
 		switch (t) {
 		case AST_SELECTION_STATEMENT: {
@@ -135,7 +141,9 @@ public:
 			sl->debug_iter = state.iter;
 			if (sl->debug_iter_name)
 				free(sl->debug_iter_name);
-			sl->debug_iter_name = strdup(state.iter_name);
+			sl->debug_iter_name = NULL;
+			if (state.iter_name)
+				sl->debug_iter_name = strdup(state.iter_name);
 			break;
 		}
 		default:

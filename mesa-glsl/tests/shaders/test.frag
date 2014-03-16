@@ -1,6 +1,8 @@
 #version 140
 // variable definition
 varying vec3 f_color;
+// sampler definition
+uniform sampler2D texture1;
 // array definition & initializer
 int deref_array[1] = {1};
 

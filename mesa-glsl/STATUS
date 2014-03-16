@@ -5,6 +5,7 @@ Not checked:
 	
 
 Not implemented:
+	images
 	switch
 	conditional expression (bool ? a : b)
 

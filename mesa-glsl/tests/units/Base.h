@@ -134,10 +134,10 @@ public:
 		if (holder->shaders[0])
 			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testVertex", &T::testVertex));
 
-		if (holder->shaders[1])
+		if (holder->shaders[1] && false)
 			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testGeom", &T::testGeom));
 
-		if (holder->shaders[2] && false)
+		if (holder->shaders[2])
 			suiteOfTests->addTest(new CppUnit::TestCaller<T>("testFrag", &T::testFrag));
 
 		return suiteOfTests;

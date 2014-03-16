@@ -2,111 +2,113 @@ AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_TYPE_SPECIFIER
 AST_DECLARATION
+AST_TYPE_SPECIFIER
+AST_DECLARATION
 AST_ARRAY_SPECIFIER
 AST_EXPRESSION (int_constant)
-AST_AGGREGATE_INITIALIZER (aggregate)        <11,gl_FragColor> <4,f_color>
+AST_AGGREGATE_INITIALIZER (aggregate)        <12,gl_FragColor> <4,f_color> <5,texture1>
 AST_TYPE_SPECIFIER
 AST_STRUCT_SPECIFIER
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_FUNCTION_DEFINITION                  <11,gl_FragColor> <4,f_color> <5,deref_array>
+AST_FUNCTION_DEFINITION                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array>
 AST_FUNCTION
 AST_PARAMETER_DECLARATOR
-AST_JUMP_STATEMENT                       <11,gl_FragColor> <4,f_color> <5,deref_array> <6,param>
-AST_EXPRESSION_BIN (*)                   <11,gl_FragColor> <4,f_color> <5,deref_array> <6,param>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <6,param>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <6,param>
-AST_FUNCTION_DEFINITION                  <11,gl_FragColor> <4,f_color> <5,deref_array>
+AST_JUMP_STATEMENT                       <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <7,param>
+AST_EXPRESSION_BIN (*)                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <7,param>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <7,param>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <7,param>
+AST_FUNCTION_DEFINITION                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array>
 AST_FUNCTION
 AST_PARAMETER_DECLARATOR
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_EXPRESSION (=)                       <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record>
-AST_EXPRESSION (.)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record>
-AST_EXPRESSION (int_constant)                <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record>
+AST_EXPRESSION (=)                       <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
+AST_EXPRESSION (.)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
+AST_EXPRESSION (int_constant)                <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record>
-AST_SELECTION_STATEMENT                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION_BIN (<)                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (.)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (float_constant)              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_JUMP_STATEMENT                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (-=)                          <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (.)                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (identifier)                          <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (float_constant)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
+AST_SELECTION_STATEMENT                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION_BIN (<)                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (.)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (float_constant)              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_JUMP_STATEMENT                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (-=)                          <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (.)                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (identifier)                          <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (float_constant)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_FUNCTION_EXPRESSION (function_call)      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
+AST_FUNCTION_EXPRESSION (function_call)      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
 AST_TYPE_SPECIFIER
-AST_EXPRESSION_BIN (*)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (.)                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (int_constant)                        <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv>
-AST_EXPRESSION (=)                       <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (.)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_FUNCTION_EXPRESSION (function_call)      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_FUNCTION_EXPRESSION (function_call)  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (=)                       <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (array_index)                 <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (int_constant)                    <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (.)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_ITERATION_STATEMENT                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION_BIN (*)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (.)                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (int_constant)                        <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv>
+AST_EXPRESSION (=)                       <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (.)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_FUNCTION_EXPRESSION (function_call)      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_FUNCTION_EXPRESSION (function_call)  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (=)                       <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (array_index)                 <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (int_constant)                    <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (.)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_ITERATION_STATEMENT                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_TYPE_SPECIFIER
 AST_DECLARATION
-AST_EXPRESSION (int_constant)                <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION_BIN (<)                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (+=)                          <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (.)                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (identifier)                          <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (float_constant)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (++)                      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count> <10,i>
-AST_SWITCH_STATEMENT                     <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION_BIN (%)                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (int_constant)                <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_SWITCH_BODY                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_CASE_STATEMENT                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION (int_constant)                <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION_BIN (<)                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (+=)                          <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (.)                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (identifier)                          <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (float_constant)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (++)                      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <11,i>
+AST_SWITCH_STATEMENT                     <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION_BIN (%)                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (int_constant)                <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_SWITCH_BODY                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_CASE_STATEMENT                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_CASE_LABEL
-AST_EXPRESSION (int_constant)                    <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION (int_constant)                    <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_CASE_LABEL
-AST_EXPRESSION (int_constant)                    <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_JUMP_STATEMENT                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_CASE_STATEMENT                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION (int_constant)                    <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_JUMP_STATEMENT                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_CASE_STATEMENT                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_CASE_LABEL
-AST_EXPRESSION (int_constant)                    <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (+=)                                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (int_constant)                            <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_CASE_STATEMENT                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION (int_constant)                    <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (+=)                                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (int_constant)                            <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_CASE_STATEMENT                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_CASE_LABEL
-AST_JUMP_STATEMENT                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (=)                       <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_FUNCTION_EXPRESSION (function_call)      <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_JUMP_STATEMENT                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (=)                       <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_FUNCTION_EXPRESSION (function_call)      <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
 AST_TYPE_SPECIFIER
-AST_EXPRESSION (.)                               <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                          <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION_BIN (*)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (.)                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (array_index)                         <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (int_constant)                            <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION_BIN (*)                           <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (.)                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (.)                                   <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (identifier)                              <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
-AST_EXPRESSION (float_constant)                  <11,gl_FragColor> <4,f_color> <5,deref_array> <7,deref_record> <8,f_color_adv> <9,count>
+AST_EXPRESSION (.)                               <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                          <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION_BIN (*)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (.)                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (array_index)                         <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (int_constant)                            <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION_BIN (*)                           <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (.)                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (.)                                   <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (identifier)                              <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>
+AST_EXPRESSION (float_constant)                  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count>

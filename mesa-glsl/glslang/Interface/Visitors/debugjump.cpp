@@ -88,6 +88,8 @@ void ast_debugjump_traverser_visitor::processDebugable(ast_node *node)
 			VPRINT(3, "\t -------- set target ---------\n");
 			if (node->as_expression())
 				setTarget(node->as_expression());
+			else if (node->as_declaration())
+				setTarget(node->as_declaration());
 			else if (node->as_jump_statement())
 				setTarget(node->as_jump_statement());
 		}
@@ -126,6 +128,16 @@ void ast_debugjump_traverser_visitor::setTarget(class ast_expression* node)
 	default:
 		break;
 	}
+}
+
+void ast_debugjump_traverser_visitor::setTarget(class ast_declaration* node)
+{
+	if (!node->initializer)
+		return;
+
+	result.position = DBG_RS_POSITION_DECLARATION;
+	setDbgResultRange(result.range, node->get_location());
+	setGobalScope(&node->scope);
 }
 
 void ast_debugjump_traverser_visitor::setTarget(class ast_jump_statement* node)
@@ -281,6 +293,47 @@ bool ast_debugjump_traverser_visitor::enter(class ast_expression* node)
 	}
 
 	return true;
+}
+
+bool ast_debugjump_traverser_visitor::enter(class ast_declaration* node)
+{
+	if (!node->initializer)
+		return true;
+
+	processDebugable(node);
+	if (operation == OTOpTargetSet) {
+		if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
+			// do not visit children
+			// add all changeables of this node to the list
+			VPRINT(2, "----> copy changeables\n");
+			addShChangeables(node);
+		} else {
+			// visit children
+			++depth;
+			node->initializer->accept(this);
+			--depth;
+
+			// if no target was found so far
+			// all changeables need to be added to the list
+			if (operation == OTOpTargetSet)
+				addShChangeables(node);
+		}
+	} else if (operation == OTOpTargetUnset) {
+		// visit children
+		++depth;
+		node->initializer->accept(this);
+		--depth;
+
+		// the old target was found inside left/right branch and
+		// a new one is still being searched for
+		// -> add only changed variables of this assigment, i.e.
+		//    changeables of the left branch
+		if (operation == OTOpTargetSet)
+			addShChangeables(node->initializer);
+	} else if (operation != OTOpDone) {
+		return true;
+	}
+	return false;
 }
 
 void ast_debugjump_traverser_visitor::leave(class ast_expression* node)
@@ -549,7 +602,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 			VPRINT( 3, "\t -------- set target again ---------\n");
 			SET_OPERATION(OTOpDone, ast_dbg_state_target, ast_dbg_if_condition_passed,
 					node->else_statement ? DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE : DBG_RS_POSITION_SELECTION_IF_CHOOSE)
-			setDbgResultRange(result.range, node->get_location());
+			setDbgResultRange(result.range, node->condition->get_location());
 			setGobalScope(&node->scope);
 			return false;
 		case ast_dbg_if_then:
@@ -741,33 +794,41 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 			VPRINT(3, "\t -------- set target ---------\n");
 			node->debug_state = ast_dbg_state_target;
 			this->operation = OTOpDone;
+			YYLTYPE loc;
 
 			switch (node->debug_state_internal) {
 			case ast_dbg_loop_unset: {
 				if (node->init_statement) {
 					node->debug_state_internal = ast_dbg_loop_qyr_init;
 					result.position = loop_position(node->mode);
+					loc = node->init_statement->get_location();
 				} else if (node->condition) {
 					node->debug_state_internal = ast_dbg_loop_qyr_test;
 					result.position = loop_position(node->mode);
+					loc = node->condition->get_location();
 				} else {
 					node->debug_state_internal = ast_dbg_loop_select_flow;
 					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
 					result.loopIteration = node->debug_iter;
+					loc = node->get_location();
 				}
 				break;
 			}
 			case ast_dbg_loop_wrk_init: {
-				if (node->condition)
+				if (node->condition) {
 					node->debug_state_internal = ast_dbg_loop_qyr_test;
-				else
+					loc = node->condition->get_location();
+				} else {
 					node->debug_state_internal = ast_dbg_loop_select_flow;
+					loc = node->get_location();
+				}
 				result.position = DBG_RS_POSITION_LOOP_FOR;
 				break;
 			}
 			case ast_dbg_loop_wrk_test: {
 				node->debug_state_internal = ast_dbg_loop_select_flow;
 				result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+				loc = node->condition->get_location();
 				if (node->mode == ast_iteration_statement::ast_do_while)
 					result.loopIteration = node->debug_iter - 1;
 				else
@@ -778,14 +839,17 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				if (node->rest_expression) {
 					node->debug_state_internal = ast_dbg_loop_qyr_terminal;
 					result.position = loop_position(node->mode);
+					loc = node->rest_expression->get_location();
 				} else if (node->condition) {
 					node->debug_state_internal = ast_dbg_loop_qyr_test;
 					result.position = loop_position(node->mode);
+					loc = node->condition->get_location();
 					/* Increase the loop counter */
 					node->debug_iter++;
 				} else {
 					node->debug_state_internal = ast_dbg_loop_select_flow;
 					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+					loc = node->get_location();
 					if (node->mode == ast_iteration_statement::ast_do_while)
 						result.loopIteration = node->debug_iter - 1;
 					else
@@ -799,9 +863,11 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				if (node->condition) {
 					node->debug_state_internal = ast_dbg_loop_qyr_test;
 					result.position = loop_position(node->mode);
+					loc = node->condition->get_location();
 				} else {
 					node->debug_state_internal = ast_dbg_loop_select_flow;
 					result.position = DBG_RS_POSITION_LOOP_CHOOSE;
+					loc = node->get_location();
 					result.loopIteration = node->debug_iter;
 				}
 				/* Increase the loop counter */
@@ -811,7 +877,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 			default:
 				break;
 			}
-			setDbgResultRange(result.range, node->get_location());
+			setDbgResultRange(result.range, loc);
 			setGobalScope(&node->scope);
 			return false;
 		}
