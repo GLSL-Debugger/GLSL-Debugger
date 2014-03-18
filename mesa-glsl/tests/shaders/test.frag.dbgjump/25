@@ -184,13 +184,13 @@ AST_EXPRESSION (int_constant)
 AST_EXPRESSION_BIN (<)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (identifier)
-AST_EXPRESSION (+=)                         TargetDbg
+AST_EXPRESSION (+=)
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (float_constant)
 AST_EXPRESSION (++)
 AST_EXPRESSION (identifier)
-AST_SWITCH_STATEMENT
+AST_SWITCH_STATEMENT                    TargetDbg
 AST_EXPRESSION_BIN (%)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
@@ -292,20 +292,20 @@ AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
-AST_ITERATION_STATEMENT                 PathDbg
+AST_ITERATION_STATEMENT
 AST_TYPE_SPECIFIER
 AST_DECLARATION
 AST_EXPRESSION (int_constant)
 AST_EXPRESSION_BIN (<)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (identifier)
-AST_EXPRESSION (+=)                         TargetDbg
+AST_EXPRESSION (+=)
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (float_constant)
 AST_EXPRESSION (++)
 AST_EXPRESSION (identifier)
-AST_SWITCH_STATEMENT
+AST_SWITCH_STATEMENT                    TargetDbg
 AST_EXPRESSION_BIN (%)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (int_constant)
@@ -343,10 +343,10 @@ AST_EXPRESSION (identifier)
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (float_constant)
-Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_ASSIGMENT
-Range: (5:43 - 25:43)
+Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_SWITCH
+Range: (3:48 - 4:60)
 Scope:
  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record> <9,f_color_adv> <10,count> <7,param> <11,i>
 Changeables:
  8{.-1} 9{,1} 6{[(0)]}
-LoopIter: 1 EmitVertex: 0 Discard: 0
+LoopIter: 0 EmitVertex: 0 Discard: 0

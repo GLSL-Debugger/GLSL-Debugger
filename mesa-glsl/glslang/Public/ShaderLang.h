@@ -176,16 +176,23 @@ typedef enum {
 } DbgCgOptions;
 
 
+// Must be pow2 - 1
+#define SWITCH_BRANCHES_COUNT 127
+
 //
 // Type for specifiing the navigation debugger
+// TODO: This approach is not good, do something about it
+//       Probably additional options for some special statements
 //
 typedef enum {
-    DBG_BH_RESET = 1,               // reset debugging to the original program
-    DBG_BH_JUMPINTO = 2,            // trace function calls
-    DBG_BH_FOLLOW_ELSE = 4,         // evaluate else brance of a conditional
-    DBG_BH_SELECTION_JUMP_OVER = 8, // do not debug either branch
-    DBG_BH_LOOP_CONTINUE = 16,      // jump out of a loop
-    DBG_BH_LOOP_NEXT_ITER = 32      // jump to next iteration without debuggig anything inbetween
+	DBG_BH_NO_ACTION = 0,                               // no default action
+	DBG_BH_SWITCH_BRANCH_FIRST = 1,                     // first switch branch
+	DBG_BH_SWITCH_BRANCH_LAST = SWITCH_BRANCHES_COUNT,  // last switch branch
+    DBG_BH_RESET = SWITCH_BRANCHES_COUNT + 1,           // reset debugging to the original program
+    DBG_BH_JUMPINTO = DBG_BH_RESET << 1,                // trace function calls
+    DBG_BH_FOLLOW_ELSE = DBG_BH_RESET << 2,             // evaluate else branch of a conditional
+    DBG_BH_JUMP_OVER = DBG_BH_RESET << 3,               // jump over any statement
+    DBG_BH_LOOP_NEXT_ITER = DBG_BH_RESET << 4           // jump to next iteration without debugging anything inbetween
 } DbgBehaviour;
 
 //
@@ -208,6 +215,8 @@ typedef enum {
     DBG_RS_POSITION_SELECTION_IF_ELSE,
     DBG_RS_POSITION_SELECTION_IF_CHOOSE,
     DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE,
+    DBG_RS_POSITION_SWITCH,
+    DBG_RS_POSITION_SWITCH_CHOOSE,
     DBG_RS_POSITION_BRANCH,
     DBG_RS_POSITION_LOOP_FOR,
     DBG_RS_POSITION_LOOP_WHILE,

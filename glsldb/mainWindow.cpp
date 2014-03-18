@@ -1882,8 +1882,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 	case DBG_BH_RESET:
 	case DBG_BH_JUMPINTO:
 	case DBG_BH_FOLLOW_ELSE:
-	case DBG_BH_SELECTION_JUMP_OVER:
-	case DBG_BH_LOOP_CONTINUE:
+	case DBG_BH_JUMP_OVER:
 		updateGUI = true;
 		break;
 	case DBG_BH_LOOP_NEXT_ITER:
@@ -2087,7 +2086,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 			}
 			switch (sDialog->exec()) {
 			case SelectionDialog::SB_SKIP:
-				ShaderStep (DBG_BH_SELECTION_JUMP_OVER);
+				ShaderStep (DBG_BH_JUMP_OVER);
 				break;
 			case SelectionDialog::SB_IF:
 				ShaderStep (DBG_BH_JUMPINTO);
@@ -2136,7 +2135,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 						QMessageBox::warning(this, "Warning",
 								"An error occurred while trying to "
 										"get loop count data.");
-						ShaderStep (DBG_BH_SELECTION_JUMP_OVER);
+						ShaderStep (DBG_BH_JUMP_OVER);
 						delete loopCondition;
 						return;
 					}
@@ -2176,7 +2175,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 						QMessageBox::warning(this, "Warning",
 								"An error occurred while trying to "
 										"get the loop data.");
-						ShaderStep (DBG_BH_SELECTION_JUMP_OVER);
+						ShaderStep (DBG_BH_JUMP_OVER);
 						return;
 					}
 				}
@@ -2223,7 +2222,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 						ShaderStep (DBG_BH_JUMPINTO);
 						break;
 					case LoopDialog::SA_BREAK:
-						ShaderStep (DBG_BH_SELECTION_JUMP_OVER);
+						ShaderStep (DBG_BH_JUMP_OVER);
 						break;
 					case LoopDialog::SA_JUMP:
 						/* Force update of all changed items */
@@ -2234,7 +2233,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 					disconnect(lDialog, 0, 0, 0);
 					delete lDialog;
 				} else {
-					ShaderStep (DBG_BH_SELECTION_JUMP_OVER);
+					ShaderStep (DBG_BH_JUMP_OVER);
 				}
 			}
 		}

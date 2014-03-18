@@ -4,3 +4,11 @@
 5 -> load
 7 -> bhvr else
 8 -> bhvr into
+# TODO: if over
+# save state then load it to step over the function call
+12 -> save
+14 -> load bhvr over
+16 -> bhvr into
+# jump out of loop
+24 -> bhvr over
+25 -> bhvr into

@@ -55,8 +55,8 @@ enum ast_dbg_state_internal_switch {
 	ast_dbg_switch_init,              // already visited once
 	ast_dbg_switch_condition,         // condition in process
 	ast_dbg_switch_condition_passed,  // condition processed
-	ast_dbg_switch_select_flow,       // select branch to debug
-	ast_dbg_switch_passed                 // debugging is past selection
+	ast_dbg_switch_branch,            // descided to debug some branch
+	ast_dbg_switch_passed             // debugging is past selection
 };
 
 

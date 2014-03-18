@@ -182,11 +182,11 @@ void TestRule::load(int id, std::string str)
 			behaviour = DBG_BH_JUMPINTO;
 		else if (!strcmp(rule.c_str(), "else"))
 			behaviour = DBG_BH_FOLLOW_ELSE;
-		else if (!strcmp(rule.c_str(), "ifout"))
-			behaviour = DBG_BH_SELECTION_JUMP_OVER;
-		else if (!strcmp(rule.c_str(), "loopout"))
-			behaviour = DBG_BH_LOOP_CONTINUE;
+		else if (!strcmp(rule.c_str(), "over"))
+			behaviour = DBG_BH_JUMP_OVER;
 		else if (!strcmp(rule.c_str(), "next"))
 			behaviour = DBG_BH_LOOP_NEXT_ITER;
+		else if (!strcmp(rule.c_str(), "none"))
+			behaviour = DBG_BH_NO_ACTION;
 	}
 }
