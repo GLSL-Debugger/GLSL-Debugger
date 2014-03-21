@@ -34,7 +34,6 @@ public:
 	virtual bool enter(ast_compound_statement *);
 	virtual bool enter(ast_expression_statement *);
 	virtual bool enter(ast_function_definition *);
-	virtual bool enter(ast_selection_statement *) { return true; }
 	virtual bool enter(ast_iteration_statement *);
 
 	virtual void leave(ast_expression *);

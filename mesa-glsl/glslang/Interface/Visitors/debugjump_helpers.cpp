@@ -249,6 +249,12 @@ bool ast_debugjump_traverser_visitor::enter(class ast_switch_statement* node)
 			// it's changeables!
 			addShChangeables(node->body);
 			node->debug_state_internal = ast_dbg_switch_unset;
+			// Unset debug branch
+			ast_switch_body* body = NULL;
+			if (node->body)
+				body = node->body->as_switch_body();
+			if (body && body->stmts)
+				body->stmts->debug_branch = 0;
 			return false;
 		}
 		default:
@@ -263,22 +269,28 @@ bool ast_debugjump_traverser_visitor::enter(class ast_case_statement_list* node)
 	VPRINT(2, "process SwitchBody L:%s DbgSt:%i\n", FormatSourceRange(node->get_location()).c_str(),
 			node->debug_state);
 
-	if (operation == OTOpTargetSet) {
-		// Process only debugged branch
-		int branch = this->dbgBehaviour & DBG_BH_SWITCH_BRANCH_LAST;
-		if (branch){
-			int current_branch = 0;
-			foreach_list_typed(ast_node, ast, link, &node->cases){
-				if (++current_branch == branch)
-					ast->accept(this);
-				if (current_branch > DBG_BH_SWITCH_BRANCH_LAST)
-					dbgPrint(DBGLVL_WARNING, "Only %i switch branches supported, but %i found\n",
-							DBG_BH_SWITCH_BRANCH_LAST, current_branch);
+	if (operation != OTOpTargetSet && operation != OTOpTargetUnset)
+		return true;
+
+	// Process only debugged branch
+	int branch = this->dbgBehaviour & DBG_BH_SWITCH_BRANCH_LAST;
+	if (branch)
+		node->debug_branch = branch;
+
+	if (node->debug_branch) {
+		int current_branch = 0;
+		bool no_break = false;
+		foreach_list_typed(ast_node, ast, link, &node->cases) {
+			if (++current_branch == node->debug_branch || no_break) {
+				ast->accept(this);
+				no_break = !(ast->debug_sideeffects & (ast_dbg_se_break | ast_dbg_se_return));
 			}
+			if (current_branch > DBG_BH_SWITCH_BRANCH_LAST)
+				dbgPrint(DBGLVL_WARNING, "Only %i switch branches supported, but %i found\n",
+						DBG_BH_SWITCH_BRANCH_LAST, current_branch);
 		}
-		return false;
 	}
-	return true;
+	return false;
 }
 
 bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)

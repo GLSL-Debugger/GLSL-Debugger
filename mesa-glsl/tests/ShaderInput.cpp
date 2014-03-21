@@ -188,5 +188,17 @@ void TestRule::load(int id, std::string str)
 			behaviour = DBG_BH_LOOP_NEXT_ITER;
 		else if (!strcmp(rule.c_str(), "none"))
 			behaviour = DBG_BH_NO_ACTION;
+
+		if (!strcmp(rule.c_str(), "switch")) {
+			pos += 7;
+			sp = str.find(' ', pos);
+			if (sp == std::string::npos)
+				sp = str.length();
+			if (pos < sp) {
+				int branch = std::stoi(str.substr(pos, sp - pos));
+				behaviour &= ~DBG_BH_SWITCH_BRANCH_LAST;
+				behaviour += branch;
+			}
+		}
 	}
 }

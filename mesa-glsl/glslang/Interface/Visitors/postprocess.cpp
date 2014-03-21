@@ -104,8 +104,10 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 
 void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
 {
+	/* No enter node
 	if (!this->enter(node))
 		return;
+	 */
 
 	if (node->condition)
 		node->condition->accept(this);
@@ -431,9 +433,9 @@ void ast_postprocess_traverser_visitor::leave(ast_case_statement* node)
 
 void ast_postprocess_traverser_visitor::leave(ast_switch_body* node)
 {
-	if (node->stmts)
+	if (node->stmts) // Break affects only case
 		foreach_list_typed (ast_node, ast, link, &node->stmts->cases)
-			node->debug_sideeffects |= ast->debug_sideeffects;
+			node->debug_sideeffects |= ast->debug_sideeffects & ~ast_dbg_se_break;
 }
 
 void ast_postprocess_traverser_visitor::leave(ast_selection_statement* node)
@@ -460,10 +462,13 @@ void ast_postprocess_traverser_visitor::leave(ast_iteration_statement* node)
 		node->debug_sideeffects |= node->init_statement->debug_sideeffects;
 	if (node->condition)
 		node->debug_sideeffects |= node->condition->debug_sideeffects;
-	if (node->body)
-		node->debug_sideeffects |= node->body->debug_sideeffects;
+	if (node->body) // Break affects only loop
+		node->debug_sideeffects |= node->body->debug_sideeffects & ~ast_dbg_se_break;
 	if (node->rest_expression)
 		node->debug_sideeffects |= node->rest_expression->debug_sideeffects;
+
+
+	node->debug_sideeffects &= ~ast_dbg_se_break;
 
 	// We pushed scope in enter()
 	if (node->mode != ast_iteration_statement::ast_do_while)
@@ -474,13 +479,17 @@ void ast_postprocess_traverser_visitor::leave(ast_jump_statement* node)
 {
 	if (node->mode == ast_jump_statement::ast_discard)
 		node->debug_sideeffects |= ast_dbg_se_discard;
+	else if (node->mode == ast_jump_statement::ast_return)
+		node->debug_sideeffects |= ast_dbg_se_return;
+	else if (node->mode == ast_jump_statement::ast_break)
+		node->debug_sideeffects |= ast_dbg_se_break;
 }
 
 void ast_postprocess_traverser_visitor::leave(ast_function_definition* node)
 {
 	node->debug_sideeffects |= ast_dbg_se_general;
-	if (node->body)
-		node->debug_sideeffects |= node->body->debug_sideeffects;
+	if (node->body) // Return takes place only inside function
+		node->debug_sideeffects |= node->body->debug_sideeffects & ~ast_dbg_se_return;
 	shader->symbols->add_function(node);
 	state->symbols->pop_scope();
 }

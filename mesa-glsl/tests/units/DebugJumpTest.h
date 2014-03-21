@@ -101,19 +101,6 @@ public:
 		   << "Discard: " << dbg_result.passedDiscard << "\n";
 
 		results << dr.str();
-
-		int iter = comparator.getFileNum();
-		iter++;
-		if (iter > 24){
-			std::stringstream ss;
-			ss << iter;
-			std::ofstream ofile("./mesa-glsl/tests/shaders/test.frag.dbgjump/" + ss.str());
-			if (!ofile.is_open())
-				return;
-			ofile << results.str();
-			ofile.close();
-		}
-
 	}
 };
 

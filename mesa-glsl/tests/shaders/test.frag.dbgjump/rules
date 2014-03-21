@@ -11,4 +11,10 @@
 16 -> bhvr into
 # jump out of loop
 24 -> bhvr over
-25 -> bhvr into
+25 -> save bhvr into
+26 -> bhvr switch 1
+27 -> load bhvr into
+28 -> bhvr switch 2
+30 -> load bhvr into
+31 -> bhvr switch 3
+32 -> bhvr into

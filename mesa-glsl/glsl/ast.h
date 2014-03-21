@@ -84,7 +84,9 @@ enum ast_dbg_sideefects {
 	ast_dbg_se_unset = 0,
 	ast_dbg_se_general = 1,
 	ast_dbg_se_discard = 2,
-	ast_dbg_se_emit_vertex = 4
+	ast_dbg_se_break = 4,
+	ast_dbg_se_return = 8,
+	ast_dbg_se_emit_vertex = 16
 };
 
 enum ast_field_selection_type {
@@ -198,6 +200,7 @@ public:
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
    virtual class ast_expression_statement* as_expression_statement() { return NULL; }
+   virtual class ast_switch_body* as_switch_body() { return NULL; }
    virtual class ast_selection_statement* as_selection_statement() { return NULL; }
    virtual class ast_switch_statement* as_switch_statement() { return NULL; }
    virtual class ast_iteration_statement* as_iteration_statement() { return NULL; }
@@ -1062,6 +1065,10 @@ public:
    virtual ir_rvalue *hir(exec_list *instructions,
 			  struct _mesa_glsl_parse_state *state);
 
+#ifdef AST_DEBUG_STATE
+   int debug_branch;
+#endif
+
    /**
     * A list of cases.
     */
@@ -1076,6 +1083,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_switch_body* as_switch_body() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,

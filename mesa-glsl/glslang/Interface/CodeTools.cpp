@@ -85,8 +85,8 @@ bool partof(ast_node* target, ast_node* node)
     ast_selection_statement* sels = node->as_selection_statement();
     ast_compound_statement* cmpd = node->as_compound_statement();
     ast_switch_statement* swtc =  node->as_switch_statement();
+    ast_switch_body* swbd = node->as_switch_body();
     ast_expression* expr = node->as_expression();
-    // TODO: switch things
 
     if (loop) {
     	if (partof(target, loop->init_statement)
@@ -107,6 +107,11 @@ bool partof(ast_node* target, ast_node* node)
     	if (partof(target, swtc->test_expression) ||
     			partof(target, swtc->body))
     		return true;
+    } else if (swbd) {
+    	if (swbd->stmts)
+    		foreach_list_typed(ast_node, ast, link, &swbd->stmts->cases)
+    			if (partof(target, ast))
+    				return true;
     } else if (expr) {
     	for (int i = 0; i < 3; ++i)
     		if (partof(target, expr->subexpressions[i]))
