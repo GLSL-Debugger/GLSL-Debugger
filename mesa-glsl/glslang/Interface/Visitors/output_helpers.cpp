@@ -403,7 +403,11 @@ void ast_output_traverser_visitor::selection_body(ast_selection_statement* node,
       depth--;
    }
 
+   depth++;
+   indent();
    instructions->accept(this);
+   ralloc_asprintf_append(&buffer, "\n");
+   depth--;
    indent();
 }
 

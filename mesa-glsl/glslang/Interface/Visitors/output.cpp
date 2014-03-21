@@ -68,6 +68,11 @@ void ast_output_traverser_visitor::indent(void)
       ralloc_asprintf_append (&buffer, "  ");
 }
 
+void ast_output_traverser_visitor::visit(exec_list* list)
+{
+	output_sequence(list, "", "\n", "");
+}
+
 void ast_output_traverser_visitor::visit(class ast_node*)
 {
 	ralloc_asprintf_append(&buffer, "unhandled node ");
@@ -210,7 +215,7 @@ void ast_output_traverser_visitor::visit(class ast_array_specifier* node)
 
 void ast_output_traverser_visitor::visit(class ast_aggregate_initializer* node)
 {
-	output_sequence(&node->expressions, "{", ", ", "}\n");
+	output_sequence(&node->expressions, "{\n", ", ", "\n}", true);
 }
 
 void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
@@ -252,6 +257,7 @@ void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 
 	/* And also add debug output at the end */
 	if (cgOptions != DBG_CG_ORIGINAL_SRC && main_child) {
+		depth++;
 		if (mode == EShLangGeometry) {
 			if (cgOptions == DBG_CG_CHANGEABLE
 					|| cgOptions == DBG_CG_COVERAGE
@@ -267,6 +273,7 @@ void ast_output_traverser_visitor::visit(class ast_compound_statement *node)
 			indent();
 			cg.addOutput(CG_TYPE_RESULT, &buffer, mode);
 		}
+		depth--;
 	}
 
 	if (!skip_brakets)
@@ -284,14 +291,13 @@ void ast_output_traverser_visitor::visit(class ast_declaration* node)
 	if (node->initializer) {
 		ralloc_asprintf_append(&buffer, " = ");
 		node->initializer->accept(this);
-		indent();
 	}
 }
 
 void ast_output_traverser_visitor::visit(class ast_struct_specifier* node)
 {
 	ralloc_asprintf_append(&buffer, "struct %s ", node->name);
-	output_sequence(&node->declarations, "{\n", "\n", "} ", true);
+	output_sequence(&node->declarations, "{\n", "\n", "\n}", true);
 }
 
 void ast_output_traverser_visitor::visit(class ast_type_specifier* node)
@@ -299,7 +305,7 @@ void ast_output_traverser_visitor::visit(class ast_type_specifier* node)
 	if (node->structure)
 		node->structure->accept(this);
 	else
-		ralloc_asprintf_append(&buffer, "%s ", node->type_name);
+		ralloc_asprintf_append(&buffer, "%s", node->type_name);
 
 	if (node->array_specifier)
 		node->array_specifier->accept(this);
@@ -324,14 +330,20 @@ void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 	}
 
 	node->type->accept(this);
-	depth++;
-	output_sequence(&node->declarations, "", ", ", ";");
-	depth--;
+	if (!node->declarations.is_empty()) {
+		depth++;
+		output_sequence(&node->declarations, " ", ", ", "");
+		depth--;
+	}
+	ralloc_asprintf_append(&buffer, ";");
 }
 
 void ast_output_traverser_visitor::visit(class ast_parameter_declarator* node)
 {
 	node->type->accept(this);
+	if (node->is_void)
+		return;
+
 	ralloc_asprintf_append(&buffer, " ");
 	print_variable(&buffer, node, node->identifier, vl);
 	if (node->array_specifier)
@@ -347,25 +359,28 @@ void ast_output_traverser_visitor::visit(class ast_expression_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_case_label* node)
 {
-	indent();
 	if (node->test_value) {
 		ralloc_asprintf_append(&buffer, "case ");
 		node->test_value->accept(this);
-		ralloc_asprintf_append(&buffer, ": ");
+		ralloc_asprintf_append(&buffer, ":");
 	} else {
-		ralloc_asprintf_append(&buffer, "default: ");
+		ralloc_asprintf_append(&buffer, "default:");
 	}
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_label_list* node)
 {
+	depth--;
 	output_sequence(&node->labels, "", "\n", "", true);
+	depth++;
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_statement* node)
 {
 	node->labels->accept(this);
-	output_sequence(&node->stmts, " {", "\n", "}", true);
+	output_sequence(&node->stmts, " {\n", "\n", "\n", true);
+	indent();
+	ralloc_asprintf_append(&buffer, "}\n");
 }
 
 void ast_output_traverser_visitor::visit(class ast_case_statement_list* node)
@@ -375,10 +390,10 @@ void ast_output_traverser_visitor::visit(class ast_case_statement_list* node)
 
 void ast_output_traverser_visitor::visit(class ast_switch_body* node)
 {
-	ralloc_asprintf_append(&buffer, "{\n");
-	indent();
+	ralloc_asprintf_append(&buffer, " {\n");
 	if (node->stmts)
 		node->stmts->accept(this);
+	indent();
 	ralloc_asprintf_append(&buffer, "}\n");
 }
 
@@ -443,7 +458,7 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 	selection_body(node, node->then_statement, true);
 	ralloc_asprintf_append(&buffer, "}");
 
-	if (!node->else_statement) {
+	if (node->else_statement) {
 		ralloc_asprintf_append(&buffer, " else {\n");
 		selection_body(node, node->else_statement, false);
 		ralloc_asprintf_append(&buffer, "}");
@@ -452,8 +467,7 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 {
-	indent();
-	ralloc_asprintf_append(&buffer, "switch ( ");
+	ralloc_asprintf_append(&buffer, "switch (");
 	node->test_expression->accept(this);
 	ralloc_asprintf_append(&buffer, ")");
 	node->body->accept(this);
@@ -470,7 +484,9 @@ void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
 		ralloc_asprintf_append(&buffer, "for (");
 		if (node->init_statement)
 			node->init_statement->accept(this);
-		if (!node->init_statement || !node->init_statement->as_expression_statement())
+		if (!node->init_statement
+				|| (!node->init_statement->as_expression_statement()
+						&& !node->init_statement->as_declarator_list()))
 			ralloc_asprintf_append(&buffer, ";");
 		ralloc_asprintf_append(&buffer, " ");
 		loop_debug_condition(node);
@@ -516,14 +532,16 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 
 	switch (node->mode) {
 	case ast_jump_statement::ast_jump_modes::ast_discard:
-		if (!dbgTargetProcessed || cgOptions == DBG_CG_ORIGINAL_SRC)
-			ralloc_asprintf_append (&buffer, "discard");
+		// Disable discard (not sure, why)
+		if (dbgTargetProcessed || cgOptions != DBG_CG_ORIGINAL_SRC)
+			ralloc_asprintf_append (&buffer, "// ");
+		ralloc_asprintf_append (&buffer, "discard;");
 		break;
 	case ast_jump_statement::ast_jump_modes::ast_break:
-		ralloc_asprintf_append (&buffer, "break");
+		ralloc_asprintf_append (&buffer, "break;");
 		break;
 	case ast_jump_statement::ast_jump_modes::ast_continue:
-		ralloc_asprintf_append (&buffer, "continue");
+		ralloc_asprintf_append (&buffer, "continue;");
 		break;
 	case ast_jump_statement::ast_jump_modes::ast_return:
 		char *tmpRegister = NULL;
@@ -571,12 +589,14 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 		ralloc_asprintf_append (&buffer, "return");
 
 		if (node->opt_return_value) {
+			ralloc_asprintf_append (&buffer, " ");
 			if (node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC)
-				ralloc_asprintf_append (&buffer, " %s", tmpRegister);
+				ralloc_asprintf_append (&buffer, "%s", tmpRegister);
 			else
 				node->opt_return_value->accept(this);
 		}
 
+		ralloc_asprintf_append (&buffer, ";");
 		break;
 	}
 }
@@ -629,9 +649,4 @@ void ast_output_traverser_visitor::visit(class ast_interface_block* node)
 		node->array_specifier->accept(this);
 
 	ralloc_asprintf_append(&buffer, ";\n");
-}
-
-void ast_output_traverser_visitor::visit(class ast_gs_input_layout* node)
-{
-	(void)node;
 }

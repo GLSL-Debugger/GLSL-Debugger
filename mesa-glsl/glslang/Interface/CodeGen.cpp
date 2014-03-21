@@ -206,9 +206,8 @@ static void clearPath(AstShader* shader)
 bool compileDbgShaderCode(AstShader* shader, ShChangeableList *cgbl, ShVariableList *vl,
 		DbgCgOptions dbgCgOptions, char** code)
 {
-	if (dbgCgOptions == DBG_CG_ORIGINAL_SRC) {
+	if (dbgCgOptions == DBG_CG_ORIGINAL_SRC)
 		return compileShaderCode(shader);
-	}
 
 	exec_list* list = shader->head;
 

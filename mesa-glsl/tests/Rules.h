@@ -89,8 +89,6 @@ public:
 		state.overwrite = node->debug_overwrite;
 		state.state_internal = 0;
 		state.iter = 0;
-		if (state.iter_name)
-			free(state.iter_name);
 		state.iter_name = NULL;
 
 		switch (t) {
@@ -108,8 +106,7 @@ public:
 			ast_iteration_statement* sl = (ast_iteration_statement*) node;
 			state.state_internal = sl->debug_state_internal;
 			state.iter = sl->debug_iter;
-			if (sl->debug_iter_name)
-				state.iter_name = strdup(sl->debug_iter_name);
+			state.iter_name = sl->debug_iter_name;
 			break;
 		}
 		default:
@@ -139,11 +136,7 @@ public:
 			sl->debug_state_internal =
 					static_cast<enum ast_dbg_state_internal_loop>(state.state_internal);
 			sl->debug_iter = state.iter;
-			if (sl->debug_iter_name)
-				free(sl->debug_iter_name);
-			sl->debug_iter_name = NULL;
-			if (state.iter_name)
-				sl->debug_iter_name = strdup(state.iter_name);
+			sl->debug_iter_name = state.iter_name;
 			break;
 		}
 		default:

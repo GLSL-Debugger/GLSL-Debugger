@@ -1,12 +1,11 @@
 
 Not checked:
-	samplers
 	default uniform layouts
-	
+
 
 Not implemented:
-	images
-	switch
+	extensions and preprocessor directives
+	images (probably)
 	conditional expression (bool ? a : b)
 
 TODO:

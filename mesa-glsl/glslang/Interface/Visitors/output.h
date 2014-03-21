@@ -34,7 +34,7 @@ public:
 	void append_header();
 	void indent(void);
 
-	virtual void visit(exec_list *l) { ast_traverse_visitor::visit(l); }
+	virtual void visit(exec_list *);
 	virtual void visit(class ast_node *);
 	virtual void visit(class ast_expression *);
 	virtual void visit(class ast_expression_bin *);
@@ -60,8 +60,6 @@ public:
 	virtual void visit(class ast_jump_statement *);
 	virtual void visit(class ast_function_definition *);
 	virtual void visit(class ast_interface_block *);
-	virtual void visit(class ast_gs_input_layout *);
-
 
 	virtual bool enter(class ast_function_expression *);
 
