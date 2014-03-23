@@ -73,7 +73,6 @@ public:
 	virtual bool accept(int, ast_node* node, enum ast_node_type node_type)
 	{
 		if (type & tr_save) {
-
 			saveState(node, node_type, (*states)[node]);
 		} else if (type & tr_load) {
 			auto it = states->find(node);

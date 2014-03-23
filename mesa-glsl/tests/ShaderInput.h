@@ -121,7 +121,7 @@ public:
 			return;
 
 		if (rule->stateAction())
-			rule->apply(&states[line], sh);
+			rule->apply(&states, sh);
 
 		if (rule->jumpAction()) {
 			int to = rule->getJump();
@@ -191,7 +191,7 @@ private:
 	static ResultsFilesMap results_dirs;
 	static ResultsListMap results;
 	static RulesMap rules;
-	std::map<int, StatesMap> states;
+	StatesMap states;
 	ResultsList* current;
 	ResultsFilesIterator file;
 	ResultsFilesIterator file_end;

@@ -85,7 +85,6 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 	if (node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC) {
 		dbgTargetProcessed = true;
 		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
-		// FIXME: WAT?
 		ralloc_asprintf_append(&buffer, ", ");
 	}
 
@@ -323,7 +322,7 @@ void ast_output_traverser_visitor::visit(class ast_fully_specified_type* node)
 void ast_output_traverser_visitor::visit(class ast_declarator_list* node)
 {
 	foreach_list_typed(ast_declaration, decl, link, &node->declarations) {
-		if (decl->initializer && decl->initializer->debug_target()) {
+		if (decl->debug_target() || (decl->initializer && decl->initializer->debug_target())) {
 			dbgTargetProcessed = true;
 			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
 			ralloc_asprintf_append(&buffer, ";\n");
@@ -535,7 +534,7 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 	switch (node->mode) {
 	case ast_jump_statement::ast_jump_modes::ast_discard:
 		// Disable discard (not sure, why)
-		if (dbgTargetProcessed || cgOptions != DBG_CG_ORIGINAL_SRC)
+		if (dbgTargetProcessed && cgOptions != DBG_CG_ORIGINAL_SRC)
 			ralloc_asprintf_append (&buffer, "// ");
 		ralloc_asprintf_append (&buffer, "discard;");
 		break;

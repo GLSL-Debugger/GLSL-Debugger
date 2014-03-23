@@ -75,7 +75,7 @@ public:
 	{
 		int iter = comparator.getFileNum();
 		iter++;
-		if (iter > 0) {
+		if (iter > 11) {
 			std::stringstream ss;
 			ss << iter;
 			std::ofstream ofile("./mesa-glsl/tests/shaders/test.frag.dbgout/" + ss.str());
