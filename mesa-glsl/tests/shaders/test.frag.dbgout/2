@@ -22,6 +22,7 @@ void main(void)
   dbgResult = float(0.0);
   test_struct deref_record;
   deref_record.val = 2;
+  dbgResult = float(1.0);
   vec3 f_color_adv = f_color;
   if (f_color_adv.x < 0.300000) {
     // discard;
