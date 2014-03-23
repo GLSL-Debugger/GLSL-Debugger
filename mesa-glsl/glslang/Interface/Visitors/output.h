@@ -65,6 +65,7 @@ public:
 
 
 protected:
+	void output_extensions(const struct sh_extension *);
 	void output_qualifier(const struct ast_type_qualifier *);
 	void output_sequence(exec_list *, const char *, const char *,
 									  const char *, bool i = false);

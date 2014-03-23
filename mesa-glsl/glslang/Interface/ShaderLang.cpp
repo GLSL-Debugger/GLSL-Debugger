@@ -91,12 +91,8 @@ int addShVariableList(ShVariableList *vl, AstShader* shader)
 	return count;
 }
 
-void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
-		int debug)
+void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader, int)
 {
-//	int dump_ast = debug & EDebugOpAssembly;
-//	int dump_hir = debug & EDebugOpIntermediate;
-//	int dump_lir = debug & EDebugOpObjectCode;
 	struct _mesa_glsl_parse_state *state = new (shader) _mesa_glsl_parse_state(
 			ctx, shader->stage, shader);
 	const char *source = shader->source;
@@ -110,41 +106,46 @@ void compile_shader_to_ast(struct gl_context *ctx, struct AstShader *shader,
 
 	if (!state->error) {
 		exec_list instructions;
-		// We need global variables later
+		/* We need global variables later */
 		_mesa_glsl_initialize_variables(&instructions, state);
 		state->symbols->push_scope();
 		shader->head = &state->translation_unit;
 	}
-
-	// TODO: locations print
-	//printShaderIr(shader);
-	//   foreach_list_typed (ast_node, ast, link, & state->translation_unit)
-	//         ast->hir(instructions, state);
 
 	shader->compile_status = !state->error;
 	shader->info_log = state->info_log;
 	shader->version = state->language_version;
 	shader->is_es = state->es_shader;
 
-	// Copy shader qualifiers from state
-	size_t qual_size = sizeof(ast_type_qualifier);
-	shader->qualifiers[SQ_DEFAULT_UNIFORM] = new(shader) ast_type_qualifier;
-	memcpy(shader->qualifiers[SQ_DEFAULT_UNIFORM], state->default_uniform_qualifier, qual_size);
-	shader->qualifiers[SQ_GS_OUT] = new(shader) ast_type_qualifier;
-	memcpy(shader->qualifiers[SQ_GS_OUT], state->out_qualifier, qual_size);
-	shader->qualifiers[SQ_GS_IN] = new(shader) ast_type_qualifier;
-	memcpy(shader->qualifiers[SQ_GS_IN], state->in_qualifier, qual_size);
-
-	/* Check side effects, discards, vertex emits */
 	if (!state->error) {
+		/* Copy extensions */
+		sh_extension* ext = state->explicit_extensions;
+		while (ext) {
+			sh_extension* sh_ext = ralloc(shader, sh_extension);
+			sh_ext->behavior = ext->behavior;
+			sh_ext->name = ralloc_strdup(shader, ext->name);
+			sh_ext->next = shader->extensions;
+			shader->extensions = sh_ext;
+			ext = ext->next;
+		}
+
+		/* Copy shader qualifiers from state */
+		size_t qual_size = sizeof(ast_type_qualifier);
+		shader->qualifiers[SQ_DEFAULT_UNIFORM] = new (shader) ast_type_qualifier;
+		memcpy(shader->qualifiers[SQ_DEFAULT_UNIFORM], state->default_uniform_qualifier,
+				qual_size);
+		shader->qualifiers[SQ_GS_OUT] = new (shader) ast_type_qualifier;
+		memcpy(shader->qualifiers[SQ_GS_OUT], state->out_qualifier, qual_size);
+		shader->qualifiers[SQ_GS_IN] = new (shader) ast_type_qualifier;
+		memcpy(shader->qualifiers[SQ_GS_IN], state->in_qualifier, qual_size);
+
+		/* Check side effects, discards, vertex emits */
 		ast_postprocess_traverser_visitor ppt(shader, state);
 		ppt.visit(shader->head);
 
-		// Processed in postprocessor instead of ast_to_hir
+		/* Processed in postprocessor instead of ast_to_hir */
 		shader->gs_input_prim_type_specified = state->gs_input_prim_type_specified;
 	}
-
-
 
 	// TODO: steal memory
 	//ralloc_free(state);

@@ -95,6 +95,19 @@ enum ast_field_selection_type {
 	ast_fst_method,
 	ast_fst_swizzle
 };
+
+enum sh_ext_behavior {
+   sh_ext_disable,
+   sh_ext_enable,
+   sh_ext_require,
+   sh_ext_warn,
+};
+
+struct sh_extension {
+	sh_ext_behavior behavior;
+	char* name;
+	sh_extension* next;
+};
 #endif
 
 struct YYLTYPE;

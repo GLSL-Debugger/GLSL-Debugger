@@ -14,6 +14,7 @@
 
 struct sh_symbol_table;
 struct ast_type_qualifier;
+struct sh_extension;
 
 typedef enum {
 	SQ_DEFAULT_UNIFORM,
@@ -31,6 +32,7 @@ struct AstShader {
 	bool compile_status;
 	char* info_log;
 	bool is_es;
+	sh_extension* extensions;
 	sh_symbol_table* symbols;
 	ShVariableList globals;
 	AstStack path;

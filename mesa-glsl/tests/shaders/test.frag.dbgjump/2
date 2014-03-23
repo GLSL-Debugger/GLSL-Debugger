@@ -344,7 +344,7 @@ AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
 AST_EXPRESSION (float_constant)
 Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_DECLARATION
-Range: (8:25 - 19:25)
+Range: (8:26 - 19:26)
 Scope:
  <12,gl_FragColor> <4,f_color> <5,texture1> <6,deref_array> <8,deref_record>
 Changeables:

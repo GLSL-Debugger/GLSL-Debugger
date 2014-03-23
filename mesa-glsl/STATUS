@@ -1,11 +1,10 @@
 
 Not checked:
+	preprocessor directives	
 	default uniform layouts
+	images
 
-
-Not implemented:
-	extensions and preprocessor directives
-	images (probably)
+Not implemented:	
 	conditional expression (bool ? a : b)
 
 TODO:

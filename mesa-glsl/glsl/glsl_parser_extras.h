@@ -36,6 +36,10 @@
 
 struct gl_context;
 
+#ifdef AST_DEBUG_STATE
+struct sh_extension;
+#endif
+
 struct glsl_switch_state {
    /** Temporary variables needed for switch statement. */
    ir_variable *test_var;
@@ -65,7 +69,6 @@ typedef struct YYLTYPE {
 
 extern void _mesa_glsl_error(YYLTYPE *locp, _mesa_glsl_parse_state *state,
 			     const char *fmt, ...);
-
 
 struct _mesa_glsl_parse_state {
    _mesa_glsl_parse_state(struct gl_context *_ctx, gl_shader_stage stage,
@@ -429,6 +432,10 @@ struct _mesa_glsl_parse_state {
 
    /** Atomic counter offsets by binding */
    unsigned atomic_counter_offsets[MAX_COMBINED_ATOMIC_BUFFERS];
+
+#ifdef AST_DEBUG_STATE
+   sh_extension* explicit_extensions;
+#endif
 };
 
 # define YYLLOC_DEFAULT(Current, Rhs, N)			\

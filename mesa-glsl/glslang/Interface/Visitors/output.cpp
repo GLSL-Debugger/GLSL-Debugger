@@ -40,9 +40,11 @@ void ast_output_traverser_visitor::get_code(char** dst)
 
 void ast_output_traverser_visitor::append_header()
 {
-	if(shader && shader->version)
-		ralloc_asprintf_append(&buffer, "#version %i\n", shader->version);
+	assert(shader);
 
+	if(shader->version)
+		ralloc_asprintf_append(&buffer, "#version %i\n", shader->version);
+	output_extensions(shader->extensions);
 	ralloc_asprintf_append(&buffer, "\n");
 
 	if (shader->stage == MESA_SHADER_GEOMETRY){

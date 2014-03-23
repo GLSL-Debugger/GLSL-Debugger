@@ -32,65 +32,51 @@ static const char* local_size_qualifiers[3] = {
 	"local_size_x",	"local_size_y", "local_size_z",
 };
 
-/*
- * TODO:
-if (!$$.flags.i) {
-            static const struct {
-               const char *name;
-               GLenum format;
-               glsl_base_type base_type;
-            } map[] = {
-               { "rgba32f", GL_RGBA32F, GLSL_TYPE_FLOAT },
-               { "rgba16f", GL_RGBA16F, GLSL_TYPE_FLOAT },
-               { "rg32f", GL_RG32F, GLSL_TYPE_FLOAT },
-               { "rg16f", GL_RG16F, GLSL_TYPE_FLOAT },
-               { "r11f_g11f_b10f", GL_R11F_G11F_B10F, GLSL_TYPE_FLOAT },
-               { "r32f", GL_R32F, GLSL_TYPE_FLOAT },
-               { "r16f", GL_R16F, GLSL_TYPE_FLOAT },
-               { "rgba32ui", GL_RGBA32UI, GLSL_TYPE_UINT },
-               { "rgba16ui", GL_RGBA16UI, GLSL_TYPE_UINT },
-               { "rgb10_a2ui", GL_RGB10_A2UI, GLSL_TYPE_UINT },
-               { "rgba8ui", GL_RGBA8UI, GLSL_TYPE_UINT },
-               { "rg32ui", GL_RG32UI, GLSL_TYPE_UINT },
-               { "rg16ui", GL_RG16UI, GLSL_TYPE_UINT },
-               { "rg8ui", GL_RG8UI, GLSL_TYPE_UINT },
-               { "r32ui", GL_R32UI, GLSL_TYPE_UINT },
-               { "r16ui", GL_R16UI, GLSL_TYPE_UINT },
-               { "r8ui", GL_R8UI, GLSL_TYPE_UINT },
-               { "rgba32i", GL_RGBA32I, GLSL_TYPE_INT },
-               { "rgba16i", GL_RGBA16I, GLSL_TYPE_INT },
-               { "rgba8i", GL_RGBA8I, GLSL_TYPE_INT },
-               { "rg32i", GL_RG32I, GLSL_TYPE_INT },
-               { "rg16i", GL_RG16I, GLSL_TYPE_INT },
-               { "rg8i", GL_RG8I, GLSL_TYPE_INT },
-               { "r32i", GL_R32I, GLSL_TYPE_INT },
-               { "r16i", GL_R16I, GLSL_TYPE_INT },
-               { "r8i", GL_R8I, GLSL_TYPE_INT },
-               { "rgba16", GL_RGBA16, GLSL_TYPE_FLOAT },
-               { "rgb10_a2", GL_RGB10_A2, GLSL_TYPE_FLOAT },
-               { "rgba8", GL_RGBA8, GLSL_TYPE_FLOAT },
-               { "rg16", GL_RG16, GLSL_TYPE_FLOAT },
-               { "rg8", GL_RG8, GLSL_TYPE_FLOAT },
-               { "r16", GL_R16, GLSL_TYPE_FLOAT },
-               { "r8", GL_R8, GLSL_TYPE_FLOAT },
-               { "rgba16_snorm", GL_RGBA16_SNORM, GLSL_TYPE_FLOAT },
-               { "rgba8_snorm", GL_RGBA8_SNORM, GLSL_TYPE_FLOAT },
-               { "rg16_snorm", GL_RG16_SNORM, GLSL_TYPE_FLOAT },
-               { "rg8_snorm", GL_RG8_SNORM, GLSL_TYPE_FLOAT },
-               { "r16_snorm", GL_R16_SNORM, GLSL_TYPE_FLOAT },
-               { "r8_snorm", GL_R8_SNORM, GLSL_TYPE_FLOAT }
-            };
-
-            for (unsigned i = 0; i < Elements(map); i++) {
-               if (match_layout_qualifier($1, map[i].name, state) == 0) {
-                  $$.flags.q.explicit_image_format = 1;
-                  $$.image_format = map[i].format;
-                  $$.image_base_type = map[i].base_type;
-                  break;
-               }
-            }
-         }
-*/
+static const struct {
+   const char *name;
+   GLenum format;
+} images[] = {
+   { "rgba32f", GL_RGBA32F },
+   { "rgba16f", GL_RGBA16F },
+   { "rg32f", GL_RG32F },
+   { "rg16f", GL_RG16F },
+   { "r11f_g11f_b10f", GL_R11F_G11F_B10F },
+   { "r32f", GL_R32F },
+   { "r16f", GL_R16F },
+   { "rgba32ui", GL_RGBA32UI },
+   { "rgba16ui", GL_RGBA16UI },
+   { "rgb10_a2ui", GL_RGB10_A2UI },
+   { "rgba8ui", GL_RGBA8UI },
+   { "rg32ui", GL_RG32UI },
+   { "rg16ui", GL_RG16UI },
+   { "rg8ui", GL_RG8UI },
+   { "r32ui", GL_R32UI },
+   { "r16ui", GL_R16UI },
+   { "r8ui", GL_R8UI },
+   { "rgba32i", GL_RGBA32I },
+   { "rgba16i", GL_RGBA16I },
+   { "rgba8i", GL_RGBA8I },
+   { "rg32i", GL_RG32I },
+   { "rg16i", GL_RG16I },
+   { "rg8i", GL_RG8I },
+   { "r32i", GL_R32I },
+   { "r16i", GL_R16I },
+   { "r8i", GL_R8I },
+   { "rgba16", GL_RGBA16 },
+   { "rgb10_a2", GL_RGB10_A2 },
+   { "rgba8", GL_RGBA8 },
+   { "rg16", GL_RG16 },
+   { "rg8", GL_RG8 },
+   { "r16", GL_R16 },
+   { "r8", GL_R8 },
+   { "rgba16_snorm", GL_RGBA16_SNORM },
+   { "rgba8_snorm", GL_RGBA8_SNORM },
+   { "rg16_snorm", GL_RG16_SNORM },
+   { "rg8_snorm", GL_RG8_SNORM },
+   { "r16_snorm", GL_R16_SNORM },
+   { "r8_snorm", GL_R8_SNORM },
+   { NULL, 0 },
+};
 
 void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualifier* q)
 {
@@ -122,7 +108,8 @@ void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualif
 
 
 	if (has_layout || q->flags.q.prim_type
-			|| q->flags.q.local_size) {
+			|| q->flags.q.local_size
+			|| q->flags.q.explicit_image_format) {
 		ralloc_asprintf_append(&buffer, "layout(");
 		bool defined = false;
 		for (int i = 0; i < LAYOUTS_COUNT; ++i) {
@@ -159,14 +146,25 @@ void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualif
 			for (int i = 0; i < 3; ++i) {
 				if (!(q->flags.q.local_size & (1 << i)))
 					continue;
-
 				if (defined)
 					ralloc_asprintf_append(&buffer, ", ");
 				defined = true;
 				ralloc_asprintf_append(&buffer, "%s = %i",
 						local_size_qualifiers[i], q->local_size[i]);
 			}
+		}
 
+		if (q->flags.q.explicit_image_format) {
+			int iter = 0;
+			while (images[iter].name != NULL) {
+				if (images[iter].format == q->image_format) {
+					if (defined)
+						ralloc_asprintf_append(&buffer, ", ");
+					ralloc_asprintf_append(&buffer, "%s", images[iter].name);
+					break;
+				}
+				iter++;
+			}
 		}
 
 		ralloc_asprintf_append(&buffer, ") ");
@@ -206,6 +204,23 @@ void ast_output_traverser_visitor::output_qualifier(const struct ast_type_qualif
 		ralloc_asprintf_append(&buffer, "flat ");
 	if (q->flags.q.noperspective)
 		ralloc_asprintf_append(&buffer, "noperspective ");
+}
+
+typedef struct {
+	int value;
+	const char *string;
+} ExtensionsMap;
+
+void ast_output_traverser_visitor::output_extensions(const struct sh_extension* extensions)
+{
+	const sh_extension* ext = extensions;
+	while (ext) {
+		ralloc_asprintf_append(&buffer, "#extension %s : %s\n", ext->name,
+				ext->behavior == sh_ext_warn ? "warn" :
+				ext->behavior == sh_ext_enable ? "enable" :
+				ext->behavior == sh_ext_require ? "require" : "disable");
+		ext = ext->next;
+	}
 }
 
 void ast_output_traverser_visitor::output_sequence(exec_list* list, const char* s,
