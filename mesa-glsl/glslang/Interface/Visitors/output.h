@@ -83,6 +83,7 @@ protected:
 	ShChangeableList *cgbls;
 	EShLanguage mode;
 	DbgCgOptions cgOptions;
+	AstStack return_types;
 	bool dbgTargetProcessed;
 	bool no_brakets;
 };

@@ -21,11 +21,12 @@ __inline std::string FormatSourceRange(const YYLTYPE& range)
     return std::string(locText);
 }
 
-void dumpNodeInfo(ast_node* node);
-void dumpDbgStack(AstStack *stack);
+void dumpNodeInfo(ast_node *);
+void dumpDbgStack(AstStack *);
 
 long strToSwizzleIdx(const char *);
-bool partof(ast_node* target, ast_node* node);
+bool partof(ast_node *, ast_node *);
+
 std::string getMangledName(ast_function_definition *, AstShader*);
 char* getFunctionName(const char *);
 int getFunctionDebugParameter(ast_function_definition *);

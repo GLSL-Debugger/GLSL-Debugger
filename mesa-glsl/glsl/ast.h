@@ -210,6 +210,7 @@ public:
    virtual class ast_compound_statement* as_compound_statement() { return NULL; }
    virtual class ast_declaration* as_declaration() { return NULL; }
    virtual class ast_struct_specifier* as_struct_specifier() { return NULL; }
+   virtual class ast_fully_specified_type* as_fully_specified_type() { return NULL; }
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
    virtual class ast_expression_statement* as_expression_statement() { return NULL; }
@@ -858,6 +859,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_fully_specified_type* as_fully_specified_type() { return this; }
 #endif
 
    virtual void print(void) const;

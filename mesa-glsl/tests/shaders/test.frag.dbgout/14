@@ -12,13 +12,13 @@ int deref_array[1] = {
 struct test_struct {
   int val;
 };
-intint test_func(int param)
+int test_func(int param)
 {
   return param * param;
 }
- test_funcDBG(int param)
+int test_funcDBG(int param)
 {
-   dbgBranch = param * param;
+  int dbgBranch = param * param;
   dbgResult = float(1.0); return dbgBranch;
 }
 

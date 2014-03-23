@@ -550,15 +550,14 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 		if (node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC) {
 			dbgTargetProcessed = true;
 			if (node->opt_return_value) {
-				/* Declaraion: type name = expression; */
-				/* TODO: type */
-//				oit->debugProgram +=
-//						node->getExpression()->getType().getCodeString(true,
-//								oit->language);
-				ralloc_asprintf_append (&buffer, " ");
+				ast_node* return_type = return_types.top();
+				assert(return_type || !"return value must have type");
+				ast_fully_specified_type* type = return_type->as_fully_specified_type();
+				assert(type || !"return type must be a type");
 
 				cg.getNewName(&tmpRegister, "dbgBranch");
-				ralloc_asprintf_append (&buffer, "%s = ", tmpRegister);
+				type->accept(this);
+				ralloc_asprintf_append (&buffer, " %s = ", tmpRegister);
 				node->opt_return_value->accept(this);
 				ralloc_asprintf_append (&buffer, ";\n");
 				indent();
@@ -604,9 +603,7 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 {
-	node->prototype->return_type->accept(this);
 	bool is_main = !strcmp(node->prototype->identifier, MAIN_FUNC_SIGNATURE);
-
 	const char* fname;
 	// Use debug name if we print debuged function's clone
 	if (this->cgOptions != DBG_CG_ORIGINAL_SRC && !is_main
@@ -626,6 +623,8 @@ void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 		fname = node->prototype->identifier;
 	}
 
+	return_types.push(node->prototype->return_type);
+	node->prototype->return_type->accept(this);
 	ralloc_asprintf_append(&buffer, " %s", fname);
 	output_sequence(&node->prototype->parameters, "(", ", ", ")");
 	if (!node->body || node->body->statements.is_empty()) {
@@ -635,6 +634,7 @@ void ast_output_traverser_visitor::visit(class ast_function_definition* node)
 
 	ralloc_asprintf_append(&buffer, "\n");
 	node->body->accept(this);
+	return_types.pop();
 }
 
 void ast_output_traverser_visitor::visit(class ast_interface_block* node)
