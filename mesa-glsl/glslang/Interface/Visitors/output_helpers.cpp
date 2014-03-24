@@ -383,9 +383,8 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 		output_sequence(&node->expressions, "(", ", ", ");\n");
 		break;
 	case DBG_CG_VERTEX_COUNT:
-		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, change_type);
-		// TODO:
-		//			oit->parseContext->resources->geoOutputType );
+		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, change_type,
+				shader->qualifiers[SQ_GS_OUT]->prim_type);
 		break;
 	case DBG_CG_COVERAGE:
 	case DBG_CG_CHANGEABLE:
@@ -528,11 +527,8 @@ void ast_output_traverser_visitor::loop_debug_terminal(ast_iteration_statement* 
 		}
 	}
 
-	DbgCgOptions opts = cgOptions;
-	cgOptions = DBG_CG_ORIGINAL_SRC;
 	if (node->rest_expression)
 		node->rest_expression->accept(this);
-	cgOptions = opts;
 }
 
 void ast_output_traverser_visitor::loop_debug_end(ast_iteration_statement* node)

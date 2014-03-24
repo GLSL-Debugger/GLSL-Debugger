@@ -7,7 +7,6 @@
 #include "SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 
-
 #include <map>
 #include <list>
 #include <stdio.h>
@@ -713,7 +712,7 @@ static void addLoopFooter(char** prog, AstStack* stack)
  *     DBG_CG_SELECTION_CONDITIONAL: branch (true or false)
  *     DBG_CG_GEOMETRY_MAP:          EmitVertex or EndPrimitive
  */
-void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, int option, int outPrimType)
+void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, int option, GLenum outPrimType)
 {
 	/* TODO: fill out other possibilities */
 	switch (type) {
@@ -774,15 +773,15 @@ void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, int 
 			ralloc_asprintf_append(prog, "%s = %s", result->name, type_code);
 			if (option) {
 				switch (outPrimType) {
-				case 0x0000: /* GL_POINTS */
+				case GL_POINTS:
 					ralloc_asprintf_append(prog,
 							"(dbgResult.y > 0 ? dbgResult.x + 1 : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
 					break;
-				case 0x0003: /* GL_LINE_STRIP */
+				case GL_LINE_STRIP:
 					ralloc_asprintf_append(prog,
 							"(dbgResult.y > 1 ? dbgResult.x + dbgResult.y : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
 					break;
-				case 0x0005: /* GL_TRIANGLE_STRIP */
+				case GL_TRIANGLE_STRIP:
 					ralloc_asprintf_append(prog,
 							"(dbgResult.y > 2 ? dbgResult.x + dbgResult.y : dbgResult.x, 0.0, gl_PrimitiveIDIn)");
 					break;

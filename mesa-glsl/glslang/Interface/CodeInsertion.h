@@ -59,7 +59,7 @@ public:
 	void getNewName(char **name, const char *prefix);
 	void addDeclaration(cgTypes type, char** prog, EShLanguage l);
 	void addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions,
-	                  int option, int outPrimType = 0x0000);
+	                  int option, GLenum outPrimType = 0x0000);
 	void addOutput(cgTypes type, char** prog, EShLanguage l);
 	void addInitialization(cgTypes type, cgInitialization init, char** prog);
 	//void addAssignment(cgTypes type, ShVariable *src);
