@@ -12,7 +12,7 @@
 
 
 const char* DBG_NAMES[ast_dbg_state_end] = {
-	"UnsetDbg", "PathDbg", "TargetDbg"
+	"UnsetDbg", "PathDbg", "TargetDbg", "CallDbg"
 };
 
 class DebugJumpTest;

@@ -302,11 +302,11 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 			ralloc_asprintf_append(&buffer, ")");
 		}
 		return false;
-	} else if (cgOptions != DBG_CG_ORIGINAL_SRC && node->debug_target() &&
-			node->debug_overwrite != ast_dbg_ow_original) {
+	} else if (cgOptions != DBG_CG_ORIGINAL_SRC && node->debug_state == ast_dbg_state_call
+			&& node->debug_overwrite != ast_dbg_ow_original) {
 		/* This call leads to the actual prosition of debugging */
 		const char* name = node->subexpressions[0]->primary_expression.identifier;
-		ralloc_asprintf_append(&buffer, ", %s", cg.getDebugName(name));
+		ralloc_asprintf_append(&buffer, "%s", cg.getDebugName(name));
 		output_sequence(&node->expressions, "(", ", ", ")");
 		return false;
 	} else if (mode == EShLangGeometry && !node->is_constructor() && node->debug_builtin) {

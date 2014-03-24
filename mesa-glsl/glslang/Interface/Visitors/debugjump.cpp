@@ -74,7 +74,8 @@ void ast_debugjump_traverser_visitor::processDebugable(ast_node *node)
 			FormatSourceRange(node->get_location()).c_str(), operation, node->debug_state);
 
 	if (operation == OTOpTargetUnset) {
-		if (node->debug_state == ast_dbg_state_target) {
+		if (node->debug_state == ast_dbg_state_target
+				|| node->debug_state == ast_dbg_state_call) {
 			node->debug_state = ast_dbg_state_unset;
 			operation = OTOpTargetSet;
 			VPRINT( 3, "\t ------- unset target --------\n");
@@ -423,7 +424,8 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 			func_name, node->debug_builtin, this->operation, node->debug_state);
 
 	if (operation == OTOpTargetUnset) {
-		if (node->debug_state != ast_dbg_state_target)
+		if (node->debug_state != ast_dbg_state_target &&
+			node->debug_state != ast_dbg_state_call)
 			return;
 
 		if (funcDef && (this->dbgBehaviour & DBG_BH_JUMPINTO)) {
@@ -433,6 +435,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 			VPRINT(2, "\t ---- push %p on stack ----\n", funcDef);
 			this->parseStack.push(funcDef);
 			this->operation = OTOpTargetSet;
+			node->debug_state = ast_dbg_state_call;
 
 			// add local parameters of called function first
 			copyShChangeableListCtx(&result.cgbls, &funcDef->prototype->changeables, shader);

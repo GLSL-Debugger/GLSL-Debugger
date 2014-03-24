@@ -37,6 +37,7 @@ enum ast_dbg_state {
    ast_dbg_state_unset,
    ast_dbg_state_path, /* path of trace */
    ast_dbg_state_target, /* leaf of trace */
+   ast_dbg_state_call, /* function called */
    ast_dbg_state_end
 };
 

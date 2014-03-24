@@ -35,7 +35,7 @@ void main(void)
   }
   int count = int(f_color_adv.x * 10);
   deref_record.val = test_func(count);
-  (dbgResult = float(1.0), test_func(count));
+  test_funcDBG(count);
   deref_array[0] = deref_record.val;
   for (int i = 0; i < count; ++ i) {
     f_color_adv.x += 0.600000;

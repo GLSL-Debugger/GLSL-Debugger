@@ -167,7 +167,7 @@ AST_EXPRESSION (int_constant)
 AST_EXPRESSION (=)
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
-AST_FUNCTION_EXPRESSION (function_call)     TargetDbg
+AST_FUNCTION_EXPRESSION (function_call)     CallDbg
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
 AST_EXPRESSION (identifier)
@@ -282,7 +282,7 @@ AST_EXPRESSION (int_constant)
 AST_EXPRESSION (=)                      PathDbg
 AST_EXPRESSION (.)
 AST_EXPRESSION (identifier)
-AST_FUNCTION_EXPRESSION (function_call)     TargetDbg
+AST_FUNCTION_EXPRESSION (function_call)     CallDbg
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
 AST_EXPRESSION (identifier)

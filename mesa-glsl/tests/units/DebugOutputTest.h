@@ -47,7 +47,7 @@ public:
 		base->results << "============================================\n";
 
 		// Now where actual comparison happens
-		base->doComparison(shader, true, current_iter > PRINT_ITER);
+		base->doComparison(shader, true);
 		base->applyRules(shader);
 	}
 };
