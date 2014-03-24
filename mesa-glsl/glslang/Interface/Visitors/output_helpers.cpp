@@ -12,6 +12,7 @@
 #include "glsldb/GL/gl.h"
 #include <unordered_set>
 
+extern bool has_comma(ast_node*);
 
 #define LAYOUTS_COUNT 18
 #define LAYOUTS_FIRST_EXPLICIT 12
@@ -472,6 +473,13 @@ void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *n
 				depth++;
 				ralloc_asprintf_append(&buffer, "{\n");
 				indent();
+				if (node->init_statement) {
+					node->init_statement->accept(this);
+					if (!has_comma(node->init_statement))
+						ralloc_asprintf_append(&buffer, ";");
+					ralloc_asprintf_append(&buffer, "\n");
+					indent();
+				}
 			}
 		}
 	}

@@ -32,6 +32,10 @@ void ast_output_traverser_visitor::dump()
 			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", buffer);
 }
 
+bool has_comma(ast_node* n)
+{
+	return n && (n->as_expression_statement() || n->as_declarator_list());
+}
 
 void ast_output_traverser_visitor::get_code(char** dst)
 {
@@ -483,11 +487,10 @@ void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
 
 	if (node->mode == ast_iteration_statement::ast_for) {
 		ralloc_asprintf_append(&buffer, "for (");
-		if (node->init_statement)
+		if (node->init_statement && node->debug_state_internal != ast_dbg_loop_wrk_init)
 			node->init_statement->accept(this);
-		if (!node->init_statement
-				|| (!node->init_statement->as_expression_statement()
-						&& !node->init_statement->as_declarator_list()))
+		if (node->debug_state_internal == ast_dbg_loop_wrk_init || !node->init_statement
+				|| !has_comma(node->init_statement))
 			ralloc_asprintf_append(&buffer, ";");
 		ralloc_asprintf_append(&buffer, " ");
 		loop_debug_condition(node);
@@ -533,7 +536,14 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 
 	switch (node->mode) {
 	case ast_jump_statement::ast_jump_modes::ast_discard:
-		// Disable discard (not sure, why)
+		/* TODO: I'm not sure why we need to disable discard, be sure when
+		 * write new widgets with data acquisition. Probably we do not want
+		 * to discard data when target located after discard to get it like
+		 * no discard happened.
+		 * FIXME: Relaying on dbgTargetProcessed is just wrong because
+		 * it may be processed in another function before discard, but call
+		 * for this function may be after it.
+		 */
 		if (dbgTargetProcessed && cgOptions != DBG_CG_ORIGINAL_SRC)
 			ralloc_asprintf_append (&buffer, "// ");
 		ralloc_asprintf_append (&buffer, "discard;");
