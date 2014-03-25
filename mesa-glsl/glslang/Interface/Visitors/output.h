@@ -63,7 +63,6 @@ public:
 
 	virtual bool enter(class ast_function_expression *);
 
-
 protected:
 	void output_extensions(const struct sh_extension *);
 	void output_qualifier(const struct ast_type_qualifier *);
@@ -84,6 +83,8 @@ protected:
 	EShLanguage mode;
 	DbgCgOptions cgOptions;
 	AstStack return_types;
+	// FIXME: it is wrong way to do it
+	AstStack switches;
 	bool dbgTargetProcessed;
 	bool no_brakets;
 };

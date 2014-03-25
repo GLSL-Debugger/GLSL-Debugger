@@ -25,7 +25,7 @@ public:
 	TestRepeater()
 	{
 		test = NULL;
-		behaviour = DBG_BH_JUMPINTO;
+		behaviour = DBG_BH_JUMP_INTO;
 		resetDbgResult(dbg_result, false);
 		djv = new ast_debugjump_traverser_visitor(dbg_result);
 	}

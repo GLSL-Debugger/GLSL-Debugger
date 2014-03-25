@@ -275,7 +275,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_expression* node)
 	case ast_or_assign: {
 		processDebugable(node);
 		if (operation == OTOpTargetSet) {
-			if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
+			if (!(dbgBehaviour & DBG_BH_JUMP_INTO)) {
 				// do not visit children
 				// add all changeables of this node to the list
 				VPRINT(2, "----> copy changeables\n");
@@ -329,7 +329,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_declaration* node)
 
 	processDebugable(node);
 	if (operation == OTOpTargetSet) {
-		if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
+		if (!(dbgBehaviour & DBG_BH_JUMP_INTO)) {
 			// do not visit children
 			// add all changeables of this node to the list
 			VPRINT(2, "----> copy changeables\n");
@@ -372,7 +372,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_expression* node)
 	case ast_post_dec:
 		processDebugable(node);
 		if (operation == OTOpTargetSet) {
-			if (!(dbgBehaviour & DBG_BH_JUMPINTO)) {
+			if (!(dbgBehaviour & DBG_BH_JUMP_INTO)) {
 				// user didn't want to debug further
 				// copy all changeables
 				VPRINT(2, "----> copy changeables\n");
@@ -428,7 +428,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_expression* node)
 			node->debug_state != ast_dbg_state_call)
 			return;
 
-		if (funcDef && (this->dbgBehaviour & DBG_BH_JUMPINTO)) {
+		if (funcDef && (this->dbgBehaviour & DBG_BH_JUMP_INTO)) {
 			// no changeable has to be copied in first place,
 			// as we jump into this function
 
@@ -496,7 +496,7 @@ void ast_debugjump_traverser_visitor::leave(class ast_function_definition* node)
 	parseStack.pop();
 	/* Do not directly jump into next function after
 	 * returning from a function */
-	dbgBehaviour &= ~DBG_BH_JUMPINTO;
+	dbgBehaviour &= ~DBG_BH_JUMP_INTO;
 	finishedDbgFunction = true;
 
 	if (!this->parseStack.empty()) {

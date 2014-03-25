@@ -1419,6 +1419,7 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 	case DBG_CG_CHANGEABLE:
 	case DBG_CG_COVERAGE:
 	case DBG_CG_SELECTION_CONDITIONAL:
+	case DBG_CG_SWITCH_CONDITIONAL:
 	case DBG_CG_LOOP_CONDITIONAL:
 		if (target == DBG_TARGET_GEOMETRY_SHADER) {
 			elementsPerVertex = 1;
@@ -1458,6 +1459,9 @@ bool MainWindow::getDebugVertexData(DbgCgOptions option, ShChangeableList *cl,
 		break;
 	case DBG_CG_SELECTION_CONDITIONAL:
 		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "DBG_CG_SELECTION_CONDITIONAL\n");
+		break;
+	case DBG_CG_SWITCH_CONDITIONAL:
+		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "DBG_CG_SWITCH_CONDITIONAL\n");
 		break;
 	case DBG_CG_LOOP_CONDITIONAL:
 		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "DBG_CG_LOOP_CONDITIONAL\n");
@@ -1534,16 +1538,17 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
 	case DBG_CG_COVERAGE:
 		channels = 1;
 		break;
-	case DBG_CG_LOOP_CONDITIONAL:
 	case DBG_CG_SELECTION_CONDITIONAL:
-		if (currentRunLevel == RL_DBG_FRAGMENT_SHADER) {
+	case DBG_CG_SWITCH_CONDITIONAL:
+	case DBG_CG_LOOP_CONDITIONAL:
+		if (currentRunLevel == RL_DBG_FRAGMENT_SHADER)
 			channels = 1;
-		} else {
+		else
 			channels = 3;
-		}
 		break;
 	default:
 		channels = 3;
+		break;
 	}
 
 	UT_NOTIFY(LV_TRACE, "Init buffers...");
@@ -1554,6 +1559,7 @@ bool MainWindow::getDebugImage(DbgCgOptions option, ShChangeableList *cl,
 		break;
 	case DBG_CG_COVERAGE:
 	case DBG_CG_SELECTION_CONDITIONAL:
+	case DBG_CG_SWITCH_CONDITIONAL:
 	case DBG_CG_LOOP_CONDITIONAL:
 	case DBG_CG_CHANGEABLE:
 		error = pc->initializeRenderBuffer(false, m_pftDialog->copyAlpha(),
@@ -1880,7 +1886,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 
 	switch (action) {
 	case DBG_BH_RESET:
-	case DBG_BH_JUMPINTO:
+	case DBG_BH_JUMP_INTO:
 	case DBG_BH_FOLLOW_ELSE:
 	case DBG_BH_JUMP_OVER:
 		updateGUI = true;
@@ -2089,13 +2095,17 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 				ShaderStep (DBG_BH_JUMP_OVER);
 				break;
 			case SelectionDialog::SB_IF:
-				ShaderStep (DBG_BH_JUMPINTO);
+				ShaderStep (DBG_BH_JUMP_INTO);
 				break;
 			case SelectionDialog::SB_ELSE:
 				ShaderStep (DBG_BH_FOLLOW_ELSE);
 				break;
 			}
 			delete sDialog;
+		}
+			break;
+		case DBG_RS_POSITION_SWITCH_CHOOSE: {
+			// TODO: switch choose
 		}
 			break;
 		case DBG_RS_POSITION_LOOP_CHOOSE: {
@@ -2219,7 +2229,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 							this, SLOT(ShaderStep(int, bool, bool)));
 					switch (lDialog->exec()) {
 					case LoopDialog::SA_NEXT:
-						ShaderStep (DBG_BH_JUMPINTO);
+						ShaderStep (DBG_BH_LOOP_NEXT_ITER);
 						break;
 					case LoopDialog::SA_BREAK:
 						ShaderStep (DBG_BH_JUMP_OVER);
@@ -2227,7 +2237,7 @@ void MainWindow::ShaderStep(int action, bool updateWatchData,
 					case LoopDialog::SA_JUMP:
 						/* Force update of all changed items */
 						updateWatchListData(COVERAGEMAP_GROWN, false);
-						ShaderStep(DBG_BH_JUMPINTO);
+						ShaderStep(DBG_BH_JUMP_INTO);
 						break;
 					}
 					disconnect(lDialog, 0, 0, 0);
@@ -2570,7 +2580,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 	m_pShVarModel->setUniformValues(m_serializedUniforms.pData,
 			m_serializedUniforms.count);
 
-	ShaderStep (DBG_BH_JUMPINTO);
+	ShaderStep (DBG_BH_JUMP_INTO);
 
 	if (currentRunLevel != RL_DBG_VERTEX_SHADER
 			&& currentRunLevel != RL_DBG_GEOMETRY_SHADER
@@ -2612,7 +2622,7 @@ void MainWindow::on_tbShaderExecute_clicked()
 void MainWindow::on_tbShaderReset_clicked()
 {
 	ShaderStep(DBG_BH_RESET, true);
-	ShaderStep (DBG_BH_JUMPINTO);
+	ShaderStep (DBG_BH_JUMP_INTO);
 
 	tbShaderStep->setEnabled(true);
 	tbShaderStepOver->setEnabled(true);
@@ -2622,7 +2632,7 @@ void MainWindow::on_tbShaderReset_clicked()
 
 void MainWindow::on_tbShaderStep_clicked()
 {
-	ShaderStep (DBG_BH_JUMPINTO);
+	ShaderStep (DBG_BH_JUMP_INTO);
 }
 
 void MainWindow::on_tbShaderStepOver_clicked()

@@ -186,6 +186,65 @@ void CodeGen::init(cgTypes type, ShVariable *src, EShLanguage l)
 	ShDumpVariable(*var, 1);
 }
 
+void CodeGen::initTarget(ast_function_expression* node, EShLanguage l, DbgCgOptions)
+{
+	if (!node)
+		return;
+
+	/* Check if an optional parameter register is neccessary */
+	const char* func_name = node->subexpressions[0]->primary_expression.identifier;
+	ast_function_definition* func = shader->symbols->get_function(func_name);
+	/* Check if a parameter is used for code insertion */
+	int lastInParameter = getFunctionDebugParameter(func);
+	if (lastInParameter >= 0) {
+		ast_node* t = getSideEffectsDebugParameter(node, lastInParameter);
+		assert((t && t->debug_id >= 0) || !"CodeGen - side effects returned type is invalid");
+		ShVariable* var = findShVariable(t->debug_id);
+		init(CG_TYPE_PARAMETER, var, l);
+	}
+}
+
+void CodeGen::initTarget(ast_selection_statement* node, EShLanguage l, DbgCgOptions o)
+{
+	/* Check if a selection condition needs to be copied */
+	if (!node || !(o == DBG_CG_COVERAGE || o == DBG_CG_SELECTION_CONDITIONAL
+			|| o == DBG_CG_CHANGEABLE || o == DBG_CG_GEOMETRY_CHANGEABLE))
+		return;
+
+	switch (node->debug_state_internal) {
+	case ast_dbg_if_condition_passed:
+	case ast_dbg_if_then:
+	case ast_dbg_if_else:
+		init(CG_TYPE_CONDITION, NULL, l);
+		break;
+	default:
+		break;
+	}
+}
+
+void CodeGen::initTarget(ast_switch_statement* node, EShLanguage l, DbgCgOptions o)
+{
+	/* Check if a selection condition needs to be copied */
+	if (!node || !(o == DBG_CG_COVERAGE  || o == DBG_CG_SWITCH_CONDITIONAL
+			|| o == DBG_CG_CHANGEABLE || o == DBG_CG_GEOMETRY_CHANGEABLE))
+		return;
+
+	if (node->debug_state_internal == ast_dbg_switch_condition_passed
+			|| node->debug_state_internal == ast_dbg_switch_branch)
+		init(CG_TYPE_CONDITION, NULL, l);
+}
+
+void CodeGen::initTarget(ast_iteration_statement* node, EShLanguage l, DbgCgOptions o)
+{
+	if (!node || !(o == DBG_CG_COVERAGE || o == DBG_CG_LOOP_CONDITIONAL
+			|| o == DBG_CG_CHANGEABLE || o == DBG_CG_GEOMETRY_CHANGEABLE))
+		return;
+
+	/* Add debug temoprary register to copy condition */
+	if (node->debug_state_internal == ast_dbg_loop_select_flow)
+		init(CG_TYPE_CONDITION, NULL, l);
+}
+
 void CodeGen::allocateResult(ast_node* target, EShLanguage language, DbgCgOptions options)
 {
 	dbgPrint(DBGLVL_COMPILERINFO, "initialize CG_TYPE_RESULT for %i\n", language);
@@ -208,38 +267,10 @@ void CodeGen::allocateResult(ast_node* target, EShLanguage language, DbgCgOption
 	if (!target)
 		return;
 
-	ast_function_expression* call = target->as_function_expression();
-	ast_selection_statement* sels = target->as_selection_statement();
-
-	/* Check if an optional parameter register is neccessary */
-	if (call) {
-		/* Now check if a parameter is used for code insertion */
-		const char* func_name = call->subexpressions[0]->primary_expression.identifier;
-		ast_function_definition* func = shader->symbols->get_function(func_name);
-
-		int lastInParameter = getFunctionDebugParameter(func);
-		if (lastInParameter >= 0) {
-			ast_node* t = getSideEffectsDebugParameter(call, lastInParameter);
-			assert((t && t->debug_id >= 0)
-					|| !"CodeGen - side effects returned type is invalid");
-			ShVariable* var = findShVariable(t->debug_id);
-			init(CG_TYPE_PARAMETER, var, language);
-		}
-	}
-
-	/* Check if a selection condition needs to be copied */
-	if (sels && (options == DBG_CG_COVERAGE || options == DBG_CG_CHANGEABLE
-		|| options == DBG_CG_GEOMETRY_CHANGEABLE)) {
-		switch (sels->debug_state_internal) {
-		case ast_dbg_if_condition_passed:
-		case ast_dbg_if_then:
-		case ast_dbg_if_else:
-			init(CG_TYPE_CONDITION, NULL, language);
-			break;
-		default:
-			break;
-		}
-	}
+	initTarget(target->as_function_expression(), language, options);
+	initTarget(target->as_selection_statement(), language, options);
+	initTarget(target->as_switch_statement(), language, options);
+	initTarget(target->as_iteration_statement(), language, options);
 }
 
 static const char* getQualifierCode(ShVariable *v, EShLanguage l, int version)
@@ -733,6 +764,11 @@ void CodeGen::addDbgCode(cgTypes type, char** prog, DbgCgOptions cgOptions, int 
 			ralloc_asprintf_append(prog, "%s = %s(%f)", result->name, type_code,
 					option ? 1.0 : 0.5);
 			break;
+		case DBG_CG_SWITCH_CONDITIONAL: {
+			float optf = (float)option / (float)DBG_BH_SWITCH_BRANCH_LAST;
+			ralloc_asprintf_append(prog, "%s = %s(%f)", result->name, type_code, optf);
+			break;
+		}
 		case DBG_CG_LOOP_CONDITIONAL:
 			ralloc_asprintf_append(prog, "%s = %s(%s)", result->name, type_code, condition->name);
 			break;

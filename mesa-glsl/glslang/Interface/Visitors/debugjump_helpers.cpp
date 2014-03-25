@@ -58,7 +58,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 			SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_if_condition,
 					DBG_RS_POSITION_UNSET)
 
-			if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
+			if (this->dbgBehaviour & DBG_BH_JUMP_INTO) {
 				// visit condition
 				if (node->condition)
 					node->condition->accept(this);
@@ -178,7 +178,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_switch_statement* node)
 			SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_switch_condition,
 					DBG_RS_POSITION_UNSET)
 
-			if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
+			if (this->dbgBehaviour & DBG_BH_JUMP_INTO) {
 				// visit condition
 				if (node->test_expression)
 					node->test_expression->accept(this);
@@ -266,8 +266,8 @@ bool ast_debugjump_traverser_visitor::enter(class ast_switch_statement* node)
 
 bool ast_debugjump_traverser_visitor::enter(class ast_case_statement_list* node)
 {
-	VPRINT(2, "process SwitchBody L:%s DbgSt:%i\n", FormatSourceRange(node->get_location()).c_str(),
-			node->debug_state);
+	VPRINT(2, "process CaseStatmentList L:%s DbgSt:%i\n",
+			FormatSourceRange(node->get_location()).c_str(), node->debug_state);
 
 	if (operation != OTOpTargetSet && operation != OTOpTargetUnset)
 		return true;
@@ -278,16 +278,13 @@ bool ast_debugjump_traverser_visitor::enter(class ast_case_statement_list* node)
 		node->debug_branch = branch;
 
 	if (node->debug_branch) {
-		int current_branch = 0;
 		bool no_break = false;
 		foreach_list_typed(ast_node, ast, link, &node->cases) {
-			if (++current_branch == node->debug_branch || no_break) {
+			ast_case_statement* stmt = ast->as_case_statement();
+			if (!stmt || stmt->debug_branch_index == node->debug_branch || no_break) {
 				ast->accept(this);
 				no_break = !(ast->debug_sideeffects & (ast_dbg_se_break | ast_dbg_se_return));
 			}
-			if (current_branch > DBG_BH_SWITCH_BRANCH_LAST)
-				dbgPrint(DBGLVL_WARNING, "Only %i switch branches supported, but %i found\n",
-						DBG_BH_SWITCH_BRANCH_LAST, current_branch);
 		}
 	}
 	return false;
@@ -311,7 +308,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_loop_wrk_init,
 						DBG_RS_POSITION_UNSET)
 
-				if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
+				if (this->dbgBehaviour & DBG_BH_JUMP_INTO) {
 					// visit initialization
 					if (node->init_statement)
 						node->init_statement->accept(this);
@@ -338,7 +335,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_loop_wrk_test,
 										DBG_RS_POSITION_UNSET)
 
-				if (this->dbgBehaviour & DBG_BH_JUMPINTO) {
+				if (this->dbgBehaviour & DBG_BH_JUMP_INTO) {
 					// visit test
 					if (node->condition)
 						node->condition->accept(this);
@@ -409,7 +406,7 @@ bool ast_debugjump_traverser_visitor::enter(class ast_iteration_statement* node)
 				SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_loop_wrk_terminal,
 										DBG_RS_POSITION_UNSET)
 				// visit terminal
-				if (this->dbgBehaviour & DBG_BH_JUMPINTO)
+				if (this->dbgBehaviour & DBG_BH_JUMP_INTO)
 					if (node->rest_expression)
 						node->rest_expression->accept(this);
 

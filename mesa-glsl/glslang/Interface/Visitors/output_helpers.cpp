@@ -435,22 +435,6 @@ void ast_output_traverser_visitor::loop_debug_prepare(ast_iteration_statement *n
 		indent();
 	}
 
-	/* Add debug temoprary register to copy condition */
-	if (node->debug_target() && node->debug_state_internal == ast_dbg_loop_select_flow) {
-		switch (cgOptions) {
-		case DBG_CG_COVERAGE:
-		case DBG_CG_LOOP_CONDITIONAL:
-		case DBG_CG_CHANGEABLE:
-		case DBG_CG_GEOMETRY_CHANGEABLE:
-			cg.init(CG_TYPE_CONDITION, NULL, mode);
-			cg.addDeclaration(CG_TYPE_CONDITION, &buffer, mode);
-			indent();
-			break;
-		default:
-			break;
-		}
-	}
-
 	/* Add debug code prior to loop */
 	if (node->mode == ast_iteration_statement::ast_for) {
 		if (node->debug_target()) {
@@ -493,7 +477,7 @@ void ast_output_traverser_visitor::loop_debug_condition(ast_iteration_statement*
 		} else if (node->debug_state_internal == ast_dbg_loop_select_flow) {
 			/* Copy test */
 			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
-			ralloc_asprintf_append(&buffer, " = ( ");
+			ralloc_asprintf_append(&buffer, " = (");
 		}
 	}
 

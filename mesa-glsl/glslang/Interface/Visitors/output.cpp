@@ -383,7 +383,25 @@ void ast_output_traverser_visitor::visit(class ast_case_label_list* node)
 void ast_output_traverser_visitor::visit(class ast_case_statement* node)
 {
 	node->labels->accept(this);
-	output_sequence(&node->stmts, " {\n", "\n", "\n", true);
+	ralloc_asprintf_append(&buffer, " {\n");
+
+	if (cgOptions == DBG_CG_SWITCH_CONDITIONAL) {
+		ast_switch_statement* current_switch = NULL;
+		if (!switches.empty())
+			current_switch = switches.top()->as_switch_statement();
+		assert(current_switch || !"Case without switch");
+		if (current_switch->debug_target()
+				&& current_switch->debug_state_internal == ast_dbg_switch_condition_passed) {
+			depth++;
+			indent();
+			/* Add code to colorize branch */
+			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, node->debug_branch_index);
+			ralloc_asprintf_append(&buffer, ";\n");
+			depth--;
+		}
+	}
+
+	output_sequence(&node->stmts, "", "\n", "\n", true);
 	indent();
 	ralloc_asprintf_append(&buffer, "}\n");
 }
@@ -472,10 +490,56 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 {
+	bool copyCondition = false;
+	/* Add debug code */
+	if (node->debug_target()) {
+		this->dbgTargetProcessed = true;
+		if (cgOptions == DBG_CG_COVERAGE || cgOptions == DBG_CG_CHANGEABLE
+				|| cgOptions == DBG_CG_GEOMETRY_CHANGEABLE) {
+			switch (node->debug_state_internal) {
+			case ast_dbg_switch_unset:
+				assert(!"CodeGen - selection status is unset\n");
+				break;
+			case ast_dbg_switch_init:
+			case ast_dbg_switch_condition:
+				/* Add debug code prior to selection */
+				cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+				ralloc_asprintf_append(&buffer, ";\n");
+				indent();
+				break;
+			case ast_dbg_switch_condition_passed:
+			case ast_dbg_switch_branch:
+				copyCondition = true;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 	ralloc_asprintf_append(&buffer, "switch (");
-	node->test_expression->accept(this);
+
+	/* Add condition */
+	if (node->test_expression) {
+		if (copyCondition) {
+			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
+			ralloc_asprintf_append(&buffer, " = (");
+			node->test_expression->accept(this);
+			ralloc_asprintf_append(&buffer, "), ");
+			/* Add debug code */
+			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+			ralloc_asprintf_append(&buffer, ", ");
+			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
+		} else {
+			node->test_expression->accept(this);
+		}
+	}
+
 	ralloc_asprintf_append(&buffer, ")");
+
+	switches.push(node);
 	node->body->accept(this);
+	switches.pop();
 }
 
 void ast_output_traverser_visitor::visit(class ast_iteration_statement* node)
@@ -584,6 +648,7 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 						|| cgOptions == DBG_CG_VERTEX_COUNT
 						|| cgOptions == DBG_CG_COVERAGE
 						|| cgOptions == DBG_CG_SELECTION_CONDITIONAL
+						|| cgOptions == DBG_CG_SWITCH_CONDITIONAL
 						|| cgOptions == DBG_CG_LOOP_CONDITIONAL))
 				|| ((mode == EShLangVertex || mode == EShLangFragment)
 						&& cgOptions != DBG_CG_ORIGINAL_SRC)) {

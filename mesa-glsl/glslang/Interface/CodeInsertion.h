@@ -27,6 +27,11 @@ enum cgGeomChangeable {
 };
 
 
+class ast_function_expression;
+class ast_selection_statement;
+class ast_switch_statement;
+class ast_iteration_statement;
+
 class CodeGen
 {
 public:
@@ -53,7 +58,6 @@ public:
 		return defined_constructions & construction;
 	}
 
-	void init(cgTypes type, ShVariable *v, EShLanguage l);
 	void allocateResult(ast_node*, EShLanguage, DbgCgOptions);
 	/* code generation */
 	void getNewName(char **name, const char *prefix);
@@ -69,6 +73,14 @@ public:
 	void resetLoopIterNames(void);
 
 	const char* getDebugName(const char *input);
+
+protected:
+	void init(cgTypes type, ShVariable *v, EShLanguage l);
+	void initTarget(ast_function_expression*, EShLanguage, DbgCgOptions);
+	void initTarget(ast_selection_statement*, EShLanguage, DbgCgOptions);
+	void initTarget(ast_switch_statement*, EShLanguage, DbgCgOptions);
+	void initTarget(ast_iteration_statement*, EShLanguage, DbgCgOptions);
+
 
 private:
 	int defined_constructions;

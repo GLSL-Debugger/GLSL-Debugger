@@ -40,6 +40,7 @@ public:
 	virtual void leave(ast_expression_bin *);
 	virtual void leave(ast_function_expression *);
 	virtual void leave(ast_case_statement *);
+	virtual void leave(ast_case_statement_list *);
 	virtual void leave(ast_switch_body *);
 	virtual void leave(ast_selection_statement *);
 	virtual void leave(ast_switch_statement *);

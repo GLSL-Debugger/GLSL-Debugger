@@ -179,7 +179,7 @@ void TestRule::load(int id, std::string str)
 		if (!strcmp(rule.c_str(), "reset"))
 			behaviour = DBG_BH_RESET;
 		else if (!strcmp(rule.c_str(), "into"))
-			behaviour = DBG_BH_JUMPINTO;
+			behaviour = DBG_BH_JUMP_INTO;
 		else if (!strcmp(rule.c_str(), "else"))
 			behaviour = DBG_BH_FOLLOW_ELSE;
 		else if (!strcmp(rule.c_str(), "over"))

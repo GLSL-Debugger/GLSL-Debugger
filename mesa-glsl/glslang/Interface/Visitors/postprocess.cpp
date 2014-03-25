@@ -18,6 +18,7 @@
 #include "glslang/Interface/CodeTools.h"
 #include "glslang/Interface/SymbolTable.h"
 #include "glslang/Include/ShaderLang.h"
+#include "glsldb/utils/dbgprint.h"
 #undef NDEBUG
 #include <assert.h>
 
@@ -429,6 +430,20 @@ void ast_postprocess_traverser_visitor::leave(ast_case_statement* node)
 {
 	foreach_list_typed (ast_node, ast, link, &node->stmts)
 		node->debug_sideeffects |= ast->debug_sideeffects;
+}
+
+void ast_postprocess_traverser_visitor::leave(ast_case_statement_list* node)
+{
+	int index = DBG_BH_SWITCH_BRANCH_FIRST;
+	foreach_list_typed (ast_node, ast, link, &node->cases) {
+		ast_case_statement* stmt = ast->as_case_statement();
+		if (stmt)
+			stmt->debug_branch_index = index++;
+	}
+
+	if (index > DBG_BH_SWITCH_BRANCH_LAST)
+		dbgPrint(DBGLVL_COMPILERINFO, "Only %i switch branches supported, but %i defined.\n",
+				DBG_BH_SWITCH_BRANCH_LAST, index);
 }
 
 void ast_postprocess_traverser_visitor::leave(ast_switch_body* node)

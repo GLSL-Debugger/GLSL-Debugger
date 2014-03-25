@@ -26,7 +26,7 @@ public:
 		finishedDbgFunction(false), shader(NULL), result(_result)
 	{
 		operation = OTOpTargetUnset;
-		dbgBehaviour = DBG_BH_JUMPINTO;
+		dbgBehaviour = DBG_BH_JUMP_INTO;
 	}
 
 	virtual ~ast_debugjump_traverser_visitor()

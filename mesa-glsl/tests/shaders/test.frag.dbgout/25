@@ -35,6 +35,7 @@ void main(void)
   for (int i = 0; i < count; ++ i) {
     f_color_adv.x += 0.600000;
   } 
+  dbgResult = float(1.0);
   switch (count % 10) {
   case 1:
   case 3: {

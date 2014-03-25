@@ -215,6 +215,7 @@ public:
    virtual class ast_declarator_list* as_declarator_list() { return NULL; }
    virtual class ast_parameter_declarator* as_parameter_declarator() { return NULL; }
    virtual class ast_expression_statement* as_expression_statement() { return NULL; }
+   virtual class ast_case_statement* as_case_statement() { return NULL; }
    virtual class ast_switch_body* as_switch_body() { return NULL; }
    virtual class ast_selection_statement* as_selection_statement() { return NULL; }
    virtual class ast_switch_statement* as_switch_statement() { return NULL; }
@@ -1055,6 +1056,7 @@ public:
 
 #ifdef AST_DEBUG_STATE
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
+   virtual class ast_case_statement* as_case_statement() { return this; }
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,
@@ -1066,6 +1068,10 @@ public:
     * A list of statements.
     */
    exec_list stmts;
+
+#ifdef AST_DEBUG_STATE
+   int debug_branch_index;
+#endif
 };
 
 
