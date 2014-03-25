@@ -70,21 +70,6 @@ public:
 		}
 		return true;
 	}
-
-	virtual void prepareCmp(AstShader*)
-	{
-		int iter = comparator.getFileNum();
-		iter++;
-		if (iter > 24) {
-			std::stringstream ss;
-			ss << iter;
-			std::ofstream ofile("./mesa-glsl/tests/shaders/test.frag.dbgout/" + ss.str());
-			if (!ofile.is_open())
-				return;
-			ofile << results.str();
-			ofile.close();
-		}
-	}
 };
 
 #endif /* DEBUGOUTPUTTEST_H_ */

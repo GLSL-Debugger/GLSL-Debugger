@@ -8,6 +8,7 @@ Not implemented:
 	conditional expression (bool ? a : b)
 
 TODO:
+    wrong code generated for calls: sequence with void as last element
 	more tests on complex shaders
 	change tree structure
 	separate to standalone library
