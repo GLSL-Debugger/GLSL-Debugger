@@ -38,7 +38,8 @@ void main(void)
   switch (count % 10) {
   case 1:
   case 3: {
-    dbgResult = float(1.0);break;
+    dbgResult = float(1.0);
+    break;
   }
   case 10: {
     count += 1;

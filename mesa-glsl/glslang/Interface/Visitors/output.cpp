@@ -595,7 +595,8 @@ void ast_output_traverser_visitor::visit(class ast_jump_statement* node)
 			node->debug_target() && cgOptions != DBG_CG_ORIGINAL_SRC) {
 		dbgTargetProcessed = true;
 		cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
-		ralloc_asprintf_append (&buffer, ";");
+		ralloc_asprintf_append (&buffer, ";\n");
+		indent();
 	}
 
 	switch (node->mode) {

@@ -24,7 +24,8 @@ void main(void)
   deref_record.val = 2;
   vec3 f_color_adv = f_color;
   if (f_color_adv.x < 0.300000) {
-    dbgResult = float(1.0);// discard;
+    dbgResult = float(1.0);
+    // discard;
   } else {
     f_color_adv.x -= 0.010000;
   }
