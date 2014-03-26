@@ -410,6 +410,7 @@ public:
    virtual class ast_function_expression* as_function_expression() { return this; }
    exec_list changeable_params;
    bool debug_builtin;
+   bool debug_void_builtin;
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,

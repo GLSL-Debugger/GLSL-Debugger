@@ -248,15 +248,21 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 {
 	if (cgOptions != DBG_CG_ORIGINAL_SRC && node->debug_target()) {
 		dbgTargetProcessed = true;
+		bool return_void = true;
 
 		/* This function call acts as target */
 		/* Check if we can use a parameter for debugging */
 		int lastInParameter = -1;
 
-		if (!node->is_constructor() && !node->debug_builtin) {
+		if (node->is_constructor()) {
+			return_void = false;
+		} else if (node->debug_builtin) {
+			return_void = node->debug_void_builtin;
+		} else {
 			const char* name = node->subexpressions[0]->primary_expression.identifier;
 			ast_function_definition* func = shader->symbols->get_function(name);
 			lastInParameter = getFunctionDebugParameter(func);
+			return_void = !strcmp(func->prototype->return_type->specifier->type_name, "void");
 		}
 
 		if (lastInParameter >= 0) {
@@ -274,7 +280,6 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 					if (!getSideEffectsDebugParameter(node, lastInParameter)) {
 						/* No special care necessary, just add it before */
 						cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
-						// FIXME: WTF? WHAT LANGUAGE ORIGIANAL USED?
 						ralloc_asprintf_append(&buffer, ", ");
 						param->accept(this);
 					} else {
@@ -300,6 +305,8 @@ bool ast_output_traverser_visitor::enter(ast_function_expression* node)
 			ralloc_asprintf_append(&buffer, ", ");
 			node->subexpressions[0]->accept(this);
 			output_sequence(&node->expressions, "(", ", ", ")");
+			if (return_void)
+				ralloc_asprintf_append(&buffer, ", true");
 			ralloc_asprintf_append(&buffer, ")");
 		}
 		return false;

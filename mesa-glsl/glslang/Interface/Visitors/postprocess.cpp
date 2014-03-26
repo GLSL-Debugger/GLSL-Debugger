@@ -408,6 +408,7 @@ void ast_postprocess_traverser_visitor::leave(ast_function_expression* node)
 	node->debug_builtin = false;
 	if (node->is_constructor()) {
 		node->debug_builtin = true;
+		node->debug_void_builtin = false;
 	} else {
 		ast_expression* id = node->subexpressions[0];
 		const char *func_name = id->primary_expression.identifier;
@@ -419,10 +420,14 @@ void ast_postprocess_traverser_visitor::leave(ast_function_expression* node)
 		exec_list instructions;
 		process_parameters(&instructions, &actual_parameters, &node->expressions, state);
 
-		/* Local shader has no exact candidates; check the built-ins. */
+		/* Check the built-ins. */
 		_mesa_glsl_initialize_builtin_functions();
-		if (_mesa_glsl_find_builtin_function(state, func_name, &actual_parameters))
+		ir_function_signature* func = _mesa_glsl_find_builtin_function(state, func_name,
+				&actual_parameters);
+		if (func) {
 			node->debug_builtin = true;
+			node->debug_void_builtin = func->return_type->is_void();
+		}
 	}
 }
 
