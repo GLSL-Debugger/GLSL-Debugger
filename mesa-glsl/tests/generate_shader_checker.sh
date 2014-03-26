@@ -8,7 +8,7 @@ cat <<EOF
 SHADERS_PATH="${OUTPUT_PATH}/shaders"
 FILES_PATH="${TEST_DIR}/shaders"
 mkdir -p \${SHADERS_PATH}
-rm \${SHADERS_PATH}/*.{frag,geom}
+rm -f \${SHADERS_PATH}/*.{frag,geom}
 for type in geom frag; do
   ( cd \$FILES_PATH/test.\${type}.dbgout
     for file in \$(find . -type f ! -name rules); do
