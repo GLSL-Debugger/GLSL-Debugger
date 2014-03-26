@@ -3,7 +3,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 float dbgResult;
-bool dbgCond;
+int dbgCond;
 
 varying vec3 f_color;
 uniform sampler2D texture1;

@@ -490,7 +490,7 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 
 void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 {
-	bool copyCondition = false;
+	bool copyExpression = false;
 	/* Add debug code */
 	if (node->debug_target()) {
 		this->dbgTargetProcessed = true;
@@ -509,7 +509,7 @@ void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 				break;
 			case ast_dbg_switch_condition_passed:
 			case ast_dbg_switch_branch:
-				copyCondition = true;
+				copyExpression = true;
 				break;
 			default:
 				break;
@@ -521,7 +521,7 @@ void ast_output_traverser_visitor::visit(class ast_switch_statement* node)
 
 	/* Add condition */
 	if (node->test_expression) {
-		if (copyCondition) {
+		if (copyExpression) {
 			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
 			ralloc_asprintf_append(&buffer, " = (");
 			node->test_expression->accept(this);

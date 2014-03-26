@@ -230,8 +230,10 @@ void CodeGen::initTarget(ast_switch_statement* node, EShLanguage l, DbgCgOptions
 		return;
 
 	if (node->debug_state_internal == ast_dbg_switch_condition_passed
-			|| node->debug_state_internal == ast_dbg_switch_branch)
+			|| node->debug_state_internal == ast_dbg_switch_branch) {
 		init(CG_TYPE_CONDITION, NULL, l);
+		this->condition->type = SH_INT;
+	}
 }
 
 void CodeGen::initTarget(ast_iteration_statement* node, EShLanguage l, DbgCgOptions o)
@@ -388,19 +390,22 @@ static const char* getInitializationCode(cgInitialization init)
 
 void CodeGen::addInitialization(cgTypes type, cgInitialization init, char** prog)
 {
+	ShVariable* tgt = NULL;
 	switch (type) {
 	case CG_TYPE_RESULT:
-		ralloc_asprintf_append(prog, "%s = %s", result->name, getTypeCode(result).c_str());
+		tgt = result;
 		break;
 	case CG_TYPE_CONDITION:
-		ralloc_asprintf_append(prog, "%s = %s", condition->name, getTypeCode(condition).c_str());
+		tgt = condition;
 		break;
 	case CG_TYPE_PARAMETER:
-		ralloc_asprintf_append(prog, "%s = %s", parameter->name, getTypeCode(parameter).c_str());
+		tgt = parameter;
 		break;
 	default:
 		break;
 	}
+	if (tgt)
+		ralloc_asprintf_append(prog, "%s = %s", tgt->name, getTypeCode(tgt).c_str());
 	ralloc_asprintf_append(prog, "(%s)", getInitializationCode(init));
 }
 
@@ -517,20 +522,10 @@ static void addVariableCode(char** prog, ShChangeable *cgb, ShVariableList *vl)
 {
 	ShVariable *var;
 
-	if (!cgb || !vl) {
-		dbgPrint(DBGLVL_ERROR,
-				"CodeInsertion - called getVariableType without valid parameter\n");
-		exit(1);
-	}
+	assert(cgb && vl || !"CodeInsertion - called getVariableType without valid parameter\n");
 
 	var = findShVariableFromId(vl, cgb->id);
-
-	if (!var) {
-		dbgPrint(DBGLVL_ERROR,
-				"CodeInsertion - called getVariableType without valid parameter\n");
-		exit(1);
-	}
-
+	assert(var || !"CodeInsertion - called getVariableType without valid parameter\n");
 	ralloc_asprintf_append(prog, "%s", var->name);
 
 	if (!var->builtin && var->qualifier != SH_VARYING_IN && var->qualifier != SH_VARYING_OUT
@@ -550,12 +545,8 @@ static void addVariableCode(char** prog, ShChangeable *cgb, ShVariableList *vl)
 			ralloc_asprintf_append(prog, ".%s", itoSwizzle(idx->index));
 			break;
 		case SH_CGB_STRUCT:
-			if (idx->index < var->structSize) {
-				var = var->structSpec[idx->index];
-			} else {
-				dbgPrint(DBGLVL_ERROR, "CodeInsertion - struct and changeable do not match\n");
-				exit(1);
-			}
+			assert(idx->index < var->structSize || !"CodeInsertion - struct and changeable do not match\n");
+			var = var->structSpec[idx->index];
 			ralloc_asprintf_append(prog, ".%s", var->name);
 			break;
 		case SH_CGB_SWIZZLE:
@@ -570,32 +561,29 @@ static int getVariableSizeByArrayIndices(ShVariable *var, int numOfArrayIndices)
 {
 	switch (numOfArrayIndices) {
 	case 0:
-		if (var->isArray) {
+		if (var->isArray)
 			return var->arraySize[0] * var->size;
-		} else if (var->structSpec) {
+		else if (var->structSpec)
 			return var->structSize;
-		} else if (var->isMatrix) {
-			/* HINT: glsl1.2 requires change here */
-			return var->size * var->size;
-		} else {
+		else if (var->isMatrix)
+			return var->matrixSize[0] * var->matrixSize[1];
+		else
 			return var->size;
-		}
 	case 1:
 		if (var->isArray) {
-			if (var->structSpec) {
+			if (var->structSpec)
 				return var->structSize;
-			} else {
+			else
 				return var->size;
-			}
 		} else if (var->isMatrix) {
 			/* HINT: glsl1.2 requires change here */
 			return var->size;
 		} else if (var->size > 1) {
 			return 1;
 		} else {
-			dbgPrint(DBGLVL_ERROR, "CodeInsertion - array subscript to a non-array variable\n");
-			exit(1);
+			assert(!"CodeInsertion - array subscript to a non-array variable\n");
 		}
+		break;
 	case 2:
 		if (var->isArray) {
 			if (var->isMatrix) {
@@ -604,28 +592,25 @@ static int getVariableSizeByArrayIndices(ShVariable *var, int numOfArrayIndices)
 			} else if (var->size > 1) {
 				return 1;
 			} else {
-				dbgPrint(DBGLVL_ERROR,
-						"CodeInsertion - array subscript to a non-array variable\n");
-				exit(1);
+				assert(!"CodeInsertion - array subscript to a non-array variable\n");
 			}
 		} else if (var->isMatrix) {
 			return 1;
 		} else {
-			dbgPrint(DBGLVL_ERROR, "CodeInsertion - array subscript to a non-array variable\n");
-			exit(1);
+			assert(!"CodeInsertion - array subscript to a non-array variable\n");
 		}
+		break;
 	case 3:
-		if (var->isArray && var->isMatrix) {
-			return 1;
-		} else {
-			dbgPrint(DBGLVL_ERROR, "CodeInsertion - array subscript to a non-array variable\n");
-			exit(1);
-		}
+		assert(var->isArray && var->isMatrix || !"CodeInsertion - array subscript to a non-array variable\n");
+		return 1;
 	default:
 		dbgPrint(DBGLVL_ERROR, "CodeInsertion - too many array subscripts (%i)\n",
 				numOfArrayIndices);
-		exit(1);
+		assert(0);
+		break;
 	}
+
+	return 0;
 }
 
 static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
@@ -634,13 +619,12 @@ static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
 	int arraySub = 0;
 	ShVariable *var;
 
-	if (!cgb || !vl) {
+	if (!cgb || !vl)
 		return 0;
-	}
+
 	var = findShVariableFromId(vl, cgb->id);
-	if (!var) {
+	if (!var)
 		return 0;
-	}
 
 	size = var->size;
 
@@ -656,14 +640,10 @@ static int getShChangeableSize(ShChangeable *cgb, ShVariableList *vl)
 			size = 1;
 			break;
 		case SH_CGB_STRUCT:
-			if (idx->index < var->structSize) {
-				var = var->structSpec[idx->index];
-				arraySub = 0;
-				size = getVariableSizeByArrayIndices(var, arraySub);
-			} else {
-				dbgPrint(DBGLVL_ERROR, "CodeInsertion - struct and changeable do not match\n");
-				exit(1);
-			}
+			assert(idx->index < var->structSize || !"CodeInsertion - struct and changeable do not match\n");
+			var = var->structSpec[idx->index];
+			arraySub = 0;
+			size = getVariableSizeByArrayIndices(var, arraySub);
 			break;
 		case SH_CGB_SWIZZLE:
 			size = (int) ceil(log10((float) idx->index));
