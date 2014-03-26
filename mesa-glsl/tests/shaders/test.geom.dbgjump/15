@@ -80,7 +80,7 @@ AST_EXPRESSION (++)
 AST_EXPRESSION (identifier)
 AST_FUNCTION_EXPRESSION (function_call)
 Status: DBG_RS_STATUS_UNSET Pos: DBG_RS_POSITION_LOOP_FOR
-Range: (3:11 - 4:14)
+Range: (35:11 - 38:11)
 Scope:
  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
 Changeables:

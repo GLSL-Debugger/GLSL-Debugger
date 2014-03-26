@@ -7,7 +7,8 @@ layout(max_vertices = 3, triangle_strip) out;
 out float dbgResult;
 int dbgIter0;
 
-void  main()
+
+void main()
 {
   dbgResult = float(0.0);
   int i;
