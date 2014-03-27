@@ -9,7 +9,7 @@
 
 #include "ast_nodes.h"
 #include "call_visitor.h"
-#include "glslang/Interface/ShaderHolder.h"
+#include "interface/ShaderHolder.h"
 #include "Format.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestSuite.h>

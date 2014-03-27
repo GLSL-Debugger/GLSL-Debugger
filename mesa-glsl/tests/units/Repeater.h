@@ -7,9 +7,9 @@
 #define TEST_REPEATOR_H_
 
 #include "Base.h"
-#include "glslang/Interface/Program.h"
-#include "glslang/Interface/Visitors/debugpath.h"
-#include "glslang/Interface/Visitors/debugjump.h"
+#include "interface/Program.h"
+#include "interface/visitors/debugpath.h"
+#include "interface/visitors/debugjump.h"
 #include <cppunit/extensions/RepeatedTest.h>
 #include <cppunit/TestResult.h>
 

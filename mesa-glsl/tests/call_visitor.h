@@ -7,7 +7,7 @@
 #ifndef AST_CALL_VISITOR_H_
 #define AST_CALL_VISITOR_H_
 
-#include "glsl/ast_visitor.h"
+#include "mesa/glsl/ast_visitor.h"
 #include "ast_nodes.h"
 
 class CallAcceptor

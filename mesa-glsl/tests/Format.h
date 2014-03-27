@@ -7,7 +7,7 @@
 #ifndef TEST_FORMAT_H_
 #define TEST_FORMAT_H_
 
-#include "glslang/Include/ShaderLang.h"
+#include "interface/Shader.h"
 #include <string>
 #include <sstream>
 

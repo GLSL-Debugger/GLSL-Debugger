@@ -4,9 +4,9 @@
  *  Created on: 11.02.2014
  */
 #include <stdio.h>
-#include "glsl/ralloc.h"
-#include "mesa/main/mtypes.h"
-#include "glsl/standalone_scaffolding.h"
+#include "mesa/glsl/ralloc.h"
+#include "mesa/glsl/standalone_scaffolding.h"
+#include "main/mtypes.h"
 
 static int glsl_version = 330;
 

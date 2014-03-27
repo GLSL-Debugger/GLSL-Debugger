@@ -7,7 +7,7 @@
 #ifndef TEST_SHADERINPUT_H_
 #define TEST_SHADERINPUT_H_
 
-#include "glslang/Interface/ShaderHolder.h"
+#include "interface/ShaderHolder.h"
 #include "Rules.h"
 #include <map>
 #include <vector>

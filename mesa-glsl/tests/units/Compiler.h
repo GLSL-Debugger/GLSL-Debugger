@@ -8,7 +8,7 @@
 #define COMPILER_H_
 
 #include "ShaderLang.h"
-#include "glslang/Interface/Visitors/debugvar.h"
+#include "interface/visitors/debugvar.h"
 #include "Base.h"
 
 

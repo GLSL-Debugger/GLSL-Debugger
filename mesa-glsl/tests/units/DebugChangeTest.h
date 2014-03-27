@@ -8,9 +8,9 @@
 #define DEBUGCHANGETEST_H_
 
 #include "ShaderInput.h"
-#include "glslang/Include/ShaderLang.h"
-#include "glslang/Interface/Visitors/debugchange.h"
-#include "glslang/Interface/AstScope.h"
+#include "interface/Shader.h"
+#include "interface/visitors/debugchange.h"
+#include "interface/AstScope.h"
 #include "Base.h"
 
 

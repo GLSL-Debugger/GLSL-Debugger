@@ -4,11 +4,11 @@
  *  Created on: 12.02.2014
  */
 
-#include "glsl/ralloc.h"
+#include "mesa/glsl/ralloc.h"
 #include "misc.h"
 #include "ShaderInput.h"
-#include "glslang/Interface/Program.h"
-#include "glslang/Interface/SymbolTable.h"
+#include "interface/Program.h"
+#include "interface/SymbolTable.h"
 #include "glsldb/utils/dbgprint.h"
 #include <locale.h>
 #include <sys/stat.h>

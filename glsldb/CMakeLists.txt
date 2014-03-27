@@ -44,8 +44,7 @@ include_directories(${OPENGL_INCLUDE_DIR}
 
 if(DEFINED USE_MESA)
     include_directories(
-    	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Public
-    	${PROJECT_SOURCE_DIR}/mesa-glsl/glslang/Include
+    	${PROJECT_SOURCE_DIR}/mesa-glsl/include
     )
     set(GLSL_LIBRARIES glsl_mesa_interface)
 else()

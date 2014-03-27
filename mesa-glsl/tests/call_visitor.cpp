@@ -4,7 +4,7 @@
  *  Created on: 22.02.2014
  */
 
-#include "glsl/ast.h"
+#include "mesa/glsl/ast.h"
 #include "call_visitor.h"
 
 

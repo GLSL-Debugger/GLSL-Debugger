@@ -8,7 +8,7 @@
 #define DEBUGJUMPTEST_H_
 
 #include "Repeater.h"
-#include "glslang/Interface/CodeTools.h"
+#include "interface/CodeTools.h"
 
 
 const char* DBG_NAMES[ast_dbg_state_end] = {

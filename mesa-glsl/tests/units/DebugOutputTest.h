@@ -7,8 +7,8 @@
 #define DEBUGOUTPUTTEST_H_
 
 #include "Repeater.h"
-#include "glslang/Interface/CodeTools.h"
-#include "glslang/Interface/Program.h"
+#include "interface/CodeTools.h"
+#include "interface/Program.h"
 
 
 const char* DBG_OW_MODE[ast_dbg_ow_end] = {

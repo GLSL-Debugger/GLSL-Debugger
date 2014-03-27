@@ -6,7 +6,7 @@
 #ifndef TEST_RULES_H_
 #define TEST_RULES_H_
 
-#include "ast.h"
+#include "mesa/glsl/ast.h"
 #include "call_visitor.h"
 #include <string>
 #include <map>

@@ -9,8 +9,8 @@
 
 #include "ShaderInput.h"
 #include "ShaderLang.h"
-#include "glslang/Interface/Visitors/debugvar.h"
-#include "glslang/Interface/AstScope.h"
+#include "interface/visitors/debugvar.h"
+#include "interface/AstScope.h"
 #include "Base.h"
 
 
