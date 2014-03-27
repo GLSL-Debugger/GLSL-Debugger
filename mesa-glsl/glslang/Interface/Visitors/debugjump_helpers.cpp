@@ -4,8 +4,8 @@
  *  Created on: 17.03.2014.
  */
 
-#include "debugjump.h"
 #include "glsl/ast.h"
+#include "debugjump.h"
 #include "glslang/Interface/CodeTools.h"
 #include "glsldb/utils/dbgprint.h"
 #include <assert.h>
@@ -32,15 +32,20 @@ static inline DbgRsTargetPosition loop_position(ast_iteration_statement::ast_ite
 	return DBG_RS_POSITION_DUMMY;
 }
 
+#define SET_OPERATION_INTERNAL(internal, op, ds, dsi, pos) \
+	this->operation = op;				\
+	node->debug_state = ds;				\
+	internal = dsi;						\
+	result.position = pos;
+
 #define SET_OPERATION(op, ds, dsi, pos) 	\
-		this->operation = op;				\
-		node->debug_state = ds;				\
-		node->debug_state_internal = dsi;	\
-		result.position = pos;
+	SET_OPERATION_INTERNAL(node->debug_state_internal, op, ds, dsi, pos)
 
 
-
-bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
+bool ast_debugjump_traverser_visitor::selection(class ast_node* node,
+		class ast_node* condition,
+		class ast_node* then_statement, class ast_node* else_statement,
+		enum ast_dbg_state_internal_if& internal_state)
 {
 	VPRINT( 2, "process Selection L:%s DbgSt:%i\n",
 			FormatSourceRange(node->get_location()).c_str(), node->debug_state);
@@ -48,71 +53,70 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 	if (operation == OTOpTargetUnset) {
 		if (node->debug_state != ast_dbg_state_target)
 			return true;
-
-		switch (node->debug_state_internal) {
+		switch (internal_state) {
 		case ast_dbg_if_unset:
-			assert(!"CodeTools - target but state unset\n");
+			assert(!"DebugChange - target but state unset\n");
 			break;
 		case ast_dbg_if_init: {
-			VPRINT( 3, "\t ------- unset target --------\n");
-			SET_OPERATION(OTOpTargetSet, ast_dbg_state_unset, ast_dbg_if_condition,
-					DBG_RS_POSITION_UNSET)
+			VPRINT(3, "\t ------- unset target --------\n");
+			SET_OPERATION_INTERNAL(internal_state, OTOpTargetSet, ast_dbg_state_unset,
+					ast_dbg_if_condition, DBG_RS_POSITION_UNSET)
 
 			if (this->dbgBehaviour & DBG_BH_JUMP_INTO) {
 				// visit condition
-				if (node->condition)
-					node->condition->accept(this);
+				if (condition)
+					condition->accept(this);
 
 				// there was not target in condition, so copy all changeables;
 				// it's unlikely that there is a changeable and no target,
 				// but anyway be on the safe side
 				if (this->operation == OTOpTargetSet)
-					addShChangeables(node->condition);
+					addShChangeables(condition);
 				return false;
 			} else {
 				/* Finish debugging this selection */
-				node->debug_state_internal = ast_dbg_if_unset;
+				internal_state = ast_dbg_if_unset;
 				/* copy changeables */
-				addShChangeables(node->condition);
-				addShChangeables(node->then_statement);
-				addShChangeables(node->else_statement);
+				addShChangeables(condition);
+				addShChangeables(then_statement);
+				addShChangeables(else_statement);
 				return false;
 			}
 			break;
 		}
 		case ast_dbg_if_condition_passed: {
-			VPRINT( 3, "\t ------- unset target again --------\n");
+			VPRINT(3, "\t ------- unset target again --------\n");
 			node->debug_state = ast_dbg_state_unset;
 			this->operation = OTOpTargetSet;
 			result.position = DBG_RS_POSITION_UNSET;
 
 			if (this->dbgBehaviour & DBG_BH_JUMP_OVER) {
 				/* Finish debugging this selection */
-				node->debug_state_internal = ast_dbg_if_unset;
+				internal_state = ast_dbg_if_unset;
 				/* copy changeables */
-				addShChangeables(node->then_statement);
-				addShChangeables(node->else_statement);
+				addShChangeables(then_statement);
+				addShChangeables(else_statement);
 				return false;
 			} else if (this->dbgBehaviour & DBG_BH_FOLLOW_ELSE) {
-				if (!node->else_statement) {
+				if (!else_statement) {
 					// It looks like it was this weird way before. Not sure
 					// this branch will ever execute
-					node->debug_state_internal = ast_dbg_if_then;
+					internal_state = ast_dbg_if_then;
 				} else {
-					node->debug_state_internal = ast_dbg_if_else;
+					internal_state = ast_dbg_if_else;
 					// check other branch for discards
-					if (node->then_statement->debug_sideeffects & ast_dbg_se_discard) {
+					if (then_statement->debug_sideeffects & ast_dbg_se_discard) {
 						this->result.passedDiscard = true;
 						VPRINT(6, "passed Discard %i\n", __LINE__);
 					}
 				}
 			} else {
-				node->debug_state_internal = ast_dbg_if_then;
+				internal_state = ast_dbg_if_then;
 				// check other branch for discards
-				if (node->else_statement &&
-						(node->else_statement->debug_sideeffects & ast_dbg_se_discard)) {
+				if (else_statement
+						&& (else_statement->debug_sideeffects & ast_dbg_se_discard)) {
 					this->result.passedDiscard = true;
-					VPRINT( 6, "passed Discard %i\n", __LINE__);
+					VPRINT(6, "passed Discard %i\n", __LINE__);
 				}
 			}
 			return true;
@@ -124,32 +128,34 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 		if (node->debug_state != ast_dbg_state_unset)
 			return true;
 
-		switch (node->debug_state_internal) {
+		switch (internal_state) {
 		case ast_dbg_if_unset:
-			VPRINT( 3, "\t -------- set target ---------\n");
-			SET_OPERATION(OTOpDone, ast_dbg_state_target, ast_dbg_if_init,
-					node->else_statement ? DBG_RS_POSITION_SELECTION_IF_ELSE : DBG_RS_POSITION_SELECTION_IF)
+			VPRINT(3, "\t -------- set target ---------\n");
+			SET_OPERATION_INTERNAL(internal_state, OTOpDone, ast_dbg_state_target,
+					ast_dbg_if_init, else_statement ?
+						DBG_RS_POSITION_SELECTION_IF_ELSE : DBG_RS_POSITION_SELECTION_IF)
 			setDbgResultRange(result.range, node->get_location());
 			setGobalScope(&node->scope);
 			return false;
 		case ast_dbg_if_condition:
-			VPRINT( 3, "\t -------- set target again ---------\n");
-			SET_OPERATION(OTOpDone, ast_dbg_state_target, ast_dbg_if_condition_passed,
-					node->else_statement ? DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE : DBG_RS_POSITION_SELECTION_IF_CHOOSE)
-			setDbgResultRange(result.range, node->condition->get_location());
+			VPRINT(3, "\t -------- set target again ---------\n");
+			SET_OPERATION_INTERNAL(internal_state, OTOpDone, ast_dbg_state_target,
+					ast_dbg_if_condition_passed, else_statement ?
+							DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE :
+							DBG_RS_POSITION_SELECTION_IF_CHOOSE)
+			setDbgResultRange(result.range, condition->get_location());
 			setGobalScope(&node->scope);
 			return false;
 		case ast_dbg_if_then:
 		case ast_dbg_if_else: {
-			VPRINT( 4, "\t -------- set condition pass ---------\n");
+			VPRINT(4, "\t -------- set condition pass ---------\n");
 			// Debugging of condition finished! Take care of the
 			// non-debugged branch - if there is one - and copy
 			// it's changeables!
-			ast_node* path =
-					node->debug_state_internal == ast_dbg_if_then ?
-							node->then_statement : node->else_statement;
+			ast_node* path = (internal_state == ast_dbg_if_then) ?
+					then_statement : else_statement;
 			addShChangeables(path);
-			node->debug_state_internal = ast_dbg_if_unset;
+			internal_state = ast_dbg_if_unset;
 			return false;
 		}
 		default:
@@ -158,7 +164,6 @@ bool ast_debugjump_traverser_visitor::enter(class ast_selection_statement* node)
 	}
 	return true;
 }
-
 
 bool ast_debugjump_traverser_visitor::enter(class ast_switch_statement* node)
 {

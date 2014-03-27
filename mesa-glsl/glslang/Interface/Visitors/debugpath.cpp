@@ -65,8 +65,17 @@ void ast_debugpath_traverser_visitor::leave(class ast_expression* node)
 	if (action != DPOpPathBuild)
 		return;
 
-	for (int i = 0; i < 3; ++i)
-		childPath(node, node->subexpressions[i]);
+	if (action == DPOpReset)
+		node->debug_state_internal = ast_dbg_if_unset;
+
+	if (node->oper == ast_conditional) {
+		childPath(node, node->subexpressions[1]);
+		childPath(node, node->subexpressions[2]);
+		childPath(node, node->subexpressions[0]);
+	} else {
+		for (int i = 0; i < 3; ++i)
+			childPath(node, node->subexpressions[i]);
+	}
 
 	if (node->debug_state != ast_dbg_state_unset)
 		path.push(node);

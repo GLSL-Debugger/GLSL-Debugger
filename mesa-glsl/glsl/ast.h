@@ -329,6 +329,8 @@ public:
    virtual void accept(ast_traverse_visitor *v) {  v->visit(this); }
    virtual ast_expression* as_expression() { return this; }
    enum ast_field_selection_type debug_selection_type;
+   /* for ast_conditional */
+   enum ast_dbg_state_internal_if debug_state_internal;
 #endif
 
    virtual ir_rvalue *hir(exec_list *instructions,

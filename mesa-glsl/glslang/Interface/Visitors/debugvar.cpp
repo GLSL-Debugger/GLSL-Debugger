@@ -54,7 +54,7 @@ bool ast_debugvar_traverser_visitor::enter(class ast_expression* node)
 	copyScopeTo(node);
 
 	if (node->oper == ast_identifier)
-		assert(node->debug_id >= 0 || !"Must not be here");
+		assert(node->debug_id >= 0 || !"All variables must have id");
 
 	return true;
 }

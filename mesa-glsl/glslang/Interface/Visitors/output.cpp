@@ -134,14 +134,66 @@ void ast_output_traverser_visitor::visit(class ast_expression* node)
 		ralloc_asprintf_append(&buffer, "%s", node->operator_string(node->oper));
 		break;
 
-	case ast_conditional:
-		assert(!"Not implemented");
-//		node->subexpressions[0]->print();
-//		printf("? ");
-//		node->subexpressions[1]->print();
-//		printf(": ");
-//		node->subexpressions[2]->print();
+	case ast_conditional: {
+		// TODO: merge it with selection
+
+		bool copyCondition = false;
+		/* Add debug code */
+		if (node->debug_target()) {
+			this->dbgTargetProcessed = true;
+			ralloc_asprintf_append(&buffer, "(");
+			if (cgOptions == DBG_CG_COVERAGE || cgOptions == DBG_CG_CHANGEABLE
+					|| cgOptions == DBG_CG_GEOMETRY_CHANGEABLE) {
+				switch (node->debug_state_internal) {
+				case ast_dbg_if_unset:
+					assert(!"CodeGen - selection status is unset\n");
+					break;
+				case ast_dbg_if_init:
+				case ast_dbg_if_condition:
+					/* Add debug code prior to selection */
+					cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+					ralloc_asprintf_append(&buffer, ", ");
+					break;
+				case ast_dbg_if_condition_passed:
+				case ast_dbg_if_then:
+				case ast_dbg_if_else:
+					if (node->subexpressions[0])
+						copyCondition = true;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+		ralloc_asprintf_append(&buffer, "(");
+		/* Add condition */
+		if (copyCondition) {
+			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
+			ralloc_asprintf_append(&buffer, " = (");
+			node->subexpressions[0]->accept(this);
+			ralloc_asprintf_append(&buffer, "), ");
+
+			/* Add debug code */
+			cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, 0);
+			ralloc_asprintf_append(&buffer, ", ");
+			cg.addDbgCode(CG_TYPE_CONDITION, &buffer, cgOptions, 0);
+		} else if (node->subexpressions[0])
+			node->subexpressions[0]->accept(this);
+
+		bool colorize = node->debug_target()
+				&& node->debug_state_internal == ast_dbg_if_condition_passed;
+
+		ralloc_asprintf_append(&buffer, ") ? (\n");
+		selection_body(node->subexpressions[1], colorize, true, true);
+		ralloc_asprintf_append(&buffer, ") : (\n");
+		selection_body(node->subexpressions[2], colorize, false, true);
+		ralloc_asprintf_append(&buffer, ")");
+		if (node->debug_target())
+			ralloc_asprintf_append(&buffer, ")");
+
 		break;
+	}
 
 	case ast_array_index:
 		node->subexpressions[0]->accept(this);
@@ -477,13 +529,16 @@ void ast_output_traverser_visitor::visit(class ast_selection_statement* node)
 		if (node->condition)
 			node->condition->accept(this);
 
+	bool colorize = node->debug_target()
+			&& node->debug_state_internal == ast_dbg_if_condition_passed;
+
 	ralloc_asprintf_append(&buffer, ") {\n");
-	selection_body(node, node->then_statement, true);
+	selection_body(node->then_statement, colorize, true);
 	ralloc_asprintf_append(&buffer, "}");
 
 	if (node->else_statement) {
 		ralloc_asprintf_append(&buffer, " else {\n");
-		selection_body(node, node->else_statement, false);
+		selection_body(node->else_statement, colorize, false);
 		ralloc_asprintf_append(&buffer, "}");
 	}
 }

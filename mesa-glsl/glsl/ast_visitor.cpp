@@ -48,7 +48,7 @@ void ast_traverse_visitor::visit(class ast_expression* node)
 	case ast_post_dec:
 	case ast_field_selection:
 	case ast_array_index:
-	case ast_conditional:  // TODO: ast_selection_statement
+	case ast_conditional:
 		for (int i = 0; i < 3; ++i) {
 			if (!node->subexpressions[i])
 				break;
@@ -322,30 +322,10 @@ void ast_traverse_visitor::visit(class ast_selection_statement* node)
 	--depth;
 
 	this->leave(node);
-//	}
 }
 
 void ast_traverse_visitor::visit(class ast_switch_statement* node)
 {
-//	if (flags & traverse_debugvisit) {
-//		bool visit;
-//		/* Visit node for optional check of condition */
-//		if (node->debug_state_internal == ast_dbg_if_unset
-//				|| node->debug_state_internal == ast_dbg_if_init
-//				|| node->debug_state_internal == ast_dbg_if_condition_passed)
-//			visit = this->traverse(node);
-//
-//		if (visit
-//				&& node->debug_state_internal == ast_dbg_if_condition
-//				&& node->test_expression)
-//			node->test_expression->accept(this);
-//
-//		/* Visit node again for choosing debugged branch */
-//		if (node->debug_state_internal == ast_dbg_if_condition)
-//			visit = this->traverse(node);
-//
-//		// TODO: ?
-//	} else {
 	if (!this->enter(node))
 		return;
 

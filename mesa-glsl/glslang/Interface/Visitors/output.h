@@ -69,7 +69,7 @@ protected:
 	void output_sequence(exec_list *, const char *, const char *,
 									  const char *, bool i = false);
 	bool geom_call(ast_function_expression *);
-	void selection_body(ast_selection_statement *, ast_node *, int);
+	void selection_body(ast_node *, bool, bool, bool conditional = false);
 	void loop_debug_prepare(ast_iteration_statement *);
 	void loop_debug_condition(ast_iteration_statement *);
 	void loop_debug_terminal(ast_iteration_statement *);

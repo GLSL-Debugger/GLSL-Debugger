@@ -408,20 +408,22 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 	return false;
 }
 
-void ast_output_traverser_visitor::selection_body(ast_selection_statement* node,
-		ast_node* instructions, int debug_option)
+void ast_output_traverser_visitor::selection_body(ast_node* instructions,
+		bool colorize, bool debug_option, bool conditional)
 {
 	if (!instructions)
 		return;
 
-   if (node->debug_target() && cgOptions == DBG_CG_SELECTION_CONDITIONAL
-		   && node->debug_state_internal == ast_dbg_if_condition_passed)	{
+   if (cgOptions == DBG_CG_SELECTION_CONDITIONAL && colorize) {
       depth++;
       /* Add code to colorize condition */
       indent();
       //DBG_CG_COVERAGE
       cg.addDbgCode(CG_TYPE_RESULT, &buffer, cgOptions, debug_option);
-      ralloc_asprintf_append(&buffer, ";\n");
+      if (conditional)
+    	  ralloc_asprintf_append(&buffer, ",\n");
+      else
+    	  ralloc_asprintf_append(&buffer, ";\n");
       depth--;
    }
 

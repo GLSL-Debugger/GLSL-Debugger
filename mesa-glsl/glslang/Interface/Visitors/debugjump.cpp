@@ -4,6 +4,7 @@
  *  Created on: 10.10.2013
  */
 
+#include "glsl/ast.h"
 #include "debugjump.h"
 #include "glsl/list.h"
 #include "glslang/Include/ShaderLang.h"
@@ -155,35 +156,71 @@ void ast_debugjump_traverser_visitor::setTarget(class ast_jump_statement* node)
 //	setGobalScope(&node->scope);
 //}
 
-void ast_debugjump_traverser_visitor::visit(class ast_selection_statement* node)
+void ast_debugjump_traverser_visitor::visit_selection(class ast_node* node)
 {
+	ast_expression* expr = node->as_expression();
+	ast_selection_statement* sels = node->as_selection_statement();
+
+	if (!expr && !sels)
+		return;
+
+	ast_node* condition = NULL;
+	ast_node* then_statement = NULL;
+	ast_node* else_statement = NULL;
+	enum ast_dbg_state_internal_if* internal_state;
+
+	if (expr) {
+		condition = expr->subexpressions[0];
+		then_statement = expr->subexpressions[1];
+		else_statement = expr->subexpressions[2];
+		internal_state = &expr->debug_state_internal;
+	} else if (sels) {
+		condition = sels->condition;
+		then_statement = sels->then_statement;
+		else_statement = sels->else_statement;
+		internal_state = &sels->debug_state_internal;
+	}
+
 	bool visit = true;
 	/* Visit node for optional check of condition */
-	if (node->debug_state_internal == ast_dbg_if_unset
-			|| node->debug_state_internal == ast_dbg_if_init
-			|| node->debug_state_internal == ast_dbg_if_condition_passed)
-		visit = this->enter(node);
+	if (*internal_state == ast_dbg_if_unset
+			|| *internal_state == ast_dbg_if_init
+			|| *internal_state == ast_dbg_if_condition_passed)
+		visit = selection(node, condition, then_statement, else_statement, *internal_state);
 
-	if (visit && node->debug_state_internal == ast_dbg_if_condition && node->condition)
-		node->condition->accept(this);
+	if (visit && *internal_state == ast_dbg_if_condition && condition)
+		condition->accept(this);
 
 	/* Visit node again for choosing debugged branch */
-	if (node->debug_state_internal == ast_dbg_if_condition)
-		visit = this->enter(node);
+	if (*internal_state == ast_dbg_if_condition)
+		visit = selection(node, condition, then_statement, else_statement, *internal_state);
 
 	if (visit) {
 		++depth;
-		if (node->debug_state_internal == ast_dbg_if_then && node->then_statement)
-			node->then_statement->accept(this);
-		if (node->debug_state_internal == ast_dbg_if_else && node->else_statement)
-			node->else_statement->accept(this);
+		if (*internal_state == ast_dbg_if_then && then_statement)
+			then_statement->accept(this);
+		if (*internal_state == ast_dbg_if_else && else_statement)
+			else_statement->accept(this);
 		--depth;
 	}
 
 	/* Visit node again for preparation of pass */
-	if (node->debug_state_internal == ast_dbg_if_then
-			|| node->debug_state_internal == ast_dbg_if_else)
-		visit = this->enter(node);
+	if (*internal_state == ast_dbg_if_then
+			|| *internal_state == ast_dbg_if_else)
+		visit = selection(node, condition, then_statement, else_statement, *internal_state);
+}
+
+void ast_debugjump_traverser_visitor::visit(class ast_expression* node)
+{
+	if (node->oper == ast_conditional)
+		visit_selection(node);
+	else
+		ast_traverse_visitor::visit(node);
+}
+
+void ast_debugjump_traverser_visitor::visit(class ast_selection_statement* node)
+{
+	visit_selection(node);
 }
 
 void ast_debugjump_traverser_visitor::visit(class ast_switch_statement* node)
@@ -312,9 +349,6 @@ bool ast_debugjump_traverser_visitor::enter(class ast_expression* node)
 		return false;
 		break;
 	}
-	case ast_conditional:  // TODO: ast_selection_statement
-		assert(!"not implemented");
-		break;
 	default:
 		break;
 	}

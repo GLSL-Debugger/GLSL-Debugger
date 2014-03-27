@@ -3,8 +3,6 @@ Not checked:
 	preprocessor directives	
 	default uniform layouts
 	images
-
-Not implemented:	
 	conditional expression (bool ? a : b)
 
 TODO:
