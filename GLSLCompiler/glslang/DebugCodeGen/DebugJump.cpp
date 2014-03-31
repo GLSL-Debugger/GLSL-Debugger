@@ -683,6 +683,7 @@ static bool TraverseBinary(bool /* preVisit */, TIntermBinary* node,
 		default:
 			return true;
 		}
+		break;
 	default:
 		switch (oit->operation) {
 		case OTOpPathClear:
@@ -1032,6 +1033,9 @@ static DbgRsTargetPosition setPositionLoop(LoopT t)
 		exit(1);
 		break;
 	}
+
+	// Never happens. Only warning
+	return DBG_RS_POSITION_DUMMY;
 }
 
 static bool TraverseLoop(bool, TIntermLoop* node, TIntermTraverser* it)
@@ -1957,6 +1961,7 @@ static void ScopeStackTraverseDummy(TIntermDummy* node, TIntermTraverser* it)
 
 	addScopeToScopeStack(node->getScope());
 }
+
 
 //
 //  Generate code from the given parse tree

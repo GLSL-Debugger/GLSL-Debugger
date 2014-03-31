@@ -3367,7 +3367,18 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
 	it.cgOptions = dbgCgOptions;
 	it.root = root;
 
+    /* I have some problems with locale-dependent %f interpretation in printf
+     * Not sure, whose fault it is, qt or some line of code in debugger initialization.
+     * I added this crutch to resolve it, but it must be eventually rewritten.
+     * Well... fuck you, something.
+     */
+    char* old_locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "POSIX");
+
 	root->traverse(&it);
+
+    /* restore locale */
+    setlocale(LC_NUMERIC, old_locale);
 
 	/* Unset target again */
 	if (target) {
