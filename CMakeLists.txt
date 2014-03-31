@@ -3,7 +3,20 @@ project(glsldb)
 
 # DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Debug")
-option(USE_MESA "Use mesa glsl compiler" ON)
+option(USE_MESA "Use mesa glsl compiler" OFF)
+option(TESTS "Build tests" OFF)
+
+if(TESTS)
+	enable_testing()
+	if (CMAKE_CONFIGURATION_TYPES)
+		add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+			--force-new-ctest-process --output-on-failure
+			--build-config "$<CONFIGURATION>")
+	else()
+		add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+			--force-new-ctest-process --output-on-failure)
+	endif()
+endif()
 
 # path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -88,11 +101,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${ARCHIVE_DIR})
 
 if(USE_MESA)
 	message(STATUS "GLSL compiler: mesa")
-    add_definitions(-DUSE_MESA)
-    add_subdirectory(mesa-glsl)
+	add_definitions(-DUSE_MESA)
+	add_subdirectory(mesa-glsl)
 else()
-    message(STATUS "GLSL compiler: native")
-    add_subdirectory(GLSLCompiler)
+	message(STATUS "GLSL compiler: native")
+	add_subdirectory(GLSLCompiler)
 endif()
 
 add_subdirectory(glsldb)

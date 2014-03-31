@@ -189,12 +189,12 @@ typedef enum {
 	DBG_BH_NO_ACTION = 0,                               // no default action
 	DBG_BH_SWITCH_BRANCH_FIRST = 1,                     // first switch branch
 	DBG_BH_SWITCH_BRANCH_LAST = SWITCH_BRANCHES_COUNT,  // last switch branch
-    DBG_BH_RESET = SWITCH_BRANCHES_COUNT + 1,           // reset debugging to the original program
-    DBG_BH_JUMP_INTO = DBG_BH_RESET << 1,               // trace function call, switch, selection then
+	DBG_BH_RESET = SWITCH_BRANCHES_COUNT + 1,           // reset debugging to the original program
+	DBG_BH_JUMP_INTO = DBG_BH_RESET << 1,               // trace function call, switch, selection then
 														// or current loop iteration
-    DBG_BH_FOLLOW_ELSE = DBG_BH_RESET << 2,             // evaluate else branch of a conditional
-    DBG_BH_JUMP_OVER = DBG_BH_RESET << 3,               // jump over any statement
-    DBG_BH_LOOP_NEXT_ITER = DBG_BH_RESET << 4           // jump to next iteration without debugging anything inbetween
+	DBG_BH_FOLLOW_ELSE = DBG_BH_RESET << 2,             // evaluate else branch of a conditional
+	DBG_BH_JUMP_OVER = DBG_BH_RESET << 3,               // jump over any statement
+	DBG_BH_LOOP_NEXT_ITER = DBG_BH_RESET << 4           // jump to next iteration without debugging anything inbetween
 } DbgBehaviour;
 
 //

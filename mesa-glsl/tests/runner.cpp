@@ -28,6 +28,5 @@ int main(int argc, char **argv)
 	runner.addTest(DebugChangeTest::suite());
 	runner.addTest(DebugJumpTest::suite());
 	runner.addTest(DebugOutputTest::suite());
-	runner.run();
-	return 0;
+	return !runner.run();
 }
