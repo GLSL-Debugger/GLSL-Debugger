@@ -32,7 +32,7 @@
 //POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "ShaderLang.h"
+#include "Shader.h"
 #include "CodeInsertion.h"
 #include "CodeTools.h"
 #include "AstStack.h"

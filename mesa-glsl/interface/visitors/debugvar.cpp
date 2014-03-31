@@ -44,7 +44,7 @@ ast_debugvar_traverser_visitor::ast_debugvar_traverser_visitor(AstShader* _sh,
 {
 	for(int i = 0; i < _sh->globals.numVariables; ++i) {
 		ShVariable* var = _sh->globals.variables[i];
-		addShVariable(vl, var, var->builtin);
+		addShVariableCtx(vl, var, var->builtin, _sh);
 		addToScope(var);
 	}
 }
@@ -92,7 +92,7 @@ bool ast_debugvar_traverser_visitor::enter(class ast_declaration* node)
 			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
 
 	// Add variable to the global list of all seen variables
-	addShVariable(vl, var, var->builtin);
+	addShVariableCtx(vl, var, var->builtin, shader);
 
 	if (node->initializer) {
 		node->initializer->accept(this);
@@ -130,7 +130,7 @@ bool ast_debugvar_traverser_visitor::enter(class ast_parameter_declarator* node)
 
 	VPRINT(3, "%c%sparameter %s <%i> %c%s\n", ESC_CHAR, ESC_BOLD,
 			node->identifier, var->uniqueId, ESC_CHAR, ESC_RESET);
-	addShVariable(vl, var, var->builtin);
+	addShVariableCtx(vl, var, var->builtin, shader);
 	addToScope(var);
 	dumpScope();
 	return false;

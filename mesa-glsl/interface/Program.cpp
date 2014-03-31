@@ -16,28 +16,6 @@ static struct {
 //
 // Some helper functions for easier scope handling
 //
-static void freeResult(DbgResult& r)
-{
-	if (r.scope.ids)
-		ralloc_free(r.scope.ids);
-	if (r.scopeStack.ids)
-		ralloc_free(r.scopeStack.ids);
-
-	if (!r.cgbls.changeables)
-		return;
-
-    for (int i=0; i < r.cgbls.numChangeables; i++) {
-        ShChangeable *c;
-        if ((c = r.cgbls.changeables[i])) {
-            for( int j=0; j<c->numIndices; j++)
-                free(c->indices[j]);
-            ralloc_free(c->indices);
-            ralloc_free(c);
-        }
-    }
-    ralloc_free(r.cgbls.changeables);
-}
-
 
 void clearTraverseDebugJump(void)
 {
@@ -45,18 +23,16 @@ void clearTraverseDebugJump(void)
     g.it = NULL;
 }
 
-void resetDbgResult(DbgResult& r, bool initialized)
+void resetDbgResult(DbgResult& r)
 {
-	if (initialized)
-		freeResult(r);
+	// All memory in DbgResult must not belong to it.
+	// Just clear it. Valgring says if something wrong.
 	memset(&r, '\0', sizeof(DbgResult));
 }
 
 static void resetGlobals()
 {
-	static bool initialized = false;
-	resetDbgResult(g.result, initialized);
-	initialized = true;
+	resetDbgResult(g.result);
 
 	if (!g.it)
 		g.it = new ast_debugjump_traverser_visitor(g.result);

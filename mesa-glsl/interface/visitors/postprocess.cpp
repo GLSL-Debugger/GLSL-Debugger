@@ -357,7 +357,7 @@ void ast_postprocess_traverser_visitor::leave(ast_expression* node)
 				ShVariable *shvar = astToShVariable(node, (variableQualifier) qual,
 														modifier, type, shader);
 				variables_id[var] = shvar->uniqueId;
-				addShVariable(&shader->globals, shvar, shvar->builtin);
+				addShVariableCtx(&shader->globals, shvar, shvar->builtin, shader);
 			}
 		}
 		break;

@@ -270,7 +270,7 @@ bool ShIsSampler(variableType v)
 }
 
 
-void addShVariable(ShVariableList *vl, ShVariable *v, int builtin)
+void addShVariableCtx(ShVariableList *vl, ShVariable *v, int builtin, void* mem_ctx)
 {
 	int i;
 	ShVariable **vp = vl->variables;
@@ -285,8 +285,8 @@ void addShVariable(ShVariableList *vl, ShVariable *v, int builtin)
 	}
 
 	vl->numVariables++;
-	vl->variables = (ShVariable**) realloc(vl->variables,
-			vl->numVariables * sizeof(ShVariable*));
+	vl->variables = (ShVariable**) reralloc_array_size(mem_ctx, vl->variables,
+			sizeof(ShVariable*), vl->numVariables);
 	vl->variables[vl->numVariables - 1] = v;
 }
 
@@ -424,22 +424,16 @@ const char* ShGetQualifierString(const ShVariable *v)
 
 ShVariable* copyShVariableCtx(ShVariable *src, void* mem_ctx)
 {
-	ShVariable *ret;
-	int i;
-
 	if (!src)
 		return NULL;
 
-	ret = (ShVariable*) rzalloc(mem_ctx, ShVariable);
+	ShVariable* ret = (ShVariable*) rzalloc(mem_ctx, ShVariable);
 	assert(ret || !"not enough memory to copy ShVariable");
 
 	ret->uniqueId = src->uniqueId;
 	ret->builtin = src->builtin;
-	if (src->name) {
-		ret->name = (char*) rzalloc_size(mem_ctx, strlen(src->name) + 1);
-		assert(ret->name || !"not enough memory to copy name of ShVariable");
-		strcpy(ret->name, src->name);
-	}
+	if (src->name)
+		ret->name = ralloc_strdup(ret, src->name);
 
 	ret->type = src->type;
 	ret->qualifier = src->qualifier;
@@ -448,22 +442,18 @@ ShVariable* copyShVariableCtx(ShVariable *src, void* mem_ctx)
 	ret->matrixSize[0] = src->matrixSize[0];
 	ret->matrixSize[1] = src->matrixSize[1];
 	ret->isArray = src->isArray;
-	for (i = 0; i < MAX_ARRAYS; i++) {
+	for (int i = 0; i < MAX_ARRAYS; i++)
 		ret->arraySize[i] = src->arraySize[i];
-	}
 
-	if (src->structName) {
-		ret->structName = (char*) rzalloc_size(mem_ctx, strlen(src->structName) + 1);
-		assert(ret->structName || !"not enough memory to copy strctName of ShVariable");
-		strcpy(ret->structName, src->structName);
-	}
+	if (src->structName)
+		ret->structName = ralloc_strdup(ret, src->structName);
 
 	ret->structSize = src->structSize;
 	if (ret->structSize) {
-		ret->structSpec = (ShVariable**) rzalloc_array(mem_ctx, ShVariable*, ret->structSize);
+		ret->structSpec = (ShVariable**) rzalloc_array(ret, ShVariable*, ret->structSize);
 		assert(ret->structSpec || !"not enough memory to copy structSpec of ShVariable");
-		for (i = 0; i < ret->structSize; i++)
-			ret->structSpec[i] = copyShVariableCtx(src->structSpec[i], mem_ctx);
+		for (int i = 0; i < ret->structSize; i++)
+			ret->structSpec[i] = copyShVariableCtx(src->structSpec[i], ret->structSpec);
 	}
 
 	return ret;
@@ -479,39 +469,32 @@ ShVariable* copyShVariable(ShVariable *src)
 
 void freeShVariable(ShVariable **var)
 {
-	if (var && *var) {
-		// Remove variable from storages
-		std::map<int, ShVariable*>::iterator iit = VariablesById.find(
-				(*var)->uniqueId);
-		if (iit != VariablesById.end())
-			VariablesById.erase(iit);
+	if (!var || *var == NULL)
+		return;
 
-		ralloc_free((*var)->name);
-		for (int i = 0; i < (*var)->structSize; i++)
-			freeShVariable(&(*var)->structSpec[i]);
-		ralloc_free((*var)->structSpec);
-		ralloc_free((*var)->structName);
-		ralloc_free(*var);
-		*var = NULL;
-	}
+	// Remove variable from storages if it is not copy
+	auto iit = VariablesById.find((*var)->uniqueId);
+	if (iit != VariablesById.end() && iit->second == *var)
+		VariablesById.erase(iit);
+
+	ralloc_free(*var);
+	*var = NULL;
 }
 
 void freeShVariableList(ShVariableList *vl)
 {
-	int i;
-	for (i = 0; i < vl->numVariables; i++)
+	for (int i = 0; i < vl->numVariables; i++)
 		freeShVariable(&vl->variables[i]);
-	free(vl->variables);
+	ralloc_free(vl->variables);
 	vl->numVariables = 0;
 }
 
-void glsltypeToShVariable(ShVariable* v, const struct glsl_type* vtype,
-		variableQualifier qualifier, variableVaryingModifier modifier,
-		void* mem_ctx)
+static void glsltypeToShVariable(ShVariable* var, const struct glsl_type* vtype,
+		variableQualifier qualifier, variableVaryingModifier modifier)
 {
 #define SET_TYPE(glsl, native) \
     case glsl: \
-        v->type = native; \
+        var->type = native; \
         break;
 
 	// Type of variable (SH_FLOAT/SH_INT/SH_BOOL/SH_STRUCT)
@@ -531,45 +514,45 @@ void glsltypeToShVariable(ShVariable* v, const struct glsl_type* vtype,
 #undef SET_TYPE
 
 	// Qualifier of variable
-	v->qualifier = qualifier;
+	var->qualifier = qualifier;
 
 	// Varying modifier
-	v->varyingModifier = modifier;
+	var->varyingModifier = modifier;
 
 	// Scalar/Vector size
-	v->size = vtype->components();
+	var->size = vtype->components();
 
 	// Matrix handling
-	v->isMatrix = vtype->is_matrix();
-	v->matrixSize[0] = vtype->vector_elements;
-	v->matrixSize[1] = vtype->matrix_columns;
+	var->isMatrix = vtype->is_matrix();
+	var->matrixSize[0] = vtype->vector_elements;
+	var->matrixSize[1] = vtype->matrix_columns;
 
 	// Array handling
-	v->isArray = vtype->is_array();
+	var->isArray = vtype->is_array();
 	for (int i = 0; i < MAX_ARRAYS; i++) {
-		v->arraySize[i] = vtype->array_size();
+		var->arraySize[i] = vtype->array_size();
 	}
 
 	if (vtype->base_type == GLSL_TYPE_STRUCT) {
 		// Add variables recursive
-		v->structSize = vtype->length;
-		v->structSpec = (ShVariable**) malloc(v->structSize * sizeof(ShVariable*));
-		v->structName = strdup(vtype->name);
-		for (int i = 0; i < v->structSize; ++i) {
+		var->structSize = vtype->length;
+		var->structSpec = (ShVariable**) ralloc_array(var, ShVariable*, var->structSize);
+		var->structName = ralloc_strdup(var, vtype->name);
+		for (int i = 0; i < var->structSize; ++i) {
 			struct glsl_struct_field* field = &vtype->fields.structure[i];
-			ShVariable* var = (ShVariable*)rzalloc(mem_ctx, ShVariable);
-			var->uniqueId = -1;
+			ShVariable* svar = (ShVariable*)rzalloc(var->structSpec, ShVariable);
+			svar->uniqueId = -1;
 			if (qualifier & SH_BUILTIN)
-				var->qualifier = SH_BUILTIN;
-			var->name = strdup(field->name);
+				svar->qualifier = SH_BUILTIN;
+			svar->name = ralloc_strdup(svar, field->name);
 			int field_mod = modifierFromGLSL(field, modifier & SH_VM_INVARIANT);
-			glsltypeToShVariable(var, field->type, qualifier, field_mod, mem_ctx);
-			v->structSpec[i] = var;
+			glsltypeToShVariable(svar, field->type, qualifier, field_mod);
+			var->structSpec[i] = svar;
 		}
 	} else {
-		v->structName = NULL;
-		v->structSize = 0;
-		v->structSpec = NULL;
+		var->structName = NULL;
+		var->structSize = 0;
+		var->structSpec = NULL;
 	}
 }
 
@@ -597,8 +580,8 @@ ShVariable* astToShVariable(ast_node* decl, variableQualifier qualifier,
 		var = (ShVariable*)rzalloc(mem_ctx, ShVariable);
 		var->uniqueId = -1;
 		var->builtin = qualifier & SH_BUILTIN;
-		var->name = strdup(identifier);
-		glsltypeToShVariable(var, decl_type, qualifier, modifier, mem_ctx);
+		var->name = ralloc_strdup(var, identifier);
+		glsltypeToShVariable(var, decl_type, qualifier, modifier);
 		addAstShVariable(decl, var);
 	}
 
@@ -608,9 +591,7 @@ ShVariable* astToShVariable(ast_node* decl, variableQualifier qualifier,
 
 void ShDumpVariable(ShVariable *v, int depth)
 {
-	int i;
-
-	for (i = 0; i < depth; i++)
+	for (int i = 0; i < depth; i++)
 		dbgPrint(DBGLVL_COMPILERINFO, "    ");
 
 	if (0 <= v->uniqueId)
@@ -632,7 +613,7 @@ void ShDumpVariable(ShVariable *v, int depth)
 	dbgPrint(DBGLVL_COMPILERINFO, " %s", v->name);
 
 	if (v->isArray) {
-		for (i = 0; i < MAX_ARRAYS; i++) {
+		for (int i = 0; i < MAX_ARRAYS; i++) {
 			if (v->arraySize[i] < 0)
 				break;
 			dbgPrint(DBGLVL_COMPILERINFO, "[%i]", v->arraySize[i]);
@@ -644,7 +625,7 @@ void ShDumpVariable(ShVariable *v, int depth)
 
 	if (v->structSize != 0) {
 		depth++;
-		for (i = 0; i < v->structSize; i++)
+		for (int i = 0; i < v->structSize; i++)
 			ShDumpVariable(v->structSpec[i], depth);
 	}
 

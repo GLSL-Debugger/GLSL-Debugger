@@ -5,6 +5,7 @@
  */
 
 #include "output.h"
+#include "Shader.h"
 #include "CodeTools.h"
 #include "SymbolTable.h"
 #include "AstScope.h"

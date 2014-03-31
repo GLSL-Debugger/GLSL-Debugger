@@ -25,16 +25,23 @@ void copyShChangeableToListCtx(ShChangeableList *cl, ShChangeable *c, void* mem_
 void copyShChangeableListCtx(ShChangeableList *clout, exec_list *clin, void* mem_ctx);
 
 // Variables
+ShVariable* findShVariable(int id);
+ShVariable* findShVariableFromId(ShVariableList *vl, int id);
+ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
+
 ShVariable* copyShVariableCtx(ShVariable *src, void* mem_ctx);
+void addShVariableCtx(ShVariableList *vl, ShVariable *v, int builtin, void *mem_ctx);
 void addAstShVariable(ast_node*, ShVariable*);
+ShVariable* astToShVariable(ast_node* decl, variableQualifier qualifier,
+		variableVaryingModifier modifier, const struct glsl_type* decl_type,
+		void* mem_ctx);
+
 variableQualifier qualifierFromAst(const ast_type_qualifier* qualifier, bool is_parameter);
 variableQualifier qualifierFromIr(ir_variable* var);
 variableVaryingModifier modifierFromAst(const ast_type_qualifier* qualifier);
 variableVaryingModifier modifierFromIr(const ir_variable* var);
-ShVariable* astToShVariable(ast_node* decl, variableQualifier qualifier,
-		variableVaryingModifier modifier, const struct glsl_type* decl_type,
-		void* mem_ctx);
-ShVariable* findShVariable(int id);
+
+
 
 
 

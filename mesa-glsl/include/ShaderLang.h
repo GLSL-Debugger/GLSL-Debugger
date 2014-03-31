@@ -393,12 +393,9 @@ SH_IMPORT_EXPORT const char* ShGetQualifierString(const ShVariable *v);
 // Some helper functions for variable handling
 //
 SH_IMPORT_EXPORT void ShDumpVariable(ShVariable *v, int depth);
-void addShVariable(ShVariableList *vl, ShVariable *v, int builtin);
-ShVariable* findShVariableFromId(ShVariableList *vl, int id);
-ShVariable* findFirstShVariableFromName(ShVariableList *vl, const char *name);
-ShVariable* copyShVariable(ShVariable *src);
-void freeShVariable(ShVariable **var);
-void freeShVariableList(ShVariableList *vl);
+SH_IMPORT_EXPORT ShVariable* copyShVariable(ShVariable *src);
+SH_IMPORT_EXPORT void freeShVariable(ShVariable **var);
+SH_IMPORT_EXPORT void freeShVariableList(ShVariableList *vl);
 
 
 //

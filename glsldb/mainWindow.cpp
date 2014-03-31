@@ -3152,9 +3152,10 @@ void MainWindow::cleanupDBGShader()
 		}
 
 		if (m_dShCompiler) {
+			// It is not needed in mesa-glsl
+			freeShVariableList(&m_dShVariableList);
 			ShDestruct(m_dShCompiler);
 			m_dShCompiler = 0;
-			freeShVariableList(&m_dShVariableList);
 		}
 
 		UT_NOTIFY(LV_INFO, "restore render target");
