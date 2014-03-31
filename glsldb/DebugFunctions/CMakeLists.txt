@@ -15,9 +15,9 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DIR}/plugins")
 
-include_directories(${X11_INCLUDE_DIR}
-	${PROJECT_SOURCE_DIR}/glsldb
-	${CMAKE_CURRENT_BINARY_DIR}/../DebugLib
+include_directories("${X11_INCLUDE_DIR}"
+	"${PROJECT_SOURCE_DIR}/glsldb"
+	"${CMAKE_CURRENT_BINARY_DIR}/../DebugLib"
 )
 
 add_library(glEnd MODULE ${SRC})
@@ -31,5 +31,5 @@ target_link_libraries(glEnd
 )
 
 if(GLSLDB_WIN)
-	install(TARGETS glEnd LIBRARY DESTINATION ${DISTRIBUTION_DIRECTORY}/plugins)
+	install(TARGETS glEnd LIBRARY DESTINATION "${DISTRIBUTION_DIRECTORY}/plugins")
 endif()

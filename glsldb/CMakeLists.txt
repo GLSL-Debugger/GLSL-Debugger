@@ -32,24 +32,24 @@ set(SRC
 	${RES_OUTFILES}
 )
 
-include_directories(${OPENGL_INCLUDE_DIR}
-	${X11_INCLUDE_DIR}
-	${QT_INCLUDE_DIR}
-	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
-	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/utils
-	${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
-	${GLEW_INCLUDE_DIR}
+include_directories("${OPENGL_INCLUDE_DIR}"
+	"${X11_INCLUDE_DIR}"
+	"${QT_INCLUDE_DIR}"
+	"${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public"
+	"${CMAKE_CURRENT_BINARY_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}/utils"
+	"${CMAKE_CURRENT_SOURCE_DIR}/DebugLib"
+	"${GLEW_INCLUDE_DIR}"
 )
 
 if(GLSLDB_LINUX)
 	#add_definitions(-DUNIX)
-	list(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp)
+	list(REMOVE_ITEM SRC "${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp")
 endif()
 if(GLSLDB_WIN)
 	include_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows
+		"${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows"
 	)
 endif()
 
@@ -67,5 +67,5 @@ target_link_libraries(glsldb
 )
 
 if(GLSLDB_WIN)
-	install(TARGETS glsldb RUNTIME DESTINATION ${DISTRIBUTION_DIRECTORY})
+	install(TARGETS glsldb RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}")
 endif()
