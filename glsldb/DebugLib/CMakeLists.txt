@@ -3,16 +3,20 @@ find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
+set(DEBUGLIB_OS_DEPENDENT_LIBS "")
+set(DEBUGLIB_OS_DEPENDENT_INCLUDES "")
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
     find_package(DL REQUIRED)
     find_package(X11 REQUIRED)
     set(DLSYM_SRC libdlsym.c)
+	set(DEBUGLIB_OS_DEPENDENT_LIBS ${DL_LIBRARIES})
+	set(DEBUGLIB_OS_DEPENDENT_INCLUDES ${X11_INCLUDE_DIR})
 endif()
 if(GLSLDB_WIN)
     #add_definitions(/DGLSLDEBUGLIB_HOST)
-    set(DL_LIBRARIES mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
-    include_directories(
+	set(DEBUGLIB_OS_DEPENDENT_LIBS mhook ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+	set(DEBUGLIB_OS_DEPENDENT_INCLUDES
         "${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib"
         "${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows"
     )
@@ -139,9 +143,8 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/glsldb/DebugLib"
     "${PROJECT_SOURCE_DIR}/glsldb/utils"
     "${CMAKE_CURRENT_BINARY_DIR}"
-    "${X11_INCLUDE_DIR}"
+	${DEBUGLIB_OS_DEPENDENT_INCLUDES}
 )
-
 
 add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 
@@ -151,7 +154,7 @@ add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 add_library(functionList STATIC "${GENERATOR_OUTPUT_DIR}/functionList.c")
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
-target_link_libraries(glsldebug utils glenumerants ${DL_LIBRARIES})
+target_link_libraries(glsldebug utils glenumerants ${DEBUGLIB_OS_DEPENDENT_LIBS})
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
     add_library(dlsym SHARED ${DLSYM_SRC})
