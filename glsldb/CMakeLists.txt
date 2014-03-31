@@ -32,51 +32,56 @@ set(SRC
 	${RES_OUTFILES}
 )
 
-include_directories(${OPENGL_INCLUDE_DIR}
-	${X11_INCLUDE_DIR}
-	${QT_INCLUDE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/utils
-	${CMAKE_CURRENT_SOURCE_DIR}/DebugLib
-	${GLEW_INCLUDE_DIR}
-)
+set(GLSLDB_OS_DEPENDENT_INCLUDES "")
+set(GLSLDB_OS_DEPENDENT_LIBS "")
+
+if(GLSLDB_LINUX)
+	#add_definitions(-DUNIX)
+	include_directories()
+	list(REMOVE_ITEM SRC "${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp")
+	set(GLSLDB_OS_DEPENDENT_INCLUDES ${X11_INCLUDE_DIR})
+	set(GLSLDB_OS_DEPENDENT_LIBS ${X11_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+endif()
+if(GLSLDB_WIN)
+	set(GLSLDB_OS_DEPENDENT_INCLUDES
+		"${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows"
+	)
+endif()
 
 if(USE_MESA)
-    include_directories(
-    	${PROJECT_SOURCE_DIR}/mesa-glsl/include
-    )
+    set(GLSL_INCLUDES "${PROJECT_SOURCE_DIR}/mesa-glsl/include")
     set(GLSL_LIBRARIES glsl_mesa_interface)
 else()
-    include_directories(
-    	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public
-    	${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Include
+    set(GLSL_INCLUDES
+    	"${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public"
+    	"${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Include"
     )
     set(GLSL_LIBRARIES glslang)
 endif()
 
-
-if(GLSLDB_LINUX)
-	#add_definitions(-DUNIX)
-	list(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp)
-endif()
-if(GLSLDB_WIN)
-	include_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows
-	)
-endif()
+include_directories(
+	"${CMAKE_CURRENT_BINARY_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}/utils"
+	"${CMAKE_CURRENT_SOURCE_DIR}/DebugLib"
+	${OPENGL_INCLUDE_DIR}
+	${QT_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIR}
+	${GLSLDB_OS_DEPENDENT_INCLUDES}
+	${GLSL_INCLUDES}
+)
 
 add_executable(glsldb ${SRC})
 target_link_libraries(glsldb
-	${QT_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT}
-	${GLSL_LIBRARIES}
 	glenumerants
 	functionList
 	utils
+	${QT_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${X11_LIBRARIES}
 	${GLEW_LIBRARIES}
+	${GLSLDB_OS_DEPENDENT_LIBS}
+	${GLSL_LIBRARIES}
 )
 
 if(GLSLDB_WIN)

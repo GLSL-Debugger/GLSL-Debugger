@@ -3,13 +3,13 @@ add_definitions(-DAST_DEBUG_STATE -DHAVE_PTHREAD)
 add_subdirectory(mesa)
 
 include_directories(
-	${PROJECT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}	
-	${CMAKE_CURRENT_SOURCE_DIR}/interface
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/mesa/mesa
-	${CMAKE_CURRENT_SOURCE_DIR}/mesa/include
-	${CMAKE_CURRENT_SOURCE_DIR}/mesa/mapi
+	"${PROJECT_SOURCE_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}/interface"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/mesa"
+	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/mapi"
 )
 
 
