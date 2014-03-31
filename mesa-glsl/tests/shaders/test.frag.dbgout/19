@@ -1,0 +1,57 @@
+================== Source ==================
+#version 140
+#extension GL_ARB_shading_language_420pack : enable
+
+float dbgResult;
+int dbgIter0;
+
+varying vec3 f_color;
+uniform sampler2D texture1;
+int deref_array[1] = {
+    1
+};
+struct test_struct {
+  int val;
+};
+int test_func(int param)
+{
+  return param * param;
+}
+
+void main(void)
+{
+  dbgResult = float(0.0);
+  test_struct deref_record;
+  deref_record.val = 2;
+  vec3 f_color_adv = f_color;
+  if (f_color_adv.x < 0.300000) {
+    discard;
+  } else {
+    f_color_adv.x -= 0.010000;
+  }
+  int count = int(f_color_adv.x * 10);
+  deref_record.val = test_func(count);
+  test_func(count);
+  deref_array[0] = deref_record.val;
+  dbgIter0 = 0;
+  for (int i = 0; (dbgIter0 == 0 && (dbgResult = float(1.0), true)), i < count; ++ i) {
+    f_color_adv.x += 0.600000;
+    dbgIter0++;
+  } 
+  switch (count % 10) {
+  case 1:
+  case 3: {
+    break;
+  }
+  case 10: {
+    count += 1;
+  }
+  default: {
+    break;
+  }
+  }
+
+  gl_FragColor = vec4(f_color_adv.x, f_color.y * deref_array[0], f_color.z * deref_record.val, 1.000000);
+  gl_FragColor.x = dbgResult;
+}
+============================================

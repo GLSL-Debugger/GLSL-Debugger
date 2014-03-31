@@ -168,6 +168,7 @@ typedef enum {
 	DBG_CG_GEOMETRY_CHANGEABLE,
 	DBG_CG_VERTEX_COUNT,
 	DBG_CG_SELECTION_CONDITIONAL,
+	DBG_CG_SWITCH_CONDITIONAL,
 	DBG_CG_LOOP_CONDITIONAL,
 	DBG_CG_CHANGEABLE
 } DbgCgOptions;
@@ -176,12 +177,14 @@ typedef enum {
 // Type for specifiing the navigation debugger
 //
 typedef enum {
-	DBG_BH_RESET = 1,               // reset debugging to the original program
-	DBG_BH_JUMPINTO = 2,            // trace function calls
+	DBG_BH_RESET = 1,               // reset debugging to the original program	
+	DBG_BH_JUMP_INTO = 2,            // trace function calls
+	DBG_BH_JUMPINTO = DBG_BH_JUMP_INTO, // quick compatability fix
 	DBG_BH_FOLLOW_ELSE = 4,         // evaluate else brance of a conditional
-	DBG_BH_SELECTION_JUMP_OVER = 8,  // do not debug either branch
-	DBG_BH_LOOP_CONTINUE = 16,      // jump out of a loop
-	DBG_BH_LOOP_NEXT_ITER = 32  // jump to next iteration without debuggig anything inbetween
+	DBG_BH_JUMP_OVER = 8,  // do not debug either branch
+	DBG_BH_SELECTION_JUMP_OVER = DBG_BH_JUMP_OVER,  // do not debug either branch
+	DBG_BH_LOOP_CONTINUE = DBG_BH_JUMP_OVER,      // jump out of a loop
+	DBG_BH_LOOP_NEXT_ITER = 16  // jump to next iteration without debuggig anything inbetween
 } DbgBehaviour;
 
 //
@@ -203,6 +206,7 @@ typedef enum {
 	DBG_RS_POSITION_SELECTION_IF_ELSE,
 	DBG_RS_POSITION_SELECTION_IF_CHOOSE,
 	DBG_RS_POSITION_SELECTION_IF_ELSE_CHOOSE,
+	DBG_RS_POSITION_SWITCH_CHOOSE,
 	DBG_RS_POSITION_BRANCH,
 	DBG_RS_POSITION_LOOP_FOR,
 	DBG_RS_POSITION_LOOP_WHILE,

@@ -1,0 +1,33 @@
+AST_GS_INPUT_LAYOUT
+AST_FUNCTION_DEFINITION                  <2,gl_in> <3,gl_Position>
+AST_FUNCTION
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_TYPE_SPECIFIER
+AST_DECLARATION
+AST_ITERATION_STATEMENT                  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (=)                       <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (int_constant)                <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION_BIN (<)                   <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (.)                           <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)          <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (=)                           <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (.)                               <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (array_index)                         <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                              <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                              <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (++)                      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (array_index)                     <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                          <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                          <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (++)                      <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_EXPRESSION (identifier)                  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
+AST_FUNCTION_EXPRESSION (function_call)  <2,gl_in> <3,gl_Position> <0,i> <1,vertex>
