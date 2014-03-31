@@ -32,38 +32,44 @@ set(SRC
 	${RES_OUTFILES}
 )
 
-include_directories("${OPENGL_INCLUDE_DIR}"
-	"${X11_INCLUDE_DIR}"
-	"${QT_INCLUDE_DIR}"
+set(GLSLDB_OS_DEPENDENT_LIBS "")
+set(GLSLDB_OS_DEPENDENT_INCLUDES "")
+
+if(GLSLDB_LINUX)
+	#add_definitions(-DUNIX)
+	include_directories()
+	list(REMOVE_ITEM SRC "${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp")
+	set(GLSLDB_OS_DEPENDENT_LIBS ${X11_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+	set(GLSLDB_OS_DEPENDENT_INCLUDES ${X11_INCLUDE_DIR})
+endif()
+if(GLSLDB_WIN)
+	set(GLSLDB_OS_DEPENDENT_INCLUDES
+		${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows
+	)
+endif()
+
+include_directories(
 	"${PROJECT_SOURCE_DIR}/GLSLCompiler/glslang/Public"
 	"${CMAKE_CURRENT_BINARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils"
 	"${CMAKE_CURRENT_SOURCE_DIR}/DebugLib"
-	"${GLEW_INCLUDE_DIR}"
+	${OPENGL_INCLUDE_DIR}
+	${QT_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIR}
+	${GLSLDB_OS_DEPENDENT_INCLUDES}
 )
-
-if(GLSLDB_LINUX)
-	#add_definitions(-DUNIX)
-	list(REMOVE_ITEM SRC "${CMAKE_CURRENT_SOURCE_DIR}/progControlWin.cpp")
-endif()
-if(GLSLDB_WIN)
-	include_directories(
-		"${CMAKE_CURRENT_SOURCE_DIR}/../GLSLCompiler/glslang/OSDependent/Windows"
-	)
-endif()
 
 add_executable(glsldb ${SRC})
 target_link_libraries(glsldb
-	${QT_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT}
 	glslang
 	glenumerants
 	functionList
 	utils
+	${QT_LIBRARIES}
 	${OPENGL_LIBRARIES}
-	${X11_LIBRARIES}
 	${GLEW_LIBRARIES}
+	${GLSLDB_OS_DEPENDENT_LIBS}
 )
 
 if(GLSLDB_WIN)

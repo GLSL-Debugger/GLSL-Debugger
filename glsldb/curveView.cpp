@@ -37,8 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtGui/QPen>
 #include <QtGui/QPainter>
 
-#ifdef _WIN32
-/* C99 sucks */
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
 inline static int round(double x) {
 	int y;
 	y = (int)(x + 0.5);
@@ -46,7 +45,7 @@ inline static int round(double x) {
 	while ((double)y > x + 0.5) y--;
 	return y;
 }
-#endif /* _WIN32 */
+#endif /* defined(_MSC_VER) && (_MSC_VER < 1800) */
 
 CurveView::CurveView(QWidget *parent) :
 		QAbstractItemView(parent)
