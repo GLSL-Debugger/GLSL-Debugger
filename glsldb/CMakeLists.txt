@@ -85,5 +85,5 @@ target_link_libraries(glsldb
 )
 
 if(GLSLDB_WIN)
-	install(TARGETS glsldb RUNTIME DESTINATION ${DISTRIBUTION_DIRECTORY})
+	install(TARGETS glsldb RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}")
 endif()
