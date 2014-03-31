@@ -52,7 +52,7 @@ Long-term goals
 - [x] Replace Windows Detours dependency with ~apiTrace, glIntercept or EasyHook~. Replaced with mhook.
 - [x] Check cmake-to-VS generation and fix it if needed.
 - [ ] Support OSX.
-- [ ] Improve GLSL language grammar support to incorporate newer dialects including switch/case. (In progress)
+- [x] Improve GLSL language grammar support to incorporate newer dialects including switch/case.
 - [ ] Support OpenGL contexts for newer versions of OpenGL.
 
 
