@@ -78,7 +78,6 @@ target_link_libraries(glsldb
 	utils
 	${QT_LIBRARIES}
 	${OPENGL_LIBRARIES}
-	${X11_LIBRARIES}
 	${GLEW_LIBRARIES}
 	${GLSLDB_OS_DEPENDENT_LIBS}
 	${GLSL_LIBRARIES}
