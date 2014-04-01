@@ -37,7 +37,7 @@ require genTools;
 # second entry is index of parameter that gives the primitiveMode, this is so
 # future-proof, I can't believe we've done that ;-)
 my @debuggableDrawCalls = (
- ["glBegin", 0],
+ #["glBegin", 0],
  #"glBitmap",
  ["glDrawArrays", 0],
  ["glDrawArraysInstanced", 0],
