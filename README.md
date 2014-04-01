@@ -39,6 +39,19 @@ Windows building requires additional dependencies installed:
 On osx build was not tested, but cmake files may be used.
 
 
+GLSL support
+----------------
+
+Old implementation of GLSLCompiler support GLSL up to 1.20. Support of newer versions is
+avaliable by using mesa-based GLSLCompiler implementation. To enable it, cmake option
+`USE_MESA` must be set. Use `-DUSE_MESA=ON` as argument to cmake command to do so.
+Mesa currently support GLSL up to version 3.30, it will be extended in future.
+Please note that mesa-based compiler is disabled by default yet and consider it as
+alternative, that may have bugs. It will replace original compiler after some testing.
+
+Also new compiler can be build with tests by passing `TESTS=ON` option to cmake.
+
+
 Short-term goals
 ----------------
 
@@ -52,7 +65,7 @@ Long-term goals
 - [x] Replace Windows Detours dependency with ~apiTrace, glIntercept or EasyHook~. Replaced with mhook.
 - [x] Check cmake-to-VS generation and fix it if needed.
 - [ ] Support OSX.
-- [ ] Improve GLSL language grammar support to incorporate newer dialects including switch/case. (In progress)
+- [x] Improve GLSL language grammar support to incorporate newer dialects including switch/case.
 - [ ] Support OpenGL contexts for newer versions of OpenGL.
 
 

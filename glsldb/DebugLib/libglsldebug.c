@@ -31,7 +31,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#define _GNU_SOURCE
 #include <stdlib.h>
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -371,7 +370,7 @@ static void loadDbgFunctions(void)
 			}
 			free(file);
 		}
-	} while (! _findnext(handle, &fd));
+	}while(! _findnext(handle, &fd));
 #endif
 }
 
@@ -688,7 +687,6 @@ static void printArgument(void *addr, int type)
 		break;
 	default:
 		dbgPrintNoPrefix(DBGLVL_INFO, "UNKNOWN TYPE [%i], ", type);
-		break;
 	}
 }
 

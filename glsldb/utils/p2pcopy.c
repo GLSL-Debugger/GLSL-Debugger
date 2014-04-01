@@ -44,7 +44,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else /* _WIN32 */
 #include <windows.h>
 #endif /* _WIN32 */
-#define _GNU_SOURCE
 #include <stdio.h>
 
 #include "dbgprint.h"

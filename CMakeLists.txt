@@ -3,6 +3,20 @@ project(glsldb)
 
 # DEBUG/Maintainer mode for now
 set(CMAKE_BUILD_TYPE "Debug")
+option(USE_MESA "Use mesa glsl compiler" OFF)
+option(TESTS "Build tests" OFF)
+
+if(TESTS)
+	enable_testing()
+	if (CMAKE_CONFIGURATION_TYPES)
+		add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+			--force-new-ctest-process --output-on-failure
+			--build-config "$<CONFIGURATION>")
+	else()
+		add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+			--force-new-ctest-process --output-on-failure)
+	endif()
+endif()
 
 # path to custom modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -15,7 +29,7 @@ set(MNT_SHRD_FLAGS "")
 # Messages with level lower than OUTPUT_LEVEL will be printed
 # Levels:  DBGLVL_ERROR = 0,	DBGLVL_WARNING,
 #	   DBGLVL_INFO,		DBGLVL_INTERNAL_WARNING,
-#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,		
+#	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,
 #	   DBGLVL_ALL = 6
 add_definitions(-DOUTPUT_LEVEL=6)
 set(BINARY_DIR "${PROJECT_BINARY_DIR}/bin")
@@ -33,8 +47,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 			add_definitions(-fPIC)
 		endif()
 	endif()
-	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -Wfatal-errors -std=c99")
-	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++0x")
+	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -Wfatal-errors -std=c99 -fprofile-arcs -ftest-coverage")
+	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++0x -fprofile-arcs -ftest-coverage")
 	list(APPEND CMAKE_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 	list(APPEND CMAKE_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
 endif()
@@ -85,8 +99,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DIR}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${ARCHIVE_DIR}")
 
+if(USE_MESA)
+	message(STATUS "GLSL compiler: mesa")
+	add_definitions(-DUSE_MESA)
+	add_subdirectory(mesa-glsl)
+else()
+	message(STATUS "GLSL compiler: native")
+	add_subdirectory(GLSLCompiler)
+endif()
 
-add_subdirectory(GLSLCompiler)
 add_subdirectory(glsldb)
 
 

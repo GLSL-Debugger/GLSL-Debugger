@@ -1,0 +1,10 @@
+
+Not checked:
+	preprocessor directives	
+	default uniform layouts
+	images
+	conditional expression (bool ? a : b)
+
+TODO:
+	more tests on complex shaders
+	separate to standalone library

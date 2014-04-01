@@ -31,9 +31,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#define _GNU_SOURCE
 #include <stdio.h>
-#undef _GNU_SOURCE
 #include <stdlib.h>
 #include <sys/types.h>
 #ifndef _WIN32
