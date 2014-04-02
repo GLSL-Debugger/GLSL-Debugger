@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.10)
 project(glsldb)
 
-# DEBUG/Maintainer mode for now
-set(CMAKE_BUILD_TYPE "Debug")
 option(USE_MESA "Use mesa glsl compiler" OFF)
 option(TESTS "Build tests" OFF)
 
@@ -16,6 +14,8 @@ if(TESTS)
 		add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
 			--force-new-ctest-process --output-on-failure)
 	endif()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
 # path to custom modules
@@ -32,9 +32,13 @@ set(MNT_SHRD_FLAGS "")
 #	   DBGLVL_COMPILERINFO, DBGLVL_DEBUG,
 #	   DBGLVL_ALL = 6
 add_definitions(-DOUTPUT_LEVEL=6)
+
 set(BINARY_DIR "${PROJECT_BINARY_DIR}/bin")
 set(LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib")
 set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/lib")
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
 
 # platform checks
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -47,16 +51,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 			add_definitions(-fPIC)
 		endif()
 	endif()
-	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -Wfatal-errors -std=c99 -fprofile-arcs -ftest-coverage")
-	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wfatal-errors -Wextra -std=c++0x -fprofile-arcs -ftest-coverage")
-	list(APPEND CMAKE_EXE_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
-	list(APPEND CMAKE_SHRD_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -std=c99")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wfatal-errors -Wextra -std=c++0x")
+	set(CMAKE_EXE_FLAGS "${CMAKE_EXE_FLAGS} -Wl,--warn-unresolved-symbols,--warn-once")
+	set(CMAKE_SHRD_FLAGS "${CMAKE_SHRD_FLAGS} -Wl,--warn-unresolved-symbols,--warn-once")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(GLSLDB_OSX 1)
 	add_definitions(-DGLSLDB_OSX)
-	list(APPEND CMAKE_C_FLAGS "-g -O0 -Wall -pedantic -std=gnu99")
-	list(APPEND CMAKE_CXX_FLAGS "-g -O0 -Wall -Wextra -std=c++0x")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++0x")
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(GLSLDB_WIN 1)
@@ -89,9 +93,12 @@ mark_as_advanced(
 	CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
 
 # Update the documentation string of CMAKE_BUILD_TYPE for GUIs
-set( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
+set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
 	"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer."
-	FORCE )
+	FORCE)
 
 
 set(DISTRIBUTION_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Dist")
