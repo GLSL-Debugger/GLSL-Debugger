@@ -30,8 +30,10 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
-
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0501
 #include "attachToProcess.qt.h"
+#endif
 
 #ifdef _WIN32
 #include <cassert>
@@ -620,7 +622,7 @@ static bool RemoteSetEnv(HANDLE hProcess, const char *name0,
 	}
 
 	/* Copy code of injected function into remote process. */
-	if (!::WriteProcessMemory(hProcess, remoteFunc, _remoteSetEnvFunc,
+	if (!::WriteProcessMemory(hProcess, remoteFunc, reinterpret_cast<LPCVOID>(_remoteSetEnvFunc),
 					remoteFuncSize, NULL)) {
 		dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
 		goto cleanup;
@@ -799,7 +801,7 @@ static bool RemoteForceUninitialse(HANDLE hProcess, HMODULE hModule) {
 	}
 
 	/* Copy code of injected function into remote process. */
-	if (!::WriteProcessMemory(hProcess, remoteFunc, _remoteForceUninitFunc,
+	if (!::WriteProcessMemory(hProcess, remoteFunc, reinterpret_cast<LPCVOID>(_remoteForceUninitFunc),
 					remoteFuncSize, NULL)) {
 		dbgPrint(DBGLVL_ERROR, "WriteProcessMemory failed: %u.\n", ::GetLastError());
 		goto cleanup;

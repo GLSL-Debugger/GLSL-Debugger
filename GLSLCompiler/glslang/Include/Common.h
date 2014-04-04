@@ -234,7 +234,7 @@ inline const TString String(const int i, const int base = 10)
 {
 	char text[16];     // 32 bit ints are at most 10 digits in base 10
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 	_itoa(i, text, base);
 #else
 	UNUSED_ARG(base)

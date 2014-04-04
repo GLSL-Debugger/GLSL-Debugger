@@ -329,7 +329,7 @@ public:
 	}
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER >= 1300
+#ifdef _WIN32
 	template<class Other>
 #ifdef USING_SGI_STL
 	pool_allocator(const pool_allocator<Other>& p) /*: allocator(p.getAllocator())*/{}
