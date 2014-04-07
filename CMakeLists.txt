@@ -65,7 +65,7 @@ endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(GLSLDB_WIN 1)	
 	set(LIBRARY_DIR "${PROJECT_BINARY_DIR}/bin")
-	set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/bin")
+	set(ARCHIVE_DIR "${PROJECT_BINARY_DIR}/bin")	
 	# Add windows target & disable warnings
 	if(MINGW)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wfatal-errors -std=c99")

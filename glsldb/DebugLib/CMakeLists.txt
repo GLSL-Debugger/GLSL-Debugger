@@ -19,7 +19,7 @@ if(GLSLDB_WIN)
 	set(DEBUGLIB_OS_DEPENDENT_INCLUDES
 		"${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows"
-	)
+	)	
 endif()
 
 
@@ -143,6 +143,7 @@ include_directories(
 	"${PROJECT_SOURCE_DIR}/glsldb/DebugLib"
 	"${PROJECT_SOURCE_DIR}/glsldb/utils"
 	"${CMAKE_CURRENT_BINARY_DIR}"
+	"${PROJECT_SOURCE_DIR}"
 	${DEBUGLIB_OS_DEPENDENT_INCLUDES}
 )
 

@@ -33,6 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string.h>
 #include <stdio.h>
+#include "debuglib.h"
 #ifndef _WIN32
 #include <pthread.h>
 #else /* !_WIN32 */
