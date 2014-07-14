@@ -12,6 +12,7 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	find_package(Threads REQUIRED)
 endif()
 
+set(CMAKE_AUTOMOC TRUE)
 include(${QT_USE_FILE})
 
 file(GLOB SRC_CPP *.cpp)
@@ -20,14 +21,13 @@ file(GLOB SRC_C *.c)
 file(GLOB MOC_HEADERS *.qt.h)
 file(GLOB RES_FILES *.qrc)
 file(GLOB UI_FILES ui/*.ui)
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
 qt4_add_resources(RES_OUTFILES ${RES_FILES})
 
 set(SRC
 	${SRC_C}
 	${SRC_CPP}
-	${MOC_OUTFILES}
+	${MOC_HEADERS}
 	${UI_OUTFILES}
 	${RES_OUTFILES}
 )
