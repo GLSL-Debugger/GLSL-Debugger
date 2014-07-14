@@ -98,7 +98,7 @@ GeoShaderDataModel::GeoShaderDataModel(int inPrimitiveType,
 	int numInPrimitives = vertexCountMap->getNumVertices();
 
 	for (int i = 0; i < numInPrimitives;) {
-		int vertexCount, numVerticesNotConsumed, primitiveIdIn;
+		int vertexCount, primitiveIdIn;
 		primitiveIdIn = (int) vcMap[3 * i + 2];
 		dbgPrint(DBGLVL_INFO, "INPUT PRIM %i\n", primitiveIdIn);
 		GeoShaderTreeItem *inPrimItem;
@@ -115,7 +115,6 @@ GeoShaderDataModel::GeoShaderDataModel(int inPrimitiveType,
 		m_rootItem->appendChild(inPrimItem);
 		GeoShaderTreeItem *currentInPrimItem = inPrimItem;
 		do {
-			numVerticesNotConsumed = (int) vcMap[3 * i + 1];
 			vertexCount = (int) vcMap[3 * i];
 
 			if (!isBasicPrimitive(inPrimitiveType)) {
