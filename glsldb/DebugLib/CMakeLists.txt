@@ -59,83 +59,44 @@ set(GLSLDEBUG_SRC
 	${GLSLDEBUG_GEN_SRC}
 )
 
+function (generate_file script output doc depends)
+	add_custom_command(
+		OUTPUT  "${output}"
+		COMMAND "${PERL_EXECUTABLE}" "${script}" ${ARGN} > "${output}"
+		DEPENDS "${GENERATOR_DIR}/${script}" ${input}
+		WORKING_DIRECTORY
+			"${GENERATOR_DIR}"
+		COMMENT "${doc}"
+	)
+endfunction ()
 
 # Generate enumerants
-message(STATUS "Generate enumerants")
-execute_process(COMMAND "${PERL_EXECUTABLE}" Enumerants.pl
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/glenumerants.h"
-)
+generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/glenumerants.h" "Generate enumerants" "")
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
-	execute_process(COMMAND "${PERL_EXECUTABLE}" Enumerants.pl -m glx
-		WORKING_DIRECTORY "${GENERATOR_DIR}"
-		OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/glxenumerants.h"
-	)
+	generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/glxenumerants.h" "Generate GLX enumerants" "" -m glx)
 endif()
 if(GLSLDB_WIN)
-	execute_process(COMMAND "${PERL_EXECUTABLE}" Enumerants.pl -m wgl
-		WORKING_DIRECTORY "${GENERATOR_DIR}"
-		OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/wglenumerants.h"
-	)
+	generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/wglenumerants.h" "Generate WGL enumerants" "" -m wgl)
 endif()
 
 
 # Generate generator for list of allowed functions between begin/end
-message(STATUS "Generate allowed function list generator.")
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE BeginEndFunctionTest.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c"
-)
+generate_file(BeginEndFunctionTest.pl "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c" "Generate allowed function list" "")
 
 # Generate debug library
-message(STATUS "Generate debug library")
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE GetProcAddressHook.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc"
-)
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE FunctionPointerTypes.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc"
-)
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE ReplayFunc.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/replayFunction.c"
-)
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE FunctionList.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/functionList.c"
-)
-execute_process(COMMAND "${PERL_EXECUTABLE}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	INPUT_FILE mergeAllowedInBeginEndList.pl
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm"
-)
-execute_process(COMMAND "${PERL_EXECUTABLE}" FunctionHooks.pl -p "${GENERATOR_OUTPUT_DIR}"
-	WORKING_DIRECTORY "${GENERATOR_DIR}"
-	OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/functionHooks.inc"
-)
+generate_file(GetProcAddressHook.pl "${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc" "Generate debug library: getProcAddressHook.inc" "")
+generate_file(FunctionPointerTypes.pl "${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc" "Generate debug library: functionPointerTypes.inc" "")
+generate_file(ReplayFunc.pl "${GENERATOR_OUTPUT_DIR}/replayFunction.c" "Generate debug library: replayFunction.c" "")
+generate_file(FunctionList.pl "${GENERATOR_OUTPUT_DIR}/functionList.c" "Generate debug library: functionList.c" "")
+generate_file(mergeAllowedInBeginEndList.pl "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" "Generate debug library: functionsAllowedInBeginEnd.pm" "")
+generate_file(FunctionHooks.pl "${GENERATOR_OUTPUT_DIR}/functionHooks.inc" "Generate debug library: functionHooks.inc" "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" -p "${GENERATOR_OUTPUT_DIR}")
 
 if(GLSLDB_WIN)
 	# Generate windows trampolines
-	message(STATUS "Generate trampolines")
-	execute_process(COMMAND "${PERL_EXECUTABLE}" Trampolines.pl decl
-		WORKING_DIRECTORY "${GENERATOR_DIR}"
-		OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/trampolines.h"
-	)
-	execute_process(COMMAND "${PERL_EXECUTABLE}" Trampolines.pl def
-		WORKING_DIRECTORY "${GENERATOR_DIR}"
-		OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/trampolines.inc"
-	)
-	execute_process(COMMAND "${PERL_EXECUTABLE}" Trampolines.pl exp
-		WORKING_DIRECTORY "${GENERATOR_DIR}"
-		OUTPUT_FILE "${GENERATOR_OUTPUT_DIR}/glsldebug.def"
-	)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.h" "Generate trampolines: trampolines.h" "" decl)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.inc" "Generate trampolines: trampolines.inc" "" def)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/glsldebug.def" "Generate trampolines: glsldebug.def" "" exp)
 endif()
 
 include_directories(
