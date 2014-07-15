@@ -410,6 +410,7 @@ public:
 	}
 	void setScope(scopeList *s)
 	{
+		delete scope;
 		scope = s;
 	}
 	ShChangeableList* getCgbList(void)
@@ -488,6 +489,8 @@ public:
 
 	virtual ~TIntermNode()
 	{
+		delete scope;
+		freeShChangeableList(&cgbl);
 	}
 protected:
 	TSourceRange range;
