@@ -837,6 +837,11 @@ ShHandle ShConstructUniformMap()
 	return reinterpret_cast<void*>(base);
 }
 
+TCompiler::~TCompiler()
+{
+	delete parseContext;
+}
+
 void ShDestruct(ShHandle handle)
 {
 	if (handle == 0)
