@@ -156,6 +156,7 @@ SH_IMPORT_EXPORT void addShIndexToChangeable(ShChangeable *c,
 SH_IMPORT_EXPORT void addShIndexToChangeableList(ShChangeableList *cl, int s,
 		ShChangeableIndex *idx);
 SH_IMPORT_EXPORT void freeShChangeable(ShChangeable **c);
+SH_IMPORT_EXPORT void freeShChangeableList(ShChangeableList *cl);
 
 //
 // Types for specifiing the behaviour of code generation
