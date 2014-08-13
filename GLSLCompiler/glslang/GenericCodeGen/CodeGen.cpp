@@ -571,7 +571,9 @@ static bool OutputAggregate(bool, TIntermAggregate* node, TIntermTraverser* it)
 
 		/* Check if 'main' is processed */
 		if (!strcmp(node->getName().c_str(), MAIN_FUNC_SIGNATURE)) {
-			oit->debugProgram += getFunctionName(node->getName());
+			char* functionName = getFunctionName(node->getName());
+			oit->debugProgram += functionName;
+			free(functionName);
 			processAggregateChildren(node, it, "(", "", "");
 		} else {
 			/* Double function if this is on path.

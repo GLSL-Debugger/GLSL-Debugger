@@ -440,6 +440,16 @@ void freeShChangeable(ShChangeable **c)
 	}
 }
 
+void freeShChangeableList(ShChangeableList *cl)
+{
+	int i;
+	for (i = 0; i < cl->numChangeables; i++) {
+		freeShChangeable(&cl->changeables[i]);
+	}
+	free(cl->changeables);
+	cl->numChangeables = 0;
+}
+
 void ShDumpVariable(ShVariable *v, int depth)
 {
 	int i;
@@ -825,6 +835,11 @@ ShHandle ShConstructUniformMap()
 	TShHandleBase* base = static_cast<TShHandleBase*>(ConstructUniformMap());
 
 	return reinterpret_cast<void*>(base);
+}
+
+TCompiler::~TCompiler()
+{
+	delete parseContext;
 }
 
 void ShDestruct(ShHandle handle)

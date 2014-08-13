@@ -1731,6 +1731,7 @@ void MainWindow::updateWatchItemData(ShVarItem *watchItem)
 			return;
 		}
 	}
+	free(cl.changeables);
 	freeShChangeable(&watchItemCgbl);
 }
 
