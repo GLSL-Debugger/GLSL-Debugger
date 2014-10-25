@@ -378,8 +378,10 @@ main(int argc, char **argv)
 	 shader->Type = GL_GEOMETRY_SHADER;
       else if (strncmp(".frag", ext, 5) == 0)
 	 shader->Type = GL_FRAGMENT_SHADER;
+#ifdef GL_VERSION_4_3
       else if (strncmp(".comp", ext, 5) == 0)
          shader->Type = GL_COMPUTE_SHADER;
+#endif
       else
 	 usage_fail(argv[0]);
       shader->Stage = _mesa_shader_enum_to_shader_stage(shader->Type);
