@@ -67,13 +67,19 @@ _mesa_print_ir(FILE *f, exec_list *instructions,
    }
 
    fprintf(f, "(\n");
-   foreach_list(n, instructions) {
-      ir_instruction *ir = (ir_instruction *) n;
+   foreach_in_list(ir_instruction, ir, instructions) {
       ir->fprint(f);
       if (ir->ir_type != ir_type_function)
 	 fprintf(f, "\n");
    }
    fprintf(f, "\n)");
+}
+
+void
+fprint_ir(FILE *f, const void *instruction)
+{
+   const ir_instruction *ir = (const ir_instruction *)instruction;
+   ir->fprint(f);
 }
 
 } /* extern "C" */
@@ -139,14 +145,14 @@ print_type(FILE *f, const glsl_type *t)
       print_type(f, t->fields.array);
       fprintf(f, " %u)", t->length);
    } else if ((t->base_type == GLSL_TYPE_STRUCT)
-	      && (strncmp("gl_", t->name, 3) != 0)) {
+              && !is_gl_identifier(t->name)) {
       fprintf(f, "%s@%p", t->name, (void *) t);
    } else {
       fprintf(f, "%s", t->name);
    }
 }
 
-void ir_print_visitor::visit(ir_rvalue *ir)
+void ir_print_visitor::visit(ir_rvalue *)
 {
    fprintf(f, "error");
 }
@@ -162,11 +168,14 @@ void ir_print_visitor::visit(ir_variable *ir)
                                 "in ", "out ", "inout ",
 			        "const_in ", "sys ", "temporary " };
    STATIC_ASSERT(ARRAY_SIZE(mode) == ir_var_mode_count);
+   const char *const stream [] = {"", "stream1 ", "stream2 ", "stream3 "};
    const char *const interp[] = { "", "smooth", "flat", "noperspective" };
    STATIC_ASSERT(ARRAY_SIZE(interp) == INTERP_QUALIFIER_COUNT);
 
-   fprintf(f, "(%s%s%s%s%s) ",
-	  cent, samp, inv, mode[ir->data.mode], interp[ir->data.interpolation]);
+   fprintf(f, "(%s%s%s%s%s%s) ",
+           cent, samp, inv, mode[ir->data.mode],
+           stream[ir->data.stream],
+           interp[ir->data.interpolation]);
 
    print_type(f, ir->type);
    fprintf(f, " %s)", unique_name(ir));
@@ -186,9 +195,7 @@ void ir_print_visitor::visit(ir_function_signature *ir)
    fprintf(f, "(parameters\n");
    indentation++;
 
-   foreach_list(n, &ir->parameters) {
-      ir_variable *const inst = (ir_variable *) n;
-
+   foreach_in_list(ir_variable, inst, &ir->parameters) {
       indent();
       inst->accept(this);
       fprintf(f, "\n");
@@ -203,9 +210,7 @@ void ir_print_visitor::visit(ir_function_signature *ir)
    fprintf(f, "(\n");
    indentation++;
 
-   foreach_list(n, &ir->body) {
-      ir_instruction *const inst = (ir_instruction *) n;
-
+   foreach_in_list(ir_instruction, inst, &ir->body) {
       indent();
       inst->accept(this);
       fprintf(f, "\n");
@@ -222,8 +227,7 @@ void ir_print_visitor::visit(ir_function *ir)
 {
    fprintf(f, "(function %s\n", ir->name);
    indentation++;
-   foreach_list(n, &ir->signatures) {
-      ir_function_signature *const sig = (ir_function_signature *) n;
+   foreach_in_list(ir_function_signature, sig, &ir->signatures) {
       indent();
       sig->accept(this);
       fprintf(f, "\n");
@@ -423,7 +427,7 @@ void ir_print_visitor::visit(ir_constant *ir)
 	 case GLSL_TYPE_FLOAT:
             if (ir->value.f[i] == 0.0f)
                /* 0.0 == -0.0, so print with %f to get the proper sign. */
-               fprintf(f, "%.1f", ir->value.f[i]);
+               fprintf(f, "%f", ir->value.f[i]);
             else if (fabs(ir->value.f[i]) < 0.000001f)
                fprintf(f, "%a", ir->value.f[i]);
             else if (fabs(ir->value.f[i]) > 1000000.0f)
@@ -447,9 +451,7 @@ ir_print_visitor::visit(ir_call *ir)
    if (ir->return_deref)
       ir->return_deref->accept(this);
    fprintf(f, " (");
-   foreach_list(n, &ir->actual_parameters) {
-      ir_rvalue *const param = (ir_rvalue *) n;
-
+   foreach_in_list(ir_rvalue, param, &ir->actual_parameters) {
       param->accept(this);
    }
    fprintf(f, "))\n");
@@ -494,9 +496,7 @@ ir_print_visitor::visit(ir_if *ir)
    fprintf(f, "(\n");
    indentation++;
 
-   foreach_list(n, &ir->then_instructions) {
-      ir_instruction *const inst = (ir_instruction *) n;
-
+   foreach_in_list(ir_instruction, inst, &ir->then_instructions) {
       indent();
       inst->accept(this);
       fprintf(f, "\n");
@@ -511,9 +511,7 @@ ir_print_visitor::visit(ir_if *ir)
       fprintf(f, "(\n");
       indentation++;
 
-      foreach_list(n, &ir->else_instructions) {
-	 ir_instruction *const inst = (ir_instruction *) n;
-
+      foreach_in_list(ir_instruction, inst, &ir->else_instructions) {
 	 indent();
 	 inst->accept(this);
 	 fprintf(f, "\n");
@@ -533,9 +531,7 @@ ir_print_visitor::visit(ir_loop *ir)
    fprintf(f, "(loop (\n");
    indentation++;
 
-   foreach_list(n, &ir->body_instructions) {
-      ir_instruction *const inst = (ir_instruction *) n;
-
+   foreach_in_list(ir_instruction, inst, &ir->body_instructions) {
       indent();
       inst->accept(this);
       fprintf(f, "\n");
@@ -555,11 +551,16 @@ ir_print_visitor::visit(ir_loop_jump *ir)
 void
 ir_print_visitor::visit(ir_emit_vertex *ir)
 {
-   fprintf(f, "(emit-vertex)");
+   fprintf(f, "(emit-vertex ");
+   ir->stream->accept(this);
+   fprintf(f, ")\n");
 }
 
 void
 ir_print_visitor::visit(ir_end_primitive *ir)
 {
-   fprintf(f, "(end-primitive)");
+   fprintf(f, "(end-primitive ");
+   ir->stream->accept(this);
+   fprintf(f, ")\n");
+
 }

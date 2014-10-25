@@ -173,9 +173,7 @@ dump_ae(exec_list *ae)
    int i = 0;
 
    printf("CSE: AE contents:\n");
-   foreach_list(node, ae) {
-      ae_entry *entry = (ae_entry *)node;
-
+   foreach_in_list(ae_entry, entry, ae) {
       printf("CSE:   AE %2d (%p): ", i, entry);
       (*entry->val)->print();
       printf("\n");
@@ -254,9 +252,7 @@ is_cse_candidate(ir_rvalue *ir)
 ir_rvalue *
 cse_visitor::try_cse(ir_rvalue *rvalue)
 {
-   foreach_list(node, ae) {
-      ae_entry *entry = (ae_entry *)node;
-
+   foreach_in_list(ae_entry, entry, ae) {
       if (debug) {
          printf("Comparing to AE %p: ", entry);
          (*entry->val)->print();
@@ -303,8 +299,7 @@ cse_visitor::try_cse(ir_rvalue *rvalue)
           * updated so that any further elimination from inside gets its new
           * assignments put before our new assignment.
           */
-         foreach_list(fixup_node, ae) {
-            ae_entry *fixup_entry = (ae_entry *)fixup_node;
+         foreach_in_list(ae_entry, fixup_entry, ae) {
             if (contains_rvalue(assignment->rhs, *fixup_entry->val))
                fixup_entry->base_ir = assignment;
          }
@@ -399,7 +394,7 @@ cse_visitor::visit_enter(ir_loop *ir)
 }
 
 ir_visitor_status
-cse_visitor::visit_enter(ir_call *ir)
+cse_visitor::visit_enter(ir_call *)
 {
    /* Because call is an exec_list of ir_rvalues, handle_rvalue gets passed a
     * pointer to the (ir_rvalue *) on the stack.  Since we save those pointers

@@ -45,10 +45,13 @@ namespace {
 
 class ir_algebraic_visitor : public ir_rvalue_visitor {
 public:
-   ir_algebraic_visitor()
+   ir_algebraic_visitor(bool native_integers,
+                        const struct gl_shader_compiler_options *options)
+      : options(options)
    {
       this->progress = false;
       this->mem_ctx = NULL;
+      this->native_integers = native_integers;
    }
 
    virtual ~ir_algebraic_visitor()
@@ -68,8 +71,10 @@ public:
    ir_rvalue *swizzle_if_required(ir_expression *expr,
 				  ir_rvalue *operand);
 
+   const struct gl_shader_compiler_options *options;
    void *mem_ctx;
 
+   bool native_integers;
    bool progress;
 };
 
@@ -112,6 +117,46 @@ update_type(ir_expression *ir)
       ir->type = ir->operands[0]->type;
    else
       ir->type = ir->operands[1]->type;
+}
+
+/* Recognize (v.x + v.y) + (v.z + v.w) as dot(v, 1.0) */
+static ir_expression *
+try_replace_with_dot(ir_expression *expr0, ir_expression *expr1, void *mem_ctx)
+{
+   if (expr0 && expr0->operation == ir_binop_add &&
+       expr0->type->is_float() &&
+       expr1 && expr1->operation == ir_binop_add &&
+       expr1->type->is_float()) {
+      ir_swizzle *x = expr0->operands[0]->as_swizzle();
+      ir_swizzle *y = expr0->operands[1]->as_swizzle();
+      ir_swizzle *z = expr1->operands[0]->as_swizzle();
+      ir_swizzle *w = expr1->operands[1]->as_swizzle();
+
+      if (!x || x->mask.num_components != 1 ||
+          !y || y->mask.num_components != 1 ||
+          !z || z->mask.num_components != 1 ||
+          !w || w->mask.num_components != 1) {
+         return NULL;
+      }
+
+      bool swiz_seen[4] = {false, false, false, false};
+      swiz_seen[x->mask.x] = true;
+      swiz_seen[y->mask.x] = true;
+      swiz_seen[z->mask.x] = true;
+      swiz_seen[w->mask.x] = true;
+
+      if (!swiz_seen[0] || !swiz_seen[1] ||
+          !swiz_seen[2] || !swiz_seen[3]) {
+         return NULL;
+      }
+
+      if (x->val->equals(y->val) &&
+          x->val->equals(z->val) &&
+          x->val->equals(w->val)) {
+         return dot(x->val, new(mem_ctx) ir_constant(1.0f, 4));
+      }
+   }
+   return NULL;
 }
 
 void
@@ -327,6 +372,14 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
       if (op_const[1] && !op_const[0])
 	 reassociate_constant(ir, 1, op_const[1], op_expr[0]);
 
+      /* Recognize (v.x + v.y) + (v.z + v.w) as dot(v, 1.0) */
+      if (options->OptimizeForAOS) {
+         ir_expression *expr = try_replace_with_dot(op_expr[0], op_expr[1],
+                                                    mem_ctx);
+         if (expr)
+            return expr;
+      }
+
       /* Replace (-x + y) * a + x and commutative variations with lrp(x, y, a).
        *
        * (-x + y) * a + x
@@ -378,6 +431,7 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
             }
          }
       }
+
       break;
 
    case ir_binop_sub:
@@ -442,6 +496,28 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
 	       component = c;
 	 }
 	 return new(mem_ctx) ir_swizzle(ir->operands[0], component, 0, 0, 0, 1);
+      }
+      break;
+
+   case ir_binop_less:
+   case ir_binop_lequal:
+   case ir_binop_greater:
+   case ir_binop_gequal:
+   case ir_binop_equal:
+   case ir_binop_nequal:
+      for (int add_pos = 0; add_pos < 2; add_pos++) {
+         ir_expression *add = op_expr[add_pos];
+
+         if (!add || add->operation != ir_binop_add)
+            continue;
+
+         ir_constant *zero = op_const[1 - add_pos];
+         if (!is_vec_zero(zero))
+            continue;
+
+         return new(mem_ctx) ir_expression(ir->operation,
+                                           add->operands[0],
+                                           neg(add->operands[1]));
       }
       break;
 
@@ -527,6 +603,14 @@ ir_algebraic_visitor::handle_expression(ir_expression *ir)
       /* pow(2,x) == exp2(x) */
       if (is_vec_two(op_const[0]))
          return expr(ir_unop_exp2, ir->operands[1]);
+
+      if (is_vec_two(op_const[1])) {
+         ir_variable *x = new(ir) ir_variable(ir->operands[1]->type, "x",
+                                              ir_var_temporary);
+         base_ir->insert_before(x);
+         base_ir->insert_before(assign(x, ir->operands[0]));
+         return mul(x, x);
+      }
 
       break;
 
@@ -615,9 +699,10 @@ ir_algebraic_visitor::handle_rvalue(ir_rvalue **rvalue)
 }
 
 bool
-do_algebraic(exec_list *instructions)
+do_algebraic(exec_list *instructions, bool native_integers,
+             const struct gl_shader_compiler_options *options)
 {
-   ir_algebraic_visitor v;
+   ir_algebraic_visitor v(native_integers, options);
 
    visit_list_elements(&v, instructions);
 

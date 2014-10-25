@@ -87,8 +87,6 @@ public:
    virtual ir_visitor_status visit(class ir_variable *);
    virtual ir_visitor_status visit(class ir_constant *);
    virtual ir_visitor_status visit(class ir_loop_jump *);
-   virtual ir_visitor_status visit(class ir_emit_vertex *);
-   virtual ir_visitor_status visit(class ir_end_primitive *);
 
    /**
     * ir_dereference_variable isn't technically a leaf, but it is treated as a
@@ -137,6 +135,10 @@ public:
    virtual ir_visitor_status visit_leave(class ir_discard *);
    virtual ir_visitor_status visit_enter(class ir_if *);
    virtual ir_visitor_status visit_leave(class ir_if *);
+   virtual ir_visitor_status visit_enter(class ir_emit_vertex *);
+   virtual ir_visitor_status visit_leave(class ir_emit_vertex *);
+   virtual ir_visitor_status visit_enter(class ir_end_primitive *);
+   virtual ir_visitor_status visit_leave(class ir_end_primitive *);
    /*@}*/
 
 
@@ -161,14 +163,29 @@ public:
     * \warning
     * Visitor classes derived from \c ir_hierarchical_visitor \b may \b not
     * invoke this function.  This can be used, for example, to cause the
-    * callback to be invoked on every node type execpt one.
+    * callback to be invoked on every node type except one.
     */
-   void (*callback)(class ir_instruction *ir, void *data);
+   void (*callback_enter)(class ir_instruction *ir, void *data);
 
    /**
-    * Extra data parameter passed to the per-node callback function
+    * Callback function that is invoked on exit of each node visited.
+    *
+    * \warning
+    * Visitor classes derived from \c ir_hierarchical_visitor \b may \b not
+    * invoke this function.  This can be used, for example, to cause the
+    * callback to be invoked on every node type except one.
     */
-   void *data;
+   void (*callback_leave)(class ir_instruction *ir, void *data);
+
+   /**
+    * Extra data parameter passed to the per-node callback_enter function
+    */
+   void *data_enter;
+
+   /**
+    * Extra data parameter passed to the per-node callback_leave function
+    */
+   void *data_leave;
 
    /**
     * Currently in the LHS of an assignment?
@@ -179,8 +196,10 @@ public:
 };
 
 void visit_tree(ir_instruction *ir,
-		void (*callback)(class ir_instruction *ir, void *data),
-		void *data);
+		void (*callback_enter)(class ir_instruction *ir, void *data),
+		void *data_enter,
+		void (*callback_leave)(class ir_instruction *ir, void *data) = NULL,
+		void *data_leave = NULL);
 
 ir_visitor_status visit_list_elements(ir_hierarchical_visitor *v, exec_list *l,
                                       bool statement_list = true);

@@ -32,9 +32,9 @@ extern "C" {
 #include "program/symbol_table.h"
 }
 #include "ir.h"
-#include "glsl_types.h"
 
 class symbol_table_entry;
+struct glsl_type;
 
 /**
  * Facade class for _mesa_symbol_table
@@ -98,7 +98,6 @@ public:
    /*@{*/
    bool add_variable(ir_variable *v);
    bool add_type(const char *name, const glsl_type *t);
-   bool add_type_ast(const char *name, const class ast_type_specifier *t);
    bool add_function(ir_function *f);
    bool add_interface(const char *name, const glsl_type *i,
                       enum ir_variable_mode mode);
@@ -115,7 +114,6 @@ public:
    /*@{*/
    ir_variable *get_variable(const char *name);
    const glsl_type *get_type(const char *name);
-   const class ast_type_specifier *get_type_ast(const char *name);
    ir_function *get_function(const char *name);
    const glsl_type *get_interface(const char *name,
                                   enum ir_variable_mode mode);

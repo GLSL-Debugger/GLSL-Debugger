@@ -39,6 +39,8 @@
  * - MOD_TO_FRACT
  * - LDEXP_TO_ARITH
  * - BITFIELD_INSERT_TO_BFM_BFI
+ * - CARRY_TO_ARITH
+ * - BORROW_TO_ARITH
  *
  * SUB_TO_ADD_NEG:
  * ---------------
@@ -94,6 +96,14 @@
  * Many GPUs implement the bitfieldInsert() built-in from ARB_gpu_shader_5
  * with a pair of instructions.
  *
+ * CARRY_TO_ARITH:
+ * ---------------
+ * Converts ir_carry into (x + y) < x.
+ *
+ * BORROW_TO_ARITH:
+ * ----------------
+ * Converts ir_borrow into (x < y).
+ *
  */
 
 #include "main/core.h" /* for M_LOG2E */
@@ -127,6 +137,8 @@ private:
    void log_to_log2(ir_expression *);
    void bitfield_insert_to_bfm_bfi(ir_expression *);
    void ldexp_to_arith(ir_expression *);
+   void carry_to_arith(ir_expression *);
+   void borrow_to_arith(ir_expression *);
 };
 
 } /* anonymous namespace */
@@ -359,8 +371,8 @@ lower_instructions_visitor::ldexp_to_arith(ir_expression *ir)
 
    ir_constant *sign_mask = new(ir) ir_constant(0x80000000u, vec_elem);
 
-   ir_constant *exp_shift = new(ir) ir_constant(23u, vec_elem);
-   ir_constant *exp_width = new(ir) ir_constant(8u, vec_elem);
+   ir_constant *exp_shift = new(ir) ir_constant(23);
+   ir_constant *exp_width = new(ir) ir_constant(8);
 
    /* Temporary variables */
    ir_variable *x = new(ir) ir_variable(ir->type, "x", ir_var_temporary);
@@ -436,6 +448,42 @@ lower_instructions_visitor::ldexp_to_arith(ir_expression *ir)
    this->progress = true;
 }
 
+void
+lower_instructions_visitor::carry_to_arith(ir_expression *ir)
+{
+   /* Translates
+    *   ir_binop_carry x y
+    * into
+    *   sum = ir_binop_add x y
+    *   bcarry = ir_binop_less sum x
+    *   carry = ir_unop_b2i bcarry
+    */
+
+   ir_rvalue *x_clone = ir->operands[0]->clone(ir, NULL);
+   ir->operation = ir_unop_i2u;
+   ir->operands[0] = b2i(less(add(ir->operands[0], ir->operands[1]), x_clone));
+   ir->operands[1] = NULL;
+
+   this->progress = true;
+}
+
+void
+lower_instructions_visitor::borrow_to_arith(ir_expression *ir)
+{
+   /* Translates
+    *   ir_binop_borrow x y
+    * into
+    *   bcarry = ir_binop_less x y
+    *   carry = ir_unop_b2i bcarry
+    */
+
+   ir->operation = ir_unop_i2u;
+   ir->operands[0] = b2i(less(ir->operands[0], ir->operands[1]));
+   ir->operands[1] = NULL;
+
+   this->progress = true;
+}
+
 ir_visitor_status
 lower_instructions_visitor::visit_leave(ir_expression *ir)
 {
@@ -480,6 +528,16 @@ lower_instructions_visitor::visit_leave(ir_expression *ir)
    case ir_binop_ldexp:
       if (lowering(LDEXP_TO_ARITH))
          ldexp_to_arith(ir);
+      break;
+
+   case ir_binop_carry:
+      if (lowering(CARRY_TO_ARITH))
+         carry_to_arith(ir);
+      break;
+
+   case ir_binop_borrow:
+      if (lowering(BORROW_TO_ARITH))
+         borrow_to_arith(ir);
       break;
 
    default:

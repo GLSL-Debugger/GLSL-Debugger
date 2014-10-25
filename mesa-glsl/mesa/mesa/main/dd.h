@@ -239,6 +239,20 @@ struct dd_function_table {
                         struct gl_texture_image *texImage );
 
    /**
+    * Called by glClearTex[Sub]Image
+    *
+    * Clears a rectangular region of the image to a given value. The
+    * clearValue argument is either NULL or points to a single texel to use as
+    * the clear value in the same internal format as the texture image. If it
+    * is NULL then the texture should be cleared to zeroes.
+    */
+   void (*ClearTexSubImage)(struct gl_context *ctx,
+                            struct gl_texture_image *texImage,
+                            GLint xoffset, GLint yoffset, GLint zoffset,
+                            GLsizei width, GLsizei height, GLsizei depth,
+                            const GLvoid *clearValue);
+
+   /**
     * Called by glCopyTex[Sub]Image[123]D().
     *
     * This function should copy a rectangular region in the rb to a single
@@ -253,6 +267,22 @@ struct dd_function_table {
                            struct gl_renderbuffer *rb,
                            GLint x, GLint y,
                            GLsizei width, GLsizei height);
+
+   /**
+    * Called by glCopyImageSubData().
+    *
+    * This function should copy one 2-D slice from srcTexImage to
+    * dstTexImage.  If one of the textures is 3-D or is a 1-D or 2-D array
+    * texture, this function will be called multiple times: once for each
+    * slice.  If one of the textures is a cube map, this function will be
+    * called once for each face to be copied.
+    */
+   void (*CopyImageSubData)(struct gl_context *ctx,
+                            struct gl_texture_image *src_image,
+                            int src_x, int src_y, int src_z,
+                            struct gl_texture_image *dstTexImage,
+                            int dst_x, int dst_y, int dst_z,
+                            int src_width, int src_height);
 
    /**
     * Called by glGenerateMipmap() or when GL_GENERATE_MIPMAP_SGIS is enabled.
@@ -314,10 +344,10 @@ struct dd_function_table {
    /*@{*/
 
    /**
-    * Called by glBindTexture().
+    * Called by glBindTexture() and glBindTextures().
     */
-   void (*BindTexture)( struct gl_context *ctx, GLenum target,
-                        struct gl_texture_object *tObj );
+   void (*BindTexture)( struct gl_context *ctx, GLuint texUnit,
+                        GLenum target, struct gl_texture_object *tObj );
 
    /**
     * Called to allocate a new texture object.  Drivers will usually

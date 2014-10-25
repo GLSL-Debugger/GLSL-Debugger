@@ -222,8 +222,7 @@ void copyShChangeableListCtx(ShChangeableList *clout, exec_list *clin, void* mem
 	if (!clout || !clin)
 		return;
 
-	foreach_list(node, clin) {
-		changeable_item* ch_item = (changeable_item*) node;
+	foreach_in_list(changeable_item, ch_item, clin) {
 		bool alreadyInList = false;
 		for (int j = 0; j < clout->numChangeables; j++) {
 			if (isEqualShChangeable(clout->changeables[j], ch_item->changeable)) {
@@ -243,18 +242,16 @@ void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, v
 
 	std::unordered_set<int> permits;
 	if (only)
-		foreach_list(node, only)
-			permits.emplace(((scope_item*)node)->id);
+		foreach_in_list(scope_item, sc_item, only)
+			permits.emplace(sc_item->id);
 
 
 	// TODO: this algorithm is bad.
-	foreach_list(node, clin){
-		changeable_item* ch_item = (changeable_item*)node;
+	foreach_in_list(changeable_item, ch_item, clin){
 		if (only && permits.find(ch_item->id) == permits.end())
 			continue;
 		bool alreadyInList = false;
-		foreach_list(onode, clout) {
-			changeable_item* cho_item = (changeable_item*)onode;
+		foreach_in_list(changeable_item, cho_item, clout) {
 			if (!isEqualShChangeable(ch_item->changeable, cho_item->changeable))
 				continue;
 			alreadyInList = true;

@@ -34,6 +34,8 @@
 
 
 #include <GL/gl.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 
 #ifdef __cplusplus
@@ -55,6 +57,29 @@ extern "C" {
  */
 #define MAX_PIXEL_BYTES 16
 
+/**
+ * Specifies the layout of a pixel format.  See the MESA_FORMAT
+ * documentation below.
+ */
+enum mesa_format_layout {
+   MESA_FORMAT_LAYOUT_ARRAY,
+   MESA_FORMAT_LAYOUT_PACKED,
+   MESA_FORMAT_LAYOUT_OTHER,
+};
+
+/**
+ * An enum representing different possible swizzling values.  This is used
+ * to interpret the output of _mesa_get_format_swizzle
+ */
+enum {
+   MESA_FORMAT_SWIZZLE_X = 0,
+   MESA_FORMAT_SWIZZLE_Y = 1,
+   MESA_FORMAT_SWIZZLE_Z = 2,
+   MESA_FORMAT_SWIZZLE_W = 3,
+   MESA_FORMAT_SWIZZLE_ZERO = 4,
+   MESA_FORMAT_SWIZZLE_ONE = 5,
+   MESA_FORMAT_SWIZZLE_NONE = 6,
+};
 
 /**
  * Mesa texture/renderbuffer image formats.
@@ -209,8 +234,6 @@ typedef enum
 
    MESA_FORMAT_YCBCR,            /*                     YYYY YYYY UorV UorV */
    MESA_FORMAT_YCBCR_REV,        /*                     UorV UorV YYYY YYYY */
-
-   MESA_FORMAT_DUDV8,            /*                     DUDU DUDU DVDV DVDV */
 
    /* Array unorm formats */
    MESA_FORMAT_A_UNORM8,      /* ubyte[i] = A */
@@ -404,6 +427,12 @@ typedef enum
    MESA_FORMAT_ETC2_RGB8_PUNCHTHROUGH_ALPHA1,
    MESA_FORMAT_ETC2_SRGB8_PUNCHTHROUGH_ALPHA1,
 
+   /* BPTC compressed formats */
+   MESA_FORMAT_BPTC_RGBA_UNORM,
+   MESA_FORMAT_BPTC_SRGB_ALPHA_UNORM,
+   MESA_FORMAT_BPTC_RGB_SIGNED_FLOAT,
+   MESA_FORMAT_BPTC_RGB_UNSIGNED_FLOAT,
+
    MESA_FORMAT_COUNT
 } mesa_format;
 
@@ -420,6 +449,9 @@ _mesa_get_format_bits(mesa_format format, GLenum pname);
 extern GLuint
 _mesa_get_format_max_bits(mesa_format format);
 
+extern enum mesa_format_layout
+_mesa_get_format_layout(mesa_format format);
+
 extern GLenum
 _mesa_get_format_datatype(mesa_format format);
 
@@ -428,6 +460,9 @@ _mesa_get_format_base_format(mesa_format format);
 
 extern void
 _mesa_get_format_block_size(mesa_format format, GLuint *bw, GLuint *bh);
+
+extern void
+_mesa_get_format_swizzle(mesa_format format, uint8_t swizzle_out[4]);
 
 extern GLboolean
 _mesa_is_format_compressed(mesa_format format);
@@ -443,6 +478,12 @@ _mesa_is_format_unsigned(mesa_format format);
 
 extern GLboolean
 _mesa_is_format_signed(mesa_format format);
+
+extern GLboolean
+_mesa_is_format_integer(mesa_format format);
+
+extern bool
+_mesa_is_format_etc2(mesa_format format);
 
 extern GLenum
 _mesa_get_format_color_encoding(mesa_format format);
@@ -473,6 +514,9 @@ _mesa_get_uncompressed_format(mesa_format format);
 
 extern GLuint
 _mesa_format_num_components(mesa_format format);
+
+extern bool
+_mesa_format_has_color_component(mesa_format format, int component);
 
 GLboolean
 _mesa_format_matches_format_and_type(mesa_format mesa_format,

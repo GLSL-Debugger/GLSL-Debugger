@@ -10,7 +10,7 @@
 #ifndef SH_SYMBOL_TABLE_H_
 #define SH_SYMBOL_TABLE_H_
 
-#include "mesa/glsl/ralloc.h"
+#include "mesa/util/ralloc.h"
 #include "mesa/glsl/glsl_types.h"
 #include <new>
 #include <assert.h>

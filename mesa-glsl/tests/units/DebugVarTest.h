@@ -45,8 +45,7 @@ public:
 		int length = printType(node, type);
 		if (!node->scope.is_empty()) {
 			printIndent(length, depth);
-			foreach_list(scope_node, &node->scope) {
-				scope_item* sc = (scope_item*)scope_node;
+			foreach_in_list(scope_item, sc, &node->scope) {
 				results << " <" << sc->id << "," << sc->name << ">";
 			}
 		}

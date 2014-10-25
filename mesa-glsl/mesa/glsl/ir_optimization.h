@@ -38,6 +38,8 @@
 #define INT_DIV_TO_MUL_RCP 0x40
 #define BITFIELD_INSERT_TO_BFM_BFI 0x80
 #define LDEXP_TO_ARITH     0x100
+#define CARRY_TO_ARITH     0x200
+#define BORROW_TO_ARITH    0x400
 
 /**
  * \see class lower_packing_builtins_visitor
@@ -66,10 +68,12 @@ enum lower_packing_builtins_op {
 
 bool do_common_optimization(exec_list *ir, bool linked,
 			    bool uniform_locations_assigned,
-			    unsigned max_unroll_iterations,
-                            const struct gl_shader_compiler_options *options);
+                            const struct gl_shader_compiler_options *options,
+                            bool native_integers);
 
-bool do_algebraic(exec_list *instructions);
+bool do_rebalance_tree(exec_list *instructions);
+bool do_algebraic(exec_list *instructions, bool native_integers,
+                  const struct gl_shader_compiler_options *options);
 bool do_constant_folding(exec_list *instructions);
 bool do_constant_variable(exec_list *instructions);
 bool do_constant_variable_unlinked(exec_list *instructions);
@@ -112,7 +116,7 @@ bool lower_clip_distance(gl_shader *shader);
 void lower_output_reads(exec_list *instructions);
 bool lower_packing_builtins(exec_list *instructions, int op_mask);
 void lower_ubo_reference(struct gl_shader *shader, exec_list *instructions);
-void lower_packed_varyings(void *mem_ctx, unsigned location_base,
+void lower_packed_varyings(void *mem_ctx,
                            unsigned locations_used, ir_variable_mode mode,
                            unsigned gs_input_vertices, gl_shader *shader);
 bool lower_vector_insert(exec_list *instructions, bool lower_nonconstant_index);
@@ -120,6 +124,8 @@ void lower_named_interface_blocks(void *mem_ctx, gl_shader *shader);
 bool optimize_redundant_jumps(exec_list *instructions);
 bool optimize_split_arrays(exec_list *instructions, bool linked);
 bool lower_offset_arrays(exec_list *instructions);
+
+bool lower_vertex_id(gl_shader *shader);
 
 ir_rvalue *
 compare_index_block(exec_list *instructions, ir_variable *index,

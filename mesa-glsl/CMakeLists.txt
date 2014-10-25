@@ -7,6 +7,7 @@ include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/interface"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/mesa"
 	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/mesa"
 	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/include"
 	"${CMAKE_CURRENT_SOURCE_DIR}/mesa/mapi"

@@ -252,8 +252,7 @@ void ast_debugvar_traverser_visitor::addToScope(ShVariable* var)
 	// their first definition.
 
 	// search for doubles and return if found
-	foreach_list(node, &scope){
-		scope_item* item = (scope_item*) node;
+	foreach_in_list(scope_item, item, &scope){
 		if (item->id == var->uniqueId)
 			return;
 	}
@@ -267,8 +266,7 @@ void ast_debugvar_traverser_visitor::dumpScope(exec_list* dscope)
 	if (dscope->is_empty())
 		return;
 
-	foreach_list(node, dscope){
-		scope_item* item = (scope_item*) node;
+	foreach_in_list(scope_item, item, dscope){
 		VPRINT(4, "<%i,%s> ", item->id, item->name);
 	}
 
@@ -280,8 +278,7 @@ void ast_debugvar_traverser_visitor::copyScopeTo(ast_node* dst)
 	std::set<std::string> in_list;
 
 	// Use reverse to get last variable with the same name.
-	foreach_list_reverse(node, &scope) {
-		scope_item* item = (scope_item*) node;
+	foreach_in_list_reverse(scope_item, item, &scope) {
 		std::string name = item->name;
 		// Name already in list
 		if (in_list.find(std::string(name)) != in_list.end())

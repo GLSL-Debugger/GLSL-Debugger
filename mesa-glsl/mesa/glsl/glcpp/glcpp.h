@@ -29,13 +29,19 @@
 
 #include "main/mtypes.h"
 
-#include "../ralloc.h"
+#include "util/ralloc.h"
 
 #include "program/hash_table.h"
 
 #define yyscan_t void*
 
 /* Some data types used for parser values. */
+
+typedef struct expression_value {
+	intmax_t value;
+	char *undefined_macro;
+} expression_value_t;
+   
 
 typedef struct string_node {
 	const char *str;
@@ -53,6 +59,7 @@ typedef struct token_list token_list_t;
 typedef union YYSTYPE
 {
 	intmax_t ival;
+	expression_value_t expression_value;
 	char *str;
 	string_list_t *string_list;
 	token_t *token;
@@ -168,13 +175,17 @@ struct glcpp_parser {
 	yyscan_t scanner;
 	struct hash_table *defines;
 	active_list_t *active;
-	int lexing_if;
+	int lexing_directive;
 	int space_tokens;
+	int last_token_was_newline;
+	int last_token_was_space;
+	int first_non_space_token_this_line;
 	int newline_as_space;
 	int in_control_line;
 	int paren_count;
 	int commented_newlines;
 	skip_node_t *skip_stack;
+	int skipping;
 	token_list_t *lex_from_list;
 	token_node_t *lex_from_node;
 	char *output;

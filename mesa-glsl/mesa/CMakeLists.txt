@@ -5,9 +5,13 @@ include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
 	"${CMAKE_CURRENT_SOURCE_DIR}/mapi"
 	"${CMAKE_CURRENT_SOURCE_DIR}/glsl"
+	"${CMAKE_CURRENT_SOURCE_DIR}/util"
 )
 
 file(GLOB SRC_MESA mesa/program/*.c mesa/main/*.c)
+file(GLOB SRC_MESA_UTIL util/*c)
+add_library(mesa_util ${SRC_MESA_UTIL})
 add_library(mesa_lib ${SRC_MESA})
+target_link_libraries(mesa_lib mesa_util)
 
 add_subdirectory(glsl)

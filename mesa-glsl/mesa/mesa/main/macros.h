@@ -140,7 +140,7 @@ extern GLfloat _mesa_ubyte_to_float_color_tab[256];
  *** UNCLAMPED_FLOAT_TO_UBYTE: clamp float to [0,1] and map to ubyte in [0,255]
  *** CLAMPED_FLOAT_TO_UBYTE: map float known to be in [0,1] to ubyte in [0,255]
  ***/
-#if defined(USE_IEEE) && !defined(DEBUG)
+#ifndef DEBUG
 /* This function/macro is sensitive to precision.  Test very carefully
  * if you change it!
  */
@@ -182,6 +182,13 @@ static inline GLfloat UINT_AS_FLT(GLuint u)
    fi_type tmp;
    tmp.u = u;
    return tmp.f;
+}
+
+static inline unsigned FLT_AS_UINT(float f)
+{
+   fi_type tmp;
+   tmp.f = f;
+   return tmp.u;
 }
 
 /**
@@ -685,6 +692,17 @@ minify(unsigned value, unsigned levels)
 }
 
 /**
+ * Return true if the given value is a power of two.
+ *
+ * Note that this considers 0 a power of two.
+ */
+static inline bool
+is_power_of_two(unsigned value)
+{
+   return (value & (value - 1)) == 0;
+}
+
+/**
  * Align a value up to an alignment value
  *
  * If \c value is not already aligned to the requested alignment value, it
@@ -807,7 +825,9 @@ DIFFERENT_SIGNS(GLfloat x, GLfloat y)
 #define ENUM_TO_BOOLEAN(E) ((E) ? GL_TRUE : GL_FALSE)
 
 /* Compute the size of an array */
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+#ifndef ARRAY_SIZE
+#  define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+#endif
 
 /* Stringify */
 #define STRINGIFY(x) #x

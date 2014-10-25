@@ -4,7 +4,7 @@
  *  Created on: 12.02.2014
  */
 
-#include "mesa/glsl/ralloc.h"
+#include "mesa/util/ralloc.h"
 #include "misc.h"
 #include "ShaderInput.h"
 #include "interface/Program.h"

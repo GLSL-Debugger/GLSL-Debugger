@@ -365,8 +365,7 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 				changeables.emplace(cgbls->changeables[id]->id);
 
 			bool allInScope = true;
-			foreach_list(ch_node, &node->changeables) {
-				changeable_item* ch_item = (changeable_item*) ch_node;
+			foreach_in_list(changeable_item, ch_item, &node->changeables) {
 				if (changeables.find(ch_item->id) != changeables.end())
 					continue;
 
