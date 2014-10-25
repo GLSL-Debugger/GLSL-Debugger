@@ -27,8 +27,8 @@ if(GLSLDB_WIN)
 endif()
 
 # Generate generator for list of allowed functions between begin/end
-if(TEST)
-generate_file(BeginEndFunctionTest.pl "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c" "Generate allowed function list" "")
+if(TESTS)
+	generate_file(BeginEndFunctionTest.pl "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c" "Generate allowed function list" "")
 endif()
 generate_file(mergeAllowedInBeginEndList.pl "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" "Generate allowed functions list library" "")
 
