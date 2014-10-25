@@ -33,6 +33,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _WIN32
 #include <windows.h>
+#  ifndef LOAD_IGNORE_CODE_AUTHZ_LEVEL
+#    define LOAD_IGNORE_CODE_AUTHZ_LEVEL	0x00000010
+#  endif
 #else
 #  include <dlfcn.h>
 #endif

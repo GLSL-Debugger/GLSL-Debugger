@@ -45,10 +45,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #include <signal.h>
 
+#include "debuglib.h"
+
 #ifdef _WIN32
-//#define _WIN32_WINNT 0x0400
 #include <windows.h>
-#include <crtdbg.h>
+
+#  ifdef _MSC_VER
+#    include <crtdbg.h>
+#  else
+#    define _ASSERT(expr) ((void)0)
+#    define _ASSERTE(expr) ((void)0)
+#  endif
+
 #include <io.h>
 #include <direct.h>
 #define GL_GLEXT_PROTOTYPES 1
@@ -62,8 +70,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WIN32
 //#include "../GL/glx.h"
 #else /* _WIN32 */
-#include "../GL/WinGDI.h"
 #include "../GL/wglext.h"
+#include "../GL/WinGDI.h"
 #include "generated/trampolines.h"
 #endif /* !_WIN32 */
 
@@ -71,7 +79,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../utils/dlutils.h"
 #include "../utils/hash.h"
 #include "glenumerants.h"
-#include "debuglib.h"
 #include "debuglibInternal.h"
 #include "glstate.h"
 #include "readback.h"
@@ -268,7 +275,7 @@ static int endsWith(const char *s, const char *t)
 static void loadDbgFunctions(void)
 {
 	char *file;
-#if !defined WIN32
+#ifndef _WIN32
 	struct dirent *entry;
 	struct stat statbuf;
 	DIR *dp;
@@ -301,7 +308,7 @@ static void loadDbgFunctions(void)
 		exit(1);
 	}
 
-#if ! defined WIN32
+#ifndef _WIN32
 	if ((dp = opendir(dbgFctsPath)) == NULL) {
 		dbgPrint(DBGLVL_ERROR,
 				"cannot open so directory \"%s\"\n", dbgFctsPath);
@@ -399,7 +406,7 @@ __declspec(dllexport) BOOL __cdecl uninitialiseDll(void) {
 		retval = FALSE;
 	}
 
-	if (!closeSharedMemory(&g.hShMem, &g.fcalls)) {
+	if (!closeSharedMemory(&g.hShMem, (void**)(&g.fcalls))) {
 		retval = FALSE;
 	}
 
@@ -409,9 +416,11 @@ __declspec(dllexport) BOOL __cdecl uninitialiseDll(void) {
 	return retval;
 }
 
-BOOL APIENTRY DllMain(HANDLE hModule,
-		DWORD reason_for_call,
-		LPVOID lpReserved)
+#ifndef _MSC_VER
+BOOL WINAPI DllMain(HINSTANCE hModule, DWORD reason_for_call, LPVOID lpReserved)
+#else
+BOOL APIENTRY DllMain(HANDLE hModule, DWORD reason_for_call, LPVOID lpReserved)
+#endif
 {
 	BOOL retval = TRUE;
 	switch (reason_for_call) {

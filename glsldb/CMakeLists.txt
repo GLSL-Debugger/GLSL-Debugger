@@ -11,6 +11,9 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	find_package(X11 REQUIRED)
 	find_package(Threads REQUIRED)
 endif()
+if (GLSLDB_WIN)
+	find_package(QtDll REQUIRED)
+endif()
 
 set(CMAKE_AUTOMOC TRUE)
 include(${QT_USE_FILE})
@@ -84,5 +87,7 @@ target_link_libraries(glsldb
 )
 
 if(GLSLDB_WIN)
-	install(TARGETS glsldb RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}")
+	install(FILES ${DLL_FILES_QT} DESTINATION "${DISTRIBUTION_DIRECTORY}")
+	set(DIST_FILES glsldb)
+	install(TARGETS "${DIST_FILES}" RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}")
 endif()

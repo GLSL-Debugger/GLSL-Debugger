@@ -178,7 +178,7 @@ typedef enum {
 // Type for specifiing the navigation debugger
 //
 typedef enum {
-	DBG_BH_RESET = 1,               // reset debugging to the original program	
+	DBG_BH_RESET = 1,               // reset debugging to the original program
 	DBG_BH_JUMP_INTO = 2,            // trace function calls
 	DBG_BH_JUMPINTO = DBG_BH_JUMP_INTO, // quick compatability fix
 	DBG_BH_FOLLOW_ELSE = 4,         // evaluate else brance of a conditional

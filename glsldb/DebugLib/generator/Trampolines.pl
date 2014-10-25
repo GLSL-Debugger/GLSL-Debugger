@@ -32,6 +32,7 @@
 #
 ################################################################################
 
+use Getopt::Std;
 require genTypes;
 require genTools;
 our %files;
@@ -231,7 +232,9 @@ sub createTrampoline
 
 
 my @modes = ("decl", "def", "exp");
-$mode = $ARGV[0];
+my %options;
+getopt('m:' => \%options);
+my $mode = $options{m};
 if (not grep(/^$mode$/, @modes)) {
 	die "Argument must be one of " . join(", ", @modes) . "\n";
 }

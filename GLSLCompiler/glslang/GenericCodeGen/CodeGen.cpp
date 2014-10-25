@@ -3420,7 +3420,7 @@ bool TGenericCompiler::compileDbg(TIntermNode* root, ShChangeableList *cgbl,
 			"%s\n"
 			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n", m_debugProgram.c_str());
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 	*code = _strdup(m_debugProgram.c_str());
 #else
 	*code = strdup(m_debugProgram.c_str());

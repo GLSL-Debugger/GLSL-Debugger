@@ -42,8 +42,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
-#else /* !_WIN32 */
+#elif defined(_MSC_VER) /* !_WIN32 */
 #include "getopt_win.h"
+#else
+#include <getopt.h>
 #endif /* !_WIN32 */
 
 #include <QtGui/QApplication>

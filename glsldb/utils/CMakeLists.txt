@@ -8,7 +8,7 @@ set(SRC
 	notify.c
 )
 
-if(GLSLDB_WIN)
+if(GLSLDB_WIN AND NOT MINGW)
 	set(SRC ${SRC} getopt.c)
 endif()
 

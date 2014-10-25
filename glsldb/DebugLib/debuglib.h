@@ -40,6 +40,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _WIN32
 #include <windows.h>
+#if !defined(_MSC_VER) && !defined(WGL_SWAPMULTIPLE_MAX)
+typedef struct _WGLSWAP
+{
+    HDC hdc;
+    UINT uiFlags;
+} WGLSWAP, *PWGLSWAP, FAR *LPWGLSWAP;
+#define WGL_SWAPMULTIPLE_MAX 16
+WINGDIAPI DWORD WINAPI wglSwapMultipleBuffers(UINT, CONST WGLSWAP *);
+#endif
 #endif /* _WIN32 */
 
 #include <stdint.h>

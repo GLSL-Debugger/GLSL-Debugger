@@ -4,14 +4,6 @@ find_package(Perl REQUIRED)
 set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 file(MAKE_DIRECTORY ${GENERATOR_OUTPUT_DIR})
 
-#~ function(generate_file input output)
-    #~ execute_process(
-        #~ COMMAND ${PERL_EXECUTABLE} ${input} -p ${GENERATOR_OUTPUT_DIR} ${ARGN}
-        #~ WORKING_DIRECTORY ${GENERATOR_DIR}
-        #~ OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/${output}
-    #~ )
-#~ endfunction()
-
 set(GENERATED_FILES "")
 function(generate_file script output doc depends)
 	add_custom_command(
@@ -35,7 +27,9 @@ if(GLSLDB_WIN)
 endif()
 
 # Generate generator for list of allowed functions between begin/end
+if(TEST)
 generate_file(BeginEndFunctionTest.pl "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c" "Generate allowed function list" "")
+endif()
 generate_file(mergeAllowedInBeginEndList.pl "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" "Generate allowed functions list library" "")
 
 # Generate debug library
@@ -50,9 +44,9 @@ generate_file(FunctionHooks.pl "${GENERATOR_OUTPUT_DIR}/functionHooks.inc" "Gene
 if(GLSLDB_WIN)
 	# Generate windows trampolines
 	message(STATUS "Prepare trampolines")
-	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.h" "trampolines.h" "" decl)
-	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.inc" "trampolines.inc" "" def)
-	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/glsldebug.def" "glsldebug.def" "" exp)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.h" "trampolines.h" "" -mdecl)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.inc" "trampolines.inc" "" -mdef)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/glsldebug.def" "glsldebug.def" "" -mexp)
 endif()
 
 add_custom_target(generation DEPENDS ${GENERATED_FILES})

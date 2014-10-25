@@ -127,7 +127,7 @@ static int byte_scan(InputSrc *, yystypepp * yylvalpp);
 #define DBG_BREAKPOINT()
 #endif
 
-#if defined(_WIN32) && !defined(_M_AMD64)
+#if 0 && defined(_WIN32) && !defined(_M_AMD64)
 __int64 RDTSC ( void ) {
 
 	__int64 v;

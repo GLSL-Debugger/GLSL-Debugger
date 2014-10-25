@@ -1,6 +1,6 @@
 add_subdirectory(preprocessor)
 
-if(GLSLDB_WIN)
+if(GLSLDB_WIN AND NOT MINGW)
 	add_definitions(/D SH_EXPORTING)
 endif()
 
@@ -33,8 +33,8 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Include"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../Public"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../compiler"
-	${OSDEPENDENT_INCLUDES}
-	"${PROJECT_SOURCE_DIR}/glsldb"
+	${COMPILER_OS_DEPENDENT_INCLUDES}
+	"${PROJECT_SOURCE_DIR}/glsldb"	
 	"${CMAKE_CURRENT_BINARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 )

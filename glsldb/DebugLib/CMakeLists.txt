@@ -19,7 +19,7 @@ if(GLSLDB_WIN)
 	set(DEBUGLIB_OS_DEPENDENT_INCLUDES
 		"${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows"
-	)
+	)	
 endif()
 
 
@@ -33,7 +33,6 @@ set(GLSLDEBUG_GEN_SRC
 	"${GENERATOR_OUTPUT_DIR}/replayFunction.c"
 	"${GENERATOR_OUTPUT_DIR}/functionList.c"
 )
-set_source_files_properties(${GLSLDEBUG_GEN_SRC} PROPERTIES GENERATED 1)
 set(GLSLDEBUG_OS_SRC "")
 
 if(GLSLDB_WIN)
@@ -42,6 +41,7 @@ if(GLSLDB_WIN)
 	set(CLIENT_SRC debugClient.c)
 endif()
 
+set_source_files_properties(${GLSLDEBUG_GEN_SRC} PROPERTIES GENERATED 1)
 
 set(GLSLDEBUG_SRC
 	libglsldebug.c
@@ -60,26 +60,33 @@ set(GLSLDEBUG_SRC
 	${GLSLDEBUG_GEN_SRC}
 )
 
-
 include_directories(
 	"${PROJECT_SOURCE_DIR}/glsldb"
 	"${PROJECT_SOURCE_DIR}/glsldb/DebugLib"
 	"${PROJECT_SOURCE_DIR}/glsldb/utils"
 	"${CMAKE_CURRENT_BINARY_DIR}"
+	"${PROJECT_SOURCE_DIR}"
 	${DEBUGLIB_OS_DEPENDENT_INCLUDES}
 )
 
 add_library(glenumerants STATIC ${ENUMERANTS_SRC})
 add_dependencies(glenumerants generation)
 
-#add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
-#target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+if(TESTS)
+	add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
+	target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+endif()
 
 add_library(functionList STATIC "${GENERATOR_OUTPUT_DIR}/functionList.c")
 add_dependencies(functionList generation)
 
 add_library(glsldebug SHARED ${GLSLDEBUG_SRC})
 target_link_libraries(glsldebug utils glenumerants ${DEBUGLIB_OS_DEPENDENT_LIBS})
+
+set(DIST_TARGETS glsldebug)
+if(TESTS)
+	set(DIST_TARGETS "${DIST_TARGETS}" beginEndFunctionTest)
+endif()
 
 if(GLSLDB_LINUX OR GLSLDB_OSX)
 	add_library(dlsym SHARED ${DLSYM_SRC})
@@ -89,6 +96,6 @@ endif()
 if(GLSLDB_WIN)
 	add_executable(debugclient ${CLIENT_SRC})
 	target_link_libraries(debugclient glsldebug utils)
-	install(TARGETS glsldebug #beginEndFunctionTest
-		RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}" LIBRARY DESTINATION "${DISTRIBUTION_DIRECTORY}")
+	install(TARGETS "${DIST_TARGETS}" RUNTIME DESTINATION "${DISTRIBUTION_DIRECTORY}"
+		LIBRARY DESTINATION "${DISTRIBUTION_DIRECTORY}")
 endif()
