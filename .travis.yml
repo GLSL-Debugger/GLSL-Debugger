@@ -11,8 +11,11 @@ install:
 before_script:
     - mkdir build
     - cd build
-    - cmake ..
-script: make
+    - cmake -DTESTS=ON ${CMAKE_ARGS} ..
+script: make && make test
+env:
+    - CMAKE_ARGS=''
+    - CMAKE_ARGS='-DUSE_MESA=ON'
 branches:
     only:
         - master
