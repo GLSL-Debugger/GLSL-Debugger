@@ -112,9 +112,6 @@ _mesa_DebugMessageControl(GLenum source, GLenum type, GLenum severity,
                           GLsizei count, const GLuint *ids,
                           GLboolean enabled);
 void GLAPIENTRY
-_mesa_DebugMessageCallback(GLDEBUGPROC callback,
-                           const void *userParam);
-void GLAPIENTRY
 _mesa_PushDebugGroup(GLenum source, GLuint id, GLsizei length,
                      const GLchar *message);
 void GLAPIENTRY
