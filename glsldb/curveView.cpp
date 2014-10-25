@@ -177,7 +177,6 @@ void CurveView::paintEvent(QPaintEvent *event)
 	}
 
 	QStyleOptionViewItem option = viewOptions();
-	QStyle::State state = option.state;
 
 	QBrush background = option.palette.base();
 	QPen foreground(option.palette.color(QPalette::WindowText));

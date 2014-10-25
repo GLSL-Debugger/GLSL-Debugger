@@ -118,7 +118,7 @@ DBGLIBLOCAL void (*glXGetProcAddressHook(const GLubyte *arg0))(void)
     }
 
     for (i = 0; i < GPA_FUNCS_COUNT; ++i) {
-        if (!strcmp(gpa_FuncsNames[i], arg0))
+        if (!strcmp(gpa_FuncsNames[i], (char*)arg0))
             return (void(*)(void))gpa_OrigFuncs[i];
     }
 

@@ -1783,7 +1783,7 @@ init_declarator_list
             TSymbol* symbol = parseContext.symbolTable.find("gl_VerticesIn");
             if (symbol) {
                 variable = static_cast<TVariable*>(symbol);
-                constUnion* varUnion      = variable->getConstPointer();
+                variable->getConstPointer();
                 vertexInSize = variable->getConstPointer()[0].getIConst();
 
                 if ($4.arraySize[0] == 0) {
@@ -2131,7 +2131,7 @@ single_declaration
             TSymbol* symbol = parseContext.symbolTable.find("gl_VerticesIn");
             if (symbol) {
                 variable = static_cast<TVariable*>(symbol);
-                constUnion* varUnion      = variable->getConstPointer();
+                variable->getConstPointer();
                 vertexInSize = variable->getConstPointer()[0].getIConst();
 
                 if ($3.arraySize[0] == 0) {

@@ -131,6 +131,7 @@ void OutputExtensionText(TInfoSink& infoSink, TIntermNode* node)
 	}
 }
 
+#if DEBUG_SCOPE == 1
 static void OutputScopeText(TInfoSink& infoSink, TIntermNode* node,
 		const int depth)
 {
@@ -154,7 +155,9 @@ static void OutputScopeText(TInfoSink& infoSink, TIntermNode* node,
 		infoSink.debug << "     └─scope─› (NULL)\n";
 	}
 }
+#endif
 
+#if DEBUG_CHANGEABLE == 1
 static void OutputChangeableText(TInfoSink &infoSink, TIntermNode* node,
 		const int depth, bool param)
 {
@@ -214,6 +217,7 @@ static void OutputChangeableText(TInfoSink &infoSink, TIntermNode* node,
 	}
 	infoSink.debug << "\n";
 }
+#endif
 
 //
 //

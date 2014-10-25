@@ -393,7 +393,6 @@ extern "C" {
 
 int yy_input(char* buf, int max_size)
 {
-     char *char_token =NULL;
      int len;
 
     if ((len = yylex_CPP(buf, max_size)) == 0)
@@ -449,11 +448,10 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
     yytokenpos[YY_TOKEN_RIGHT] = 1;
    
     if (*cpp->PaStrLen >= 0) {    
-        int ret;
         //#ifdef _WIN32
-        //    ret = yyparse(parseContextLocal);            
+        //    yyparse(parseContextLocal);            
         //#else
-            ret = yyparse((void*)(&parseContextLocal));
+            yyparse((void*)(&parseContextLocal));
         //#endif
         if (cpp->CompileError == 1 || parseContextLocal.recoveredFromError || parseContextLocal.numErrors > 0) {
             return 1;
@@ -464,7 +462,7 @@ int PaParseStrings(char* argv[], int strLen[], int argc, TParseContext& parseCon
     else
         return 0;
 }
-void yyerror(void* parseContextLocal, const char *s) 
+void yyerror(void* /*parseContextLocal*/, const char *s) 
 {
     
     TSourceRange range;

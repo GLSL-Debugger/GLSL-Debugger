@@ -742,8 +742,7 @@ void MainWindow::setShaderCodeText(char *shaders[3])
 		QTextDocument *newDoc = new QTextDocument(QString(shaders[0]),
 				teVertexShader);
 		/* the document becomes owner of the highlighter, so it get's freed */
-		GlslSyntaxHighlighter *highlighter;
-		highlighter = new GlslSyntaxHighlighter(newDoc);
+		new GlslSyntaxHighlighter(newDoc);
 		teVertexShader->setDocument(newDoc);
 		teVertexShader->setTabStopWidth(30);
 	} else {
@@ -756,8 +755,7 @@ void MainWindow::setShaderCodeText(char *shaders[3])
 		QTextDocument *newDoc = new QTextDocument(QString(shaders[1]),
 				teGeometryShader);
 		/* the document becomes owner of the highlighter, so it get's freed */
-		GlslSyntaxHighlighter *highlighter;
-		highlighter = new GlslSyntaxHighlighter(newDoc);
+		new GlslSyntaxHighlighter(newDoc);
 		teGeometryShader->setDocument(newDoc);
 		teGeometryShader->setTabStopWidth(30);
 	} else {
@@ -771,8 +769,7 @@ void MainWindow::setShaderCodeText(char *shaders[3])
 		QTextDocument *newDoc = new QTextDocument(QString(shaders[2]),
 				teFragmentShader);
 		/* the document becomes owner of the highlighter, so it get's freed */
-		GlslSyntaxHighlighter *highlighter;
-		highlighter = new GlslSyntaxHighlighter(newDoc);
+		new GlslSyntaxHighlighter(newDoc);
 		teFragmentShader->setDocument(newDoc);
 		teFragmentShader->setTabStopWidth(30);
 	} else {
@@ -1734,6 +1731,7 @@ void MainWindow::updateWatchItemData(ShVarItem *watchItem)
 			return;
 		}
 	}
+	free(cl.changeables);
 	freeShChangeable(&watchItemCgbl);
 }
 

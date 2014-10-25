@@ -1258,6 +1258,7 @@ static void addShVariable(const ShVariable *i_pVar, QString i_qName,
 			structElement->varyingModifier = i_pVar->varyingModifier;
 			addShVariable(structElement, fullName, i_pVar->builtin,
 					FORCE_STRUCT, &i, newVar);
+			freeShVariable(&structElement);
 		}
 		return;
 	}

@@ -1,0 +1,58 @@
+
+find_package(Perl REQUIRED)
+
+set(GENERATOR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+file(MAKE_DIRECTORY ${GENERATOR_OUTPUT_DIR})
+
+#~ function(generate_file input output)
+    #~ execute_process(
+        #~ COMMAND ${PERL_EXECUTABLE} ${input} -p ${GENERATOR_OUTPUT_DIR} ${ARGN}
+        #~ WORKING_DIRECTORY ${GENERATOR_DIR}
+        #~ OUTPUT_FILE ${GENERATOR_OUTPUT_DIR}/${output}
+    #~ )
+#~ endfunction()
+
+set(GENERATED_FILES "")
+function(generate_file script output doc depends)
+	add_custom_command(
+		OUTPUT  "${output}"
+		COMMAND "${PERL_EXECUTABLE}" "${script}" ${ARGN} > "${output}"
+		DEPENDS "${GENERATOR_DIR}/${script}" ${input}
+		WORKING_DIRECTORY "${GENERATOR_DIR}"
+		COMMENT "${doc}: ${output}"
+	)
+	set(GENERATED_FILES "${GENERATED_FILES}" "${output}" PARENT_SCOPE)
+endfunction()
+
+# Generate enumerants
+message(STATUS "Prepare enumerants")
+generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/glenumerants.h" "Generate enumerants" "")
+if(GLSLDB_LINUX OR GLSLDB_OSX)
+	generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/glxenumerants.h" "Generate GLX enumerants" "" -mglx)
+endif()
+if(GLSLDB_WIN)
+	generate_file(Enumerants.pl "${GENERATOR_OUTPUT_DIR}/wglenumerants.h" "Generate WGL enumerants" "" -mwgl)
+endif()
+
+# Generate generator for list of allowed functions between begin/end
+generate_file(BeginEndFunctionTest.pl "${GENERATOR_OUTPUT_DIR}/beginEndFunctionTest.c" "Generate allowed function list" "")
+generate_file(mergeAllowedInBeginEndList.pl "${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" "Generate allowed functions list library" "")
+
+# Generate debug library
+message(STATUS "Prepare debug library")
+generate_file(GetProcAddressHook.pl "${GENERATOR_OUTPUT_DIR}/getProcAddressHook.inc" "Generate DebugLib" "")
+generate_file(FunctionPointerTypes.pl "${GENERATOR_OUTPUT_DIR}/functionPointerTypes.inc" "Generate DebugLib" "")
+generate_file(ReplayFunc.pl "${GENERATOR_OUTPUT_DIR}/replayFunction.c" "Generate DebugLib" "")
+generate_file(FunctionList.pl "${GENERATOR_OUTPUT_DIR}/functionList.c" "Generate DebugLib" "")
+generate_file(FunctionHooks.pl "${GENERATOR_OUTPUT_DIR}/functionHooks.inc" "Generate DebugLib"
+	"${GENERATOR_OUTPUT_DIR}/functionsAllowedInBeginEnd.pm" -p"${GENERATOR_OUTPUT_DIR}")
+
+if(GLSLDB_WIN)
+	# Generate windows trampolines
+	message(STATUS "Prepare trampolines")
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.h" "trampolines.h" "" decl)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/trampolines.inc" "trampolines.inc" "" def)
+	generate_file(Trampolines.pl "${GENERATOR_OUTPUT_DIR}/glsldebug.def" "glsldebug.def" "" exp)
+endif()
+
+add_custom_target(generation DEPENDS ${GENERATED_FILES})

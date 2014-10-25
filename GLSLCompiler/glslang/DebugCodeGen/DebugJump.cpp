@@ -178,9 +178,9 @@ static void setGobalScope(scopeList *s)
 		g.result.scope.ids = (int*) realloc(g.result.scope.ids,
 				g.result.scope.numIds * sizeof(int));
 		g.result.scope.ids[g.result.scope.numIds - 1] = *si;
-		si++;
 
-		VPRINT(3, "%i ", *si);
+		VPRINT(3, " %i", *si);
+		si++;
 	}
 	VPRINT(3, "\n");
 

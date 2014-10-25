@@ -116,9 +116,7 @@ public:
 					NULL)
 	{
 	}
-	virtual ~TCompiler()
-	{
-	}
+	virtual ~TCompiler();
 	EShLanguage getLanguage()
 	{
 		return language;
