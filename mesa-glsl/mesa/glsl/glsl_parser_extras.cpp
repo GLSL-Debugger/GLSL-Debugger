@@ -661,6 +661,12 @@ _mesa_glsl_process_extension(const char *name, YYLTYPE *name_locp,
       const _mesa_glsl_extension *extension = find_extension(name);
       if (extension && extension->compatible_with_state(state)) {
          extension->set_flags(state, behavior);
+         /* Save extension as explicitelly called */
+         sh_extension* ext = ralloc(state, sh_extension);
+         ext->next = state->explicit_extensions;
+         ext->behavior = static_cast<sh_ext_behavior>(behavior);
+         ext->name = ralloc_strdup(state, name);
+         state->explicit_extensions = ext;
       } else {
          static const char fmt[] = "extension `%s' unsupported in %s shader";
 
