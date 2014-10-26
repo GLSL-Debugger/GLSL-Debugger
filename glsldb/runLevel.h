@@ -32,7 +32,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #ifndef RUNLEVEL_H
-#define RUNLEVEL
+#define RUNLEVEL_H
 
 enum runLevel {
 	RL_INIT,
@@ -48,4 +48,4 @@ enum runLevel {
 	RL_DBG_RESTART
 };
 
-#endif
+#endif /* RUNLEVEL_H */

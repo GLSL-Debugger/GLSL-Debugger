@@ -20,7 +20,7 @@ static CPPUNIT_NS::TestResult* tests_eventManager = NULL;
 template<typename T, typename O>
 class TestRepeater: public SuitedUnitTest<T> {
 public:
-	friend O;
+	friend class O;
 
 	TestRepeater()
 	{

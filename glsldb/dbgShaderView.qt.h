@@ -31,8 +31,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef _DBG_SHADER_VIEW_QT_H_
-#define _DBG_SHADER_VIEW_QT_H__
+#ifndef DBG_SHADER_VIEW_QT_H
+#define DBG_SHADER_VIEW_QT_H
 
 #include "ui_dbgShaderView.h"
 
@@ -44,5 +44,5 @@ public:
 
 };
 
-#endif
+#endif /* DBG_SHADER_VIEW_QT_H */
 
