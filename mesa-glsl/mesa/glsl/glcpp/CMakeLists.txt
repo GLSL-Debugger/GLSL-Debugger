@@ -3,7 +3,10 @@ find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
 mark_as_advanced(YACC_BINARY FLEX_BINARY)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories(
+	"${CMAKE_CURRENT_SOURCE_DIR}"
+	"${PROJECT_SOURCE_DIR}/glsldb"
+)
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/glcpp-lex.c"
         SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/glcpp-lex.l"

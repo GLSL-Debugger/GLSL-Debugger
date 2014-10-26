@@ -7,7 +7,12 @@ include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/mapi"
 	"${CMAKE_CURRENT_SOURCE_DIR}/glsl"
 	"${CMAKE_CURRENT_SOURCE_DIR}/util"
+	"${PROJECT_SOURCE_DIR}/glsldb"
 )
+
+if (MSVC)
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/c99")
+endif()
 
 file(GLOB SRC_MESA mesa/program/*.c mesa/main/*.c)
 file(GLOB SRC_MESA_UTIL util/*c)

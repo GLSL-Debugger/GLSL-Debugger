@@ -9,6 +9,9 @@
 #include "mesa/glsl/ast.h"
 #include "glsldb/utils/dbgprint.h"
 #include <map>
+#ifdef GLSLDB_WIN
+	#include "asprintf.h"
+#endif
 
 
 namespace {
