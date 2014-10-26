@@ -80,7 +80,7 @@ static ast_node* prepareTarget(AstShader* shader, DbgCgOptions dbgCgOptions,
 
 		std::unordered_set<int> changeables;
 		for (int id = 0; id < cgbl->numChangeables; id++)
-			changeables.emplace(cgbl->changeables[id]->id);
+			changeables.insert(cgbl->changeables[id]->id);
 
 		/* stack top is path beginning, base is target */
 		foreach_stack_reverse(node, stack) {

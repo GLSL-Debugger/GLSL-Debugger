@@ -362,7 +362,7 @@ bool ast_output_traverser_visitor::geom_call(ast_function_expression *node)
 		if (cgbls && vl) {
 			std::unordered_set<int> changeables;
 			for (int id = 0; id < cgbls->numChangeables; id++)
-				changeables.emplace(cgbls->changeables[id]->id);
+				changeables.insert(cgbls->changeables[id]->id);
 
 			bool allInScope = true;
 			foreach_in_list(changeable_item, ch_item, &node->changeables) {

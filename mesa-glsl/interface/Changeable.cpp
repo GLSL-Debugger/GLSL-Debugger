@@ -243,7 +243,7 @@ void copyAstChangeableList(exec_list *clout, exec_list *clin, exec_list* only, v
 	std::unordered_set<int> permits;
 	if (only)
 		foreach_in_list(scope_item, sc_item, only)
-			permits.emplace(sc_item->id);
+			permits.insert(sc_item->id);
 
 
 	// TODO: this algorithm is bad.
