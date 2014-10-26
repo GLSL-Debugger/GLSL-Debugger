@@ -53,6 +53,11 @@
  *    name and parameters.
  */
 
+#ifdef GLSLDB_WIN
+	#define _USE_MATH_DEFINES
+	#include <cmath>
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include "main/core.h" /* for struct gl_shader */
