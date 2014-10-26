@@ -110,6 +110,12 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 }
 
 
+ast_postprocess_traverser_visitor::~ast_postprocess_traverser_visitor()
+{
+	/* Free builtin functions, no need anymore */
+	_mesa_glsl_release_builtin_functions();
+}
+
 void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
 {
 	/* No enter node
@@ -547,4 +553,3 @@ void ast_postprocess_traverser_visitor::leave(ast_gs_input_layout* node)
 		}
 	}
 }
-

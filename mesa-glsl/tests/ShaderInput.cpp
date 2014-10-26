@@ -30,6 +30,12 @@ ResultsFilesMap ResultComparator::results_dirs;
 RulesMap ResultComparator::rules;
 std::vector<ResultsList> ResultComparator::dummy_files;
 
+void ShaderInput::free()
+{
+	for (auto it = shaders.begin(); it != shaders.end(); ++it){
+		ralloc_free(it->second->ctx);
+	}
+}
 
 ShaderHolder* ShaderInput::load(std::string name)
 {
@@ -57,7 +63,7 @@ ShaderHolder* ShaderInput::load(std::string name)
 		holder->shaders[shnum] = shader;
 		shader->stage = shTypes[shnum];
 		shader->source = source;
-		shader->name = (char*) rzalloc_array(holder, char, fname.length());
+		shader->name = (char*) rzalloc_array(holder, char, fname.length()+1);
 		strcpy(shader->name, fname.c_str());
 
 		char* old_locale = setlocale(LC_NUMERIC, NULL);
@@ -113,6 +119,7 @@ static void loadRules(RulesList& rules_map, std::string path)
 		int id = std::stoi(line.substr(0, delim));
 		rules_map[id].load(id, line.substr(delim + 1));
 	}
+	ralloc_free(source);
 }
 
 void ResultComparator::loadResults(std::string name, std::string unit)

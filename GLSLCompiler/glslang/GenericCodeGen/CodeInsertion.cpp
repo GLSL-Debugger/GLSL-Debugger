@@ -892,17 +892,18 @@ static const char* getNewUnusedFunctionName(const char *input,
 	char *output;
 	size_t baseLen;
 	int i;
+	char *func_name = getFunctionName(input);
 
-	if (!(output = (char*) malloc(
-			strlen(getFunctionName(input)) + strlen(CG_FUNCTION_POSTFIX)
+	if (!(output = (char*) malloc(strlen(func_name) + strlen(CG_FUNCTION_POSTFIX)
 					+ CG_RANDOMIZED_POSTFIX_SIZE + 1))) {
 		dbgPrint(DBGLVL_ERROR,
 				"CodeInsertion - not enough memory to create debug function name\n");
 		exit(1);
 	}
-	strcpy(output, getFunctionName(input));
+	strcpy(output, func_name);
 	strcat(output, CG_FUNCTION_POSTFIX);
 	baseLen = strlen(output);
+	free(func_name);
 
 	while (getFunctionBySignature(output, root)) {
 		output[baseLen] = '\0';

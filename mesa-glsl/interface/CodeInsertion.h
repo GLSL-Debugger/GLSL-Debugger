@@ -90,6 +90,7 @@ private:
 	ShVariable* result;
 	ShVariable* condition;
 	ShVariable* parameter;
+	void *mem;
 };
 
 

@@ -28,5 +28,7 @@ int main(int argc, char **argv)
 	runner.addTest(DebugChangeTest::suite());
 	runner.addTest(DebugJumpTest::suite());
 	runner.addTest(DebugOutputTest::suite());
-	return !runner.run();
+	int status = !runner.run();
+	ShaderInput::free();
+	return status;
 }
