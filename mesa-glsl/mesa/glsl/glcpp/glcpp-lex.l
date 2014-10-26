@@ -57,7 +57,7 @@ void glcpp_set_column (int  column_no , yyscan_t yyscanner);
 #define YY_USER_INIT			\
 	do {				\
 		yylineno = 1;		\
-		yycolumn = 0;		\
+		yycolumn = 1;		\
 		yylloc->source = 0;	\
 	} while(0)
 
@@ -144,7 +144,7 @@ glcpp_lex_update_state_per_token (glcpp_parser_t *parser, int token)
 			return 1;
 		} else {
 			parser->last_token_was_space = 1;
-			return 0;
+			return 1;
 		}
 	} else {
 		parser->last_token_was_space = 0;
@@ -421,7 +421,7 @@ HEXADECIMAL_INTEGER	0[xX][0-9a-fA-F]+[uU]?
 }
 
 	/* Whitespace */
-<DEFINE>{HSPACE}+ {
+<DEFINE>{HSPACE} {
 	/* Just ignore it. Nothing to do here. */
 }
 
