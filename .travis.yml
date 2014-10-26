@@ -16,7 +16,7 @@ before_script:
     - mkdir build
     - cd build
     - cmake -DTESTS=ON ${CMAKE_ARGS} ..
-script: make && valgrind --tool=memcheck --leak-check=full bin/glsl_tests ../mesa-glsl/tests/
+script: make && ctest -VV --output-on-failure
 env:
     - CMAKE_ARGS=""
     - CMAKE_ARGS="-DUSE_MESA=ON"
