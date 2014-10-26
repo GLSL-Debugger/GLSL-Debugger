@@ -1,5 +1,4 @@
 #include "CodeTools.h"
-
 #include "dbgprint.h"
 
 char* getFunctionName(const TString &in)

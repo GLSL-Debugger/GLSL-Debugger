@@ -38,10 +38,9 @@
  * Tridgell's talloc, but ralloc is an independent implementation
  * released under the MIT license and tuned for Mesa.
  *
- * The talloc implementation is available under the GNU Lesser
- * General Public License (GNU LGPL), version 3 or later. It is
- * more sophisticated than ralloc in that it includes reference
- * counting and debugging features. See: http://talloc.samba.org/
+ * talloc is more sophisticated than ralloc in that it includes reference
+ * counting and useful debugging features.  However, it is released under
+ * a non-permissive open source license.
  */
 
 #ifndef RALLOC_H
@@ -54,7 +53,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include "main/compiler.h"
+
+#include "macros.h"
 
 /**
  * \def ralloc(ctx, type)

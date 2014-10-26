@@ -15,7 +15,7 @@
 //#include "mesa/glsl/glsl_parser_extras.h"
 //#include "mesa/glsl/glsl_symbol_table.cpp"
 //#include "mesa/glsl/program.h"
-#include "mesa/glsl/ralloc.h"
+#include "mesa/util/ralloc.h"
 #include "mesa/glsl/ast.h"
 #include "main/mtypes.h"
 
@@ -76,7 +76,7 @@ static void initialize_context(struct gl_context *ctx, const TBuiltInResource* r
 int addShVariableList(ShVariableList *vl, AstShader* shader)
 {
 	int count = 0;
-	foreach_list(node, shader->head) {
+	foreach_in_list(exec_node, node, shader->head) {
 		ast_node *ast = exec_node_data(ast_node, node, link);
 		ast_declarator_list* dlist = ast->as_declarator_list();
 		if (!dlist)

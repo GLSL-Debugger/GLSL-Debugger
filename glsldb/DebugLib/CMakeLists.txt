@@ -19,7 +19,7 @@ if(GLSLDB_WIN)
 	set(DEBUGLIB_OS_DEPENDENT_INCLUDES
 		"${PROJECT_SOURCE_DIR}/3rdparty/mhook/mhook-lib"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../../GLSLCompiler/glslang/OSDependent/Windows"
-	)	
+	)
 endif()
 
 
@@ -42,6 +42,7 @@ if(GLSLDB_WIN)
 endif()
 
 set_source_files_properties(${GLSLDEBUG_GEN_SRC} PROPERTIES GENERATED 1)
+set_source_files_properties(${BEGINENDTEST_SRC} PROPERTIES GENERATED 1)
 
 set(GLSLDEBUG_SRC
 	libglsldebug.c
@@ -74,6 +75,7 @@ add_dependencies(glenumerants generation)
 
 if(TESTS)
 	add_executable(beginEndFunctionTest ${BEGINENDTEST_SRC})
+	add_dependencies(beginEndFunctionTest generation)
 	target_link_libraries(beginEndFunctionTest ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 endif()
 

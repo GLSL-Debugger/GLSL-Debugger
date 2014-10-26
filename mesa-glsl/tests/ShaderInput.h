@@ -37,6 +37,7 @@ protected:
 
 class ShaderInput: public Resource {
 public:
+	static void free();
 	static ShaderHolder* getShader(std::string name)
 	{
 		ShadersList::iterator shader = shaders.find(name);
@@ -46,6 +47,7 @@ public:
 		shaders[name] = holder;
 		return holder;
 	}
+
 
 private:
 	static ShaderHolder* load(std::string);

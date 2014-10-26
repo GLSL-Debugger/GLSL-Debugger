@@ -115,7 +115,6 @@ protected:
 	std::stringstream results;
 	static ShaderInput input;
 	ResultComparator comparator;
-
 };
 
 

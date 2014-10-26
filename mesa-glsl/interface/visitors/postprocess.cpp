@@ -44,13 +44,12 @@ extern ir_variable * get_variable_being_redeclared(ir_variable *var, YYLTYPE loc
 // As in ast_to_hir
 unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visitor* visitor,
 		struct _mesa_glsl_parse_state *state, exec_list *declarations, YYLTYPE &loc,
-		glsl_struct_field **fields_ret, bool block_row_major)
+		glsl_struct_field **fields_ret, bool is_interface, enum glsl_matrix_layout matrix_layout,
+		bool allow_reserved_names, ir_variable_mode var_mode)
 {
 	unsigned decl_count = 0;
 	foreach_list_typed (ast_declarator_list, decl_list, link, declarations) {
-		foreach_list_const (decl_ptr, & decl_list->declarations) {
-			decl_count++;
-		}
+		decl_count += decl_list->declarations.length();
 	}
 
 	glsl_struct_field * const fields = ralloc_array(state, glsl_struct_field,
@@ -62,7 +61,8 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 		decl_list->type->specifier->accept(visitor);
 		const glsl_type *decl_type = decl_list->type->glsl_type(&type_name, state);
 		foreach_list_typed (ast_declaration, decl, link, &decl_list->declarations) {
-			validate_identifier(decl->identifier, loc, state);
+			if (!allow_reserved_names)
+				validate_identifier(decl->identifier, loc, state);
 
 			const struct glsl_type *field_type =
 					decl_type != NULL ? decl_type : glsl_type::error_type;
@@ -72,23 +72,31 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 			fields[i].type = field_type;
 			fields[i].name = decl->identifier;
 			fields[i].location = -1;
-			fields[i].interpolation = interpret_interpolation_qualifier(qual, ir_var_auto,
+			fields[i].interpolation = interpret_interpolation_qualifier(qual, var_mode,
 					state, &loc);
 			fields[i].centroid = qual->flags.q.centroid ? 1 : 0;
 			fields[i].sample = qual->flags.q.sample ? 1 : 0;
+
+			fields[i].stream = qual->flags.q.explicit_stream ? qual->stream : -1;
 
 			if (qual->flags.q.row_major || qual->flags.q.column_major) {
 				if (qual->flags.q.uniform)
 					validate_matrix_layout_for_type(state, &loc, field_type, NULL);
 			}
 
-			if (field_type->is_matrix()
-					|| (field_type->is_array() && field_type->fields.array->is_matrix())) {
-				fields[i].row_major = block_row_major;
+			if (field_type->without_array()->is_matrix() ||
+				field_type->without_array()->is_record()) {
+
+				fields[i].matrix_layout = matrix_layout;
+
 				if (qual->flags.q.row_major)
-					fields[i].row_major = true;
+					fields[i].matrix_layout = GLSL_MATRIX_LAYOUT_ROW_MAJOR;
 				else if (qual->flags.q.column_major)
-					fields[i].row_major = false;
+					fields[i].matrix_layout = GLSL_MATRIX_LAYOUT_COLUMN_MAJOR;
+
+				assert(!is_interface || 
+						fields[i].matrix_layout == GLSL_MATRIX_LAYOUT_ROW_MAJOR ||
+					   	fields[i].matrix_layout == GLSL_MATRIX_LAYOUT_COLUMN_MAJOR);
 			}
 
 			i++;
@@ -101,6 +109,12 @@ unsigned ast_process_structure_or_interface_block(ast_postprocess_traverser_visi
 	return decl_count;
 }
 
+
+ast_postprocess_traverser_visitor::~ast_postprocess_traverser_visitor()
+{
+	/* Free builtin functions, no need anymore */
+	_mesa_glsl_release_builtin_functions();
+}
 
 void ast_postprocess_traverser_visitor::visit(ast_selection_statement *node)
 {
@@ -187,7 +201,8 @@ bool ast_postprocess_traverser_visitor::enter(ast_struct_specifier* node)
 
 	glsl_struct_field *fields;
 	unsigned decl_count = ast_process_structure_or_interface_block(this, state,
-			&node->declarations, loc, &fields, false);
+		   	&node->declarations, loc, &fields, false, GLSL_MATRIX_LAYOUT_INHERITED,
+		   	false, ir_var_auto);
 
 	validate_identifier(node->name, loc, state);
 	const glsl_type *t = glsl_type::get_record_instance(fields, decl_count, node->name);
@@ -521,8 +536,8 @@ void ast_postprocess_traverser_visitor::leave(ast_gs_input_layout* node)
 
 	/* If any shader inputs occurred before this declaration and did not
 	 * specify an array size, their size is determined now. */
-	foreach_list (node, &input_variables) {
-		ir_variable *var = ((ir_instruction *) node)->as_variable();
+	foreach_in_list(ir_instruction, ir, &input_variables) {
+		ir_variable *var = ir->as_variable();
 		if (var == NULL || var->data.mode != ir_var_shader_in)
 			continue;
 
@@ -538,4 +553,3 @@ void ast_postprocess_traverser_visitor::leave(ast_gs_input_layout* node)
 		}
 	}
 }
-

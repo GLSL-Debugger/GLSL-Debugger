@@ -200,8 +200,7 @@ void dumpDbgStack(AstStack *stack)
 			break;
 		}
 		dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "\n");
-		foreach_list(item, &node->scope){
-			scope_item* sc = (scope_item*)item;
+		foreach_in_list(scope_item, sc, &node->scope){
 			dbgPrintNoPrefix(DBGLVL_COMPILERINFO, "<%i,%s> ", sc->id, sc->name);
 		}
 		if (node->scope.is_empty())

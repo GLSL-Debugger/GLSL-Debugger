@@ -76,6 +76,7 @@ struct gl_list_extensions;
 struct gl_meta_state;
 struct gl_program_cache;
 struct gl_texture_object;
+struct gl_debug_state;
 struct gl_context;
 struct st_context;
 struct gl_uniform_storage;
@@ -1085,7 +1086,6 @@ typedef enum
 
 /**
  * Bit flags for each type of texture object
- * Used for Texture.Unit[]._ReallyEnabled flags.
  */
 /*@{*/
 #define TEXTURE_2D_MULTISAMPLE_BIT (1 << TEXTURE_2D_MULTISAMPLE_INDEX)
@@ -1195,6 +1195,8 @@ struct gl_texture_object
    GLuint Name;                /**< the user-visible texture object ID */
    GLchar *Label;               /**< GL_KHR_debug */
    GLenum Target;              /**< GL_TEXTURE_1D, GL_TEXTURE_2D, etc. */
+   gl_texture_index TargetIndex; /**< The gl_texture_unit::CurrentTex index.
+                                      Only valid when Target is valid. */
 
    struct gl_sampler_object Sampler;
 
@@ -1327,7 +1329,6 @@ struct gl_texgen
 struct gl_texture_unit
 {
    GLbitfield Enabled;          /**< bitmask of TEXTURE_*_BIT flags */
-   GLbitfield _ReallyEnabled;   /**< 0 or exactly one of TEXTURE_*_BIT flags */
 
    GLenum EnvMode;              /**< GL_MODULATE, GL_DECAL, GL_BLEND, etc. */
    GLclampf EnvColor[4];
@@ -1341,8 +1342,6 @@ struct gl_texture_unit
    GLbitfield _GenFlags;	/**< Bitwise-OR of Gen[STRQ]._ModeBit */
 
    GLfloat LodBias;		/**< for biasing mipmap levels */
-   GLenum BumpTarget;
-   GLfloat RotMatrix[4]; /* 2x2 matrix */
 
    /** Current sampler object (GL_ARB_sampler_objects) */
    struct gl_sampler_object *Sampler;
@@ -1369,6 +1368,9 @@ struct gl_texture_unit
 
    /** Points to highest priority, complete and enabled texture object */
    struct gl_texture_object *_Current;
+
+   /** Texture targets that have a non-default texture bound */
+   GLbitfield _BoundTextures;
 };
 
 
@@ -1388,9 +1390,6 @@ struct gl_texture_attrib
    /** GL_ARB_seamless_cubemap */
    GLboolean CubeMapSeamless;
 
-   /** Texture units/samplers used by vertex or fragment texturing */
-   GLbitfield _EnabledUnits;
-
    /** Texture coord units/sets used for fragment texturing */
    GLbitfield _EnabledCoordUnits;
 
@@ -1402,6 +1401,12 @@ struct gl_texture_attrib
 
    /** Bitwise-OR of all Texture.Unit[i]._GenFlags */
    GLbitfield _GenFlags;
+
+   /** Largest index of a texture unit with _Current != NULL. */
+   GLint _MaxEnabledTexImageUnit;
+
+   /** Largest index + 1 of texture units that have had any CurrentTex set. */
+   GLint NumCurrentTexUsed;
 };
 
 
@@ -1495,6 +1500,10 @@ struct gl_pixelstore_attrib
    GLboolean SwapBytes;
    GLboolean LsbFirst;
    GLboolean Invert;        /**< GL_MESA_pack_invert */
+   GLint CompressedBlockWidth;   /**< GL_ARB_compressed_texture_pixel_storage */
+   GLint CompressedBlockHeight;
+   GLint CompressedBlockDepth;
+   GLint CompressedBlockSize;
    struct gl_buffer_object *BufferObj; /**< GL_ARB_pixel_buffer_object */
 };
 
@@ -1631,6 +1640,17 @@ struct gl_vertex_array_object
 };
 
 
+/** Used to signal when transitioning from one kind of drawing method
+ * to another.
+ */
+typedef enum {
+   DRAW_NONE,          /**< Initial value only */
+   DRAW_BEGIN_END,
+   DRAW_DISPLAY_LIST,
+   DRAW_ARRAYS
+} gl_draw_method;
+
+
 /**
  * Vertex array state
  */
@@ -1670,6 +1690,12 @@ struct gl_array_attrib
     * The array pointer is set up only by the VBO module.
     */
    const struct gl_client_array **_DrawArrays; /**< 0..VERT_ATTRIB_MAX-1 */
+
+   /** One of the DRAW_xxx flags, not consumed by drivers */
+   gl_draw_method DrawMethod;
+
+   /** Legal array datatypes */
+   GLbitfield LegalTypesMask;
 };
 
 
@@ -1780,6 +1806,7 @@ struct gl_transform_feedback_output
    unsigned OutputRegister;
    unsigned OutputBuffer;
    unsigned NumComponents;
+   unsigned StreamId;
 
    /** offset (in DWORDs) of this output within the interleaved structure */
    unsigned DstOffset;
@@ -2024,13 +2051,113 @@ typedef enum
  */
 typedef enum
 {
-   SYSTEM_VALUE_FRONT_FACE,     /**< Fragment shader only (not done yet) */
-   SYSTEM_VALUE_VERTEX_ID,      /**< Vertex shader only */
-   SYSTEM_VALUE_INSTANCE_ID,    /**< Vertex shader only */
-   SYSTEM_VALUE_SAMPLE_ID,      /**< Fragment shader only */
-   SYSTEM_VALUE_SAMPLE_POS,     /**< Fragment shader only */
-   SYSTEM_VALUE_SAMPLE_MASK_IN, /**< Fragment shader only */
-   SYSTEM_VALUE_INVOCATION_ID,  /**< Geometry shader only */
+   /**
+    * \name Vertex shader system values
+    */
+   /*@{*/
+   /**
+    * OpenGL-style vertex ID.
+    *
+    * Section 2.11.7 (Shader Execution), subsection Shader Inputs, of the
+    * OpenGL 3.3 core profile spec says:
+    *
+    *     "gl_VertexID holds the integer index i implicitly passed by
+    *     DrawArrays or one of the other drawing commands defined in section
+    *     2.8.3."
+    *
+    * Section 2.8.3 (Drawing Commands) of the same spec says:
+    *
+    *     "The commands....are equivalent to the commands with the same base
+    *     name (without the BaseVertex suffix), except that the ith element
+    *     transferred by the corresponding draw call will be taken from
+    *     element indices[i] + basevertex of each enabled array."
+    *
+    * Additionally, the overview in the GL_ARB_shader_draw_parameters spec
+    * says:
+    *
+    *     "In unextended GL, vertex shaders have inputs named gl_VertexID and
+    *     gl_InstanceID, which contain, respectively the index of the vertex
+    *     and instance. The value of gl_VertexID is the implicitly passed
+    *     index of the vertex being processed, which includes the value of
+    *     baseVertex, for those commands that accept it."
+    *
+    * gl_VertexID gets basevertex added in.  This differs from DirectX where
+    * SV_VertexID does \b not get basevertex added in.
+    *
+    * \note
+    * If all system values are available, \c SYSTEM_VALUE_VERTEX_ID will be
+    * equal to \c SYSTEM_VALUE_VERTEX_ID_ZERO_BASE plus
+    * \c SYSTEM_VALUE_BASE_VERTEX.
+    *
+    * \sa SYSTEM_VALUE_VERTEX_ID_ZERO_BASE, SYSTEM_VALUE_BASE_VERTEX
+    */
+   SYSTEM_VALUE_VERTEX_ID,
+
+   /**
+    * Instanced ID as supplied to gl_InstanceID
+    *
+    * Values assigned to gl_InstanceID always begin with zero, regardless of
+    * the value of baseinstance.
+    *
+    * Section 11.1.3.9 (Shader Inputs) of the OpenGL 4.4 core profile spec
+    * says:
+    *
+    *     "gl_InstanceID holds the integer instance number of the current
+    *     primitive in an instanced draw call (see section 10.5)."
+    *
+    * Through a big chain of pseudocode, section 10.5 describes that
+    * baseinstance is not counted by gl_InstanceID.  In that section, notice
+    *
+    *     "If an enabled vertex attribute array is instanced (it has a
+    *     non-zero divisor as specified by VertexAttribDivisor), the element
+    *     index that is transferred to the GL, for all vertices, is given by
+    *
+    *         floor(instance/divisor) + baseinstance
+    *
+    *     If an array corresponding to an attribute required by a vertex
+    *     shader is not enabled, then the corresponding element is taken from
+    *     the current attribute state (see section 10.2)."
+    *
+    * Note that baseinstance is \b not included in the value of instance.
+    */
+   SYSTEM_VALUE_INSTANCE_ID,
+
+   /**
+    * DirectX-style vertex ID.
+    *
+    * Unlike \c SYSTEM_VALUE_VERTEX_ID, this system value does \b not include
+    * the value of basevertex.
+    *
+    * \sa SYSTEM_VALUE_VERTEX_ID, SYSTEM_VALUE_BASE_VERTEX
+    */
+   SYSTEM_VALUE_VERTEX_ID_ZERO_BASE,
+
+   /**
+    * Value of \c basevertex passed to \c glDrawElementsBaseVertex and similar
+    * functions.
+    *
+    * \sa SYSTEM_VALUE_VERTEX_ID, SYSTEM_VALUE_VERTEX_ID_ZERO_BASE
+    */
+   SYSTEM_VALUE_BASE_VERTEX,
+   /*@}*/
+
+   /**
+    * \name Geometry shader system values
+    */
+   /*@{*/
+   SYSTEM_VALUE_INVOCATION_ID,
+   /*@}*/
+
+   /**
+    * \name Fragment shader system values
+    */
+   /*@{*/
+   SYSTEM_VALUE_FRONT_FACE,     /**< (not done yet) */
+   SYSTEM_VALUE_SAMPLE_ID,
+   SYSTEM_VALUE_SAMPLE_POS,
+   SYSTEM_VALUE_SAMPLE_MASK_IN,
+   /*@}*/
+
    SYSTEM_VALUE_MAX             /**< Number of values */
 } gl_system_value;
 
@@ -2165,7 +2292,8 @@ struct gl_geometry_program
    GLenum InputType;  /**< GL_POINTS, GL_LINES, GL_LINES_ADJACENCY_ARB,
                            GL_TRIANGLES, or GL_TRIANGLES_ADJACENCY_ARB */
    GLenum OutputType; /**< GL_POINTS, GL_LINE_STRIP or GL_TRIANGLE_STRIP */
-   GLboolean UsesEndPrimitive;
+   bool UsesEndPrimitive;
+   bool UsesStreams;
 };
 
 
@@ -2421,8 +2549,7 @@ struct gl_shader
    /**
     * This shader's uniform block information.
     *
-    * The offsets of the variables are assigned only for shaders in a program's
-    * _LinkedShaders[].
+    * These fields are only set post-linking.
     */
    struct gl_uniform_block *UniformBlocks;
    unsigned NumUniformBlocks;
@@ -2431,6 +2558,15 @@ struct gl_shader
    struct glsl_symbol_table *symbols;
 
    bool uses_builtin_functions;
+   bool uses_gl_fragcoord;
+   bool redeclares_gl_fragcoord;
+   bool ARB_fragment_coord_conventions_enable;
+
+   /**
+    * Fragment shader state from GLSL 1.50 layout qualifiers.
+    */
+   bool origin_upper_left;
+   bool pixel_center_integer;
 
    /**
     * Geometry shader state from GLSL 1.50 layout qualifiers.
@@ -2541,7 +2677,7 @@ struct gl_uniform_block
    GLuint Binding;
 
    /**
-    * Minimum size of a buffer object to back this uniform buffer
+    * Minimum size (in bytes) of a buffer object to back this uniform buffer
     * (GL_UNIFORM_BLOCK_DATA_SIZE).
     */
    GLuint UniformBufferSize;
@@ -2591,17 +2727,6 @@ struct gl_shader_program
     * Is the application intending to glGetProgramBinary this program?
     */
    GLboolean BinaryRetreivableHint;
-
-   /**
-    * Flags that the linker should not reject the program if it lacks
-    * a vertex or fragment shader.  GLES2 doesn't allow separate
-    * shader objects, and would reject them.  However, we internally
-    * build separate shader objects for fixed function programs, which
-    * we use for drivers/common/meta.c and for handling
-    * _mesa_update_state with no program bound (for example in
-    * glClear()).
-    */
-   GLboolean InternalSeparateShader;
 
    /**
     * Indicates whether program can be bound for individual pipeline stages
@@ -2671,7 +2796,8 @@ struct gl_shader_program
       GLboolean UsesClipDistance;
       GLuint ClipDistanceArraySize; /**< Size of the gl_ClipDistance array, or
                                          0 if not present. */
-      GLboolean UsesEndPrimitive;
+      bool UsesEndPrimitive;
+      bool UsesStreams;
    } Geom;
 
    /** Vertex shader state */
@@ -2756,6 +2882,11 @@ struct gl_shader_program
     * \c NULL.
     */
    struct gl_shader *_LinkedShaders[MESA_SHADER_STAGES];
+
+   /* True if any of the fragment shaders attached to this program use:
+    * #extension ARB_fragment_coord_conventions: enable
+    */
+   GLboolean ARB_fragment_coord_conventions_enable;
 };   
 
 
@@ -2789,9 +2920,7 @@ struct gl_pipeline_object
    /**
     * Programs used for rendering
     *
-    * There is a separate program set for each shader stage.  If
-    * GL_EXT_separate_shader_objects is not supported, each of these must point
-    * to \c NULL or to the same program.
+    * There is a separate program set for each shader stage.
     */
    struct gl_shader_program *CurrentProgram[MESA_SHADER_STAGES];
 
@@ -2807,6 +2936,10 @@ struct gl_pipeline_object
    GLbitfield Flags;                    /**< Mask of GLSL_x flags */
 
    GLboolean EverBound;                 /**< Has the pipeline object been created */
+
+   GLboolean Validated;                 /**< Pipeline Validation status */
+
+   GLchar *InfoLog;
 };
 
 /**
@@ -2816,6 +2949,9 @@ struct gl_pipeline_shader_state
 {
    /** Currently bound pipeline object. See _mesa_BindProgramPipeline() */
    struct gl_pipeline_object *Current;
+
+   /* Default Object to ensure that _Shader is never NULL */
+   struct gl_pipeline_object *Default;
 
    /** Pipeline objects */
    struct _mesa_HashTable *Objects;
@@ -2874,6 +3010,7 @@ struct gl_query_object
    GLboolean Active;   /**< inside Begin/EndQuery */
    GLboolean Ready;    /**< result is ready? */
    GLboolean EverBound;/**< has query object ever been bound */
+   GLuint Stream;      /**< The stream */
 };
 
 
@@ -2890,8 +3027,8 @@ struct gl_query_state
    struct gl_query_object *CondRenderQuery;
 
    /** GL_EXT_transform_feedback */
-   struct gl_query_object *PrimitivesGenerated;
-   struct gl_query_object *PrimitivesWritten;
+   struct gl_query_object *PrimitivesGenerated[MAX_VERTEX_STREAMS];
+   struct gl_query_object *PrimitivesWritten[MAX_VERTEX_STREAMS];
 
    /** GL_ARB_timer_query */
    struct gl_query_object *TimeElapsed;
@@ -3305,6 +3442,11 @@ struct gl_constants
    GLuint UniformBufferOffsetAlignment;
    /** @} */
 
+   /**
+    * GL_ARB_explicit_uniform_location
+    */
+   GLuint MaxUserAssignableUniformLocations;
+
    /** GL_ARB_geometry_shader4 */
    GLuint MaxGeometryOutputVertices;
    GLuint MaxGeometryTotalOutputComponents;
@@ -3324,19 +3466,30 @@ struct gl_constants
    GLuint ForceGLSLVersion;
 
    /**
+    * Allow GLSL #extension directives in the middle of shaders.
+    */
+   GLboolean AllowGLSLExtensionDirectiveMidShader;
+
+   /**
     * Does the driver support real 32-bit integers?  (Otherwise, integers are
     * simulated via floats.)
     */
    GLboolean NativeIntegers;
 
    /**
+    * Does VertexID count from zero or from base vertex?
+    *
+    * \note
+    * If desktop GLSL 1.30 or GLSL ES 3.00 are not supported, this field is
+    * ignored and need not be set.
+    */
+   bool VertexID_is_zero_based;
+
+   /**
     * If the driver supports real 32-bit integers, what integer value should be
     * used for boolean true in uniform uploads?  (Usually 1 or ~0.)
     */
    GLuint UniformBooleanTrue;
-
-   /** Which texture units support GL_ATI_envmap_bumpmap as targets */
-   GLbitfield SupportedBumpUnits;
 
    /**
     * Maximum amount of time, measured in nanseconds, that the server can wait.
@@ -3465,6 +3618,10 @@ struct gl_constants
    /** GL_ARB_gpu_shader5 */
    GLfloat MinFragmentInterpolationOffset;
    GLfloat MaxFragmentInterpolationOffset;
+
+   GLboolean FakeSWMSAA;
+
+   struct gl_shader_compiler_options ShaderCompilerOptions[MESA_SHADER_STAGES];
 };
 
 
@@ -3484,22 +3641,28 @@ struct gl_extensions
    GLboolean ARB_base_instance;
    GLboolean ARB_blend_func_extended;
    GLboolean ARB_buffer_storage;
+   GLboolean ARB_clear_texture;
    GLboolean ARB_color_buffer_float;
    GLboolean ARB_compute_shader;
+   GLboolean ARB_conditional_render_inverted;
    GLboolean ARB_conservative_depth;
+   GLboolean ARB_copy_image;
    GLboolean ARB_depth_buffer_float;
    GLboolean ARB_depth_clamp;
    GLboolean ARB_depth_texture;
+   GLboolean ARB_derivative_control;
    GLboolean ARB_draw_buffers_blend;
    GLboolean ARB_draw_elements_base_vertex;
    GLboolean ARB_draw_indirect;
    GLboolean ARB_draw_instanced;
    GLboolean ARB_fragment_coord_conventions;
+   GLboolean ARB_fragment_layer_viewport;
    GLboolean ARB_fragment_program;
    GLboolean ARB_fragment_program_shadow;
    GLboolean ARB_fragment_shader;
    GLboolean ARB_framebuffer_object;
    GLboolean ARB_explicit_attrib_location;
+   GLboolean ARB_explicit_uniform_location;
    GLboolean ARB_geometry_shader4;
    GLboolean ARB_gpu_shader5;
    GLboolean ARB_half_float_vertex;
@@ -3511,7 +3674,6 @@ struct gl_extensions
    GLboolean ARB_point_sprite;
    GLboolean ARB_sample_shading;
    GLboolean ARB_seamless_cube_map;
-   GLboolean ARB_separate_shader_objects;
    GLboolean ARB_shader_atomic_counters;
    GLboolean ARB_shader_bit_encoding;
    GLboolean ARB_shader_image_load_store;
@@ -3526,6 +3688,7 @@ struct gl_extensions
    GLboolean ARB_texture_buffer_object;
    GLboolean ARB_texture_buffer_object_rgb32;
    GLboolean ARB_texture_buffer_range;
+   GLboolean ARB_texture_compression_bptc;
    GLboolean ARB_texture_compression_rgtc;
    GLboolean ARB_texture_cube_map;
    GLboolean ARB_texture_cube_map_array;
@@ -3537,6 +3700,7 @@ struct gl_extensions
    GLboolean ARB_texture_mirror_clamp_to_edge;
    GLboolean ARB_texture_multisample;
    GLboolean ARB_texture_non_power_of_two;
+   GLboolean ARB_texture_stencil8;
    GLboolean ARB_texture_query_levels;
    GLboolean ARB_texture_query_lod;
    GLboolean ARB_texture_rg;
@@ -3567,7 +3731,6 @@ struct gl_extensions
    GLboolean EXT_pixel_buffer_object;
    GLboolean EXT_point_parameters;
    GLboolean EXT_provoking_vertex;
-   GLboolean EXT_separate_shader_objects;
    GLboolean EXT_shader_integer_mix;
    GLboolean EXT_stencil_two_side;
    GLboolean EXT_texture3D;
@@ -3591,13 +3754,14 @@ struct gl_extensions
    GLboolean AMD_performance_monitor;
    GLboolean AMD_seamless_cubemap_per_texture;
    GLboolean AMD_vertex_shader_layer;
+   GLboolean AMD_vertex_shader_viewport_index;
    GLboolean APPLE_object_purgeable;
-   GLboolean ATI_envmap_bumpmap;
    GLboolean ATI_texture_compression_3dc;
    GLboolean ATI_texture_mirror_once;
    GLboolean ATI_texture_env_combine3;
    GLboolean ATI_fragment_shader;
    GLboolean ATI_separate_stencil;
+   GLboolean INTEL_performance_query;
    GLboolean MESA_pack_invert;
    GLboolean MESA_ycbcr_texture;
    GLboolean NV_conditional_render;
@@ -3809,45 +3973,6 @@ enum mesa_debug_severity {
 };
 
 /** @} */
-
-/**
- * An error, warning, or other piece of debug information for an application
- * to consume via GL_ARB_debug_output/GL_KHR_debug.
- */
-struct gl_debug_msg
-{
-   enum mesa_debug_source source;
-   enum mesa_debug_type type;
-   GLuint id;
-   enum mesa_debug_severity severity;
-   GLsizei length;
-   GLcharARB *message;
-};
-
-struct gl_debug_namespace
-{
-   struct _mesa_HashTable *IDs;
-   unsigned ZeroID; /* a HashTable won't take zero, so store its state here */
-   /** lists of IDs in the hash table at each severity */
-   struct simple_node Severity[MESA_DEBUG_SEVERITY_COUNT];
-};
-
-struct gl_debug_state
-{
-   GLDEBUGPROC Callback;
-   const void *CallbackData;
-   GLboolean SyncOutput;
-   GLboolean DebugOutput;
-   GLboolean Defaults[MAX_DEBUG_GROUP_STACK_DEPTH][MESA_DEBUG_SEVERITY_COUNT][MESA_DEBUG_SOURCE_COUNT][MESA_DEBUG_TYPE_COUNT];
-   struct gl_debug_namespace Namespaces[MAX_DEBUG_GROUP_STACK_DEPTH][MESA_DEBUG_SOURCE_COUNT][MESA_DEBUG_TYPE_COUNT];
-   struct gl_debug_msg Log[MAX_DEBUG_LOGGED_MESSAGES];
-   struct gl_debug_msg DebugGroupMsgs[MAX_DEBUG_GROUP_STACK_DEPTH];
-   GLint GroupStackDepth;
-   GLint NumMessages;
-   GLint NextMsg;
-   GLint NextMsgLength; /* redundant, but copied here from Log[NextMsg].length
-                           for the sake of the offsetof() code in get.c */
-};
 
 /**
  * Enum for the OpenGL APIs we know about and may support.
@@ -4123,7 +4248,25 @@ struct gl_context
 
    struct gl_pipeline_shader_state Pipeline; /**< GLSL pipeline shader object state */
    struct gl_pipeline_object Shader; /**< GLSL shader object state */
-   struct gl_shader_compiler_options ShaderCompilerOptions[MESA_SHADER_STAGES];
+
+   /**
+    * Current active shader pipeline state
+    *
+    * Almost all internal users want ::_Shader instead of ::Shader.  The
+    * exceptions are bits of legacy GLSL API that do not know about separate
+    * shader objects.
+    *
+    * If a program is active via \c glUseProgram, this will point to
+    * \c ::Shader.
+    *
+    * If a program pipeline is active via \c glBindProgramPipeline, this will
+    * point to \c ::Pipeline.Current.
+    *
+    * If neither a program nor a program pipeline is active, this will point to
+    * \c ::Pipeline.Default.  This ensures that \c ::_Shader will never be
+    * \c NULL.
+    */
+   struct gl_pipeline_object *_Shader;
 
    struct gl_query_state Query;  /**< occlusion, timer queries */
 

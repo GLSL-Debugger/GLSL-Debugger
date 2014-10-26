@@ -41,8 +41,7 @@ process_parameters(exec_list *instructions, exec_list *actual_parameters,
 {
    unsigned count = 0;
 
-   foreach_list (n, parameters) {
-      ast_node *const ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, parameters) {
       ir_rvalue *result = ast->hir(instructions, state);
 
       ir_constant *const constant = result->constant_expression_value();
@@ -82,9 +81,7 @@ prototype_string(const glsl_type *return_type, const char *name,
    ralloc_asprintf_append(&str, "%s(", name);
 
    const char *comma = "";
-   foreach_list(node, parameters) {
-      const ir_variable *const param = (ir_variable *) node;
-
+   foreach_in_list(const ir_variable, param, parameters) {
       ralloc_asprintf_append(&str, "%s%s", comma, param->type->name);
       comma = ", ";
    }
@@ -158,12 +155,11 @@ verify_parameter_modes(_mesa_glsl_parse_state *state,
    exec_node *actual_ir_node  = actual_ir_parameters.head;
    exec_node *actual_ast_node = actual_ast_parameters.head;
 
-   foreach_list(formal_node, &sig->parameters) {
+   foreach_in_list(const ir_variable, formal, &sig->parameters) {
       /* The lists must be the same length. */
       assert(!actual_ir_node->is_tail_sentinel());
       assert(!actual_ast_node->is_tail_sentinel());
 
-      const ir_variable *const formal = (ir_variable *) formal_node;
       const ir_rvalue *const actual = (ir_rvalue *) actual_ir_node;
       const ast_expression *const actual_ast =
 	 exec_node_data(ast_expression, actual_ast_node, link);
@@ -180,6 +176,24 @@ verify_parameter_modes(_mesa_glsl_parse_state *state,
 			  "parameter `in %s' must be a constant expression",
 			  formal->name);
 	 return false;
+      }
+
+      /* Verify that shader_in parameters are shader inputs */
+      if (formal->data.must_be_shader_input) {
+         ir_variable *var = actual->variable_referenced();
+         if (var && var->data.mode != ir_var_shader_in) {
+            _mesa_glsl_error(&loc, state,
+                             "parameter `%s` must be a shader input",
+                             formal->name);
+            return false;
+         }
+
+         if (actual->ir_type == ir_type_swizzle) {
+            _mesa_glsl_error(&loc, state,
+                             "parameter `%s` must not be swizzled",
+                             formal->name);
+            return false;
+         }
       }
 
       /* Verify that 'out' and 'inout' actual parameters are lvalues. */
@@ -436,20 +450,21 @@ match_function_by_name(const char *name,
       goto done; /* no match */
 
    if (f != NULL) {
+      /* In desktop GL, the presence of a user-defined signature hides any
+       * built-in signatures, so we must ignore them.  In contrast, in ES2
+       * user-defined signatures add new overloads, so we must consider them.
+       */
+      bool allow_builtins = state->es_shader || !f->has_user_signature();
+
       /* Look for a match in the local shader.  If exact, we're done. */
       bool is_exact = false;
       sig = local_sig = f->matching_signature(state, actual_parameters,
-                                              &is_exact);
+                                              allow_builtins, &is_exact);
       if (is_exact)
 	 goto done;
 
-      if (!state->es_shader && f->has_user_signature()) {
-	 /* In desktop GL, the presence of a user-defined signature hides any
-	  * built-in signatures, so we must ignore them.  In contrast, in ES2
-	  * user-defined signatures add new overloads, so we must proceed.
-	  */
+      if (!allow_builtins)
 	 goto done;
-      }
    }
 
    /* Local shader has no exact candidates; check the built-ins. */
@@ -478,9 +493,7 @@ print_function_prototypes(_mesa_glsl_parse_state *state, YYLTYPE *loc,
    if (f == NULL)
       return;
 
-   foreach_list (node, &f->signatures) {
-      ir_function_signature *sig = (ir_function_signature *) node;
-
+   foreach_in_list(ir_function_signature, sig, &f->signatures) {
       if (sig->is_builtin() && !sig->is_builtin_available(state))
          continue;
 
@@ -690,8 +703,7 @@ process_vec_mat_constructor(exec_list *instructions,
    bool all_parameters_are_constant = true;
 
    /* Type cast each parameter and, if possible, fold constants. */
-   foreach_list_safe(n, &actual_parameters) {
-      ir_rvalue *ir = (ir_rvalue *) n;
+   foreach_in_list_safe(ir_rvalue, ir, &actual_parameters) {
       ir_rvalue *result = ir;
 
       /* Apply implicit conversions (not the scalar constructor rules!). See
@@ -701,7 +713,7 @@ process_vec_mat_constructor(exec_list *instructions,
             glsl_type::get_instance(GLSL_TYPE_FLOAT,
                                     ir->type->vector_elements,
                                     ir->type->matrix_columns);
-         if (result->type->can_implicitly_convert_to(desired_type)) {
+         if (result->type->can_implicitly_convert_to(desired_type, state)) {
             /* Even though convert_component() implements the constructor
              * conversion rules (not the implicit conversion rules), its safe
              * to use it here because we already checked that the implicit
@@ -749,12 +761,22 @@ process_vec_mat_constructor(exec_list *instructions,
    instructions->push_tail(var);
 
    int i = 0;
-   foreach_list(node, &actual_parameters) {
-      ir_rvalue *rhs = (ir_rvalue *) node;
-      ir_rvalue *lhs = new(ctx) ir_dereference_array(var,
-                                                     new(ctx) ir_constant(i));
 
-      ir_instruction *assignment = new(ctx) ir_assignment(lhs, rhs, NULL);
+   foreach_in_list(ir_rvalue, rhs, &actual_parameters) {
+      ir_instruction *assignment = NULL;
+
+      if (var->type->is_matrix()) {
+         ir_rvalue *lhs = new(ctx) ir_dereference_array(var,
+                                             new(ctx) ir_constant(i));
+         assignment = new(ctx) ir_assignment(lhs, rhs, NULL);
+      } else {
+         /* use writemask rather than index for vector */
+         assert(var->type->is_vector());
+         assert(i < 4);
+         ir_dereference *lhs = new(ctx) ir_dereference_variable(var);
+         assignment = new(ctx) ir_assignment(lhs, rhs, NULL, (unsigned)(1 << i));
+      }
+
       instructions->push_tail(assignment);
 
       i++;
@@ -819,8 +841,7 @@ process_array_constructor(exec_list *instructions,
    bool all_parameters_are_constant = true;
 
    /* Type cast each parameter and, if possible, fold constants. */
-   foreach_list_safe(n, &actual_parameters) {
-      ir_rvalue *ir = (ir_rvalue *) n;
+   foreach_in_list_safe(ir_rvalue, ir, &actual_parameters) {
       ir_rvalue *result = ir;
 
       /* Apply implicit conversions (not the scalar constructor rules!). See
@@ -830,7 +851,7 @@ process_array_constructor(exec_list *instructions,
 	    glsl_type::get_instance(GLSL_TYPE_FLOAT,
 				    ir->type->vector_elements,
 				    ir->type->matrix_columns);
-	 if (result->type->can_implicitly_convert_to(desired_type)) {
+	 if (result->type->can_implicitly_convert_to(desired_type, state)) {
 	    /* Even though convert_component() implements the constructor
 	     * conversion rules (not the implicit conversion rules), its safe
 	     * to use it here because we already checked that the implicit
@@ -870,8 +891,7 @@ process_array_constructor(exec_list *instructions,
    instructions->push_tail(var);
 
    int i = 0;
-   foreach_list(node, &actual_parameters) {
-      ir_rvalue *rhs = (ir_rvalue *) node;
+   foreach_in_list(ir_rvalue, rhs, &actual_parameters) {
       ir_rvalue *lhs = new(ctx) ir_dereference_array(var,
 						     new(ctx) ir_constant(i));
 
@@ -892,8 +912,8 @@ static ir_constant *
 constant_record_constructor(const glsl_type *constructor_type,
 			    exec_list *parameters, void *mem_ctx)
 {
-   foreach_list(node, parameters) {
-      ir_constant *constant = ((ir_instruction *) node)->as_constant();
+   foreach_in_list(ir_instruction, node, parameters) {
+      ir_constant *constant = node->as_constant();
       if (constant == NULL)
 	 return NULL;
       node->replace_with(constant);
@@ -967,8 +987,7 @@ emit_inline_vector_constructor(const glsl_type *type,
 
       memset(&data, 0, sizeof(data));
 
-      foreach_list(node, parameters) {
-	 ir_rvalue *param = (ir_rvalue *) node;
+      foreach_in_list(ir_rvalue, param, parameters) {
 	 unsigned rhs_components = param->type->components();
 
 	 /* Do not try to assign more components to the vector than it has!
@@ -1025,8 +1044,7 @@ emit_inline_vector_constructor(const glsl_type *type,
       }
 
       base_component = 0;
-      foreach_list(node, parameters) {
-	 ir_rvalue *param = (ir_rvalue *) node;
+      foreach_in_list(ir_rvalue, param, parameters) {
 	 unsigned rhs_components = param->type->components();
 
 	 /* Do not try to assign more components to the vector than it has!
@@ -1312,8 +1330,7 @@ emit_inline_matrix_constructor(const glsl_type *type,
       unsigned col_idx = 0;
       unsigned row_idx = 0;
 
-      foreach_list (node, parameters) {
-	 ir_rvalue *const rhs = (ir_rvalue *) node;
+      foreach_in_list(ir_rvalue, rhs, parameters) {
 	 const unsigned components_remaining_this_column = rows - row_idx;
 	 unsigned rhs_components = rhs->type->components();
 	 unsigned rhs_base = 0;
@@ -1558,9 +1575,8 @@ ast_function_expression::hir(exec_list *instructions,
       unsigned nonmatrix_parameters = 0;
       exec_list actual_parameters;
 
-      foreach_list (n, &this->expressions) {
-	 ast_node *ast = exec_node_data(ast_node, n, link);
-	 ir_rvalue *result = ast->hir(instructions, state)->as_rvalue();
+      foreach_list_typed(ast_node, ast, link, &this->expressions) {
+	 ir_rvalue *result = ast->hir(instructions, state);
 
 	 /* From page 50 (page 56 of the PDF) of the GLSL 1.50 spec:
 	  *
@@ -1639,9 +1655,7 @@ ast_function_expression::hir(exec_list *instructions,
        * need to break them up into a series of column vectors.
        */
       if (constructor_type->base_type != GLSL_TYPE_FLOAT) {
-	 foreach_list_safe(n, &actual_parameters) {
-	    ir_rvalue *matrix = (ir_rvalue *) n;
-
+	 foreach_in_list_safe(ir_rvalue, matrix, &actual_parameters) {
 	    if (!matrix->type->is_matrix())
 	       continue;
 
@@ -1665,9 +1679,7 @@ ast_function_expression::hir(exec_list *instructions,
       bool all_parameters_are_constant = true;
 
       /* Type cast each parameter and, if possible, fold constants.*/
-      foreach_list_safe(n, &actual_parameters) {
-	 ir_rvalue *ir = (ir_rvalue *) n;
-
+      foreach_in_list_safe(ir_rvalue, ir, &actual_parameters) {
 	 const glsl_type *desired_type =
 	    glsl_type::get_instance(constructor_type->base_type,
 				    ir->type->vector_elements,

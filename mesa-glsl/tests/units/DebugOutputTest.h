@@ -45,6 +45,7 @@ public:
 		base->results << "================== Source ==================\n";
 		base->results << std::string(src ? src : "no code\n");
 		base->results << "============================================\n";
+		free(src);
 
 		// Now where actual comparison happens
 		base->doComparison(shader, true);

@@ -45,6 +45,7 @@ CodeGen::CodeGen(AstShader* _sh, ShVariableList* _vl, ShChangeableList* _cgbls)
 	cgbls = _cgbls;
 	result = condition = parameter = NULL;
 	defined_constructions = 0;
+	mem = ralloc_context(NULL);
 
 	g.nameMap.clear();
 	g.numLoopIters = 0;
@@ -55,6 +56,7 @@ CodeGen::CodeGen(AstShader* _sh, ShVariableList* _vl, ShChangeableList* _cgbls)
 CodeGen::~CodeGen()
 {
 	destruct(CG_TYPE_ALL);
+	ralloc_free(mem);
 }
 
 
@@ -859,14 +861,16 @@ static const char* getNewUnusedFunctionName(const char *input, AstShader* shader
 	size_t baseLen;
 	int i;
 	char* func_name = getFunctionName(input);
+	size_t fn_len = strlen(func_name);
 
-	output = (char*) rzalloc_size(shader, strlen(func_name) + strlen(CG_FUNCTION_POSTFIX) +
+	output = (char*) rzalloc_size(shader, fn_len + strlen(CG_FUNCTION_POSTFIX) +
 									CG_RANDOMIZED_POSTFIX_SIZE + 1);
 	assert(output || !"CodeInsertion - not enough memory to create debug function name");
 
-	strcpy(output, func_name);
+	strncpy(output, func_name, fn_len);
 	strcat(output, CG_FUNCTION_POSTFIX);
 	baseLen = strlen(output);
+	free(func_name);
 
     while (shader->symbols->get_function(output)) {
         output[baseLen] = '\0';
@@ -883,15 +887,15 @@ static const char* getNewUnusedFunctionName(const char *input, AstShader* shader
 const char* CodeGen::getDebugName(const char *input)
 {
 	strMap::iterator it = g.nameMap.find(input);
-
 	if (it != g.nameMap.end()) {
 		/* Object already found */
 		return it->second;
 	} else {
 		/* New object: 1. generate new name
 		 *             2. add to map */
-		g.nameMap[input] = getNewUnusedFunctionName(input, shader);
-		return g.nameMap[input];
+		char *name = ralloc_strdup(mem, input);
+		g.nameMap[name] = getNewUnusedFunctionName(name, shader);
+		return g.nameMap[name];
 	}
 }
 

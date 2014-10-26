@@ -37,8 +37,7 @@ public:
 		int length = printType(node, type);
 		if (!node->changeables.is_empty()) {
 			printIndent(length, depth);
-			foreach_list(scope_node, &node->changeables) {
-				changeable_item* sc = (changeable_item*)scope_node;
+			foreach_in_list(changeable_item, sc, &node->changeables) {
 				ShVariable* var = findShVariable(sc->id);
 				const char* name = var ? var->name : "undefined";
 				results << " <" << sc->id << "," << name << ">";

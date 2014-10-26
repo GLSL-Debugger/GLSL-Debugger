@@ -31,7 +31,7 @@ extern "C" {
 #include "main/shaderobj.h"
 }
 
-#include "ralloc.h"
+#include "util/ralloc.h"
 #include "ast.h"
 #include "glsl_parser_extras.h"
 #include "glsl_parser.h"
@@ -49,7 +49,7 @@ glsl_compute_version_string(void *mem_ctx, bool is_es, unsigned version)
 }
 
 
-static unsigned known_desktop_glsl_versions[] =
+static const unsigned known_desktop_glsl_versions[] =
    { 110, 120, 130, 140, 150, 330, 400, 410, 420, 430, 440 };
 
 
@@ -65,10 +65,6 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->scanner = NULL;
    this->translation_unit.make_empty();
    this->symbols = new(mem_ctx) glsl_symbol_table;
-
-   this->num_uniform_blocks = 0;
-   this->uniform_block_array_size = 0;
-   this->uniform_blocks = NULL;
 
    this->info_log = ralloc_strdup(mem_ctx, "");
    this->error = false;
@@ -201,6 +197,12 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->default_uniform_qualifier->flags.q.shared = 1;
    this->default_uniform_qualifier->flags.q.column_major = 1;
 
+   this->fs_uses_gl_fragcoord = false;
+   this->fs_redeclares_gl_fragcoord = false;
+   this->fs_origin_upper_left = false;
+   this->fs_pixel_center_integer = false;
+   this->fs_redeclares_gl_fragcoord_with_no_layout_qualifiers = false;
+
    this->gs_input_prim_type_specified = false;
    this->gs_input_size = 0;
    this->in_qualifier = new(this) ast_type_qualifier();
@@ -208,6 +210,8 @@ _mesa_glsl_parse_state::_mesa_glsl_parse_state(struct gl_context *_ctx,
    this->early_fragment_tests = false;
    memset(this->atomic_counter_offsets, 0,
           sizeof(this->atomic_counter_offsets));
+   this->allow_extension_directive_midshader =
+      ctx->Const.AllowGLSLExtensionDirectiveMidShader;
 }
 
 /**
@@ -504,40 +508,57 @@ struct _mesa_glsl_extension {
 static const _mesa_glsl_extension _mesa_glsl_supported_extensions[] = {
    /*                                  API availability */
    /* name                             GL     ES         supported flag */
+
+   /* ARB extensions go here, sorted alphabetically.
+    */
    EXT(ARB_arrays_of_arrays,           true,  false,     ARB_arrays_of_arrays),
+   EXT(ARB_compute_shader,             true,  false,     ARB_compute_shader),
    EXT(ARB_conservative_depth,         true,  false,     ARB_conservative_depth),
+   EXT(ARB_derivative_control,         true,  false,     ARB_derivative_control),
    EXT(ARB_draw_buffers,               true,  false,     dummy_true),
    EXT(ARB_draw_instanced,             true,  false,     ARB_draw_instanced),
    EXT(ARB_explicit_attrib_location,   true,  false,     ARB_explicit_attrib_location),
+   EXT(ARB_explicit_uniform_location,  true,  false,     ARB_explicit_uniform_location),
    EXT(ARB_fragment_coord_conventions, true,  false,     ARB_fragment_coord_conventions),
-   EXT(ARB_texture_rectangle,          true,  false,     dummy_true),
-   EXT(EXT_texture_array,              true,  false,     EXT_texture_array),
-   EXT(ARB_separate_shader_objects,    true,  false,     ARB_separate_shader_objects),
-   EXT(ARB_shader_texture_lod,         true,  false,     ARB_shader_texture_lod),
-   EXT(ARB_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
-   EXT(AMD_conservative_depth,         true,  false,     ARB_conservative_depth),
-   EXT(AMD_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
-   EXT(OES_texture_3D,                 false, true,      EXT_texture3D),
-   EXT(OES_EGL_image_external,         false, true,      OES_EGL_image_external),
+   EXT(ARB_fragment_layer_viewport,    true,  false,     ARB_fragment_layer_viewport),
+   EXT(ARB_gpu_shader5,                true,  false,     ARB_gpu_shader5),
+   EXT(ARB_sample_shading,             true,  false,     ARB_sample_shading),
+   EXT(ARB_separate_shader_objects,    true,  false,     dummy_true),
+   EXT(ARB_shader_atomic_counters,     true,  false,     ARB_shader_atomic_counters),
    EXT(ARB_shader_bit_encoding,        true,  false,     ARB_shader_bit_encoding),
-   EXT(ARB_uniform_buffer_object,      true,  false,     ARB_uniform_buffer_object),
-   EXT(OES_standard_derivatives,       false,  true,     OES_standard_derivatives),
-   EXT(ARB_texture_cube_map_array,     true,  false,     ARB_texture_cube_map_array),
-   EXT(ARB_shading_language_packing,   true,  false,     ARB_shading_language_packing),
+   EXT(ARB_shader_image_load_store,    true,  false,     ARB_shader_image_load_store),
+   EXT(ARB_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
+   EXT(ARB_shader_texture_lod,         true,  false,     ARB_shader_texture_lod),
    EXT(ARB_shading_language_420pack,   true,  false,     ARB_shading_language_420pack),
+   EXT(ARB_shading_language_packing,   true,  false,     ARB_shading_language_packing),
+   EXT(ARB_texture_cube_map_array,     true,  false,     ARB_texture_cube_map_array),
+   EXT(ARB_texture_gather,             true,  false,     ARB_texture_gather),
    EXT(ARB_texture_multisample,        true,  false,     ARB_texture_multisample),
    EXT(ARB_texture_query_levels,       true,  false,     ARB_texture_query_levels),
    EXT(ARB_texture_query_lod,          true,  false,     ARB_texture_query_lod),
-   EXT(ARB_gpu_shader5,                true,  false,     ARB_gpu_shader5),
-   EXT(AMD_vertex_shader_layer,        true,  false,     AMD_vertex_shader_layer),
-   EXT(EXT_shader_integer_mix,         true,  true,      EXT_shader_integer_mix),
-   EXT(ARB_texture_gather,             true,  false,     ARB_texture_gather),
-   EXT(ARB_shader_atomic_counters,     true,  false,     ARB_shader_atomic_counters),
-   EXT(ARB_sample_shading,             true,  false,     ARB_sample_shading),
-   EXT(AMD_shader_trinary_minmax,      true,  false,     dummy_true),
+   EXT(ARB_texture_rectangle,          true,  false,     dummy_true),
+   EXT(ARB_uniform_buffer_object,      true,  false,     ARB_uniform_buffer_object),
    EXT(ARB_viewport_array,             true,  false,     ARB_viewport_array),
-   EXT(ARB_compute_shader,             true,  false,     ARB_compute_shader),
-   EXT(ARB_shader_image_load_store,    true,  false,     ARB_shader_image_load_store),
+
+   /* KHR extensions go here, sorted alphabetically.
+    */
+
+   /* OES extensions go here, sorted alphabetically.
+    */
+   EXT(OES_EGL_image_external,         false, true,      OES_EGL_image_external),
+   EXT(OES_standard_derivatives,       false, true,      OES_standard_derivatives),
+   EXT(OES_texture_3D,                 false, true,      EXT_texture3D),
+
+   /* All other extensions go here, sorted alphabetically.
+    */
+   EXT(AMD_conservative_depth,         true,  false,     ARB_conservative_depth),
+   EXT(AMD_shader_stencil_export,      true,  false,     ARB_shader_stencil_export),
+   EXT(AMD_shader_trinary_minmax,      true,  false,     dummy_true),
+   EXT(AMD_vertex_shader_layer,        true,  false,     AMD_vertex_shader_layer),
+   EXT(AMD_vertex_shader_viewport_index, true,  false,   AMD_vertex_shader_viewport_index),
+   EXT(EXT_separate_shader_objects,    false, true,      dummy_true),
+   EXT(EXT_shader_integer_mix,         true,  true,      EXT_shader_integer_mix),
+   EXT(EXT_texture_array,              true,  false,     EXT_texture_array),
 };
 
 #undef EXT
@@ -647,7 +668,7 @@ _mesa_glsl_process_extension(const char *name, YYLTYPE *name_locp,
          ext->name = ralloc_strdup(state, name);
          state->explicit_extensions = ext;
       } else {
-         static const char *const fmt = "extension `%s' unsupported in %s shader";
+         static const char fmt[] = "extension `%s' unsupported in %s shader";
 
          if (behavior == extension_require) {
             _mesa_glsl_error(name_locp, state, fmt,
@@ -835,9 +856,8 @@ void
 ast_compound_statement::print(void) const
 {
    printf("{\n");
-
-   foreach_list_const(n, &this->statements) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   
+   foreach_list_typed(ast_node, ast, link, &this->statements) {
       ast->print();
    }
 
@@ -916,11 +936,10 @@ ast_expression::print(void) const
       subexpressions[0]->print();
       printf("( ");
 
-      foreach_list_const (n, &this->expressions) {
-	 if (n != this->expressions.get_head())
+      foreach_list_typed (ast_node, ast, link, &this->expressions) {
+	 if (&ast->link != this->expressions.get_head())
 	    printf(", ");
 
-	 ast_node *ast = exec_node_data(ast_node, n, link);
 	 ast->print();
       }
 
@@ -952,11 +971,10 @@ ast_expression::print(void) const
 
    case ast_sequence: {
       printf("( ");
-      foreach_list_const(n, & this->expressions) {
-	 if (n != this->expressions.get_head())
+      foreach_list_typed (ast_node, ast, link, & this->expressions) {
+	 if (&ast->link != this->expressions.get_head())
 	    printf(", ");
 
-	 ast_node *ast = exec_node_data(ast_node, n, link);
 	 ast->print();
       }
       printf(") ");
@@ -965,11 +983,10 @@ ast_expression::print(void) const
 
    case ast_aggregate: {
       printf("{ ");
-      foreach_list_const(n, & this->expressions) {
-	 if (n != this->expressions.get_head())
+      foreach_list_typed (ast_node, ast, link, & this->expressions) {
+	 if (&ast->link != this->expressions.get_head())
 	    printf(", ");
 
-	 ast_node *ast = exec_node_data(ast_node, n, link);
 	 ast->print();
       }
       printf("} ");
@@ -1019,8 +1036,7 @@ ast_function::print(void) const
    return_type->print();
    printf(" %s (", identifier);
 
-   foreach_list_const(n, & this->parameters) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, & this->parameters) {
       ast->print();
    }
 
@@ -1092,14 +1108,15 @@ ast_declarator_list::print(void) const
 
    if (type)
       type->print();
-   else
+   else if (invariant)
       printf("invariant ");
+   else
+      printf("precise ");
 
-   foreach_list_const (ptr, & this->declarations) {
-      if (ptr != this->declarations.get_head())
+   foreach_list_typed (ast_node, ast, link, & this->declarations) {
+      if (&ast->link != this->declarations.get_head())
 	 printf(", ");
 
-      ast_node *ast = exec_node_data(ast_node, ptr, link);
       ast->print();
    }
 
@@ -1111,6 +1128,7 @@ ast_declarator_list::ast_declarator_list(ast_fully_specified_type *type)
 {
    this->type = type;
    this->invariant = false;
+   this->precise = false;
 }
 
 void
@@ -1234,8 +1252,7 @@ ast_case_label::ast_case_label(ast_expression *test_value)
 
 void ast_case_label_list::print(void) const
 {
-   foreach_list_const(n, & this->labels) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, & this->labels) {
       ast->print();
    }
    printf("\n");
@@ -1250,8 +1267,7 @@ ast_case_label_list::ast_case_label_list(void)
 void ast_case_statement::print(void) const
 {
    labels->print();
-   foreach_list_const(n, & this->stmts) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, & this->stmts) {
       ast->print();
       printf("\n");
    }
@@ -1266,8 +1282,7 @@ ast_case_statement::ast_case_statement(ast_case_label_list *labels)
 
 void ast_case_statement_list::print(void) const
 {
-   foreach_list_const(n, & this->cases) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, & this->cases) {
       ast->print();
    }
 }
@@ -1340,8 +1355,7 @@ void
 ast_struct_specifier::print(void) const
 {
    printf("struct %s { ", name);
-   foreach_list_const(n, &this->declarations) {
-      ast_node *ast = exec_node_data(ast_node, n, link);
+   foreach_list_typed(ast_node, ast, link, &this->declarations) {
       ast->print();
    }
    printf("} ");
@@ -1374,6 +1388,14 @@ set_shader_inout_layout(struct gl_shader *shader,
    if (shader->Stage != MESA_SHADER_COMPUTE) {
       /* Should have been prevented by the parser. */
       assert(!state->cs_input_local_size_specified);
+   }
+
+   if (shader->Stage != MESA_SHADER_FRAGMENT) {
+      /* Should have been prevented by the parser. */
+      assert(!state->fs_uses_gl_fragcoord);
+      assert(!state->fs_redeclares_gl_fragcoord);
+      assert(!state->fs_pixel_center_integer);
+      assert(!state->fs_origin_upper_left);
    }
 
    switch (shader->Stage) {
@@ -1409,6 +1431,15 @@ set_shader_inout_layout(struct gl_shader *shader,
       }
       break;
 
+   case MESA_SHADER_FRAGMENT:
+      shader->redeclares_gl_fragcoord = state->fs_redeclares_gl_fragcoord;
+      shader->uses_gl_fragcoord = state->fs_uses_gl_fragcoord;
+      shader->pixel_center_integer = state->fs_pixel_center_integer;
+      shader->origin_upper_left = state->fs_origin_upper_left;
+      shader->ARB_fragment_coord_conventions_enable =
+         state->ARB_fragment_coord_conventions_enable;
+      break;
+
    default:
       /* Nothing to do. */
       break;
@@ -1435,8 +1466,7 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
    }
 
    if (dump_ast) {
-      foreach_list_const(n, &state->translation_unit) {
-         ast_node *ast = exec_node_data(ast_node, n, link);
+      foreach_list_typed(ast_node, ast, link, &state->translation_unit) {
          ast->print();
       }
       printf("\n\n");
@@ -1459,12 +1489,13 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
 
    if (!state->error && !shader->ir->is_empty()) {
       struct gl_shader_compiler_options *options =
-         &ctx->ShaderCompilerOptions[shader->Stage];
+         &ctx->Const.ShaderCompilerOptions[shader->Stage];
 
       /* Do some optimization at compile time to reduce shader IR size
        * and reduce later work if the same shader is linked multiple times
        */
-      while (do_common_optimization(shader->ir, false, false, 32, options))
+      while (do_common_optimization(shader->ir, false, false, options,
+                                    ctx->Const.NativeIntegers))
          ;
 
       validate_ir_tree(shader->ir);
@@ -1473,18 +1504,12 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
    if (shader->InfoLog)
       ralloc_free(shader->InfoLog);
 
-   shader->symbols = state->symbols;
+   shader->symbols = new(shader->ir) glsl_symbol_table;
    shader->CompileStatus = !state->error;
    shader->InfoLog = state->info_log;
    shader->Version = state->language_version;
    shader->IsES = state->es_shader;
    shader->uses_builtin_functions = state->uses_builtin_functions;
-
-   if (shader->UniformBlocks)
-      ralloc_free(shader->UniformBlocks);
-   shader->NumUniformBlocks = state->num_uniform_blocks;
-   shader->UniformBlocks = state->uniform_blocks;
-   ralloc_steal(shader, shader->UniformBlocks);
 
    if (!state->error)
       set_shader_inout_layout(shader, state);
@@ -1492,6 +1517,30 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
    /* Retain any live IR, but trash the rest. */
    reparent_ir(shader->ir, shader->ir);
 
+   /* Destroy the symbol table.  Create a new symbol table that contains only
+    * the variables and functions that still exist in the IR.  The symbol
+    * table will be used later during linking.
+    *
+    * There must NOT be any freed objects still referenced by the symbol
+    * table.  That could cause the linker to dereference freed memory.
+    *
+    * We don't have to worry about types or interface-types here because those
+    * are fly-weights that are looked up by glsl_type.
+    */
+   foreach_in_list (ir_instruction, ir, shader->ir) {
+      switch (ir->ir_type) {
+      case ir_type_function:
+         shader->symbols->add_function((ir_function *) ir);
+         break;
+      case ir_type_variable:
+         shader->symbols->add_variable((ir_variable *) ir);
+         break;
+      default:
+         break;
+      }
+   }
+
+   delete state->symbols;
    ralloc_free(state);
 }
 
@@ -1517,8 +1566,8 @@ _mesa_glsl_compile_shader(struct gl_context *ctx, struct gl_shader *shader,
 bool
 do_common_optimization(exec_list *ir, bool linked,
 		       bool uniform_locations_assigned,
-		       unsigned max_unroll_iterations,
-                       const struct gl_shader_compiler_options *options)
+                       const struct gl_shader_compiler_options *options,
+                       bool native_integers)
 {
    GLboolean progress = GL_FALSE;
 
@@ -1554,7 +1603,8 @@ do_common_optimization(exec_list *ir, bool linked,
       progress = do_constant_variable_unlinked(ir) || progress;
    progress = do_constant_folding(ir) || progress;
    progress = do_cse(ir) || progress;
-   progress = do_algebraic(ir) || progress;
+   progress = do_rebalance_tree(ir) || progress;
+   progress = do_algebraic(ir, native_integers, options) || progress;
    progress = do_lower_jumps(ir) || progress;
    progress = do_vec_index_to_swizzle(ir) || progress;
    progress = lower_vector_insert(ir, false) || progress;
@@ -1567,7 +1617,7 @@ do_common_optimization(exec_list *ir, bool linked,
    loop_state *ls = analyze_loop_variables(ir);
    if (ls->loop_found) {
       progress = set_loop_controls(ir, ls) || progress;
-      progress = unroll_loops(ir, ls, max_unroll_iterations) || progress;
+      progress = unroll_loops(ir, ls, options) || progress;
    }
    delete ls;
 

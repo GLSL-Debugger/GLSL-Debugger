@@ -79,9 +79,30 @@ enum glsl_interface_packing {
    GLSL_INTERFACE_PACKING_PACKED
 };
 
+enum glsl_matrix_layout {
+   /**
+    * The layout of the matrix is inherited from the object containing the
+    * matrix (the top level structure or the uniform block).
+    */
+   GLSL_MATRIX_LAYOUT_INHERITED,
+
+   /**
+    * Explicit column-major layout
+    *
+    * If a uniform block doesn't have an explicit layout set, it will default
+    * to this layout.
+    */
+   GLSL_MATRIX_LAYOUT_COLUMN_MAJOR,
+
+   /**
+    * Row-major layout
+    */
+   GLSL_MATRIX_LAYOUT_ROW_MAJOR
+};
+
 #ifdef __cplusplus
 #include "GL/gl.h"
-#include "ralloc.h"
+#include "util/ralloc.h"
 
 struct glsl_type {
    GLenum gl_type;
@@ -180,7 +201,7 @@ struct glsl_type {
    /**@}*/
 
    /**
-    * For numeric and boolean derrived types returns the basic scalar type
+    * For numeric and boolean derived types returns the basic scalar type
     *
     * If the type is a numeric or boolean scalar, vector, or matrix type,
     * this function gets the scalar type of the individual components.  For
@@ -256,6 +277,12 @@ struct glsl_type {
    unsigned component_slots() const;
 
    /**
+    * Calculate the number of unique values from glGetUniformLocation for the
+    * elements of the type.
+    */
+   unsigned uniform_locations() const;
+
+   /**
     * Calculate the number of attribute slots required to hold this type
     *
     * This implements the language rules of GLSL 1.50 for counting the number
@@ -314,7 +341,8 @@ struct glsl_type {
     *     integers.
     * \endverbatim
     */
-   bool can_implicitly_convert_to(const glsl_type *desired) const;
+   bool can_implicitly_convert_to(const glsl_type *desired,
+                                  _mesa_glsl_parse_state *state) const;
 
    /**
     * Query whether or not a type is a scalar (non-vector and non-matrix).
@@ -455,6 +483,18 @@ struct glsl_type {
    bool is_error() const
    {
       return base_type == GLSL_TYPE_ERROR;
+   }
+
+   /**
+    * Get the type stripped of any arrays
+    *
+    * \return
+    * Pointer to the type of elements of the first non-array type for array
+    * types, or pointer to itself for non-array types.
+    */
+   const glsl_type *without_array() const
+   {
+      return this->is_array() ? this->fields.array : this;
    }
 
    /**
@@ -636,7 +676,6 @@ private:
 struct glsl_struct_field {
    const struct glsl_type *type;
    const char *name;
-   bool row_major;
 
    /**
     * For interface blocks, gl_varying_slot corresponding to the input/output
@@ -664,6 +703,17 @@ struct glsl_struct_field {
     * in ir_variable::sample). 0 otherwise.
     */
    unsigned sample:1;
+
+   /**
+    * Layout of the matrix.  Uses glsl_matrix_layout values.
+    */
+   unsigned matrix_layout:2;
+
+   /**
+    * For interface blocks, it has a value if this variable uses multiple vertex
+    * streams (as in ir_variable::stream). -1 otherwise.
+    */
+   int stream;
 };
 
 static inline unsigned int

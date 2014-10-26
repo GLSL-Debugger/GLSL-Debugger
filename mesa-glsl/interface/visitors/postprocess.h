@@ -21,9 +21,7 @@ public:
 	{
 	}
 
-	virtual ~ast_postprocess_traverser_visitor()
-	{
-	}
+	virtual ~ast_postprocess_traverser_visitor();
 
 	virtual void visit(exec_list* list) { ast_traverse_visitor::visit(list); }
 	virtual void visit(ast_selection_statement *);

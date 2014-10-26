@@ -24,9 +24,7 @@ public:
 		dbgTargetProcessed = false;
 	}
 
-	virtual ~ast_output_traverser_visitor()
-	{
-	}
+	virtual ~ast_output_traverser_visitor();
 
 	void dump();
 	void get_code(char **);

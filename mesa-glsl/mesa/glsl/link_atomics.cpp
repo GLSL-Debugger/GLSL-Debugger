@@ -54,9 +54,18 @@ namespace {
 
       void push_back(unsigned id, ir_variable *var)
       {
-         counters = (active_atomic_counter *)
-            realloc(counters, sizeof(active_atomic_counter) * (num_counters + 1));
+         active_atomic_counter *new_counters;
 
+         new_counters = (active_atomic_counter *)
+            realloc(counters, sizeof(active_atomic_counter) *
+                    (num_counters + 1));
+
+         if (new_counters == NULL) {
+            //_mesa_error_no_memory(__func__);
+            return;
+         }
+
+         counters = new_counters;
          counters[num_counters].id = id;
          counters[num_counters].var = var;
          num_counters++;
@@ -101,8 +110,8 @@ namespace {
          if (sh == NULL)
             continue;
 
-         foreach_list(node, sh->ir) {
-            ir_variable *var = ((ir_instruction *)node)->as_variable();
+         foreach_in_list(ir_instruction, node, sh->ir) {
+            ir_variable *var = node->as_variable();
 
             if (var && var->type->contains_atomic()) {
                unsigned id = 0;

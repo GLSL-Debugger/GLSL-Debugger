@@ -100,26 +100,6 @@ _mesa_init_shader_state(struct gl_context *ctx);
 extern void
 _mesa_free_shader_state(struct gl_context *ctx);
 
-
-static inline gl_shader_stage
-_mesa_shader_enum_to_shader_stage(GLenum v)
-{
-   switch (v) {
-   case GL_VERTEX_SHADER:
-      return MESA_SHADER_VERTEX;
-   case GL_FRAGMENT_SHADER:
-      return MESA_SHADER_FRAGMENT;
-   case GL_GEOMETRY_SHADER:
-      return MESA_SHADER_GEOMETRY;
-   case GL_COMPUTE_SHADER:
-      return MESA_SHADER_COMPUTE;
-   default:
-      ASSERT(0 && "bad value in _mesa_shader_enum_to_shader_stage()");
-      return MESA_SHADER_VERTEX;
-   }
-}
-
-
 #ifdef __cplusplus
 }
 #endif

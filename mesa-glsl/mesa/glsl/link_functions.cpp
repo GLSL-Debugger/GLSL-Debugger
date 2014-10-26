@@ -145,8 +145,7 @@ public:
       struct hash_table *ht = hash_table_ctor(0, hash_table_pointer_hash,
 					      hash_table_pointer_compare);
       exec_list formal_parameters;
-      foreach_list_const(node, &sig->parameters) {
-	 const ir_instruction *const original = (ir_instruction *) node;
+      foreach_in_list(const ir_instruction, original, &sig->parameters) {
 	 assert(const_cast<ir_instruction *>(original)->as_variable());
 
 	 ir_instruction *copy = original->clone(linked, ht);
@@ -156,9 +155,7 @@ public:
       linked_sig->replace_parameters(&formal_parameters);
 
       if (sig->is_defined) {
-         foreach_list_const(node, &sig->body) {
-            const ir_instruction *const original = (ir_instruction *) node;
-
+         foreach_in_list(const ir_instruction, original, &sig->body) {
             ir_instruction *copy = original->clone(linked, ht);
             linked_sig->body.push_tail(copy);
          }
@@ -310,7 +307,7 @@ find_matching_signature(const char *name, const exec_list *actual_parameters,
 	 continue;
 
       ir_function_signature *sig =
-         f->matching_signature(NULL, actual_parameters);
+         f->matching_signature(NULL, actual_parameters, use_builtin);
 
       if ((sig == NULL) ||
           (!sig->is_defined && !sig->is_intrinsic))

@@ -28,7 +28,7 @@
 #include "program/hash_table.h"
 
 ir_rvalue *
-ir_rvalue::clone(void *mem_ctx, struct hash_table *ht) const
+ir_rvalue::clone(void *mem_ctx, struct hash_table *) const
 {
    /* The only possible instantiation is the generic error value. */
    return error_value(mem_ctx);
@@ -123,13 +123,11 @@ ir_if::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_if *new_if = new(mem_ctx) ir_if(this->condition->clone(mem_ctx, ht));
 
-   foreach_list(n, &this->then_instructions) {
-      ir_instruction *ir = (ir_instruction *) n;
+   foreach_in_list(ir_instruction, ir, &this->then_instructions) {
       new_if->then_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
-   foreach_list(n, &this->else_instructions) {
-      ir_instruction *ir = (ir_instruction *) n;
+   foreach_in_list(ir_instruction, ir, &this->else_instructions) {
       new_if->else_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
@@ -141,8 +139,7 @@ ir_loop::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_loop *new_loop = new(mem_ctx) ir_loop();
 
-   foreach_list(n, &this->body_instructions) {
-      ir_instruction *ir = (ir_instruction *) n;
+   foreach_in_list(ir_instruction, ir, &this->body_instructions) {
       new_loop->body_instructions.push_tail(ir->clone(mem_ctx, ht));
    }
 
@@ -158,8 +155,7 @@ ir_call::clone(void *mem_ctx, struct hash_table *ht) const
 
    exec_list new_parameters;
 
-   foreach_list(n, &this->actual_parameters) {
-      ir_instruction *ir = (ir_instruction *) n;
+   foreach_in_list(ir_instruction, ir, &this->actual_parameters) {
       new_parameters.push_tail(ir->clone(mem_ctx, ht));
    }
 
@@ -265,10 +261,12 @@ ir_assignment::clone(void *mem_ctx, struct hash_table *ht) const
    if (this->condition)
       new_condition = this->condition->clone(mem_ctx, ht);
 
-   return new(mem_ctx) ir_assignment(this->lhs->clone(mem_ctx, ht),
-				     this->rhs->clone(mem_ctx, ht),
-				     new_condition,
-				     this->write_mask);
+   ir_assignment *cloned =
+      new(mem_ctx) ir_assignment(this->lhs->clone(mem_ctx, ht),
+                                 this->rhs->clone(mem_ctx, ht),
+                                 new_condition);
+   cloned->write_mask = this->write_mask;
+   return cloned;
 }
 
 ir_function *
@@ -276,10 +274,7 @@ ir_function::clone(void *mem_ctx, struct hash_table *ht) const
 {
    ir_function *copy = new(mem_ctx) ir_function(this->name);
 
-   foreach_list_const(node, &this->signatures) {
-      const ir_function_signature *const sig =
-	 (const ir_function_signature *const) node;
-
+   foreach_in_list(const ir_function_signature, sig, &this->signatures) {
       ir_function_signature *sig_copy = sig->clone(mem_ctx, ht);
       copy->add_signature(sig_copy);
 
@@ -300,9 +295,7 @@ ir_function_signature::clone(void *mem_ctx, struct hash_table *ht) const
 
    /* Clone the instruction list.
     */
-   foreach_list_const(node, &this->body) {
-      const ir_instruction *const inst = (const ir_instruction *) node;
-
+   foreach_in_list(const ir_instruction, inst, &this->body) {
       ir_instruction *const inst_copy = inst->clone(mem_ctx, ht);
       copy->body.push_tail(inst_copy);
    }
@@ -322,9 +315,7 @@ ir_function_signature::clone_prototype(void *mem_ctx, struct hash_table *ht) con
 
    /* Clone the parameter list, but NOT the body.
     */
-   foreach_list_const(node, &this->parameters) {
-      const ir_variable *const param = (const ir_variable *) node;
-
+   foreach_in_list(const ir_variable, param, &this->parameters) {
       assert(const_cast<ir_variable *>(param)->as_variable() != NULL);
 
       ir_variable *const param_copy = param->clone(mem_ctx, ht);
@@ -428,8 +419,7 @@ clone_ir_list(void *mem_ctx, exec_list *out, const exec_list *in)
    struct hash_table *ht =
       hash_table_ctor(0, hash_table_pointer_hash, hash_table_pointer_compare);
 
-   foreach_list_const(node, in) {
-      const ir_instruction *const original = (ir_instruction *) node;
+   foreach_in_list(const ir_instruction, original, in) {
       ir_instruction *copy = original->clone(mem_ctx, ht);
 
       out->push_tail(copy);

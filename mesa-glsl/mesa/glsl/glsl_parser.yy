@@ -128,7 +128,7 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %token ATTRIBUTE CONST_TOK BOOL_TOK FLOAT_TOK INT_TOK UINT_TOK
 %token BREAK CONTINUE DO ELSE FOR IF DISCARD RETURN SWITCH CASE DEFAULT
 %token BVEC2 BVEC3 BVEC4 IVEC2 IVEC3 IVEC4 UVEC2 UVEC3 UVEC4 VEC2 VEC3 VEC4
-%token CENTROID IN_TOK OUT_TOK INOUT_TOK UNIFORM VARYING
+%token CENTROID IN_TOK OUT_TOK INOUT_TOK UNIFORM VARYING SAMPLE
 %token NOPERSPECTIVE FLAT SMOOTH
 %token MAT2X2 MAT2X3 MAT2X4
 %token MAT3X2 MAT3X3 MAT3X4
@@ -166,7 +166,7 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %token AND_OP OR_OP XOR_OP MUL_ASSIGN DIV_ASSIGN ADD_ASSIGN
 %token MOD_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %token SUB_ASSIGN
-%token INVARIANT
+%token INVARIANT PRECISE
 %token LOWP MEDIUMP HIGHP SUPERP PRECISION
 
 %token VERSION_TOK EXTENSION LINE COLON EOL INTERFACE OUTPUT
@@ -183,7 +183,7 @@ static bool match_layout_qualifier(const char *s1, const char *s2,
 %token HVEC2 HVEC3 HVEC4 DVEC2 DVEC3 DVEC4 FVEC2 FVEC3 FVEC4
 %token SAMPLER3DRECT
 %token SIZEOF CAST NAMESPACE USING
-%token RESOURCE PATCH SAMPLE
+%token RESOURCE PATCH
 %token SUBROUTINE
 
 %token ERROR_TOK
@@ -375,6 +375,14 @@ external_declaration_list:
        */
       if ($2 != NULL)
          state->translation_unit.push_tail(& $2->link);
+   }
+   | external_declaration_list extension_statement {
+      if (!state->allow_extension_directive_midshader) {
+         _mesa_glsl_error(& @2, state,
+                          "#extension directive is not allowed "
+                          "in the middle of a shader");
+         YYERROR;
+      }
    }
    ;
 
@@ -931,14 +939,22 @@ parameter_qualifier:
       $$ = $2;
       $$.flags.q.constant = 1;
    }
+   | PRECISE parameter_qualifier
+   {
+      if ($2.flags.q.precise)
+         _mesa_glsl_error(&@1, state, "duplicate precise qualifier");
+
+      $$ = $2;
+      $$.flags.q.precise = 1;
+   }
    | parameter_direction_qualifier parameter_qualifier
    {
       if (($1.flags.q.in || $1.flags.q.out) && ($2.flags.q.in || $2.flags.q.out))
          _mesa_glsl_error(&@1, state, "duplicate in/out/inout qualifier");
 
       if (!state->ARB_shading_language_420pack_enable && $2.flags.q.constant)
-         _mesa_glsl_error(&@1, state, "const must be specified before "
-                          "in/out/inout");
+         _mesa_glsl_error(&@1, state, "in/out/inout must come after const "
+                                      "or precise");
 
       $$ = $1;
       $$.merge_qualifier(&@1, state, $2);
@@ -1071,7 +1087,7 @@ single_declaration:
       $$->set_location_range(@1, @2);
       $$->declarations.push_tail(&decl->link);
    }
-   | INVARIANT variable_identifier // Vertex only.
+   | INVARIANT variable_identifier
    {
       void *ctx = state;
       ast_declaration *decl = new(ctx) ast_declaration($2, NULL, NULL);
@@ -1080,6 +1096,18 @@ single_declaration:
       $$ = new(ctx) ast_declarator_list(NULL);
       $$->set_location_range(@1, @2);
       $$->invariant = true;
+
+      $$->declarations.push_tail(&decl->link);
+   }
+   | PRECISE variable_identifier
+   {
+      void *ctx = state;
+      ast_declaration *decl = new(ctx) ast_declaration($2, NULL, NULL);
+      decl->set_location(@2);
+
+      $$ = new(ctx) ast_declarator_list(NULL);
+      $$->set_location_range(@1, @2);
+      $$->precise = true;
 
       $$->declarations.push_tail(&decl->link);
    }
@@ -1214,7 +1242,7 @@ layout_qualifier_id:
 
       /* Layout qualifiers for GLSL 1.50 geometry shaders. */
       if (!$$.flags.i) {
-         struct {
+         static const struct {
             const char *s;
             GLenum e;
          } map[] = {
@@ -1319,6 +1347,13 @@ layout_qualifier_id:
       if (match_layout_qualifier("location", $1, state) == 0) {
          $$.flags.q.explicit_location = 1;
 
+         if ($$.flags.q.attribute == 1 &&
+             state->ARB_explicit_attrib_location_warn) {
+            _mesa_glsl_warning(& @1, state,
+                               "GL_ARB_explicit_attrib_location layout "
+                               "identifier `%s' used", $1);
+         }
+
          if ($3 >= 0) {
             $$.location = $3;
          } else {
@@ -1368,7 +1403,23 @@ layout_qualifier_id:
          }
       }
 
-      static const char *local_size_qualifiers[3] = {
+      if (state->stage == MESA_SHADER_GEOMETRY) {
+         if (match_layout_qualifier("stream", $1, state) == 0 &&
+             state->check_explicit_attrib_stream_allowed(& @3)) {
+            $$.flags.q.stream = 1;
+
+            if ($3 < 0) {
+               _mesa_glsl_error(& @3, state,
+                                "invalid stream %d specified", $3);
+               YYERROR;
+            } else {
+               $$.flags.q.explicit_stream = 1;
+               $$.stream = $3;
+            }
+         }
+      }
+
+      static const char * const local_size_qualifiers[3] = {
          "local_size_x",
          "local_size_y",
          "local_size_z",
@@ -1426,10 +1477,6 @@ layout_qualifier_id:
          _mesa_glsl_error(& @1, state, "unrecognized layout identifier "
                           "`%s'", $1);
          YYERROR;
-      } else if (state->ARB_explicit_attrib_location_warn) {
-         _mesa_glsl_warning(& @1, state,
-                            "GL_ARB_explicit_attrib_location layout "
-                            "identifier `%s' used", $1);
       }
    }
    | interface_block_layout_qualifier
@@ -1495,6 +1542,11 @@ type_qualifier:
       memset(& $$, 0, sizeof($$));
       $$.flags.q.invariant = 1;
    }
+   | PRECISE
+   {
+      memset(& $$, 0, sizeof($$));
+      $$.flags.q.precise = 1;
+   }
    | auxiliary_storage_qualifier
    | storage_qualifier
    | interpolation_qualifier
@@ -1515,17 +1567,24 @@ type_qualifier:
     * Each qualifier's rule ensures that the accumulated qualifiers on the right
     * side don't contain any that must appear on the left hand side.
     * For example, when processing a storage qualifier, we check that there are
-    * no auxiliary, interpolation, layout, or invariant qualifiers to the right.
+    * no auxiliary, interpolation, layout, invariant, or precise qualifiers to the right.
     */
+   | PRECISE type_qualifier
+   {
+      if ($2.flags.q.precise)
+         _mesa_glsl_error(&@1, state, "duplicate \"precise\" qualifier");
+
+      $$ = $2;
+      $$.flags.q.precise = 1;
+   }
    | INVARIANT type_qualifier
    {
       if ($2.flags.q.invariant)
          _mesa_glsl_error(&@1, state, "duplicate \"invariant\" qualifier");
 
-      if ($2.has_layout()) {
+      if (!state->ARB_shading_language_420pack_enable && $2.flags.q.precise)
          _mesa_glsl_error(&@1, state,
-                          "\"invariant\" cannot be used with layout(...)");
-      }
+                          "\"invariant\" must come after \"precise\"");
 
       $$ = $2;
       $$.flags.q.invariant = 1;
@@ -1545,14 +1604,10 @@ type_qualifier:
       if ($2.has_interpolation())
          _mesa_glsl_error(&@1, state, "duplicate interpolation qualifier");
 
-      if ($2.has_layout()) {
-         _mesa_glsl_error(&@1, state, "interpolation qualifiers cannot be used "
-                          "with layout(...)");
-      }
-
-      if (!state->ARB_shading_language_420pack_enable && $2.flags.q.invariant) {
+      if (!state->ARB_shading_language_420pack_enable &&
+          ($2.flags.q.precise || $2.flags.q.invariant)) {
          _mesa_glsl_error(&@1, state, "interpolation qualifiers must come "
-                          "after \"invariant\"");
+                          "after \"precise\" or \"invariant\"");
       }
 
       $$ = $1;
@@ -1560,23 +1615,17 @@ type_qualifier:
    }
    | layout_qualifier type_qualifier
    {
-      /* The GLSL 1.50 grammar indicates that a layout(...) declaration can be
-       * used standalone or immediately before a storage qualifier.  It cannot
-       * be used with interpolation qualifiers or invariant.  There does not
-       * appear to be any text indicating that it must come before the storage
-       * qualifier, but always seems to in examples.
+      /* In the absence of ARB_shading_language_420pack, layout qualifiers may
+       * appear no later than auxiliary storage qualifiers. There is no
+       * particularly clear spec language mandating this, but in all examples
+       * the layout qualifier precedes the storage qualifier.
+       *
+       * We allow combinations of layout with interpolation, invariant or
+       * precise qualifiers since these are useful in ARB_separate_shader_objects.
+       * There is no clear spec guidance on this either.
        */
       if (!state->ARB_shading_language_420pack_enable && $2.has_layout())
          _mesa_glsl_error(&@1, state, "duplicate layout(...) qualifiers");
-
-      if ($2.flags.q.invariant)
-         _mesa_glsl_error(&@1, state, "layout(...) cannot be used with "
-                          "the \"invariant\" qualifier");
-
-      if ($2.has_interpolation()) {
-         _mesa_glsl_error(&@1, state, "layout(...) cannot be used with "
-                          "interpolation qualifiers");
-      }
 
       $$ = $1;
       $$.merge_qualifier(&@1, state, $2);
@@ -1589,7 +1638,8 @@ type_qualifier:
       }
 
       if (!state->ARB_shading_language_420pack_enable &&
-          ($2.flags.q.invariant || $2.has_interpolation() || $2.has_layout())) {
+          ($2.flags.q.precise || $2.flags.q.invariant ||
+           $2.has_interpolation() || $2.has_layout())) {
          _mesa_glsl_error(&@1, state, "auxiliary storage qualifiers must come "
                           "just before storage qualifiers");
       }
@@ -1606,10 +1656,10 @@ type_qualifier:
          _mesa_glsl_error(&@1, state, "duplicate storage qualifier");
 
       if (!state->ARB_shading_language_420pack_enable &&
-          ($2.flags.q.invariant || $2.has_interpolation() || $2.has_layout() ||
-           $2.has_auxiliary_storage())) {
+          ($2.flags.q.precise || $2.flags.q.invariant || $2.has_interpolation() ||
+           $2.has_layout() || $2.has_auxiliary_storage())) {
          _mesa_glsl_error(&@1, state, "storage qualifiers must come after "
-                          "invariant, interpolation, layout and auxiliary "
+                          "precise, invariant, interpolation, layout and auxiliary "
                           "storage qualifiers");
       }
 
@@ -1667,6 +1717,20 @@ storage_qualifier:
    {
       memset(& $$, 0, sizeof($$));
       $$.flags.q.out = 1;
+
+      if (state->stage == MESA_SHADER_GEOMETRY &&
+          state->has_explicit_attrib_stream()) {
+         /* Section 4.3.8.2 (Output Layout Qualifiers) of the GLSL 4.00
+          * spec says:
+          *
+          *     "If the block or variable is declared with the stream
+          *     identifier, it is associated with the specified stream;
+          *     otherwise, it is associated with the current default stream."
+          */
+          $$.flags.q.stream = 1;
+          $$.flags.q.explicit_stream = 0;
+          $$.stream = state->out_qualifier->stream;
+      }
    }
    | UNIFORM
    {
@@ -1901,7 +1965,6 @@ struct_specifier:
       $$ = new(ctx) ast_struct_specifier($2, $4);
       $$->set_location_range(@2, @5);
       state->symbols->add_type($2, glsl_type::void_type);
-      state->symbols->add_type_ast($2, new(ctx) ast_type_specifier($$));
    }
    | STRUCT '{' struct_declaration_list '}'
    {
@@ -2135,7 +2198,7 @@ condition:
    ;
 
 /*
- * siwtch_statement grammar is based on the syntax described in the body
+ * switch_statement grammar is based on the syntax described in the body
  * of the GLSL spec, not in it's appendix!!!
  */
 switch_statement:
@@ -2336,6 +2399,18 @@ interface_block:
       if (!block->layout.merge_qualifier(& @1, state, $1)) {
          YYERROR;
       }
+
+      foreach_list_typed (ast_declarator_list, member, link, &block->declarations) {
+         ast_type_qualifier& qualifier = member->type->qualifier;
+         if (qualifier.flags.q.stream && qualifier.stream != block->layout.stream) {
+               _mesa_glsl_error(& @1, state,
+                             "stream layout qualifier on "
+                             "interface block member does not match "
+                             "the interface block (%d vs %d)",
+                             qualifier.stream, block->layout.stream);
+               YYERROR;
+         }
+      }
       $$ = block;
    }
    ;
@@ -2408,6 +2483,14 @@ basic_interface_block:
       uint64_t block_interface_qualifier = $1.flags.i;
 
       block->layout.flags.i |= block_interface_qualifier;
+
+      if (state->stage == MESA_SHADER_GEOMETRY &&
+          state->has_explicit_attrib_stream()) {
+         /* Assign global layout's stream value. */
+         block->layout.flags.q.stream = 1;
+         block->layout.flags.q.explicit_stream = 0;
+         block->layout.stream = state->out_qualifier->stream;
+      }
 
       foreach_list_typed (ast_declarator_list, member, link, &block->declarations) {
          ast_type_qualifier& qualifier = member->type->qualifier;
@@ -2551,6 +2634,9 @@ layout_defaults:
          }
          if (!state->out_qualifier->merge_qualifier(& @1, state, $1))
             YYERROR;
+
+         /* Allow future assigments of global out's stream id value */
+         state->out_qualifier->flags.q.explicit_stream = 0;
       }
       $$ = NULL;
    }

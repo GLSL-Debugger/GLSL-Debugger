@@ -25,6 +25,12 @@ static void print_variable(char **buffer, ast_node* node, const char* name, ShVa
 		ralloc_asprintf_append(buffer, "_%i", postfix);
 }
 
+ast_output_traverser_visitor::~ast_output_traverser_visitor()
+{
+	if (buffer)
+		ralloc_free(buffer);
+}
+
 void ast_output_traverser_visitor::dump()
 {
 	dbgPrint(DBGLVL_COMPILERINFO, "\n"

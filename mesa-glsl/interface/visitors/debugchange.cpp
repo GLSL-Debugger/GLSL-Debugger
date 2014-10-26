@@ -20,8 +20,7 @@ static void dumpAstChangeableList(exec_list *cl)
 	dbgPrint(DBGLVL_INFO, "===> ");
 	if (cl->is_empty())
 		dbgPrint(DBGLVL_INFO, "empty");
-	foreach_list(node, cl) {
-		changeable_item* item = (changeable_item*) node;
+	foreach_in_list(changeable_item, item, cl) {
 		dumpShChangeable(item->changeable);
 	}
 	dbgPrint(DBGLVL_INFO, "\n");
@@ -162,10 +161,7 @@ bool ast_debugchange_traverser_visitor::enter(class ast_expression* node)
 		// should be one or zero, otherwise we have a problem
 		copyChangeables(node, subnode);
 
-		int count = 0;
-		foreach_list(c, &node->changeables)
-			count++;
-
+		int count = exec_list_length(&node->changeables);
 		assert(count <= 1 || !"DebugVar - field_selection or index to more than one changeable?");
 		if (node->changeables.is_empty())
 			return false;
