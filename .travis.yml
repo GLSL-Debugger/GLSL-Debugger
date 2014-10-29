@@ -11,12 +11,15 @@ install:
     - sudo apt-get install cmake bison freeglut3-dev libglew-dev gcc-4.7 g++-4.7
     # Tests requirements
     - sudo apt-get install libcppunit-dev libxmu-dev libxi-dev valgrind
+    - sudo pip install cpp-coveralls
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7" CC="gcc-4.7"; fi
 before_script:
     - mkdir build
     - cd build
     - cmake -DTESTS=ON ${CMAKE_ARGS} ..
 script: make && ctest -VV --output-on-failure
+after_success:
+    - coveralls --gcov-options '\-lp'
 env:
     - CMAKE_ARGS=""
     - CMAKE_ARGS="-DUSE_MESA=ON"
