@@ -197,7 +197,7 @@ int pfmWrite(const char *filename, PFMFile *pfmFile)
 	int dataSize;
 	FILE *fp;
 
-	if (!(fp = fopen(filename, "wb")) == -1) {
+	if (!(fp = fopen(filename, "wb"))) {
 		perror("opening image file failed");
 		return -1;
 	}
