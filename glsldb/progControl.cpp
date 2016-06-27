@@ -243,6 +243,8 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		break;
 	}
 
+	DbgRec *rec = getThreadRecord(_debuggeePID);
+	rec->pendingSignal=0;
 	if (WIFEXITED(status)) {
 		dbgPrint(DBGLVL_INFO,
 				"debuggee terminated normally with status %i\n", WEXITSTATUS(status));
@@ -310,10 +312,12 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		case SIGXFSZ:
 		case SIGXCPU:
 		case SIGVTALRM:
+		case SIGCHLD:
 		default:
 			dbgPrint(DBGLVL_INFO, "debuggee process was stopped by signal %i: %s\n",
 					signal, strsignal(signal));
-			return PCE_EXIT;
+			rec->pendingSignal=signal;
+			return PCE_NONE;
 		}
 #ifdef WIFCONTINUED
 	} else if (WIFCONTINUED(status)) {
@@ -372,7 +376,9 @@ pcErrorCode ProgramControl::executeDbgCommand(void)
 		OutputDebugStringA("Set event failed\n");
 	}
 #else /* _WIN32 */
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+    DbgRec *rec = getThreadRecord(_debuggeePID);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+    rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return checkChildStatus();
 
@@ -861,7 +867,8 @@ pcErrorCode ProgramControl::dbgCommandExecute(bool stopOnGLError)
 #ifdef _WIN32
 	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+	rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return PCE_NONE;
 }
@@ -880,7 +887,8 @@ pcErrorCode ProgramControl::dbgCommandExecuteToDrawCall(bool stopOnGLError)
 #ifdef _WIN32
 	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+	rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return PCE_NONE;
 }
@@ -899,7 +907,8 @@ pcErrorCode ProgramControl::dbgCommandExecuteToShaderSwitch(bool stopOnGLError)
 #ifdef _WIN32
 	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+	rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return PCE_NONE;
 }
@@ -920,7 +929,8 @@ pcErrorCode ProgramControl::dbgCommandExecuteToUserDefined(const char *fname,
 #ifdef _WIN32
 	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+	rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return PCE_NONE;
 }
@@ -2069,7 +2079,9 @@ pcErrorCode ProgramControl::executeContinueOnError(void)
 	::SetEvent(_hEvtDebuggee);
 #else /* _WIN32 */
 	sched_yield();
-	ptrace(PTRACE_CONT, _debuggeePID, 0, 0);
+    DbgRec *rec = getThreadRecord(_debuggeePID);
+	ptrace(PTRACE_CONT, _debuggeePID, 0, rec->pendingSignal);
+	rec->pendingSignal=0;
 #endif /* _WIN32 */
 	return PCE_NONE;
 }
