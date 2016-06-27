@@ -288,6 +288,9 @@ pcErrorCode ProgramControl::checkChildStatus(void)
 		case SIGTRAP:
 			dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGTRAP %i\n", signal);
 			return PCE_NONE;
+        case SIGCHLD:
+			dbgPrint(DBGLVL_DEBUG, "debuggee process was stopped by SIGCHLD %i\n", signal);
+			return PCE_NONE;
 		case SIGHUP:
 		case SIGINT:
 		case SIGQUIT:
