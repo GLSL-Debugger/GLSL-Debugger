@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "textPercentDelegate.qt.h"
 
 #include <QtCore/QAbstractItemModel>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QHeaderView>
 #include <QtCore/QList>
 
 GlCallStatistics::GlCallStatistics(QTableView *parent)

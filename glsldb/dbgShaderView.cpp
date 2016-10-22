@@ -32,7 +32,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "dbgShaderView.qt.h"
-#include <QtGui/QFrame>
+#include <QtWidgets/QFrame>
 
 DbgShaderView::DbgShaderView(QWidget *parent) :
 		QDialog(parent)

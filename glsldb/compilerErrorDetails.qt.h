@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _COMPILERERRORDETAILS_QT_H
 #define _COMPILERERRORDETAILS_QT_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "ui_compilerErrorDetails.h"
 
 class Widget_CompilerError: public QWidget, public Ui::Widget_CompilerError {

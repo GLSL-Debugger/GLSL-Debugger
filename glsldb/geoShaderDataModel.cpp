@@ -412,7 +412,8 @@ void GeoShaderDataModel::updateData(void)
 		emit dataChanged(indexBegin, indexEnd);
 		emit layoutChanged();
 	} else {
-		reset();
+		beginResetModel();
+		endResetModel();
 	}
 }
 
@@ -480,13 +481,15 @@ GeoShaderDataSortFilterProxyModel::GeoShaderDataSortFilterProxyModel(
 void GeoShaderDataSortFilterProxyModel::setHideInactive(bool b)
 {
 	m_hideInactive = b;
-	reset();
+	beginResetModel();
+	endResetModel();
 }
 
 void GeoShaderDataSortFilterProxyModel::setHideEmpty(bool b)
 {
 	m_hideEmpty = b;
-	reset();
+	beginResetModel();
+	endResetModel();
 }
 
 bool GeoShaderDataSortFilterProxyModel::filterAcceptsRow(int sourceRow,

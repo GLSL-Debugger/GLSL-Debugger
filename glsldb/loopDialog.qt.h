@@ -37,11 +37,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ui_loopDialog.h"
 #include "loopData.qt.h"
 #include "curveView.qt.h"
-#include <QtGui/QLabel>
-#include <QtGui/QWidget>
-#include <QtGui/QScrollArea>
-#include <QtGui/QTableView>
-#include <QtGui/QTreeView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QScrollArea>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QTreeView>
 #include <QtCore/QList>
 
 #include "shVarModel.qt.h"

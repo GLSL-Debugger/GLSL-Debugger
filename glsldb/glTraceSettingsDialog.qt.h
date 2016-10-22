@@ -34,9 +34,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GL_TRACE_SETTINGS_DIALOG_H
 #define GL_TRACE_SETTINGS_DIALOG_H
 
-#include <QtGui/QItemEditorCreatorBase>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QItemEditorCreatorBase>
+#include <QtCore/QSortFilterProxyModel>
+#include <QtWidgets/QCheckBox>
 #include <QtCore/QString>
 
 #include "ui_glTraceSettingsDialog.h"

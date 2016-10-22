@@ -34,11 +34,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _IMAGEVIEW_QT_H
 #define _IMAGEVIEW_QT_H
 
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 #include <QtGui/QImage>
-#include <QtGui/QWidget>
-#include <QtGui/QRubberBand>
-#include <QtGui/QWorkspace>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QRubberBand>
+#include <QtWidgets/QMdiArea>
 
 class ImageView: public QLabel {
 Q_OBJECT
@@ -54,7 +54,7 @@ public:
 	ImageView(QWidget *parent = 0);
 	void setImage(QImage &image);
 	void setMouseMode(int mouseMode);
-	void setWorkspace(QWorkspace *ws);
+	void setWorkspace(QMdiArea *ws);
 
 	QImage getImage(void)
 	{
@@ -93,7 +93,7 @@ protected:
 	float m_zoomLevel;
 	int m_lastZoomEvent;
 	QImage m_image;
-	QWorkspace *m_pWorkspace;
+	QMdiArea *m_pWorkspace;
 };
 
 #endif

@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "shVarModel.qt.h"
 
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 #include <QtCore/QEventLoop>
 #include <QtCore/QStack>
 
@@ -450,7 +450,7 @@ QVariant ShVarModel::data(const QModelIndex &i_qIndex, int i_nRole) const
 		return item->data(i_qIndex.column());
 	case Qt::TextColorRole:
 		if (item->data(DF_CHANGED).toBool() == true) {
-			return Qt::red;
+			return QColor(Qt::red);
 		} else {
 			return QVariant();
 		}
@@ -777,7 +777,7 @@ int Uniform::initialize(const char* serializedUniform)
 	currentOffset = 0;
 	memcpy(&nameLength, serializedUniform, sizeof(GLint));
 	currentOffset += sizeof(GLint);
-	m_name = QString::fromAscii(serializedUniform + currentOffset, nameLength);
+	m_name = QString::fromLatin1(serializedUniform + currentOffset, nameLength);
 	currentOffset += nameLength;
 	memcpy(&type, serializedUniform + currentOffset, sizeof(GLuint));
 	currentOffset += sizeof(GLuint);
@@ -999,7 +999,7 @@ int Uniform::initialize(const char* serializedUniform)
 		m_data = NULL;
 	}
 
-	dbgPrint(DBGLVL_INFO, "Got Uniform " "%s" ":\n", m_name.toAscii().data());
+	dbgPrint(DBGLVL_INFO, "Got Uniform " "%s" ":\n", m_name.toLatin1().data());
 	dbgPrint(DBGLVL_INFO, "    arraySize: %d\n", m_arraySize);
 	dbgPrint(DBGLVL_INFO, "    isVector: %d\n", m_isVector);
 	dbgPrint(DBGLVL_INFO, "    isMatrix: %d\n", m_isMatrix);
@@ -1082,7 +1082,7 @@ void ShVarModel::setRecursiveUniformValues(ShVarItem *item, const Uniform& u)
 		return;
 
 	if (item->getFullName() == u.name()) {
-		dbgPrint(DBGLVL_INFO, "found uniform: %s\n", u.name().toAscii().data());
+		dbgPrint(DBGLVL_INFO, "found uniform: %s\n", u.name().toLatin1().data());
 		item->setData(DF_DEBUG_UNIFORM_VALUE, u.toString());
 		emit dataChanged(ShVarModel::getIndex(item, 0),
 				ShVarModel::getIndex(item, DF_LAST - 1));

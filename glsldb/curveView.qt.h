@@ -34,10 +34,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef CURVEVIEW_QT_H
 #define CURVEVIEW_QT_H
 
-#include <QtGui/QAbstractItemView>
+#include <QtWidgets/QAbstractItemView>
 #include <QtGui/QPaintEvent>
-#include <QtGui/QScrollBar>
-#include <QtGui/QWidget>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QWidget>
 #include <QtGui/QColor>
 #include <QtCore/QMap>
 

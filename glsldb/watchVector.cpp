@@ -34,12 +34,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 
 #include "watchVector.qt.h"
-#include <QtGui/QGridLayout>
-#include <QtGui/QFrame>
-#include <QtGui/QScrollBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QDir>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QtGui/QImageWriter>
 
 #include "mappings.h"
@@ -829,7 +829,7 @@ void WatchVector::on_tbSaveImage_clicked()
 				<< "Portable Pixmap (*.ppm)"
 				<< "Tagged Image File Format (*.tif, *.tiff)"
 				<< "X11 Bitmap (*.xbm, *.xpm)";
-		sDialog->setFilters(formatDesc);
+		sDialog->setNameFilters(formatDesc);
 
 		if (!(history.isEmpty())) {
 			sDialog->setHistory(history);
@@ -850,7 +850,7 @@ void WatchVector::on_tbSaveImage_clicked()
 				if (!(img->save(selected))) {
 
 					QString forceFilter;
-					QString filter = sDialog->selectedFilter();
+					QString filter = sDialog->selectedNameFilter();
 					if (filter
 							== QString("Portable Network Graphics (*.png)")) {
 						forceFilter.append("png");
@@ -1234,7 +1234,7 @@ void WatchVector::onMinMaxAreaChanged(void)
 	this->updateGUI();
 }
 
-void WatchVector::setWorkspace(QWorkspace *ws)
+void WatchVector::setWorkspace(QMdiArea *ws)
 {
 	m_pImageView->setWorkspace(ws);
 }

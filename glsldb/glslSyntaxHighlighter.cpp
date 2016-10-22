@@ -328,8 +328,8 @@ void GlslSyntaxHighlighter::highlightBlock(const QString &text)
 			if (length <= 0) {
 				fprintf(stderr,
 						"length==0 for " "%s" " mathcing in " "%s" " at %d\n",
-						expression.pattern().toAscii().data(),
-						text.toAscii().data(), index);
+						expression.pattern().toLatin1().data(),
+						text.toLatin1().data(), index);
 			}
 			setFormat(index, length, rule.format);
 			index = expression.indexIn(text, index + length);

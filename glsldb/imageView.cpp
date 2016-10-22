@@ -33,7 +33,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cmath>
 
-#include <QtGui/QFrame>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QMdiSubWindow>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QBitmap>
 #include <QtGui/QPainter>
@@ -98,7 +99,7 @@ void ImageView::mouseMoveEvent(QMouseEvent *event)
 	/* this is really ugly! But as far as I can see the only way to ensure that
 	 * the ImageView always has focus when the window is in the foreground
 	 */
-	if (m_pWorkspace->activeWindow()
+	if (m_pWorkspace->activeSubWindow()->widget()
 			== parent()->parent()->parent()->parent()) {
 		setFocus(Qt::MouseFocusReason);
 	}
@@ -337,7 +338,7 @@ void ImageView::setMouseMode(int mouseMode)
 	}
 }
 
-void ImageView::setWorkspace(QWorkspace *ws)
+void ImageView::setWorkspace(QMdiArea *ws)
 {
 	m_pWorkspace = ws;
 }

@@ -33,14 +33,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtGui/QDesktopServices>
 #include <QtGui/QTextDocument>
-#include <QtGui/QMessageBox>
-#include <QtGui/QHeaderView>
-#include <QtGui/QGridLayout>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QFileDialog>
 #include <QtCore/QSettings>
-#include <QtGui/QWorkspace>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTabBar>
+#include <QtWidgets/QMdiArea>
+#include <QtWidgets/QMdiSubWindow>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTabBar>
 #include <QtGui/QColor>
 #include <QtCore/QUrl>
 #include <stdio.h>
@@ -97,10 +98,10 @@ MainWindow::MainWindow(char *pname, const QStringList& args) :
 	statusbar->addPermanentWidget(fSBMouseInfo);
 
 	/*   Workspace    */
-	workspace = new QWorkspace;
+	workspace = new QMdiArea;
 	setCentralWidget(workspace);
-	connect(workspace, SIGNAL(windowActivated(QWidget*)), this,
-			SLOT(changedActiveWindow(QWidget*)));
+	connect(workspace, SIGNAL(subWindowActivated(QMdiSubWindow*)), this,
+			SLOT(changedActiveWindow(QMdiSubWindow*)));
 
 	/*   Buffer View    */
 	QGridLayout *gridLayout;
@@ -486,7 +487,7 @@ void MainWindow::on_tbBVSave_clicked()
 					<< "Portable Pixmap (*.ppm)"
 					<< "Tagged Image File Format (*.tif, *.tiff)"
 					<< "X11 Bitmap (*.xbm, *.xpm)";
-			sDialog->setFilters(formatDesc);
+			sDialog->setNameFilters(formatDesc);
 
 			if (!(history.isEmpty())) {
 				sDialog->setHistory(history);
@@ -502,7 +503,7 @@ void MainWindow::on_tbBVSave_clicked()
 					if (!(img.save(selected))) {
 
 						QString forceFilter;
-						QString filter = sDialog->selectedFilter();
+						QString filter = sDialog->selectedNameFilter();
 						if (filter
 								== QString(
 										"Portable Network Graphics (*.png)")) {
@@ -604,7 +605,7 @@ void MainWindow::on_tbExecute_clicked()
 		/* Build arguments */
 		args = new char*[dbgProgArgs.size() + 1];
 		for (i = 0; i < dbgProgArgs.size(); i++) {
-			args[i] = strdup(dbgProgArgs[i].toAscii().data());
+			args[i] = strdup(dbgProgArgs[i].toLatin1().data());
 		}
 		//args[dbgProgArgs.size()] = (char*)malloc(sizeof(char));
 		//args[dbgProgArgs.size()] = '\0';
@@ -613,7 +614,7 @@ void MainWindow::on_tbExecute_clicked()
 		if (this->workDir.isEmpty()) {
 			workDir = NULL;
 		} else {
-			workDir = strdup(this->workDir.toAscii().data());
+			workDir = strdup(this->workDir.toLatin1().data());
 		}
 
 		/* Execute prog */
@@ -1177,7 +1178,7 @@ void MainWindow::on_tbJumpToUserDef_clicked()
 			m_bHaveValidShaderCode = false;
 
 			pcErrorCode error = pc->executeToUserDefined(
-					targetName.toAscii().data(),
+					targetName.toLatin1().data(),
 					tbToggleHaltOnError->isChecked());
 			setErrorStatus(error);
 			if (error != PCE_NONE) {
@@ -1335,7 +1336,7 @@ void MainWindow::on_tbSave_clicked()
 	sDialog->setFileMode(QFileDialog::AnyFile);
 	QStringList formatDesc;
 	formatDesc << "Plain Text (*.txt)";
-	sDialog->setFilters(formatDesc);
+	sDialog->setNameFilters(formatDesc);
 
 	if (!(history.isEmpty())) {
 		sDialog->setHistory(history);
@@ -1347,7 +1348,7 @@ void MainWindow::on_tbSave_clicked()
 		QStringList files = sDialog->selectedFiles();
 		QString selected;
 		if (!files.isEmpty()) {
-			QString filter = sDialog->selectedFilter();
+			QString filter = sDialog->selectedNameFilter();
 			if (filter == QString("Plain Text (*.txt)")) {
 				QFile file(files[0]);
 				if (file.open(QIODevice::WriteOnly)) {
@@ -1805,10 +1806,10 @@ void MainWindow::updateWatchListData(CoverageMapStatus cmstatus,
 	}
 
 	/* Now update all windows to update themselves if necessary */
-	QWidgetList windowList = workspace->windowList();
+	QList<QMdiSubWindow*> windowList = workspace->subWindowList();
 
 	for (i = 0; i < windowList.count(); i++) {
-		WatchView *wv = static_cast<WatchView*>(windowList[i]);
+		WatchView *wv = static_cast<WatchView*>(windowList[i]->widget());
 		wv->updateView(cmstatus != COVERAGEMAP_UNCHANGED);
 	}
 	/* update view */
@@ -1867,9 +1868,9 @@ void MainWindow::resetWatchListData(void)
 			}
 		}
 		/* Now notify all windows to update themselves if necessary */
-		QWidgetList windowList = workspace->windowList();
+		QList<QMdiSubWindow*> windowList = workspace->subWindowList();
 		for (i = 0; i < windowList.count(); i++) {
-			WatchView *wv = static_cast<WatchView*>(windowList[i]);
+			WatchView *wv = static_cast<WatchView*>(windowList[i]->widget());
 			wv->updateView(true);
 		}
 		/* update view */
@@ -2779,7 +2780,7 @@ WatchView* MainWindow::newWatchWindowFragment(QModelIndexList &list)
 					window->setMinMaxMode();
 				}
 				window->setWorkspace(workspace);
-				workspace->addWindow(window);
+				workspace->addSubWindow(window);
 			}
 			window->attachFpData(item->getPixelBoxPointer(),
 					item->getFullName());
@@ -2801,7 +2802,7 @@ WatchView* MainWindow::newWatchWindowVertexTable(QModelIndexList &list)
 				window = new WatchTable(workspace);
 				connect(window, SIGNAL(selectionChanged(int)), this,
 						SLOT(newSelectedVertex(int)));
-				workspace->addWindow(window);
+				workspace->addSubWindow(window);
 			}
 			window->attachVpData(item->getVertexBoxPointer(),
 					item->getFullName());
@@ -2825,7 +2826,7 @@ WatchView* MainWindow::newWatchWindowGeoDataTree(QModelIndexList &list)
 						m_pVertexCount, workspace);
 				connect(window, SIGNAL(selectionChanged(int)), this,
 						SLOT(newSelectedPrimitive(int)));
-				workspace->addWindow(window);
+				workspace->addSubWindow(window);
 			}
 			window->attachData(item->getCurrentPointer(),
 					item->getVertexBoxPointer(), item->getFullName());
@@ -2913,7 +2914,7 @@ void MainWindow::addToWatchWindowGeoDataTree(WatchView *watchView,
 void MainWindow::on_tbWatchWindowAdd_clicked()
 {
 	/* TODO: do not use static cast! instead watchView should provide functionality */
-	WatchView *window = static_cast<WatchView*>(workspace->activeWindow());
+	WatchView *window = static_cast<WatchView*>(workspace->activeSubWindow()->widget());
 	QModelIndexList list = cleanupSelectionList(
 			tvWatchList->selectionModel()->selectedRows(0));
 
@@ -2942,7 +2943,7 @@ void MainWindow::on_tbWatchWindowAdd_clicked()
 
 void MainWindow::watchWindowClosed()
 {
-	QWidgetList windowList = workspace->windowList();
+	QList<QMdiSubWindow*> windowList = workspace->subWindowList();
 	if (windowList.count() == 0) {
 		agWatchControl->setEnabled(false);
 	}
@@ -2956,7 +2957,7 @@ void MainWindow::updateWatchGui(int s)
 		tbWatchDelete->setEnabled(false);
 	} else if (s == 1) {
 		tbWatchWindow->setEnabled(true);
-		if (workspace->activeWindow()) {
+		if (workspace->activeSubWindow()) {
 			tbWatchWindowAdd->setEnabled(true);
 		} else {
 			tbWatchWindowAdd->setEnabled(false);
@@ -2964,7 +2965,7 @@ void MainWindow::updateWatchGui(int s)
 		tbWatchDelete->setEnabled(true);
 	} else {
 		tbWatchWindow->setEnabled(true);
-		if (workspace->activeWindow()) {
+		if (workspace->activeSubWindow()) {
 			tbWatchWindowAdd->setEnabled(true);
 		} else {
 			tbWatchWindowAdd->setEnabled(false);
@@ -2994,10 +2995,10 @@ void MainWindow::on_tbWatchDelete_clicked()
 			cleanupSelectionList(tvWatchList->selectionModel()->selectedRows()).count());
 
 	/* Now update all windows to update themselves if necessary */
-	QWidgetList windowList = workspace->windowList();
+	QList<QMdiSubWindow*> windowList = workspace->subWindowList();
 
 	for (i = 0; i < windowList.count(); i++) {
-		WatchView *wv = static_cast<WatchView*>(windowList[i]);
+		WatchView *wv = static_cast<WatchView*>(windowList[i]->widget());
 		wv->updateView(false);
 	}
 }
@@ -3011,16 +3012,16 @@ void MainWindow::watchSelectionChanged(const QItemSelection& selected,
 			cleanupSelectionList(tvWatchList->selectionModel()->selectedRows()).count());
 }
 
-void MainWindow::changedActiveWindow(QWidget *w)
+void MainWindow::changedActiveWindow(QMdiSubWindow *w)
 {
-	QWidgetList list = workspace->windowList();
+	QList<QMdiSubWindow*> list = workspace->subWindowList();
 	int i;
 
 	for (i = 0; i < list.count(); i++) {
 		if (w == list[i]) {
-			static_cast<WatchView*>(list[i])->setActive(true);
+			static_cast<WatchView*>(list[i]->widget())->setActive(true);
 		} else {
-			static_cast<WatchView*>(list[i])->setActive(false);
+			static_cast<WatchView*>(list[i]->widget())->setActive(false);
 		}
 	}
 }

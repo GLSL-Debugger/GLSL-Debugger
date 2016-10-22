@@ -36,11 +36,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QtCore/QList>
 #include <QtCore/QVariant>
-#include <QtGui/QTreeView>
-#include <QtGui/QTableView>
-#include <QtGui/QAbstractItemView>
+#include <QtWidgets/QTreeView>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QAbstractItemView>
 #include <QtCore/QAbstractItemModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 #include <QtCore/QCoreApplication>
 
 #include "ShaderLang.h"

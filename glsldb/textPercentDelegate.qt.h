@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _TEXTPERCENTDELEGATE_QT_H_
 #define _TEXTPERCENTDELEGATE_QT_H_
 
-#include <QtGui/QItemDelegate>
+#include <QtWidgets/QItemDelegate>
 
 class TextPercentDelegate: public QItemDelegate {
 Q_OBJECT

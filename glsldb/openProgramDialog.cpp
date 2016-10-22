@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "openProgramDialog.qt.h"
 
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 
 Dialog_OpenProgram::Dialog_OpenProgram()
 {
