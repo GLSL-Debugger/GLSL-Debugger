@@ -379,7 +379,7 @@ void MainWindow::on_aAttach_triggered()
 
 void MainWindow::on_aOnlineHelp_triggered()
 {
-	QUrl url("http://www.vis.uni-stuttgart.de/glsldevil/");
+	QUrl url("https://glsl-debugger.github.io/");
 	QDesktopServices ds;
 	ds.openUrl(url);
 }
