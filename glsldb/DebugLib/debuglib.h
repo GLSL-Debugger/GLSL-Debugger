@@ -190,7 +190,8 @@ enum DBG_OPERATIONS {
 	DBG_CALL_ORIGFUNCTION,
 	/*
 	 Call the original function.
-	 Parameters: -
+	 Parameters:
+	 pendingSignal  : pending signal to deliver to debuggee
 	 Returns:
 	 result : DBG_ERROR_CODE
 	 */
@@ -471,6 +472,8 @@ typedef struct {
 	ALIGNED_DATA items[SHM_MAX_ITEMS];
 #ifdef _WIN32
 	ALIGNED_DATA isRecursing;
+#else
+	ALIGNED_DATA pendingSignal;
 #endif /* _WIN32 */
 } DbgRec;
 
