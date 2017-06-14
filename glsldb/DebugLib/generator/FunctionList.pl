@@ -31,6 +31,9 @@
 #
 ################################################################################
 
+use FindBin;
+use lib "$FindBin::Bin";
+
 require genTools;
 
 # edit this list for new extensions that include drawcalls

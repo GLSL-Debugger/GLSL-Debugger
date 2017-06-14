@@ -32,6 +32,9 @@
 #
 ################################################################################
 
+use FindBin;
+use lib "$FindBin::Bin";
+
 require genTypes;
 require genTools;
 our %regexps;

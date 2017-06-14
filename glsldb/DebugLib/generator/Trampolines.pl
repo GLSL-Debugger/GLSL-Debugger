@@ -32,6 +32,9 @@
 #
 ################################################################################
 
+use FindBin;
+use lib "$FindBin::Bin";
+
 use Getopt::Std;
 require genTypes;
 require genTools;
