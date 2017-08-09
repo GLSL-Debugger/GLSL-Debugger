@@ -9,6 +9,21 @@ as glslDevil ( http://www.vis.uni-stuttgart.de/glsldevil/ ), by
 Thomas Klein, Magnus Strengert and Thomas Ertl.
 
 
+Status and important notes
+--------------------------
+
+There is currently no active development and no active maintenance. 
+
+Please expect problems and expect that you will need to touch some code in order to fix them. We are
+around to help though. Historically, the source code became open source after being beginning its
+life as part of a university project. After that, the community integrated CMake, made the project
+build on Windows, current Linux systems, partially on OSX and integrated Mesa as GLSLCompiler. Most
+of the development was done on Linux. Hence, Linux is probably the best choice in terms of debugger
+functionality and build difficulties. 
+If you experience any issues, please check the github issue tracker and file a
+new ticket if need be.
+
+
 Building
 ------
 
@@ -68,6 +83,7 @@ Long-term goals
 - [ ] Support OSX.
 - [x] Improve GLSL language grammar support to incorporate newer dialects including switch/case.
 - [ ] Support OpenGL contexts for newer versions of OpenGL.
+- [ ] Decouple the debugger logic from the UI (allow remote debugging)
 
 
 Contribute
