@@ -363,12 +363,6 @@ int main(int argc, char **argv)
 
 	QApplication app(argc, argv);
 
-#ifdef _WIN32
-	app.setStyle("windowsxp");
-#else /* _WIN32 */
-	app.setStyle("cleanlooks");
-#endif /* _WIN32 */
-
 	QCoreApplication::setOrganizationName("VIS");
 	QCoreApplication::setOrganizationDomain("vis.uni-stuttgart.de");
 	QCoreApplication::setApplicationName("glsldevil");
