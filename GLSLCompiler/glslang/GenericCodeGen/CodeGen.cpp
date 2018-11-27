@@ -42,6 +42,7 @@
 #include <MachineIndependent/SymbolTable.h>
 #include <MachineIndependent/localintermediate.h>
 #include <MachineIndependent/ParseHelper.h>
+#include <locale.h>
 
 #include "CodeInsertion.h"
 #include "CodeTools.h"
