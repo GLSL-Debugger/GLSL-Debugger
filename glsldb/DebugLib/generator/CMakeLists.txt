@@ -8,8 +8,8 @@ set(GENERATED_FILES "")
 function(generate_file script output doc depends)
 	add_custom_command(
 		OUTPUT  "${output}"
-		COMMAND "${PERL_EXECUTABLE}" "${script}" ${ARGN} > "${output}"
-		DEPENDS "${GENERATOR_DIR}/${script}" ${input}
+		COMMAND "${PERL_EXECUTABLE}" -I${GENERATOR_DIR} "${script}" ${ARGN} > "${output}"
+		DEPENDS "${GENERATOR_DIR}/${script}" "${depends}"
 		WORKING_DIRECTORY "${GENERATOR_DIR}"
 		COMMENT "${doc}: ${output}"
 	)
