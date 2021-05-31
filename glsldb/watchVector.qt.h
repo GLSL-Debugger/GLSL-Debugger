@@ -39,10 +39,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "watchView.qt.h"
 #include "imageView.qt.h"
 
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 #include <QtGui/QImage>
-#include <QtGui/QWidget>
-#include <QtGui/QScrollArea>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QScrollArea>
 
 #define MAX_ATTACHMENTS 16
 
@@ -53,7 +53,7 @@ public:
 	WatchVector(QWidget *parent = 0);
 	void updateView(bool force);
 	void attachFpData(PixelBox *f, QString name);
-	void setWorkspace(QWorkspace *ws);
+	void setWorkspace(QMdiArea *ws);
 
 public slots:
 	void on_cbRed_activated(int);

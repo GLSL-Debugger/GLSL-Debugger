@@ -30,6 +30,7 @@ detours/
 
 # output & generated stuff
 Build/
+build/
 bin
 lib
 glsldb/DebugLib/generated/

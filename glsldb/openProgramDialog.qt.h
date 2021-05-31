@@ -34,8 +34,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OPENPROGRAMDIALOG_QT_H
 #define OPENPROGRAMDIALOG_QT_H
 
-#include <QtGui/QCompleter>
-#include <QtGui/QDirModel>
+#include <QtWidgets/QCompleter>
+#include <QtWidgets/QDirModel>
 #include "ui_openProgramDialog.h"
 
 class Dialog_OpenProgram: public QDialog, public Ui::Dialog_OpenProgram {

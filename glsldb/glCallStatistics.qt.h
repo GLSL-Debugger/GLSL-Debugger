@@ -34,9 +34,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _GL_CALL_STATISTICS_QT_H_
 #define _GL_CALL_STATISTICS_QT_H_
 
-#include <QtGui/QTableView>
+#include <QtWidgets/QTableView>
 #include <QtGui/QStandardItemModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 #include <QtCore/QString>
 
 class GlCallStatistics {

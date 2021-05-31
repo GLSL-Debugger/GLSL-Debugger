@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "textPercentDelegate.qt.h"
 
 #include <QtCore/QModelIndex>
-#include <QtGui/QItemDelegate>
+#include <QtWidgets/QItemDelegate>
 #include <QtGui/QLinearGradient>
 #include <QtGui/QBrush>
 #include <QtGui/QPainter>

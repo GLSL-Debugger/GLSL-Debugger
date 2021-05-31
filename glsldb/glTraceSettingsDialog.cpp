@@ -32,10 +32,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "glTraceSettingsDialog.qt.h"
-#include <QtGui/QAbstractItemDelegate>
-#include <QtGui/QItemDelegate>
-#include <QtGui/QItemEditorFactory>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QAbstractItemDelegate>
+#include <QtWidgets/QItemDelegate>
+#include <QtWidgets/QItemEditorFactory>
+#include <QtWidgets/QPushButton>
 
 #ifdef _WIN32
 #include <wingdi.h>

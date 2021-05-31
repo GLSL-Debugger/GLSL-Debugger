@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GL_TRACE_FILTER_MODEL_H
 #define GL_TRACE_FILTER_MODEL_H
 
-#include <QtGui/QItemEditorCreatorBase>
+#include <QtWidgets/QItemEditorCreatorBase>
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QVariant>
 #include <QtCore/QSettings>

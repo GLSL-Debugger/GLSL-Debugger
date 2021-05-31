@@ -58,7 +58,8 @@ bool VertexTableModel::addVertexBox(VertexBox *vb, QString &name)
 	m_Names.append(name);
 	connect(vb, SIGNAL(dataDeleted()), this, SLOT(detachData()));
 	connect(vb, SIGNAL(dataChanged()), this, SLOT(updateData()));
-	reset();
+	beginResetModel();
+	endResetModel();
 	return true;
 }
 
@@ -246,7 +247,8 @@ void VertexTableModel::detachData(void)
 	if (idx >= 0) {
 		m_pData.removeAt(idx);
 		m_Names.removeAt(idx);
-		reset();
+		beginResetModel();
+		endResetModel();
 	}
 	emit dataDeleted(idx);
 	if (m_pData.isEmpty()) {
@@ -262,7 +264,8 @@ void VertexTableModel::updateData(void)
 		emit dataChanged(indexBegin, indexEnd);
 		emit layoutChanged();
 	} else {
-		reset();
+		beginResetModel();
+		endResetModel();
 	}
 }
 
@@ -282,7 +285,8 @@ void VertexTableSortFilterProxyModel::setHideInactive(bool b)
 	 sourceModel()->rowCount()-1);
 	 emit dataChanged(indexBegin, indexEnd);
 	 */
-	reset();
+	beginResetModel();
+	endResetModel();
 }
 
 bool VertexTableSortFilterProxyModel::filterAcceptsRow(int sourceRow,

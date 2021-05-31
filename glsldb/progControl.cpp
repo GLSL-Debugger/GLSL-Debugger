@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "asprintf.h"
 #endif /* _WIN32 */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -32,10 +32,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "selectionDialog.qt.h"
-#include <QtGui/QTableView>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QGridLayout>
 #include <QtGui/QImage>
-#include <QtGui/QFrame>
+#include <QtWidgets/QFrame>
 #include "colors.qt.h"
 #include "vertexTableModel.qt.h"
 #include "geoShaderDataModel.qt.h"

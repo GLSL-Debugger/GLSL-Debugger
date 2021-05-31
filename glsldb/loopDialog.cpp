@@ -32,10 +32,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "loopDialog.qt.h"
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QHeaderView>
 
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QSplitter>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QSplitter>
 #include <QtCore/QString>
 #include <QtGui/QImage>
 #include "ShaderLang.h"

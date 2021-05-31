@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VERTEX_TABLE_MODEL_H
 
 #include <QtCore/QAbstractTableModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 #include "vertexBox.qt.h"
 
 class VertexTableSortFilterProxyModel: public QSortFilterProxyModel {

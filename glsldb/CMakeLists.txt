@@ -2,8 +2,7 @@ add_subdirectory(DebugLib)
 add_subdirectory(DebugFunctions)
 add_subdirectory(utils)
 
-set(QT_MIN_VERSION 4.4.0)
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtOpenGL)
+find_package(Qt5 REQUIRED COMPONENTS OpenGL Widgets Gui Core REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
@@ -11,12 +10,8 @@ if(GLSLDB_LINUX OR GLSLDB_OSX)
 	find_package(X11 REQUIRED)
 	find_package(Threads REQUIRED)
 endif()
-if (GLSLDB_WIN)
-	find_package(QtDll REQUIRED)
-endif()
 
 set(CMAKE_AUTOMOC TRUE)
-include(${QT_USE_FILE})
 
 file(GLOB SRC_CPP *.cpp)
 file(GLOB SRC_C *.c)
@@ -24,8 +19,8 @@ file(GLOB SRC_C *.c)
 file(GLOB MOC_HEADERS *.qt.h)
 file(GLOB RES_FILES *.qrc)
 file(GLOB UI_FILES ui/*.ui)
-qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
-qt4_add_resources(RES_OUTFILES ${RES_FILES})
+qt5_wrap_ui(UI_OUTFILES ${UI_FILES})
+qt5_add_resources(RES_OUTFILES ${RES_FILES})
 
 set(SRC
 	${SRC_C}
@@ -68,7 +63,6 @@ include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils"
 	"${CMAKE_CURRENT_SOURCE_DIR}/DebugLib"
 	${OPENGL_INCLUDE_DIR}
-	${QT_INCLUDE_DIR}
 	${GLEW_INCLUDE_DIR}
 	${GLSLDB_OS_DEPENDENT_INCLUDES}
 	${GLSL_INCLUDES}
@@ -79,7 +73,10 @@ target_link_libraries(glsldb
 	glenumerants
 	functionList
 	utils
-	${QT_LIBRARIES}
+	Qt5::Core
+	Qt5::OpenGL
+	Qt5::Widgets
+	Qt5::Gui
 	${OPENGL_LIBRARIES}
 	${GLEW_LIBRARIES}
 	${GLSLDB_OS_DEPENDENT_LIBS}

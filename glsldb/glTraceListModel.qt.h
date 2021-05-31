@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GL_TRACE_LIST_MODEL_H
 
 #include <QtCore/QTextStream>
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QString>
 #include <QtGui/QIcon>

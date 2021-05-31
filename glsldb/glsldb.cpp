@@ -48,7 +48,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <getopt.h>
 #endif /* !_WIN32 */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtCore/QStringList>
 #include "mainWindow.qt.h"
 #include "notify.h"

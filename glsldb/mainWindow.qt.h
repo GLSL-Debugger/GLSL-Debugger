@@ -63,10 +63,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glTraceListModel.qt.h"
 #include "glTraceSettingsDialog.qt.h"
 
-#include <QtGui/QScrollArea>
+#include <QtWidgets/QScrollArea>
 #include <QtCore/QStack>
 
-class QWorkspace;
+class QMdiArea;
+class QMdiSubWindow;
 
 class MainWindow: public QMainWindow, public Ui::MainWindow {
 Q_OBJECT
@@ -141,7 +142,7 @@ private slots:
 	void newSelectedPixel(int x, int y);
 	void newSelectedVertex(int n);
 	void newSelectedPrimitive(int dataIdx);
-	void changedActiveWindow(QWidget *w);
+	void changedActiveWindow(QMdiSubWindow *w);
 	void ShaderStep(int action, bool updateData = true, bool updateCovermap =
 			true);
 
@@ -180,7 +181,7 @@ private:
 	void waitForEndOfExecution();
 
 	/* Workspace */
-	QWorkspace *workspace;
+	QMdiArea *workspace;
 	int currentRunLevel;
 
 	/* GLTrace Model */

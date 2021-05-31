@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _WATCH_VIEW_QT_H_
 #define _WATCH_VIEW_QT_H_
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "pixelBox.qt.h"
 
 class WatchView: public QWidget {
